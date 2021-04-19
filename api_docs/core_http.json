@@ -372,6 +372,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpInterceptor.request.$1",
                 "type": "Object",
                 "label": "fetchOptions",
                 "isRequired": true,
@@ -393,6 +394,7 @@
                 }
               },
               {
+                "id": "def-public.HttpInterceptor.request.$2",
                 "type": "Object",
                 "label": "controller",
                 "isRequired": true,
@@ -463,6 +465,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpInterceptor.requestError.$1",
                 "type": "Object",
                 "label": "httpErrorRequest",
                 "isRequired": true,
@@ -482,6 +485,7 @@
                 }
               },
               {
+                "id": "def-public.HttpInterceptor.requestError.$2",
                 "type": "Object",
                 "label": "controller",
                 "isRequired": true,
@@ -552,6 +556,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpInterceptor.response.$1",
                 "type": "Object",
                 "label": "httpResponse",
                 "isRequired": true,
@@ -572,6 +577,7 @@
                 }
               },
               {
+                "id": "def-public.HttpInterceptor.response.$2",
                 "type": "Object",
                 "label": "controller",
                 "isRequired": true,
@@ -642,6 +648,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpInterceptor.responseError.$1",
                 "type": "Object",
                 "label": "httpErrorResponse",
                 "isRequired": true,
@@ -661,6 +668,7 @@
                 }
               },
               {
+                "id": "def-public.HttpInterceptor.responseError.$2",
                 "type": "Object",
                 "label": "controller",
                 "isRequired": true,
@@ -1239,6 +1247,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpSetup.intercept.$1",
                 "type": "Object",
                 "label": "interceptor",
                 "isRequired": true,
@@ -1459,6 +1468,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HttpSetup.addLoadingCountSource.$1",
                 "type": "Object",
                 "label": "countSource$",
                 "isRequired": true,
@@ -1530,6 +1540,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IAnonymousPaths.isAnonymous.$1",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -1562,6 +1573,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IAnonymousPaths.register.$1",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -1707,6 +1719,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IExternalUrl.validateUrl.$1",
                 "type": "string",
                 "label": "relativeOrAbsoluteUrl",
                 "isRequired": true,
@@ -2026,6 +2039,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.BasePath.get.$1",
                 "type": "CompoundType",
                 "label": "request",
                 "isRequired": true,
@@ -2088,6 +2102,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.BasePath.set.$1",
                 "type": "CompoundType",
                 "label": "request",
                 "isRequired": true,
@@ -2115,6 +2130,7 @@
                 }
               },
               {
+                "id": "def-server.BasePath.set.$2",
                 "type": "string",
                 "label": "requestSpecificBasePath",
                 "isRequired": true,
@@ -2165,6 +2181,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.BasePath.prepend.$1",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -2197,6 +2214,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.BasePath.remove.$1",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -2442,6 +2460,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.KibanaRequest.Unnamed.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -2455,6 +2474,7 @@
                 }
               },
               {
+                "id": "def-server.KibanaRequest.Unnamed.$2",
                 "type": "Uncategorized",
                 "label": "params",
                 "isRequired": true,
@@ -2468,6 +2488,7 @@
                 }
               },
               {
+                "id": "def-server.KibanaRequest.Unnamed.$3",
                 "type": "Uncategorized",
                 "label": "query",
                 "isRequired": true,
@@ -2481,6 +2502,7 @@
                 }
               },
               {
+                "id": "def-server.KibanaRequest.Unnamed.$4",
                 "type": "Uncategorized",
                 "label": "body",
                 "isRequired": true,
@@ -2494,6 +2516,7 @@
                 }
               },
               {
+                "id": "def-server.KibanaRequest.Unnamed.$5",
                 "type": "boolean",
                 "label": "withoutSecretHeaders",
                 "isRequired": true,
@@ -2553,6 +2576,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.RouteValidationError.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -2566,6 +2590,7 @@
                 }
               },
               {
+                "id": "def-server.RouteValidationError.Unnamed.$2",
                 "type": "Array",
                 "label": "path",
                 "isRequired": true,
@@ -3777,6 +3802,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IKibanaSocket.getPeerCertificate.$1",
                 "type": "boolean",
                 "label": "detailed",
                 "isRequired": true,
@@ -3815,6 +3841,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IKibanaSocket.getPeerCertificate.$1",
                 "type": "boolean",
                 "label": "detailed",
                 "isRequired": true,
@@ -3855,6 +3882,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IKibanaSocket.getPeerCertificate.$1",
                 "type": "CompoundType",
                 "label": "detailed",
                 "isRequired": false,
@@ -3909,7 +3937,7 @@
             ],
             "children": [
               {
-                "id": "def-server.IKibanaSocket.renegotiate.options",
+                "id": "def-server.IKibanaSocket.renegotiate.$1.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -3917,7 +3945,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.IKibanaSocket.renegotiate.options.rejectUnauthorized",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.rejectUnauthorized",
                     "type": "CompoundType",
                     "label": "rejectUnauthorized",
                     "description": [],
@@ -3931,7 +3959,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IKibanaSocket.renegotiate.options.requestCert",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.requestCert",
                     "type": "CompoundType",
                     "label": "requestCert",
                     "description": [],
@@ -5230,6 +5258,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SessionStorage.set.$1",
                 "type": "Uncategorized",
                 "label": "sessionValue",
                 "isRequired": true,
@@ -6521,6 +6550,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.kibanaResponseFactory.custom.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6553,13 +6583,7 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              },
+              "KibanaResponse",
               "<T>"
             ],
             "description": [

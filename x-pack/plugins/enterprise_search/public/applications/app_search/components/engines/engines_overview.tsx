@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
@@ -30,6 +29,8 @@ import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
@@ -39,7 +40,6 @@ import {
   META_ENGINES_TITLE,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
-import { EnginesTable } from './engines_table';
 
 import './engines_overview.scss';
 
@@ -59,13 +59,9 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesLoading,
   } = useValues(EnginesLogic);
 
-  const {
-    deleteEngine,
-    loadEngines,
-    loadMetaEngines,
-    onEnginesPagination,
-    onMetaEnginesPagination,
-  } = useActions(EnginesLogic);
+  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
+    EnginesLogic
+  );
 
   useEffect(() => {
     loadEngines();
@@ -80,7 +76,6 @@ export const EnginesOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
@@ -97,8 +92,9 @@ export const EnginesOverview: React.FC = () => {
           <EuiPageContentHeaderSection>
             {canManageEngines && (
               <EuiButtonTo
-                color="primary"
-                fill
+                color="secondary"
+                size="s"
+                iconType="plusInCircle"
                 data-test-subj="appSearchEnginesEngineCreationButton"
                 to={ENGINE_CREATION_PATH}
               >
@@ -108,6 +104,7 @@ export const EnginesOverview: React.FC = () => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
+          <EuiSpacer />
           <EnginesTable
             items={engines}
             loading={enginesLoading}
@@ -116,7 +113,6 @@ export const EnginesOverview: React.FC = () => {
               hidePerPageOptions: true,
             }}
             onChange={handlePageChange(onEnginesPagination)}
-            onDeleteEngine={deleteEngine}
           />
         </EuiPageContentBody>
 
@@ -134,8 +130,9 @@ export const EnginesOverview: React.FC = () => {
               <EuiPageContentHeaderSection>
                 {canManageEngines && (
                   <EuiButtonTo
-                    color="primary"
-                    fill
+                    color="secondary"
+                    size="s"
+                    iconType="plusInCircle"
                     data-test-subj="appSearchEnginesMetaEngineCreationButton"
                     to={META_ENGINE_CREATION_PATH}
                   >
@@ -145,7 +142,7 @@ export const EnginesOverview: React.FC = () => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-              <EnginesTable
+              <MetaEnginesTable
                 items={metaEngines}
                 loading={metaEnginesLoading}
                 pagination={{
@@ -170,7 +167,6 @@ export const EnginesOverview: React.FC = () => {
                   />
                 }
                 onChange={handlePageChange(onMetaEnginesPagination)}
-                onDeleteEngine={deleteEngine}
               />
             </EuiPageContentBody>
           </>

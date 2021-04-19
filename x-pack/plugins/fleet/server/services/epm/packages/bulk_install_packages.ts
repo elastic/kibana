@@ -32,22 +32,27 @@ export async function bulkInstallPackages({
   );
 
   logger.debug(`kicking off bulk install of ${packagesToInstall.join(', ')} from registry`);
-  const installResults = await Promise.allSettled(
+  const bulkInstallResults = await Promise.allSettled(
     latestPackagesResults.map(async (result, index) => {
       const packageName = packagesToInstall[index];
       if (result.status === 'fulfilled') {
         const latestPackage = result.value;
-        return {
-          name: packageName,
-          version: latestPackage.version,
-          result: await installPackage({
-            savedObjectsClient,
-            esClient,
-            pkgkey: Registry.pkgToPkgKey(latestPackage),
-            installSource,
-            skipPostInstall: true,
-          }),
-        };
+        const installResult = await installPackage({
+          savedObjectsClient,
+          esClient,
+          pkgkey: Registry.pkgToPkgKey(latestPackage),
+          installSource,
+          skipPostInstall: true,
+        });
+        if (installResult.error) {
+          return { name: packageName, error: installResult.error };
+        } else {
+          return {
+            name: packageName,
+            version: latestPackage.version,
+            result: installResult,
+          };
+        }
       }
       return { name: packageName, error: result.reason };
     })
@@ -56,18 +61,27 @@ export async function bulkInstallPackages({
   // only install index patterns if we completed install for any package-version for the
   // first time, aka fresh installs or upgrades
   if (
-    installResults.find(
-      (result) => result.status === 'fulfilled' && result.value.result?.status === 'installed'
+    bulkInstallResults.find(
+      (result) =>
+        result.status === 'fulfilled' &&
+        !result.value.result?.error &&
+        result.value.result?.status === 'installed'
     )
   ) {
     await installIndexPatterns({ savedObjectsClient, esClient, installSource });
   }
 
-  return installResults.map((result, index) => {
+  return bulkInstallResults.map((result, index) => {
     const packageName = packagesToInstall[index];
-    return result.status === 'fulfilled'
-      ? result.value
-      : { name: packageName, error: result.reason };
+    if (result.status === 'fulfilled') {
+      if (result.value && result.value.error) {
+        return { name: packageName, error: result.value.error };
+      } else {
+        return result.value;
+      }
+    } else {
+      return { name: packageName, error: result.reason };
+    }
   });
 }
 

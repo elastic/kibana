@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
 
@@ -16,7 +18,8 @@ const varsSchema = schema.maybe(
     schema.object({
       name: schema.string(),
       type: schema.maybe(schema.string()),
-      value: schema.oneOf([schema.string(), schema.number()]),
+      value: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+      frozen: schema.maybe(schema.boolean()),
     })
   )
 );
@@ -26,9 +29,9 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     name: schema.string(),
     version: schema.string({
       validate: (value) => {
-        if (!semverValid(value)) {
+        if (value !== PRECONFIGURATION_LATEST_KEYWORD && !semverValid(value)) {
           return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
-            defaultMessage: 'must be a valid semver',
+            defaultMessage: 'must be a valid semver, or the keyword `latest`',
           });
         }
       },
@@ -41,6 +44,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ...AgentPolicyBaseSchema,
     namespace: schema.maybe(NamespaceSchema),
     id: schema.oneOf([schema.string(), schema.number()]),
+    is_default: schema.maybe(schema.boolean()),
+    is_default_fleet_server: schema.maybe(schema.boolean()),
     package_policies: schema.arrayOf(
       schema.object({
         name: schema.string(),

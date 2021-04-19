@@ -23,15 +23,10 @@ import type {
 } from '../../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
 import { appContextService } from '../app_context';
-import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
 import { invalidateAPIKeys } from '../api_keys';
 
 export async function runFleetServerMigration() {
-  // If Agents are not setup skip as there is nothing to migrate
-  if (!(await isAgentsSetup(getInternalUserSOClient()))) {
-    return;
-  }
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
 }
 
@@ -177,6 +172,7 @@ async function migrateAgentPolicies() {
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
         track_total_hits: true,
+        ignore_unavailable: true,
       });
 
       // @ts-expect-error value is number | TotalHits
