@@ -352,6 +352,50 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
+    it('should call onOtherColumn changed on existing columns', () => {
+      expect(
+        insertNewColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Top values of source',
+                dataType: 'string',
+                isBucketed: true,
+
+                // Private
+                operationType: 'terms',
+                sourceField: 'source',
+                params: {
+                  orderBy: { type: 'alphabetical', fallback: true },
+                  orderDirection: 'asc',
+                  size: 5,
+                },
+              },
+            },
+          },
+          columnId: 'col2',
+          indexPattern,
+          op: 'sum',
+          field: indexPattern.fields[2],
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({
+              params: {
+                orderBy: { columnId: 'col2', type: 'column' },
+                orderDirection: 'desc',
+                size: 5,
+              },
+            }),
+          }),
+        })
+      );
+    });
+
     it('should allow multiple metrics', () => {
       expect(
         insertNewColumn({
@@ -908,7 +952,11 @@ describe('state_helpers', () => {
           columns: {
             col1: {
               ...termsColumn,
-              params: { orderBy: { type: 'alphabetical' }, orderDirection: 'asc', size: 5 },
+              params: {
+                orderBy: { type: 'alphabetical', fallback: true },
+                orderDirection: 'asc',
+                size: 5,
+              },
             },
             id1: expect.objectContaining({
               dataType: 'number',
@@ -1624,7 +1672,7 @@ describe('state_helpers', () => {
             ...termsColumn,
             params: {
               ...termsColumn.params,
-              orderBy: { type: 'alphabetical' },
+              orderBy: { type: 'alphabetical', fallback: true },
               orderDirection: 'asc',
             },
           },
