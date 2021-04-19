@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState, useMemo } from 'react';
 
-import { useMessagesStorage } from '../../containers/use_messages_storage';
+import { MessagesStorage } from '../../containers/messages_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
@@ -32,7 +32,7 @@ interface CalloutVisibility {
 }
 
 const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
-  const { getMessages, addMessage } = useMessagesStorage();
+  const { getMessages, addMessage } = new MessagesStorage();
 
   const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
   const dismissedCallouts = useMemo(
