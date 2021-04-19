@@ -66,19 +66,7 @@ export function PalettePanelContainer({
                 className="lnsPalettePanelContainer__headerLink"
                 onClick={closeFlyout}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-PalettePanelContainerBack"
-                    className="lnsPalettePanelContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="sortLeft"
-                    aria-label={i18n.translate('xpack.lens.table.palettePanelContainer.back', {
-                      defaultMessage: 'Back',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
+                <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h2
                       id="lnsPalettePanelContainerTitle"
@@ -91,6 +79,18 @@ export function PalettePanelContainer({
                       </strong>
                     </h2>
                   </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-PalettePanelContainerBack"
+                    className="lnsPalettePanelContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="cross"
+                    aria-label={i18n.translate('xpack.lens.table.palettePanelContainer.back', {
+                      defaultMessage: 'Back',
+                    })}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutHeader>
