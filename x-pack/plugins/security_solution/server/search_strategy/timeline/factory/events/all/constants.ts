@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-export const TIMELINE_CTI_FIELDS = [
-  'threat.indicator.event.dataset',
-  'threat.indicator.event.reference',
-  'threat.indicator.matched.atomic',
-  'threat.indicator.matched.field',
-  'threat.indicator.matched.type',
-  'threat.indicator.provider',
-];
+import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
@@ -239,5 +232,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.established',
   'zeek.ssl.resumed',
   'zeek.ssl.version',
-  ...TIMELINE_CTI_FIELDS,
+  ...CTI_ROW_RENDERER_FIELDS,
 ];
