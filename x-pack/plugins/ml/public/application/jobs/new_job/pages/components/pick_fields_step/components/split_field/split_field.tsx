@@ -12,7 +12,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import {
   newJobCapsService,
   filterCategoryFields,
-} from '../../../../../../../services/new_job_capabilities_service';
+} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
 import {
   MultiMetricJobCreator,

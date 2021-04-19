@@ -17,7 +17,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
   const config = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken) {
-    const elasticsearch = reporting.getElasticsearchService();
+    const elasticsearch = await reporting.getEsClient();
     const logger = parentLogger.clone([jobId]);
     const generateCsv = createGenerateCsv(logger);
 
@@ -25,16 +25,13 @@ export const runTaskFnFactory: RunTaskFnFactory<
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
-
-    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(fakeRequest);
-    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
-      callAsCurrentUser(endpoint, clientParams, options);
+    const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
 
     const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
       uiSettingsClient,
-      callEndpoint,
+      elasticsearchClient,
       cancellationToken
     );
 
