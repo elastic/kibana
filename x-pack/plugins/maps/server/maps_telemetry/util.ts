@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-// These capture a particular "combo" of source and layer-settings.
-// They are mutually exclusive (ie. a layerDescriptor can only be a single telemetry_layer_type)
-// They are more useful from a telemetry-perspective than:
-// - an actual SourceType (which does not say enough about how it looks on a map)
-// - an actual LayerType (which is too coarse and does not say much about what kind of data)
 import {
   EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
@@ -23,21 +18,22 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
 } from '../../../../../src/plugins/maps_ems/common/';
 
+// lowercase is on purpose, so it matches lowercase es-field-names of the maps-telemetry schema
 export enum TELEMETRY_LAYER_TYPE {
-  ES_DOCS = 'ES_DOCS',
-  ES_TOP_HITS = 'ES_TOP_HITS',
-  ES_TRACKS = 'ES_TRACKS',
-  ES_POINT_TO_POINT = 'ES_POINT_TO_POINT',
-  ES_AGG_CLUSTERS = 'ES_AGG_CLUSTERS',
-  ES_AGG_GRIDS = 'ES_AGG_GRIDS',
-  ES_AGG_HEATMAP = 'ES_AGG_HEATMAP',
-  EMS_REGION = 'EMS_REGION',
-  EMS_BASEMAP = 'EMS_BASEMAP',
-  KBN_REGION = 'KBN_REGION',
-  KBN_TMS_RASTER = 'KBN_TMS_RASTER',
-  UX_TMS_RASTER = 'TMS_RASTER',
-  UX_TMS_MVT = 'UX_TMS_MVT',
-  UX_WMS = 'UX_WMS',
+  ES_DOCS = 'es_docs',
+  ES_TOP_HITS = 'es_top_hits',
+  ES_TRACKS = 'es_tracks',
+  ES_POINT_TO_POINT = 'es_point_to_point',
+  ES_AGG_CLUSTERS = 'es_agg_clusters',
+  ES_AGG_GRIDS = 'es_agg_grids',
+  ES_AGG_HEATMAP = 'es_agg_heatmap',
+  EMS_REGION = 'ems_region',
+  EMS_BASEMAP = 'ems_basemap',
+  KBN_REGION = 'kbn_region',
+  KBN_TMS_RASTER = 'kbn_tms_raster',
+  UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
+  UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps
+  UX_WMS = 'ux_wms', // configured in the UX layer wizard of Maps
 }
 
 interface ClusterCountStats {
@@ -52,16 +48,36 @@ export type TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {
 };
 
 export enum TELEMETRY_EMS_BASEMAP_TYPES {
-  ROADMAP_DESATURATED = 'DESATURATED',
-  ROADMAP = 'ROADMAP',
-  AUTO = 'AUTO',
-  DARK = 'DARK',
+  ROADMAP_DESATURATED = 'desaturated',
+  ROADMAP = 'roadmap',
+  AUTO = 'auto',
+  DARK = 'dark',
 }
 
 export type TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER = {
   [key in TELEMETRY_EMS_BASEMAP_TYPES]?: ClusterCountStats;
 };
 
+export enum TELEMETRY_SCALING_OPTIONS {
+  LIMIT = 'limit',
+  MVT = 'mvt',
+  CLUSTERS = 'clusters',
+}
+
+export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
+  [key in TELEMETRY_SCALING_OPTIONS]?: ClusterCountStats;
+};
+
+const TELEMETRY_TERM_JOIN = 'term';
+export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
+  [TELEMETRY_TERM_JOIN]?: ClusterCountStats;
+}
+
+// These capture a particular "combo" of source and layer-settings.
+// They are mutually exclusive (ie. a layerDescriptor can only be a single telemetry_layer_type)
+// They are more useful from a telemetry-perspective than:
+// - an actual SourceType (which does not say enough about how it looks on a map)
+// - an actual LayerType (which is too coarse and does not say much about what kind of data)
 export function getTelemetryLayerType(
   layerDescriptor: LayerDescriptor
 ): TELEMETRY_LAYER_TYPE | null {
@@ -131,17 +147,7 @@ export function getTelemetryLayerType(
   return null;
 }
 
-export interface TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER {
-  [SCALING_TYPES.LIMIT]?: ClusterCountStats;
-  [SCALING_TYPES.MVT]?: ClusterCountStats;
-  [SCALING_TYPES.CLUSTERS]?: ClusterCountStats;
-}
-
-export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
-  TERM?: ClusterCountStats;
-}
-
-function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | null {
+function getScalingOption(layerDescriptor: LayerDescriptor): TELEMETRY_SCALING_OPTIONS | null {
   if (
     !layerDescriptor.sourceDescriptor ||
     layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
@@ -149,7 +155,20 @@ function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | nul
   ) {
     return null;
   }
-  return (layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType;
+
+  const descriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+
+  if (descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+    return TELEMETRY_SCALING_OPTIONS.CLUSTERS;
+  }
+
+  if (descriptor.scalingType === SCALING_TYPES.MVT) {
+    return TELEMETRY_SCALING_OPTIONS.MVT;
+  }
+
+  if (descriptor.scalingType === SCALING_TYPES.LIMIT) {
+    return TELEMETRY_SCALING_OPTIONS.LIMIT;
+  }
 }
 
 export function getCountsByMap<K extends string>(
@@ -235,7 +254,7 @@ export function getTermJoinsPerCluster(
     return layerDescriptor.type === LAYER_TYPE.VECTOR &&
       layerDescriptor.joins &&
       layerDescriptor.joins.length
-      ? 'TERM'
+      ? TELEMETRY_TERM_JOIN
       : null;
   });
 }

@@ -101,31 +101,31 @@ describe('buildMapsSavedObjectsTelemetry', () => {
     const result = buildMapsSavedObjectsTelemetry(layerLists);
 
     expect(result.layerTypes).toEqual({
-      EMS_BASEMAP: {
+      ems_basemap: {
         avg: 0.6,
         max: 1,
         min: 1,
         total: 3,
       },
-      EMS_REGION: {
+      ems_region: {
         avg: 0.6,
         max: 1,
         min: 1,
         total: 3,
       },
-      ES_AGG_CLUSTERS: {
+      es_agg_clusters: {
         avg: 0.4,
         max: 1,
         min: 1,
         total: 2,
       },
-      ES_AGG_HEATMAP: {
+      es_agg_heatmap: {
         avg: 0.2,
         max: 1,
         min: 1,
         total: 1,
       },
-      ES_DOCS: {
+      es_docs: {
         avg: 0.2,
         max: 1,
         min: 1,
@@ -133,7 +133,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
       },
     });
     expect(result.scalingOptions).toEqual({
-      LIMIT: {
+      limit: {
         avg: 0.2,
         max: 1,
         min: 1,
@@ -141,7 +141,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
       },
     });
     expect(result.joins).toEqual({
-      TERM: {
+      term: {
         avg: 0.2,
         max: 1,
         min: 1,
@@ -149,7 +149,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
       },
     });
     expect(result.basemaps).toEqual({
-      ROADMAP: {
+      roadmap: {
         avg: 0.6,
         max: 1,
         min: 1,
