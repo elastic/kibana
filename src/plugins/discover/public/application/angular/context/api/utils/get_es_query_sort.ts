@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EsQuerySortValue,
-  SortDirection,
-  SortDirectionFormat,
-} from '../../../../../kibana_services';
+import { EsQuerySortValue, SortDirection } from '../../../../../kibana_services';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
@@ -26,10 +22,13 @@ export function getEsQuerySort(
   sortDir: SortDirection,
   nanos?: string
 ): [EsQuerySortValue, EsQuerySortValue] {
-  const time = {} as Record<string, SortDirectionFormat>;
-  time[timeField] = {
-    order: sortDir,
-    format: nanos ? 'strict_date_optional_time_nanos' : 'strict_date_optional_time',
-  };
-  return [{ ...time }, { [tieBreakerField]: sortDir }];
+  return [
+    {
+      [timeField]: {
+        order: sortDir,
+        format: nanos ? 'strict_date_optional_time_nanos' : 'strict_date_optional_time',
+      },
+    },
+    { [tieBreakerField]: sortDir },
+  ];
 }
