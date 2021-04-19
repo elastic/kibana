@@ -17,7 +17,6 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '../../../../../../../public/shared_imports';
-import { getInitialExceptionFromEvent } from '../../../store/utils';
 
 jest.mock('../form');
 jest.mock('../notification');
