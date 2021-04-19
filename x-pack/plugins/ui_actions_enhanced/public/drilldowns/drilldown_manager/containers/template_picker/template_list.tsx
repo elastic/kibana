@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFormRow } from '@elastic/eui';
 import * as React from 'react';
 import {
   DrilldownTemplateTable,
@@ -12,6 +13,7 @@ import {
 } from '../../components/drilldown_template_table';
 import { DrilldownTemplate } from '../../types';
 import { useDrilldownManager } from '../context';
+import { txtLabel } from './i18n';
 
 export interface TemplateListProps {
   items: DrilldownTemplate[];
@@ -46,10 +48,12 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
   }, [drilldowns, items]);
 
   return (
-    <DrilldownTemplateTable
-      items={tableItems}
-      onCreate={drilldowns.onCreateFromTemplate}
-      onClone={drilldowns.onClone}
-    />
+    <EuiFormRow label={txtLabel} fullWidth>
+      <DrilldownTemplateTable
+        items={tableItems}
+        onCreate={drilldowns.onCreateFromTemplate}
+        onClone={drilldowns.onClone}
+      />
+    </EuiFormRow>
   );
 };
