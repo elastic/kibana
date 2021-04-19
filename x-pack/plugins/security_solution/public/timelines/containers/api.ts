@@ -237,10 +237,7 @@ export const exportSelectedTimeline: ExportSelectedData = ({
   try {
     requestBody = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   return KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
@@ -289,10 +286,7 @@ export const cleanDraftTimeline = async ({
       ...templateTimelineInfo,
     });
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
     body: requestBody,
@@ -370,10 +364,7 @@ export const persistFavorite = async ({
       timelineType,
     });
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
   const response = await KibanaServices.get().http.patch<ResponseFavoriteTimeline>(
@@ -395,10 +386,7 @@ export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
       savedObjectIds,
     });
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   const response = await KibanaServices.get().http.delete<boolean>(TIMELINE_URL, {
     method: 'DELETE',
