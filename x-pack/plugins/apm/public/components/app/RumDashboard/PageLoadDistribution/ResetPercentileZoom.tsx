@@ -11,6 +11,7 @@ import {
   EuiHideFor,
   EuiShowFor,
   EuiButtonIcon,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { PercentileRange } from './index';
@@ -28,8 +29,8 @@ export function ResetPercentileZoom({
   const onClick = () => {
     setPercentileRange({ min: null, max: null });
   };
-  return (
-    <>
+  return !isDisabled ? (
+    <EuiFlexItem grow={false}>
       <EuiShowFor sizes={['xs']}>
         <EuiButtonIcon
           iconType="inspect"
@@ -49,6 +50,6 @@ export function ResetPercentileZoom({
           {I18LABELS.resetZoom}
         </EuiButtonEmpty>
       </EuiHideFor>
-    </>
-  );
+    </EuiFlexItem>
+  ) : null;
 }
