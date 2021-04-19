@@ -13,8 +13,5 @@
     "build": "../../node_modules/.bin/babel src --out-dir target",
     "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
-  },
-  "dependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset"
   }
 }
