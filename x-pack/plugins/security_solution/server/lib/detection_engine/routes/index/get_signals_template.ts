@@ -7,6 +7,7 @@
 
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
+import otherMapping from './other_mappings.json';
 
 /**
   @constant
@@ -44,20 +45,27 @@ export const getSignalsTemplate = (index: string) => {
       ...ecsMapping.mappings,
       properties: {
         ...ecsMapping.mappings.properties,
+        as: otherMapping.as,
+        code_signature: otherMapping.code_signature,
+        geo: otherMapping.geo,
+        hash: otherMapping.hash,
+        interface: otherMapping.interface,
+        os: otherMapping.os,
+        pe: otherMapping.pe,
         signal: signalsMapping.mappings.properties.signal,
         threat: {
           ...ecsMapping.mappings.properties.threat,
           properties: {
             ...ecsMapping.mappings.properties.threat.properties,
             indicator: {
-              ...ecsMapping.mappings.properties.threat.properties.indicator,
               properties: {
-                ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
+                ...otherMapping.threat.properties.indicator.properties,
                 event: ecsMapping.mappings.properties.event,
               },
             },
           },
         },
+        vlan: otherMapping.vlan,
       },
       _meta: {
         version: SIGNALS_TEMPLATE_VERSION,
