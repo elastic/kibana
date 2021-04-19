@@ -12,44 +12,32 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiToolTip,
-  EuiTitle,
-  euiPaletteGray,
-  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
-import * as i18n from './translations';
+import { isEmpty } from 'fp-ts/Array';
 import { SummaryView } from './summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from './helpers';
-
-const linkFields = ['threat.indicator.event.url', 'threat.indicator.event.reference'];
-
-const StyledNoEnrichmentContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const StyledEuiIcon = styled(EuiIcon)`
-  margin: ${({ theme }) => theme.eui.paddingSizes.m};
-`;
-
-const StyledSpan = styled.span`
-  color: ${euiPaletteGray(5)[2]};
-  line-height: 1.8em;
-  text-align: center;
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.xl}`};
-`;
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
+import {
+  FIRSTSEEN,
+  INDICATOR_EVENT_URL,
+  INDICATOR_REFERENCE,
+} from '../../../../common/cti/constants';
+import { EmptyThreatDetailsView } from './empty_threat_details_view';
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
   value,
 }) => {
-  const tooltipChild = linkFields.some((field) => field === fieldName) ? (
-    <a href={value} target="_blank" rel="noreferrer">
+  const tooltipChild = [INDICATOR_EVENT_URL, INDICATOR_REFERENCE].some(
+    (field) => field === fieldName
+  ) ? (
+    <EuiLink href={value} target="_blank">
       {value}
-    </a>
+    </EuiLink>
   ) : (
     <span>{value}</span>
   );
@@ -68,34 +56,51 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
     </EuiToolTip>
   );
 };
+
 const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(
   ThreatDetailsDescription
 );
 
+const getISOStringFromThreatDataItem = (threatDataItem: TimelineEventsDetailsItem[]) => {
+  const firstSeen = threatDataItem.find(
+    (item: TimelineEventsDetailsItem) => item.field === FIRSTSEEN
+  );
+  if (firstSeen) {
+    const { originalValue } = firstSeen;
+    const firstSeenValue = Array.isArray(originalValue) ? originalValue[0] : originalValue;
+    if (!Number.isNaN(Date.parse(firstSeenValue))) {
+      return firstSeenValue;
+    }
+  }
+  return new Date(-1).toString();
+};
+
+const getThreatDetailsRowsArray = (threatData: TimelineEventsDetailsItem[][]) =>
+  threatData
+    .sort(
+      (a, b) =>
+        Date.parse(getISOStringFromThreatDataItem(b)) -
+        Date.parse(getISOStringFromThreatDataItem(a))
+    )
+    .map((items) =>
+      items.map(({ field, originalValue }) => ({
+        title: field,
+        description: {
+          fieldName: `${INDICATOR_DESTINATION_PATH}.${field}`,
+          value: Array.isArray(originalValue) ? originalValue[0] : originalValue,
+        },
+      }))
+    );
+
 const ThreatDetailsViewComponent: React.FC<{
-  threatDetailsRows: ThreatDetailsRow[][];
-}> = ({ threatDetailsRows }) =>
-  !threatDetailsRows[0] || threatDetailsRows[0].length === 0 ? (
-    <StyledNoEnrichmentContainer data-test-subj="empty-threat-details-view">
-      <EuiSpacer size="xxl" />
-      <StyledEuiIcon type="faceHappy" size="xl" color="plain" />
-      <EuiTitle size="m">
-        <h2>{i18n.NO_ENRICHMENT_FOUND}</h2>
-      </EuiTitle>
-      <StyledSpan>
-        {i18n.IF_CTI_NOT_ENABLED}
-        <a
-          href="https://www.elastic.co/guide/en/beats/filebeat/7.12/filebeat-module-threatintel.html"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {i18n.CHECK_DOCS}
-        </a>
-      </StyledSpan>
-    </StyledNoEnrichmentContainer>
+  threatData: TimelineEventsDetailsItem[][];
+}> = ({ threatData }) => {
+  const threatDetailsRowsArray = getThreatDetailsRowsArray(threatData);
+  return isEmpty(threatDetailsRowsArray) || isEmpty(threatDetailsRowsArray[0]) ? (
+    <EmptyThreatDetailsView />
   ) : (
     <>
-      {threatDetailsRows.map((summaryRows, index, arr) => {
+      {threatDetailsRowsArray.map((summaryRows, index, arr) => {
         const key = summaryRows.find((threat) => threat.title === 'matched.id')?.description
           .value[0];
         return (
@@ -112,5 +117,6 @@ const ThreatDetailsViewComponent: React.FC<{
       })}
     </>
   );
+};
 
 export const ThreatDetailsView = React.memo(ThreatDetailsViewComponent);

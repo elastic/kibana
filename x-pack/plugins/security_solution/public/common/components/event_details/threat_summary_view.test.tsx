@@ -10,6 +10,8 @@ import React from 'react';
 import { ThreatSummaryView } from './threat_summary_view';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { mockAlertDetailsData } from './__mocks__';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
   return {
@@ -18,26 +20,9 @@ jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async'
 });
 
 const props = {
-  threatSummaryRows: [
-    {
-      title: 'matched.field',
-      description: {
-        contextId: 'test-context-id',
-        eventId: 'test-event-id',
-        fieldName: 'threat.indicator.matched.field',
-        values: ['ip'],
-      },
-    },
-    {
-      title: 'matched.type',
-      description: {
-        contextId: 'test-context-id',
-        eventId: 'test-event-id',
-        fieldName: 'threat.indicator.matched.type',
-        values: ['file'],
-      },
-    },
-  ],
+  data: mockAlertDetailsData as TimelineEventsDetailsItem[],
+  eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
+  timelineId: 'detections-page',
 };
 
 describe('ThreatSummaryView', () => {

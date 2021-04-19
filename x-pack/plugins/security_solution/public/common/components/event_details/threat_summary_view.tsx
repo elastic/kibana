@@ -12,6 +12,33 @@ import * as i18n from './translations';
 import { SummaryView } from './summary_view';
 import { getSummaryColumns, SummaryRow, ThreatSummaryRow } from './helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import { SORTED_THREAT_SUMMARY_FIELDS } from '../../../../common/cti/constants';
+import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
+
+const getThreatSummaryRows = (
+  data: TimelineEventsDetailsItem[],
+  timelineId: string,
+  eventId: string
+) => {
+  return data
+    .reduce((acc, { field, originalValue }) => {
+      const index = SORTED_THREAT_SUMMARY_FIELDS.indexOf(field);
+      if (index > -1) {
+        acc[index] = {
+          title: field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
+          description: {
+            values: Array.isArray(originalValue) ? originalValue : [originalValue],
+            contextId: timelineId,
+            eventId,
+            fieldName: field,
+          },
+        };
+      }
+      return acc;
+    }, [] as Array<ThreatSummaryRow | undefined>)
+    .filter((item) => !!item) as ThreatSummaryRow[];
+};
 
 const getDescription = ({
   contextId,
@@ -35,14 +62,16 @@ const getDescription = ({
 const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(getDescription);
 
 const ThreatSummaryViewComponent: React.FC<{
-  threatSummaryRows: ThreatSummaryRow[];
-}> = ({ threatSummaryRows }) => (
+  data: TimelineEventsDetailsItem[];
+  timelineId: string;
+  eventId: string;
+}> = ({ data, timelineId, eventId }) => (
   <>
     <EuiSpacer size="l" />
     <SummaryView
       title={i18n.THREAT_SUMMARY}
       summaryColumns={summaryColumns}
-      summaryRows={threatSummaryRows}
+      summaryRows={getThreatSummaryRows(data, timelineId, eventId)}
       dataTestSubj="threat-summary-view"
     />
   </>

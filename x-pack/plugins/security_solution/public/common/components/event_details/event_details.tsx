@@ -18,7 +18,8 @@ import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { useThreatIntelTabs } from '../../hooks/use_threat_intel_tabs';
+import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
+import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
 
 interface EventViewTab {
   id: EventViewId;
@@ -89,13 +90,21 @@ const EventDetailsComponent: React.FC<Props> = ({
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
     [setSelectedTabId]
   );
-  const { isThreatPresent, threatCount, threatSummaryRows, threatDetailsRows } = useThreatIntelTabs(
-    data,
-    isAlert,
-    id,
-    timelineId,
-    selectedTabId
-  );
+
+  const threatData = useMemo(() => {
+    if (isAlert && data) {
+      const threatIndicator = data.find(
+        ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
+      );
+      if (!threatIndicator) return [];
+      const { originalValue } = threatIndicator;
+      const values = Array.isArray(originalValue) ? originalValue : [originalValue];
+      return values.map((value) => getDataFromSourceHits(JSON.parse(value)));
+    }
+    return [];
+  }, [data, isAlert]);
+
+  const threatCount = useMemo(() => threatData.length, [threatData.length]);
 
   const summaryTab = useMemo(
     () =>
@@ -111,15 +120,15 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     timelineId,
-                    title: isThreatPresent ? i18n.ALERT_SUMMARY : undefined,
+                    title: threatCount ? i18n.ALERT_SUMMARY : undefined,
                   }}
                 />
-                {isThreatPresent && <ThreatSummaryView threatSummaryRows={threatSummaryRows} />}
+                {threatCount > 0 && <ThreatSummaryView {...{ data, timelineId, eventId: id }} />}
               </>
             ),
           }
         : undefined,
-    [browserFields, data, id, isAlert, isThreatPresent, timelineId, threatSummaryRows]
+    [browserFields, data, id, isAlert, timelineId, threatCount]
   );
 
   const threatIntelTab = useMemo(
@@ -128,10 +137,10 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             name: `${i18n.THREAT_INTEL} (${threatCount})`,
-            content: <ThreatDetailsView threatDetailsRows={threatDetailsRows} />,
+            content: <ThreatDetailsView threatData={threatData} />,
           }
         : undefined,
-    [isAlert, threatDetailsRows, threatCount]
+    [isAlert, threatCount, threatData]
   );
 
   const tableTab = useMemo(

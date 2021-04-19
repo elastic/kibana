@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiTitle,
-  euiPaletteGray,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -34,7 +28,7 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`
-  color: ${euiPaletteGray(5)[2]};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
   text-transform: lowercase;
   padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
   h2 {
@@ -45,7 +39,7 @@ const StyledEuiTitle = styled(EuiTitle)`
   }
 `;
 
-const StyledDiv = styled.div`
+const FlexDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -61,10 +55,10 @@ export const SummaryViewComponent: React.FC<{
     <>
       {title && (
         <StyledEuiTitle size="xxs">
-          <StyledDiv>
+          <FlexDiv>
             <h2>{title}</h2>
             <EuiHorizontalRule margin="none" />
-          </StyledDiv>
+          </FlexDiv>
         </StyledEuiTitle>
       )}
       <StyledEuiInMemoryTable
