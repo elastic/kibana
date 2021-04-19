@@ -18,17 +18,12 @@ import {
 } from '@elastic/eui';
 import { MlAnomalyDetectionAlertAdvancedSettings } from '../../common/types/alerts';
 import { TimeIntervalControl } from './time_interval_control';
-import { numberValidator, timeIntervalInputValidator } from '../../common/util/validators';
 import { TOP_N_BUCKETS_COUNT } from '../../common/constants/alerts';
 
 interface AdvancedSettingsProps {
   value: MlAnomalyDetectionAlertAdvancedSettings;
   onChange: (update: Partial<MlAnomalyDetectionAlertAdvancedSettings>) => void;
 }
-
-export const validateLookbackInterval = timeIntervalInputValidator();
-
-export const validateTopNBucket = numberValidator({ min: 1 });
 
 export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
   return (
