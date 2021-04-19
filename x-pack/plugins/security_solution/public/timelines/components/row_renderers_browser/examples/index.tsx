@@ -19,4 +19,5 @@ export * from './system_file';
 export * from './system_fim';
 export * from './system_security_event';
 export * from './system_socket';
+export * from './threat_match';
 export * from './zeek';
