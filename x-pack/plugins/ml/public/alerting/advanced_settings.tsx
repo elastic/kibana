@@ -73,6 +73,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
           onChange={(update) => {
             onChange({ lookbackInterval: update });
           }}
+          data-test-subj={'mlAnomalyAlertLookbackInterval'}
         />
       </EuiDescribedFormGroup>
 
@@ -110,6 +111,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
             onChange={(e) => {
               onChange({ topNBuckets: Number(e.target.value) });
             }}
+            data-test-subj={'mlAnomalyAlertTopNBuckets'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

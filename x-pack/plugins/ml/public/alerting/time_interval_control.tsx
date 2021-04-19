@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiFieldTextProps } from '@elastic/eui';
 import React, { FC, ReactNode, useMemo } from 'react';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 import { composeValidators } from '../../common';
 import { timeIntervalInputValidator } from '../../common/util/validators';
 
-interface TimeIntervalControlProps {
+type TimeIntervalControlProps = Omit<EuiFieldTextProps, 'value' | 'onChange'> & {
   label: string | ReactNode;
   value: string | null | undefined;
   onChange: (update: string) => void;
-}
+};
 
-export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({ value, onChange, label }) => {
+export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
+  value,
+  onChange,
+  label,
+  ...fieldTextProps
+}) => {
   const validators = useMemo(() => composeValidators(timeIntervalInputValidator()), []);
 
   const validationErrors = useMemo(() => validators(value), [value]);
@@ -31,13 +36,13 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({ value, onCha
       error={invalidTimeIntervalMessage(value ?? undefined)}
     >
       <EuiFieldText
+        {...fieldTextProps}
         placeholder="15d, 6m"
         value={value ?? ''}
         onChange={(e) => {
           onChange(e.target.value);
         }}
         isInvalid={isInvalid}
-        data-test-subj={'mlAnomalyAlertPreviewInterval'}
       />
     </EuiFormRow>
   );
