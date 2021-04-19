@@ -112,7 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await ml.testExecution.logTestStep('should populate advanced settings with default values');
         await ml.alerting.assertTopNBuckets(1);
-        await ml.alerting.assertLookbackInterval('7321s');
+        await ml.alerting.assertLookbackInterval('123m');
 
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);
