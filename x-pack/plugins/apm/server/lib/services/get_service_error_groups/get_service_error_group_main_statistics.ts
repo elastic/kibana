@@ -23,7 +23,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
-export function getServiceErrorGroupPrimaryStatistics({
+export function getServiceErrorGroupMainStatistics({
   kuery,
   serviceName,
   setup,
@@ -36,7 +36,7 @@ export function getServiceErrorGroupPrimaryStatistics({
   transactionType: string;
   environment?: string;
 }) {
-  return withApmSpan('get_service_error_group_primary_statistics', async () => {
+  return withApmSpan('get_service_error_group_main_statistics', async () => {
     const { apmEventClient, start, end } = setup;
 
     const response = await apmEventClient.search({
