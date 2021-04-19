@@ -60,7 +60,7 @@ export const MonitorDurationComponent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>
-            <FormattedMessage id="xpack.apm.csm.pageViews.analyze" defaultMessage="Analyze" />
+            <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
