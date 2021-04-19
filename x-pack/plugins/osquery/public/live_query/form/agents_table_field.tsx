@@ -7,10 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { FieldHook } from '../../shared_imports';
-import { AgentsTable, AgentsSelection } from '../../agents/agents_table';
+import { AgentsTable } from '../../agents/agents_table';
+import { AgentSelection } from '../../agents/types';
 
 interface AgentsTableFieldProps {
-  field: FieldHook<AgentsSelection>;
+  field: FieldHook<AgentSelection>;
 }
 
 const AgentsTableFieldComponent: React.FC<AgentsTableFieldProps> = ({ field }) => {
