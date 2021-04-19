@@ -5,33 +5,96 @@
  * 2.0.
  */
 
-import { IIndexPattern, IFieldType, IndexPatternsContract } from 'src/plugins/data/common';
+import { from, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import {
+  fieldList,
+  FieldSpec,
+  IIndexPattern,
+  IndexPattern,
+  IndexPatternsContract,
+  RuntimeField,
+} from 'src/plugins/data/common';
 
-const indexPatternFields: IFieldType[] = [
-  {
-    name: 'event.dataset',
-    type: 'string',
-    esTypes: ['keyword'],
-    aggregatable: true,
-    filterable: true,
-    searchable: true,
-  },
-];
-
-const indexPattern: IIndexPattern = {
-  id: '1234',
-  title: 'log-indices-*',
-  timeFieldName: '@timestamp',
-  fields: indexPatternFields,
+type IndexPatternMock = Pick<
+  IndexPattern,
+  | 'fields'
+  | 'getComputedFields'
+  | 'getFieldByName'
+  | 'getTimeField'
+  | 'id'
+  | 'isTimeBased'
+  | 'title'
+  | 'type'
+>;
+type IndexPatternMockSpec = Pick<IIndexPattern, 'id' | 'title' | 'type' | 'timeFieldName'> & {
+  fields: FieldSpec[];
 };
 
-export const getIndexPatternsMock = (): any => {
+export const createIndexPatternMock = ({
+  id,
+  title,
+  type = undefined,
+  fields,
+  timeFieldName,
+}: IndexPatternMockSpec): IndexPatternMock => {
+  const indexPatternFieldList = fieldList(fields);
+
   return {
-    indexPatternsServiceFactory: async () => {
-      return {
-        get: async (id) => indexPattern,
-        getFieldsForWildcard: async (options) => indexPatternFields,
-      } as Pick<IndexPatternsContract, 'get' | 'getFieldsForWildcard'>;
+    id,
+    title,
+    type,
+    fields: indexPatternFieldList,
+    getTimeField: () => indexPatternFieldList.find(({ name }) => name === timeFieldName),
+    isTimeBased: () => timeFieldName != null,
+    getFieldByName: (fieldName) => indexPatternFieldList.find(({ name }) => name === fieldName),
+    getComputedFields: () => ({
+      runtimeFields: indexPatternFieldList.reduce<Record<string, RuntimeField>>(
+        (accumulatedFields, { name, runtimeField }) => ({
+          ...accumulatedFields,
+          ...(runtimeField != null
+            ? {
+                [name]: runtimeField,
+              }
+            : {}),
+        }),
+        {}
+      ),
+      scriptFields: {},
+      storedFields: [],
+      docvalueFields: [],
+    }),
+  };
+};
+
+export const createIndexPatternsMock = (
+  asyncDelay: number,
+  indexPatterns: IndexPatternMock[]
+): {
+  getIdsWithTitle: IndexPatternsContract['getIdsWithTitle'];
+  get: (...args: Parameters<IndexPatternsContract['get']>) => Promise<IndexPatternMock>;
+} => {
+  return {
+    async getIdsWithTitle(_refresh?: boolean) {
+      const indexPatterns$ = of(
+        indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
+      );
+      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
     },
+    async get(indexPatternId: string) {
+      const indexPatterns$ = from(
+        indexPatterns.filter((indexPattern) => indexPattern.id === indexPatternId)
+      );
+      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+    },
+  };
+};
+
+export const createIndexPatternsStartMock = (
+  asyncDelay: number,
+  indexPatterns: IndexPatternMock[]
+): any => {
+  return {
+    indexPatternsServiceFactory: async () => createIndexPatternsMock(asyncDelay, indexPatterns),
   };
 };
