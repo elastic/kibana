@@ -330,8 +330,6 @@ export type State =
   | ReindexSourceToTempRead
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndex
-  // | ReindexSourceToTempState
-  // | ReindexSourceToTempWaitForTaskState
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
