@@ -26,13 +26,19 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
+  GetSubCase = 'getSubCase',
+  FindSubCases = 'findSubCases',
 }
 
 // TODO: comments
 export enum WriteOperations {
   CreateCase = 'createCase',
+  // TODO: should delete and update be cases? plural?
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
+  CreateSubCase = 'createSubCase',
+  DeleteSubCases = 'deleteSubCases',
+  UpdateSubCases = 'updateSubCases',
 }
 
 /**

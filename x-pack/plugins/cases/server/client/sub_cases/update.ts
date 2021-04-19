@@ -35,7 +35,7 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getCaseToUpdate } from '../utils';
+import { ensureAuthorized, getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {
   createAlertUpdateRequest,
@@ -46,6 +46,7 @@ import { createCaseError } from '../../common/error';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 import { CasesClientArgs } from '../types';
 import { CasesClientInternal } from '../client_internal';
+import { Operations } from '../../authorization';
 
 function checkNonExistingOrConflict(
   toUpdate: SubCasePatchRequest[],
@@ -271,11 +272,29 @@ export async function update({
   );
 
   try {
-    const { savedObjectsClient: soClient, user, caseService, userActionService } = clientArgs;
+    const {
+      savedObjectsClient: soClient,
+      user,
+      caseService,
+      userActionService,
+      auditLogger,
+      authorization,
+    } = clientArgs;
 
     const bulkSubCases = await caseService.getSubCases({
       soClient,
       ids: query.subCases.map((q) => q.id),
+    });
+
+    const entities = bulkSubCases.saved_objects
+      .filter((subCase) => subCase.error === undefined)
+      .map((subCase) => ({ owner: subCase.attributes.owner, id: subCase.id }));
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      operation: Operations.updateSubCases,
+      entities,
     });
 
     const subCasesMap = bulkSubCases.saved_objects.reduce((acc, so) => {

@@ -37,6 +37,8 @@ const deleteVerbs: Verbs = {
   past: 'deleted',
 };
 
+const subCaseDocType = 'sub cases';
+
 /**
  * Definition of all APIs within the cases backend.
  */
@@ -96,7 +98,31 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     name: ReadOperations.FindSubCases,
     action: 'find-sub-cases',
     verbs: accessVerbs,
-    docType: 'sub cases',
+    docType: subCaseDocType,
+    savedObjectType: SUB_CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateSubCase]: {
+    type: EventType.CREATION,
+    name: WriteOperations.CreateSubCase,
+    action: 'create-sub-case',
+    verbs: createVerbs,
+    docType: subCaseDocType,
+    savedObjectType: SUB_CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteSubCases]: {
+    type: EventType.DELETION,
+    name: WriteOperations.DeleteSubCases,
+    action: 'delete-sub-cases',
+    verbs: deleteVerbs,
+    docType: subCaseDocType,
+    savedObjectType: SUB_CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateSubCases]: {
+    type: EventType.CHANGE,
+    name: WriteOperations.UpdateSubCases,
+    action: 'update-sub-cases',
+    verbs: updateVerbs,
+    docType: subCaseDocType,
     savedObjectType: SUB_CASE_SAVED_OBJECT,
   },
 };

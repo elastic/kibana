@@ -10,7 +10,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  Logger,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
@@ -45,7 +51,9 @@ import {
   ENABLE_CASE_CONNECTOR,
 } from '../../../common/constants';
 
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { AuditLogger } from '../../../../security/server';
+import { Authorization, Operations } from '../../authorization';
 
 async function getSubCase({
   caseService,
@@ -92,6 +100,7 @@ async function getSubCase({
     createdBy: user,
     owner,
   });
+
   await userActionService.bulkCreate({
     soClient: savedObjectsClient,
     actions: [
@@ -118,6 +127,8 @@ interface AddCommentFromRuleArgs {
   caseService: CaseService;
   userActionService: CaseUserActionService;
   logger: Logger;
+  auditLogger?: AuditLogger;
+  authorization: PublicMethodsOf<Authorization>;
 }
 
 const addGeneratedAlerts = async ({
@@ -129,6 +140,8 @@ const addGeneratedAlerts = async ({
   caseId,
   comment,
   logger,
+  auditLogger,
+  authorization,
 }: AddCommentFromRuleArgs): Promise<CaseResponse> => {
   const query = pipe(
     AlertCommentRequestRt.decode(comment),
@@ -162,6 +175,15 @@ const addGeneratedAlerts = async ({
       full_name: caseInfo.attributes.created_by?.full_name,
       email: caseInfo.attributes.created_by?.email,
     };
+
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await ensureAuthorized({
+      operation: Operations.createSubCase,
+      entities: [{ owner: caseInfo.attributes.owner, id: savedObjectID }],
+      authorization,
+      auditLogger,
+    });
 
     const subCase = await getSubCase({
       caseService,
@@ -311,6 +333,8 @@ export const addComment = async ({
     attachmentService,
     user,
     logger,
+    auditLogger,
+    authorization,
   } = rest;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -329,6 +353,8 @@ export const addComment = async ({
       caseService,
       attachmentService,
       logger,
+      auditLogger,
+      authorization,
     });
   }
 

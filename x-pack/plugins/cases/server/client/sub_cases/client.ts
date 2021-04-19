@@ -20,9 +20,9 @@ import {
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
 import { createCaseError } from '../../common/error';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, ensureAuthorized, getAuthorizationFilter } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
 import { Operations } from '../../authorization';
@@ -72,6 +72,8 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       userActionService,
       caseService,
       attachmentService,
+      authorization,
+      auditLogger,
     } = clientArgs;
 
     const [comments, subCases] = await Promise.all([
@@ -79,6 +81,19 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       caseService.getSubCases({ soClient, ids }),
     ]);
 
+    const entities = subCases.saved_objects
+      .filter((subCase) => subCase.error === undefined)
+      .map((subCase) => ({ owner: subCase.attributes.owner, id: subCase.id }));
+
+    // ensure we're authorized to delete each sub case
+    await ensureAuthorized({
+      entities,
+      operation: Operations.deleteSubCases,
+      authorization,
+      auditLogger,
+    });
+
+    // check and see if we had some errors in the sub cases we requested, if so throw and assume we couldn't find them
     const subCaseErrors = subCases.saved_objects.filter((subCase) => subCase.error !== undefined);
 
     if (subCaseErrors.length > 0) {
@@ -95,13 +110,14 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       return acc;
     }, new Map<string, string | undefined>());
 
+    // delete the sub case first and then the comments
+    await Promise.all(ids.map((id) => caseService.deleteSubCase(soClient, id)));
+
     await Promise.all(
       comments.saved_objects.map((comment) =>
         attachmentService.delete({ soClient, attachmentId: comment.id })
       )
     );
-
-    await Promise.all(ids.map((id) => caseService.deleteSubCase(soClient, id)));
 
     const deleteDate = new Date().toISOString();
 
@@ -134,15 +150,16 @@ async function find(
   clientArgs: CasesClientArgs
 ): Promise<SubCasesFindResponse> {
   try {
-    const { savedObjectsClient: soClient, caseService, authorization } = clientArgs;
+    const { savedObjectsClient: soClient, caseService, authorization, auditLogger } = clientArgs;
 
     const {
       filter: authorizationFilter,
-      ensureAuthorizedForSavedObjects,
+      ensureSavedObjectsAreAuthorized,
       logSuccessfulAuthorization,
-    } = await authorization.getFindAuthorizationFilter({
-      savedObjectType: SUB_CASE_SAVED_OBJECT,
+    } = await getAuthorizationFilter({
       operation: Operations.findSubCases,
+      authorization,
+      auditLogger,
     });
 
     const ids = [caseID];
@@ -167,7 +184,7 @@ async function find(
       },
     });
 
-    ensureAuthorizedForSavedObjects([...subCases.subCasesMap.values()].flat());
+    ensureSavedObjectsAreAuthorized([...subCases.subCasesMap.values()].flat());
 
     // TODO: do we need to do additional authorization checks here?
     const [open, inProgress, closed] = await Promise.all([
@@ -219,10 +236,11 @@ async function get(
       id,
     });
 
-    await authorization.ensureAuthorized({
-      owner: subCase.attributes.owner,
+    await ensureAuthorized({
+      entities: [{ owner: subCase.attributes.owner, id: subCase.id }],
       operation: Operations.getSubCase,
-      savedObjectID: subCase.id,
+      authorization,
+      auditLogger,
     });
 
     if (!includeComments) {

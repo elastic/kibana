@@ -448,6 +448,7 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
   }
 };
 
+// TODO: move these to authorization utils.ts
 /**
  * Wraps the Authorization class' ensureAuthorized call in a try/catch to handle the audit logging
  * on a failure.
