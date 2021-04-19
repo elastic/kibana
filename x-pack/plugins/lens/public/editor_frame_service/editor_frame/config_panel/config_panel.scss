@@ -1,3 +1,7 @@
+.lnsConfigPanel__addLayerBtnWrapper {
+  padding-bottom: $euiSize;
+}
+
 .lnsConfigPanel__addLayerBtn {
   color: transparentize($euiColorMediumShade, .3);
   // Remove EuiButton's default shadow to make button more subtle

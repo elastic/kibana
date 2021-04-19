@@ -134,7 +134,7 @@ export function LayerPanels(
         ) : null
       )}
       {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
             title={i18n.translate('xpack.lens.xyChart.addLayer', {
