@@ -17,11 +17,11 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
-import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
-import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
-import { getServiceInstancesPrimaryStatistics } from '../lib/services/get_service_instances/primary_statistics';
 import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
+import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
+import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
+import { getServiceInstancesDetailedStatisticsPeriods } from '../lib/services/get_service_instances/detailed_statistics';
+import { getServiceInstancesMainStatistics } from '../lib/services/get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
@@ -293,9 +293,8 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
   },
 });
 
-const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
+const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -318,7 +317,7 @@ const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
       path: { serviceName },
       query: { kuery, transactionType, environment },
     } = params;
-    return getServiceErrorGroupPrimaryStatistics({
+    return getServiceErrorGroupMainStatistics({
       kuery,
       serviceName,
       setup,
@@ -328,9 +327,9 @@ const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceErrorGroupsComparisonStatisticsRoute = createApmServerRoute({
+const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+    'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -445,9 +444,9 @@ const serviceThroughputRoute = createApmServerRoute({
   },
 });
 
-const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
+const serviceInstancesMainStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics',
+    'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -480,7 +479,7 @@ const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
 
     const { start, end } = setup;
 
-    const serviceInstances = await getServiceInstancesPrimaryStatistics({
+    const serviceInstances = await getServiceInstancesMainStatistics({
       environment,
       kuery,
       latencyAggregationType,
@@ -496,9 +495,9 @@ const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
+const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics',
+    'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -536,7 +535,7 @@ const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
       setup
     );
 
-    return getServiceInstancesComparisonStatisticsPeriods({
+    return getServiceInstancesDetailedStatisticsPeriods({
       environment,
       kuery,
       latencyAggregationType,
@@ -709,12 +708,17 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
   .add(serviceAnnotationsCreateRoute)
-  .add(serviceErrorGroupsPrimaryStatisticsRoute)
-  .add(serviceErrorGroupsComparisonStatisticsRoute)
+  .add(serviceErrorGroupsMainStatisticsRoute)
+  .add(serviceErrorGroupsDetailedStatisticsRoute)
   .add(serviceThroughputRoute)
+<<<<<<< HEAD
   .add(serviceInstancesPrimaryStatisticsRoute)
   .add(serviceInstancesComparisonStatisticsRoute)
   .add(serviceInstancesMetadataDetails)
+=======
+  .add(serviceInstancesMainStatisticsRoute)
+  .add(serviceInstancesDetailedStatisticsRoute)
+>>>>>>> 83824ab13a24da809e152a15ac4269d78f09a37f
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute);
