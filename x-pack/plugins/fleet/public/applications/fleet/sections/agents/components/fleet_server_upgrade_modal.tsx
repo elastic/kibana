@@ -28,12 +28,13 @@ import { sendPutSettings, useLink, useStartServices } from '../../../hooks';
 
 interface Props {
   onClose: () => void;
-  isCloud: boolean;
 }
 
-export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClose, isCloud }) => {
+export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClose }) => {
   const { getAssetsPath } = useLink();
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
+
+  const isCloud = !!cloud?.cloudId;
 
   const [checked, setChecked] = useState(false);
   const onChange = useCallback(async () => {
@@ -45,7 +46,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
     } catch (error) {
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.fleetServerUpgradeModal.failedUpdateTitle', {
-          defaultMessage: `Error updating the settings`,
+          defaultMessage: `Error saving settings`,
         }),
       });
     }
@@ -110,10 +111,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
                   </strong>
                 ),
                 link: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/fleet/current/upgrade-elastic-agent.html"
-                    external={true}
-                  >
+                  <EuiLink href="https://ela.st/add-fleet-server" external={true} target="_blank">
                     <FormattedMessage
                       id="xpack.fleet.fleetServerUpgradeModal.fleetServerMigrationGuide"
                       defaultMessage="Fleet Server migration guide"
@@ -131,7 +129,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
             defaultMessage="This is a breaking change, which is why we are making it in a beta release. We are sorry for the inconvenience. Please share {link} if you have questions or need help."
             values={{
               link: (
-                <EuiLink href="https://ela.st/fleet-feedback">
+                <EuiLink href="https://ela.st/fleet-feedback" target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.fleetServerUpgradeModal.fleetFeedbackLink"
                     defaultMessage="feedback"

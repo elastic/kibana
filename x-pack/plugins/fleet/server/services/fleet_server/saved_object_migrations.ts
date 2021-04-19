@@ -55,6 +55,9 @@ async function migrateAgents() {
   const soClient = getInternalUserSOClient();
   const logger = appContextService.getLogger();
   let hasMore = true;
+
+  let hasAgents = false;
+
   while (hasMore) {
     const res = await soClient.find({
       type: AGENT_SAVED_OBJECT_TYPE,
@@ -65,6 +68,7 @@ async function migrateAgents() {
     if (res.total === 0) {
       hasMore = false;
     }
+    hasAgents = true;
     for (const so of res.saved_objects) {
       try {
         const {
@@ -115,6 +119,13 @@ async function migrateAgents() {
         }
       }
     }
+  }
+
+  // Update settings to show migration modal
+  if (hasAgents) {
+    await settingsService.saveSettings(soClient, {
+      has_seen_fleet_migration_notice: false,
+    });
   }
 }
 
@@ -167,10 +178,8 @@ async function migrateAgentPolicies() {
     perPage: SO_SEARCH_LIMIT,
   });
 
-  let hasAgents = false;
   await Promise.all(
     agentPolicies.map(async (agentPolicy) => {
-      hasAgents = true;
       const res = await esClient.search({
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
@@ -188,13 +197,6 @@ async function migrateAgentPolicies() {
       }
     })
   );
-
-  // Update settings to show migration modal
-  if (hasAgents) {
-    await settingsService.saveSettings(soClient, {
-      has_seen_fleet_migration_notice: false,
-    });
-  }
 }
 
 function is404Error(error: any) {

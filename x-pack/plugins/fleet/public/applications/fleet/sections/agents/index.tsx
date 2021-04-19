@@ -16,7 +16,6 @@ import {
   useFleetStatus,
   useBreadcrumbs,
   useCapabilities,
-  useStartServices,
   useGetSettings,
 } from '../../hooks';
 import { WithoutHeaderLayout } from '../../layouts';
@@ -40,8 +39,6 @@ export const FleetApp: React.FunctionComponent = () => {
   const fleetStatus = useFleetStatus();
 
   const settings = useGetSettings();
-
-  const { cloud } = useStartServices();
 
   const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
   const onCloseFleetServerModal = useCallback(() => {
@@ -124,10 +121,7 @@ export const FleetApp: React.FunctionComponent = () => {
         <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
           <ListLayout>
             {fleetServerModalVisible && (
-              <FleetServerUpgradeModal
-                onClose={onCloseFleetServerModal}
-                isCloud={!!cloud?.cloudId}
-              />
+              <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
             )}
             {hasOnlyFleetServerMissingRequirement ? (
               <FleetServerRequirementPage />
