@@ -154,6 +154,12 @@ export const SIGNALS_ID = `siem.signals`;
 export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
 export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
 
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
+export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
+export const ML_ALERT_TYPE_ID = `siem.mlRule`;
+export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+
 /**
  * Id for the notifications alerting type
  */
