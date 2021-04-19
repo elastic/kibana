@@ -17,7 +17,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
-import { SavedObjectsMigrationLogger } from '.';
+import { SavedObjectsMigrationLogger, TransformSavedObjectDocumentError } from '.';
 
 /**
  * Error thrown when saved object migrations encounter a corrupt saved object.
@@ -79,10 +79,15 @@ export async function migrateRawDocs(
  */
 export interface DocumentsTransformFailed {
   type: string;
-  failedDocumentIds: string[];
+  corruptDocumentIds: string[];
+  transformErrors: TransformErrorObjects[];
 }
 export interface DocumentsTransformSuccess {
   processedDocs: SavedObjectsRawDoc[];
+}
+export interface TransformErrorObjects {
+  rawId: string;
+  err: TransformSavedObjectDocumentError | Error; // do we want the full error here or just the stack trace?
 }
 
 export function migrateRawDocsNonThrowing(
@@ -94,28 +99,47 @@ export function migrateRawDocsNonThrowing(
   return async () => {
     const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
     const processedDocs: SavedObjectsRawDoc[] = [];
+    const transformErrors: TransformErrorObjects[] = []; // this isn't going to be an instance of an Error anymore since we're going to return an object
     const corruptSavedObjectIds: string[] = [];
     for (const raw of rawDocs) {
       const options = { namespaceTreatment: 'lax' as const };
       if (serializer.isRawSavedObject(raw, options)) {
         const savedObject = serializer.rawToSavedObject(raw, options);
         savedObject.migrationVersion = savedObject.migrationVersion || {};
-        processedDocs.push(
-          ...(await migrateDocWithoutBlocking(savedObject)).map((attrs) =>
+        try {
+          const migratedDocs = [...(await migrateDocWithoutBlocking(savedObject))].map((attrs) =>
             serializer.savedObjectToRaw({
               references: [],
               ...attrs,
             })
-          )
-        );
+          );
+          processedDocs.push(...migratedDocs);
+        } catch (err) {
+          // if there is an error, we want to intercept it and convert the id (that is only the uuid part) to the raw document id so that users can actually act on the document where the transform script failed.
+          // We're passing the stack trace back up to allow easier debugging.
+          if (err instanceof TransformSavedObjectDocumentError) {
+            // the error message contains a Doc:... item that's a stringified version of the doc itself.
+            // the doc id we get from the error isn't a raw saved object id. The transform method throws an error from a document where the _id is only the uuid part
+            // transform the id in the error message to a raw saved object id.
+            const serializedId = serializer.generateRawId(
+              err.getNamespace(),
+              err.getType(),
+              err.getId()
+            );
+            transformErrors.push({ rawId: serializedId, err });
+          } else {
+            transformErrors.push({ rawId: 'unknown', err }); // cases we haven't accounted for yet
+          }
+        }
       } else {
         corruptSavedObjectIds.push(raw._id);
       }
     }
-    if (corruptSavedObjectIds.length > 0) {
+    if (corruptSavedObjectIds.length > 0 || transformErrors.length > 0) {
       return Either.left({
         type: 'documents_transform_failed',
-        failedDocumentIds: [...corruptSavedObjectIds],
+        corruptDocumentIds: [...corruptSavedObjectIds],
+        transformErrors,
       });
     }
     return Either.right({ processedDocs });
@@ -137,8 +161,10 @@ function transformNonBlocking(
       // set immediate is though
       setImmediate(() => {
         try {
+          // TINA: If we changed document_migrator `wrapWithTry` to always resolve something and return with an Either.left for a fialed case, v1 migrations would need refactoring too: v1 migrations expect an error when the document migrator runs the transform
           resolve(transform(doc));
         } catch (e) {
+          // TINA: We need to continue to throw from within the transform for v1 migrations to carry on working. This can be changed when we remove v1 migrations
           reject(e);
         }
       });

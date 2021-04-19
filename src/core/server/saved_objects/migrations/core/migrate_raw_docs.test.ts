@@ -10,8 +10,9 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
-import { migrateRawDocs } from './migrate_raw_docs';
+import { migrateRawDocs, migrateRawDocsNonThrowing } from './migrate_raw_docs';
 import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
+import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
@@ -126,5 +127,163 @@ describe('migrateRawDocs', () => {
         createSavedObjectsMigrationLoggerMock()
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error during transform"`);
+  });
+});
+
+describe('migrateRawDocsNonThrowing', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  // create an instance of a TransformSavedObjectDocumentError;
+
+  test('converts raw docs to saved objects', async () => {
+    let result: any;
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
+    ]);
+    const task = migrateRawDocsNonThrowing(
+      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      transform,
+      [
+        { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
+        { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
+      ],
+      createSavedObjectsMigrationLoggerMock()
+    );
+    try {
+      result = await task();
+    } catch (e) {
+      /** ignore */
+    }
+    expect(result._tag).toEqual('Right');
+    expect(result.right.processedDocs).toEqual([
+      {
+        _id: 'a:b',
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      },
+      {
+        _id: 'c:d',
+        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      },
+    ]);
+
+    const obj1 = {
+      id: 'b',
+      type: 'a',
+      attributes: { name: 'AAA' },
+      migrationVersion: {},
+      references: [],
+    };
+    const obj2 = {
+      id: 'd',
+      type: 'c',
+      attributes: { name: 'DDD' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(2);
+    expect(transform).toHaveBeenNthCalledWith(1, obj1);
+    expect(transform).toHaveBeenNthCalledWith(2, obj2);
+  });
+  test('returns a `left` tag when encountering a corrupt saved object document', async () => {
+    let result: any;
+    const logger = createSavedObjectsMigrationLoggerMock();
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
+    ]);
+    const task = migrateRawDocsNonThrowing(
+      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      transform,
+      [
+        { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
+        { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
+      ],
+      logger
+    );
+    try {
+      result = await task();
+    } catch (e) {
+      result = e;
+    }
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(result._tag).toEqual('Left');
+    expect(Object.keys(result.left)).toEqual(['type', 'corruptDocumentIds', 'transformErrors']);
+    expect(result.left.corruptDocumentIds.length).toEqual(1);
+    expect(result.left.transformErrors.length).toEqual(0);
+  });
+
+  test('handles when one document is transformed into multiple documents', async () => {
+    let result: any;
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
+      { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
+    ]);
+    const task = migrateRawDocsNonThrowing(
+      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      transform,
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
+      createSavedObjectsMigrationLoggerMock()
+    );
+    try {
+      result = await task();
+    } catch (err) {
+      /** ignore */
+    }
+    expect(result._tag).toEqual('Right');
+    expect(result.right.processedDocs).toEqual([
+      {
+        _id: 'a:b',
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      },
+      {
+        _id: 'foo:bar',
+        _source: { type: 'foo', foo: { name: 'baz' }, references: [] },
+      },
+    ]);
+
+    const obj = {
+      id: 'b',
+      type: 'a',
+      attributes: { name: 'AAA' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(transform).toHaveBeenCalledWith(obj);
+  });
+
+  test('rejects when the transform function throws an error', async () => {
+    let result: any;
+    const transform = jest.fn<any, any>((doc: any) => {
+      throw new TransformSavedObjectDocumentError(
+        `${doc.id}`,
+        `${doc.type}`,
+        `${doc.namespace}`,
+        `${doc.type}1.2.3`,
+        JSON.stringify(doc),
+        new Error('error during transform')
+      );
+    });
+    const task = migrateRawDocsNonThrowing(
+      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      transform,
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }], // this is the raw doc
+      createSavedObjectsMigrationLoggerMock()
+    );
+    try {
+      result = await task();
+    } catch (err) {
+      /* ignore */
+    }
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(result._tag).toEqual('Left');
+    expect(result.left.corruptDocumentIds.length).toEqual(0);
+    expect(result.left.transformErrors.length).toEqual(1);
+    expect(result.left.transformErrors[0].err.message).toMatchInlineSnapshot(
+      `
+      "Failed to transform document b. Transform: a1.2.3
+      Doc: {\\"type\\":\\"a\\",\\"id\\":\\"b\\",\\"attributes\\":{\\"name\\":\\"AAA\\"},\\"references\\":[],\\"migrationVersion\\":{}}"
+    `
+    );
   });
 });

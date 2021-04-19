@@ -97,7 +97,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       transformRawDocs(state.outdatedDocuments),
     TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: any) =>
-      Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, state.processedDocs),
+      Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, state.transformedDocs),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
