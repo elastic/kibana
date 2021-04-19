@@ -101,12 +101,16 @@ export default new Datasource('es', {
       (index) => index.title === config.index
     );
 
-    const scriptedFields = indexPatternSpec?.getScriptedFields() ?? [];
-    const runtimeFields = indexPatternSpec?.getComputedFields().runtimeFields ?? {};
-
+    const computedFields = indexPatternSpec?.getComputedFields();
     const esShardTimeout = tlConfig.esShardTimeout;
 
-    const body = buildRequest(config, tlConfig, scriptedFields, runtimeFields, esShardTimeout);
+    const body = buildRequest(
+      config,
+      tlConfig,
+      computedFields?.scriptFields ?? {},
+      computedFields?.runtimeFields ?? {},
+      esShardTimeout
+    );
 
     const resp = await tlConfig.context.search
       .search(

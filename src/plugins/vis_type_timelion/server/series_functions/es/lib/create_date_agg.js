@@ -11,7 +11,7 @@ import { buildAggBody } from './agg_body';
 import { search } from '../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export default function createDateAgg(config, tlConfig, scriptedFields) {
+export default function createDateAgg(config, tlConfig, scriptFields) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
@@ -43,7 +43,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
     } else if (metric[0] && metric[1]) {
       const metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
-      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
+      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptFields);
       if (metric[0] === 'percentiles' && metric[2]) {
         let percentList = metric[2].split(',');
         percentList = percentList.map((x) => parseFloat(x));
