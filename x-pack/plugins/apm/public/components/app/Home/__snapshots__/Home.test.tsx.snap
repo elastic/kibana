@@ -4,6 +4,10 @@ exports[`Home component should render services 1`] = `
 <ContextProvider
   value={
     Object {
+      "apmRuleRegistry": Object {
+        "getTypeByRuleId": [Function],
+        "registerType": [Function],
+      },
       "appMountParameters": Object {
         "setHeaderActionMenu": [Function],
       },
@@ -92,6 +96,10 @@ exports[`Home component should render traces 1`] = `
 <ContextProvider
   value={
     Object {
+      "apmRuleRegistry": Object {
+        "getTypeByRuleId": [Function],
+        "registerType": [Function],
+      },
       "appMountParameters": Object {
         "setHeaderActionMenu": [Function],
       },

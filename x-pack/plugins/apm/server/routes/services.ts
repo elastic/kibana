@@ -16,6 +16,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
@@ -662,6 +663,55 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+const serviceAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/alerts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, params, apmRuleRegistry }) => {
+    const alertsClient = context.alerting.getAlertsClient();
+
+    const {
+      query: { start, end, environment, transactionType },
+      path: { serviceName },
+    } = params;
+
+    const apmRuleRegistryClient = await apmRuleRegistry.createScopedRuleRegistryClient(
+      {
+        alertsClient,
+        context,
+      }
+    );
+
+    if (!apmRuleRegistryClient) {
+      throw Boom.failedDependency();
+    }
+
+    return {
+      alerts: await getServiceAlerts({
+        apmRuleRegistryClient,
+        start,
+        end,
+        serviceName,
+        environment,
+        transactionType,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(serviceMetadataDetailsRoute)
@@ -678,4 +728,5 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceInstancesComparisonStatisticsRoute)
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
-  .add(serviceProfilingStatisticsRoute);
+  .add(serviceProfilingStatisticsRoute)
+  .add(serviceAlertsRoute);
