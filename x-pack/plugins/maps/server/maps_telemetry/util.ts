@@ -169,6 +169,8 @@ function getScalingOption(layerDescriptor: LayerDescriptor): TELEMETRY_SCALING_O
   if (descriptor.scalingType === SCALING_TYPES.LIMIT) {
     return TELEMETRY_SCALING_OPTIONS.LIMIT;
   }
+
+  return null;
 }
 
 export function getCountsByMap<K extends string>(
