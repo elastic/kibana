@@ -17,9 +17,15 @@ export const persistPinnedEvent = async ({
   pinnedEventId?: string | null;
   timelineId?: string | null;
 }) => {
+  let requestBody;
+  try {
+    requestBody = JSON.stringify({ eventId, pinnedEventId, timelineId });
+  } catch (err) {
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
+  }
   const response = await KibanaServices.get().http.patch<PinnedEvent | null>(PINNED_EVENT_URL, {
     method: 'PATCH',
-    body: JSON.stringify({ eventId, pinnedEventId, timelineId }),
+    body: requestBody,
   });
   return response;
 };
