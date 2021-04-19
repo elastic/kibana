@@ -42,7 +42,8 @@ import {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
-import { apmRuleRegistrySettings } from '../common/rules';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import { apmRuleFieldMap } from '../common/rules/apm_rule_field_map';
 
 export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
 
@@ -151,9 +152,10 @@ export class APMPlugin
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
 
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create(
-      apmRuleRegistrySettings
-    );
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: apmRuleFieldMap,
+    });
 
     registerApmAlerts({
       registry: apmRuleRegistry,
