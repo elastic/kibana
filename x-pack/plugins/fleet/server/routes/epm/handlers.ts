@@ -226,20 +226,21 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  try {
-    const res = await installPackage({
-      installSource: 'registry',
-      savedObjectsClient,
-      pkgkey,
-      esClient,
-      force: request.body?.force,
-    });
+
+  const res = await installPackage({
+    installSource: 'registry',
+    savedObjectsClient,
+    pkgkey,
+    esClient,
+    force: request.body?.force,
+  });
+  if (!res.error) {
     const body: InstallPackageResponse = {
-      response: res.assets,
+      response: res.assets || [],
     };
     return response.ok({ body });
-  } catch (e) {
-    return await defaultIngestErrorHandler({ error: e, response });
+  } else {
+    return await defaultIngestErrorHandler({ error: res.error, response });
   }
 };
 
@@ -292,20 +293,21 @@ export const installPackageByUploadHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-  try {
-    const res = await installPackage({
-      installSource: 'upload',
-      savedObjectsClient,
-      esClient,
-      archiveBuffer,
-      contentType,
-    });
+
+  const res = await installPackage({
+    installSource: 'upload',
+    savedObjectsClient,
+    esClient,
+    archiveBuffer,
+    contentType,
+  });
+  if (!res.error) {
     const body: InstallPackageResponse = {
-      response: res.assets,
+      response: res.assets || [],
     };
     return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+  } else {
+    return defaultIngestErrorHandler({ error: res.error, response });
   }
 };
 
