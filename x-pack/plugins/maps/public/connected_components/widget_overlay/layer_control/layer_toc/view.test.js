@@ -21,10 +21,16 @@ const mockLayers = [
     getId: () => {
       return '1';
     },
+    supportsFitToBounds: () => {
+      return true;
+    },
   },
   {
     getId: () => {
       return '2';
+    },
+    supportsFitToBounds: () => {
+      return false;
     },
   },
 ];
