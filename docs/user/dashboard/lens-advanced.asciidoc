@@ -37,16 +37,81 @@ Open the *Lens* editor, then make sure the correct fields appear.
 [role="screenshot"]
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
-. Make sure the *kibana_sample_data_ecommerce_* index appears.
+. Make sure the *kibana_sample_data_ecommerce* index appears.
+
+[discrete]
+[[add-a-data-layer-advanced]]
+=== Quickly copy a metric
+
+*Lens* will copy of a function when you drag it to the *Drop a field or click to add*
+button within the same group, or when you drag to the *Duplicate* label on a different group.
+Dragging and dropping can also be done fully by keyboard.
+
+To quickly create many copies of a percentile metric which will show distribution of price over time:
+
+. From the *Chart Type* dropdown, select *Line*.
+
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+
+* Drag and drop *products.price* to the *Vertical axis* field.
+
+* Drag and drop *order_date* to the *Horizontal axis* field.
+
+. Create the 95th percentile.
+
+.. In the editor, click *Median of products.price*.
+
+.. From *Select a function*, click *Percentile*.
+
+.. In the *Display name* field, enter `95th`, then click *Close*.
+
+. To create the 90th percentile, duplicate the `95th` percentile.
+
+.. Drag and drop *95th* to *Drop a field or click to add*.
+
+.. Click *95th [1]*, then enter `90` in the *Percentile* field.
+
+.. In the *Display name* field enter `90th`, then click *Close*.
++
+[role="screenshot"]
+image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
+
+. Create the 50th percentile. 
+
+.. Drag and drop *90th* to *Drop a field or click to add*.
+
+.. Click *90th [1]*, then enter `50` in the *Percentile* field.
+
+.. In the *Display name* field enter `50th`, then click *Close*.
+
+. Create the 10th percentile. 
+
+.. Drag and drop *50th* to *Drop a field or click to add*.
+
+.. Click *50th [1]*, then enter `10` in the *Percentile* field.
+
+.. In the *Display name* field enter `10th`, then click *Close*.
+
+. To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
++
+[role="screenshot"]
+image::images/lens_advanced_3_1_1.png[Left Axis menu]
++
+You have a line chart that shows you the price distribution of products sold over time.
++
+[role="screenshot"]
+image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
+
+. Click *Save and return*.
 
 [discrete]
 [[add-a-data-layer]]
-==== Add a second chart type or index pattern to your existing chart
+==== Compare using multiple chart types or index patterns
 
 You can add multiple metrics to a single chart type, but if you want to overlay
-multiple chart types or index patterns, use *layers*. When building layered charts
+multiple chart types or index patterns, use a second layer. When building layered charts
 it is important to match the data on the horizontal axis so that it uses the same
-scale. To add a line chart layer on top of your area chart:
+scale. To add a line chart layer on top of an existing chart:
 
 . In the editor, click *+*.
 +
@@ -87,9 +152,7 @@ display the *Unique visitors* data along a second y-axis, then change the format
 
 . For *Axis side*, click *Right*, then click *Close*.
 
-[float]
-[[change-the-visualization-type]]
-==== Change the visualization type
+Change the format:
 
 . In the editor, click *Average of bytes* in the area chart layer. 
 
@@ -97,10 +160,6 @@ display the *Unique visitors* data along a second y-axis, then change the format
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_4.png[Multiaxis chart]
-
-[discrete]
-[[lens-legend-position]]
-==== Change the legend position
 
 The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
 
@@ -114,9 +173,26 @@ image::images/lens_end_to_end_3_5.png[legend position]
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]
-=== View the number of transactions per hour
+=== View a date histogram with a small time interval
 
-To determine the number of orders made every hour, create a bar chart, then add the chart to the dashboard.
+Most *Lens* users use the automatic date histogram interval, but sometimes you want more control over the
+interval. The automatic date histogram will not show a per-second metric unless your time range is 2 minutes,
+and the largest range possible without making changes is a per-second metric on a 5 minute time range.
+The maximum difference between the time range and time interval is controlled by the <<histogram-maxbars, `histogram:maxBars`>>
+advanced setting.
+
+*Lens* users have four options for viewing a small time interval:
+
+. If approximation is okay, *Lens* offers a function to *normalize unit*, for example "per second".
+
+. You can set a minimum interval that is lower than the automatic interval, but is still affected by the `histogram:maxBars` setting.
+
+. With the automatic date histogram, you will see a smaller interval by reducing the overall time range.
+
+. You can change the {kib} advanced settings, which will affect all visualizations
+
+To determine the order per hour for a 30 day period, you will need to choose one of these options. For the
+sample data, use the *normalize unit* function because approximation is okay:
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
@@ -198,69 +274,6 @@ image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders mad
 . Click *Save and return*.
 
 [discrete]
-[[add-a-data-layer-advanced]]
-=== Create multiple key percentiles of product prices 
-
-To view the price distribution of products sold over time, create a percentile chart, then add it to the dashboard.
-
-. Open *Lens*.
-
-. From the *Chart Type* dropdown, select *Line*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-* Drag and drop *products.price* to the *Vertical axis* field.
-
-* Drag and drop *order_date* to the *Horizontal axis* field.
-
-. Create the 95th percentile.
-
-.. In the editor, click *Median of products.price*.
-
-.. From *Select a function*, click *Percentile*.
-
-.. In the *Display name* field, enter `95th`, then click *Close*.
-
-. To create the 90th percentile, duplicate the `95th` percentile.
-
-.. Drag and drop *95th* to *Drop a field or click to add*.
-
-.. Click *95th [1]*, then enter `90` in the *Percentile* field.
-
-.. In the *Display name* field enter `90th`, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
-
-. Create the 50th percentile. 
-
-.. Drag and drop *90th* to *Drop a field or click to add*.
-
-.. Click *90th [1]*, then enter `50` in the *Percentile* field.
-
-.. In the *Display name* field enter `50th`, then click *Close*.
-
-. Create the 10th percentile. 
-
-.. Drag and drop *50th* to *Drop a field or click to add*.
-
-.. Click *50th [1]*, then enter `10` in the *Percentile* field.
-
-.. In the *Display name* field enter `10th`, then click *Close*.
-
-. To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1_1.png[Left Axis menu]
-+
-You have a line chart that shows you the price distribution of products sold over time.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
-
-. Click *Save and return*.
-
-[discrete]
 [[add-the-response-code-filters-advanced]]
 === View the moving average of inventory prices
 
@@ -304,10 +317,6 @@ To view and analyze the prices of shoes, accessories, and clothing in the store 
 +
 [role="screenshot"]
 image::images/lens_advanced_4_1.png[Median prices chart for different categories]
-
-[discrete]
-[[add-the-moving-average]]
-==== Add the moving average
 
 To focus on the general trends rather than on the peaks in the data, add the moving average, then add the visualization to the dashboard.
 
