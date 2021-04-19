@@ -4316,6 +4316,28 @@
                 },
                 "settings_page": {
                   "type": "long"
+                },
+                "fleet_monitor_name_stats": {
+                  "properties": {
+                    "avg_length": {
+                      "type": "float"
+                    },
+                    "max_length": {
+                      "type": "long"
+                    },
+                    "min_length": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "fleet_monitor_frequency": {
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
+                },
+                "fleet_no_of_unique_monitors": {
+                  "type": "long"
                 }
               }
             }
