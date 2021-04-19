@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { Filter } from '../../../es_query';
 import type { IndexPattern } from '../../../index_patterns';
-import type { IAggConfig, IAggConfigs } from '../../aggs';
+import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock } from '../../search_source/mocks';
 
@@ -38,7 +38,6 @@ describe('esaggs expression function - public', () => {
       filters: undefined,
       indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
       inspectorAdapters: {},
-      metricsAtAllLevels: false,
       partialRows: false,
       query: undefined,
       searchSessionId: 'abc123',
@@ -76,21 +75,7 @@ describe('esaggs expression function - public', () => {
 
     test('setField(aggs)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect(typeof (searchSource.setField as jest.Mock).mock.calls[2][1]).toBe('function');
-      expect((searchSource.setField as jest.Mock).mock.calls[2][1]()).toEqual(
-        mockParams.aggs.toDsl()
-      );
-      expect(mockParams.aggs.toDsl).toHaveBeenCalledWith(mockParams.metricsAtAllLevels);
-
-      // make sure param is passed through
-      jest.clearAllMocks();
-      await handleRequest({
-        ...mockParams,
-        metricsAtAllLevels: true,
-      });
-      searchSource = await mockParams.searchSourceService.create();
-      (searchSource.setField as jest.Mock).mock.calls[2][1]();
-      expect(mockParams.aggs.toDsl).toHaveBeenCalledWith(true);
+      expect((searchSource.setField as jest.Mock).mock.calls[2][1]).toEqual(mockParams.aggs);
     });
 
     test('setField(filter)', async () => {
@@ -133,27 +118,16 @@ describe('esaggs expression function - public', () => {
   test('calls searchSource.fetch', async () => {
     await handleRequest(mockParams);
     const searchSource = await mockParams.searchSourceService.create();
+
     expect(searchSource.fetch$).toHaveBeenCalledWith({
       abortSignal: mockParams.abortSignal,
       sessionId: mockParams.searchSessionId,
+      inspector: {
+        title: 'Data',
+        description: 'This request queries Elasticsearch to fetch the data for the visualization.',
+        adapter: undefined,
+      },
     });
-  });
-
-  test('calls agg.postFlightRequest if it exiests and agg is enabled', async () => {
-    mockParams.aggs.aggs[0].enabled = true;
-    await handleRequest(mockParams);
-    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(1);
-
-    // ensure it works if the function doesn't exist
-    jest.clearAllMocks();
-    mockParams.aggs.aggs[0] = ({ type: { name: 'count' } } as unknown) as IAggConfig;
-    expect(async () => await handleRequest(mockParams)).not.toThrowError();
-  });
-
-  test('should skip agg.postFlightRequest call if the agg is disabled', async () => {
-    mockParams.aggs.aggs[0].enabled = false;
-    await handleRequest(mockParams);
-    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(0);
   });
 
   test('tabifies response data', async () => {
@@ -162,7 +136,6 @@ describe('esaggs expression function - public', () => {
       mockParams.aggs,
       {},
       {
-        metricsAtAllLevels: mockParams.metricsAtAllLevels,
         partialRows: mockParams.partialRows,
         timeRange: mockParams.timeRange,
       }

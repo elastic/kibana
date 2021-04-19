@@ -62,5 +62,8 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
   };
 };
 
+export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
+
 export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
   value === 'partial failure' ? 'warning' : value != null ? value : null;

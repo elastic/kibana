@@ -11,6 +11,10 @@ import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
+import { AggConfigs, AggTypesRegistryStart } from '../../';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
+import { RequestResponder } from 'src/plugins/inspector/common';
+import { switchMap } from 'rxjs/operators';
 
 jest.mock('./legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -39,6 +43,21 @@ const indexPattern2 = ({
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
 
+const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
+const indexPattern3 = ({
+  title: 'foo',
+  fields: {
+    getByName: (name: string) => {
+      return fields3.find((field) => field.name === name);
+    },
+    filter: () => {
+      return fields3;
+    },
+  },
+  getComputedFields,
+  getSourceFiltering: () => mockSource,
+} as unknown) as IndexPattern;
+
 const runtimeFieldDef = {
   type: 'keyword',
   script: {
@@ -61,8 +80,8 @@ describe('SearchSource', () => {
       .fn()
       .mockReturnValue(
         of(
-          { rawResponse: { isPartial: true, isRunning: true } },
-          { rawResponse: { isPartial: false, isRunning: false } }
+          { rawResponse: { test: 1 }, isPartial: true, isRunning: true },
+          { rawResponse: { test: 2 }, isPartial: false, isRunning: false }
         )
       );
 
@@ -81,17 +100,19 @@ describe('SearchSource', () => {
 
   describe('#getField()', () => {
     test('gets the value for the property', () => {
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getField('aggs')).toBe(5);
+      searchSource.setField('aggs', { i: 5 });
+      expect(searchSource.getField('aggs')).toStrictEqual({ i: 5 });
     });
   });
 
   describe('#getFields()', () => {
     test('gets the value for the property', () => {
-      searchSource.setField('aggs', 5);
+      searchSource.setField('aggs', { i: 5 });
       expect(searchSource.getFields()).toMatchInlineSnapshot(`
         Object {
-          "aggs": 5,
+          "aggs": Object {
+            "i": 5,
+          },
         }
       `);
     });
@@ -100,7 +121,7 @@ describe('SearchSource', () => {
   describe('#removeField()', () => {
     test('remove property', () => {
       searchSource = new SearchSource({}, searchSourceDependencies);
-      searchSource.setField('aggs', 5);
+      searchSource.setField('aggs', { i: 5 });
       searchSource.removeField('aggs');
       expect(searchSource.getField('aggs')).toBeFalsy();
     });
@@ -108,8 +129,20 @@ describe('SearchSource', () => {
 
   describe('#setField() / #flatten', () => {
     test('sets the value for the property', () => {
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getField('aggs')).toBe(5);
+      searchSource.setField('aggs', { i: 5 });
+      expect(searchSource.getField('aggs')).toStrictEqual({ i: 5 });
+    });
+
+    test('sets the value for the property with AggConfigs', () => {
+      const typesRegistry = mockAggTypesRegistry();
+
+      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
+        typesRegistry,
+      });
+
+      searchSource.setField('aggs', ac);
+      const request = searchSource.getSearchRequestBody();
+      expect(request.aggs).toStrictEqual({ '1': { avg: { field: 'field1' } } });
     });
 
     describe('computed fields handling', () => {
@@ -631,7 +664,7 @@ describe('SearchSource', () => {
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
-      await searchSource.fetch(options);
+      await searchSource.fetch$(options).toPromise();
       expect(fn).toBeCalledWith(searchSource, options);
     });
 
@@ -644,7 +677,7 @@ describe('SearchSource', () => {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      await searchSource.fetch(options);
+      await searchSource.fetch$(options).toPromise();
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).not.toBeCalled();
@@ -664,66 +697,10 @@ describe('SearchSource', () => {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      await searchSource.fetch(options);
+      await searchSource.fetch$(options).toPromise();
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
-    });
-  });
-
-  describe('#legacy fetch()', () => {
-    beforeEach(() => {
-      searchSourceDependencies = {
-        ...searchSourceDependencies,
-        getConfig: jest.fn(() => {
-          return true; // batchSearches = true
-        }) as GetConfigFn,
-      };
-    });
-
-    test('should call msearch', async () => {
-      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-      const options = {};
-      await searchSource.fetch(options);
-      expect(fetchSoon).toBeCalledTimes(1);
-    });
-  });
-
-  describe('#search service fetch()', () => {
-    test('should call msearch', async () => {
-      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-      const options = {};
-
-      await searchSource.fetch(options);
-      expect(mockSearchMethod).toBeCalledTimes(1);
-    });
-
-    test('should return partial results', (done) => {
-      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-      const options = {};
-
-      const next = jest.fn();
-      const complete = () => {
-        expect(next).toBeCalledTimes(2);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "isPartial": true,
-              "isRunning": true,
-            },
-          ]
-        `);
-        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "isPartial": false,
-              "isRunning": false,
-            },
-          ]
-        `);
-        done();
-      };
-      searchSource.fetch$(options).subscribe({ next, complete });
     });
   });
 
@@ -882,6 +859,375 @@ describe('SearchSource', () => {
         }
       `
       );
+    });
+  });
+
+  describe('fetch$', () => {
+    describe('#legacy fetch()', () => {
+      beforeEach(() => {
+        searchSourceDependencies = {
+          ...searchSourceDependencies,
+          getConfig: jest.fn(() => {
+            return true; // batchSearches = true
+          }) as GetConfigFn,
+        };
+      });
+
+      test('should call msearch', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = {};
+        await searchSource.fetch$(options).toPromise();
+        expect(fetchSoon).toBeCalledTimes(1);
+      });
+    });
+
+    describe('responses', () => {
+      test('should return partial results', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = {};
+
+        const next = jest.fn();
+        const complete = jest.fn();
+        const res$ = searchSource.fetch$(options);
+        res$.subscribe({ next, complete });
+        await res$.toPromise();
+
+        expect(next).toBeCalledTimes(2);
+        expect(complete).toBeCalledTimes(1);
+        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "test": 1,
+            },
+          ]
+        `);
+        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "test": 2,
+            },
+          ]
+        `);
+      });
+
+      test('shareReplays result', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = {};
+
+        const next = jest.fn();
+        const complete = jest.fn();
+        const next2 = jest.fn();
+        const complete2 = jest.fn();
+        const res$ = searchSource.fetch$(options);
+        res$.subscribe({ next, complete });
+        res$.subscribe({ next: next2, complete: complete2 });
+        await res$.toPromise();
+
+        expect(next).toBeCalledTimes(2);
+        expect(next2).toBeCalledTimes(2);
+        expect(complete).toBeCalledTimes(1);
+        expect(complete2).toBeCalledTimes(1);
+        expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
+      });
+
+      test('should emit error on empty response', async () => {
+        searchSourceDependencies.search = mockSearchMethod = jest
+          .fn()
+          .mockReturnValue(
+            of({ rawResponse: { test: 1 }, isPartial: true, isRunning: true }, undefined)
+          );
+
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = {};
+
+        const next = jest.fn();
+        const error = jest.fn();
+        const complete = jest.fn();
+        const res$ = searchSource.fetch$(options);
+        res$.subscribe({ next, error, complete });
+        await res$.toPromise().catch((e) => {});
+
+        expect(next).toBeCalledTimes(1);
+        expect(error).toBeCalledTimes(1);
+        expect(complete).toBeCalledTimes(0);
+        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "test": 1,
+            },
+          ]
+        `);
+        expect(error.mock.calls[0][0]).toBe(undefined);
+      });
+    });
+
+    describe('inspector', () => {
+      let requestResponder: RequestResponder;
+      beforeEach(() => {
+        requestResponder = ({
+          stats: jest.fn(),
+          ok: jest.fn(),
+          error: jest.fn(),
+          json: jest.fn(),
+        } as unknown) as RequestResponder;
+      });
+
+      test('calls inspector if provided', async () => {
+        const options = {
+          inspector: {
+            title: 'a',
+            adapter: {
+              start: jest.fn().mockReturnValue(requestResponder),
+            } as any,
+          },
+        };
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        await searchSource.fetch$(options).toPromise();
+
+        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+        expect(requestResponder.error).not.toBeCalled();
+        expect(requestResponder.json).toBeCalledTimes(1);
+        expect(requestResponder.ok).toBeCalledTimes(1);
+        // First and last
+        expect(requestResponder.stats).toBeCalledTimes(2);
+      });
+
+      test('calls inspector only once, with multiple subs (shareReplay)', async () => {
+        const options = {
+          inspector: {
+            title: 'a',
+            adapter: {
+              start: jest.fn().mockReturnValue(requestResponder),
+            } as any,
+          },
+        };
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        const res$ = searchSource.fetch$(options);
+
+        const complete1 = jest.fn();
+        const complete2 = jest.fn();
+
+        res$.subscribe({
+          complete: complete1,
+        });
+        res$.subscribe({
+          complete: complete2,
+        });
+
+        await res$.toPromise();
+
+        expect(complete1).toBeCalledTimes(1);
+        expect(complete2).toBeCalledTimes(1);
+        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+      });
+
+      test('calls error on inspector', async () => {
+        const options = {
+          inspector: {
+            title: 'a',
+            adapter: {
+              start: jest.fn().mockReturnValue(requestResponder),
+            } as any,
+          },
+        };
+
+        searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        await searchSource
+          .fetch$(options)
+          .toPromise()
+          .catch(() => {});
+
+        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+        expect(requestResponder.json).toBeCalledTimes(1);
+        expect(requestResponder.error).toBeCalledTimes(1);
+        expect(requestResponder.ok).toBeCalledTimes(0);
+        expect(requestResponder.stats).toBeCalledTimes(0);
+      });
+    });
+
+    describe('postFlightRequest', () => {
+      let fetchSub: any;
+
+      function getAggConfigs(typesRegistry: AggTypesRegistryStart, enabled: boolean) {
+        return new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled,
+              params: { field: 'field1' },
+            },
+          ],
+          {
+            typesRegistry,
+          }
+        );
+      }
+
+      beforeEach(() => {
+        fetchSub = {
+          next: jest.fn(),
+          complete: jest.fn(),
+          error: jest.fn(),
+        };
+      });
+
+      test('doesnt call any post flight requests if disabled', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        const ac = getAggConfigs(typesRegistry, false);
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', ac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+        await fetch$.toPromise();
+
+        expect(fetchSub.next).toHaveBeenCalledTimes(2);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(1);
+        expect(fetchSub.error).toHaveBeenCalledTimes(0);
+
+        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+      });
+
+      test('doesnt call any post flight if searchsource has error', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        const ac = getAggConfigs(typesRegistry, true);
+
+        searchSourceDependencies.search = jest.fn().mockImplementation(() =>
+          of(1).pipe(
+            switchMap((r) => {
+              throw r;
+            })
+          )
+        );
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', ac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+        await fetch$.toPromise().catch((e) => {});
+
+        expect(fetchSub.next).toHaveBeenCalledTimes(0);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(0);
+        expect(fetchSub.error).toHaveBeenNthCalledWith(1, 1);
+
+        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+      });
+
+      test('calls post flight requests, fires 1 extra response, returns last response', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+          other: 5,
+        });
+
+        const allac = new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field1' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field2' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'foo-bar' },
+            },
+          ],
+          {
+            typesRegistry,
+          }
+        );
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', allac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+
+        const resp = await fetch$.toPromise();
+
+        expect(fetchSub.next).toHaveBeenCalledTimes(3);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(1);
+        expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(resp).toStrictEqual({ other: 5 });
+        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
+      });
+
+      test('calls post flight requests only once, with multiple subs (shareReplay)', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+          other: 5,
+        });
+
+        const allac = new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field1' },
+            },
+          ],
+          {
+            typesRegistry,
+          }
+        );
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', allac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+
+        const fetchSub2 = {
+          next: jest.fn(),
+          complete: jest.fn(),
+          error: jest.fn(),
+        };
+        fetch$.subscribe(fetchSub2);
+
+        await fetch$.toPromise();
+
+        expect(fetchSub.next).toHaveBeenCalledTimes(3);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+      });
+
+      test('calls post flight requests, handles error', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn().mockRejectedValue(undefined);
+        const ac = getAggConfigs(typesRegistry, true);
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', ac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+
+        await fetch$.toPromise().catch(() => {});
+
+        expect(fetchSub.next).toHaveBeenCalledTimes(2);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(0);
+        expect(fetchSub.error).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
