@@ -32,7 +32,7 @@ image::maps/images/inspector.png[]
   ** Ensure your geospatial field is searchable and aggregatable.
   ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
 * Index patterns with thousands of fields can exceed the default maximum payload size.
-Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
+Increase <<settings, `server.maxPayload`>> for large index patterns.
 
 [float]
 ==== Features are not displayed

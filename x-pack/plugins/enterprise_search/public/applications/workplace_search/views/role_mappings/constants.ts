@@ -15,6 +15,27 @@ export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
   }
 );
 
+export const ROLE_MAPPING_DELETED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMappingDeletedMessage',
+  {
+    defaultMessage: 'Successfully deleted role mapping',
+  }
+);
+
+export const ROLE_MAPPING_CREATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMappingCreatedMessage',
+  {
+    defaultMessage: 'Role mapping successfully created.',
+  }
+);
+
+export const ROLE_MAPPING_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMappingUpdatedMessage',
+  {
+    defaultMessage: 'Role mapping successfully updated.',
+  }
+);
+
 export const DEFAULT_GROUP_NAME = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.defaultGroupName',
   {
