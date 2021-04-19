@@ -6,18 +6,12 @@
  */
 
 import React, { RefObject, useMemo, useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { SidebarItem } from '../waterfall/types';
 import { MiddleTruncatedText } from '../../waterfall';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
 import { OnSidebarClick } from '../../waterfall/components/use_flyout';
-import { FIXED_AXIS_HEIGHT } from '../../waterfall/components/constants';
-
-const StyledText = euiStyled(EuiText)`
-  height: ${FIXED_AXIS_HEIGHT}px
-`;
 
 interface SidebarItemProps {
   item: SidebarItem;
@@ -61,36 +55,32 @@ export const WaterfallSidebarItem = ({
       data-test-subj={isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
     >
       {!status || !isErrorStatusCode(status) ? (
-        <StyledText size="s">
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-              <MiddleTruncatedText
-                text={text}
-                url={url}
-                ariaLabel={ariaLabel}
-                onClick={handleSidebarClick}
-                setButtonRef={setRef}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </StyledText>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <MiddleTruncatedText
+              text={text}
+              url={url}
+              ariaLabel={ariaLabel}
+              onClick={handleSidebarClick}
+              setButtonRef={setRef}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
-        <StyledText size="s">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-              <MiddleTruncatedText
-                text={text}
-                url={url}
-                ariaLabel={ariaLabel}
-                onClick={handleSidebarClick}
-                setButtonRef={setRef}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem component="span" grow={false}>
-              <EuiBadge color="danger">{status}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </StyledText>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <MiddleTruncatedText
+              text={text}
+              url={url}
+              ariaLabel={ariaLabel}
+              onClick={handleSidebarClick}
+              setButtonRef={setRef}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiBadge color="danger">{status}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </SideBarItemHighlighter>
   );
