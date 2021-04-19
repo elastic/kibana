@@ -181,7 +181,7 @@ image:management/index-patterns/images/edit-field-format.png["Edit field format"
 
 [float]
 [[default-index-pattern]]
-==== Set the default index pattern
+=== Set the default index pattern
 
 The first index pattern you create is automatically designated as the default pattern,
 but you can set any index pattern as the default.  The default index pattern is automatically selected when you first open <<discover,*Discover*>> or create a visualization from scratch.

@@ -1,5 +1,5 @@
 [[kibana-concepts-analysts]]
-== {kib} concepts for analysts
+== {kib} concepts
 **_Learn the shared concepts for analyzing and visualizing your data_**
 
 As an analyst, you will use a combination of {kib} apps to analyze and

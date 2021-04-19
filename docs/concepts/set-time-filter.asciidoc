@@ -1,18 +1,16 @@
 [[set-time-filter]]
 === Set the time range
-If your index contains time-based events, and a time-field is configured for the
-selected <<index-patterns, index pattern>>, set a time filter that displays only the data within the
-specified time range.
-
-You can use the time filter to change the time range, or select a specific time
-range in the histogram.
+Display data within a
+specified time range when your index contains time-based events, and a time-field is configured for the
+selected <<index-patterns, index pattern>>.
 
 [float]
 [[use-time-filter]]
-==== Use the time filter
+==== Use the global time filter
 
-Use the time filter to change the time range. By default, the time filter is set
-to the last 15 minutes.
+The global time filter offers multiple ways to get the data you want.
+The default time range is 15 minutes, but you can customize
+it in <<advanced-options,Advanced Settings>>.
 
 . Click image:images/time-filter-calendar.png[Calendar icon].
 
@@ -24,8 +22,7 @@ to the last 15 minutes.
 * *Commonly used* to use a time range from options such as *Last 15 minutes*,
   *Today*, and *Week to date*.
 
-* *Recently used date ranges* to use a previously selected data range that
-  you recently used.
+* *Recently used date ranges* to use a previously selected data range.
 
 * *Refresh every* to specify an automatic refresh rate.
 +
@@ -40,14 +37,14 @@ options.
 image::images/time-filter-bar.png[Time filter bar]
 
 [float]
-==== Select a time range from the histogram
+==== Select a time from the histogram
 
-To select a specific time range in the histogram, choose one of the following:
+From the histogram in *Discover*, select a time range in one of the following ways:
 
 * Click the bar that represents the time range you want to zoom in on.
 
 * Click and drag to view a specific time range. You must start the selection with
-the cursor over the background of the chart--the cursor changes to a plus sign
+the cursor over the background of the chart&mdash;the cursor changes to a plus sign
 when you hover over a valid start point.
 
 * Click the dropdown, then select an interval.
