@@ -393,7 +393,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
-        hideDetails: fieldInfoUnavailable,
+        // Show details on timeout but not failure
+        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
           defaultMessage: `There are no available fields that contain data.`,
         }),
@@ -442,11 +443,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    existingFields,
-    currentIndexPattern,
     hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
+    existenceFetchTimeout,
+    currentIndexPattern,
+    existingFields,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
