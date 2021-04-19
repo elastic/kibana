@@ -55,3 +55,10 @@ export interface AuthorizationFilter {
   ensureSavedObjectIsAuthorized: (owner: string) => void;
   logSuccessfulAuthorization: () => void;
 }
+
+/**
+ * Defines the helper methods and necessary information for authorizing the find API's request.
+ */
+export interface AuthorizationValidator {
+  ensureSavedObjectIsAuthorized: (owner: string) => void;
+}
