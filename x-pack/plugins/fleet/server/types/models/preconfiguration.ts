@@ -12,7 +12,7 @@ import {
   PRECONFIGURATION_LATEST_KEYWORD,
   DEFAULT_AGENT_POLICY,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
-  DEFAULT_PACKAGES_NAMES,
+  DEFAULT_PACKAGES,
 } from '../../constants';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
@@ -43,10 +43,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     }),
   }),
   {
-    defaultValue: DEFAULT_PACKAGES_NAMES.map((name) => ({
-      name,
-      version: PRECONFIGURATION_LATEST_KEYWORD,
-    })),
+    defaultValue: DEFAULT_PACKAGES,
   }
 );
 

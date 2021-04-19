@@ -18,7 +18,6 @@ export const requiredPackages = {
 
 // these are currently identical. we can separate if they later diverge
 export const defaultPackages = requiredPackages;
-export const DEFAULT_PACKAGES_NAMES = Object.values(defaultPackages);
 
 export const agentAssetTypes = {
   Input: 'input',

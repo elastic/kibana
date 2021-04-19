@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { SO_SEARCH_LIMIT } from '../constants';
+import { SO_SEARCH_LIMIT, REQUIRED_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -55,7 +55,15 @@ async function createSetupSideEffects(
     appContextService.getConfig() ?? {};
 
   const policies = policiesOrUndefined ?? [];
-  const packages = packagesOrUndefined ?? [];
+
+  let packages = packagesOrUndefined ?? [];
+  // Ensure that required packages are always installed even if they're left out of the config
+  const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
+  packages = [
+    ...packages,
+    ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+  ];
+
   let preconfigurationError;
 
   try {

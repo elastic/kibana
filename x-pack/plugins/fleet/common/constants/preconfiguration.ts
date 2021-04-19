@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import type { PreconfiguredAgentPolicy } from '../types';
 
 import { defaultPackages } from './epm';
@@ -22,9 +20,7 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicy = {
   description: 'Default agent policy created by Kibana',
   package_policies: [
     {
-      name: i18n.translate('xpack.fleet.agentPolicies.defaultAgentPolicySystemIntegrationName', {
-        defaultMessage: 'System',
-      }),
+      name: `${defaultPackages.System}-1`,
       package: {
         name: defaultPackages.System,
       },
@@ -42,12 +38,7 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicy = {
   description: 'Default Fleet Server agent policy created by Kibana',
   package_policies: [
     {
-      name: i18n.translate(
-        'xpack.fleet.agentPolicies.defaultAgentPolicyFleetServerIntegrationName',
-        {
-          defaultMessage: 'Fleet Server',
-        }
-      ),
+      name: `${defaultPackages.FleetServer}-1`,
       package: {
         name: defaultPackages.FleetServer,
       },
@@ -59,3 +50,11 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicy = {
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
   id: 'default-fleet-server-agent-policy',
 };
+
+export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({
+  name,
+  version: PRECONFIGURATION_LATEST_KEYWORD,
+}));
+
+// these are currently identical. we can separate if they later diverge
+export const REQUIRED_PACKAGES = DEFAULT_PACKAGES;
