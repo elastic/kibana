@@ -102,5 +102,4 @@ export {
   ISearchSource,
   EsQuerySortValue,
   SortDirection,
-  SortDirectionFormat,
 } from '../../data/public';

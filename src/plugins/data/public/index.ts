@@ -375,7 +375,6 @@ export {
   SearchRequest,
   SearchSourceFields,
   SortDirection,
-  SortDirectionFormat,
   SearchSessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,

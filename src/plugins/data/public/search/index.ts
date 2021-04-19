@@ -35,7 +35,6 @@ export {
   SearchSourceDependencies,
   SearchSourceFields,
   SortDirection,
-  SortDirectionFormat,
 } from '../../common/search';
 export {
   SessionService,
