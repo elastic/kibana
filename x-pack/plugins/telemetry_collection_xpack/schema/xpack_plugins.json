@@ -2560,7 +2560,7 @@
         },
         "layerTypes": {
           "properties": {
-            "[TELEMETRY_LAYER_TYPE.EMS_BASEMAP]": {
+            "EMS_BASEMAP": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2576,7 +2576,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.EMS_REGION]": {
+            "EMS_REGION": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2592,7 +2592,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]": {
+            "ES_AGG_CLUSTERS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2608,7 +2608,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]": {
+            "ES_AGG_GRIDS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2624,7 +2624,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]": {
+            "ES_AGG_HEATMAP": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2640,7 +2640,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_TOP_HITS]": {
+            "ES_TOP_HITS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2656,7 +2656,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_DOCS]": {
+            "ES_DOCS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2672,7 +2672,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]": {
+            "ES_POINT_TO_POINT": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2688,7 +2688,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.ES_TRACKS]": {
+            "ES_TRACKS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2704,7 +2704,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.KBN_REGION]": {
+            "KBN_REGION": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2720,7 +2720,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]": {
+            "KBN_TMS_RASTER": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2736,7 +2736,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.UX_TMS_MVT]": {
+            "UX_TMS_MVT": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2752,7 +2752,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]": {
+            "UX_TMS_RASTER": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2768,7 +2768,7 @@
                 }
               }
             },
-            "[TELEMETRY_LAYER_TYPE.UX_WMS]": {
+            "UX_WMS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2788,7 +2788,7 @@
         },
         "scalingOptions": {
           "properties": {
-            "[SCALING_TYPES.LIMIT]": {
+            "LIMIT": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2804,7 +2804,7 @@
                 }
               }
             },
-            "[SCALING_TYPES.CLUSTERS]": {
+            "CLUSTERS": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2820,7 +2820,7 @@
                 }
               }
             },
-            "[SCALING_TYPES.MVT]": {
+            "MVT": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2860,7 +2860,7 @@
         },
         "basemaps": {
           "properties": {
-            "[TELEMETRY_EMS_BASEMAP_TYPES.AUTO]": {
+            "AUTO": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2876,7 +2876,7 @@
                 }
               }
             },
-            "[TELEMETRY_EMS_BASEMAP_TYPES.DARK]": {
+            "DARK": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2892,7 +2892,7 @@
                 }
               }
             },
-            "[TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP]": {
+            "ROADMAP": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2908,7 +2908,7 @@
                 }
               }
             },
-            "[TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED]": {
+            "ROADMAP_DESATURATED": {
               "properties": {
                 "min": {
                   "type": "long"
