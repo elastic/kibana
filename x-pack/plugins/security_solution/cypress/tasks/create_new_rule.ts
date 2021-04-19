@@ -85,7 +85,6 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  MACHINE_LEARNING_DROPDOWN_ITEM,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
