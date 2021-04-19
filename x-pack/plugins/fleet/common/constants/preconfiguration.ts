@@ -7,3 +7,5 @@
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
+
+export const PRECONFIGURATION_LATEST_KEYWORD = 'latest';
