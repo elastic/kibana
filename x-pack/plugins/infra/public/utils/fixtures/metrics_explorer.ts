@@ -27,9 +27,7 @@ export const options: MetricsExplorerOptions = {
 export const source = {
   name: 'default',
   description: '',
-  logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
-  logColumns: [],
   inventoryDefaultView: 'host',
   metricsExplorerDefaultView: 'host',
   fields: {

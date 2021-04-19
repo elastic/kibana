@@ -22,6 +22,7 @@ const searchSettingsSchema = schema.object({
   boosts,
   result_fields: resultFields,
   search_fields: searchFields,
+  precision: schema.number(),
 });
 
 export function registerSearchSettingsRoutes({

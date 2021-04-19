@@ -6,22 +6,40 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiLink,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { EuiDataGridSorting } from '@elastic/eui';
+import { pagePathGetters } from '../../../fleet/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
   agentId?: string;
+  isLive?: boolean;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, isLive }) => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getFleetAppUrl = useCallback(
+    (agentId) =>
+      getUrlForApp('fleet', {
+        path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
+      }),
+    [getUrlForApp]
+  );
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -39,22 +57,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const onSort = useCallback(
-    (newSortingColumns) => {
-      setSortingColumns(newSortingColumns);
-    },
-    [setSortingColumns]
-  );
 
-  const { data: allResultsData = [] } = useAllResults({
+  const { data: allResultsData } = useAllResults({
     actionId,
-    agentId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
     sortField: '@timestamp',
+    isLive,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -68,24 +79,22 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
-      // @ts-expect-error fields is optional
-      const value = data[rowIndex].fields[columnId];
+      // @ts-expect-error update types
+      const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
 
       if (columnId === 'agent.name') {
-        // @ts-expect-error fields is optional
-        const agentIdValue = data[rowIndex].fields['agent.id'];
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
-        return <EuiLink {...linkProps}>{value}</EuiLink>;
+        // @ts-expect-error update types
+        const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
+
+        return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
       }
 
       return !isEmpty(value) ? value : '-';
     },
-    [actionId]
+    [getFleetAppUrl, pagination.pageSize]
   );
 
-  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
-    onSort,
+  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
     sortingColumns,
   ]);
 
@@ -100,34 +109,32 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   );
 
   useEffect(() => {
-    // @ts-expect-error update types
-    if (!allResultsData?.results) {
+    if (!allResultsData?.edges) {
       return;
     }
-    // @ts-expect-error update types
-    const newColumns = keys(allResultsData?.results[0]?.fields)
+
+    const newColumns = keys(allResultsData?.edges[0]?.fields)
       .sort()
       .reduce((acc, fieldName) => {
         if (fieldName === 'agent.name') {
-          return [
-            ...acc,
-            {
-              id: fieldName,
-              displayAsText: 'agent',
-              defaultSortDirection: Direction.asc,
-            },
-          ];
+          acc.push({
+            id: fieldName,
+            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
+              defaultMessage: 'agent',
+            }),
+            defaultSortDirection: Direction.asc,
+          });
+
+          return acc;
         }
 
         if (fieldName.startsWith('osquery.')) {
-          return [
-            ...acc,
-            {
-              id: fieldName,
-              displayAsText: fieldName.split('.')[1],
-              defaultSortDirection: Direction.asc,
-            },
-          ];
+          acc.push({
+            id: fieldName,
+            displayAsText: fieldName.split('.')[1],
+            defaultSortDirection: Direction.asc,
+          });
+          return acc;
         }
 
         return acc;
@@ -137,22 +144,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-    // @ts-expect-error update types
-  }, [columns, allResultsData?.results]);
+  }, [columns, allResultsData?.edges]);
 
   return (
     // @ts-expect-error update types
-    <DataContext.Provider value={allResultsData?.results}>
+    <DataContext.Provider value={allResultsData?.edges}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        // @ts-expect-error update types
         rowCount={allResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
-        height="300px"
+        height="500px"
       />
     </DataContext.Provider>
   );
