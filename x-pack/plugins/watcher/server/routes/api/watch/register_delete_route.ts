@@ -7,9 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -21,15 +19,15 @@ function deleteWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   });
 }
 
-export function registerDeleteRoute(deps: RouteDependencies) {
-  deps.router.delete(
+export function registerDeleteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {

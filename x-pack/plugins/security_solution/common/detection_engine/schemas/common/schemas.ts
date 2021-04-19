@@ -22,6 +22,7 @@ import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greate
 import { PositiveInteger } from '../types/positive_integer';
 import { NonEmptyString } from '../types/non_empty_string';
 import { parseScheduleDates } from '../../parse_schedule_dates';
+import { machine_learning_job_id_normalized } from '../types/normalized_ml_job_id';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -230,7 +231,7 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
-export const machine_learning_job_id = t.string;
+export const machine_learning_job_id = t.union([t.string, machine_learning_job_id_normalized]);
 export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
 
 export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
@@ -494,7 +495,7 @@ export const threshold = t.intersection([
   thresholdField,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);
@@ -507,7 +508,7 @@ export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);

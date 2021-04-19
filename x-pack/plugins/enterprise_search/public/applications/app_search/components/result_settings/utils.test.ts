@@ -9,7 +9,6 @@ import { SchemaTypes } from '../../../shared/types';
 
 import {
   areFieldsAtDefaultSettings,
-  areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllFields,
@@ -142,35 +141,6 @@ describe('splitResultFields', () => {
       },
       textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
     });
-  });
-});
-
-describe('areFieldsEmpty', () => {
-  it('should return true if all fields are empty objects', () => {
-    expect(
-      areFieldsEmpty({
-        foo: {},
-        bar: {},
-      })
-    ).toBe(true);
-  });
-  it('should return false otherwise', () => {
-    expect(
-      areFieldsEmpty({
-        foo: {
-          raw: true,
-          rawSize: 5,
-          snippet: false,
-          snippetFallback: false,
-        },
-        bar: {
-          raw: true,
-          rawSize: 5,
-          snippet: false,
-          snippetFallback: false,
-        },
-      })
-    ).toBe(false);
   });
 });
 

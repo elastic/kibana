@@ -16,14 +16,16 @@ import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
 import { registerUiCountersRoute } from './ui_counters';
 import { registerStatsRoute } from './stats';
-
+import type { UsageCounter } from '../usage_counters';
 export function setupRoutes({
   router,
+  uiCountersUsageCounter,
   getSavedObjects,
   ...rest
 }: {
   router: IRouter;
   getSavedObjects: () => ISavedObjectsRepository | undefined;
+  uiCountersUsageCounter: UsageCounter;
   config: {
     allowAnonymous: boolean;
     kibanaIndex: string;
@@ -39,6 +41,6 @@ export function setupRoutes({
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  registerUiCountersRoute(router, getSavedObjects);
+  registerUiCountersRoute(router, getSavedObjects, uiCountersUsageCounter);
   registerStatsRoute({ router, ...rest });
 }

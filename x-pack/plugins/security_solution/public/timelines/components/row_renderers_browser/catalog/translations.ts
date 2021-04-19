@@ -230,6 +230,19 @@ export const SYSTEM_DESCRIPTION_PART3 = i18n.translate(
       'All datasets send both periodic state information (e.g. all currently running processes) and real-time changes (e.g. when a new process starts or stops).',
   }
 );
+export const THREAT_MATCH_NAME = i18n.translate(
+  'xpack.securitySolution.eventRenderers.threatMatchName',
+  {
+    defaultMessage: 'Threat Indicator Match',
+  }
+);
+
+export const THREAT_MATCH_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.threatMatchDescription',
+  {
+    defaultMessage: 'Summarizes events that matched threat indicators',
+  }
+);
 
 export const ZEEK_NAME = i18n.translate('xpack.securitySolution.eventRenderers.zeekName', {
   defaultMessage: 'Zeek (formerly Bro)',

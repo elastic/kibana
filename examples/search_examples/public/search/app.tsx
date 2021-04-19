@@ -20,13 +20,13 @@ import {
   EuiTitle,
   EuiText,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiCheckbox,
   EuiSpacer,
   EuiCode,
   EuiComboBox,
   EuiFormLabel,
+  EuiTabbedContent,
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
@@ -60,6 +60,11 @@ function getNumeric(fields?: IndexPatternField[]) {
   return fields?.filter((f) => f.type === 'number' && f.aggregatable);
 }
 
+function getAggregatableStrings(fields?: IndexPatternField[]) {
+  if (!fields) return [];
+  return fields?.filter((f) => f.type === 'string' && f.aggregatable);
+}
+
 function formatFieldToComboBox(field?: IndexPatternField | null) {
   if (!field) return [];
   return formatFieldsToComboBox([field]);
@@ -90,6 +95,9 @@ export const SearchExamplesApp = ({
   const [selectedNumericField, setSelectedNumericField] = useState<
     IndexPatternField | null | undefined
   >();
+  const [selectedBucketField, setSelectedBucketField] = useState<
+    IndexPatternField | null | undefined
+  >();
   const [request, setRequest] = useState<Record<string, any>>({});
   const [response, setResponse] = useState<Record<string, any>>({});
 
@@ -108,10 +116,11 @@ export const SearchExamplesApp = ({
     setFields(indexPattern?.fields);
   }, [indexPattern]);
   useEffect(() => {
+    setSelectedBucketField(fields?.length ? getAggregatableStrings(fields)[0] : null);
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
   }, [fields]);
 
-  const doAsyncSearch = async (strategy?: string) => {
+  const doAsyncSearch = async (strategy?: string, sessionId?: string) => {
     if (!indexPattern || !selectedNumericField) return;
 
     // Construct the query portion of the search request
@@ -138,6 +147,7 @@ export const SearchExamplesApp = ({
     const searchSubscription$ = data.search
       .search(req, {
         strategy,
+        sessionId,
       })
       .subscribe({
         next: (res) => {
@@ -148,19 +158,30 @@ export const SearchExamplesApp = ({
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
               : undefined;
+            const isCool = (res as IMyStrategyResponse).cool;
+            const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
                 The average of {selectedNumericField!.name} is{' '}
                 {avgResult ? Math.floor(avgResult) : 0}.
                 <br />
-                Is it Cool? {String((res as IMyStrategyResponse).cool)}
+                {isCool ? `Is it Cool? ${isCool}` : undefined}
+                <br />
+                <EuiText data-test-subj="requestExecutedAt">
+                  {executedAt ? `Executed at? ${executedAt}` : undefined}
+                </EuiText>
               </EuiText>
             );
-            notifications.toasts.addSuccess({
-              title: 'Query result',
-              text: mountReactNode(message),
-            });
+            notifications.toasts.addSuccess(
+              {
+                title: 'Query result',
+                text: mountReactNode(message),
+              },
+              {
+                toastLifeTimeMs: 300000,
+              }
+            );
             searchSubscription$.unsubscribe();
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
@@ -191,13 +212,23 @@ export const SearchExamplesApp = ({
         .setField('index', indexPattern)
         .setField('filter', filters)
         .setField('query', query)
-        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*'])
+        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : [''])
+        .setField('size', selectedFields.length ? 100 : 0)
         .setField('trackTotalHits', 100);
 
+      const aggDef = [];
+      if (selectedBucketField) {
+        aggDef.push({
+          type: 'terms',
+          schema: 'split',
+          params: { field: selectedBucketField.name, size: 2, otherBucket: true },
+        });
+      }
       if (selectedNumericField) {
-        const ac = data.search.aggs.createAggConfigs(indexPattern, [
-          { type: 'avg', params: { field: selectedNumericField.name } },
-        ]);
+        aggDef.push({ type: 'avg', params: { field: selectedNumericField.name } });
+      }
+      if (aggDef.length > 0) {
+        const ac = data.search.aggs.createAggConfigs(indexPattern, aggDef);
         searchSource.setField('aggs', ac);
       }
 
@@ -206,10 +237,15 @@ export const SearchExamplesApp = ({
       setResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
-      notifications.toasts.addSuccess({
-        title: 'Query result',
-        text: mountReactNode(message),
-      });
+      notifications.toasts.addSuccess(
+        {
+          title: 'Query result',
+          text: mountReactNode(message),
+        },
+        {
+          toastLifeTimeMs: 300000,
+        }
+      );
     } catch (e) {
       setResponse(e.body);
       notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
@@ -222,6 +258,10 @@ export const SearchExamplesApp = ({
 
   const onMyStrategyClickHandler = () => {
     doAsyncSearch('myStrategy');
+  };
+
+  const onClientSideSessionCacheClickHandler = () => {
+    doAsyncSearch('myStrategy', data.search.session.getSessionId());
   };
 
   const onServerClickHandler = async () => {
@@ -244,6 +284,55 @@ export const SearchExamplesApp = ({
     doSearchSourceSearch();
   };
 
+  const reqTabs = [
+    {
+      id: 'request',
+      name: <EuiText data-test-subj="requestTab">Request</EuiText>,
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiText size="xs">Search body sent to ES</EuiText>
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={450}
+            isCopyable
+            data-test-subj="requestCodeBlock"
+          >
+            {JSON.stringify(request, null, 2)}
+          </EuiCodeBlock>
+        </>
+      ),
+    },
+    {
+      id: 'response',
+      name: <EuiText data-test-subj="responseTab">Response</EuiText>,
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiText size="xs">
+            <FormattedMessage
+              id="searchExamples.timestampText"
+              defaultMessage="Took: {time} ms"
+              values={{ time: timeTook ?? 'Unknown' }}
+            />
+          </EuiText>
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={450}
+            isCopyable
+            data-test-subj="responseCodeBlock"
+          >
+            {JSON.stringify(response, null, 2)}
+          </EuiCodeBlock>
+        </>
+      ),
+    },
+  ];
+
   return (
     <EuiPageBody>
       <EuiPageHeader>
@@ -265,59 +354,75 @@ export const SearchExamplesApp = ({
             useDefaultBehaviors={true}
             indexPatterns={indexPattern ? [indexPattern] : undefined}
           />
-          <EuiFlexGrid columns={3}>
+          <EuiFlexGrid columns={4}>
+            <EuiFlexItem>
+              <EuiFormLabel>Index Pattern</EuiFormLabel>
+              <IndexPatternSelect
+                placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
+                  defaultMessage: 'Select index pattern',
+                })}
+                indexPatternId={indexPattern?.id || ''}
+                onChange={async (newIndexPatternId: any) => {
+                  const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
+                  setIndexPattern(newIndexPattern);
+                }}
+                isClearable={false}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormLabel>Field (bucket)</EuiFormLabel>
+              <EuiComboBox
+                options={formatFieldsToComboBox(getAggregatableStrings(fields))}
+                selectedOptions={formatFieldToComboBox(selectedBucketField)}
+                singleSelection={true}
+                onChange={(option) => {
+                  if (option.length) {
+                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    setSelectedBucketField(fld || null);
+                  } else {
+                    setSelectedBucketField(null);
+                  }
+                }}
+                sortMatchesBy="startsWith"
+                data-test-subj="searchBucketField"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormLabel>Numeric Field (metric)</EuiFormLabel>
+              <EuiComboBox
+                options={formatFieldsToComboBox(getNumeric(fields))}
+                selectedOptions={formatFieldToComboBox(selectedNumericField)}
+                singleSelection={true}
+                onChange={(option) => {
+                  if (option.length) {
+                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    setSelectedNumericField(fld || null);
+                  } else {
+                    setSelectedNumericField(null);
+                  }
+                }}
+                sortMatchesBy="startsWith"
+                data-test-subj="searchMetricField"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormLabel>Fields to queryString</EuiFormLabel>
+              <EuiComboBox
+                options={formatFieldsToComboBox(fields)}
+                selectedOptions={formatFieldsToComboBox(selectedFields)}
+                singleSelection={false}
+                onChange={(option) => {
+                  const flds = option
+                    .map((opt) => indexPattern?.getFieldByName(opt?.label))
+                    .filter((f) => f);
+                  setSelectedFields(flds.length ? (flds as IndexPatternField[]) : []);
+                }}
+                sortMatchesBy="startsWith"
+              />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+          <EuiFlexGrid columns={2}>
             <EuiFlexItem style={{ width: '40%' }}>
-              <EuiText>
-                <EuiFlexGrid columns={2}>
-                  <EuiFlexItem>
-                    <EuiFormLabel>Index Pattern</EuiFormLabel>
-                    <IndexPatternSelect
-                      placeholder={i18n.translate(
-                        'searchSessionExample.selectIndexPatternPlaceholder',
-                        {
-                          defaultMessage: 'Select index pattern',
-                        }
-                      )}
-                      indexPatternId={indexPattern?.id || ''}
-                      onChange={async (newIndexPatternId: any) => {
-                        const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
-                        setIndexPattern(newIndexPattern);
-                      }}
-                      isClearable={false}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormLabel>Numeric Field to Aggregate</EuiFormLabel>
-                    <EuiComboBox
-                      options={formatFieldsToComboBox(getNumeric(fields))}
-                      selectedOptions={formatFieldToComboBox(selectedNumericField)}
-                      singleSelection={true}
-                      onChange={(option) => {
-                        const fld = indexPattern?.getFieldByName(option[0].label);
-                        setSelectedNumericField(fld || null);
-                      }}
-                      sortMatchesBy="startsWith"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGrid>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFormLabel>Fields to query (leave blank to include all fields)</EuiFormLabel>
-                    <EuiComboBox
-                      options={formatFieldsToComboBox(fields)}
-                      selectedOptions={formatFieldsToComboBox(selectedFields)}
-                      singleSelection={false}
-                      onChange={(option) => {
-                        const flds = option
-                          .map((opt) => indexPattern?.getFieldByName(opt?.label))
-                          .filter((f) => f);
-                        setSelectedFields(flds.length ? (flds as IndexPatternField[]) : []);
-                      }}
-                      sortMatchesBy="startsWith"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiText>
               <EuiSpacer />
               <EuiTitle size="s">
                 <h3>
@@ -333,15 +438,32 @@ export const SearchExamplesApp = ({
                 <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Request from low-level client (data.search.search)"
+                    defaultMessage="Request from low-level client (data.search.search)."
                   />
                 </EuiButtonEmpty>
-                <EuiButtonEmpty size="xs" onClick={onSearchSourceClickHandler} iconType="play">
+                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                  <FormattedMessage
+                    id="searchExamples.buttonText"
+                    defaultMessage="Metrics aggregation with raw documents in response."
+                  />
+                </EuiText>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onSearchSourceClickHandler}
+                  iconType="play"
+                  data-test-subj="searchSourceWithOther"
+                >
                   <FormattedMessage
                     id="searchExamples.searchSource.buttonText"
                     defaultMessage="Request from high-level client (data.search.searchSource)"
                   />
                 </EuiButtonEmpty>
+                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                  <FormattedMessage
+                    id="searchExamples.buttonText"
+                    defaultMessage="Bucket and metrics aggregations with other bucket."
+                  />
+                </EuiText>
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="s">
@@ -372,6 +494,45 @@ export const SearchExamplesApp = ({
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="s">
+                <h3>Client side search session caching</h3>
+              </EuiTitle>
+              <EuiText>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => data.search.session.start()}
+                  iconType="alert"
+                  data-test-subj="searchExamplesStartSession"
+                >
+                  <FormattedMessage
+                    id="searchExamples.startNewSession"
+                    defaultMessage="Start a new session"
+                  />
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => data.search.session.clear()}
+                  iconType="alert"
+                  data-test-subj="searchExamplesClearSession"
+                >
+                  <FormattedMessage
+                    id="searchExamples.clearSession"
+                    defaultMessage="Clear session"
+                  />
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onClientSideSessionCacheClickHandler}
+                  iconType="play"
+                  data-test-subj="searchExamplesCacheSearch"
+                >
+                  <FormattedMessage
+                    id="searchExamples.myStrategyButtonText"
+                    defaultMessage="Request from low-level client via My Strategy"
+                  />
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="s">
                 <h3>Using search on the server</h3>
               </EuiTitle>
               <EuiText>
@@ -388,41 +549,8 @@ export const SearchExamplesApp = ({
                 </EuiButtonEmpty>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '30%' }}>
-              <EuiTitle size="xs">
-                <h4>Request</h4>
-              </EuiTitle>
-              <EuiText size="xs">Search body sent to ES</EuiText>
-              <EuiCodeBlock
-                language="json"
-                fontSize="s"
-                paddingSize="s"
-                overflowHeight={450}
-                isCopyable
-              >
-                {JSON.stringify(request, null, 2)}
-              </EuiCodeBlock>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ width: '30%' }}>
-              <EuiTitle size="xs">
-                <h4>Response</h4>
-              </EuiTitle>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="searchExamples.timestampText"
-                  defaultMessage="Took: {time} ms"
-                  values={{ time: timeTook ?? 'Unknown' }}
-                />
-              </EuiText>
-              <EuiCodeBlock
-                language="json"
-                fontSize="s"
-                paddingSize="s"
-                overflowHeight={450}
-                isCopyable
-              >
-                {JSON.stringify(response, null, 2)}
-              </EuiCodeBlock>
+            <EuiFlexItem style={{ width: '60%' }}>
+              <EuiTabbedContent tabs={reqTabs} />
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

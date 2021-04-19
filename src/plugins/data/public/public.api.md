@@ -1561,7 +1561,6 @@ export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
 export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
     onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
-    fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
 };
 
@@ -2354,6 +2353,8 @@ export class SearchInterceptor {
     protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
+    // (undocumented)
+    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // Warning: (ae-forgotten-export) The symbol "KibanaServerError" needs to be exported by the entry point index.d.ts

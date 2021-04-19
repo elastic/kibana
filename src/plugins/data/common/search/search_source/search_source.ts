@@ -90,7 +90,6 @@ import {
   buildEsQuery,
   Filter,
   UI_SETTINGS,
-  isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
   IKibanaSearchResponse,
@@ -441,9 +440,7 @@ export class SearchSource {
           } else {
             if (!this.hasPostFlightRequests()) {
               obs.next(response);
-              if (isCompleteResponse(response)) {
-                obs.complete();
-              }
+              obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
@@ -564,7 +561,7 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'aggs':
         if ((val as any) instanceof AggConfigs) {
-          return addToBody('aggs', val.toDsl(true));
+          return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);
         }

@@ -7,6 +7,7 @@
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
+import { createObservabilityRuleRegistryMock } from '../../../../rules/observability_rule_registry_mock';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
@@ -53,6 +54,7 @@ describe('UXSection', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
+      observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
     }));
   });
   it('renders with core web vitals', () => {
