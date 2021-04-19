@@ -65,32 +65,32 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'time',
+          name: 'Time',
         }),
         expect.objectContaining({
-          name: 'severity',
+          field: 'severity',
         }),
         expect.objectContaining({
-          name: 'detector',
+          name: 'Detector',
         }),
         expect.objectContaining({
           field: 'entityValue',
-          name: 'found for',
+          name: 'Found for',
         }),
         expect.objectContaining({
-          name: 'influenced by',
+          name: 'Influenced by',
         }),
         expect.objectContaining({
-          name: 'actual',
+          name: 'Actual',
         }),
         expect.objectContaining({
-          name: 'typical',
+          name: 'Typical',
         }),
         expect.objectContaining({
-          name: 'description',
+          name: 'Description',
         }),
         expect.objectContaining({
-          name: 'category examples',
+          name: 'Category examples',
         }),
       ])
     );
@@ -240,7 +240,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'job ID',
+          name: 'Job ID',
         }),
       ])
     );
