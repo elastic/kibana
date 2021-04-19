@@ -96,7 +96,7 @@ const createStartContractMock = () => {
               truststoreConfigured: false,
             },
             securityResponseHeaders: {
-              strictTransportSecurity: null,
+              strictTransportSecurity: 'NULL', // `null` values are coalesced to `"NULL"` strings
               xContentTypeOptions: 'nosniff',
               referrerPolicy: 'no-referrer-when-downgrade',
               permissionsPolicyConfigured: false,

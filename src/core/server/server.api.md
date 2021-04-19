@@ -443,9 +443,9 @@ export interface CoreConfigUsageData {
             clientAuthentication: 'none' | 'optional' | 'required';
         };
         securityResponseHeaders: {
-            strictTransportSecurity: string | null;
-            xContentTypeOptions: string | null;
-            referrerPolicy: string | null;
+            strictTransportSecurity: string;
+            xContentTypeOptions: string;
+            referrerPolicy: string;
             permissionsPolicyConfigured: boolean;
             disableEmbedding: boolean;
         };

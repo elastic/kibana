@@ -242,18 +242,18 @@ export function getCoreUsageCollector(
             strictTransportSecurity: {
               type: 'keyword',
               _meta: {
-                description: 'The strictTransportSecurity response header, if it is configured.',
+                description: 'The strictTransportSecurity response header, "NULL" if disabled.',
               },
             },
             xContentTypeOptions: {
               type: 'keyword',
               _meta: {
-                description: 'The xContentTypeOptions response header, if it is configured.',
+                description: 'The xContentTypeOptions response header, "NULL" if disabled.',
               },
             },
             referrerPolicy: {
               type: 'keyword',
-              _meta: { description: 'The referrerPolicy response header, if it is configured.' },
+              _meta: { description: 'The referrerPolicy response header, "NULL" if disabled.' },
             },
             permissionsPolicyConfigured: {
               type: 'boolean',
