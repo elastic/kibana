@@ -614,6 +614,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async setFieldFormat(format: string) {
+      await testSubjects.setEuiSwitch('formatRow>toggle', 'check');
       log.debug('set scripted field format = ' + format);
       await find.clickByCssSelector(
         'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
