@@ -421,12 +421,12 @@ export class Worker extends events.EventEmitter {
     };
 
     return this._client
-      .callAsInternalUser('search', {
+      .search({
         index: `${this.queue.index}-*`,
         body: query,
       })
       .then((results) => {
-        const jobs = results.hits.hits;
+        const jobs = results.body.hits.hits;
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
