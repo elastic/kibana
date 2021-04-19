@@ -10,9 +10,11 @@ import { lazy } from 'react';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import { validateLookbackInterval, validateTopNBucket } from './validators';
 
-export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+  // async import validators to reduce initial bundle size
+  const { validateLookbackInterval, validateTopNBucket } = await import('./validators');
+
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
