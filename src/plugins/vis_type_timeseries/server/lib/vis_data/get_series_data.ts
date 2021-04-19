@@ -97,7 +97,7 @@ export async function getSeriesData(
       },
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body) {
       err.response = err.body;
 
       return {

@@ -15,6 +15,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getDisplayText.$1",
             "type": "CompoundType",
             "label": "id",
             "isRequired": true,
@@ -889,13 +890,7 @@
             "lineNumber": 179
           },
           "signature": [
-            {
-              "pluginId": "home",
-              "scope": "public",
-              "docId": "kibHomePluginApi",
-              "section": "def-public.FeatureCatalogueRegistry",
-              "text": "FeatureCatalogueRegistry"
-            }
+            "FeatureCatalogueRegistry"
           ]
         }
       ],
@@ -943,13 +938,7 @@
               "lineNumber": 63
             },
             "signature": [
-              {
-                "pluginId": "home",
-                "scope": "server",
-                "docId": "kibHomePluginApi",
-                "section": "def-server.DashboardSchema",
-                "text": "DashboardSchema"
-              },
+              "DashboardSchema",
               "[]"
             ]
           },
@@ -1285,13 +1274,7 @@
               "text": "TutorialProvider"
             },
             ") => void; addScopedTutorialContextFactory: (scopedTutorialContextFactory: ",
-            {
-              "pluginId": "home",
-              "scope": "server",
-              "docId": "kibHomePluginApi",
-              "section": "def-server.ScopedTutorialContextFactory",
-              "text": "ScopedTutorialContextFactory"
-            },
+            "ScopedTutorialContextFactory",
             ") => void; }"
           ]
         },
@@ -1315,37 +1298,13 @@
               "text": "SampleDatasetProvider"
             },
             ") => void; getSampleDatasets: () => ",
-            {
-              "pluginId": "home",
-              "scope": "server",
-              "docId": "kibHomePluginApi",
-              "section": "def-server.SampleDatasetSchema",
-              "text": "SampleDatasetSchema"
-            },
+            "SampleDatasetSchema",
             "<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-            {
-              "pluginId": "core",
-              "scope": "common",
-              "docId": "kibCorePluginApi",
-              "section": "def-common.SavedObject",
-              "text": "SavedObject"
-            },
+            "SavedObject",
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
-            {
-              "pluginId": "home",
-              "scope": "server",
-              "docId": "kibHomePluginApi",
-              "section": "def-server.AppLinkSchema",
-              "text": "AppLinkSchema"
-            },
+            "AppLinkSchema",
             "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
-            {
-              "pluginId": "home",
-              "scope": "server",
-              "docId": "kibHomePluginApi",
-              "section": "def-server.SampleDatasetDashboardPanel",
-              "text": "SampleDatasetDashboardPanel"
-            }
+            "SampleDatasetDashboardPanel"
           ]
         }
       ],
