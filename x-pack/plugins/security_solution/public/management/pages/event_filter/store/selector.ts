@@ -27,20 +27,6 @@ export const getFormHasError = (state: EventFilterListPageState): boolean => {
   return state.form.hasItemsError || state.form.hasNameError;
 };
 
-export const getFormSubmissionIsLoadingStatus = (state: EventFilterListPageState): boolean => {
-  return state.form.submissionResourceState.type === 'LoadingResourceState';
-};
-
-export const getFormSubmissionIsUninitialisedStatus = (
-  state: EventFilterListPageState
-): boolean => {
-  return state.form.submissionResourceState.type === 'UninitialisedResourceState';
-};
-
-export const getFormSubmissionIsLoadedStatus = (state: EventFilterListPageState): boolean => {
-  return state.form.submissionResourceState.type === 'LoadedResourceState';
-};
-
 export const isCreationInProgress = (state: EventFilterListPageState): boolean => {
   return isLoadingResourceState(state.form.submissionResourceState);
 };
