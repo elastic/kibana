@@ -6,33 +6,12 @@
  */
 
 import React, { memo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../../../public/shared_imports';
-import { ServerApiError } from '../../../../../../common/types';
 import { isCreationSuccessful, getFormEntry, getCreationError } from '../../../store/selector';
 
 import { useToasts } from '../../../../../../common/lib/kibana';
 import { useEventFilterSelector } from '../../hooks';
-
-const getCreationSuccessMessage = (
-  entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined
-) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
-    defaultMessage: '"{name}" has been added to the event exceptions list.',
-    values: { name: entry?.name },
-  });
-};
-
-const getCreationErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
-    defaultMessage: 'There was an error creating the new exception: "{error}"',
-    values: { error: creationError.message },
-  });
-};
+import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
 export const EventFilterNotification = memo(() => {
   const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
