@@ -11,6 +11,7 @@ import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common
 import { IndexPattern, ISearchSource, SearchSource } from '../../../../data/common/';
 import { SortOrder } from '../../saved_searches/types';
 import { DiscoverServices } from '../../build_services';
+import { indexPatterns as indexPatternsUtils } from '../../../../data/public';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -57,6 +58,10 @@ export function updateSearchSource({
       // Even when searching rollups, we want to use the default strategy so that we get back a
       // document-like response.
       .setPreferredSearchStrategyId('default');
+
+    if (indexPatternsUtils.isDefault(indexPattern)) {
+      volatileSearchSource.setField('filter', services.timefilter.createFilter(indexPattern));
+    }
 
     if (useNewFieldsApi) {
       volatileSearchSource.removeField('fieldsFromSource');

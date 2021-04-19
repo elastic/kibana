@@ -206,12 +206,13 @@ export function Discover({
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
         <TopNavMemoized
           indexPattern={indexPattern}
-          opts={opts}
           onOpenInspector={onOpenInspector}
+          opts={opts}
           query={state.query}
           savedQuery={state.savedQuery}
-          updateQuery={updateQuery}
           searchSource={searchSource}
+          stateContainer={stateContainer}
+          updateQuery={updateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
@@ -228,7 +229,7 @@ export function Discover({
                 onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
-                selectedIndexPattern={searchSource && searchSource.getField('index')}
+                selectedIndexPattern={indexPattern}
                 services={services}
                 setAppState={stateContainer.setAppState}
                 state={state}
@@ -295,7 +296,7 @@ export function Discover({
                         state={state}
                         resetQuery={resetQuery}
                         savedSearch={savedSearch}
-                        stateContainer={opts.stateContainer}
+                        stateContainer={stateContainer}
                         timefield={timeField}
                       />
                     </EuiFlexItem>

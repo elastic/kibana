@@ -8,11 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { getState } from './discover_state';
-import { indexPatterns as indexPatternsUtils } from '../../../../data/public';
 import indexTemplateLegacy from './discover_legacy.html';
 import {
   getAngularModule,
-  getHeaderActionMenuMounter,
   getServices,
   getUrlTracker,
   redirectWhenMissing,
@@ -30,7 +28,6 @@ const {
   data,
   history: getHistory,
   filterManager,
-  timefilter,
   toastNotifications,
   uiSettings: config,
 } = getServices();
@@ -120,13 +117,10 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController($route, $scope) {
-  const { isDefault: isDefaultType } = indexPatternsUtils;
-
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
-  const persistentSearchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPattern(
     $route.current.locals.savedObjects.ip,
-    persistentSearchSource,
+    savedSearch.searchSource,
     toastNotifications
   );
 
@@ -139,10 +133,8 @@ function discoverController($route, $scope) {
     services,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
-    setHeaderActionMenu: getHeaderActionMenuMounter(),
     filterManager,
     data,
-    persistentSearchSource,
     routeReload: () => {
       $scope.$evalAsync(() => {
         $route.reload();
@@ -159,19 +151,6 @@ function discoverController($route, $scope) {
       history.push(path);
     });
   };
-
-  persistentSearchSource.setField('index', $scope.indexPattern);
-  // searchSource which applies time range
-  const volatileSearchSource = savedSearch.searchSource.create();
-
-  if (isDefaultType($scope.indexPattern)) {
-    volatileSearchSource.setField('filter', () => {
-      return timefilter.createFilter($scope.indexPattern);
-    });
-  }
-
-  volatileSearchSource.setParent(persistentSearchSource);
-  $scope.volatileSearchSource = volatileSearchSource;
 
   $scope.resetQuery = function () {
     history.push(

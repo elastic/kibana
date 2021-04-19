@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
+import { IUiSettingsClient, SavedObject } from 'kibana/public';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
 import {
   DataPublicPluginStart,
   FilterManager,
   IndexPatternAttributes,
   ISearchSource,
-  SearchSource,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { GetStateReturn } from '../angular/discover_state';
 
 import { DiscoverServices } from '../../build_services';
 
@@ -48,10 +46,6 @@ export interface DiscoverProps {
      */
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     /**
-     * Persisted search source it is
-     */
-    persistentSearchSource: SearchSource;
-    /**
      * Reload current Angular route, used for switching index patterns, legacy
      */
     routeReload: () => void;
@@ -68,17 +62,9 @@ export interface DiscoverProps {
      */
     savedSearch: SavedSearch;
     /**
-     * Function to set the header menu
-     */
-    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
-    /**
      * Timefield of the currently used index pattern
      */
     timefield: string;
-    /**
-     * State container providing globalState, appState and functions
-     */
-    stateContainer: GetStateReturn;
   };
   /**
    * Function to reset the current query

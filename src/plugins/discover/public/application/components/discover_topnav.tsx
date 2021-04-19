@@ -9,12 +9,15 @@ import React, { useMemo } from 'react';
 import { DiscoverProps } from './types';
 import { getTopNavLinks } from './top_nav/get_top_nav_links';
 import { Query, TimeRange } from '../../../../data/common/query';
+import { getHeaderActionMenuMounter } from '../../kibana_services';
+import { GetStateReturn } from '../angular/discover_state';
 
 export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts' | 'searchSource'> & {
   onOpenInspector: () => void;
   query?: Query;
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  stateContainer: GetStateReturn;
 };
 
 export const DiscoverTopNav = ({
@@ -23,6 +26,7 @@ export const DiscoverTopNav = ({
   onOpenInspector,
   query,
   savedQuery,
+  stateContainer,
   updateQuery,
   searchSource,
 }: DiscoverTopNavProps) => {
@@ -35,15 +39,15 @@ export const DiscoverTopNav = ({
         navigateTo: opts.navigateTo,
         savedSearch: opts.savedSearch,
         services: opts.services,
-        state: opts.stateContainer,
+        state: stateContainer,
         onOpenInspector,
         searchSource,
       }),
-    [indexPattern, opts, onOpenInspector, searchSource]
+    [indexPattern, opts, onOpenInspector, searchSource, stateContainer]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appStateContainer, setAppState } = opts.stateContainer;
+    const { appStateContainer, setAppState } = stateContainer;
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
@@ -55,6 +59,10 @@ export const DiscoverTopNav = ({
       appStateContainer.set(newState);
     }
   };
+  const setMenuMountPoint = useMemo(() => {
+    return getHeaderActionMenuMounter();
+  }, []);
+
   return (
     <TopNavMenu
       appName="discover"
@@ -63,7 +71,7 @@ export const DiscoverTopNav = ({
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}
-      setMenuMountPoint={opts.setHeaderActionMenu}
+      setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}
       screenTitle={opts.savedSearch.title}
       showDatePicker={showDatePicker}

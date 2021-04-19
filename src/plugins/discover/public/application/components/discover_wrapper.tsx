@@ -5,18 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, useEffect, useState, useRef } from 'react';
-import { cloneDeep, isEqual } from 'lodash';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { DiscoverProps } from './types';
 import { Discover } from './discover';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
-import {
-  createSearchSessionRestorationDataProvider,
-  getState,
-  splitState,
-} from '../angular/discover_state';
+import { createSearchSessionRestorationDataProvider, getState } from '../angular/discover_state';
 import {
   connectToQueryState,
   esFilters,
@@ -27,15 +23,25 @@ import { useFetch } from './use_fetch';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { getStateDefaults } from '../helpers/get_state_defaults';
+import { loadIndexPattern } from '../helpers/resolve_index_pattern';
 
 const DiscoverMemoized = React.memo(Discover);
 
 export function DiscoverWrapper(props: DiscoverProps) {
-  const { indexPattern, searchSource } = props;
-  const { savedSearch, config, services, persistentSearchSource } = props.opts;
+  const [indexPattern, setIndexPattern] = useState(props.indexPattern);
+  const { savedSearch, config, services } = props.opts;
   const { capabilities, data, chrome, docLinks } = services;
 
-  const isChangingIndexPattern = useRef(false);
+  const persistentSearchSource = useMemo(() => {
+    savedSearch.searchSource.setField('index', indexPattern);
+    // searchSource which applies time range
+    return savedSearch.searchSource;
+  }, [indexPattern, savedSearch.searchSource]);
+
+  const searchSource = useMemo(() => savedSearch.searchSource.createChild(), [
+    savedSearch.searchSource,
+  ]);
+
   const history = useMemo(() => services.history(), [services]);
 
   const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
@@ -43,23 +49,9 @@ export function DiscoverWrapper(props: DiscoverProps) {
   ]);
 
   /**
-   * Url / Routing logic
-   */
-  useEffect(() => {
-    // this listener is waiting for such a path http://localhost:5601/app/discover#/
-    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
-    // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
-        props.opts.routeReload();
-      }
-    });
-    return () => unlistenHistoryBasePath();
-  }, [history, props.opts]);
-
-  /**
    * State logic
    */
+
   const stateContainer = useMemo(
     () =>
       getState({
@@ -87,22 +79,31 @@ export function DiscoverWrapper(props: DiscoverProps) {
     ]
   );
   // temporary hack, to be removed
-  props.opts.stateContainer = stateContainer;
   const { appStateContainer, getPreviousAppState, stopSync } = stateContainer;
 
   const [state, setState] = useState(stateContainer.appStateContainer.getState());
   useEffect(() => {
-    const unsubsribe = stateContainer.appStateContainer.subscribe((newState) => {
+    const unsubsribe = stateContainer.appStateContainer.subscribe(async (newState) => {
+      // NOTE: this is also called when navigating from discover app to context app
+      if (newState.index && state.index !== newState.index) {
+        // in case of index pattern switch the route has currently to be reloaded, legacy
+        const ip = await loadIndexPattern(newState.index, services.indexPatterns, config);
+
+        if (ip) {
+          setIndexPattern(ip.loaded);
+        }
+      }
       setState(newState);
     });
     return () => unsubsribe();
-  }, [stateContainer.appStateContainer]);
+  }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer]);
 
   useEffect(() => {
+    /**
     if (stateContainer.appStateContainer.getState().index !== indexPattern.id) {
       // used index pattern is different than the given by url/state which is invalid
       stateContainer.setAppState({ index: indexPattern.id });
-    }
+    }**/
     // sync initial app filters from state to filterManager
     const filters = stateContainer.appStateContainer.getState().filters;
     if (filters) {
@@ -112,19 +113,6 @@ export function DiscoverWrapper(props: DiscoverProps) {
     if (query) {
       data.query.queryString.setQuery(query);
     }
-    const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
-      const { state: newStatePartial } = splitState(newState);
-      const { state: oldStatePartial } = splitState(getPreviousAppState());
-
-      if (!isEqual(newStatePartial, oldStatePartial)) {
-        // NOTE: this is also called when navigating from discover app to context app
-        if (newStatePartial.index && oldStatePartial.index !== newStatePartial.index) {
-          // in case of index pattern switch the route has currently to be reloaded, legacy
-          isChangingIndexPattern.current = true;
-          props.opts.routeReload();
-        }
-      }
-    });
 
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
@@ -143,25 +131,52 @@ export function DiscoverWrapper(props: DiscoverProps) {
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
       stopSyncingGlobalStateWithUrl();
-      appStateUnsubscribe();
       stopSync();
-      if (!isChangingIndexPattern.current) {
-        // HACK:
-        // do not clear session when changing index pattern due to how state management around it is setup
-        // it will be cleared by searchSessionManager on controller reload instead
-        data.search.session.clear();
-      }
     };
   }, [
     appStateContainer,
+    config,
     data.query,
     data.search.session,
     getPreviousAppState,
     indexPattern.id,
     props.opts,
     services.filterManager,
+    services.indexPatterns,
     stateContainer,
     stopSync,
+  ]);
+
+  /**
+   * Url / Routing logic
+   */
+  useEffect(() => {
+    // this listener is waiting for such a path http://localhost:5601/app/discover#/
+    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
+    // to reload the page in a right way
+    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+      if (!search && !hash && pathname === '/') {
+        stateContainer.setAppState(
+          getStateDefaults({
+            config,
+            data,
+            indexPattern,
+            savedSearch,
+            searchSource: persistentSearchSource,
+          })
+        );
+      }
+    });
+    return () => unlistenHistoryBasePath();
+  }, [
+    config,
+    data,
+    history,
+    indexPattern,
+    persistentSearchSource,
+    props.opts,
+    savedSearch,
+    stateContainer,
   ]);
 
   /**

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../../kibana_services';
-import { IndexPatternsService, SearchSource } from '../../../../data/common';
+import { IndexPatternsContract, SearchSource } from '../../../../data/common';
 
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
@@ -77,7 +77,7 @@ export function getIndexPatternId(
  */
 export async function loadIndexPattern(
   id: string,
-  indexPatterns: IndexPatternsService,
+  indexPatterns: IndexPatternsContract,
   config: IUiSettingsClient
 ): Promise<IndexPatternData> {
   const indexPatternList = ((await indexPatterns.getCache()) as unknown) as IndexPatternSavedObject[];
