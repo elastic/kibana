@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { PreconfiguredAgentPolicy } from '../types';
 
 import { defaultPackages } from './epm';
-import { agentPolicyStatuses } from './agent_policy';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
@@ -21,7 +20,6 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicy = {
   name: 'Default policy',
   namespace: 'default',
   description: 'Default agent policy created by Kibana',
-  status: agentPolicyStatuses.Active,
   package_policies: [
     {
       name: i18n.translate('xpack.fleet.agentPolicies.defaultAgentPolicySystemIntegrationName', {
@@ -42,7 +40,6 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicy = {
   name: 'Default Fleet Server policy',
   namespace: 'default',
   description: 'Default Fleet Server agent policy created by Kibana',
-  status: agentPolicyStatuses.Active,
   package_policies: [
     {
       name: i18n.translate(
