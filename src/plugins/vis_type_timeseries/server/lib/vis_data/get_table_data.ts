@@ -107,7 +107,7 @@ export async function getTableData(
       series,
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body) {
       err.response = err.body;
 
       return {
