@@ -25,6 +25,7 @@ import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollme
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { invalidateAPIKeys } from '../api_keys';
+import { settingsService } from '..';
 
 export async function runFleetServerMigration() {
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
@@ -166,8 +167,10 @@ async function migrateAgentPolicies() {
     perPage: SO_SEARCH_LIMIT,
   });
 
+  let hasAgents = false;
   await Promise.all(
     agentPolicies.map(async (agentPolicy) => {
+      hasAgents = true;
       const res = await esClient.search({
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
@@ -185,6 +188,13 @@ async function migrateAgentPolicies() {
       }
     })
   );
+
+  // Update settings to show migration modal
+  if (hasAgents) {
+    await settingsService.saveSettings(soClient, {
+      has_seen_fleet_migration_notice: false,
+    });
+  }
 }
 
 function is404Error(error: any) {
