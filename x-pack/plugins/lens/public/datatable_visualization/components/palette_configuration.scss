@@ -1,0 +1,12 @@
+.lnsPalettePanel__colorIndicator {
+  display: inline-block;
+  border-radius: $euiBorderRadius / 2;
+  cursor: pointer;
+  border: solid 1px transparentize($euiColorFullShade, .9);
+  box-shadow: inset 0 0 0 1px transparentize($euiColorEmptyShade, .95);
+  margin-right: 6px;
+
+  &:focus {
+    @include euiFocusRing;
+  }
+}

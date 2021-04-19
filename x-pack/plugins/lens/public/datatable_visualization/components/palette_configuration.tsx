@@ -15,11 +15,14 @@ import {
   EuiFieldNumber,
   EuiColorStops,
   EuiRange,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
 import { CustomPaletteParams } from '../expression';
 import { useDebounceWithOptions } from '../../indexpattern_datasource/operations/definitions/helpers';
+
+import './palette_configuration.scss';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -195,6 +198,48 @@ export function CustomizablePalette({
     [minLocalValue, maxLocalValue]
   );
 
+  const safeColorList = controlStops || colorStops || [];
+  const [firstColorStop] = safeColorList;
+  const lastColorStop = safeColorList[safeColorList.length - 1];
+
+  // The fixed type is named "Stepped" when in predefined palette, or Fixed for custom palettes
+  const progressionTypeLabel = [
+    activePalette?.params?.name === 'custom'
+      ? {
+          id: `${idPrefix}fixed`,
+          label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixedCustom', {
+            defaultMessage: 'Fixed',
+          }),
+          'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_fixed',
+        }
+      : {
+          id: `${idPrefix}fixed`,
+          label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixedPrefilled', {
+            defaultMessage: 'Stepped',
+          }),
+          'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_fixed',
+        },
+    {
+      id: `${idPrefix}gradient`,
+      label: i18n.translate('xpack.lens.table.dynamicColoring.progression.gradient', {
+        defaultMessage: 'Gradient',
+      }),
+      'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
+    },
+  ].concat(
+    activePalette?.params?.name === 'custom'
+      ? [
+          {
+            id: `${idPrefix}stepped`,
+            label: i18n.translate('xpack.lens.table.dynamicColoring.progression.stepped', {
+              defaultMessage: 'Stepped',
+            }),
+            'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_stepped',
+          },
+        ]
+      : []
+  );
+
   return (
     <>
       <PalettePicker
@@ -290,7 +335,10 @@ export function CustomizablePalette({
               'data-test-subj': 'lnsDatatable_dynamicColoring_stopValue_groups_percent',
             },
           ]}
-          idSelected={`${idPrefix}${activePalette.params?.rangeType}`}
+          idSelected={
+            isAutoRange ? `${idPrefix}percent` : `${idPrefix}${activePalette.params?.rangeType}`
+          }
+          isDisabled={isAutoRange}
           onChange={(id) => {
             const newRangeType = id.replace(idPrefix, '') as RequiredParamTypes['rangeType'];
             setPalette(
@@ -303,60 +351,95 @@ export function CustomizablePalette({
           }}
         />
       </EuiFormRow>
-      {!isAutoRange ? (
-        <>
-          <EuiFormRow
-            data-test-subj="lnsDatatable_dynamicColoring_min_range_label"
-            label={i18n.translate('xpack.lens.table.dynamicColoring.progression.minStop', {
+      <EuiFormRow
+        data-test-subj="lnsDatatable_dynamicColoring_min_range_label"
+        label={
+          <>
+            <span className="lnsPalettePanel__colorIndicator">
+              <EuiIcon
+                color={firstColorStop.color}
+                type="stopFilled"
+                aria-label={i18n.translate(
+                  'xpack.lens.table.dynamicColoring.progression.minStopColor',
+                  {
+                    defaultMessage: 'Color for the minimum value: {hex}',
+                    values: {
+                      hex: firstColorStop.color,
+                    },
+                  }
+                )}
+              />
+            </span>
+            {i18n.translate('xpack.lens.table.dynamicColoring.progression.minStop', {
               defaultMessage: 'Min color stop',
             })}
-            display="columnCompressed"
-            isInvalid={!isMaxMinValid}
-            error={
-              isMaxMinValid
-                ? []
-                : i18n.translate('xpack.lens.table.dynamicColoring.range.minError', {
-                    defaultMessage: 'Min cannot be higher than max',
-                  })
-            }
-          >
-            <EuiFieldNumber
-              data-test-subj="lnsDatatable_dynamicColoring_min_range"
-              value={minLocalValue}
-              onChange={({ target }) => {
-                setMinLocalValue(target.value);
-              }}
-              append={rangeType === 'percent' ? '%' : undefined}
-              isInvalid={!isMaxMinValid}
+          </>
+        }
+        display="columnCompressed"
+        isInvalid={!isMaxMinValid}
+        error={
+          isMaxMinValid
+            ? []
+            : i18n.translate('xpack.lens.table.dynamicColoring.range.minError', {
+                defaultMessage: 'Min cannot be higher than max',
+              })
+        }
+      >
+        <EuiFieldNumber
+          data-test-subj="lnsDatatable_dynamicColoring_min_range"
+          value={minLocalValue}
+          onChange={({ target }) => {
+            setMinLocalValue(target.value);
+          }}
+          append={rangeType === 'number' ? undefined : '%'}
+          isInvalid={!isMaxMinValid}
+          disabled={isAutoRange}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        data-test-subj="lnsDatatable_dynamicColoring_max_range_label"
+        label={
+          <>
+            <EuiIcon
+              className="lnsPalettePanel__colorIndicator"
+              color={lastColorStop.color}
+              type="stopFilled"
+              aria-label={i18n.translate(
+                'xpack.lens.table.dynamicColoring.progression.maxStopColor',
+                {
+                  defaultMessage: 'Color for the maximum value: {hex}',
+                  values: {
+                    hex: lastColorStop.color,
+                  },
+                }
+              )}
             />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="lnsDatatable_dynamicColoring_max_range_label"
-            label={i18n.translate('xpack.lens.table.dynamicColoring.progression.maxStop', {
+            {i18n.translate('xpack.lens.table.dynamicColoring.progression.maxStop', {
               defaultMessage: 'Max color stop',
             })}
-            display="columnCompressed"
-            isInvalid={!isMaxMinValid}
-            error={
-              isMaxMinValid
-                ? []
-                : i18n.translate('xpack.lens.table.dynamicColoring.range.maxError', {
-                    defaultMessage: 'Max cannot be lower than min',
-                  })
-            }
-          >
-            <EuiFieldNumber
-              data-test-subj="lnsDatatable_dynamicColoring_max_range"
-              value={maxLocalValue}
-              onChange={({ target }) => {
-                setMaxLocalValue(target.value);
-              }}
-              append={rangeType === 'percent' ? '%' : undefined}
-              isInvalid={!isMaxMinValid}
-            />
-          </EuiFormRow>
-        </>
-      ) : null}
+          </>
+        }
+        display="columnCompressed"
+        isInvalid={!isMaxMinValid}
+        error={
+          isMaxMinValid
+            ? []
+            : i18n.translate('xpack.lens.table.dynamicColoring.range.maxError', {
+                defaultMessage: 'Max cannot be lower than min',
+              })
+        }
+      >
+        <EuiFieldNumber
+          data-test-subj="lnsDatatable_dynamicColoring_max_range"
+          value={maxLocalValue}
+          onChange={({ target }) => {
+            setMaxLocalValue(target.value);
+          }}
+          append={rangeType === 'number' ? undefined : '%'}
+          isInvalid={!isMaxMinValid}
+          disabled={isAutoRange}
+        />
+      </EuiFormRow>
       {activePalette.name === 'custom' ? (
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
@@ -365,6 +448,7 @@ export function CustomizablePalette({
           display="columnCompressed"
         >
           <EuiColorStops
+            showAlpha
             data-test-subj="lnsDatatable_dynamicColoring_progression_custom_stops"
             label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
               defaultMessage: 'Custom palette',
@@ -420,34 +504,7 @@ export function CustomizablePalette({
           data-test-subj="lnsDatatable_dynamicColoring_progression_groups"
           name="dynamicColoringProgressionValue"
           buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}gradient`,
-              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.gradient', {
-                defaultMessage: 'Gradient',
-              }),
-              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
-            },
-            {
-              id: `${idPrefix}fixed`,
-              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixed', {
-                defaultMessage: 'Fixed',
-              }),
-              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_fixed',
-            },
-          ].concat(
-            activePalette?.params?.name === 'custom'
-              ? [
-                  {
-                    id: `${idPrefix}stepped`,
-                    label: i18n.translate('xpack.lens.table.dynamicColoring.progression.stepped', {
-                      defaultMessage: 'Stepped',
-                    }),
-                    'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_stepped',
-                  },
-                ]
-              : []
-          )}
+          options={progressionTypeLabel}
           idSelected={`${idPrefix}${progressionType}`}
           onChange={(id) => {
             const newProgressionType = id.replace(
