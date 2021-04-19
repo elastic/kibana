@@ -12,7 +12,6 @@ import { waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
-import * as i18n from './translations';
 
 import { CaseStatuses, CaseType, StatusAll } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
