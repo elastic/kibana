@@ -4,91 +4,418 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-public.DashboardPicker",
+        "id": "def-public.AddFromLibraryButton",
         "type": "Function",
-        "label": "DashboardPicker",
-        "signature": [
-          "(props: ",
-          "DashboardPickerProps",
-          ") => JSX.Element"
-        ],
-        "description": [],
         "children": [
           {
+            "id": "def-public.AddFromLibraryButton.$1",
             "type": "Object",
-            "label": "props",
+            "label": "{ onClick, ...rest }",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardPickerProps",
-                "text": "DashboardPickerProps"
-              }
+              "Pick<",
+              "Props",
+              ", \"onClick\" | \"primary\">"
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-              "lineNumber": 27
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+              "lineNumber": 17
             }
           }
         ],
+        "signature": [
+          "({ onClick, ...rest }: Pick<",
+          "Props",
+          ", \"onClick\" | \"primary\">) => JSX.Element"
+        ],
+        "description": [],
+        "label": "AddFromLibraryButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+          "lineNumber": 17
+        },
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-          "lineNumber": 27
-        },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedObjectSaveModalDashboard",
+        "tags": [],
+        "id": "def-public.LazyDashboardPicker",
         "type": "Function",
-        "label": "SavedObjectSaveModalDashboard",
+        "label": "LazyDashboardPicker",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 34
+        },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "DashboardPicker",
+          ">"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.LazyLabsBeakerButton",
+        "type": "Function",
+        "label": "LazyLabsBeakerButton",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 28
+        },
         "signature": [
           "(props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.SaveModalDashboardProps",
-            "text": "SaveModalDashboardProps"
-          },
+          "Props",
           ") => JSX.Element"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.LazyLabsFlyout",
+        "type": "Function",
+        "label": "LazyLabsFlyout",
         "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 32
+        },
+        "signature": [
+          "(props: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.LazySavedObjectSaveModalDashboard",
+        "type": "Function",
+        "label": "LazySavedObjectSaveModalDashboard",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 36
+        },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "default",
+          ">"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PrimaryActionButton",
+        "type": "Function",
         "children": [
           {
+            "id": "def-public.PrimaryActionButton.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.SaveModalDashboardProps",
-                "text": "SaveModalDashboardProps"
-              }
+              "Pick<",
+              "Props",
+              ", \"onClick\" | \"label\" | \"iconType\">"
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 37
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+              "lineNumber": 13
             }
           }
         ],
+        "signature": [
+          "(props: Pick<",
+          "Props",
+          ", \"onClick\" | \"label\" | \"iconType\">) => JSX.Element"
+        ],
+        "description": [],
+        "label": "PrimaryActionButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+          "lineNumber": 13
+        },
         "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PrimaryActionPopover",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.PrimaryActionPopover.$1",
+            "type": "Object",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              "Pick<",
+              "Props",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"buttonRef\" | \"hasArrow\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "signature": [
+          "(props: Pick<",
+          "Props",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"buttonRef\" | \"hasArrow\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">) => JSX.Element"
+        ],
+        "description": [],
+        "label": "PrimaryActionPopover",
         "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 37
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+          "lineNumber": 15
         },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.QuickButtonGroup",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.QuickButtonGroup.$1",
+            "type": "Object",
+            "label": "{ buttons }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 28
+            }
+          }
+        ],
+        "signature": [
+          "({ buttons }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "QuickButtonGroup",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 28
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbar",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbar.$1",
+            "type": "Object",
+            "label": "{ children }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+              "lineNumber": 34
+            }
+          }
+        ],
+        "signature": [
+          "({ children }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbar",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+          "lineNumber": 34
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbarButton",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbarButton.$1",
+            "type": "Object",
+            "label": "{ label, primary, ...rest }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+              "lineNumber": 20
+            }
+          }
+        ],
+        "signature": [
+          "({ label, primary, ...rest }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbarButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+          "lineNumber": 20
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbarPopover",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbarPopover.$1",
+            "type": "CompoundType",
+            "label": "{ label, iconType, primary, ...popover }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+              "lineNumber": 23
+            }
+          }
+        ],
+        "signature": [
+          "({ label, iconType, primary, ...popover }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbarPopover",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+          "lineNumber": 23
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.withSuspense",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.withSuspense.$1",
+            "type": "CompoundType",
+            "label": "Component",
+            "isRequired": true,
+            "signature": [
+              "React.ComponentType<P>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "id": "def-public.withSuspense.$2",
+            "type": "CompoundType",
+            "label": "fallback",
+            "isRequired": false,
+            "signature": [
+              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 19
+            }
+          }
+        ],
+        "signature": [
+          "<P extends {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => (props: P) => JSX.Element"
+        ],
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "label": "withSuspense",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 17
+        },
+        "tags": [],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "id": "def-public.QuickButtonProps",
+        "type": "Interface",
+        "label": "QuickButtonProps",
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.QuickButtonProps",
+            "text": "QuickButtonProps"
+          },
+          " extends Pick<",
+          "EuiButtonGroupOptionProps",
+          ", \"iconType\">"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.QuickButtonProps.createType",
+            "type": "string",
+            "label": "createType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuickButtonProps.onClick",
+            "type": "Function",
+            "label": "onClick",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 19
+            },
+            "signature": [
+              "() => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 17
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.SaveModalDashboardProps",
         "type": "Interface",
@@ -103,12 +430,23 @@
             "label": "documentInfo",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 30
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 18
             },
             "signature": [
               "SaveModalDocumentInfo"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.canSaveByReference",
+            "type": "boolean",
+            "label": "canSaveByReference",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -117,8 +455,8 @@
             "label": "objectType",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 31
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 20
             }
           },
           {
@@ -128,8 +466,8 @@
             "label": "onClose",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 32
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 21
             },
             "signature": [
               "() => void"
@@ -142,8 +480,8 @@
             "label": "onSave",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 33
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 22
             },
             "signature": [
               "(props: ",
@@ -164,8 +502,8 @@
             "label": "tagOptions",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 34
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 23
             },
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
@@ -181,15 +519,62 @@
           }
         ],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 29
+          "path": "src/plugins/presentation_util/public/components/types.ts",
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": [],
+    "misc": [
+      {
+        "id": "def-public.Project",
+        "type": "Type",
+        "label": "Project",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 59
+        },
+        "signature": [
+          "ProjectConfig & { status: ProjectStatus; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ProjectID",
+        "type": "Type",
+        "label": "ProjectID",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "tags": [],
+        "id": "def-public.projectIDs",
+        "type": "Object",
+        "label": "projectIDs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "id": "def-public.PresentationUtilPluginSetup",
       "type": "Interface",
@@ -199,7 +584,7 @@
       "children": [],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 10
+        "lineNumber": 12
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -219,16 +604,30 @@
           "description": [],
           "source": {
             "path": "src/plugins/presentation_util/public/types.ts",
-            "lineNumber": 13
+            "lineNumber": 15
           },
           "signature": [
             "React.FC<{}>"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.PresentationUtilPluginStart.labsService",
+          "type": "Object",
+          "label": "labsService",
+          "description": [],
+          "source": {
+            "path": "src/plugins/presentation_util/public/types.ts",
+            "lineNumber": 16
+          },
+          "signature": [
+            "PresentationLabsService"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 12
+        "lineNumber": 14
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -244,10 +643,467 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "id": "def-common.getProjectIDs",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "description": [],
+        "label": "getProjectIDs",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 61
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isProjectEnabledByStatus",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.isProjectEnabledByStatus.$1",
+            "type": "boolean",
+            "label": "active",
+            "isRequired": true,
+            "signature": [
+              "boolean"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 63
+            }
+          },
+          {
+            "id": "def-common.isProjectEnabledByStatus.$2",
+            "type": "Object",
+            "label": "status",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.EnvironmentStatus",
+                "text": "EnvironmentStatus"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 63
+            }
+          }
+        ],
+        "signature": [
+          "(active: boolean, status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          },
+          ") => boolean"
+        ],
+        "description": [],
+        "label": "isProjectEnabledByStatus",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 63
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "def-common.ProjectConfig",
+        "type": "Interface",
+        "label": "ProjectConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              "\"labs:presentation:unifiedToolbar\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 52
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.isActive",
+            "type": "boolean",
+            "label": "isActive",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 53
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.environments",
+            "type": "Array",
+            "label": "environments",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 54
+            },
+            "signature": [
+              "(\"kibana\" | \"browser\" | \"session\")[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 55
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.solutions",
+            "type": "Array",
+            "label": "solutions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 56
+            },
+            "signature": [
+              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 50
+        },
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "id": "def-common.EnvironmentName",
+        "type": "Type",
+        "label": "EnvironmentName",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 37
+        },
+        "signature": [
+          "\"kibana\" | \"browser\" | \"session\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.EnvironmentStatus",
+        "type": "Type",
+        "label": "EnvironmentStatus",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 40
+        },
+        "signature": [
+          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "label": "PLUGIN_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Project",
+        "type": "Type",
+        "label": "Project",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 59
+        },
+        "signature": [
+          "ProjectConfig & { status: ProjectStatus; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ProjectID",
+        "type": "Type",
+        "label": "ProjectID",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ProjectStatus",
+        "type": "Type",
+        "label": "ProjectStatus",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 44
+        },
+        "signature": [
+          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & EnvironmentStatus"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SolutionName",
+        "type": "Type",
+        "label": "SolutionName",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 38
+        },
+        "signature": [
+          "\"dashboard\" | \"canvas\" | \"presentation\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.UNIFIED_TOOLBAR",
+        "type": "string",
+        "label": "UNIFIED_TOOLBAR",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "tags": [],
+        "id": "def-common.environmentNames",
+        "type": "Object",
+        "label": "environmentNames",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "readonly [\"kibana\", \"browser\", \"session\"]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.projectIDs",
+        "type": "Object",
+        "label": "projectIDs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.projects",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "id": "def-common.projects.UNIFIED_TOOLBAR",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.id",
+                "type": "string",
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 23
+                },
+                "signature": [
+                  "\"labs:presentation:unifiedToolbar\""
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.isActive",
+                "type": "boolean",
+                "label": "isActive",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 24
+                },
+                "signature": [
+                  "false"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.environments",
+                "type": "Array",
+                "label": "environments",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 25
+                },
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.name",
+                "type": "string",
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 26
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.description",
+                "type": "string",
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 29
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.solutions",
+                "type": "Array",
+                "label": "solutions",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 32
+                },
+                "signature": [
+                  "(\"dashboard\" | \"canvas\")[]"
+                ]
+              }
+            ],
+            "description": [],
+            "label": "[UNIFIED_TOOLBAR]",
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 22
+            }
+          }
+        ],
+        "description": [
+          "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+        ],
+        "label": "projects",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 21
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.solutionNames",
+        "type": "Object",
+        "label": "solutionNames",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 15
+        },
+        "signature": [
+          "readonly [\"canvas\", \"dashboard\", \"presentation\"]"
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -14,6 +14,8 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
+  require.resolve('../test/reporting_functional/reporting_and_security.config.ts'),
+  require.resolve('../test/reporting_functional/reporting_without_security.config.ts'),
   require.resolve('../test/security_functional/login_selector.config.ts'),
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
@@ -71,8 +73,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/reporting_api_integration/reporting_and_security.config.ts'),
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96515
-  // require.resolve('../test/fleet_api_integration/config.ts'),
+  require.resolve('../test/fleet_api_integration/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
   require.resolve('../test/functional_vis_wizard/config.ts'),
   require.resolve('../test/search_sessions_integration/config.ts'),

@@ -148,13 +148,7 @@
             },
             "signature": [
               "() => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicenseJSON",
-                "text": "PublicLicenseJSON"
-              }
+              "PublicLicenseJSON"
             ]
           },
           {
@@ -201,6 +195,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ILicense.hasAtLeast.$1",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -229,19 +224,14 @@
             "label": "check",
             "signature": [
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheck",
-                "text": "LicenseCheck"
-              }
+              "LicenseCheck"
             ],
             "description": [
               "\nFor a given plugin and license type, receive information about the status of the license."
             ],
             "children": [
               {
+                "id": "def-public.ILicense.check.$1",
                 "type": "string",
                 "label": "pluginName",
                 "isRequired": true,
@@ -257,6 +247,7 @@
                 }
               },
               {
+                "id": "def-public.ILicense.check.$2",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -285,19 +276,14 @@
             "label": "getFeature",
             "signature": [
               "(name: string) => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              }
+              "LicenseFeature"
             ],
             "description": [
               "\nA specific API for interacting with the specific features of the license."
             ],
             "children": [
               {
+                "id": "def-public.ILicense.getFeature.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -349,13 +335,7 @@
               "lineNumber": 89
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheckState",
-                "text": "LicenseCheckState"
-              }
+              "LicenseCheckState"
             ]
           },
           {
@@ -456,13 +436,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseStatus",
-                "text": "LicenseStatus"
-              }
+              "LicenseStatus"
             ]
           },
           {
@@ -541,13 +515,7 @@
               "lineNumber": 75
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicense",
-                "text": "PublicLicense"
-              },
+              "PublicLicense",
               " | undefined"
             ]
           },
@@ -563,13 +531,7 @@
             },
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              },
+              "LicenseFeature",
               "> | undefined"
             ]
           },
@@ -703,13 +665,7 @@
           "signature": [
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ]
         },
@@ -719,13 +675,7 @@
           "label": "refresh",
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ],
           "description": [
@@ -754,13 +704,7 @@
             "lineNumber": 28
           },
           "signature": [
-            {
-              "pluginId": "licensing",
-              "scope": "public",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-public.FeatureUsageServiceSetup",
-              "text": "FeatureUsageServiceSetup"
-            }
+            "FeatureUsageServiceSetup"
           ]
         }
       ],
@@ -795,13 +739,7 @@
           "signature": [
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ]
         },
@@ -811,13 +749,7 @@
           "label": "refresh",
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ],
           "description": [
@@ -844,13 +776,7 @@
             "lineNumber": 44
           },
           "signature": [
-            {
-              "pluginId": "licensing",
-              "scope": "public",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-public.FeatureUsageServiceStart",
-              "text": "FeatureUsageServiceStart"
-            }
+            "FeatureUsageServiceStart"
           ]
         }
       ],
@@ -902,6 +828,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.wrapRouteWithLicenseCheck.$1",
             "type": "Function",
             "label": "checkLicense",
             "isRequired": true,
@@ -921,6 +848,7 @@
             }
           },
           {
+            "id": "def-server.wrapRouteWithLicenseCheck.$2",
             "type": "Function",
             "label": "handler",
             "isRequired": true,
@@ -943,13 +871,7 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              },
+              "KibanaResponse",
               "<T>; badRequest: (options?: ",
               {
                 "pluginId": "core",
@@ -1035,6 +957,7 @@
             ],
             "children": [
               {
+                "id": "def-server.FeatureUsageServiceSetup.register.$1",
                 "type": "string",
                 "label": "featureName",
                 "isRequired": true,
@@ -1048,6 +971,7 @@
                 }
               },
               {
+                "id": "def-server.FeatureUsageServiceSetup.register.$2",
                 "type": "CompoundType",
                 "label": "licenseType",
                 "isRequired": true,
@@ -1096,6 +1020,7 @@
             ],
             "children": [
               {
+                "id": "def-server.FeatureUsageServiceStart.notifyUsage.$1",
                 "type": "string",
                 "label": "featureName",
                 "isRequired": true,
@@ -1111,6 +1036,7 @@
                 }
               },
               {
+                "id": "def-server.FeatureUsageServiceStart.notifyUsage.$2",
                 "type": "CompoundType",
                 "label": "usedAt",
                 "isRequired": false,
@@ -1139,13 +1065,7 @@
             "label": "getLastUsages",
             "signature": [
               "() => ",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LastFeatureUsage",
-                "text": "LastFeatureUsage"
-              },
+              "LastFeatureUsage",
               "[]"
             ],
             "description": [
@@ -1310,13 +1230,7 @@
             },
             "signature": [
               "() => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicenseJSON",
-                "text": "PublicLicenseJSON"
-              }
+              "PublicLicenseJSON"
             ]
           },
           {
@@ -1363,6 +1277,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ILicense.hasAtLeast.$1",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -1391,19 +1306,14 @@
             "label": "check",
             "signature": [
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheck",
-                "text": "LicenseCheck"
-              }
+              "LicenseCheck"
             ],
             "description": [
               "\nFor a given plugin and license type, receive information about the status of the license."
             ],
             "children": [
               {
+                "id": "def-server.ILicense.check.$1",
                 "type": "string",
                 "label": "pluginName",
                 "isRequired": true,
@@ -1419,6 +1329,7 @@
                 }
               },
               {
+                "id": "def-server.ILicense.check.$2",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -1447,19 +1358,14 @@
             "label": "getFeature",
             "signature": [
               "(name: string) => ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              }
+              "LicenseFeature"
             ],
             "description": [
               "\nA specific API for interacting with the specific features of the license."
             ],
             "children": [
               {
+                "id": "def-server.ILicense.getFeature.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1511,13 +1417,7 @@
               "lineNumber": 89
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheckState",
-                "text": "LicenseCheckState"
-              }
+              "LicenseCheckState"
             ]
           },
           {
@@ -1623,13 +1523,7 @@
               "lineNumber": 51
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.ILicense",
-                "text": "ILicense"
-              }
+              "ILicense"
             ]
           }
         ],
@@ -1676,13 +1570,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseStatus",
-                "text": "LicenseStatus"
-              }
+              "LicenseStatus"
             ]
           },
           {
@@ -1761,13 +1649,7 @@
               "lineNumber": 75
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicense",
-                "text": "PublicLicense"
-              },
+              "PublicLicense",
               " | undefined"
             ]
           },
@@ -1783,13 +1665,7 @@
             },
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              },
+              "LicenseFeature",
               "> | undefined"
             ]
           },
@@ -1940,13 +1816,7 @@
           "signature": [
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ]
         },
@@ -1956,13 +1826,7 @@
           "label": "refresh",
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ],
           "description": [
@@ -2004,21 +1868,9 @@
             ", \"callAsInternalUser\" | \"asScoped\">, pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">; refresh(): Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">; }"
           ]
         },
@@ -2076,13 +1928,7 @@
           "signature": [
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ]
         },
@@ -2092,13 +1938,7 @@
           "label": "refresh",
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">"
           ],
           "description": [
@@ -2136,21 +1976,9 @@
             ", \"callAsInternalUser\" | \"asScoped\">, pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">; refresh(): Promise<",
-            {
-              "pluginId": "licensing",
-              "scope": "common",
-              "docId": "kibLicensingPluginApi",
-              "section": "def-common.ILicense",
-              "text": "ILicense"
-            },
+            "ILicense",
             ">; }"
           ]
         },

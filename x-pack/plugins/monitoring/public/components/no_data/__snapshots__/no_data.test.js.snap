@@ -10,6 +10,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      role="main"
     >
       <span
         data-euiicon-type="monitoringApp"
@@ -95,6 +96,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      role="main"
     >
       <span
         data-euiicon-type="monitoringApp"

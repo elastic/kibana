@@ -9,9 +9,7 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
@@ -30,13 +28,13 @@ function fetchWatches(dataClient: ILegacyScopedClusterClient) {
     .then((response: any) => fetchAllFromScroll(response, dataClient));
 }
 
-export function registerListRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerListRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       try {
         const hits = await fetchWatches(ctx.watcher!.client);
         const watches = hits.map((hit: any) => {

@@ -39,18 +39,15 @@ export const registerStartRoute = ({
         return response.ok({ body: data });
       } catch (err) {
         // There is an issue opened on ES to handle the following error correctly
-        // https://github.com/elastic/elasticsearch/issues/42908
-        // Until then we'll modify the response here.
-        if (
-          err?.meta &&
-          err.body?.task_failures[0]?.reason?.reason?.includes(
-            'Job must be [STOPPED] before deletion'
-          )
-        ) {
+        // https://github.com/elastic/elasticsearch/issues/39845, which was addressed in 8.0
+        // but not backported to 7.x because it's breaking. So we need to modify the response
+        // here for 7.x.
+        if (err.meta?.body?.error?.reason?.includes('Cannot start task for Rollup Job')) {
           err.meta.status = 400;
           err.meta.statusCode = 400;
-          err.meta.displayName = 'Bad request';
-          err.message = err.body.task_failures[0].reason.reason;
+          err.body.error.status = 400;
+          err.body.status = 400;
+          err.meta.displayName = 'Bad Request';
         }
         return handleEsError({ error: err, response });
       }
