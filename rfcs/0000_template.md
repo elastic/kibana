@@ -4,7 +4,7 @@
 
 # Summary
 
-Brief explanation of the feature.
+Brief explanation of the feature and short summary of the project goals.
 
 # Basic example
 
