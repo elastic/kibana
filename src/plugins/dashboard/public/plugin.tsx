@@ -24,6 +24,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
 } from '../../../core/public';
+import { VisualizationsStart } from '../../visualizations/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
@@ -115,6 +116,7 @@ export interface DashboardStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spacesOss?: SpacesOssPluginStart;
+  visualizations: VisualizationsStart;
 }
 
 export type DashboardSetup = void;

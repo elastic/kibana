@@ -6,18 +6,38 @@
  */
 
 import { of } from 'rxjs';
-import type { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServerMock } from 'src/core/server/http/http_server.mocks';
-
+import type { Logger, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 import { License } from './license';
-import { LicenseCheckState, licensingMock } from './shared_imports';
+import { LicenseCheckState, licensingMock, LicenseType } from './shared_imports';
 
 describe('License API guard', () => {
   const pluginName = 'testPlugin';
-  const currentLicenseType = 'basic';
 
-  const testRoute = ({ licenseState }: { licenseState: string }) => {
+  const mockLicensingService = ({
+    licenseType,
+    licenseState,
+  }: {
+    licenseType: LicenseType;
+    licenseState: LicenseCheckState;
+  }) => {
+    const licenseMock = licensingMock.createLicenseMock();
+    licenseMock.type = licenseType;
+    licenseMock.check('test', 'gold'); // Flush default mocked state
+    licenseMock.check.mockReturnValue({ state: licenseState }); // Replace with new mocked state
+
+    return {
+      license$: of(licenseMock),
+    };
+  };
+
+  const testRoute = ({
+    licenseType,
+    licenseState,
+  }: {
+    licenseType: LicenseType;
+    licenseState: LicenseCheckState;
+  }) => {
     const license = new License();
 
     const logger = {
@@ -25,19 +45,11 @@ describe('License API guard', () => {
     };
 
     license.setup({ pluginName, logger });
-
-    const licenseMock = licensingMock.createLicenseMock();
-    licenseMock.type = currentLicenseType;
-    licenseMock.check('test', 'basic'); // Flush default mocked state
-    licenseMock.check.mockReturnValue({ state: licenseState as LicenseCheckState }); // Replace with new mocked state
-
-    const licensing = {
-      license$: of(licenseMock),
-    };
+    const licensing = mockLicensingService({ licenseType, licenseState });
 
     license.start({
       pluginId: 'id',
-      minimumLicenseType: 'basic',
+      minimumLicenseType: 'gold',
       licensing,
     });
 
@@ -61,44 +73,67 @@ describe('License API guard', () => {
     };
   };
 
-  describe('valid license', () => {
-    it('the original route is called and nothing is logged', () => {
-      const { errorResponse, logMesssage, route } = testRoute({ licenseState: 'valid' });
-
-      expect(errorResponse).toBeUndefined();
-      expect(logMesssage).toBeUndefined();
-      expect(route).toHaveBeenCalled();
+  describe('basic minimum license', () => {
+    it('is rejected', () => {
+      const license = new License();
+      license.setup({ pluginName, logger: {} as Logger });
+      expect(() => {
+        license.start({
+          pluginId: pluginName,
+          minimumLicenseType: 'basic',
+          licensing: mockLicensingService({ licenseType: 'gold', licenseState: 'valid' }),
+        });
+      }).toThrowError(
+        `Basic licenses don't restrict the use of plugins. Please don't use license_api_guard in the ${pluginName} plugin, or provide a more restrictive minimumLicenseType.`
+      );
     });
   });
 
-  [
-    {
-      licenseState: 'invalid',
-      expectedMessage: `Your ${currentLicenseType} license does not support ${pluginName}. Please upgrade your license.`,
-    },
-    {
-      licenseState: 'expired',
-      expectedMessage: `You cannot use ${pluginName} because your ${currentLicenseType} license has expired.`,
-    },
-    {
-      licenseState: 'unavailable',
-      expectedMessage: `You cannot use ${pluginName} because license information is not available at this time.`,
-    },
-  ].forEach(({ licenseState, expectedMessage }) => {
-    describe(`${licenseState} license`, () => {
-      it('replies with and logs the error message', () => {
-        const { errorResponse, logMesssage, route } = testRoute({ licenseState });
+  describe('non-basic minimum license', () => {
+    const licenseType = 'gold';
 
-        // We depend on the call to `response.forbidden()` to generate the 403 status code,
-        // so we can't assert for it here.
-        expect(errorResponse).toEqual({
-          body: {
-            message: expectedMessage,
-          },
+    describe('when valid', () => {
+      it('the original route is called and nothing is logged', () => {
+        const { errorResponse, logMesssage, route } = testRoute({
+          licenseType,
+          licenseState: 'valid',
         });
 
-        expect(logMesssage).toBe(expectedMessage);
-        expect(route).not.toHaveBeenCalled();
+        expect(errorResponse).toBeUndefined();
+        expect(logMesssage).toBeUndefined();
+        expect(route).toHaveBeenCalled();
+      });
+    });
+
+    [
+      {
+        licenseState: 'invalid' as LicenseCheckState,
+        expectedMessage: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`,
+      },
+      {
+        licenseState: 'expired' as LicenseCheckState,
+        expectedMessage: `You cannot use ${pluginName} because your ${licenseType} license has expired.`,
+      },
+      {
+        licenseState: 'unavailable' as LicenseCheckState,
+        expectedMessage: `You cannot use ${pluginName} because license information is not available at this time.`,
+      },
+    ].forEach(({ licenseState, expectedMessage }) => {
+      describe(`when ${licenseState}`, () => {
+        it('replies with and logs the error message', () => {
+          const { errorResponse, logMesssage, route } = testRoute({ licenseType, licenseState });
+
+          // We depend on the call to `response.forbidden()` to generate the 403 status code,
+          // so we can't assert for it here.
+          expect(errorResponse).toEqual({
+            body: {
+              message: expectedMessage,
+            },
+          });
+
+          expect(logMesssage).toBe(expectedMessage);
+          expect(route).not.toHaveBeenCalled();
+        });
       });
     });
   });
