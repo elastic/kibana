@@ -21,7 +21,7 @@ import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_ROADMAP_ID,
-} from '../../../../../src/plugins/maps_ems/common';
+} from '../../../../../src/plugins/maps_ems/common/';
 
 export enum TELEMETRY_LAYER_TYPE {
   ES_DOCS = 'ES_DOCS',
@@ -131,9 +131,11 @@ export function getTelemetryLayerType(
   return null;
 }
 
-export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
-  [key in SCALING_TYPES]?: ClusterCountStats;
-};
+export interface TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER {
+  [SCALING_TYPES.LIMIT]?: ClusterCountStats;
+  [SCALING_TYPES.MVT]?: ClusterCountStats;
+  [SCALING_TYPES.CLUSTERS]?: ClusterCountStats;
+}
 
 export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   TERM?: ClusterCountStats;
