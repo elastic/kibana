@@ -2624,7 +2624,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-preset@link:packages/kbn-babel-preset":
+"@kbn/babel-preset@link:bazel-bin/packages/kbn-babel-preset/npm_module":
   version "0.0.0"
   uid ""
 
