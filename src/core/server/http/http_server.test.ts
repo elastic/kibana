@@ -67,7 +67,7 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
-    shutdownTimeout: moment.duration(100, 'ms'),
+    shutdownTimeout: moment.duration(500, 'ms'),
   } as any;
 
   configWithSSL = {
@@ -1436,16 +1436,19 @@ describe('setup contract', () => {
 });
 
 describe('Graceful shutdown', () => {
-  test('it should wait until the ongoing requests are resolved and reject any new ones', async () => {
-    const shutdownTimeout = config.shutdownTimeout.asMilliseconds();
+  let shutdownTimeout: number;
+  let innerServerListener: Server;
 
+  beforeEach(async () => {
+    shutdownTimeout = config.shutdownTimeout.asMilliseconds();
     const { registerRouter, server: innerServer } = await server.setup(config);
+    innerServerListener = innerServer.listener;
 
     const router = new Router('', logger, enhanceWithContext);
     router.post(
       {
         path: '/',
-        validate: { body: schema.object({ test: schema.number() }) },
+        validate: false,
         options: { body: { accepts: 'application/json' } },
       },
       async (context, req, res) => {
@@ -1458,47 +1461,69 @@ describe('Graceful shutdown', () => {
     registerRouter(router);
 
     await server.start();
+  });
 
-    const makeRequest = () => supertest(innerServer.listener).post('/').send({ test: 1 });
-
-    const [firstResponse, , secondResponse] = await Promise.all([
-      // Trigger a request that should succeed
-      makeRequest().expect(200, {
-        method: 'post',
-        path: '/',
-        options: {
-          authRequired: true,
-          xsrfRequired: true,
-          tags: [],
-          timeout: {
-            payload: 10000,
-          },
-          body: {
-            parse: true, // hapi populates the default
-            maxBytes: 1024, // hapi populates the default
-            accepts: ['application/json'],
-            output: 'data',
-          },
-        },
-      }),
+  test('any ongoing requests should be resolved with `connection: close`', async () => {
+    const [response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled
+      supertest(innerServerListener).post('/'),
       // Stop the server while the request is in progress
       (async () => {
         await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
-        return server.stop();
+        await server.stop();
+      })(),
+    ]);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual({
+      method: 'post',
+      path: '/',
+      options: {
+        authRequired: true,
+        xsrfRequired: true,
+        tags: [],
+        timeout: {
+          payload: 10000,
+        },
+        body: {
+          parse: true, // hapi populates the default
+          maxBytes: 1024, // hapi populates the default
+          accepts: ['application/json'],
+          output: 'data',
+        },
+      },
+    });
+    // The server is about to be closed, we need to ask connections to close on their end (stop their keep-alive policies)
+    expect(response.header.connection).toBe('close');
+  });
+
+  test('any requests triggered while stopping should be rejected with 503', async () => {
+    const [, , response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled (otherwise the server will stop straight away)
+      supertest(innerServerListener).post('/'),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
+        await server.stop();
       })(),
       // Trigger a new request while shutting down (should be rejected)
       (async () => {
         await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
-        return makeRequest().expect(503, {
-          statusCode: 503,
-          error: 'Service Unavailable',
-          message: 'Kibana is shutting down and not accepting new incoming requests',
-        });
+        return supertest(innerServerListener).post('/');
       })(),
     ]);
+    expect(response.status).toBe(503);
+    expect(response.body).toStrictEqual({
+      statusCode: 503,
+      error: 'Service Unavailable',
+      message: 'Kibana is shutting down and not accepting new incoming requests',
+    });
+    expect(response.header.connection).toBe('close');
+  });
 
-    // hapi automatically sends the header `connection: 'close'` when shutting down
-    expect(firstResponse.header.connection).toBe('close');
-    expect(secondResponse.header.connection).toBe('close');
+  test('when no ongoing connections, the server should stop without waiting any longer', async () => {
+    const preStop = Date.now();
+    await server.stop();
+    expect(Date.now() - preStop).toBeLessThan(shutdownTimeout);
   });
 });
