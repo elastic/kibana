@@ -90,6 +90,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ),
   }),
   {
+    // @ts-ignore
     defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
   }
 );
