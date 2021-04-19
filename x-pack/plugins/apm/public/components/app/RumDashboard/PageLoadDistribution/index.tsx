@@ -77,6 +77,7 @@ export function PageLoadDistribution() {
       percentileRange.min,
       percentileRange.max,
       searchTerm,
+      serviceName,
     ]
   );
 
