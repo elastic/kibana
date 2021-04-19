@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -235,8 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates pagination');
           await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 5);
 
-          const axisLabels = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
-          expect(axisLabels.length).to.eql(5);
+          await ml.swimLane.assertAxisLabelCount(viewBySwimLaneTestSubj, 'y', 5);
 
           await ml.swimLane.selectPage(viewBySwimLaneTestSubj, 3);
 

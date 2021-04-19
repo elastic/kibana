@@ -146,7 +146,7 @@
           "lineNumber": 13
         },
         "signature": [
-          "\"disabled\" | \"header\""
+          "\"top\" | \"disabled\""
         ],
         "initialIsOpen": false
       }

@@ -40,28 +40,12 @@ export interface RequestHandlerParams {
   getNow?: () => Date;
 }
 
-function getRequestMainResponder(inspectorAdapters: Adapters, searchSessionId?: string) {
-  return inspectorAdapters.requests?.start(
-    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-      defaultMessage: 'Data',
-    }),
-    {
-      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-        defaultMessage:
-          'This request queries Elasticsearch to fetch the data for the visualization.',
-      }),
-      searchSessionId,
-    }
-  );
-}
-
 export const handleRequest = async ({
   abortSignal,
   aggs,
   filters,
   indexPattern,
   inspectorAdapters,
-  metricsAtAllLevels,
   partialRows,
   query,
   searchSessionId,
@@ -100,9 +84,7 @@ export const handleRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function () {
-    return aggs.toDsl(metricsAtAllLevels);
-  });
+  requestSearchSource.setField('aggs', aggs);
 
   requestSearchSource.onRequestStart((paramSearchSource, options) => {
     return aggs.onSearchRequestStart(paramSearchSource, options);
@@ -128,35 +110,27 @@ export const handleRequest = async ({
   requestSearchSource.setField('query', query);
 
   inspectorAdapters.requests?.reset();
-  const requestResponder = getRequestMainResponder(inspectorAdapters, searchSessionId);
 
-  const response$ = await requestSearchSource.fetch$({
-    abortSignal,
-    sessionId: searchSessionId,
-    requestResponder,
-  });
-
-  // Note that rawResponse is not deeply cloned here, so downstream applications using courier
-  // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
-  // response data incorrectly in the inspector.
-  let response = await response$.toPromise();
-  for (const agg of aggs.aggs) {
-    if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
-      response = await agg.type.postFlightRequest(
-        response,
-        aggs,
-        agg,
-        requestSearchSource,
-        inspectorAdapters.requests,
-        abortSignal,
-        searchSessionId
-      );
-    }
-  }
+  const response = await requestSearchSource
+    .fetch$({
+      abortSignal,
+      sessionId: searchSessionId,
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+          defaultMessage: 'Data',
+        }),
+        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the data for the visualization.',
+        }),
+      },
+    })
+    .toPromise();
 
   const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
   const tabifyParams = {
-    metricsAtAllLevels,
+    metricsAtAllLevels: aggs.hierarchical,
     partialRows,
     timeRange: parsedTimeRange
       ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }

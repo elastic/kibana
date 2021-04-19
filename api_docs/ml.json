@@ -37,6 +37,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.MlUrlGenerator.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -76,17 +77,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.MlUrlGenerator.createUrl.$1",
                 "type": "CompoundType",
                 "label": "mlUrlGeneratorParams",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "ml",
-                    "scope": "common",
-                    "docId": "kibMlPluginApi",
-                    "section": "def-common.MlUrlGeneratorState",
-                    "text": "MlUrlGeneratorState"
-                  }
+                  "MlUrlGeneratorState"
                 ],
                 "description": [],
                 "source": {
@@ -97,13 +93,7 @@
             ],
             "signature": [
               "(mlUrlGeneratorParams: ",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.MlUrlGeneratorState",
-                "text": "MlUrlGeneratorState"
-              },
+              "MlUrlGeneratorState",
               ") => Promise<string>"
             ],
             "description": [],
@@ -136,6 +126,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getFormattedSeverityScore.$1",
             "type": "number",
             "label": "score",
             "isRequired": true,
@@ -145,7 +136,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 116
+              "lineNumber": 124
             }
           }
         ],
@@ -153,7 +144,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 116
+          "lineNumber": 124
         },
         "initialIsOpen": false
       },
@@ -186,6 +177,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getSeverityColor.$1",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -195,7 +187,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 177
+              "lineNumber": 185
             }
           }
         ],
@@ -203,7 +195,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 177
+          "lineNumber": 185
         },
         "initialIsOpen": false
       },
@@ -224,6 +216,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getSeverityType.$1",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -233,7 +226,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 138
+              "lineNumber": 146
             }
           }
         ],
@@ -241,7 +234,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 138
+          "lineNumber": 146
         },
         "initialIsOpen": false
       },
@@ -250,6 +243,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useMlHref.$1",
             "type": "Object",
             "label": "ml",
             "isRequired": false,
@@ -271,6 +265,7 @@
             }
           },
           {
+            "id": "def-public.useMlHref.$2",
             "type": "string",
             "label": "basePath",
             "isRequired": false,
@@ -284,17 +279,12 @@
             }
           },
           {
+            "id": "def-public.useMlHref.$3",
             "type": "CompoundType",
             "label": "params",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.MlUrlGeneratorState",
-                "text": "MlUrlGeneratorState"
-              }
+              "MlUrlGeneratorState"
             ],
             "description": [],
             "source": {
@@ -359,13 +349,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.AnomalyRecordDoc",
-                "text": "AnomalyRecordDoc"
-              }
+              "AnomalyRecordDoc"
             ]
           },
           {
@@ -549,13 +533,7 @@
               "lineNumber": 94
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.DatafeedResponse",
-                "text": "DatafeedResponse"
-              },
+              "DatafeedResponse",
               "[]"
             ]
           },
@@ -570,13 +548,7 @@
               "lineNumber": 95
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.JobResponse",
-                "text": "JobResponse"
-              },
+              "JobResponse",
               "[]"
             ]
           },
@@ -592,29 +564,11 @@
             },
             "signature": [
               "{ search: ",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.KibanaObjectResponse",
-                "text": "KibanaObjectResponse"
-              },
+              "KibanaObjectResponse",
               "[]; visualization: ",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.KibanaObjectResponse",
-                "text": "KibanaObjectResponse"
-              },
+              "KibanaObjectResponse",
               "[]; dashboard: ",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.KibanaObjectResponse",
-                "text": "KibanaObjectResponse"
-              },
+              "KibanaObjectResponse",
               "[]; }"
             ]
           }
@@ -693,13 +647,7 @@
               "lineNumber": 17
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.JobStat",
-                "text": "JobStat"
-              },
+              "JobStat",
               "[]"
             ]
           }
@@ -789,13 +737,7 @@
               "lineNumber": 151
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.MlCapabilities",
-                "text": "MlCapabilities"
-              }
+              "MlCapabilities"
             ]
           },
           {
@@ -1020,13 +962,7 @@
               "lineNumber": 28
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.CombinedJob",
-                "text": "CombinedJob"
-              },
+              "CombinedJob",
               " | undefined"
             ]
           },
@@ -1056,13 +992,7 @@
             },
             "signature": [
               "Partial<",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.AuditMessage",
-                "text": "AuditMessage"
-              },
+              "AuditMessage",
               "> | undefined"
             ]
           },
@@ -1165,7 +1095,7 @@
           },
           " extends Pick<",
           "UseDataGridReturnType",
-          ", \"status\" | \"baseline\" | \"pagination\" | \"errorMessage\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCount\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"baseline\" | \"pagination\" | \"errorMessage\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCount\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "description": [],
         "tags": [],
@@ -1178,7 +1108,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "signature": [
               {
@@ -1236,7 +1166,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/embeddables/types.ts",
-          "lineNumber": 40
+          "lineNumber": 49
         },
         "signature": [
           "EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput"
@@ -1310,16 +1240,18 @@
     "objects": [
       {
         "tags": [],
-        "id": "def-public.HITS_TOTAL_RELATION",
+        "id": "def-public.ES_CLIENT_TOTAL_HITS_RELATION",
         "type": "Object",
-        "label": "HITS_TOTAL_RELATION",
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 10
+          "lineNumber": 20
         },
         "signature": [
-          "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
+          "Record<\"GTE\" | \"EQ\", ",
+          "TotalHitsRelation",
+          ">"
         ],
         "initialIsOpen": false
       },
@@ -1401,6 +1333,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.InsufficientMLCapabilities.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1455,6 +1388,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.MLPrivilegesUninitialized.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1509,6 +1443,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.UnknownMLCapabilitiesError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1543,6 +1478,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.getHistogramsForFields.$1",
             "type": "Object",
             "label": "client",
             "isRequired": true,
@@ -1562,6 +1498,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.$2",
             "type": "string",
             "label": "indexPatternTitle",
             "isRequired": true,
@@ -1575,6 +1512,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.$3",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -1588,17 +1526,12 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.$4",
             "type": "Array",
             "label": "fields",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "server",
-                "docId": "kibMlPluginApi",
-                "section": "def-server.HistogramField",
-                "text": "HistogramField"
-              },
+              "HistogramField",
               "[]"
             ],
             "description": [],
@@ -1608,6 +1541,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.$5",
             "type": "number",
             "label": "samplerShardSize",
             "isRequired": true,
@@ -1621,6 +1555,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.$6",
             "type": "Object",
             "label": "runtimeMappings",
             "isRequired": false,
@@ -1671,6 +1606,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.isCombinedJobWithStats.$1",
             "type": "Any",
             "label": "arg",
             "isRequired": true,
@@ -1723,13 +1659,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.AnomalyRecordDoc",
-                "text": "AnomalyRecordDoc"
-              }
+              "AnomalyRecordDoc"
             ]
           },
           {
@@ -2287,13 +2217,7 @@
               "lineNumber": 32
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.Influencer",
-                "text": "Influencer"
-              },
+              "Influencer",
               "[] | undefined"
             ]
           },
@@ -2566,13 +2490,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.DatafeedWithStats",
-                "text": "DatafeedWithStats"
-              }
+              "DatafeedWithStats"
             ]
           }
         ],
@@ -2600,13 +2518,7 @@
               "lineNumber": 16
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.UrlConfig",
-                "text": "UrlConfig"
-              },
+              "UrlConfig",
               "[] | undefined"
             ]
           },
@@ -2621,13 +2533,7 @@
               "lineNumber": 17
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.CREATED_BY_LABEL",
-                "text": "CREATED_BY_LABEL"
-              },
+              "CREATED_BY_LABEL",
               " | undefined"
             ]
           },
@@ -2896,13 +2802,7 @@
               "lineNumber": 13
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.DATAFEED_STATE",
-                "text": "DATAFEED_STATE"
-              }
+              "DATAFEED_STATE"
             ]
           },
           {
@@ -2916,13 +2816,7 @@
               "lineNumber": 14
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.Node",
-                "text": "Node"
-              }
+              "Node"
             ]
           },
           {
@@ -3117,13 +3011,7 @@
               "lineNumber": 12
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.DataCounts",
-                "text": "DataCounts"
-              }
+              "DataCounts"
             ]
           },
           {
@@ -3137,13 +3025,7 @@
               "lineNumber": 13
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.ModelSizeStats",
-                "text": "ModelSizeStats"
-              }
+              "ModelSizeStats"
             ]
           },
           {
@@ -3157,13 +3039,7 @@
               "lineNumber": 14
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.ForecastsStats",
-                "text": "ForecastsStats"
-              }
+              "ForecastsStats"
             ]
           },
           {
@@ -3177,13 +3053,7 @@
               "lineNumber": 15
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.JOB_STATE",
-                "text": "JOB_STATE"
-              }
+              "JOB_STATE"
             ]
           },
           {
@@ -3197,13 +3067,7 @@
               "lineNumber": 16
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.Node",
-                "text": "Node"
-              }
+              "Node"
             ]
           },
           {
@@ -3503,13 +3367,7 @@
               "lineNumber": 28
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.CombinedJob",
-                "text": "CombinedJob"
-              },
+              "CombinedJob",
               " | undefined"
             ]
           },
@@ -3539,13 +3397,7 @@
             },
             "signature": [
               "Partial<",
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.AuditMessage",
-                "text": "AuditMessage"
-              },
+              "AuditMessage",
               "> | undefined"
             ]
           },
@@ -3950,13 +3802,7 @@
               "lineNumber": 18
             },
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.ModelSizeStats",
-                "text": "ModelSizeStats"
-              }
+              "ModelSizeStats"
             ]
           },
           {
@@ -4172,7 +4018,7 @@
           "lineNumber": 81
         },
         "signature": [
-          "\"bucket\" | \"record\" | \"influencer\""
+          "\"record\" | \"bucket\" | \"influencer\""
         ],
         "initialIsOpen": false
       },
@@ -4491,6 +4337,7 @@
         ],
         "children": [
           {
+            "id": "def-common.composeValidators.$1",
             "type": "Array",
             "label": "validators",
             "isRequired": true,
@@ -4517,17 +4364,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.extractErrorMessage.$1",
             "type": "CompoundType",
             "label": "error",
             "isRequired": false,
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              }
+              "ErrorType"
             ],
             "description": [],
             "source": {
@@ -4561,6 +4403,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSeverityColor.$1",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -4570,7 +4413,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 177
+              "lineNumber": 185
             }
           }
         ],
@@ -4578,7 +4421,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 177
+          "lineNumber": 185
         },
         "initialIsOpen": false
       },
@@ -4599,6 +4442,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSeverityType.$1",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -4608,7 +4452,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 138
+              "lineNumber": 146
             }
           }
         ],
@@ -4616,7 +4460,117 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 138
+          "lineNumber": 146
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isPopulatedObject",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.isPopulatedObject.$1",
+            "type": "Unknown",
+            "label": "arg",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "id": "def-common.isPopulatedObject.$2",
+            "type": "Array",
+            "label": "requiredAttributes",
+            "isRequired": true,
+            "signature": [
+              "U[]"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "signature": [
+          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
+        ],
+        "description": [],
+        "label": "isPopulatedObject",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+          "lineNumber": 25
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isRuntimeField",
+        "type": "Function",
+        "label": "isRuntimeField",
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-common.isRuntimeField.$1",
+            "type": "Unknown",
+            "label": "arg",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+          "lineNumber": 14
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isRuntimeMappings",
+        "type": "Function",
+        "label": "isRuntimeMappings",
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-common.isRuntimeMappings.$1",
+            "type": "Unknown",
+            "label": "arg",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+          "lineNumber": 27
         },
         "initialIsOpen": false
       },
@@ -4632,6 +4586,7 @@
         ],
         "children": [
           {
+            "id": "def-common.patternValidator.$1",
             "type": "Object",
             "label": "pattern",
             "isRequired": true,
@@ -4654,110 +4609,7 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "id": "def-common.SearchResponse7",
-        "type": "Interface",
-        "label": "SearchResponse7",
-        "signature": [
-          {
-            "pluginId": "ml",
-            "scope": "common",
-            "docId": "kibMlPluginApi",
-            "section": "def-common.SearchResponse7",
-            "text": "SearchResponse7"
-          },
-          "<T>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.took",
-            "type": "number",
-            "label": "took",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 26
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.timed_out",
-            "type": "boolean",
-            "label": "timed_out",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7._scroll_id",
-            "type": "string",
-            "label": "_scroll_id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 28
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7._shards",
-            "type": "Object",
-            "label": "_shards",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 29
-            },
-            "signature": [
-              "ShardsResponse"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.hits",
-            "type": "Object",
-            "label": "hits",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 30
-            },
-            "signature": [
-              "SearchResponse7Hits<T>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.aggregations",
-            "type": "Any",
-            "label": "aggregations",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 31
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 25
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [
       {
         "id": "def-common.ANOMALY_SEVERITY",
@@ -4805,17 +4657,17 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.HitsTotalRelation",
+        "id": "def-common.RuntimeMappings",
         "type": "Type",
-        "label": "HitsTotalRelation",
+        "label": "RuntimeMappings",
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 14
+          "path": "x-pack/plugins/ml/common/types/fields.ts",
+          "lineNumber": 111
         },
         "signature": [
-          "\"gte\" | \"eq\""
+          "{ [x: string]: estypes.RuntimeField; }"
         ],
         "initialIsOpen": false
       }
@@ -4823,16 +4675,18 @@
     "objects": [
       {
         "tags": [],
-        "id": "def-common.HITS_TOTAL_RELATION",
+        "id": "def-common.ES_CLIENT_TOTAL_HITS_RELATION",
         "type": "Object",
-        "label": "HITS_TOTAL_RELATION",
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 10
+          "lineNumber": 20
         },
         "signature": [
-          "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
+          "Record<\"GTE\" | \"EQ\", ",
+          "TotalHitsRelation",
+          ">"
         ],
         "initialIsOpen": false
       },
