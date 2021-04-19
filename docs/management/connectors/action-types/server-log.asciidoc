@@ -27,6 +27,20 @@ Name::      The name of the connector. The name is used to identify a  connector
 --
 
 [float]
+[[define-serverlog-ui]]
+==== Define connector in Stack Management
+
+Define Server log connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/serverlog-connector.png[Server log connector]
+
+Test Server log action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/serverlog-params-test.png[Server log params test]
+
+[float]
 [[server-log-action-configuration]]
 ==== Action configuration
 
