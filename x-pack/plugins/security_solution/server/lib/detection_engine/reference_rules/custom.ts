@@ -50,11 +50,7 @@ export const customAlertType = createSecurityCustomRuleType({
     const esQuery = buildEsQuery(indexPattern, { query: customQuery, language: 'kuery' }, []);
     const query = {
       body: {
-        query: {
-          bool: {
-            must: esQuery.bool.must, // FIXME
-          },
-        },
+        query: esQuery,
         fields: ['*'],
         sort: {
           '@timestamp': 'asc' as const,
@@ -62,6 +58,7 @@ export const customAlertType = createSecurityCustomRuleType({
       },
     };
 
+    // @ts-expect-error Filter[] is not assignable to QueryContainer[]
     const alerts = await findAlerts(query);
     alertWithPersistence(alerts).forEach((alert) => {
       alert.scheduleActions('default', { server: 'server-test' });

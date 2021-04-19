@@ -14,19 +14,21 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
      -d '
 {
   "params":{
-     "query": "*:*"
+     "indexPatterns: ["*"],
+     "customQuery": "*:*"
    },
    "consumer":"alerts",
-   "alertTypeId":"siem.referenceRulePersistence",
+   "alertTypeId":"siem.customRule",
    "schedule":{
       "interval":"1m"
    },
    "actions":[],
    "tags":[
+      "custom"
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Basic persistence rule"
+   "name":"Basic custom query rule"
 }'
 
 
