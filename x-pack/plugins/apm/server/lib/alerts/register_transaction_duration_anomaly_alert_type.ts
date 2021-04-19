@@ -9,14 +9,16 @@ import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'typings/elasticsearch';
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
   AlertType,
@@ -49,7 +51,6 @@ const alertTypeConfig =
 export function registerTransactionDurationAnomalyAlertType({
   registry,
   ml,
-  logger,
 }: RegisterRuleDependencies) {
   registry.registerType(
     createAPMLifecycleRuleType({
@@ -166,7 +167,7 @@ export function registerTransactionDurationAnomalyAlertType({
                         { field: 'job_id' },
                       ] as const),
                       sort: {
-                        '@timestamp': 'desc' as const,
+                        timestamp: 'desc' as const,
                       },
                     },
                   },
@@ -189,7 +190,7 @@ export function registerTransactionDurationAnomalyAlertType({
               const job = mlJobs.find((j) => j.job_id === latest.job_id);
 
               if (!job) {
-                logger.warn(
+                services.logger.warn(
                   `Could not find matching job for job id ${latest.job_id}`
                 );
                 return undefined;
@@ -211,6 +212,8 @@ export function registerTransactionDurationAnomalyAlertType({
 
           const parsedEnvironment = parseEnvironmentUrlParam(environment);
 
+          const severityLevel = getSeverity(score);
+
           services
             .alertWithLifecycle({
               id: [
@@ -227,6 +230,11 @@ export function registerTransactionDurationAnomalyAlertType({
                   ? { [SERVICE_ENVIRONMENT]: environment }
                   : {}),
                 [TRANSACTION_TYPE]: transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                'kibana.rac.alert.severity.level': severityLevel,
+                'kibana.rac.alert.severity.value': score,
+                'kibana.observability.evaluation.value': score,
+                'kibana.observability.evaluation.threshold': threshold,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -234,7 +242,7 @@ export function registerTransactionDurationAnomalyAlertType({
               transactionType,
               environment,
               threshold: selectedOption?.label,
-              triggerValue: getSeverity(score),
+              triggerValue: severityLevel,
             });
         });
 
