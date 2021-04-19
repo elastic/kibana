@@ -12,6 +12,10 @@ import { parseInterval } from './parse_interval';
 
 const narrowBucketLength = 60;
 
+/**
+ * Resolves the lookback interval for the rule
+ * using the formula max(2m, 2 * bucket_span) + query_delay + 1s
+ */
 export function resolveLookbackInterval(jobs: Job[], datafeeds: Datafeed[]): number {
   const bucketSpanInSeconds = Math.ceil(
     resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span)) ?? 0
@@ -24,18 +28,14 @@ export function resolveLookbackInterval(jobs: Job[], datafeeds: Datafeed[]): num
 }
 
 /**
- * Resolved the lookback interval for the rule
- * using the formula max(2m, 2 * bucket_span) + query_delay + 1s
+ * @deprecated We should avoid using {@link CombinedJobWithStats}. Replace usages with {@link resolveLookbackInterval} when
+ * Kibana API returns mapped job and the datafeed configs.
  */
 export function getLookbackInterval(jobs: CombinedJobWithStats[]): number {
-  const bucketSpanInSeconds = Math.ceil(
-    resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span)) ?? 0
+  return resolveLookbackInterval(
+    jobs,
+    jobs.map((v) => v.datafeed_config)
   );
-  const queryDelayInSeconds = Math.ceil(
-    resolveMaxTimeInterval(jobs.map((v) => v.datafeed_config.query_delay).filter(isDefined)) ?? 0
-  );
-
-  return Math.max(2 * narrowBucketLength, 2 * bucketSpanInSeconds) + queryDelayInSeconds + 1;
 }
 
 export function getTopNBuckets(job: Job): number {
