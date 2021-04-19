@@ -9,7 +9,7 @@ date: 2021-04-14
 
 ## Basic
 
-Dynamic fields are fields that the user can add or remove in your form. Those fields will end up in an array of _values_ or an array of _objects_.  To enable dynamic fields in your form you use <DocLink id="formLibCoreUseArray" text="the <UseArray /> component"/>.
+Dynamic fields are fields that the user can add or remove. Those fields will end up in an array of _values_ or an array of _objects_, it's up to you.  To work with dynamic fields in your form you use the <DocLink id="formLibCoreUseArray" text="<UseArray />"/> component.
 
 Let's imagine a form that lets a user enter dynamic items to a list.
 
@@ -90,9 +90,9 @@ export const DynamicFields = () => {
 
 ## Validation
 
-If you need to validate the number of items in the array, you can provide a `validations` prop to the `<UseArray />`. If, for example, we require at least one relationship to be provided, we can either:
+If you need to validate the number of items in the array, you can provide a `validations` prop to the `<UseArray />`. If, for example, we require at least one item to be added to the list, we can either:
 
-* Hide the "Remove" button when there is only one relationship
+* Hide the "Remove" button when there is only one item
 * Add a `validations` prop
 
 The first one is easy, let's look at the second option:
@@ -100,7 +100,7 @@ The first one is easy, let's look at the second option:
 ```js
 const itemsValidations = [
   {
-    validator: ({ value }: { value: any[] }) => {
+    validator: ({ value }: { value: Array<{ title: string; subtitle: string }> }) => {
       if (value.length === 0) {
         return {
           message: 'You need to add at least one item',

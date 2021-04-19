@@ -17,6 +17,7 @@ This object has the following properties and handlers
 **Type:** `boolean`
 
 Flag that indicates if the form has been submitted at least once. It is set to `true` when we call <DocLink id="formLibCoreFormHook" section="submit" text="submit()"/>.  
+
 **Note:** If you have a dynamic form where fields are removed and added, the `isSubmitted` is set to `false` whenever a new field is added, as in such case the user has a new form in front of him.
 
 ### isSubmitting
@@ -45,7 +46,7 @@ export const MyComponent = () => {
   const { form } = useForm();
   
   const onClickSubmit = async () => {
-    // We validate all the form fields and set the "isValid" state to true or false
+    // We validate all the form fields and get its "isValid" state (true|false)
     const { isValid, data } = await form.submit();
   
     if (isValid) {
@@ -65,7 +66,8 @@ export const MyComponent = () => {
 }
 ```
 
-* calling the `validate()` handler on the form. As you can see in the example below, if you don't use the `form.submit()`, you have to manually declare and update the `isSubmitting` and `isSubmitted` states.  
+* calling the `validate()` handler on the form. As you can see in the example below, as we don't use the `form.submit()`, we have to manually declare and update the `isSubmitting` and `isSubmitted` states.  
+
 **Note:** It is usually better to use `form.submit()`, but you might need at some stage to know the form validity without updating its `isSubmitted` state, and that's what `validate()` is for.
 
 ```js
@@ -151,7 +153,7 @@ const { name: nameField }  = form.getFields();
 **Arguments:** `options?: { unflatten?: boolean }`  
 **Returns:** `T | R`
 
-Return the form data. Accepts an optional `options` with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler (<DocLink id="formLibCoreInOutRawState" section="raw-data-state" text="read more about the 'Raw' data state here" />).
+Return the form data. Accepts an optional `options` with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler.
 
 ```js
 const formData  = form.getFormData();
@@ -175,7 +177,7 @@ const errors  = form.getErrors();
 
 Resets the form to its initial state. It accepts an optional configuration object:
 
-- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value. Remember: default field values can be set in <DocLink id="formLibCoreDefaultValue" text="different ways" />.
+- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value.
 
 - `defaultValue`. In some cases you might not want to reset the form to the default value initially provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
 
@@ -184,10 +186,10 @@ Resets the form to its initial state. It accepts an optional configuration objec
 // If none was provided, reset to the field config defaultValue.
 form.reset();
 
-// Reset to the default value declared on the field config defaultValue
+// Reset to the default value declared on the **field config** defaultValue
 form.reset({ defaultValue: {} });
 
-// You can keep some current field value and the rest will come from the field config defaultValue.
+// You can keep some current field value and the rest will come from the **field config** defaultValue.
 form.reset({ defaultValue: { type: 'SomeValueToKeep' } });
 ```
 

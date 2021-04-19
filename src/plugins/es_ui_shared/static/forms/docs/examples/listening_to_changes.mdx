@@ -59,11 +59,13 @@ export const MyComponent = () => {
 
 ## Listen to specific form fields changes
 
-In some cases you only want to listen to some field change and don't want to trigger a re-render of your component for every field value change. You can specify a **watch** (`string | string[]`) parameter for that.
+In some cases you only want to listen to some field change and don't want to trigger a re-render of your component for every field value change in your form. You can specify a **watch** (`string | string[]`) parameter for that.
 
 ```js
 export const ReactToSpecificFields = () => {
   const { form } = useForm();
+
+  // Only listen for changes from the "showAddress" toggle
   const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
 
   return (
@@ -115,6 +117,8 @@ export const OnChangeHandler = () => {
 
 If your UX requires to submit the form in a parent component (e.g. because that's where your submit button is located), you will need a way to access the form validity and the form data outside your form component. Unless your parent component needs to be aware of every field value change in the form (which should rarely be needed), you don't want to use the `useFormData()` hook and forward the data from there. This would create unnecessary re-renders. Instead it is better to forward the `getFormData()` handler on the form.
 
+This pattern is useful when, for example, the form is inside one of the steps of multi-step wizard and the button to go "next" is thus outside the scope of the component where the form is declared.
+
 ```js
 interface MyForm {
   name: string;
@@ -149,11 +153,13 @@ const MyForm = ({ defaultValue, onChange }: Props) => {
   const { form } = useForm<MyForm>({ defaultValue, schema });
   const { isValid, validate, getFormData } = form;
 
-  // "getFormData" is a stable reference that is not mutated
-  // when the form data change.
+  // getFormData() is a stable reference that is not mutated when the form data change.
   // This means that it does not trigger a re-render on each form data change.
   useEffect(() => {
-    onChange({ isValid, validate, getData: getFormData });
+    const updatedFormState = { isValid, validate, getData: getFormData };
+
+    // Forward the state to the parent
+    onChange(updatedFormState);
   }, [onChange, isValid, validate, getFormData]);
 
   return (
@@ -171,8 +177,6 @@ export const ForwardFormStateToParent = () => {
 
   // As the parent component does not know anything about the form until the form calls an onChange(),
   // we initially set the validate() and getData() to return the default state.
-  // This pattern is useful when, for example, the form is inside a multi step wizard and the button
-  // to go "next" is outside the scope of the component where the form is declared.
   const initialState = {
     isValid: true,
     validate: async () => true,

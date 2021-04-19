@@ -39,7 +39,7 @@ const nameConfig: FieldConfig<MyForm, string> = {
     // It is a good practice to keep validators single purposed,
     // and compose them in the "validations" array.
     // This way if any other field has the same validation we can easily
-    // copy/paste it or extract it and import it in multiple places.
+    // copy it over or extract it and import it in multiple places.
   ],
 };
 
@@ -48,7 +48,7 @@ export const MyComponent = () => {
 
   return (
     <Form form={form}>
-      <UseField path="name" config={nameConfig}>
+      <UseField<string> path="name" config={nameConfig}>
         {(field) => {
           const isInvalid = !field.isChangingValue && field.errors.length > 0;
           const errorMessage = !isChangingValue && errors.length ? errors[0].message : null;
@@ -93,7 +93,7 @@ const nameConfig: FieldConfig<MyForm, string> = {
       validator: indexNameField(i18n),
     },
     {
-      validator: async ({ value }) => {
+      validator: ({ value }) => {
         return new Promise((resolve) => {
           setTimeout(() => {
             if (value === 'bad') {
@@ -112,7 +112,7 @@ const nameConfig: FieldConfig<MyForm, string> = {
 
 If you need to cancel the previous asynchronous validation before calling the new one, you can do it by adding a `cancel()` handler to the Promise returned.
 
-**Note:** Make sure **to not** use an `async` validator function when returning your Promise, or the `cancel` handler will be stripped out.
+**Note:** Make sure **to not** use an `async/await` validator function when returning your Promise, or the `cancel` handler will be stripped out.
 
 ```js
 const nameConfig: FieldConfig<MyForm, string> = {
@@ -120,7 +120,7 @@ const nameConfig: FieldConfig<MyForm, string> = {
     {
       validator: ({ value }) => {
         let isCanceled = false;
-        const promise: Promise<any> & { cancel?(): void } = new Promise((resolve) => {
+        const promise: Promise<ValidationError | void | undefined> & { cancel?(): void } = new Promise((resolve) => {
           setTimeout(() => {
             if (isCanceled) {
               console.log('This promise has been canceled, skipping');
@@ -172,7 +172,7 @@ export const CancelAsyncValidation = () => {
 
 ## Validating arrays of items
 
-When validating an array of items we might have to handle **two types of validations**: one to make sure the array valid (e.g. it is not empty or it contains X number of items), and another one to make sure that each item in the array is valid.
+When validating an array of items we might have to handle **two types of validations**: one to make sure the array is valid (e.g. it is not empty or it contains X number of items), and another one to make sure that each item in the array is valid.
 
 To solve that problem, you can give a `type` to a validation to distinguish between different validations.
 
@@ -200,14 +200,14 @@ const tagsConfig: FieldConfig<MyForm, string[]> = {
       // This validation won't be executed when the field value changes
       // (when items are added or removed from the array).
       // This means that we will need to manually call:
-      // field.validate({ validationType: 'arrayItem })
+      // field.validate({ validationType: 'arrayItem' })
       // to run this validation.
       type: 'arrayItem',
     },
   ],
 };
 
-export const ValidationWithType = () => {
+export const MyComponent = () => {
   const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
     console.log('Is form valid:', isValid);
     console.log('Form data', data);
@@ -219,7 +219,7 @@ export const ValidationWithType = () => {
     <Form form={form}>
       <UseField<string[]> path="tags" config={tagsConfig}>
         {(field) => {
-          // Look for error message on **both** the default validation and the "arrayItem" type
+          // Check for error messages on **both** the default validation and the "arrayItem" type
           const errorMessage =
             field.getErrorsMessages() ?? field.getErrorsMessages({ validationType: 'arrayItem' });
 
@@ -234,6 +234,7 @@ export const ValidationWithType = () => {
               return false;
             }
 
+            // Add the tag to the array
             field.setValue([...field.value, value]);
           };
 

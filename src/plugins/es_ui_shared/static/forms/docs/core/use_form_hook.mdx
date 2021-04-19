@@ -19,7 +19,7 @@ Use the `useForm` hook to declare a new form object. As we have seen in the <Doc
 **Returns:** `Promise<void>`
 
 The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
-When the form is submitted `isSubmitting` will be set to `true` then back to `false` after the `onSubmit` handler has run. This can be useful to change the state of the submit button in the UI.
+When the form is submitted its `isSubmitting` state will be set to `true` and then back to `false` after the `onSubmit` handler has finished running. This can be useful to update the state of the submit button while saving the form to the server for example.
 
 ```js
 interface MyFormData {
@@ -104,7 +104,7 @@ export const MyComponent = () => {
 
 ### deserializer
 
-When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values (<DocLink id="formLibCoreInOutRawState" section="in-data-state" text="read more about the 'In' state here"/>).  
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values.  
 **Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
 
 ```js
@@ -151,7 +151,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
 
 ### serializer
 
-Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example). <DocLink id="formLibCoreInOutRawState" section="out-data-state" text="Read more about the 'Out' state here"/>.  
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  
 **Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
 
 If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console
@@ -192,7 +192,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
 };
 ```
 
-Much better, now when we submit the form, the internal fields are not leaked outside when building the form object.
+Much better, now when we submit the form, the internal UI fields are not leaked outside when building the form object.
 
 ### id
 
@@ -209,7 +209,7 @@ You can optionally give an id to the form, that will be attached to the `form` o
 **Type:** `number` (ms)
 **Default:** 500
 
-When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state changes entirely depends on the time it takes to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
+When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state changes depends on the time it takes to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
 
 With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed since the last value change.
 
@@ -243,8 +243,8 @@ return (
 
 #### stripEmptyFields
 
-**Type:**: `boolean`
-**Default:**: true
+**Type:** `boolean`
+**Default:** `true`
 
 With this option you can decide if you want empty string value to be returned by the form.
 

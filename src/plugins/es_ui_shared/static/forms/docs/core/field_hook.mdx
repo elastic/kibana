@@ -2,12 +2,12 @@
 id: formLibCoreFieldHook
 slug: /form-lib/core/field-hook
 title: Field hook
-summary: You will never create them but you'll get all the love from them
+summary: You don't manually create them but you'll get all the love from them
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-When you use the  `<UseField />` component you receive a `field` hook object that you can connect to your React components.  
+When you use the  `<UseField />` component you receive back a `field` hook object that you can connect to your React components.  
 
 This hook has the following properties and handlers:
 
@@ -131,7 +131,7 @@ Handler to set the errors of the field.
 **Returns:** `void`
 
 Handler to clear the errors of the field. You can optionally provide the type of error to clear.  
-Read more about [typed validation here](../examples/validation.md#typed-validation).
+See an example of typed validation when <DocLink id="formLibExampleValidation" section="validating-arrays-of-items" text="validating an array of items" />.
 
 ### getErrorsMessages()
 

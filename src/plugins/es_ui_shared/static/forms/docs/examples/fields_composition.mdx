@@ -7,7 +7,7 @@ tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-If you need to swap your form fields according to one field value (e.g. the "model" has changed), you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
+If your form does not have a fix set of fields (single interface) and you need to add/remove fields dynamically, you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
 If you _do_ need to keep a field value, but hide the field in the UI, then you need to use CSS (`<div style={{ display: isVisible ? 'block' : 'none' }}>...</div>`)
 
 Imagine you're building an app that lets people buy a car online. You want to build a form that lets the user select the model of the car (`sedan`, `golf cart`, `clown mobile`), and based on their selection you'll show a different form for configuring the selected model's options.
@@ -44,8 +44,6 @@ Let's create one component for each car that will expose its unique parameter(s)
 
 const plateConfig = {
   label: 'Plate number',
-  // no need to declare the defaultValue as '' _is_ the default
-  // defaultValue: '',
 };
 
 export const SedanCar = () => {
@@ -92,7 +90,7 @@ export const ClownMobileCar = () => {
 };
 ```
 
-And finally, let's build our form which will swap those components according to the selected `model`.
+And finally, let's build our form which will swap those components according to the selected car `model`.
 
 ```js
 import { UsedParameter } from './used_parameter';
@@ -102,8 +100,8 @@ import { ClownMobileCar } from './clown_mobile_car';
 
 const modelToComponentMap: { [key: string]: React.FunctionComponent } = {
   sedan: SedanCar,
-  'golf_cart': GolfCartCar,
-  'clown_mobile': ClownMobileCar,
+  golfCart: GolfCartCar,
+  clownMobile: ClownMobileCar,
 };
 
 // We create a schema so we don't need to manually add the config
@@ -124,10 +122,10 @@ const modelOptions = [
     text: 'sedan',
   },
   {
-    text: 'golf_cart',
+    text: 'golfCart',
   },
   {
-    text: 'clown_mobile',
+    text: 'clownMobile',
   },
 ];
 

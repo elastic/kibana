@@ -7,7 +7,7 @@ tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-There are multiple places where you can define the default value of a field. Note that by "default value" we are saying "the initial value" of a field. Once the field is initiated it has its own internal state and can't be controlled.
+There are multiple places where you can define the default value of a field. By "default value" we are saying "the initial value" of a field. Once the field is initiated it has its own internal state and can't be controlled.
 
 ## Order of precedence
 
@@ -59,7 +59,7 @@ When you are creating a new resource, the form is empty and there is no data com
 
 ```js
 interface Props {
-  fetchedData?: { index: boolean }
+  fetchedData?: { foo: boolean }
 }
 
 export const MyForm = ({ fetchedData }: Props) => {
@@ -68,7 +68,7 @@ export const MyForm = ({ fetchedData }: Props) => {
   const { form } = useForm({ defaultValue: fetchedData });
 
   return (
-    <UseField path="index" config={{ defaultValue: true } />
+    <UseField path="foo" config={{ defaultValue: true } />
   );
 }
 ```
@@ -77,20 +77,20 @@ Or the same but using a form schema
 
 ```js
 const schema = {
-  // Field config for the path "index" declared below
-  index: {
+  // Field config for the path "foo" declared below
+  foo: {
     defaultValue: true,
   },
 };
 
 export const MyComponent = ({ fetchedData }: Props) => {
-  // 1. If defaultValue is not undefined **and** there is a value at the "index" path, use it
-  // 2. otherwise if there is a schema with a config at the "index" path read its "defaultValue"
-  // 3. if it's still undefined, use an "" (empty string) - which will throw an error for a checkbox field-.
+  // 1. If "fetchedData" is not undefined **and** there is a value at the "foo" path, use it
+  // 2. otherwise, if there is a schema with a config at the "foo" path, read its "defaultValue"
+  // 3. otherwise use an "" (empty string)
   const { form } = useForm({ schema, defaultValue: fetchedData });
 
   return (
-    <UseField path="index" />
+    <UseField path="foo" />
   );
 }
 ```

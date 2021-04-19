@@ -50,11 +50,11 @@ The array path. It can be any valid [`lodash.set()` path](https://lodash.com/doc
 ### initialNumberOfItems
 
 **Type:** `number`
-**Default:** 1
+**Default:** `1`
 
-Define the number of items you want to have by default in the array. It is only used when there are no `defaultValue` found for the array. If there is a default value found, the number of items will be the length of the array.
+Define the number of items you want to have by default in the array. It is only used when there are no `defaultValue` found for the array. If there is a default value found, the number of items will be the length of that array.
 
-Those items are not fields yet, they are objects that you will receive back in the child function (see below).
+Those items are not fields yet, they are objects that you will receive back in the child function.
 
 ### validations
 
@@ -65,7 +65,7 @@ Array of validations to run whenever an item is added or removed. This is <DocLi
 ### readDefaultValueOnForm
 
 **Type:** `boolean`
-**Default:** true
+**Default:** `true`
 
 Flag to indicate if you want to read the array value from <DocLink id="formLibCoreUseForm" section="defaultvalue" text="the form `defaultValue` object" />.
 

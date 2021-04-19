@@ -162,7 +162,7 @@ An array of validation to run against the field value. Although it would be poss
 
 If any of the validation fails, the other validations don't run unless <DocLink id="formLibCoreUseField" section="exitonfail" text="the `exitOnFail` parameter" /> (`false` by default) is set to `true`.
 
-**Note:** There are already many reusable field validators. Check if there isn't already one for your use case before writing your own.
+**Note:** There are already many <DocLink id="formLibHelpersValidators" text="reusable field validators" />. Check if there isn't already one for your use case before writing your own.
 
 The `ValidationConfig` accepts the following parameters:
 
@@ -174,7 +174,7 @@ The `ValidationConfig` accepts the following parameters:
 
 A validator function to execute. It can be synchronous or asynchronous.
 
-**Note:** Have a look a [the validation examples](../examples/validation.md) for different use cases.
+**Note:** Have a look a <DocLink id="formLibExampleValidation" text="the validation examples" /> for different use cases.
 
 This function receives a data argument with the following properties:
 
@@ -196,7 +196,9 @@ A specific type for the validation. <DocLink id="formLibExampleValidation" secti
 **Type:** `boolean`
 **Default:** `true`
 
-By default all validation are blockers, which means that if they fail, the field `isValid` state is set to `false`. There might be some cases, like when trying to add an item to the ComboBox array, where we don't want to block the UI and set the field as invalid. If the item is not valid we won't add it to the array, but the field is still valid. Thus the validation on the array item is **not** blocking. 
+By default all validation are blockers, which means that if they fail, the field `isValid` state is set to `false`. There might be some cases where you don't want the form to be invalid when a fied validation fails.
+
+For example: when we add an item to the ComboBox array, we don't want to block the UI and set the field (array) as invalid if the item is invalid. We won't add the item to the array but the field is still valid. For that we will pass `isBlocking: false` to the validation on the array item. 
 
 ##### exitOnFail
 
@@ -209,7 +211,7 @@ By default, when any of the validation fails, the following validation are not e
 
 **Type:** `SerializerFunc`
 
-If the type of a field value differs from the type provided as `defaultValue` you can use a `deserializer` to transform the value. This handler is executed, once, on the default value provided right before initializing the field `value` state.
+If the type of a field value differs from the type provided as `defaultValue` you can use a `deserializer` to transform the value. This handler is executedo once to initialize the field `value` state.
 
 ```js
 // The country field select options
@@ -270,7 +272,7 @@ const countryConfig = {
 
 **Type:** `FormatterFunc[]`
 
-If you need to format the field value each time it changes you can use a formatter for that. Like with the validations you can provide as many formatters as needed.
+If you need to format the field value each time it changes you can use a formatter for that. You can provide as many formatters as needed.
 
 **Note:** Only use formatters when you need to change visually how the field value appears in the UI. If you only need the transformed value when submitting the form, it is better to use a `serializer` for that.
 
@@ -338,7 +340,7 @@ By default if you don't provide a `defaultValue` prop to `<UseField />`, it will
 
 **Type:** `(value:T) => void`
 
-With this handler you can listen to the field value changes. <DocLink id="formLibExampleListeningToChanges" section="using-the-onchange-handler" text="See the example" /> in the "React to changes" page.
+With this handler you can listen to the field value changes. <DocLink id="formLibExampleListeningToChanges" section="using-the-onchange-handler" text="See the example" /> in the "Listening to changes" page.
 
 ### children
 
@@ -346,7 +348,10 @@ With this handler you can listen to the field value changes. <DocLink id="formLi
 
 The (optional) children of `<UseField />` is a function child which receives the <DocLink id="formLibCoreFieldHook" text="field hook" />. You are then responsible to return a JSX element from that function.
 
-## `getUseField()`
+
+## Helpers
+
+### `getUseField()`
 
 **Arguments:** `props: UseFieldProps` 
 
