@@ -252,6 +252,7 @@ export function TableDimensionEditor(
                       setIsPaletteOpen(!isPaletteOpen);
                     }}
                     size="xs"
+                    flush="both"
                   >
                     {i18n.translate('xpack.lens.paletteTableGradient.customize', {
                       defaultMessage: 'Settings',
