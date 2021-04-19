@@ -7,7 +7,6 @@
 
 import { OperationDetails } from '.';
 import { AuditLogger, EventCategory, EventOutcome } from '../../../security/server';
-import { createAuditMsg, CreateAuditMsgParams } from '../common';
 
 enum AuthorizationResult {
   Unauthorized = 'Unauthorized',
@@ -62,13 +61,6 @@ export class AuthorizationAuditLogger {
         },
       }),
     });
-  }
-
-  /**
-   * Passthrough method for creating a generic audit message.
-   */
-  public genericOperation(params: CreateAuditMsgParams) {
-    this.auditLogger?.log(createAuditMsg(params));
   }
 
   public failure({

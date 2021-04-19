@@ -22,10 +22,9 @@ import {
   excess,
 } from '../../../common/api';
 
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CaseService } from '../../services';
 import { createCaseError } from '../../common/error';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, getAuthorizationFilter } from '../utils';
 import { Authorization } from '../../authorization/authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
@@ -50,6 +49,7 @@ export const find = async ({
   logger,
   auth,
   options,
+  auditLogger,
 }: FindParams): Promise<CasesFindResponse> => {
   try {
     const queryParams = pipe(
@@ -59,11 +59,12 @@ export const find = async ({
 
     const {
       filter: authorizationFilter,
-      ensureAuthorizedForSavedObjects,
+      ensureSavedObjectsAreAuthorized,
       logSuccessfulAuthorization,
-    } = await auth.getFindAuthorizationFilter({
-      savedObjectType: CASE_SAVED_OBJECT,
+    } = await getAuthorizationFilter({
+      authorization: auth,
       operation: Operations.findCases,
+      auditLogger,
     });
 
     const queryArgs = {
@@ -94,7 +95,7 @@ export const find = async ({
       subCaseOptions: caseQueries.subCase,
     });
 
-    ensureAuthorizedForSavedObjects([...cases.casesMap.values()]);
+    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
     // TODO: Make sure we do not leak information when authorization is on
     const [openCases, inProgressCases, closedCases] = await Promise.all([
