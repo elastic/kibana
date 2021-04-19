@@ -9,12 +9,7 @@ import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 
-import {
-  EventFilterInitForm,
-  EventFilterChangeForm,
-  EventFilterCreateStart,
-  EventFilterFormStateChanged,
-} from './action';
+import { EventFilterInitForm, EventFilterChangeForm, EventFilterFormStateChanged } from './action';
 
 import { EventFilterListPageState } from '../state';
 import { initialEventFilterPageState } from './builders';
@@ -57,20 +52,6 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
   };
 };
 
-// const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
-//   return {
-//     ...state,
-//     form: {
-//       ...state.form,
-//       isLoadingAction: true,
-//       submissionResourceState: {
-//         type: 'LoadingResourceState',
-//         previousState: { type: 'UninitialisedResourceState' },
-//       },
-//     },
-//   };
-// };
-
 const eventFilterFormStateChanged: CaseReducer<EventFilterFormStateChanged> = (state, action) => {
   return {
     ...state,
@@ -90,8 +71,6 @@ export const eventFilterPageReducer: StateReducer = (
       return eventFilterInitForm(state, action);
     case 'eventFilterChangeForm':
       return eventFilterChangeForm(state, action);
-    // case 'eventFilterCreateStart':
-    //   return eventFilterCreateStart(state, action);
     case 'eventFilterFormStateChanged':
       return eventFilterFormStateChanged(state, action);
   }
