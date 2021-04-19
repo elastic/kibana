@@ -34,6 +34,7 @@ import {
 } from '../../../utils/source_configuration';
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
 import { FormElement } from './form_elements';
+import { LogSourceConfigurationFormError } from './source_configuration_form_errors';
 import { FormValidationError } from './validation_errors';
 
 export const LogColumnsConfigurationPanel = React.memo<{
@@ -124,6 +125,13 @@ export const LogColumnsConfigurationPanel = React.memo<{
       ) : (
         <LogColumnConfigurationEmptyPrompt />
       )}
+      {logColumnsFormElement.validity.validity === 'invalid'
+        ? logColumnsFormElement.validity.reasons.map((error) => (
+            <EuiText key={error.type} textAlign="center" color="danger">
+              <LogSourceConfigurationFormError error={error} />
+            </EuiText>
+          ))
+        : null}
     </>
   );
 });
