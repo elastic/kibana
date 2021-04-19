@@ -17,7 +17,7 @@ import {
 import { ILayer } from '../../../classes/layers/layer';
 
 interface Props {
-  findLayerById: (layerId: string) => ILayer;
+  findLayerById: (layerId: string) => ILayer | undefined;
   isLocked: boolean;
   layerId: string;
   onClose: () => void;
@@ -46,6 +46,9 @@ export class Header extends Component<Props, State> {
 
   async _loadLayerState() {
     const layer = this.props.findLayerById(this.props.layerId);
+    if (!layer) {
+      return;
+    }
     const layerName = await layer.getDisplayName();
     const customIconAndTooltipContent = layer.getCustomIconAndTooltipContent();
     if (this._isMounted) {
