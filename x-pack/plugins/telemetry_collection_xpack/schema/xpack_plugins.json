@@ -2558,6 +2558,374 @@
         "timeCaptured": {
           "type": "date"
         },
+        "layerTypes": {
+          "properties": {
+            "[TELEMETRY_LAYER_TYPE.EMS_BASEMAP]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.EMS_REGION]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_TOP_HITS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_DOCS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.ES_TRACKS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.KBN_REGION]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.UX_TMS_MVT]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_LAYER_TYPE.UX_WMS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "scalingOptions": {
+          "properties": {
+            "[SCALING_TYPES.LIMIT]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[SCALING_TYPES.CLUSTERS]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[SCALING_TYPES.MVT]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "joins": {
+          "properties": {
+            "TERM": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "basemaps": {
+          "properties": {
+            "[TELEMETRY_EMS_BASEMAP_TYPES.AUTO]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_EMS_BASEMAP_TYPES.DARK]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "[TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED]": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "attributesPerMap": {
           "properties": {
             "dataSourcesCount": {

@@ -19,13 +19,6 @@ export function registerMapsUsageCollector(
     return;
   }
 
-  const clusterStats = {
-    min: { type: 'long' },
-    max: { type: 'long' },
-    avg: { type: 'float' },
-    total: { type: 'long' },
-  };
-
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,
@@ -41,34 +34,144 @@ export function registerMapsUsageCollector(
       mapsTotalCount: { type: 'long' },
       timeCaptured: { type: 'date' },
       layerTypes: {
-        [TELEMETRY_LAYER_TYPE.EMS_BASEMAP]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.EMS_REGION]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_TOP_HITS]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_DOCS]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.ES_TRACKS]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.KBN_REGION]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.UX_TMS_MVT]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]: clusterStats,
-        [TELEMETRY_LAYER_TYPE.UX_WMS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.EMS_BASEMAP]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.EMS_REGION]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_TOP_HITS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_DOCS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.ES_TRACKS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.KBN_REGION]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.UX_TMS_MVT]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_LAYER_TYPE.UX_WMS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
       },
       scalingOptions: {
-        [SCALING_TYPES.LIMIT]: clusterStats,
-        [SCALING_TYPES.CLUSTERS]: clusterStats,
-        [SCALING_TYPES.MVT]: clusterStats,
+        [SCALING_TYPES.LIMIT]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [SCALING_TYPES.CLUSTERS]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [SCALING_TYPES.MVT]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
       },
       joins: {
-        TERM: clusterStats,
+        TERM: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
       },
       basemaps: {
-        [TELEMETRY_EMS_BASEMAP_TYPES.AUTO]: clusterStats,
-        [TELEMETRY_EMS_BASEMAP_TYPES.DARK]: clusterStats,
-        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP]: clusterStats,
-        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED]: clusterStats,
+        [TELEMETRY_EMS_BASEMAP_TYPES.AUTO]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_EMS_BASEMAP_TYPES.DARK]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
+        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED]: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+          total: { type: 'long' },
+        },
       },
       attributesPerMap: {
         dataSourcesCount: {
