@@ -12,17 +12,19 @@ import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/butt
 
 import './button.scss';
 
-export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType'> {
+export interface Props
+  extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'className'> {
   label: string;
   primary?: boolean;
+  isDarkModeEnabled?: boolean;
 }
 
-export const SolutionToolbarButton = ({ label, primary, ...rest }: Props) => (
+export const SolutionToolbarButton = ({ label, primary, className, ...rest }: Props) => (
   <EuiButton
     {...rest}
-    size="s"
+    size="m"
     color={primary ? 'primary' : 'text'}
-    className="solutionToolbarButton"
+    className={`solutionToolbarButton ${className}`}
     fill={primary}
   >
     {label}

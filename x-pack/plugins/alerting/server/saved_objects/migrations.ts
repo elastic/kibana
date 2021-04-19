@@ -400,6 +400,12 @@ function removeNullsFromSecurityRules(
             ? params.lists
             : [],
         threatFilters: convertNullToUndefined(params.threatFilters),
+        machineLearningJobId:
+          params.machineLearningJobId == null
+            ? undefined
+            : Array.isArray(params.machineLearningJobId)
+            ? params.machineLearningJobId
+            : [params.machineLearningJobId],
       },
     },
   };
