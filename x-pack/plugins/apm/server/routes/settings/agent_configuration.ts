@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '../../../common/runtime_types/to_boolean_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
