@@ -106,9 +106,9 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
               {agentPolicy?.is_managed && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
-                    title="Managed agent policy"
+                    title="Hosted agent policy"
                     content={i18n.translate(
-                      'xpack.fleet.policyDetails.policyDetailsManagedPolicyTooltip',
+                      'xpack.fleet.policyDetails.policyDetailsHostedPolicyTooltip',
                       {
                         defaultMessage:
                           'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
