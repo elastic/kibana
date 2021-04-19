@@ -24,7 +24,7 @@ export interface DiscoverIndexPatternManagementProps {
   /**
    * Read from the Fields API
    */
-  useNewFieldsApi: boolean;
+  useNewFieldsApi?: boolean;
   /**
    * Callback to execute on edit field action
    * @param fieldName
