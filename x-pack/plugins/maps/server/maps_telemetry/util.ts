@@ -48,7 +48,7 @@ export type TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {
 };
 
 export enum TELEMETRY_EMS_BASEMAP_TYPES {
-  ROADMAP_DESATURATED = 'desaturated',
+  ROADMAP_DESATURATED = 'roadmap_desaturated',
   ROADMAP = 'roadmap',
   AUTO = 'auto',
   DARK = 'dark',
