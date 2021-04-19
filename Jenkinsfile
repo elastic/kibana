@@ -3,6 +3,8 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+env.ES_SNAPSHOT_MANIFEST = '20210418-194426_b390cbd'
+
 kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
   slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
     githubPr.withDefaultPrComments {
