@@ -748,7 +748,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
         mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap, mvtSourceLayer);
+      this._setMbSymbolProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
@@ -814,7 +814,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
-  _setMbSymbolProperties(mbMap: MbMap, mvtSourceLayer?: string) {
+  _setMbSymbolProperties(
+    mbMap: MbMap,
+    mvtSourceLayer?: string,
+    timesliceMaskConfig?: TimesliceMaskConfig
+  ) {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
@@ -831,7 +835,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this.hasJoins());
+    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
     if (!_.isEqual(filterExpr, mbMap.getFilter(symbolLayerId))) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
