@@ -93,7 +93,7 @@ export class HttpServer {
   constructor(
     private readonly logger: LoggerFactory,
     private readonly name: string,
-    private readonly gracefulShutdownTimeout$: Observable<Duration>
+    private readonly shutdownTimeout$: Observable<Duration>
   ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
@@ -230,8 +230,8 @@ export class HttpServer {
     if (hasStarted) {
       this.log.debug('stopping http server');
 
-      const gracefulShutdownTimeout = await this.gracefulShutdownTimeout$.pipe(take(1)).toPromise();
-      await this.server.stop({ timeout: gracefulShutdownTimeout.asMilliseconds() });
+      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
 
       this.log.debug(`http server stopped`);
 

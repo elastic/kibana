@@ -32,7 +32,7 @@ const configSchema = schema.object(
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
       })
     ),
-    gracefulShutdownTimeout: schema.duration({ defaultValue: '30s' }),
+    shutdownTimeout: schema.duration({ defaultValue: '30s' }),
     cors: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),
@@ -184,7 +184,7 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
-  public gracefulShutdownTimeout: Duration;
+  public shutdownTimeout: Duration;
 
   /**
    * @internal
@@ -220,7 +220,7 @@ export class HttpConfig implements IHttpConfig {
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
-    this.gracefulShutdownTimeout = rawHttpConfig.gracefulShutdownTimeout;
+    this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
   }
 }
 

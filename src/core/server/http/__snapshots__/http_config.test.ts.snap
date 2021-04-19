@@ -52,7 +52,6 @@ Object {
     "enabled": false,
   },
   "customResponseHeaders": Object {},
-  "gracefulShutdownTimeout": "PT30S",
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
@@ -65,6 +64,7 @@ Object {
     "ipAllowlist": Array [],
   },
   "rewriteBasePath": false,
+  "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [

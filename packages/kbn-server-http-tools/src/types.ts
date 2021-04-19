@@ -17,7 +17,7 @@ export interface IHttpConfig {
   socketTimeout: number;
   cors: ICorsConfig;
   ssl: ISslConfig;
-  gracefulShutdownTimeout: Duration;
+  shutdownTimeout: Duration;
 }
 
 export interface ICorsConfig {

@@ -67,7 +67,7 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
-    gracefulShutdownTimeout: moment.duration(100, 'ms'),
+    shutdownTimeout: moment.duration(100, 'ms'),
   } as any;
 
   configWithSSL = {
@@ -82,7 +82,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests', of(config.gracefulShutdownTimeout));
+  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
@@ -1437,7 +1437,7 @@ describe('setup contract', () => {
 
 describe('Graceful shutdown', () => {
   test('it should wait until the ongoing requests are resolved and reject any new ones', async () => {
-    const gracefulShutdownTimeout = config.gracefulShutdownTimeout.asMilliseconds();
+    const shutdownTimeout = config.shutdownTimeout.asMilliseconds();
 
     const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -1449,9 +1449,9 @@ describe('Graceful shutdown', () => {
         options: { body: { accepts: 'application/json' } },
       },
       async (context, req, res) => {
-        // It takes to resolve the same period of the gracefulShutdownTimeout.
+        // It takes to resolve the same period of the shutdownTimeout.
         // Since we'll trigger the stop a few ms after, it should have time to finish
-        await new Promise((resolve) => setTimeout(resolve, gracefulShutdownTimeout));
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout));
         return res.ok({ body: req.route });
       }
     );
@@ -1483,12 +1483,12 @@ describe('Graceful shutdown', () => {
       }),
       // Stop the server while the request is in progress
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, gracefulShutdownTimeout / 3));
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
         return server.stop();
       })(),
       // Trigger a new request while shutting down (should be rejected)
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, (2 * gracefulShutdownTimeout) / 3));
+        await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
         return makeRequest().expect(503, {
           statusCode: 503,
           error: 'Service Unavailable',

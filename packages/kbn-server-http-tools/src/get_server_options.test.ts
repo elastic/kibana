@@ -25,7 +25,7 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   port: 5601,
   socketTimeout: 120000,
   keepaliveTimeout: 120000,
-  gracefulShutdownTimeout: moment.duration(30, 'seconds'),
+  shutdownTimeout: moment.duration(30, 'seconds'),
   maxPayload: ByteSizeValue.parse('1048576b'),
   ...parts,
   cors: {

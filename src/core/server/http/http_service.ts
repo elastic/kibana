@@ -69,10 +69,8 @@ export class HttpService
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
-    const gracefulShutdownTimeout$ = this.config$.pipe(
-      map(({ gracefulShutdownTimeout }) => gracefulShutdownTimeout)
-    );
-    this.httpServer = new HttpServer(logger, 'Kibana', gracefulShutdownTimeout$);
+    const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
+    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -182,7 +180,7 @@ export class HttpService
 
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.logger, 'NotReady', of(config.gracefulShutdownTimeout));
+    const httpServer = new HttpServer(this.logger, 'NotReady', of(config.shutdownTimeout));
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
     // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers

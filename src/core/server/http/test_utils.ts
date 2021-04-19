@@ -44,7 +44,7 @@ configService.atPath.mockImplementation((path) => {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
-      gracefulShutdownTimeout: moment.duration(30, 'seconds'),
+      shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 120_000,
       socketTimeout: 120_000,
     } as any);
