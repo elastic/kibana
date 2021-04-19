@@ -49,7 +49,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.number({ min: 0 }),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable the countdown.
     },
     'notifications:lifetime:error': {
       name: i18n.translate('core.ui_settings.params.notifications.errorLifetimeTitle', {
@@ -62,7 +62,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.number({ min: 0 }),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
     'notifications:lifetime:warning': {
       name: i18n.translate('core.ui_settings.params.notifications.warningLifetimeTitle', {
@@ -75,7 +75,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.number({ min: 0 }),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
     'notifications:lifetime:info': {
       name: i18n.translate('core.ui_settings.params.notifications.infoLifetimeTitle', {
@@ -88,7 +88,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.number({ min: 0 }),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
   };
 };
