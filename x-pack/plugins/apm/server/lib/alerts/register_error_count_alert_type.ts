@@ -114,10 +114,10 @@ export function registerErrorCountAlertType({
           },
         };
 
-        const response = await alertingEsClient(
-          services.scopedClusterClient,
-          searchParams
-        );
+        const response = await alertingEsClient({
+          scopedClusterClient: services.scopedClusterClient,
+          params: searchParams,
+        });
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
@@ -145,7 +145,10 @@ export function registerErrorCountAlertType({
                   ...(environment
                     ? { [SERVICE_ENVIRONMENT]: environment }
                     : {}),
-                  [PROCESSOR_EVENT]: 'error',
+                  [PROCESSOR_EVENT]: ProcessorEvent.error,
+                  'kibana.observability.evaluation.value': errorCount,
+                  'kibana.observability.evaluation.threshold':
+                    alertParams.threshold,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {

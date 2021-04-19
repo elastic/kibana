@@ -30,6 +30,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.Unnamed.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -43,6 +44,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.Unnamed.$2",
                 "type": "CompoundType",
                 "label": "path",
                 "isRequired": false,
@@ -73,6 +75,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.get.$1",
                 "type": "CompoundType",
                 "label": "key",
                 "isRequired": false,
@@ -86,6 +89,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.get.$2",
                 "type": "Any",
                 "label": "defaultValue",
                 "isRequired": true,
@@ -116,6 +120,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.set.$1",
                 "type": "Any",
                 "label": "key",
                 "isRequired": true,
@@ -129,6 +134,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.set.$2",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -159,6 +165,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.setSilent.$1",
                 "type": "Any",
                 "label": "key",
                 "isRequired": true,
@@ -172,6 +179,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.setSilent.$2",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -218,6 +226,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.reset.$1",
                 "type": "CompoundType",
                 "label": "path",
                 "isRequired": true,
@@ -296,6 +305,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.fromString.$1",
                 "type": "string",
                 "label": "input",
                 "isRequired": true,
@@ -351,13 +361,7 @@
               "lineNumber": 74
             },
             "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.BaseVisType",
-                "text": "BaseVisType"
-              },
+              "BaseVisType",
               "<TVisParams>"
             ]
           },
@@ -453,6 +457,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Vis.Unnamed.$1",
                 "type": "string",
                 "label": "visType",
                 "isRequired": true,
@@ -466,6 +471,7 @@
                 }
               },
               {
+                "id": "def-public.Vis.Unnamed.$2",
                 "type": "Object",
                 "label": "visState",
                 "isRequired": true,
@@ -535,6 +541,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Vis.setState.$1",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -673,6 +680,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getVisSchemas.$1",
             "type": "Object",
             "label": "vis",
             "isRequired": true,
@@ -693,6 +701,7 @@
             }
           },
           {
+            "id": "def-public.getVisSchemas.$2",
             "type": "Object",
             "label": "{ timeRange, timefilter }",
             "isRequired": true,
@@ -768,6 +777,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.updateOldState.$1",
             "type": "Unknown",
             "label": "oldState",
             "isRequired": true,
@@ -794,6 +804,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.VisualizationContainer.$1",
             "type": "Object",
             "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
             "isRequired": true,
@@ -967,7 +978,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-public.ISchemas.[AggGroupNames.Buckets]",
+            "id": "def-public.ISchemas.AggGroupNames.Buckets",
             "type": "Array",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -988,7 +999,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.ISchemas.[AggGroupNames.Metrics]",
+            "id": "def-public.ISchemas.AggGroupNames.Metrics",
             "type": "Array",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -1100,13 +1111,7 @@
             },
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -1562,13 +1567,7 @@
             },
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -1867,6 +1866,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setValue.$1",
                 "type": "Uncategorized",
                 "label": "paramName",
                 "isRequired": true,
@@ -1880,6 +1880,7 @@
                 }
               },
               {
+                "id": "def-public.VisEditorOptionsProps.setValue.$2",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -1910,6 +1911,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setValidity.$1",
                 "type": "boolean",
                 "label": "isValid",
                 "isRequired": true,
@@ -1940,6 +1942,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setTouched.$1",
                 "type": "boolean",
                 "label": "isTouched",
                 "isRequired": true,
@@ -2052,13 +2055,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.Timefilter",
-                "text": "Timefilter"
-              },
+              "Timefilter",
               ", \"isTimeRangeSelectorEnabled\" | \"isAutoRefreshSelectorEnabled\" | \"isTimeTouched\" | \"getEnabledUpdated$\" | \"getTimeUpdate$\" | \"getRefreshIntervalUpdate$\" | \"getAutoRefreshFetch$\" | \"getFetch$\" | \"getTime\" | \"getAbsoluteTime\" | \"setTime\" | \"getRefreshInterval\" | \"setRefreshInterval\" | \"createFilter\" | \"getBounds\" | \"calculateBounds\" | \"getActiveBounds\" | \"enableTimeRangeSelector\" | \"disableTimeRangeSelector\" | \"enableAutoRefreshSelector\" | \"disableAutoRefreshSelector\" | \"getTimeDefaults\" | \"getRefreshIntervalDefaults\">"
             ]
           },
@@ -2244,13 +2241,7 @@
             },
             "signature": [
               "{ [appName: string]: unknown; visualizations: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisualizationsAppExtension",
-                "text": "VisualizationsAppExtension"
-              },
+              "VisualizationsAppExtension",
               "; } | undefined"
             ]
           }
@@ -2669,13 +2660,7 @@
             },
             "signature": [
               "Partial<",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisTypeOptions",
-                "text": "VisTypeOptions"
-              },
+              "VisTypeOptions",
               "> | undefined"
             ]
           },
@@ -3434,13 +3419,7 @@
               "text": "SavedObjectLoader"
             },
             " & { findListItems: (search: string, sizeOrOptions?: number | ",
-            {
-              "pluginId": "visualizations",
-              "scope": "public",
-              "docId": "kibVisualizationsPluginApi",
-              "section": "def-public.FindListItemsOptions",
-              "text": "FindListItemsOptions"
-            },
+            "FindListItemsOptions",
             " | undefined) => any; }"
           ]
         },
@@ -3577,13 +3556,7 @@
           },
           "signature": [
             "typeof ",
-            {
-              "pluginId": "visualizations",
-              "scope": "public",
-              "docId": "kibVisualizationsPluginApi",
-              "section": "def-public.showNewVisModal",
-              "text": "showNewVisModal"
-            }
+            "showNewVisModal"
           ]
         },
         {
@@ -3630,13 +3603,7 @@
               "text": "SavedObjectLoader"
             },
             " & { findListItems: (search: string, sizeOrOptions?: number | ",
-            {
-              "pluginId": "visualizations",
-              "scope": "public",
-              "docId": "kibVisualizationsPluginApi",
-              "section": "def-public.FindListItemsOptions",
-              "text": "FindListItemsOptions"
-            }
+            "FindListItemsOptions"
           ]
         }
       ],
@@ -3725,13 +3692,7 @@
             },
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",

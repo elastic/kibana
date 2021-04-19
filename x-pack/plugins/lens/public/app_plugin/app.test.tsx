@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -77,6 +77,8 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   };
 }
 
+const sessionIdSubject = new Subject<string>();
+
 function createMockSearchService() {
   let sessionIdCounter = 1;
   return {
@@ -84,6 +86,7 @@ function createMockSearchService() {
       start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
       clear: jest.fn(),
       getSessionId: jest.fn(() => `sessionId-${sessionIdCounter}`),
+      getSession$: jest.fn(() => sessionIdSubject.asObservable()),
     },
   };
 }
@@ -1269,6 +1272,26 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the query if saved query is selected', () => {
+      const { component } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: 'abc:def', language: 'lucene' },
+          },
+        });
+      });
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { query: 'abc:def', language: 'lucene' },
+        }),
+        {}
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>
@@ -1324,6 +1347,24 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    it('re-renders the frame if session id changes from the outside', async () => {
+      const services = makeDefaultServices();
+      const { frame } = mountWith({ props: undefined, services });
+
+      act(() => {
+        sessionIdSubject.next('new-session-id');
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `new-session-id`,
         })
       );
     });
