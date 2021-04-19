@@ -171,6 +171,7 @@ export const timelineSchema = gql`
     system_fim
     system_security_event
     system_socket
+    threat_match
     zeek
   }
 
