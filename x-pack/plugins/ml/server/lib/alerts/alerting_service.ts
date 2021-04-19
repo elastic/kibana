@@ -545,7 +545,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       },
     };
 
-    const response = await mlClient.anomalySearch<{ body: { aggregations: { test: number } } }>(
+    const response = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
