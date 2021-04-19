@@ -7,7 +7,7 @@
 
 import './dimension_container.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -37,10 +39,10 @@ export function DimensionContainer({
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     handleClose();
     setFocusTrapIsEnabled(false);
-  };
+  }, [handleClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,9 +53,20 @@ export function DimensionContainer({
     }
   }, [isOpen]);
 
+  const closeOnEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        event.preventDefault();
+        closeFlyout();
+      }
+    },
+    [closeFlyout]
+  );
+
   return isOpen ? (
     <div ref={panelRef}>
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
+        <EuiWindowEvent event="keydown" handler={closeOnEscape} />
         <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
           <div
             role="dialog"

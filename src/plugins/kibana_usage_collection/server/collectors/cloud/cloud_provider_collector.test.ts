@@ -12,25 +12,23 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 
 import { registerCloudProviderUsageCollector } from './cloud_provider_collector';
 
 describe('registerCloudProviderUsageCollector', () => {
   let collector: Collector<unknown>;
   const logger = loggingSystemMock.createLogger();
-
-  const usageCollectionMock = createUsageCollectionSetupMock();
-  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = new Collector(logger, config);
-    return createUsageCollectionSetupMock().makeUsageCollector(config);
-  });
-
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeEach(() => {
     cloudDetailsMock.mockClear();
     detectCloudServiceMock.mockClear();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
     registerCloudProviderUsageCollector(usageCollectionMock);
   });
 
@@ -45,6 +43,11 @@ describe('registerCloudProviderUsageCollector', () => {
 
   test('isReady() => true when cloud details are available', () => {
     cloudDetailsMock.mockReturnValueOnce({ foo: true });
+    expect(collector.isReady()).toBe(true);
+  });
+
+  test('isReady() => true when cloud details have been retrieved but none have been found', () => {
+    cloudDetailsMock.mockReturnValueOnce(null);
     expect(collector.isReady()).toBe(true);
   });
 
