@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { ClientFileCreateSourceEditor, INDEX_SETUP_STEP_ID, INDEXING_STEP_ID } from './wizard';
+import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
@@ -30,15 +30,21 @@ export const uploadLayerWizardConfig: LayerWizard = {
   icon: 'importAction',
   prerequisiteSteps: [
     {
-      id: INDEX_SETUP_STEP_ID,
-      label: i18n.translate('xpack.maps.fileUploadWizard.importFileSetupLabel', {
+      id: UPLOAD_STEPS.CONFIGURE_UPLOAD,
+      label: i18n.translate('xpack.maps.fileUploadWizard.configureUploadLabel', {
         defaultMessage: 'Import file',
       }),
     },
     {
-      id: INDEXING_STEP_ID,
-      label: i18n.translate('xpack.maps.fileUploadWizard.indexingLabel', {
+      id: UPLOAD_STEPS.UPLOAD,
+      label: i18n.translate('xpack.maps.fileUploadWizard.uploadLabel', {
         defaultMessage: 'Importing file',
+      }),
+    },
+    {
+      id: UPLOAD_STEPS.ADD_DOCUMENT_LAYER,
+      label: i18n.translate('xpack.maps.fileUploadWizard.configureDocumentLayerLabel', {
+        defaultMessage: 'Add as document layer',
       }),
     },
   ],

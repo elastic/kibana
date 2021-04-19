@@ -24,6 +24,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import { getAbsoluteDateRange } from '../../utils/date';
+import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
 
@@ -68,7 +69,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           const formatted = {
             link: undefined,
             reason: alert['rule.name'],
-            ...(ruleType?.format?.({ alert }) ?? {}),
+            ...(ruleType?.format?.({ alert, formatters: { asDuration, asPercent } }) ?? {}),
           };
 
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;

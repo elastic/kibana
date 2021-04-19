@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -15,17 +14,6 @@ import {
   BASE_ALERTING_API_PATH,
   AlertingFrameworkHealth,
 } from '../types';
-
-interface XPackUsageSecurity {
-  security?: {
-    enabled?: boolean;
-    ssl?: {
-      http?: {
-        enabled?: boolean;
-      };
-    };
-  };
-}
 
 const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
   isSufficientlySecure,
@@ -56,23 +44,11 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const {
-            body: {
-              security: {
-                enabled: isSecurityEnabled = false,
-                ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
-              } = {},
-            },
-          }: ApiResponse<XPackUsageSecurity> = await context.core.elasticsearch.client.asInternalUser.transport // Do not augment with such input. // `transport.request` is potentially unsafe when combined with untrusted user input.
-            .request({
-              method: 'GET',
-              path: '/_xpack/usage',
-            });
-
+          const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
           const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
 
           const frameworkHealth: AlertingFrameworkHealth = {
-            isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
+            isSufficientlySecure: areApiKeysEnabled,
             hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
             alertingFrameworkHeath,
           };
