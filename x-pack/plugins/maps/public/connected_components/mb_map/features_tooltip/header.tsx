@@ -50,8 +50,12 @@ export class Header extends Component<Props, State> {
     const items: ReactNode[] = [];
     if (this.state.layerName) {
       items.push(
-        <EuiFlexItem grow={true} key="layerName">
-          <EuiTextColor>{this.state.layerName}</EuiTextColor>
+        <EuiFlexItem grow={true} key="layerName" className="eui-textTruncate">
+          <EuiTextColor>
+            <h4 className="eui-textTruncate" title={this.state.layerName}>
+              {this.state.layerName}
+            </h4>
+          </EuiTextColor>
         </EuiFlexItem>
       );
     }
