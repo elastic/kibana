@@ -103,7 +103,7 @@ export function getCombinedRuntimeMappings(
 ): RuntimeMappings | undefined {
   let combinedRuntimeMappings = {};
 
-  // And runtime field mappings defined by index pattern
+  // Add runtime field mappings defined by index pattern
   if (indexPattern) {
     const computedFields = indexPattern?.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
@@ -147,6 +147,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'date':
         schema = 'datetime';
         break;
+      case 'nested':
       case 'geo_point':
         schema = 'json';
         break;
@@ -237,6 +238,9 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
     case KBN_FIELD_TYPES.NUMBER:
       schema = 'numeric';
+      break;
+    case KBN_FIELD_TYPES.NESTED:
+      schema = 'json';
       break;
   }
 
