@@ -105,10 +105,7 @@ const postTimeline = async ({
   try {
     requestBody = JSON.stringify({ timeline });
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
@@ -129,10 +126,7 @@ const patchTimeline = async ({
   try {
     requestBody = JSON.stringify({ timeline, timelineId, version });
   } catch (err) {
-    return Promise.resolve({
-      message: `Failed to stringify query: ${JSON.stringify(err)}`,
-      status_code: 500,
-    });
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   try {
     response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
