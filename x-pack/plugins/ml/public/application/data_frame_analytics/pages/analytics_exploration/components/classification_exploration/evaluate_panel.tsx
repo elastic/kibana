@@ -409,7 +409,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                     'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip',
                     {
                       defaultMessage:
-                        'This value shows how many of the data points that are actual class members were identified correctly as class members.',
+                        'Mean recall shows how many of the data points that are actual class members were identified correctly as class members.',
                     }
                   )}
                 />

@@ -10,6 +10,20 @@ import React from 'react';
 
 import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
 
-export const PrimaryActionButton = (props: Omit<SolutionToolbarButtonProps, 'primary'>) => (
-  <SolutionToolbarButton primary={true} {...props} />
+import './primary_button.scss';
+
+export interface Props extends Omit<SolutionToolbarButtonProps, 'primary'> {
+  isDarkModeEnabled?: boolean;
+}
+
+export const PrimaryActionButton = ({ isDarkModeEnabled, ...props }: Props) => (
+  <SolutionToolbarButton
+    primary={true}
+    className={`solutionToolbar__primaryButton ${
+      isDarkModeEnabled
+        ? 'solutionToolbar__primaryButton--dark'
+        : 'solutionToolbar__primaryButton--light'
+    }`}
+    {...props}
+  />
 );

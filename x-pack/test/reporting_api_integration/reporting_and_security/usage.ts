@@ -6,10 +6,20 @@
  */
 
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/utils';
+import path from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
-import * as GenerationUrls from '../generation_urls';
-import { ReportingUsageStats } from '../services';
-import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
+import * as GenerationUrls from '../services/generation_urls';
+import { ReportingUsageStats } from '../services/usage';
+
+const OSS_KIBANA_ARCHIVE_PATH = path.resolve(
+  REPO_ROOT,
+  'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+);
+const OSS_DATA_ARCHIVE_PATH = path.resolve(
+  REPO_ROOT,
+  'test/functional/fixtures/es_archiver/dashboard/current/data'
+);
 
 interface UsageStats {
   reporting: ReportingUsageStats;
@@ -20,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
+  const retry = getService('retry');
   const usageAPI = getService('usageAPI');
 
   describe('Usage', () => {
@@ -46,7 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
       let usage: UsageStats;
 
       before(async () => {
-        usage = (await usageAPI.getUsageStats()) as UsageStats;
+        await retry.try(async () => {
+          // use retry for stability - usage API could return 503
+          usage = (await usageAPI.getUsageStats()) as UsageStats;
+        });
       });
 
       it('shows reporting as available and enabled', async () => {
