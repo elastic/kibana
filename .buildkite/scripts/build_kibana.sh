@@ -37,7 +37,18 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 mkdir -p "$KIBANA_BUILD_LOCATION"
 cp -pR install/kibana/. "$KIBANA_BUILD_LOCATION/"
 
+echo "--- Archive built plugins"
+tar -zcf \
+  target/kibana-default-plugins.tar.gz \
+  x-pack/plugins/**/target/public \
+  x-pack/test/**/target/public \
+  examples/**/target/public \
+  test/**/target/public
+
+echo "--- Upload Build Artifacts"
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"
-buildkite-agent artifact upload 'kibana-*-linux-x86_64.tar.gz'
+mv kibana-*-linux-x86_64.tar.gz kibana-default.tar.gz
+buildkite-agent artifact upload kibana-default.tar.gz
+buildkite-agent artifact upload kibana-default-plugins.tar.gz
 cd -
