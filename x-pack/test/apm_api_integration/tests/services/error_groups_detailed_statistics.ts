@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
-type ErrorGroupsComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
+type ErrorGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,13 +30,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   ];
 
   registry.when(
-    'Error groups comparison statistics when data is not loaded',
+    'Error groups detailed statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -54,13 +54,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Error groups comparison statistics when data is loaded',
+    'Error groups detailed statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
+        const errorGroupsComparisonStatistics = response.body as ErrorGroupsDetailedStatistics;
         expect(Object.keys(errorGroupsComparisonStatistics.currentPeriod).sort()).to.eql(
           groupIds.sort()
         );
@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns an empty state when requested groupIds are not available in the given time range', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -111,18 +111,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Error groups comparison statistics when data is loaded with previous data',
+    'Error groups detailed statistics when data is loaded with previous data',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('returns the correct data', async () => {
         let response: {
           status: number;
-          body: ErrorGroupsComparisonStatistics;
+          body: ErrorGroupsDetailedStatistics;
         };
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+              pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
               query: {
                 numBuckets: 20,
                 transactionType: 'request',
@@ -139,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct timeseries', () => {
-          const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
+          const errorGroupsComparisonStatistics = response.body as ErrorGroupsDetailedStatistics;
           const errorgroupsComparisonStatistics =
             errorGroupsComparisonStatistics.currentPeriod[groupIds[0]];
           expect(
@@ -149,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('matches x-axis on current period and previous period', () => {
-          const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
+          const errorGroupsComparisonStatistics = response.body as ErrorGroupsDetailedStatistics;
 
           const currentPeriodItems = Object.values(errorGroupsComparisonStatistics.currentPeriod);
           const previousPeriodItems = Object.values(errorGroupsComparisonStatistics.previousPeriod);
@@ -166,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns an empty state when requested groupIds are not available in the given time range', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               numBuckets: 20,
               transactionType: 'request',

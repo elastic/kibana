@@ -24,18 +24,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   interface Response {
     status: number;
-    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
   }
 
   registry.when(
-    'Service overview instances comparison statistics when data is not loaded',
+    'Service overview instances detailed statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response: Response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/comparison_statistics`,
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -55,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Service overview instances comparison statistics when data is loaded',
+    'Service overview instances detailed statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('fetching data without comparison', () => {
@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/comparison_statistics`,
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -111,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/comparison_statistics`,
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 numBuckets: 20,
