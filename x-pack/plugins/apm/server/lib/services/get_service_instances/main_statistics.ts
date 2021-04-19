@@ -12,7 +12,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
-interface ServiceInstancePrimaryStatisticsParams {
+interface ServiceInstanceMainStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
@@ -25,8 +25,8 @@ interface ServiceInstancePrimaryStatisticsParams {
   end: number;
 }
 
-export async function getServiceInstancesPrimaryStatistics(
-  params: Omit<ServiceInstancePrimaryStatisticsParams, 'size'>
+export async function getServiceInstancesMainStatistics(
+  params: Omit<ServiceInstanceMainStatisticsParams, 'size'>
 ): Promise<
   Array<{
     serviceNodeName: string;
@@ -37,7 +37,7 @@ export async function getServiceInstancesPrimaryStatistics(
     memoryUsage?: number | null;
   }>
 > {
-  return withApmSpan('get_service_instances_primary_statistics', async () => {
+  return withApmSpan('get_service_instances_main_statistics', async () => {
     const paramsForSubQueries = {
       ...params,
       size: 50,

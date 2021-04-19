@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
-type ErrorGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
+type ErrorGroupsMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,13 +22,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = metadata;
 
   registry.when(
-    'Error groups primary statistics when data is not loaded',
+    'Error groups main statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/primary_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/main_statistics`,
             query: {
               start,
               end,
@@ -47,13 +47,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Error groups primary statistics when data is loaded',
+    'Error groups main statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/primary_statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/main_statistics`,
             query: {
               start,
               end,
@@ -65,12 +65,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const errorGroupPrimaryStatistics = response.body as ErrorGroupsPrimaryStatistics;
+        const errorGroupMainStatistics = response.body as ErrorGroupsMainStatistics;
 
-        expect(errorGroupPrimaryStatistics.is_aggregation_accurate).to.eql(true);
-        expect(errorGroupPrimaryStatistics.error_groups.length).to.be.greaterThan(0);
+        expect(errorGroupMainStatistics.is_aggregation_accurate).to.eql(true);
+        expect(errorGroupMainStatistics.error_groups.length).to.be.greaterThan(0);
 
-        expectSnapshot(errorGroupPrimaryStatistics.error_groups.map(({ name }) => name))
+        expectSnapshot(errorGroupMainStatistics.error_groups.map(({ name }) => name))
           .toMatchInline(`
           Array [
             "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy132[\\"revenue\\"])",
@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        const occurences = errorGroupPrimaryStatistics.error_groups.map(
+        const occurences = errorGroupMainStatistics.error_groups.map(
           ({ occurrences }) => occurrences
         );
 
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        const firstItem = errorGroupPrimaryStatistics.error_groups[0];
+        const firstItem = errorGroupMainStatistics.error_groups[0];
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {

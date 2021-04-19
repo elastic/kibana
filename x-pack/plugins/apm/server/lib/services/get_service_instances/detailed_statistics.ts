@@ -15,7 +15,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
-interface ServiceInstanceComparisonStatisticsParams {
+interface ServiceInstanceDetailedStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
@@ -29,8 +29,8 @@ interface ServiceInstanceComparisonStatisticsParams {
   serviceNodeIds: string[];
 }
 
-async function getServiceInstancesComparisonStatistics(
-  params: ServiceInstanceComparisonStatisticsParams
+async function getServiceInstancesDetailedStatistics(
+  params: ServiceInstanceDetailedStatisticsParams
 ): Promise<
   Array<{
     serviceNodeName: string;
@@ -41,31 +41,28 @@ async function getServiceInstancesComparisonStatistics(
     memoryUsage?: Coordinate[];
   }>
 > {
-  return withApmSpan(
-    'get_service_instances_comparison_statistics',
-    async () => {
-      const [transactionStats, systemMetricStats = []] = await Promise.all([
-        getServiceInstancesTransactionStatistics({
-          ...params,
-          isComparisonSearch: true,
-        }),
-        getServiceInstancesSystemMetricStatistics({
-          ...params,
-          isComparisonSearch: true,
-        }),
-      ]);
+  return withApmSpan('get_service_instances_detailed_statistics', async () => {
+    const [transactionStats, systemMetricStats = []] = await Promise.all([
+      getServiceInstancesTransactionStatistics({
+        ...params,
+        isComparisonSearch: true,
+      }),
+      getServiceInstancesSystemMetricStatistics({
+        ...params,
+        isComparisonSearch: true,
+      }),
+    ]);
 
-      const stats = joinByKey(
-        [...transactionStats, ...systemMetricStats],
-        'serviceNodeName'
-      );
+    const stats = joinByKey(
+      [...transactionStats, ...systemMetricStats],
+      'serviceNodeName'
+    );
 
-      return stats;
-    }
-  );
+    return stats;
+  });
 }
 
-export async function getServiceInstancesComparisonStatisticsPeriods({
+export async function getServiceInstancesDetailedStatisticsPeriods({
   environment,
   kuery,
   latencyAggregationType,
@@ -91,7 +88,7 @@ export async function getServiceInstancesComparisonStatisticsPeriods({
   comparisonEnd?: number;
 }) {
   return withApmSpan(
-    'get_service_instances_comparison_statistics_periods',
+    'get_service_instances_detailed_statistics_periods',
     async () => {
       const { start, end } = setup;
 
@@ -107,7 +104,7 @@ export async function getServiceInstancesComparisonStatisticsPeriods({
         serviceNodeIds,
       };
 
-      const currentPeriodPromise = getServiceInstancesComparisonStatistics({
+      const currentPeriodPromise = getServiceInstancesDetailedStatistics({
         ...commonParams,
         start,
         end,
@@ -115,7 +112,7 @@ export async function getServiceInstancesComparisonStatisticsPeriods({
 
       const previousPeriodPromise =
         comparisonStart && comparisonEnd
-          ? getServiceInstancesComparisonStatistics({
+          ? getServiceInstancesDetailedStatistics({
               ...commonParams,
               start: comparisonStart,
               end: comparisonEnd,
