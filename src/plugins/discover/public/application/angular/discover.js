@@ -415,11 +415,20 @@ function discoverController($route, $scope) {
     $scope.fetchStatus = fetchStatuses.LOADING;
     $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
 
+    inspectorAdapters.requests.reset();
     return $scope.volatileSearchSource
       .fetch$({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
-        requestResponder: getRequestResponder({ searchSessionId }),
+        inspector: {
+          adapter: inspectorAdapters.requests,
+          title: i18n.translate('discover.inspectorRequestDataTitle', {
+            defaultMessage: 'data',
+          }),
+          description: i18n.translate('discover.inspectorRequestDescription', {
+            defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+          }),
+        },
       })
       .toPromise()
       .then(onResults)
@@ -464,17 +473,6 @@ function discoverController($route, $scope) {
     $scope.fieldCounts = {};
     await refetch$.next();
   };
-
-  function getRequestResponder({ searchSessionId = null } = { searchSessionId: null }) {
-    inspectorAdapters.requests.reset();
-    const title = i18n.translate('discover.inspectorRequestDataTitle', {
-      defaultMessage: 'data',
-    });
-    const description = i18n.translate('discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-    });
-    return inspectorAdapters.requests.start(title, { description, searchSessionId });
-  }
 
   $scope.resetQuery = function () {
     history.push(
