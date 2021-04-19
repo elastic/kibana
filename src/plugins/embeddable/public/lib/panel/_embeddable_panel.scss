@@ -162,4 +162,5 @@
 .embPanel__label {
   position: absolute;
   padding-left: $euiSizeS;
+  z-index: $euiZLevel1;
 }
