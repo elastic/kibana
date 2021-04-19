@@ -8,10 +8,7 @@
 
 import { config, FRAME_ANCESTORS_RULE } from './config';
 
-const DEFAULT_CONFIG = Object.freeze({
-  ...config.schema.validate({}),
-  disableEmbedding: false,
-});
+const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
 /**
  * CSP configuration for use in Kibana.
