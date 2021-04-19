@@ -22,6 +22,7 @@ export function getDefaultExplorationPageUrlState(
     analysis: false,
     evaluation: true,
     feature_importance: true,
+    hyperparameter_importance: true,
     results: true,
     splom: true,
     ...(isPopulatedObject(overrides) ? overrides : {}),
