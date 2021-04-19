@@ -142,7 +142,10 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
         {
           type: 'field',
           field: 'service.name',
-          header: 'Service Name',
+          header: i18n.translate(
+            'xpack.apm.propertiesTable.tabs.logs.serviceName',
+            { defaultMessage: 'Service Name' }
+          ),
           width: 200,
         },
         { type: 'message' },
