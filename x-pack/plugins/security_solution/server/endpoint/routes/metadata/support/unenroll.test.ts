@@ -12,17 +12,24 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../../fleet/server/services';
-import { createMockAgentService } from '../../../../../../fleet/server/mocks';
+import {
+  createMockAgentService,
+  createPackagePolicyServiceMock,
+} from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
+import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 
 describe('test find all unenrolled Agent id', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockAgentService: jest.Mocked<AgentService>;
+  let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+
   beforeEach(() => {
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockAgentService = createMockAgentService();
+    mockPackagePolicyService = createPackagePolicyServiceMock();
   });
 
   it('can find all unerolled endpoint agent ids', async () => {
@@ -61,6 +68,7 @@ describe('test find all unenrolled Agent id', () => {
       );
     const agentIds = await findAllUnenrolledAgentIds(
       mockAgentService,
+      mockPackagePolicyService,
       mockSavedObjectClient,
       mockElasticsearchClient
     );
