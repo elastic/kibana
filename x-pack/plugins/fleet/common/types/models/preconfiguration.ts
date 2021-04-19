@@ -22,7 +22,7 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
   package_policies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {
       name: string;
-      package: Partial<PackagePolicyPackage>;
+      package: Partial<PackagePolicyPackage> & { name: string };
       inputs?: InputsOverride[];
     }
   >;
