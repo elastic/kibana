@@ -37,7 +37,7 @@ const getThreatSummaryRows = (
       }
       return acc;
     }, [] as Array<ThreatSummaryRow | undefined>)
-    .filter((item) => !!item) as ThreatSummaryRow[];
+    .filter((item: ThreatSummaryRow | undefined): item is ThreatSummaryRow => !!item);
 };
 
 const getDescription = ({
