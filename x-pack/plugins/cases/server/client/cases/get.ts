@@ -5,14 +5,28 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject } from 'kibana/server';
-import { CaseResponseRt, CaseResponse, ESCaseAttributes, User, UsersRt } from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseResponse,
+  ESCaseAttributes,
+  User,
+  UsersRt,
+  AllTagsFindRequest,
+  AllTagsFindRequestRt,
+  excess,
+  throwErrors,
+} from '../../../common/api';
 import { countAlertsForID, createAuditMsg, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { CASE_SAVED_OBJECT, ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { AuthorizationFilter, Operations } from '../../authorization';
+import { constructQueryOptions } from '../utils';
 
 interface GetParams {
   id: string;
@@ -92,14 +106,25 @@ export const get = async (
 /**
  * Retrieves the tags from all the cases.
  */
-export async function getTags({
-  savedObjectsClient: soClient,
-  caseService,
-  logger,
-  authorization: auth,
-  auditLogger,
-}: CasesClientArgs): Promise<string[]> {
+
+export async function getTags(
+  params: AllTagsFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
+
   try {
+    const queryParams = pipe(
+      excess(AllTagsFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
     let authFindHelpers: AuthorizationFilter;
     try {
       authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
@@ -109,10 +134,15 @@ export async function getTags({
     }
 
     const { filter: authorizationFilter } = authFindHelpers;
+    const queryArgs = {
+      owner: queryParams.owner,
+    };
+
+    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
     return await caseService.getTags({
       soClient,
-      filter: authorizationFilter,
+      filter: caseQueries.case.filter,
     });
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });

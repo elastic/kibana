@@ -48,6 +48,7 @@ import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
+import { superUser } from './authentication/users';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -528,7 +529,7 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const getSpaceUrlPrefix = (spaceId?: string) => {
+export const getSpaceUrlPrefix = (spaceId?: string | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
@@ -591,17 +592,15 @@ export const createCase = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
-  auth?: { user: User; space: string }
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CaseResponse> => {
-  const superTestInstance = supertest
+  const { body: theCase } = await supertest
     .post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
-    .set('kbn-xsrf', 'true');
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
 
-  if (auth != null) {
-    superTestInstance.auth(auth.user.username, auth.user.password);
-  }
-
-  const { body: theCase } = await superTestInstance.send(params).expect(expectedHttpCode);
   return theCase;
 };
 
@@ -846,22 +845,24 @@ export const findCases = async (
   return res;
 };
 
-export const getTags = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
+export const getTags = async ({
+  supertest,
+  query = {},
   expectedHttpCode = 200,
-  auth?: { user: User; space: string }
-): Promise<CasesFindResponse> => {
-  const superTestInstance = supertest
-    .get(`${getSpaceUrlPrefix(auth?.space)}${CASE_TAGS_URL}`)
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_TAGS_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .query({ sortOrder: 'asc' })
+    .query({ ...query })
     .send()
     .expect(expectedHttpCode);
 
-  if (auth != null) {
-    superTestInstance.auth(auth.user.username, auth.user.password);
-  }
-
-  const { body: res } = await superTestInstance.send().expect(expectedHttpCode);
   return res;
 };

@@ -6,20 +6,28 @@
  */
 
 import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
+import { wrapError, escapeHatch } from '../../utils';
 import { CASE_TAGS_URL } from '../../../../../common/constants';
+import { AllTagsFindRequest } from '../../../../../common/api';
 
 export function initGetTagsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_TAGS_URL,
-      validate: {},
+      validate: {
+        query: escapeHatch,
+      },
     },
     async (context, request, response) => {
       try {
-        const client = await context.cases.getCasesClient();
+        if (!context.cases) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
 
-        return response.ok({ body: await client.cases.getTags() });
+        const client = await context.cases.getCasesClient();
+        const options = request.query as AllTagsFindRequest;
+
+        return response.ok({ body: await client.cases.getTags({ ...options }) });
       } catch (error) {
         logger.error(`Failed to retrieve tags in route: ${error}`);
         return response.customError(wrapError(error));
