@@ -12,6 +12,9 @@
   overflow: visible;
   border: none;
   height: 100%;
+  @include kbnThemeStyle('v7') {
+    border: none !important; // sass-lint:disable-line no-important
+  }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
