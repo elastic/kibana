@@ -58,7 +58,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
           <EuiText size={'xs'}>
             <FormattedMessage
               id="xpack.ml.anomalyDetectionAlert.lookbackIntervalDescription"
-              defaultMessage="Time interval to query the anomalies data during each rule condition check. By default, it is derived from the job's bucket span and datafeed's query delay."
+              defaultMessage="Time interval to query the anomalies data during each rule condition check. By default, is derived from the bucket span of the job and the query delay of the datafeed."
             />
           </EuiText>
         }

@@ -61,7 +61,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                  defaultMessage="The check interval is greater than the lookback interval. Reduce it to {lookbackInterval} to avoid missing potential notifications."
+                  defaultMessage="The check interval is greater than the lookback interval. Reduce it to {lookbackInterval} to avoid potentially missing notifications."
                   values={{
                     lookbackInterval: alertParams.lookbackInterval,
                   }}
