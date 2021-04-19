@@ -137,6 +137,16 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
       endTimestamp={endTimestamp + framePaddingMs}
       query={`trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`}
       height={640}
+      columns={[
+        { type: 'timestamp' },
+        {
+          type: 'field',
+          field: 'service.name',
+          header: 'Service Name',
+          width: 200,
+        },
+        { type: 'message' },
+      ]}
     />
   );
 }
