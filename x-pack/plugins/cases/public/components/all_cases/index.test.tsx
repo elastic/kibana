@@ -23,6 +23,7 @@ import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCasesColumns } from './columns';
 import { AllCasesGeneric as AllCases } from './all_cases_generic';
+import { AllCasesProps } from '.';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -38,8 +39,8 @@ const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 jest.mock('../../common/lib/kibana');
 
-describe('AllCases', () => {
-  const defaultAllCasesProps = {
+describe('AllCasesGeneric', () => {
+  const defaultAllCasesProps: AllCasesProps = {
     configureCasesNavigation: {
       href: 'blah',
       onClick: jest.fn(),
@@ -55,7 +56,6 @@ describe('AllCases', () => {
     userCanCrud: true,
   };
 
-  const handleIsLoading = jest.fn();
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
@@ -352,7 +352,7 @@ describe('AllCases', () => {
       };
       useCasesColumns({
         filterStatus: CaseStatuses.open,
-        handleIsLoading,
+        handleIsLoading: jest.fn(),
         showActions: false,
       }).map((i, key) => i.name != null && checkIt(`${i.name}`));
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
@@ -529,7 +529,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('Renders correct bulk actoins for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
+  it('Renders correct bulk actions for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },

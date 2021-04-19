@@ -58,4 +58,4 @@ export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 /**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
  */
-export const ENABLE_CASE_CONNECTOR = true;
+export const ENABLE_CASE_CONNECTOR = false;

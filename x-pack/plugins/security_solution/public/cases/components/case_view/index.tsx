@@ -210,6 +210,11 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         },
         caseDetailsNavigation: {
           href: caseDetailsLink,
+          onClick: () => {
+            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+              path: getCaseDetailsUrl({ id: caseId }),
+            });
+          },
         },
         caseId,
         configureCasesNavigation: {

@@ -75,6 +75,7 @@ export const caseProps: CaseComponentProps = {
   },
   caseDetailsNavigation: {
     href: 'case-details-href',
+    onClick: jest.fn(),
   },
   caseId: basicCase.id,
   configureCasesNavigation: {
@@ -411,6 +412,7 @@ describe('CaseView ', () => {
               },
               caseDetailsNavigation: {
                 href: 'case-details-href',
+                onClick: jest.fn(),
               },
               caseId: '1234',
               configureCasesNavigation: {
@@ -452,6 +454,7 @@ describe('CaseView ', () => {
               },
               caseDetailsNavigation: {
                 href: 'case-details-href',
+                onClick: jest.fn(),
               },
               caseId: '1234',
               configureCasesNavigation: {
@@ -490,6 +493,7 @@ describe('CaseView ', () => {
               },
               caseDetailsNavigation: {
                 href: 'case-details-href',
+                onClick: jest.fn(),
               },
               caseId: '1234',
               configureCasesNavigation: {
@@ -528,6 +532,7 @@ describe('CaseView ', () => {
               },
               caseDetailsNavigation: {
                 href: 'case-details-href',
+                onClick: jest.fn(),
               },
               caseId: '1234',
               configureCasesNavigation: {

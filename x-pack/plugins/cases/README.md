@@ -75,7 +75,7 @@ Arguments:
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |disabledStatuses?|`CaseStatuses[];` array of disabled statuses
 |onRowClick|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
-|updateCase|`(theCase: Case ! SubCase) => void;` callback after case has been updated
+|updateCase?|`(theCase: Case ! SubCase) => void;` callback after case has been updated
 |userCanCrud|`boolean;` user permissions to crud
 
 UI component:

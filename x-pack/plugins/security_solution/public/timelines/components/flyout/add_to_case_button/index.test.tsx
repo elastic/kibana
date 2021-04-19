@@ -12,7 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AddToCaseButton } from '.';
-import { waitFor } from '@testing-library/react';
+
 jest.mock('../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../common/components/link_to');
   return {
