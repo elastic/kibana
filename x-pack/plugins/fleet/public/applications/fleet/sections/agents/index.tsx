@@ -20,7 +20,6 @@ import {
   useGetSettings,
 } from '../../hooks';
 import { WithoutHeaderLayout } from '../../layouts';
-import { SettingsConfirmModal } from '../../components/settings_flyout/confirm_modal';
 
 import { AgentListPage } from './agent_list_page';
 import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
