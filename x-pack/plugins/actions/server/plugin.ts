@@ -35,12 +35,18 @@ import {
 } from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  LicenseState,
+  ILicenseState,
+  spaceIdToNamespace,
+} from './lib';
 import {
   Services,
   ActionType,
@@ -368,18 +374,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       preconfiguredActions,
     });
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
     });

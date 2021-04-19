@@ -13,7 +13,8 @@ import {
 } from 'kibana/server';
 import { TaskInstance } from '../../../task_manager/server';
 import { SpacesPluginStart } from '../../../spaces/server';
-import { bulkDelete, extractBulkResponseDeleteFailures, spaceIdToNamespace } from './lib';
+import { bulkDelete, extractBulkResponseDeleteFailures } from './lib';
+import { spaceIdToNamespace } from '../lib';
 
 export interface CleanupTasksOpts {
   logger: Logger;

@@ -52,7 +52,7 @@ export const configSchema = schema.object({
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   cleanupFailedExecutionsTask: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    interval: schema.duration({ defaultValue: '15s' }),
+    interval: schema.duration({ defaultValue: '5m' }),
     pageSize: schema.number({ defaultValue: 100 }),
   }),
 });

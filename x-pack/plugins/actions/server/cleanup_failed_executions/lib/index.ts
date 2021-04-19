@@ -6,5 +6,4 @@
  */
 
 export { extractBulkResponseDeleteFailures } from './extract_bulk_response_delete_failures';
-export { spaceIdToNamespace } from './space_id_to_namespace';
 export { bulkDelete } from './bulk_delete';
