@@ -31,7 +31,7 @@ import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './
 
 import { EventFilterNotification } from '../notification';
 
-export interface EventFilteringModalProps {
+export interface EventFilterModalProps {
   data: Ecs;
   onCancel(): void;
 }
@@ -64,85 +64,83 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
-  ({ data, onCancel }) => {
-    const dispatch = useDispatch<Dispatch<AppAction>>();
-    const formHasError = useEventFilterSelector(getFormHasError);
-    const creationInProgress = useEventFilterSelector(isCreationInProgress);
-    const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
+export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, onCancel }) => {
+  const dispatch = useDispatch<Dispatch<AppAction>>();
+  const formHasError = useEventFilterSelector(getFormHasError);
+  const creationInProgress = useEventFilterSelector(isCreationInProgress);
+  const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
 
-    useEffect(() => {
-      if (creationSuccessful) {
-        onCancel();
-        dispatch({
-          type: 'eventFilterFormStateChanged',
-          payload: {
-            type: 'UninitialisedResourceState',
-          },
-        });
-      }
-    }, [creationSuccessful, onCancel, dispatch]);
-
-    useEffect(() => {
-      dispatch({
-        type: 'eventFilterInitForm',
-        payload: { entry: getInitialExceptionFromEvent(data) },
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleOnCancel = useCallback(() => {
-      if (creationInProgress) return;
+  useEffect(() => {
+    if (creationSuccessful) {
       onCancel();
-    }, [creationInProgress, onCancel]);
+      dispatch({
+        type: 'eventFilterFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+    }
+  }, [creationSuccessful, onCancel, dispatch]);
 
-    const confirmButtonMemo = useMemo(
-      () => (
-        <EuiButton
-          data-test-subj="add-exception-confirm-button"
-          fill
-          disabled={formHasError || creationInProgress}
-          onClick={() => {
-            dispatch({ type: 'eventFilterCreateStart' });
-          }}
-          isLoading={creationInProgress}
-        >
-          {ACTIONS_CONFIRM}
-        </EuiButton>
-      ),
-      [dispatch, formHasError, creationInProgress]
-    );
+  useEffect(() => {
+    dispatch({
+      type: 'eventFilterInitForm',
+      payload: { entry: getInitialExceptionFromEvent(data) },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    const modalBodyMemo = useMemo(
-      () => (
-        <ModalBodySection className="builder-section">
-          <EventFilterForm />
-        </ModalBodySection>
-      ),
-      []
-    );
+  const handleOnCancel = useCallback(() => {
+    if (creationInProgress) return;
+    onCancel();
+  }, [creationInProgress, onCancel]);
 
-    return (
-      <>
-        <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
-          <ModalHeader>
-            <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
-            <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
-          </ModalHeader>
+  const confirmButtonMemo = useMemo(
+    () => (
+      <EuiButton
+        data-test-subj="add-exception-confirm-button"
+        fill
+        disabled={formHasError || creationInProgress}
+        onClick={() => {
+          dispatch({ type: 'eventFilterCreateStart' });
+        }}
+        isLoading={creationInProgress}
+      >
+        {ACTIONS_CONFIRM}
+      </EuiButton>
+    ),
+    [dispatch, formHasError, creationInProgress]
+  );
 
-          {modalBodyMemo}
+  const modalBodyMemo = useMemo(
+    () => (
+      <ModalBodySection className="builder-section">
+        <EventFilterForm />
+      </ModalBodySection>
+    ),
+    []
+  );
 
-          <EuiModalFooter>
-            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
-              {ACTIONS_CANCEL}
-            </EuiButtonEmpty>
-            {confirmButtonMemo}
-          </EuiModalFooter>
-        </Modal>
-        <EventFilterNotification />
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
+        <ModalHeader>
+          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+          <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
+        </ModalHeader>
 
-EventFilteringModal.displayName = 'EventFilterModal';
+        {modalBodyMemo}
+
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+            {ACTIONS_CANCEL}
+          </EuiButtonEmpty>
+          {confirmButtonMemo}
+        </EuiModalFooter>
+      </Modal>
+      <EventFilterNotification />
+    </>
+  );
+});
+
+EventFilterModal.displayName = 'EventFilterModal';

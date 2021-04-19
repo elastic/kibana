@@ -67,7 +67,7 @@ const mockTheme = getMockTheme({
   },
 });
 
-describe('Event filtering form', () => {
+describe('Event filter form', () => {
   let component: RenderResult;
   let store: ReturnType<typeof createGlobalNoMiddlewareStore>;
 
