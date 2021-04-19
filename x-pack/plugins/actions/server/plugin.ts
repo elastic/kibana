@@ -235,6 +235,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
+        this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }

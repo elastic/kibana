@@ -8,9 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../models/watch_status/index';
 
@@ -24,15 +22,15 @@ const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-export function registerActivateRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerActivateRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{watchId}/activate',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {

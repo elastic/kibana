@@ -62,11 +62,7 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   }
 `;
 
-const ExitFullScreenFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    ${({ theme }) => `margin: ${theme.eui.euiSizeS} 0 0 ${theme.eui.euiSizeS};`}
-  }
-
+const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
 
@@ -205,13 +201,15 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   return (
     <>
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
-        {timelineFullScreen && setTimelineFullScreen != null && (
-          <ExitFullScreenFlexItem grow={false}>
-            <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />
-          </ExitFullScreenFlexItem>
-        )}
-
         <ScrollableFlexItem grow={2}>
+          {timelineFullScreen && setTimelineFullScreen != null && (
+            <ExitFullScreenContainer>
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            </ExitFullScreenContainer>
+          )}
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
