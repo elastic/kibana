@@ -26,13 +26,11 @@ type ServiceDependencies = APIReturnType<'GET /api/apm/services/{serviceName}/de
 
 export function getColumns({
   environment,
-  previousPeriod,
   comparisonEnabled,
 }: {
   environment?: string;
-  previousPeriod: ServiceDependencies['previousPeriod'];
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<ServiceDependencies['currentPeriod'][0]>> {
+}): Array<EuiBasicTableColumn<ServiceDependencies['serviceDependencies'][0]>> {
   return [
     {
       field: 'name',
@@ -88,12 +86,14 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, item) => {
         const previousPeriodLatencyTimeseries =
-          previousPeriod?.[item.name]?.latency.timeseries;
+          item.previousPeriodMetrics?.latency?.timeseries;
         return (
           <SparkPlot
             color="euiColorVis1"
-            series={item.latency.timeseries}
-            valueLabel={asMillisecondDuration(item.latency.value)}
+            series={item.currentPeriodMetrics.latency.timeseries}
+            valueLabel={asMillisecondDuration(
+              item.currentPeriodMetrics.latency.value
+            )}
             comparisonSeries={
               comparisonEnabled ? previousPeriodLatencyTimeseries : undefined
             }
@@ -111,13 +111,15 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, item) => {
         const previousPeriodThroughputTimeseries =
-          previousPeriod?.[item.name]?.throughput.timeseries;
+          item.previousPeriodMetrics?.throughput?.timeseries;
         return (
           <SparkPlot
             compact
             color="euiColorVis0"
-            series={item.throughput.timeseries}
-            valueLabel={asTransactionRate(item.throughput.value)}
+            series={item.currentPeriodMetrics.throughput.timeseries}
+            valueLabel={asTransactionRate(
+              item.currentPeriodMetrics.throughput.value
+            )}
             comparisonSeries={
               comparisonEnabled ? previousPeriodThroughputTimeseries : undefined
             }
@@ -137,13 +139,13 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, item) => {
         const previousPeriodErrorRateTimeseries =
-          previousPeriod?.[item.name]?.errorRate.timeseries;
+          item.previousPeriodMetrics?.errorRate?.timeseries;
         return (
           <SparkPlot
             compact
             color="euiColorVis7"
-            series={item.errorRate.timeseries}
-            valueLabel={asPercent(item.errorRate.value, 1)}
+            series={item.currentPeriodMetrics.errorRate.timeseries}
+            valueLabel={asPercent(item.currentPeriodMetrics.errorRate.value, 1)}
             comparisonSeries={
               comparisonEnabled ? previousPeriodErrorRateTimeseries : undefined
             }
@@ -162,11 +164,11 @@ export function getColumns({
       ),
       width: px(unit * 5),
       render: (_, item) => {
-        const previousPeriodImpact = previousPeriod?.[item.name]?.impact || 0;
+        const previousPeriodImpact = item.previousPeriodMetrics?.impact || 0;
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem>
-              <ImpactBar value={item.impact} size="m" />
+              <ImpactBar value={item.currentPeriodMetrics.impact} size="m" />
             </EuiFlexItem>
             {comparisonEnabled && (
               <EuiFlexItem>

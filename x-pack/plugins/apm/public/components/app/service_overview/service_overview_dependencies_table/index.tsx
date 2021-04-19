@@ -29,8 +29,7 @@ interface Props {
 }
 
 const INITIAL_STATE = {
-  currentPeriod: [],
-  previousPeriod: {},
+  serviceDependencies: [],
 } as ServiceDependencies;
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
@@ -70,18 +69,17 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   );
 
   // need top-level sortable fields for the managed table
-  const items = data.currentPeriod.map((item) => ({
+  const items = data.serviceDependencies.map((item) => ({
     ...item,
-    errorRateValue: item.errorRate.value,
-    latencyValue: item.latency.value,
-    throughputValue: item.throughput.value,
-    impactValue: item.impact,
+    errorRateValue: item.currentPeriodMetrics.errorRate.value,
+    latencyValue: item.currentPeriodMetrics.latency.value,
+    throughputValue: item.currentPeriodMetrics.throughput.value,
+    impactValue: item.currentPeriodMetrics.impact,
   }));
 
   const columns = getColumns({
     environment,
     comparisonEnabled,
-    previousPeriod: data.previousPeriod,
   });
 
   return (
