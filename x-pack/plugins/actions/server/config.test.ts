@@ -25,7 +25,7 @@ describe('config validation', () => {
         ],
         "cleanupFailedExecutionsTask": Object {
           "enabled": true,
-          "interval": "PT15S",
+          "interval": "PT5M",
           "pageSize": 100,
         },
         "enabled": true,
@@ -65,7 +65,7 @@ describe('config validation', () => {
         ],
         "cleanupFailedExecutionsTask": Object {
           "enabled": true,
-          "interval": "PT15S",
+          "interval": "PT5M",
           "pageSize": 100,
         },
         "enabled": true,
