@@ -142,7 +142,17 @@
       },
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f"
-      }
+      },
+      "Endpoint": {
+        "policy": {
+          "applied": {
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "name": "Default",
+            "status": "failure"
+          }
+        },
+        "status": "enrolled"
+      },
     }
   }
 }
@@ -217,7 +227,17 @@
       },
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b"
-      }
+      },
+      "Endpoint": {
+        "policy": {
+          "applied": {
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "name": "Default",
+            "status": "success"
+          }
+        },
+        "status": "enrolled"
+      },
     }
   }
 }
