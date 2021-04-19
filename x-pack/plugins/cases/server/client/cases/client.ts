@@ -15,6 +15,7 @@ import {
   CasesFindResponse,
   User,
   AllTagsFindRequest,
+  AllReportersFindRequest,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -49,6 +50,7 @@ export interface CasesSubClient {
   update(cases: CasesPatchRequest): Promise<CasesResponse>;
   delete(ids: string[]): Promise<void>;
   getTags(params: AllTagsFindRequest): Promise<string[]>;
+  getReporters(params: AllReportersFindRequest): Promise<User[]>;
 }
 
 /**
@@ -67,6 +69,7 @@ export const createCasesSubClient = (
     update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
+    getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

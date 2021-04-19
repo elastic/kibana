@@ -6,20 +6,28 @@
  */
 
 import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
+import { wrapError, escapeHatch } from '../../utils';
 import { CASE_REPORTERS_URL } from '../../../../../common/constants';
+import { AllReportersFindRequest } from '../../../../../common/api';
 
 export function initGetReportersApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_REPORTERS_URL,
-      validate: {},
+      validate: {
+        query: escapeHatch,
+      },
     },
     async (context, request, response) => {
       try {
-        const client = await context.cases.getCasesClient();
+        if (!context.cases) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
 
-        return response.ok({ body: await client.cases.getReporters() });
+        const client = await context.cases.getCasesClient();
+        const options = request.query as AllReportersFindRequest;
+
+        return response.ok({ body: await client.cases.getReporters({ ...options }) });
       } catch (error) {
         logger.error(`Failed to get reporters in route: ${error}`);
         return response.customError(wrapError(error));

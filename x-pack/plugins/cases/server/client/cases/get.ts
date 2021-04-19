@@ -20,6 +20,8 @@ import {
   AllTagsFindRequestRt,
   excess,
   throwErrors,
+  AllReportersFindRequestRt,
+  AllReportersFindRequest,
 } from '../../../common/api';
 import { countAlertsForID, createAuditMsg, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
@@ -152,15 +154,43 @@ export async function getTags(
 /**
  * Retrieves the reporters from all the cases.
  */
-export async function getReporters({
-  savedObjectsClient: soClient,
-  caseService,
-  logger,
-}: CasesClientArgs): Promise<User[]> {
+export async function getReporters(
+  params: AllReportersFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<User[]> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
+
   try {
+    const queryParams = pipe(
+      excess(AllReportersFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    let authFindHelpers: AuthorizationFilter;
+    try {
+      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+    } catch (error) {
+      auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
+      throw error;
+    }
+
+    const { filter: authorizationFilter } = authFindHelpers;
+    const queryArgs = {
+      owner: queryParams.owner,
+    };
+
+    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const reporters = await caseService.getReporters({
       soClient,
+      filter: caseQueries.case.filter,
     });
+
     return UsersRt.encode(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });

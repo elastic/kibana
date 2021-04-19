@@ -177,6 +177,11 @@ interface GetTagsArgs {
   filter?: KueryNode;
 }
 
+interface GetReportersArgs {
+  soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
 const transformNewSubCase = ({
   createdAt,
   createdBy,
@@ -911,10 +916,10 @@ export class CaseService {
     }
   }
 
-  public async getReporters({ soClient }: ClientArgs) {
+  public async getReporters({ soClient, filter }: GetReportersArgs) {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      return await readReporters({ soClient });
+      return await readReporters({ soClient, filter });
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
       throw error;

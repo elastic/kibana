@@ -19,6 +19,12 @@ export interface User {
   roles: string[];
 }
 
+export interface UserInfo {
+  username: string;
+  full_name: string;
+  email: string;
+}
+
 interface FeaturesPrivileges {
   [featureId: string]: string[];
 }

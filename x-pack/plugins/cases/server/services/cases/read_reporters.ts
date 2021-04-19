@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
+import { KueryNode } from '../../../../../../src/plugins/data/common';
 import { CaseAttributes, User } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 
@@ -27,21 +29,25 @@ export const convertToReporters = (caseObjects: Array<SavedObject<CaseAttributes
 
 export const readReporters = async ({
   soClient,
+  filter,
 }: {
   soClient: SavedObjectsClientContract;
   perPage?: number;
+  filter?: KueryNode;
 }): Promise<User[]> => {
   const firstReporters = await soClient.find({
     type: CASE_SAVED_OBJECT,
     fields: ['created_by'],
     page: 1,
     perPage: 1,
+    filter: cloneDeep(filter),
   });
   const reporters = await soClient.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['created_by'],
     page: 1,
     perPage: firstReporters.total,
+    filter: cloneDeep(filter),
   });
   return convertToReporters(reporters.saved_objects);
 };

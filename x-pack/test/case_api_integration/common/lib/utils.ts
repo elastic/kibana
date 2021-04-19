@@ -16,6 +16,7 @@ import {
   CASES_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
+  CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   SUB_CASES_PATCH_DEL_URL,
@@ -858,6 +859,28 @@ export const getTags = async ({
 }): Promise<CasesFindResponse> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_TAGS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query({ ...query })
+    .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getReporters = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_REPORTERS_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })
