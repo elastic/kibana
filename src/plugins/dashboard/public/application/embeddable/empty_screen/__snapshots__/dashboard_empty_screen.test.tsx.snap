@@ -287,7 +287,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
             <h3
               className="euiTitle euiTitle--xsmall"
             >
-              Add your first panel
+              Add your first visualization
             </h3>
           </EuiTitle>
           <EuiSpacer
