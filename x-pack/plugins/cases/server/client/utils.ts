@@ -13,6 +13,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import {
   CaseConnector,
@@ -27,6 +28,7 @@ import {
   AlertCommentRequestRt,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
+import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
@@ -34,6 +36,8 @@ import {
   isCommentRequestTypeUser,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
+import { Authorization, OperationDetails } from '../authorization';
+import { AuditLogger } from '../../../security/server';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -443,3 +447,122 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
       return SortFieldCase.createdAt;
   }
 };
+
+/**
+ * Wraps the Authorization class' ensureAuthorized call in a try/catch to handle the audit logging
+ * on a failure.
+ */
+export async function ensureAuthorized({
+  owner,
+  operation,
+  savedObjectID,
+  authorization,
+  auditLogger,
+}: {
+  owner: string;
+  operation: OperationDetails;
+  savedObjectID: string;
+  authorization: PublicMethodsOf<Authorization>;
+  auditLogger?: AuditLogger;
+}) {
+  try {
+    return await authorization.ensureAuthorized(owner, operation);
+  } catch (error) {
+    auditLogger?.log(createAuditMsg({ operation, error, savedObjectID }));
+    throw error;
+  }
+}
+
+/**
+ * Describes an entity with the necessary fields to identify if the user is authorized to interact with the saved object
+ * returned from some find query.
+ */
+interface OwnerEntity {
+  owner: string;
+  id: string;
+}
+
+/**
+ * Wraps the Authorization class' method for determining which found saved objects the user making the request
+ * is authorized to interact with.
+ */
+export async function getAuthorizationFilter({
+  operation,
+  authorization,
+  auditLogger,
+}: {
+  operation: OperationDetails;
+  authorization: PublicMethodsOf<Authorization>;
+  auditLogger?: AuditLogger;
+}) {
+  try {
+    const {
+      filter,
+      ensureSavedObjectIsAuthorized,
+      logSuccessfulAuthorization,
+    } = await authorization.getFindAuthorizationFilter(operation);
+    return {
+      filter,
+      ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => {
+        for (const entity of entities) {
+          try {
+            ensureSavedObjectIsAuthorized(entity.owner);
+            auditLogger?.log(createAuditMsg({ operation, savedObjectID: entity.id }));
+          } catch (error) {
+            auditLogger?.log(createAuditMsg({ error, operation, savedObjectID: entity.id }));
+          }
+        }
+      },
+      logSuccessfulAuthorization,
+    };
+  } catch (error) {
+    auditLogger?.log(createAuditMsg({ error, operation }));
+    throw error;
+  }
+}
+
+/**
+ * Creates an AuditEvent describing the state of a request.
+ */
+export function createAuditMsg({
+  operation,
+  outcome,
+  error,
+  savedObjectID,
+}: {
+  operation: OperationDetails;
+  savedObjectID?: string;
+  outcome?: EventOutcome;
+  error?: Error;
+}): AuditEvent {
+  const doc =
+    savedObjectID != null
+      ? `${operation.savedObjectType} [id=${savedObjectID}]`
+      : `a ${operation.docType}`;
+  const message = error
+    ? `Failed attempt to ${operation.verbs.present} ${doc}`
+    : outcome === EventOutcome.UNKNOWN
+    ? `User is ${operation.verbs.progressive} ${doc}`
+    : `User has ${operation.verbs.past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action: operation.action,
+      category: EventCategory.DATABASE,
+      type: operation.type,
+      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+    },
+    ...(savedObjectID != null && {
+      kibana: {
+        saved_object: { type: operation.savedObjectType, id: savedObjectID },
+      },
+    }),
+    ...(error != null && {
+      error: {
+        code: error.name,
+        message: error.message,
+      },
+    }),
+  };
+}

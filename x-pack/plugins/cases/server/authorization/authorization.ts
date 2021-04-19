@@ -9,7 +9,7 @@ import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AuthorizationFilter, GetSpaceFn, OwnerEntity } from './types';
+import { AuthorizationFilter, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
 
@@ -21,7 +21,7 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseOwners: Set<string>;
-  private readonly authLogger: AuthorizationAuditLogger;
+  private readonly auditLogger: AuthorizationAuditLogger;
 
   private constructor({
     request,
@@ -37,7 +37,7 @@ export class Authorization {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseOwners = caseOwners;
-    this.authLogger = auditLogger;
+    this.auditLogger = auditLogger;
   }
 
   /**
@@ -79,106 +79,71 @@ export class Authorization {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized({
-    owner,
-    operation,
-    savedObjectID,
-  }: {
-    owner: string;
-    operation: OperationDetails;
-    savedObjectID: string;
-  }) {
-    try {
-      const { securityAuth } = this;
-      const isOwnerAvailable = this.featureCaseOwners.has(owner);
+  public async ensureAuthorized(owner: string, operation: OperationDetails) {
+    const { securityAuth } = this;
+    const isOwnerAvailable = this.featureCaseOwners.has(owner);
 
-      if (securityAuth && this.shouldCheckAuthorization()) {
-        const requiredPrivileges: string[] = [
-          securityAuth.actions.cases.get(owner, operation.name),
-        ];
+    if (securityAuth && this.shouldCheckAuthorization()) {
+      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(owner, operation.name)];
 
-        const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-        const { hasAllRequested, username } = await checkPrivileges({
-          kibana: requiredPrivileges,
-        });
+      const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
+      const { hasAllRequested, username } = await checkPrivileges({
+        kibana: requiredPrivileges,
+      });
 
-        if (!isOwnerAvailable) {
-          /**
-           * Under most circumstances this would have been caught by `checkPrivileges` as
-           * a user can't have Privileges to an unknown owner, but super users
-           * don't actually get "privilege checked" so the made up owner *will* return
-           * as Privileged.
-           * This check will ensure we don't accidentally let these through
-           */
-          throw Boom.forbidden(this.authLogger.failure({ username, owner, operation }));
-        }
-
-        if (hasAllRequested) {
-          this.authLogger.success({ username, operation, owner });
-        } else {
-          throw Boom.forbidden(this.authLogger.failure({ owner, operation, username }));
-        }
-      } else if (!isOwnerAvailable) {
-        throw Boom.forbidden(this.authLogger.failure({ owner, operation }));
+      if (!isOwnerAvailable) {
+        /**
+         * Under most circumstances this would have been caught by `checkPrivileges` as
+         * a user can't have Privileges to an unknown owner, but super users
+         * don't actually get "privilege checked" so the made up owner *will* return
+         * as Privileged.
+         * This check will ensure we don't accidentally let these through
+         */
+        throw Boom.forbidden(this.auditLogger.failure({ username, owner, operation }));
       }
 
-      // else security is disabled so let the operation proceed
-    } catch (error) {
-      this.authLogger.genericOperation({ operation, savedObjectID, error });
-      throw error;
+      if (hasAllRequested) {
+        this.auditLogger.success({ username, operation, owner });
+      } else {
+        throw Boom.forbidden(this.auditLogger.failure({ owner, operation, username }));
+      }
+    } else if (!isOwnerAvailable) {
+      throw Boom.forbidden(this.auditLogger.failure({ owner, operation }));
     }
+
+    // else security is disabled so let the operation proceed
   }
 
-  public async getFindAuthorizationFilter({
-    savedObjectType,
-    operation,
-  }: {
-    savedObjectType: string;
-    operation: OperationDetails;
-  }): Promise<AuthorizationFilter> {
-    try {
-      const { securityAuth } = this;
-      if (securityAuth && this.shouldCheckAuthorization()) {
-        const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
+  public async getFindAuthorizationFilter(
+    operation: OperationDetails
+  ): Promise<AuthorizationFilter> {
+    const { securityAuth } = this;
+    if (securityAuth && this.shouldCheckAuthorization()) {
+      const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
-        if (!authorizedOwners.length) {
-          throw Boom.forbidden(this.authLogger.failure({ username, operation }));
-        }
-
-        return {
-          filter: getOwnersFilter(savedObjectType, authorizedOwners),
-          ensureAuthorizedForSavedObjects: (entities: OwnerEntity[]) => {
-            for (const entity of entities) {
-              try {
-                if (!authorizedOwners.includes(entity.owner)) {
-                  throw Boom.forbidden(
-                    this.authLogger.failure({ username, operation, owner: entity.owner })
-                  );
-                }
-
-                this.authLogger.genericOperation({ operation, savedObjectID: entity.id });
-              } catch (error) {
-                this.authLogger.genericOperation({ operation, savedObjectID: entity.id, error });
-                throw error;
-              }
-            }
-          },
-          logSuccessfulAuthorization: () => {
-            if (authorizedOwners.length) {
-              this.authLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
-            }
-          },
-        };
+      if (!authorizedOwners.length) {
+        throw Boom.forbidden(this.auditLogger.failure({ username, operation }));
       }
 
       return {
-        ensureAuthorizedForSavedObjects: (entity: OwnerEntity[]) => {},
-        logSuccessfulAuthorization: () => {},
+        filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
+        ensureSavedObjectIsAuthorized: (owner: string) => {
+          if (!authorizedOwners.includes(owner)) {
+            throw Boom.forbidden(this.auditLogger.failure({ username, operation, owner }));
+          }
+        },
+        logSuccessfulAuthorization: () => {
+          if (authorizedOwners.length) {
+            this.auditLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
+          }
+        },
       };
-    } catch (error) {
-      this.authLogger.genericOperation({ operation, error });
-      throw error;
     }
+
+    return {
+      ensureSavedObjectIsAuthorized: (owner: string) => {},
+      logSuccessfulAuthorization: () => {},
+    };
   }
 
   private async getAuthorizedOwners(

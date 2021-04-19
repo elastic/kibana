@@ -28,7 +28,7 @@ import {
   User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { getConnectorFromConfiguration } from '../utils';
+import { createAuditMsg, ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 
 import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
@@ -37,7 +37,6 @@ import { Operations } from '../../authorization';
 import { AuditLogger, EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  createAuditMsg,
   flattenCaseSavedObject,
   transformCaseConnectorToEsConnector,
   transformNewCase,
@@ -90,9 +89,11 @@ export const create = async ({
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await auth.ensureAuthorized({
-      owner: query.owner,
+    await ensureAuthorized({
       operation: Operations.createCase,
+      owner: query.owner,
+      authorization: auth,
+      auditLogger,
       savedObjectID,
     });
 
