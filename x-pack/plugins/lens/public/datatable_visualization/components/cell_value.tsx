@@ -90,10 +90,10 @@ function workoutColorForCell(
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
   if (comparisonFn(normalizedValue, normalizedMaxValue) > 0) {
-    return colors[colors.length - 1];
+    return;
   }
   if (comparisonFn(normalizedValue, normalizedMinValue) < 0) {
-    return colors[0];
+    return;
   }
 
   if (gradient && gradientHelper) {
@@ -137,13 +137,15 @@ export const createGridCell = (
             minMaxByColumnId[columnId],
             gradientHelpers[columnId]
           );
-          const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
-          if (colorMode === 'cell' && color) {
-            style.color = isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+          if (color) {
+            const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
+            if (colorMode === 'cell' && color) {
+              style.color = isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+            }
+            setCellProps({
+              style,
+            });
           }
-          setCellProps({
-            style,
-          });
         }
       }
       // make sure to clean it up when something change

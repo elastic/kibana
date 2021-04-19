@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   EuiFormRow,
@@ -58,18 +58,34 @@ function shiftPalette(stops: Required<CustomPaletteParams>['stops']) {
   return result;
 }
 
+function remapStopsByNewInterval(
+  controlStops: Required<CustomPaletteParams>['stops'],
+  { newInterval, oldInterval }: { newInterval: number; oldInterval: number },
+  { prevMin, newMin }: { prevMin: number; newMin: number }
+) {
+  return (controlStops || []).map(({ color, stop }) => {
+    return {
+      color,
+      stop: newMin + ((stop - prevMin) * newInterval) / oldInterval,
+    };
+  });
+}
+
 function getPaletteColors(
   palettes: PaletteRegistry,
   activePaletteParams: CustomPaletteParams,
   // used to customize color resolution
-  {
-    stopFactor,
-    prevPalette,
-    shouldShift,
-  }: { stopFactor: number; prevPalette?: string; shouldShift?: boolean } = {
-    stopFactor: 1,
-  }
+  { prevPalette, shouldShift }: { prevPalette?: string; shouldShift?: boolean } = {}
 ) {
+  const isCustomPalette = activePaletteParams.name === 'custom';
+  // compute the stopFactor based on steps value. Fallback to 3 steps if not defined yet
+  const steps = activePaletteParams.steps ?? isCustomPalette ? 3 : DEFAULT_COLOR_STEPS;
+  const visualSteps = isCustomPalette ? steps - 1 : steps;
+  const interval =
+    (activePaletteParams.rangeMax ?? DEFAULT_MAX_STOP) -
+    (activePaletteParams.rangeMin ?? DEFAULT_MIN_STOP);
+
+  const stopFactor = interval / visualSteps;
   // If stops are already declared just return them
   if (
     activePaletteParams?.stops != null &&
@@ -113,13 +129,9 @@ function reversePalette(paletteColorRepresentation: CustomPaletteParams['stops']
 
 export function applyPaletteParams(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
+  activePalette: PaletteOutput<CustomPaletteParams>,
   { forDisplay }: { forDisplay?: boolean } = {}
 ) {
-  if (!activePalette) {
-    return {};
-  }
-
   const paletteDisplayMode = activePalette?.params?.progression ?? 'fixed';
 
   const isCustomPalette = activePalette?.params?.name === 'custom';
@@ -129,7 +141,6 @@ export function applyPaletteParams(
     // shifting is a specific subtask for custom palettes in fixed mode when have to be visualized
     // on the EuiColorDisplay component: see https://github.com/elastic/eui/issues/4664
     shouldShift: forDisplay && isCustomPalette && paletteDisplayMode !== 'gradient',
-    stopFactor: 1,
   }).map(({ color, stop }) => ({ color, stop }));
 
   if (activePalette?.params?.reverse && paletteColorRepresentation) {
@@ -173,10 +184,11 @@ export function CustomizablePalette({
   const isAutoRange = rangeType === 'auto';
   const isMaxMinValid = Number(minLocalValue) < Number(maxLocalValue);
   const progressionType = activePalette.params?.progression ?? defaultParams.progression;
+  const isCustomPalette = activePalette?.params?.name === 'custom';
 
   const showStepsInput =
-    (activePalette?.params?.name !== 'custom' && progressionType !== 'gradient') ||
-    (activePalette?.params?.name === 'custom' && progressionType === 'stepped');
+    (!isCustomPalette && progressionType !== 'gradient') ||
+    (isCustomPalette && progressionType === 'stepped');
 
   const controlStops = activePalette?.params?.reverse
     ? reversePalette(activePalette?.params?.controlStops)
@@ -198,13 +210,54 @@ export function CustomizablePalette({
     [minLocalValue, maxLocalValue]
   );
 
-  const safeColorList = controlStops || colorStops || [];
-  const [firstColorStop] = safeColorList;
-  const lastColorStop = safeColorList[safeColorList.length - 1];
+  const setMinMaxLocalValues = useCallback(
+    (min: string, max: string) => {
+      // update both min/max
+      setMinLocalValue(min);
+      setMaxLocalValue(max);
+
+      if (isCustomPalette) {
+        // remap color stops and control stops now to be consistent on the new range
+        const newInterval = Number(max) - Number(min);
+        const oldInterval = Number(maxLocalValue) - Number(minLocalValue);
+
+        const newControlColorStops = remapStopsByNewInterval(
+          controlStops || [],
+          { newInterval, oldInterval },
+          { prevMin: Number(minLocalValue), newMin: Number(min) }
+        );
+
+        setPalette(
+          mergePaletteParams(activePalette, {
+            stops:
+              progressionType !== 'stepped'
+                ? newControlColorStops
+                : getPaletteColors(
+                    palettes,
+                    { ...activePalette.params, controlStops: newControlColorStops },
+                    {
+                      shouldShift: false,
+                    }
+                  ),
+            controlStops: newControlColorStops,
+            steps:
+              progressionType === 'stepped'
+                ? activePalette.params!.steps!
+                : (newControlColorStops || []).length,
+          })
+        );
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [minLocalValue, maxLocalValue, progressionType, controlStops, activePalette, setPalette]
+  );
+
+  const [firstColorStop] = colorStops;
+  const lastColorStop = colorStops[colorStops.length - 1];
 
   // The fixed type is named "Stepped" when in predefined palette, or Fixed for custom palettes
   const progressionTypeLabel = [
-    activePalette?.params?.name === 'custom'
+    isCustomPalette
       ? {
           id: `${idPrefix}fixed`,
           label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixedCustom', {
@@ -227,7 +280,7 @@ export function CustomizablePalette({
       'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
     },
   ].concat(
-    activePalette?.params?.name === 'custom'
+    isCustomPalette
       ? [
           {
             id: `${idPrefix}stepped`,
@@ -259,7 +312,7 @@ export function CustomizablePalette({
             newParams,
             newPalette.name === 'custom'
               ? // pick the previous palette to calculate init colors in custom mode
-                { stopFactor: 50, prevPalette: activePalette.name, shouldShift: false }
+                { prevPalette: activePalette.name, shouldShift: false }
               : undefined
           );
           setPalette({
@@ -355,21 +408,20 @@ export function CustomizablePalette({
         data-test-subj="lnsDatatable_dynamicColoring_min_range_label"
         label={
           <>
-            <span className="lnsPalettePanel__colorIndicator">
-              <EuiIcon
-                color={firstColorStop.color}
-                type="stopFilled"
-                aria-label={i18n.translate(
-                  'xpack.lens.table.dynamicColoring.progression.minStopColor',
-                  {
-                    defaultMessage: 'Color for the minimum value: {hex}',
-                    values: {
-                      hex: firstColorStop.color,
-                    },
-                  }
-                )}
-              />
-            </span>
+            <EuiIcon
+              className="lnsPalettePanel__colorIndicator"
+              color={firstColorStop.color}
+              type="stopFilled"
+              aria-label={i18n.translate(
+                'xpack.lens.table.dynamicColoring.progression.minStopColor',
+                {
+                  defaultMessage: 'Color for the minimum value: {hex}',
+                  values: {
+                    hex: firstColorStop.color,
+                  },
+                }
+              )}
+            />
             {i18n.translate('xpack.lens.table.dynamicColoring.progression.minStop', {
               defaultMessage: 'Min color stop',
             })}
@@ -389,7 +441,7 @@ export function CustomizablePalette({
           data-test-subj="lnsDatatable_dynamicColoring_min_range"
           value={minLocalValue}
           onChange={({ target }) => {
-            setMinLocalValue(target.value);
+            setMinMaxLocalValues(target.value, maxLocalValue);
           }}
           append={rangeType === 'number' ? undefined : '%'}
           isInvalid={!isMaxMinValid}
@@ -433,14 +485,14 @@ export function CustomizablePalette({
           data-test-subj="lnsDatatable_dynamicColoring_max_range"
           value={maxLocalValue}
           onChange={({ target }) => {
-            setMaxLocalValue(target.value);
+            setMinMaxLocalValues(minLocalValue, target.value);
           }}
           append={rangeType === 'number' ? undefined : '%'}
           isInvalid={!isMaxMinValid}
           disabled={isAutoRange}
         />
       </EuiFormRow>
-      {activePalette.name === 'custom' ? (
+      {isCustomPalette ? (
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
             defaultMessage: 'Custom palette',
@@ -455,9 +507,17 @@ export function CustomizablePalette({
             })}
             valueInputProps={rangeType === 'number' ? {} : { append: '%' }}
             onChange={(colorSteps) => {
-              const stops = (colorSteps || [])
-                // sort them to make it consistent for reverse
-                .sort(({ stop: stopA }, { stop: stopB }) => stopA - stopB);
+              const stops =
+                // if stops are less than 2, restore the previous stops
+                colorSteps && colorSteps.length > 1
+                  ? colorSteps
+                      // sort them to make it consistent for reverse
+                      .sort(({ stop: stopA }, { stop: stopB }) => stopA - stopB)
+                  : controlStops || colorStops;
+              // the minimum and maximum stops must be at min and max value,
+              // so make sure to restore them in case the user changes them
+              stops[0].stop = Number(minLocalValue);
+              stops[stops.length - 1].stop = Number(maxLocalValue);
               return setPalette(
                 mergePaletteParams(activePalette, {
                   stops:
@@ -467,10 +527,6 @@ export function CustomizablePalette({
                           palettes,
                           { ...activePalette.params, controlStops: stops },
                           {
-                            stopFactor:
-                              progressionType === 'stepped'
-                                ? 100 / activePalette.params!.steps!
-                                : 1,
                             shouldShift: false,
                           }
                         ),
@@ -483,8 +539,8 @@ export function CustomizablePalette({
               );
             }}
             colorStops={controlStops || colorStops || []}
-            min={0}
-            max={100}
+            min={Number(minLocalValue)}
+            max={Number(maxLocalValue)}
             stopType={progressionType}
             stepNumber={activePalette?.params?.steps}
           />
@@ -538,8 +594,6 @@ export function CustomizablePalette({
                     palettes,
                     { ...activePalette.params, steps: Number(currentTarget.value) },
                     {
-                      stopFactor:
-                        progressionType === 'stepped' ? 100 / Number(currentTarget.value) : 1,
                       shouldShift: false,
                     }
                   ),
