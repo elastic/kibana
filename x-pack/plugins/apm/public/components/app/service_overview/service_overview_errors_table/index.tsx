@@ -28,8 +28,8 @@ import { getColumns } from './get_column';
 interface Props {
   serviceName: string;
 }
-type ErrorGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
-type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
+type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'last_seen' | 'occurrences';
@@ -40,8 +40,8 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
-const INITIAL_STATE_PRIMARY_STATISTICS: {
-  items: ErrorGroupPrimaryStatistics['error_groups'];
+const INITIAL_STATE_MAIN_STATISTICS: {
+  items: ErrorGroupMainStatistics['error_groups'];
   totalItems: number;
   requestId?: string;
 } = {
@@ -50,7 +50,7 @@ const INITIAL_STATE_PRIMARY_STATISTICS: {
   requestId: undefined,
 };
 
-const INITIAL_STATE_COMPARISON_STATISTICS: ErrorGroupComparisonStatistics = {
+const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   currentPeriod: {},
   previousPeriod: {},
 };
@@ -88,14 +88,14 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
-  const { data = INITIAL_STATE_PRIMARY_STATISTICS, status } = useFetcher(
+  const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType) {
         return;
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
+          'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -114,7 +114,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
         return {
-          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
+          // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
           requestId: uuid(),
           items: currentPageErrorGroups,
           totalItems: response.error_groups.length,
@@ -142,14 +142,14 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { requestId, items, totalItems } = data;
 
   const {
-    data: errorGroupComparisonStatistics = INITIAL_STATE_COMPARISON_STATISTICS,
-    status: errorGroupComparisonStatisticsStatus,
+    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+            'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -177,7 +177,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const columns = getColumns({
     serviceName,
-    errorGroupComparisonStatistics,
+    errorGroupDetailedStatistics,
     comparisonEnabled,
   });
 
@@ -222,7 +222,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                errorGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING
+                errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {

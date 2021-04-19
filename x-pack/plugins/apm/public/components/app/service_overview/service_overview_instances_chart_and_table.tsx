@@ -25,7 +25,7 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface PrimaryStatsServiceInstanceItem {
+export interface MainStatsServiceInstanceItem {
   serviceNodeName: string;
   errorRate: number;
   throughput: number;
@@ -34,15 +34,15 @@ export interface PrimaryStatsServiceInstanceItem {
   memoryUsage: number;
 }
 
-const INITIAL_STATE_PRIMARY_STATS = {
-  primaryStatsItems: [] as PrimaryStatsServiceInstanceItem[],
-  primaryStatsRequestId: undefined,
-  primaryStatsItemCount: 0,
+const INITIAL_STATE_MAIN_STATS = {
+  mainStatsItems: [] as MainStatsServiceInstanceItem[],
+  mainStatsRequestId: undefined,
+  mainStatsItemCount: 0,
 };
 
-type ApiResponseComparisonStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
-const INITIAL_STATE_COMPARISON_STATISTICS: ApiResponseComparisonStats = {
+const INITIAL_STATE_DETAILED_STATISTICS: ApiResponseDetailedStats = {
   currentPeriod: {},
   previousPeriod: {},
 };
@@ -95,8 +95,8 @@ export function ServiceOverviewInstancesChartAndTable({
   });
 
   const {
-    data: primaryStatsData = INITIAL_STATE_PRIMARY_STATS,
-    status: primaryStatsStatus,
+    data: mainStatsData = INITIAL_STATE_MAIN_STATS,
+    status: mainStatsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType || !latencyAggregationType) {
@@ -105,7 +105,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics',
+          'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
         params: {
           path: {
             serviceName,
@@ -120,7 +120,7 @@ export function ServiceOverviewInstancesChartAndTable({
           },
         },
       }).then((response) => {
-        const primaryStatsItems = orderBy(
+        const mainStatsItems = orderBy(
           // need top-level sortable fields for the managed table
           response.serviceInstances.map((item) => ({
             ...item,
@@ -135,10 +135,10 @@ export function ServiceOverviewInstancesChartAndTable({
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
         return {
-          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
-          primaryStatsRequestId: uuid(),
-          primaryStatsItems,
-          primaryStatsItemCount: response.serviceInstances.length,
+          // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
+          mainStatsRequestId: uuid(),
+          mainStatsItems,
+          mainStatsItemCount: response.serviceInstances.length,
         };
       });
     },
@@ -162,14 +162,14 @@ export function ServiceOverviewInstancesChartAndTable({
   );
 
   const {
-    primaryStatsItems,
-    primaryStatsRequestId,
-    primaryStatsItemCount,
-  } = primaryStatsData;
+    mainStatsItems,
+    mainStatsRequestId,
+    mainStatsItemCount,
+  } = mainStatsData;
 
   const {
-    data: comparisonStatsData = INITIAL_STATE_COMPARISON_STATISTICS,
-    status: comparisonStatisticsStatus,
+    data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
+    status: detailedStatsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
@@ -177,14 +177,14 @@ export function ServiceOverviewInstancesChartAndTable({
         !end ||
         !transactionType ||
         !latencyAggregationType ||
-        !primaryStatsItemCount
+        !mainStatsItemCount
       ) {
         return;
       }
 
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics',
+          'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
         params: {
           path: {
             serviceName,
@@ -198,7 +198,7 @@ export function ServiceOverviewInstancesChartAndTable({
             numBuckets: 20,
             transactionType,
             serviceNodeIds: JSON.stringify(
-              primaryStatsItems.map((item) => item.serviceNodeName)
+              mainStatsItems.map((item) => item.serviceNodeName)
             ),
             comparisonStart,
             comparisonEnd,
@@ -206,9 +206,9 @@ export function ServiceOverviewInstancesChartAndTable({
         },
       });
     },
-    // only fetches comparison statistics when requestId is invalidated by primary statistics api call
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [primaryStatsRequestId],
+    [mainStatsRequestId],
     { preservePreviousData: false }
   );
 
@@ -217,22 +217,22 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={primaryStatsItems}
-          status={primaryStatsStatus}
+          items={mainStatsItems}
+          status={mainStatsStatus}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable
-            primaryStatsItems={primaryStatsItems}
-            primaryStatsStatus={primaryStatsStatus}
-            primaryStatsItemCount={primaryStatsItemCount}
-            comparisonStatsData={comparisonStatsData}
+            mainStatsItems={mainStatsItems}
+            mainStatsStatus={mainStatsStatus}
+            mainStatsItemCount={mainStatsItemCount}
+            detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}
             isLoading={
-              primaryStatsStatus === FETCH_STATUS.LOADING ||
-              comparisonStatisticsStatus === FETCH_STATUS.LOADING
+              mainStatsStatus === FETCH_STATUS.LOADING ||
+              detailedStatsStatus === FETCH_STATUS.LOADING
             }
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({

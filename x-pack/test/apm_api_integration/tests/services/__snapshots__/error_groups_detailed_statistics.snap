@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Error groups comparison statistics when data is loaded returns the correct data 1`] = `
+exports[`APM API tests basic apm_8.0.0 Error groups detailed statistics when data is loaded returns the correct data 1`] = `
 Object {
   "groupId": "051f95eabf120ebe2f8b0399fe3e54c5",
   "timeseries": Array [
@@ -132,7 +132,7 @@ Object {
 }
 `;
 
-exports[`APM API tests basic apm_8.0.0 Error groups comparison statistics when data is loaded with previous data returns the correct data returns correct timeseries 1`] = `
+exports[`APM API tests basic apm_8.0.0 Error groups detailed statistics when data is loaded with previous data returns the correct data returns correct timeseries 1`] = `
 Object {
   "groupId": "051f95eabf120ebe2f8b0399fe3e54c5",
   "timeseries": Array [
