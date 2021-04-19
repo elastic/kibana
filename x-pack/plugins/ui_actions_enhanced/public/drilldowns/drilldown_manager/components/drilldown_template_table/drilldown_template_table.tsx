@@ -19,7 +19,7 @@ import {
   txtNameColumnTitle,
   txtSelectableMessage,
   txtCopyButtonLabel,
-  txtSingleItemCloneActionLabel,
+  txtSingleItemCopyActionLabel,
   txtActionColumnTitle,
   txtTriggerColumnTitle,
 } from './i18n';
@@ -89,7 +89,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
             disabled={!!selected.length}
             onClick={() => onCreate(drilldown.id)}
           >
-            {txtSingleItemCloneActionLabel}
+            {txtSingleItemCopyActionLabel}
           </EuiButtonEmpty>
         ),
     },

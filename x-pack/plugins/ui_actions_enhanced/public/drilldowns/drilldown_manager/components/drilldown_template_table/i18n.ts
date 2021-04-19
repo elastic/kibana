@@ -44,11 +44,11 @@ export const txtTriggerColumnTitle = i18n.translate(
   }
 );
 
-export const txtSingleItemCloneActionLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCloneAction',
+export const txtSingleItemCopyActionLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCopyAction',
   {
-    defaultMessage: 'Copy to this panel',
-    description: '"Clone" action button label in drilldown template cloning table last column.',
+    defaultMessage: 'Copy',
+    description: '"Copy" action button label in drilldown template cloning table last column.',
   }
 );
 
