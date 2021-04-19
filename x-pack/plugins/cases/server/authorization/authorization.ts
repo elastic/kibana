@@ -21,7 +21,7 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseOwners: Set<string>;
-  private readonly authLogger: AuthorizationAuditLogger;
+  private readonly auditLogger: AuthorizationAuditLogger;
 
   private constructor({
     request,
@@ -37,7 +37,7 @@ export class Authorization {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseOwners = caseOwners;
-    this.authLogger = auditLogger;
+    this.auditLogger = auditLogger;
   }
 
   /**
@@ -99,16 +99,16 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(this.authLogger.failure({ username, owner, operation }));
+        throw Boom.forbidden(this.auditLogger.failure({ username, owner, operation }));
       }
 
       if (hasAllRequested) {
-        this.authLogger.success({ username, operation, owner });
+        this.auditLogger.success({ username, operation, owner });
       } else {
-        throw Boom.forbidden(this.authLogger.failure({ owner, operation, username }));
+        throw Boom.forbidden(this.auditLogger.failure({ owner, operation, username }));
       }
     } else if (!isOwnerAvailable) {
-      throw Boom.forbidden(this.authLogger.failure({ owner, operation }));
+      throw Boom.forbidden(this.auditLogger.failure({ owner, operation }));
     }
 
     // else security is disabled so let the operation proceed
@@ -122,19 +122,19 @@ export class Authorization {
       const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
       if (!authorizedOwners.length) {
-        throw Boom.forbidden(this.authLogger.failure({ username, operation }));
+        throw Boom.forbidden(this.auditLogger.failure({ username, operation }));
       }
 
       return {
         filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
         ensureSavedObjectIsAuthorized: (owner: string) => {
           if (!authorizedOwners.includes(owner)) {
-            throw Boom.forbidden(this.authLogger.failure({ username, operation, owner }));
+            throw Boom.forbidden(this.auditLogger.failure({ username, operation, owner }));
           }
         },
         logSuccessfulAuthorization: () => {
           if (authorizedOwners.length) {
-            this.authLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
+            this.auditLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
           }
         },
       };
