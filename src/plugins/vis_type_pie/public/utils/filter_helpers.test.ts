@@ -21,6 +21,7 @@ describe('getFilterClickData', () => {
         depth: 1,
         path: [],
         sortIndex: 1,
+        smAccessorValue: 'Logstash Airways',
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
@@ -38,6 +39,7 @@ describe('getFilterClickData', () => {
         depth: 1,
         path: [],
         sortIndex: 1,
+        smAccessorValue: 'ES-Air',
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
