@@ -14,7 +14,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
      -d '
 {
   "params":{
-     "indexPatterns: ["*"],
+     "indexPatterns": ["*"],
      "eqlQuery": "sequence by hostname [network where true]"
    },
    "consumer":"alerts",
@@ -24,7 +24,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
    },
    "actions":[],
    "tags":[
-      "eql"
+      "eql",
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",

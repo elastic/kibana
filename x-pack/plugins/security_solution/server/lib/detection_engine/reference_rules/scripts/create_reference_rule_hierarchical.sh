@@ -17,7 +17,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
      -d '
 {
   "params":{
-     "indexPatterns: ["*"],
+     "indexPatterns": ["*"],
      "customQuery": "rule.id:siem.referenceRule"
    },
    "consumer":"alerts",
@@ -27,8 +27,8 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
    },
    "actions":[],
    "tags":[
-      "custom"
-      "hierarchical"
+      "custom",
+      "hierarchical",
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",

@@ -14,7 +14,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
      -d '
 {
   "params":{
-     "indexPatterns: ["*"],
+     "indexPatterns": ["*"],
      "customQuery": "*:*"
    },
    "consumer":"alerts",
@@ -24,7 +24,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
    },
    "actions":[],
    "tags":[
-      "custom"
+      "custom",
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",
