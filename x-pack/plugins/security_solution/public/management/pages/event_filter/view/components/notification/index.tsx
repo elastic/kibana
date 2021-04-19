@@ -5,27 +5,48 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Immutable, NewTrustedApp } from '../../../../../../../common/endpoint/types';
-import { isCreationSuccessful } from '../../../store/selector';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../../../../../public/shared_imports';
+import { ServerApiError } from '../../../../../../common/types';
+import { isCreationSuccessful, getFormEntry, getCreationError } from '../../../store/selector';
 
 import { useToasts } from '../../../../../../common/lib/kibana';
 import { useEventFilterSelector } from '../../hooks';
 
-const getCreationSuccessMessage = (entry?: Immutable<NewTrustedApp>) => {
+const getCreationSuccessMessage = (
+  entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined
+) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
     defaultMessage: '"{name}" has been added to the event exceptions list.',
-    values: { name: entry?.name ?? 'Fake' },
+    values: { name: entry?.name },
+  });
+};
+
+const getCreationErrorMessage = (creationError: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
+    defaultMessage: 'There was an error creating the new exception: "{error}"',
+    values: { error: creationError.message },
   });
 };
 
 export const EventFilterNotification = memo(() => {
   const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
+  const creationError = useEventFilterSelector(getCreationError);
+  const formEntry = useEventFilterSelector(getFormEntry);
   const toasts = useToasts();
-  if (creationSuccessful) {
-    toasts.addSuccess(getCreationSuccessMessage());
+  const [wasAlreadyHandled] = useState(new WeakSet());
+
+  if (creationSuccessful && formEntry && !wasAlreadyHandled.has(formEntry)) {
+    wasAlreadyHandled.add(formEntry);
+    toasts.addSuccess(getCreationSuccessMessage(formEntry));
+  } else if (creationError && !wasAlreadyHandled.has(creationError)) {
+    wasAlreadyHandled.add(creationError);
+    toasts.addDanger(getCreationErrorMessage(creationError));
   }
 
   return <></>;

@@ -123,22 +123,24 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     );
 
     return (
-      <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
-        <ModalHeader>
-          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
-          <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
-        </ModalHeader>
+      <>
+        <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
+          <ModalHeader>
+            <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+            <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
+          </ModalHeader>
 
-        {modalBodyMemo}
+          {modalBodyMemo}
 
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
-            {ACTIONS_CANCEL}
-          </EuiButtonEmpty>
-          {confirmButtonMemo}
-        </EuiModalFooter>
+          <EuiModalFooter>
+            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+              {ACTIONS_CANCEL}
+            </EuiButtonEmpty>
+            {confirmButtonMemo}
+          </EuiModalFooter>
+        </Modal>
         <EventFilterNotification />
-      </Modal>
+      </>
     );
   }
 );

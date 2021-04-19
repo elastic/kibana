@@ -10,7 +10,12 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
-import { isLoadingResourceState, isLoadedResourceState } from '../../../state/async_resource_state';
+import { ServerApiError } from '../../../../common/types';
+import {
+  isLoadingResourceState,
+  isLoadedResourceState,
+  isFailedResourceState,
+} from '../../../state/async_resource_state';
 
 export const getFormEntry = (
   state: EventFilterListPageState
@@ -42,4 +47,10 @@ export const isCreationInProgress = (state: EventFilterListPageState): boolean =
 
 export const isCreationSuccessful = (state: EventFilterListPageState): boolean => {
   return isLoadedResourceState(state.form.submissionResourceState);
+};
+
+export const getCreationError = (state: EventFilterListPageState): ServerApiError | undefined => {
+  const submissionResourceState = state.form.submissionResourceState;
+
+  return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
