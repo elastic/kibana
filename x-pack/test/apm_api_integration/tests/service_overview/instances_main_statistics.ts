@@ -22,13 +22,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   registry.when(
-    'Service overview instances primary statistics when data is not loaded',
+    'Service overview instances main statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await apmApiSupertest({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -48,17 +48,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Service overview instances primary statistics when data is loaded',
+    'Service overview instances main statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('fetching java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`>;
+          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiSupertest({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -122,12 +122,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('fetching non-java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`>;
+          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiSupertest({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
               query: {

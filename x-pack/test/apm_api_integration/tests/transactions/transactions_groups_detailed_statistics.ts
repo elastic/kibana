@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { removeEmptyCoordinates, roundNumber } from '../../utils';
 
-type TransactionsGroupsComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics'>;
+type TransactionsGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,13 +25,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const transactionNames = ['DispatcherServlet#doGet', 'APIRestController#customers'];
 
   registry.when(
-    'Transaction groups comparison statistics when data is not loaded',
+    'Transaction groups detailed statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -50,13 +50,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Transaction groups comparison statistics when data is loaded',
+    'Transaction groups detailed statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const {
           currentPeriod,
           previousPeriod,
-        } = response.body as TransactionsGroupsComparisonStatistics;
+        } = response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
@@ -110,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data for latency aggregation 99th percentile', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -127,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const {
           currentPeriod,
           previousPeriod,
-        } = response.body as TransactionsGroupsComparisonStatistics;
+        } = response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
@@ -158,7 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns empty when transaction name is not found', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -175,12 +175,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('returns data with previous period', async () => {
-        let currentPeriod: TransactionsGroupsComparisonStatistics['currentPeriod'];
-        let previousPeriod: TransactionsGroupsComparisonStatistics['previousPeriod'];
+        let currentPeriod: TransactionsGroupsDetailedStatistics['currentPeriod'];
+        let previousPeriod: TransactionsGroupsDetailedStatistics['previousPeriod'];
         before(async () => {
           const response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+              pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
               query: {
                 numBuckets: 20,
                 transactionType: 'request',

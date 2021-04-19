@@ -22,7 +22,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
-export async function getServiceErrorGroupComparisonStatistics({
+export async function getServiceErrorGroupDetailedStatistics({
   kuery,
   serviceName,
   setup,
@@ -44,7 +44,7 @@ export async function getServiceErrorGroupComparisonStatistics({
   end: number;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
   return withApmSpan(
-    'get_service_error_group_comparison_statistics',
+    'get_service_error_group_detailed_statistics',
     async () => {
       const { apmEventClient } = setup;
 
@@ -147,7 +147,7 @@ export async function getServiceErrorGroupPeriods({
     groupIds,
   };
 
-  const currentPeriodPromise = getServiceErrorGroupComparisonStatistics({
+  const currentPeriodPromise = getServiceErrorGroupDetailedStatistics({
     ...commonProps,
     start,
     end,
@@ -155,7 +155,7 @@ export async function getServiceErrorGroupPeriods({
 
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
-      ? getServiceErrorGroupComparisonStatistics({
+      ? getServiceErrorGroupDetailedStatistics({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
