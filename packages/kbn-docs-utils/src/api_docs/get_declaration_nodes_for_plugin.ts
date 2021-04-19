@@ -63,7 +63,7 @@ function getExportedFileDeclarations(source: SourceFile, log: ToolingLog): Node[
       if (name && name !== '') {
         nodes.push(ed);
       } else {
-        log.warning(`API with missing name encountered.`);
+        log.warning(`API with missing name encountered, text is ` + ed.getText().substring(0, 50));
       }
     });
   });

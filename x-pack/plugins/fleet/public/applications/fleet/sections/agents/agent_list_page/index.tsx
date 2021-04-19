@@ -37,7 +37,7 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
-import { ContextMenuActions } from '../../../components';
+import { AgentPolicySummaryLine, ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -344,8 +344,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (!agent.policy_id) return true;
 
     const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isManaged = agentPolicy?.is_managed === true;
-    return !isManaged;
+    const isHosted = agentPolicy?.is_managed === true;
+    return !isHosted;
   };
 
   const columns = [
@@ -374,48 +374,24 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
-        const policyName = agentPoliciesIndexedById[policyId]?.name;
+        const agentPolicy = agentPoliciesIndexedById[policyId];
+        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
+
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} className="eui-textTruncate">
-              <EuiLink
-                href={getHref('policy_details', { policyId })}
-                className="eui-textTruncate"
-                title={policyName || policyId}
-              >
-                {policyName || policyId}
-              </EuiLink>
-            </EuiFlexItem>
-            {agent.policy_revision && (
+            <AgentPolicySummaryLine policy={agentPolicy} />
+            {showWarning && (
               <EuiFlexItem grow={false}>
-                <EuiText color="default" size="xs" className="eui-textNoWrap">
+                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                  <EuiIcon size="m" type="alert" color="warning" />
+                  &nbsp;
                   <FormattedMessage
-                    id="xpack.fleet.agentList.revisionNumber"
-                    defaultMessage="rev. {revNumber}"
-                    values={{ revNumber: agent.policy_revision }}
+                    id="xpack.fleet.agentList.outOfDateLabel"
+                    defaultMessage="Out-of-date"
                   />
                 </EuiText>
               </EuiFlexItem>
             )}
-            {agent.policy_id &&
-              agent.policy_revision &&
-              agentPoliciesIndexedById[agent.policy_id] &&
-              agentPoliciesIndexedById[agent.policy_id].revision > agent.policy_revision && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <EuiIcon size="m" type="alert" color="warning" />
-                    &nbsp;
-                    {true && (
-                      <>
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.outOfDateLabel"
-                          defaultMessage="Out-of-date"
-                        />
-                      </>
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
           </EuiFlexGroup>
         );
       },

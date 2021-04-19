@@ -28,18 +28,18 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
 
   const { reportDefinitions } = series;
 
-  const NO_SELECT = 'no_select';
-
-  const options = [{ label: 'Select metric', field: NO_SELECT }, ...(opts ?? [])];
+  const options = opts ?? [];
 
   return (
-    <div style={{ maxWidth: 200 }}>
+    <div style={{ maxWidth: 250 }}>
       <EuiSuperSelect
+        compressed
+        prepend={'Metric'}
         options={options.map(({ label, field: fd, description }) => ({
           value: fd,
           inputDisplay: label,
         }))}
-        valueOfSelected={reportDefinitions?.[field] || defaultValue || NO_SELECT}
+        valueOfSelected={reportDefinitions?.[field] || defaultValue || options?.[0].field}
         onChange={(value) => onChange(value)}
       />
     </div>

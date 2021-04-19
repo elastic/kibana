@@ -4,11 +4,7 @@
   "description": "Detect anomalous network activity in your ECS-compatible network logs.",
   "type": "network data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": [
-    "logs-*",
-    "filebeat-*",
-    "packetbeat-*"
-  ],
+  "defaultIndexPattern": "logs-*,filebeat-*,packetbeat-*",
   "query": {
     "bool": {
       "filter": [
