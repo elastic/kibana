@@ -832,10 +832,11 @@ export interface EsQueryConfig {
 }
 
 // Warning: (ae-forgotten-export) The symbol "SortDirectionNumeric" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "SortDirectionFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EsQuerySortValue" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric | SortDirectionFormat>;
 
 // Warning: (ae-forgotten-export) The symbol "ExpressionTypeDefinition" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
