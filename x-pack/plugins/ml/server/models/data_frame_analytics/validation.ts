@@ -352,7 +352,7 @@ async function getValidationCheckMessages(
           'xpack.ml.models.dfaValidation.messages.lowFieldCountOutlierWarningText',
           {
             defaultMessage:
-              'Outlier detection requires at least one field to be included in the analysis.',
+              'Outlier detection requires that at least one field is included in the analysis.',
           }
         );
         messages.push(lowFieldCountWarningMessage);
@@ -364,7 +364,7 @@ async function getValidationCheckMessages(
           'xpack.ml.models.dfaValidation.messages.lowFieldCountWarningText',
           {
             defaultMessage:
-              '{analysisType} requires at least two fields to be included in the analysis.',
+              '{analysisType} requires that at least two fields are included in the analysis.',
             values: {
               analysisType:
                 analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ? 'Regression' : 'Classification',
