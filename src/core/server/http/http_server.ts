@@ -18,6 +18,8 @@ import {
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
@@ -92,7 +94,7 @@ export class HttpServer {
   constructor(
     private readonly logger: LoggerFactory,
     private readonly name: string,
-    private readonly shutdownTimeout: Duration
+    private readonly shutdownTimeout$: Observable<Duration>
   ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
@@ -231,7 +233,8 @@ export class HttpServer {
     if (hasStarted) {
       this.log.debug('stopping http server');
 
-      await this.server.stop({ timeout: this.shutdownTimeout.asMilliseconds() });
+      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
 
       this.log.debug(`http server stopped`);
 

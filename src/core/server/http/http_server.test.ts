@@ -27,6 +27,7 @@ import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
+import { of } from 'rxjs';
 
 const cookieOptions = {
   name: 'sid',
@@ -81,7 +82,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests', config.shutdownTimeout);
+  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
