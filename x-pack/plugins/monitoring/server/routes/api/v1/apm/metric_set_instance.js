@@ -15,14 +15,12 @@ export const metricSet = [
     name: 'apm_os_load',
   },
   {
-    keys: [
-      'apm_mem_alloc',
-      'apm_mem_rss',
-      'apm_mem_gc_next',
-      'apm_cgroup_memory_usage',
-      'apm_cgroup_memory_limit',
-    ],
+    keys: ['apm_mem_alloc', 'apm_mem_rss', 'apm_mem_gc_next'],
     name: 'apm_memory',
+  },
+  {
+    keys: ['apm_cgroup_memory_usage', 'apm_cgroup_memory_limit', 'apm_mem_gc_next'],
+    name: 'apm_memory_cgroup',
   },
   {
     keys: ['apm_output_events_total', 'apm_output_events_active', 'apm_output_events_acked'],

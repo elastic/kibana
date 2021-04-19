@@ -461,53 +461,30 @@ Object {
     "usageField": "cpuacct.total.ns",
     "uuidField": "beats_stats.beat.uuid",
   },
-  "apm_cgroup_memory": QuotaMetric {
-    "aggs": Object {
-      "periods": Object {
-        "max": Object {
-          "field": "beats_stats.metrics.beat.cgroup.memory.stats.periods",
-        },
-      },
-      "periods_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "periods",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-      "quota": Object {
-        "min": Object {
-          "field": "beats_stats.metrics.beat.cgroup.memory.cfs.quota.us",
-        },
-      },
-      "usage": Object {
-        "max": Object {
-          "field": "beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes",
-        },
-      },
-      "usage_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "usage",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-    },
+  "apm_cgroup_memory_limit": ApmMetric {
     "app": "apm",
-    "calculation": [Function],
-    "derivative": true,
-    "description": "Memory Usage time compared to the memory quota shown in percentage. If memory quotas are not set, then no data will be shown.",
-    "field": "",
-    "fieldSource": "beats_stats.metrics.beat.cgroup",
-    "format": "0,0.[00]",
-    "label": "Cgroup Memory Utilization",
+    "derivative": false,
+    "description": "Memory limit of the container",
+    "field": "beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes",
+    "format": "0,0.0 b",
+    "label": "Memory Limit",
     "metricAgg": "max",
-    "periodsField": "memory.stats.periods",
-    "quotaField": "memory.cfs.quota.us",
     "timestampField": "beats_stats.timestamp",
-    "title": "Memory Utilization",
-    "units": "%",
-    "usageField": "memory.mem.usage.bytes",
+    "title": "Memory",
+    "units": "B",
+    "uuidField": "beats_stats.beat.uuid",
+  },
+  "apm_cgroup_memory_usage": ApmMetric {
+    "app": "apm",
+    "derivative": false,
+    "description": "Memory usage of the container",
+    "field": "beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes",
+    "format": "0,0.0 b",
+    "label": "Memory Utilization (cgroup)",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Memory",
+    "units": "B",
     "uuidField": "beats_stats.beat.uuid",
   },
   "apm_cpu_total": ApmCpuUtilizationMetric {
