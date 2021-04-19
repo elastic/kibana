@@ -29,6 +29,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfig.ensureIds.$1",
                 "type": "Array",
                 "label": "list",
                 "isRequired": true,
@@ -75,6 +76,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfig.nextId.$1",
                 "type": "Array",
                 "label": "list",
                 "isRequired": true,
@@ -221,6 +223,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.Unnamed.$1",
                 "type": "Object",
                 "label": "aggConfigs",
                 "isRequired": true,
@@ -240,18 +243,13 @@
                 }
               },
               {
+                "id": "def-public.AggConfig.Unnamed.$2",
                 "type": "Object",
                 "label": "opts",
                 "isRequired": true,
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
-                  },
+                  "SerializableState",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
                   {
                     "pluginId": "data",
@@ -296,6 +294,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfig.setParams.$1",
                 "type": "Any",
                 "label": "from",
                 "isRequired": true,
@@ -330,6 +329,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.getParam.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -368,6 +368,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.write.$1",
                 "type": "Object",
                 "label": "aggs",
                 "isRequired": false,
@@ -421,6 +422,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.createFilter.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -434,6 +436,7 @@
                 }
               },
               {
+                "id": "def-public.AggConfig.createFilter.$2",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -482,6 +485,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfig.onSearchRequestStart.$1",
                 "type": "Object",
                 "label": "searchSource",
                 "isRequired": true,
@@ -503,6 +507,7 @@
                 }
               },
               {
+                "id": "def-public.AggConfig.onSearchRequestStart.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -552,6 +557,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfig.toDsl.$1",
                 "type": "Object",
                 "label": "aggConfigs",
                 "isRequired": false,
@@ -591,13 +597,7 @@
             "label": "serialize",
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }"
             ],
             "description": [],
@@ -617,13 +617,7 @@
             "label": "toJSON",
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }"
             ],
             "description": [],
@@ -773,6 +767,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.getValue.$1",
                 "type": "Any",
                 "label": "bucket",
                 "isRequired": true,
@@ -803,6 +798,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.getKey.$1",
                 "type": "Any",
                 "label": "bucket",
                 "isRequired": true,
@@ -816,6 +812,7 @@
                 }
               },
               {
+                "id": "def-public.AggConfig.getKey.$2",
                 "type": "string",
                 "label": "key",
                 "isRequired": false,
@@ -896,6 +893,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.makeLabel.$1",
                 "type": "boolean",
                 "label": "percentageMode",
                 "isRequired": true,
@@ -984,7 +982,7 @@
             "type": "Function",
             "label": "fieldIsTimeField",
             "signature": [
-              "() => boolean | \"\" | undefined"
+              "() => boolean"
             ],
             "description": [],
             "children": [],
@@ -1003,7 +1001,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 448
+              "lineNumber": 452
             },
             "signature": [
               {
@@ -1023,7 +1021,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 452
+              "lineNumber": 456
             },
             "signature": [
               {
@@ -1053,6 +1051,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfig.setType.$1",
                 "type": "Object",
                 "label": "type",
                 "isRequired": true,
@@ -1068,7 +1067,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 482
+                  "lineNumber": 486
                 }
               }
             ],
@@ -1076,7 +1075,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 482
+              "lineNumber": 486
             }
           }
         ],
@@ -1136,13 +1135,27 @@
           },
           {
             "tags": [],
+            "id": "def-public.AggConfigs.timeFields",
+            "type": "Array",
+            "label": "timeFields",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+              "lineNumber": 67
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.AggConfigs.aggs",
             "type": "Array",
             "label": "aggs",
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 69
+              "lineNumber": 70
             },
             "signature": [
               {
@@ -1165,6 +1178,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.Unnamed.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -1180,22 +1194,17 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 72
+                  "lineNumber": 73
                 }
               },
               {
+                "id": "def-public.AggConfigs.Unnamed.$2",
                 "type": "Array",
                 "label": "configStates",
                 "isRequired": true,
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
-                  },
+                  "SerializableState",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -1217,10 +1226,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 73
+                  "lineNumber": 74
                 }
               },
               {
+                "id": "def-public.AggConfigs.Unnamed.$3",
                 "type": "Object",
                 "label": "opts",
                 "isRequired": true,
@@ -1236,7 +1246,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 }
               }
             ],
@@ -1244,7 +1254,38 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 71
+              "lineNumber": 72
+            }
+          },
+          {
+            "id": "def-public.AggConfigs.setTimeFields",
+            "type": "Function",
+            "label": "setTimeFields",
+            "signature": [
+              "(timeFields: string[] | undefined) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.AggConfigs.setTimeFields.$1",
+                "type": "Array",
+                "label": "timeFields",
+                "isRequired": false,
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+                  "lineNumber": 87
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+              "lineNumber": 87
             }
           },
           {
@@ -1265,6 +1306,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.setTimeRange.$1",
                 "type": "Object",
                 "label": "timeRange",
                 "isRequired": true,
@@ -1280,7 +1322,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 86
+                  "lineNumber": 91
                 }
               }
             ],
@@ -1288,7 +1330,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 86
+              "lineNumber": 91
             }
           },
           {
@@ -1308,6 +1350,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.clone.$1",
                 "type": "Object",
                 "label": "{ enabledOnly = true }",
                 "isRequired": true,
@@ -1317,7 +1360,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 104
+                  "lineNumber": 109
                 }
               }
             ],
@@ -1325,7 +1368,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 104
+              "lineNumber": 109
             }
           },
           {
@@ -1333,18 +1376,13 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AggConfigs.createAggConfig.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
-                  },
+                  "SerializableState",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -1366,10 +1404,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 118
+                  "lineNumber": 123
                 }
               },
               {
+                "id": "def-public.AggConfigs.createAggConfig.$2",
                 "type": "Object",
                 "label": "{ addToAggConfigs = true }",
                 "isRequired": true,
@@ -1379,7 +1418,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 119
+                  "lineNumber": 124
                 }
               }
             ],
@@ -1401,13 +1440,7 @@
                 "text": "AggConfig"
               },
               ">(params: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
@@ -1429,7 +1462,7 @@
             "label": "createAggConfig",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 117
+              "lineNumber": 122
             },
             "tags": [],
             "returnComment": []
@@ -1454,6 +1487,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfigs.jsonDataEquals.$1",
                 "type": "Array",
                 "label": "aggConfigs",
                 "isRequired": true,
@@ -1472,7 +1506,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 160
+                  "lineNumber": 165
                 }
               }
             ],
@@ -1480,7 +1514,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 160
+              "lineNumber": 165
             }
           },
           {
@@ -1493,6 +1527,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.toDsl.$1",
                 "type": "boolean",
                 "label": "hierarchical",
                 "isRequired": true,
@@ -1502,7 +1537,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 172
+                  "lineNumber": 177
                 }
               }
             ],
@@ -1510,7 +1545,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 172
+              "lineNumber": 177
             }
           },
           {
@@ -1534,7 +1569,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 241
+              "lineNumber": 246
             }
           },
           {
@@ -1554,6 +1589,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.byIndex.$1",
                 "type": "number",
                 "label": "index",
                 "isRequired": true,
@@ -1563,7 +1599,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 245
+                  "lineNumber": 250
                 }
               }
             ],
@@ -1571,7 +1607,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 245
+              "lineNumber": 250
             }
           },
           {
@@ -1592,6 +1628,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.byId.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1601,7 +1638,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 249
+                  "lineNumber": 254
                 }
               }
             ],
@@ -1609,7 +1646,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 249
+              "lineNumber": 254
             }
           },
           {
@@ -1630,6 +1667,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.byName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1639,7 +1677,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 253
+                  "lineNumber": 258
                 }
               }
             ],
@@ -1647,7 +1685,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 253
+              "lineNumber": 258
             }
           },
           {
@@ -1668,6 +1706,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.byType.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1677,7 +1716,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 257
+                  "lineNumber": 262
                 }
               }
             ],
@@ -1685,7 +1724,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 257
+              "lineNumber": 262
             }
           },
           {
@@ -1706,6 +1745,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.byTypeName.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1715,7 +1755,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 261
+                  "lineNumber": 266
                 }
               }
             ],
@@ -1723,7 +1763,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 261
+              "lineNumber": 266
             }
           },
           {
@@ -1744,6 +1784,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.bySchemaName.$1",
                 "type": "string",
                 "label": "schema",
                 "isRequired": true,
@@ -1753,7 +1794,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 265
+                  "lineNumber": 270
                 }
               }
             ],
@@ -1761,7 +1802,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 265
+              "lineNumber": 270
             }
           },
           {
@@ -1785,7 +1826,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             }
           },
           {
@@ -1806,6 +1847,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.getRequestAggById.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1815,7 +1857,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 283
+                  "lineNumber": 288
                 }
               }
             ],
@@ -1823,7 +1865,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 283
+              "lineNumber": 288
             }
           },
           {
@@ -1851,7 +1893,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 298
+              "lineNumber": 303
             }
           },
           {
@@ -1874,6 +1916,7 @@
             ],
             "children": [
               {
+                "id": "def-public.AggConfigs.getResponseAggById.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1885,7 +1928,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 312
+                  "lineNumber": 317
                 }
               }
             ],
@@ -1895,7 +1938,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 312
+              "lineNumber": 317
             }
           },
           {
@@ -1924,6 +1967,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggConfigs.onSearchRequestStart.$1",
                 "type": "Object",
                 "label": "searchSource",
                 "isRequired": true,
@@ -1941,10 +1985,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 321
+                  "lineNumber": 326
                 }
               },
               {
+                "id": "def-public.AggConfigs.onSearchRequestStart.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1961,7 +2006,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 321
+                  "lineNumber": 326
                 }
               }
             ],
@@ -1969,7 +2014,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 321
+              "lineNumber": 326
             }
           }
         ],
@@ -2016,13 +2061,7 @@
             },
             "signature": [
               "(agg: TAggConfig, state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; } | undefined) => TAggConfig"
             ]
           },
@@ -2050,6 +2089,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggParamType.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2129,6 +2169,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DataPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -2170,13 +2211,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.DataStartDependencies",
-                "text": "DataStartDependencies"
-              },
+              "DataStartDependencies",
               ", ",
               {
                 "pluginId": "data",
@@ -2186,13 +2221,7 @@
                 "text": "DataPublicPluginStart"
               },
               ">, { bfetch, expressions, uiActions, usageCollection, inspector }: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.DataSetupDependencies",
-                "text": "DataSetupDependencies"
-              },
+              "DataSetupDependencies",
               ") => ",
               {
                 "pluginId": "data",
@@ -2205,6 +2234,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DataPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -2217,13 +2247,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-public.DataStartDependencies",
-                    "text": "DataStartDependencies"
-                  },
+                  "DataStartDependencies",
                   ", ",
                   {
                     "pluginId": "data",
@@ -2241,17 +2265,12 @@
                 }
               },
               {
+                "id": "def-public.DataPublicPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ bfetch, expressions, uiActions, usageCollection, inspector }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-public.DataSetupDependencies",
-                    "text": "DataSetupDependencies"
-                  }
+                  "DataSetupDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -2281,13 +2300,7 @@
                 "text": "CoreStart"
               },
               ", { uiActions }: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.DataStartDependencies",
-                "text": "DataStartDependencies"
-              },
+              "DataStartDependencies",
               ") => ",
               {
                 "pluginId": "data",
@@ -2300,6 +2313,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DataPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -2319,17 +2333,12 @@
                 }
               },
               {
+                "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "label": "{ uiActions }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-public.DataStartDependencies",
-                    "text": "DataStartDependencies"
-                  }
+                  "DataStartDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -2395,6 +2404,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DuplicateIndexPatternError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -2490,13 +2500,7 @@
               "lineNumber": 52
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvert",
-                "text": "FieldFormatConvert"
-              },
+              "FieldFormatConvert",
               " | undefined"
             ]
           },
@@ -2514,13 +2518,7 @@
               "lineNumber": 60
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeConvert",
-                "text": "HtmlContextTypeConvert"
-              },
+              "HtmlContextTypeConvert",
               " | undefined"
             ]
           },
@@ -2538,13 +2536,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.TextContextTypeConvert",
-                "text": "TextContextTypeConvert"
-              },
+              "TextContextTypeConvert",
               " | undefined"
             ]
           },
@@ -2624,17 +2616,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FieldFormat.Unnamed.$1",
                 "type": "Object",
                 "label": "_params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.IFieldFormatMetaParams",
-                    "text": "IFieldFormatMetaParams"
-                  }
+                  "IFieldFormatMetaParams"
                 ],
                 "description": [],
                 "source": {
@@ -2643,6 +2630,7 @@
                 }
               },
               {
+                "id": "def-public.FieldFormat.Unnamed.$2",
                 "type": "Function",
                 "label": "getConfig",
                 "isRequired": false,
@@ -2684,13 +2672,7 @@
                 "text": "FieldFormatsContentType"
               },
               ", options?: Record<string, any> | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
+              "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
             "description": [
@@ -2698,6 +2680,7 @@
             ],
             "children": [
               {
+                "id": "def-public.FieldFormat.convert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -2711,6 +2694,7 @@
                 }
               },
               {
+                "id": "def-public.FieldFormat.convert.$2",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -2732,18 +2716,13 @@
                 }
               },
               {
+                "id": "def-public.FieldFormat.convert.$3",
                 "type": "CompoundType",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
                   "Record<string, any> | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
+                  "HtmlContextTypeOptions",
                   " | undefined"
                 ],
                 "description": [],
@@ -2779,19 +2758,14 @@
                 "text": "FieldFormatsContentType"
               },
               ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvertFunction",
-                "text": "FieldFormatConvertFunction"
-              }
+              "FieldFormatConvertFunction"
             ],
             "description": [
               "\nGet a convert function that is bound to a specific contentType"
             ],
             "children": [
               {
+                "id": "def-public.FieldFormat.getConverterFor.$1",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -2858,6 +2832,7 @@
             ],
             "children": [
               {
+                "id": "def-public.FieldFormat.param.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -2943,17 +2918,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FieldFormat.from.$1",
                 "type": "Function",
                 "label": "convertFn",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatConvertFunction",
-                    "text": "FieldFormatConvertFunction"
-                  }
+                  "FieldFormatConvertFunction"
                 ],
                 "description": [],
                 "source": {
@@ -2975,13 +2945,7 @@
             "label": "setupContentType",
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvert",
-                "text": "FieldFormatConvert"
-              }
+              "FieldFormatConvert"
             ],
             "description": [],
             "children": [],
@@ -3010,6 +2974,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FieldFormat.isInstanceOfFieldFormat.$1",
                 "type": "Any",
                 "label": "fieldFormat",
                 "isRequired": true,
@@ -3314,6 +3279,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPattern.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -3473,6 +3439,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.addScriptedField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3488,6 +3455,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.addScriptedField.$2",
                 "type": "string",
                 "label": "script",
                 "isRequired": true,
@@ -3503,6 +3471,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.addScriptedField.$3",
                 "type": "string",
                 "label": "fieldType",
                 "isRequired": true,
@@ -3535,6 +3504,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.removeScriptedField.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -3677,6 +3647,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPattern.getFieldByName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3774,6 +3745,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.getFormatterForField.$1",
                 "type": "CompoundType",
                 "label": "field",
                 "isRequired": true,
@@ -3836,6 +3808,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.addRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3851,6 +3824,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.addRuntimeField.$2",
                 "type": "Object",
                 "label": "runtimeField",
                 "isRequired": true,
@@ -3891,6 +3865,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.removeRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3933,6 +3908,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPattern.getFormatterForFieldNoDefault.$1",
                 "type": "string",
                 "label": "fieldname",
                 "isRequired": true,
@@ -3971,6 +3947,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPattern.setFieldAttrs.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -3984,6 +3961,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.setFieldAttrs.$2",
                 "type": "Uncategorized",
                 "label": "attrName",
                 "isRequired": true,
@@ -3997,6 +3975,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.setFieldAttrs.$3",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -4034,6 +4013,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPattern.setFieldCustomLabel.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -4047,6 +4027,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.setFieldCustomLabel.$2",
                 "type": "CompoundType",
                 "label": "customLabel",
                 "isRequired": false,
@@ -4077,6 +4058,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPattern.setFieldCount.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -4090,6 +4072,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.setFieldCount.$2",
                 "type": "CompoundType",
                 "label": "count",
                 "isRequired": false,
@@ -4115,6 +4098,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPattern.setFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -4128,6 +4112,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPattern.setFieldFormat.$2",
                 "type": "Object",
                 "label": "format",
                 "isRequired": true,
@@ -4173,6 +4158,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPattern.deleteFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -4259,6 +4245,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternField.Unnamed.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -4719,7 +4706,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }",
+                "id": "def-public.IndexPatternField.toSpec.$1.getFormatterForField",
                 "type": "Object",
                 "label": "{\n    getFormatterForField,\n  }",
                 "tags": [],
@@ -4727,7 +4714,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.getFormatterForField",
+                    "id": "def-public.IndexPatternField.toSpec.$1.getFormatterForField.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -4810,13 +4797,7 @@
               "lineNumber": 67
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.EnsureDefaultIndexPattern",
-                "text": "EnsureDefaultIndexPattern"
-              }
+              "EnsureDefaultIndexPattern"
             ]
           },
           {
@@ -4829,6 +4810,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -4854,6 +4836,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.getIds.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -4886,6 +4869,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.getTitles.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -4918,6 +4902,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -4931,6 +4916,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.find.$2",
                 "type": "number",
                 "label": "size",
                 "isRequired": true,
@@ -4973,6 +4959,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.getIdsWithTitle.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -5005,6 +4992,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.clearCache.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -5038,21 +5026,9 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternSavedObjectAttrs",
-                "text": "IndexPatternSavedObjectAttrs"
-              },
+              "IndexPatternSavedObjectAttrs",
               ">[] | null | undefined>"
             ],
             "description": [],
@@ -5095,6 +5071,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.setDefault.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5108,6 +5085,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.setDefault.$2",
                 "type": "boolean",
                 "label": "force",
                 "isRequired": true,
@@ -5140,6 +5118,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.getFieldsForWildcard.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5188,6 +5167,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.getFieldsForIndexPattern.$1",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -5215,6 +5195,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.getFieldsForIndexPattern.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -5280,6 +5261,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.refreshFields.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -5326,6 +5308,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.fieldArrayToMap.$1",
                 "type": "Array",
                 "label": "fields",
                 "isRequired": true,
@@ -5346,6 +5329,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.fieldArrayToMap.$2",
                 "type": "Object",
                 "label": "fieldAttrs",
                 "isRequired": false,
@@ -5411,17 +5395,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.savedObjectToSpec.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<",
                   {
                     "pluginId": "data",
@@ -5441,13 +5420,7 @@
             ],
             "signature": [
               "(savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -5483,6 +5456,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IndexPatternsService.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5546,6 +5520,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.create.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -5565,6 +5540,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.create.$2",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -5615,6 +5591,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.createAndSave.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -5634,6 +5611,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.createAndSave.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -5649,6 +5627,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.createAndSave.$3",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -5699,6 +5678,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.createSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -5718,6 +5698,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.createSavedObject.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -5760,6 +5741,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.updateSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -5775,10 +5757,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 551
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.updateSavedObject.$2",
                 "type": "number",
                 "label": "saveAttempts",
                 "isRequired": true,
@@ -5788,10 +5771,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 552
                 }
               },
               {
+                "id": "def-public.IndexPatternsService.updateSavedObject.$3",
                 "type": "boolean",
                 "label": "ignoreErrors",
                 "isRequired": true,
@@ -5801,7 +5785,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 553
                 }
               }
             ],
@@ -5809,7 +5793,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 550
             }
           },
           {
@@ -5824,6 +5808,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IndexPatternsService.delete.$1",
                 "type": "string",
                 "label": "indexPatternId",
                 "isRequired": true,
@@ -5835,7 +5820,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 636
                 }
               }
             ],
@@ -5843,7 +5828,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 636
             }
           }
         ],
@@ -5917,6 +5902,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.OptionedParamType.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -5977,6 +5963,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SearchSource.Unnamed.$1",
                 "type": "Object",
                 "label": "fields",
                 "isRequired": true,
@@ -5996,6 +5983,7 @@
                 }
               },
               {
+                "id": "def-public.SearchSource.Unnamed.$2",
                 "type": "Object",
                 "label": "dependencies",
                 "isRequired": true,
@@ -6034,6 +6022,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.setPreferredSearchStrategyId.$1",
                 "type": "string",
                 "label": "searchStrategyId",
                 "isRequired": true,
@@ -6074,6 +6063,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.setField.$1",
                 "type": "Uncategorized",
                 "label": "field",
                 "isRequired": true,
@@ -6089,6 +6079,7 @@
                 }
               },
               {
+                "id": "def-public.SearchSource.setField.$2",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -6130,6 +6121,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.removeField.$1",
                 "type": "Uncategorized",
                 "label": "field",
                 "isRequired": true,
@@ -6172,6 +6164,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.setFields.$1",
                 "type": "Object",
                 "label": "newFields",
                 "isRequired": true,
@@ -6265,6 +6258,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.getField.$1",
                 "type": "Uncategorized",
                 "label": "field",
                 "isRequired": true,
@@ -6278,6 +6272,7 @@
                 }
               },
               {
+                "id": "def-public.SearchSource.getField.$2",
                 "type": "boolean",
                 "label": "recurse",
                 "isRequired": true,
@@ -6318,6 +6313,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.getOwnField.$1",
                 "type": "Uncategorized",
                 "label": "field",
                 "isRequired": true,
@@ -6407,6 +6403,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.createChild.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6455,6 +6452,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.setParent.$1",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -6478,6 +6476,7 @@
                 }
               },
               {
+                "id": "def-public.SearchSource.setParent.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6562,6 +6561,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.fetch$.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6610,6 +6610,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.fetch.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6666,6 +6667,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.onRequestStart.$1",
                 "type": "Function",
                 "label": "handler",
                 "isRequired": true,
@@ -6761,6 +6763,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SearchSource.getSerializedFields.$1",
                 "type": "boolean",
                 "label": "recurse",
                 "isRequired": true,
@@ -6787,13 +6790,7 @@
             "label": "serialize",
             "signature": [
               "() => { searchSourceJSON: string; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "description": [
@@ -6823,6 +6820,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.castEsToKbnFieldTypeName.$1",
             "type": "string",
             "label": "esType",
             "isRequired": true,
@@ -6865,6 +6863,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.extractReferences.$1",
             "type": "Object",
             "label": "state",
             "isRequired": true,
@@ -6920,6 +6919,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.fieldList.$1",
             "type": "Array",
             "label": "specs",
             "isRequired": true,
@@ -6940,6 +6940,7 @@
             }
           },
           {
+            "id": "def-public.fieldList.$2",
             "type": "boolean",
             "label": "shortDotsEnable",
             "isRequired": true,
@@ -7027,6 +7028,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getSearchParamsFromRequest.$1",
             "type": "Object",
             "label": "searchRequest",
             "isRequired": true,
@@ -7040,7 +7042,7 @@
             }
           },
           {
-            "id": "def-public.getSearchParamsFromRequest.dependencies",
+            "id": "def-public.getSearchParamsFromRequest.$2.dependencies",
             "type": "Object",
             "label": "dependencies",
             "tags": [],
@@ -7048,7 +7050,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getSearchParamsFromRequest.dependencies.getConfig",
+                "id": "def-public.getSearchParamsFromRequest.$2.dependencies.getConfig",
                 "type": "Function",
                 "label": "getConfig",
                 "description": [],
@@ -7117,6 +7119,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getTime.$1",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -7137,6 +7140,7 @@
             }
           },
           {
+            "id": "def-public.getTime.$2",
             "type": "Object",
             "label": "timeRange",
             "isRequired": true,
@@ -7156,7 +7160,7 @@
             }
           },
           {
-            "id": "def-public.getTime.options",
+            "id": "def-public.getTime.$3.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -7164,7 +7168,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getTime.options.forceNow",
+                "id": "def-public.getTime.$3.options.forceNow",
                 "type": "Object",
                 "label": "forceNow",
                 "description": [],
@@ -7178,7 +7182,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getTime.options.fieldName",
+                "id": "def-public.getTime.$3.options.fieldName",
                 "type": "string",
                 "label": "fieldName",
                 "description": [],
@@ -7210,6 +7214,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.injectReferences.$1",
             "type": "CompoundType",
             "label": "searchSourceFields",
             "isRequired": true,
@@ -7230,17 +7235,12 @@
             }
           },
           {
+            "id": "def-public.injectReferences.$2",
             "type": "Array",
             "label": "references",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
             "description": [],
@@ -7285,6 +7285,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isCompleteResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": false,
@@ -7333,6 +7334,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isErrorResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": false,
@@ -7381,6 +7383,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isFilter.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -7419,6 +7422,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isFilters.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -7458,6 +7462,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isPartialResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": false,
@@ -7506,6 +7511,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isQuery.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -7544,6 +7550,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isTimeRange.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -7582,6 +7589,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.parseSearchSourceJSON.$1",
             "type": "string",
             "label": "searchSourceJSON",
             "isRequired": true,
@@ -7634,7 +7642,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 207
+              "lineNumber": 196
             },
             "signature": [
               "FunctionDefinition"
@@ -7648,7 +7656,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 208
+              "lineNumber": 197
             },
             "signature": [
               "FunctionDefinition"
@@ -7662,7 +7670,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 209
+              "lineNumber": 198
             },
             "signature": [
               "FunctionDefinition"
@@ -7676,7 +7684,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 210
+              "lineNumber": 199
             },
             "signature": [
               "FunctionDefinition"
@@ -7690,7 +7698,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 211
+              "lineNumber": 200
             },
             "signature": [
               "FunctionDefinition"
@@ -7704,7 +7712,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 212
+              "lineNumber": 201
             },
             "signature": [
               "FunctionDefinition"
@@ -7718,7 +7726,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 213
+              "lineNumber": 202
             },
             "signature": [
               "FunctionDefinition"
@@ -7732,7 +7740,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 214
+              "lineNumber": 203
             },
             "signature": [
               "FunctionDefinition"
@@ -7746,7 +7754,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 215
+              "lineNumber": 204
             },
             "signature": [
               "FunctionDefinition"
@@ -7760,7 +7768,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 216
+              "lineNumber": 205
             },
             "signature": [
               "FunctionDefinition"
@@ -7774,7 +7782,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 217
+              "lineNumber": 206
             },
             "signature": [
               "FunctionDefinition"
@@ -7788,7 +7796,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 218
+              "lineNumber": 207
             },
             "signature": [
               "FunctionDefinition"
@@ -7802,7 +7810,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 219
+              "lineNumber": 208
             },
             "signature": [
               "FunctionDefinition"
@@ -7816,7 +7824,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 220
+              "lineNumber": 209
             },
             "signature": [
               "FunctionDefinition"
@@ -7830,7 +7838,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 221
+              "lineNumber": 210
             },
             "signature": [
               "FunctionDefinition"
@@ -7844,7 +7852,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 222
+              "lineNumber": 211
             },
             "signature": [
               "FunctionDefinition"
@@ -7858,7 +7866,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 223
+              "lineNumber": 212
             },
             "signature": [
               "FunctionDefinition"
@@ -7872,7 +7880,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 224
+              "lineNumber": 213
             },
             "signature": [
               "FunctionDefinition"
@@ -7886,7 +7894,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 225
+              "lineNumber": 214
             },
             "signature": [
               "FunctionDefinition"
@@ -7900,7 +7908,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 226
+              "lineNumber": 215
             },
             "signature": [
               "FunctionDefinition"
@@ -7914,7 +7922,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 227
+              "lineNumber": 216
             },
             "signature": [
               "FunctionDefinition"
@@ -7928,7 +7936,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 228
+              "lineNumber": 217
             },
             "signature": [
               "FunctionDefinition"
@@ -7942,7 +7950,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 229
+              "lineNumber": 218
             },
             "signature": [
               "FunctionDefinition"
@@ -7956,7 +7964,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 230
+              "lineNumber": 219
             },
             "signature": [
               "FunctionDefinition"
@@ -7970,7 +7978,21 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 231
+              "lineNumber": 220
+            },
+            "signature": [
+              "FunctionDefinition"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.AggFunctionsMapping.aggSinglePercentile",
+            "type": "Object",
+            "label": "aggSinglePercentile",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 221
             },
             "signature": [
               "FunctionDefinition"
@@ -7984,7 +8006,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 232
+              "lineNumber": 222
             },
             "signature": [
               "FunctionDefinition"
@@ -7998,7 +8020,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 233
+              "lineNumber": 223
             },
             "signature": [
               "FunctionDefinition"
@@ -8012,7 +8034,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 234
+              "lineNumber": 224
             },
             "signature": [
               "FunctionDefinition"
@@ -8026,7 +8048,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 235
+              "lineNumber": 225
             },
             "signature": [
               "FunctionDefinition"
@@ -8040,7 +8062,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 236
+              "lineNumber": 226
             },
             "signature": [
               "FunctionDefinition"
@@ -8054,7 +8076,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 237
+              "lineNumber": 227
             },
             "signature": [
               "FunctionDefinition"
@@ -8068,7 +8090,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 238
+              "lineNumber": 228
             },
             "signature": [
               "FunctionDefinition"
@@ -8082,7 +8104,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 239
+              "lineNumber": 229
             },
             "signature": [
               "FunctionDefinition"
@@ -8091,7 +8113,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 206
+          "lineNumber": 195
         },
         "initialIsOpen": false
       },
@@ -8142,6 +8164,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AggParamOption.enabled.$1",
                 "type": "Object",
                 "label": "agg",
                 "isRequired": true,
@@ -8259,13 +8282,7 @@
             },
             "signature": [
               "({ data, negate, }: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.ValueClickDataContext",
-                "text": "ValueClickDataContext"
-              },
+              "ValueClickDataContext",
               ") => Promise<",
               {
                 "pluginId": "data",
@@ -8289,13 +8306,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.createFiltersFromRangeSelectAction",
-                "text": "createFiltersFromRangeSelectAction"
-              }
+              "createFiltersFromRangeSelectAction"
             ]
           }
         ],
@@ -9298,6 +9309,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.add.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -9366,6 +9378,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.getByName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -9404,6 +9417,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.getByType.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -9442,6 +9456,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.remove.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -9502,6 +9517,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.replaceAll.$1",
                 "type": "Array",
                 "label": "specs",
                 "isRequired": true,
@@ -9547,6 +9563,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IIndexPatternFieldList.update.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -9622,7 +9639,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IIndexPatternFieldList.toSpec.options",
+                "id": "def-public.IIndexPatternFieldList.toSpec.$1.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -9630,7 +9647,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.IIndexPatternFieldList.toSpec.options.getFormatterForField",
+                    "id": "def-public.IIndexPatternFieldList.toSpec.$1.options.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -11420,10 +11437,18 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 141
+          "lineNumber": 129
         },
         "signature": [
-          "{ calculateAutoTimeExpression: (range: TimeRange) => string | undefined; getDateMetaByDatatableColumn: (column: DatatableColumn) => Promise<{ timeZone: string; timeRange?: TimeRange | undefined; interval: string; } | undefined>; datatableUtilities: { getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>; getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>; isFilterable: (column: DatatableColumn) => boolean; }; createAggConfigs: (indexPattern: IndexPattern, configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+          "{ calculateAutoTimeExpression: (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ") => string | undefined; datatableUtilities: { getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>; getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>; isFilterable: (column: DatatableColumn) => boolean; }; createAggConfigs: (indexPattern: IndexPattern, configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
           "SerializableState",
           " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
           {
@@ -11524,6 +11549,54 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.EsdslExpressionFunctionDefinition",
+        "type": "Type",
+        "label": "EsdslExpressionFunctionDefinition",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/esdsl.ts",
+          "lineNumber": 29
+        },
+        "signature": [
+          "ExpressionFunctionDefinition<\"esdsl\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_context\", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ExecutionContextSearch",
+            "text": "ExecutionContextSearch"
+          },
+          "> | null, Arguments, Output, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.EsQuerySortValue",
         "type": "Type",
         "label": "EsQuerySortValue",
@@ -11535,6 +11608,21 @@
         },
         "signature": [
           "{ [x: string]: SortDirection | SortDirectionNumeric; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.EsRawResponseExpressionTypeDefinition",
+        "type": "Type",
+        "label": "EsRawResponseExpressionTypeDefinition",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/es_raw_response.ts",
+          "lineNumber": 57
+        },
+        "signature": [
+          "ExpressionTypeDefinition<\"es_raw_response\", EsRawResponse<unknown>, EsRawResponse<unknown>>"
         ],
         "initialIsOpen": false
       },
@@ -11816,7 +11904,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/param_types/field.ts",
-          "lineNumber": 21
+          "lineNumber": 24
         },
         "signature": [
           "FieldParamType"
@@ -11879,10 +11967,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 639
+          "lineNumber": 642
         },
         "signature": [
-          "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; find: (search: string, size?: number) => Promise<IndexPattern[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
+          "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; find: (search: string, size?: number) => Promise<IndexPattern[]>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
         ],
         "initialIsOpen": false
       },
@@ -12095,7 +12183,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.Buckets]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.Buckets",
             "type": "string",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -12106,7 +12194,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.Metrics]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.Metrics",
             "type": "string",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -12117,7 +12205,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.None]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.None",
             "type": "string",
             "label": "[AggGroupNames.None]",
             "description": [],
@@ -12167,13 +12255,7 @@
             },
             "signature": [
               "(props: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.FilterLabelProps",
-                "text": "FilterLabelProps"
-              },
+              "FilterLabelProps",
               ") => JSX.Element"
             ]
           },
@@ -12189,13 +12271,7 @@
             },
             "signature": [
               "(props: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.FilterItemProps",
-                "text": "FilterItemProps"
-              },
+              "FilterItemProps",
               ") => JSX.Element"
             ]
           },
@@ -12817,13 +12893,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.generateFilters",
-                "text": "generateFilters"
-              }
+              "generateFilters"
             ]
           },
           {
@@ -12868,13 +12938,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.changeTimeFilter",
-                "text": "changeTimeFilter"
-              }
+              "changeTimeFilter"
             ]
           },
           {
@@ -12889,13 +12953,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.convertRangeFilterToTimeRangeString",
-                "text": "convertRangeFilterToTimeRangeString"
-              }
+              "convertRangeFilterToTimeRangeString"
             ]
           },
           {
@@ -12940,13 +12998,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.extractTimeFilter",
-                "text": "extractTimeFilter"
-              }
+              "extractTimeFilter"
             ]
           },
           {
@@ -12961,13 +13013,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.extractTimeRange",
-                "text": "extractTimeRange"
-              }
+              "extractTimeRange"
             ]
           }
         ],
@@ -12995,13 +13041,7 @@
               "lineNumber": 124
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.NodeTypes",
-                "text": "NodeTypes"
-              }
+              "NodeTypes"
             ]
           },
           {
@@ -13466,13 +13506,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-public.DateFormat",
-                "text": "DateFormat"
-              }
+              "DateFormat"
             ]
           },
           {
@@ -13487,13 +13521,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.DateNanosFormat",
-                "text": "DateNanosFormat"
-              }
+              "DateNanosFormat"
             ]
           },
           {
@@ -13867,13 +13895,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.validateIndexPattern",
-                "text": "validateIndexPattern"
-              }
+              "validateIndexPattern"
             ]
           },
           {
@@ -13888,13 +13910,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.flattenHitWrapper",
-                "text": "flattenHitWrapper"
-              }
+              "flattenHitWrapper"
             ]
           },
           {
@@ -13909,13 +13925,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.formatHitProvider",
-                "text": "formatHitProvider"
-              }
+              "formatHitProvider"
             ]
           }
         ],
@@ -13945,7 +13955,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 405
+                  "lineNumber": 408
                 },
                 "signature": [
                   "typeof ",
@@ -13966,7 +13976,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 406
+                  "lineNumber": 409
                 },
                 "signature": [
                   "typeof ",
@@ -13987,7 +13997,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 407
+                  "lineNumber": 410
                 },
                 "signature": [
                   "({ display: string; val: string; enabled(agg: ",
@@ -13998,7 +14008,7 @@
                     "section": "def-common.IBucketAggConfig",
                     "text": "IBucketAggConfig"
                   },
-                  "): boolean | \"\" | undefined; } | { display: string; val: string; })[]"
+                  "): boolean; } | { display: string; val: string; })[]"
                 ]
               },
               {
@@ -14009,7 +14019,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 408
+                  "lineNumber": 411
                 },
                 "signature": [
                   "typeof ",
@@ -14030,7 +14040,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 409
+                  "lineNumber": 412
                 },
                 "signature": [
                   "typeof ",
@@ -14051,7 +14061,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 410
+                  "lineNumber": 413
                 },
                 "signature": [
                   "typeof ",
@@ -14072,7 +14082,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 411
+                  "lineNumber": 414
                 },
                 "signature": [
                   "typeof ",
@@ -14093,7 +14103,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 412
+                  "lineNumber": 415
                 },
                 "signature": [
                   "(agg: ",
@@ -14115,7 +14125,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 413
+                  "lineNumber": 416
                 },
                 "signature": [
                   "(agg: ",
@@ -14137,7 +14147,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 414
+                  "lineNumber": 417
                 },
                 "signature": [
                   "(...types: string[]) => (agg: ",
@@ -14159,7 +14169,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 415
+                  "lineNumber": 418
                 },
                 "signature": [
                   "typeof ",
@@ -14180,7 +14190,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 416
+                  "lineNumber": 419
                 },
                 "signature": [
                   "typeof ",
@@ -14201,7 +14211,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 417
+                  "lineNumber": 420
                 }
               },
               {
@@ -14212,7 +14222,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 418
+                  "lineNumber": 421
                 },
                 "signature": [
                   "typeof ",
@@ -14233,7 +14243,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 419
+                  "lineNumber": 422
                 },
                 "signature": [
                   "typeof ",
@@ -14254,7 +14264,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 420
+                  "lineNumber": 423
                 },
                 "signature": [
                   "typeof ",
@@ -14275,7 +14285,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 421
+                  "lineNumber": 424
                 }
               },
               {
@@ -14286,7 +14296,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 422
+                  "lineNumber": 425
                 },
                 "signature": [
                   "string[]"
@@ -14300,7 +14310,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 423
+                  "lineNumber": 426
                 },
                 "signature": [
                   "typeof ",
@@ -14321,7 +14331,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 424
+                  "lineNumber": 427
                 },
                 "signature": [
                   "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
@@ -14335,7 +14345,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 425
+                  "lineNumber": 428
                 },
                 "signature": [
                   "(column: ",
@@ -14348,13 +14358,43 @@
                   },
                   ") => number | undefined"
                 ]
+              },
+              {
+                "tags": [],
+                "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn",
+                "type": "Function",
+                "label": "getDateHistogramMetaDataByDatatableColumn",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/public/index.ts",
+                  "lineNumber": 429
+                },
+                "signature": [
+                  "(column: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
+                  },
+                  ") => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  },
+                  " | undefined; } | undefined"
+                ]
               }
             ],
             "description": [],
             "label": "aggs",
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 404
+              "lineNumber": 407
             }
           },
           {
@@ -14365,7 +14405,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 427
+              "lineNumber": 431
             },
             "signature": [
               "typeof ",
@@ -14386,7 +14426,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 428
+              "lineNumber": 432
             },
             "signature": [
               "typeof ",
@@ -14407,7 +14447,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 429
+              "lineNumber": 433
             },
             "signature": [
               "typeof ",
@@ -14428,7 +14468,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 430
+              "lineNumber": 434
             },
             "signature": [
               "typeof ",
@@ -14446,7 +14486,7 @@
         "label": "search",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 403
+          "lineNumber": 406
         },
         "initialIsOpen": false
       },
@@ -14458,7 +14498,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/constants.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "signature": [
           "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; }"
@@ -14559,21 +14599,9 @@
               "text": "FilterManager"
             },
             "; timefilter: ",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataQueryPluginApi",
-              "section": "def-public.TimefilterSetup",
-              "text": "TimefilterSetup"
-            },
+            "TimefilterSetup",
             "; queryString: Pick<",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataQueryPluginApi",
-              "section": "def-public.QueryStringManager",
-              "text": "QueryStringManager"
-            },
+            "QueryStringManager",
             ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; state$: ",
             "Observable",
             "<{ changes: ",
@@ -14647,13 +14675,7 @@
               "text": "QuerySuggestionGetFn"
             },
             "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataAutocompletePluginApi",
-              "section": "def-public.ValueSuggestionsGetFn",
-              "text": "ValueSuggestionsGetFn"
-            },
+            "ValueSuggestionsGetFn",
             "; }"
           ]
         },
@@ -14678,7 +14700,7 @@
               "section": "def-common.IndexPatternsService",
               "text": "IndexPatternsService"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+            ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
           ]
         },
         {
@@ -14755,13 +14777,7 @@
               "text": "FilterManager"
             },
             "; queryString: Pick<",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataQueryPluginApi",
-              "section": "def-public.QueryStringManager",
-              "text": "QueryStringManager"
-            },
+            "QueryStringManager",
             ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: ",
             {
               "pluginId": "data",
@@ -14808,13 +14824,7 @@
           },
           "signature": [
             "Pick<Pick<",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataPluginApi",
-              "section": "def-public.NowProvider",
-              "text": "NowProvider"
-            },
+            "NowProvider",
             ", \"get\" | \"set\" | \"reset\">, \"get\">"
           ]
         }
@@ -14866,13 +14876,7 @@
             },
             "signature": [
               "(agg: TAggConfig, state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
+              "SerializableState",
               " | undefined; schema?: string | undefined; } | undefined) => TAggConfig"
             ]
           },
@@ -14900,6 +14904,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AggParamType.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -14979,6 +14984,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.DataServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -14995,7 +15001,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               }
             ],
@@ -15003,7 +15009,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             }
           },
           {
@@ -15020,13 +15026,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStartDependencies",
-                "text": "DataPluginStartDependencies"
-              },
+              "DataPluginStartDependencies",
               ", ",
               {
                 "pluginId": "data",
@@ -15036,25 +15036,14 @@
                 "text": "DataPluginStart"
               },
               ">, { bfetch, expressions, usageCollection }: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginSetupDependencies",
-                "text": "DataPluginSetupDependencies"
-              },
+              "DataPluginSetupDependencies",
               ") => { __enhance: (enhancements: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataEnhancements",
-                "text": "DataEnhancements"
-              }
+              "DataEnhancements"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.DataServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -15067,13 +15056,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStartDependencies",
-                    "text": "DataPluginStartDependencies"
-                  },
+                  "DataPluginStartDependencies",
                   ", ",
                   {
                     "pluginId": "data",
@@ -15087,26 +15070,21 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 78
+                  "lineNumber": 80
                 }
               },
               {
+                "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ bfetch, expressions, usageCollection }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginSetupDependencies",
-                    "text": "DataPluginSetupDependencies"
-                  }
+                  "DataPluginSetupDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 79
+                  "lineNumber": 81
                 }
               }
             ],
@@ -15114,7 +15092,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 77
+              "lineNumber": 79
             }
           },
           {
@@ -15154,7 +15132,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, elasticsearchClient: ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15166,6 +15144,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.DataServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -15181,7 +15160,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 104
+                  "lineNumber": 110
                 }
               }
             ],
@@ -15189,7 +15168,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 104
+              "lineNumber": 110
             }
           },
           {
@@ -15205,13 +15184,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 118
+              "lineNumber": 124
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/server/plugin.ts",
-          "lineNumber": 52
+          "lineNumber": 54
         },
         "initialIsOpen": false
       },
@@ -15492,6 +15471,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPattern.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -15651,6 +15631,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.addScriptedField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -15666,6 +15647,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.addScriptedField.$2",
                 "type": "string",
                 "label": "script",
                 "isRequired": true,
@@ -15681,6 +15663,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.addScriptedField.$3",
                 "type": "string",
                 "label": "fieldType",
                 "isRequired": true,
@@ -15713,6 +15696,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.removeScriptedField.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -15855,6 +15839,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPattern.getFieldByName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -15952,6 +15937,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.getFormatterForField.$1",
                 "type": "CompoundType",
                 "label": "field",
                 "isRequired": true,
@@ -16014,6 +16000,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.addRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -16029,6 +16016,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.addRuntimeField.$2",
                 "type": "Object",
                 "label": "runtimeField",
                 "isRequired": true,
@@ -16069,6 +16057,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.removeRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -16111,6 +16100,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPattern.getFormatterForFieldNoDefault.$1",
                 "type": "string",
                 "label": "fieldname",
                 "isRequired": true,
@@ -16149,6 +16139,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPattern.setFieldAttrs.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -16162,6 +16153,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.setFieldAttrs.$2",
                 "type": "Uncategorized",
                 "label": "attrName",
                 "isRequired": true,
@@ -16175,6 +16167,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.setFieldAttrs.$3",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -16212,6 +16205,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPattern.setFieldCustomLabel.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -16225,6 +16219,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.setFieldCustomLabel.$2",
                 "type": "CompoundType",
                 "label": "customLabel",
                 "isRequired": false,
@@ -16255,6 +16250,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPattern.setFieldCount.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -16268,6 +16264,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.setFieldCount.$2",
                 "type": "CompoundType",
                 "label": "count",
                 "isRequired": false,
@@ -16293,6 +16290,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPattern.setFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -16306,6 +16304,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPattern.setFieldFormat.$2",
                 "type": "Object",
                 "label": "format",
                 "isRequired": true,
@@ -16351,6 +16350,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPattern.deleteFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -16401,13 +16401,7 @@
               "lineNumber": 67
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.EnsureDefaultIndexPattern",
-                "text": "EnsureDefaultIndexPattern"
-              }
+              "EnsureDefaultIndexPattern"
             ]
           },
           {
@@ -16420,6 +16414,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -16445,6 +16440,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getIds.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -16477,6 +16473,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getTitles.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -16509,6 +16506,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -16522,6 +16520,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.find.$2",
                 "type": "number",
                 "label": "size",
                 "isRequired": true,
@@ -16564,6 +16563,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getIdsWithTitle.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -16596,6 +16596,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.clearCache.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -16629,21 +16630,9 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternSavedObjectAttrs",
-                "text": "IndexPatternSavedObjectAttrs"
-              },
+              "IndexPatternSavedObjectAttrs",
               ">[] | null | undefined>"
             ],
             "description": [],
@@ -16686,6 +16675,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.setDefault.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -16699,6 +16689,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.setDefault.$2",
                 "type": "boolean",
                 "label": "force",
                 "isRequired": true,
@@ -16731,6 +16722,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getFieldsForWildcard.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -16779,6 +16771,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getFieldsForIndexPattern.$1",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -16806,6 +16799,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.getFieldsForIndexPattern.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -16871,6 +16865,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.refreshFields.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -16917,6 +16912,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.fieldArrayToMap.$1",
                 "type": "Array",
                 "label": "fields",
                 "isRequired": true,
@@ -16937,6 +16933,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.fieldArrayToMap.$2",
                 "type": "Object",
                 "label": "fieldAttrs",
                 "isRequired": false,
@@ -17002,17 +16999,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.savedObjectToSpec.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<",
                   {
                     "pluginId": "data",
@@ -17032,13 +17024,7 @@
             ],
             "signature": [
               "(savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -17074,6 +17060,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -17137,6 +17124,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.create.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -17156,6 +17144,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.create.$2",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -17206,6 +17195,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -17225,6 +17215,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -17240,6 +17231,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$3",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -17290,6 +17282,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.createSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -17309,6 +17302,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createSavedObject.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -17351,6 +17345,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -17366,10 +17361,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 551
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$2",
                 "type": "number",
                 "label": "saveAttempts",
                 "isRequired": true,
@@ -17379,10 +17375,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 552
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$3",
                 "type": "boolean",
                 "label": "ignoreErrors",
                 "isRequired": true,
@@ -17392,7 +17389,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 553
                 }
               }
             ],
@@ -17400,7 +17397,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 550
             }
           },
           {
@@ -17415,6 +17412,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.delete.$1",
                 "type": "string",
                 "label": "indexPatternId",
                 "isRequired": true,
@@ -17426,7 +17424,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 636
                 }
               }
             ],
@@ -17434,7 +17432,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 636
             }
           }
         ],
@@ -17462,13 +17460,7 @@
               "lineNumber": 67
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.EnsureDefaultIndexPattern",
-                "text": "EnsureDefaultIndexPattern"
-              }
+              "EnsureDefaultIndexPattern"
             ]
           },
           {
@@ -17481,6 +17473,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -17506,6 +17499,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getIds.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -17538,6 +17532,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getTitles.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -17570,6 +17565,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -17583,6 +17579,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.find.$2",
                 "type": "number",
                 "label": "size",
                 "isRequired": true,
@@ -17625,6 +17622,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getIdsWithTitle.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -17657,6 +17655,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.clearCache.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -17690,21 +17689,9 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternSavedObjectAttrs",
-                "text": "IndexPatternSavedObjectAttrs"
-              },
+              "IndexPatternSavedObjectAttrs",
               ">[] | null | undefined>"
             ],
             "description": [],
@@ -17747,6 +17734,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.setDefault.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -17760,6 +17748,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.setDefault.$2",
                 "type": "boolean",
                 "label": "force",
                 "isRequired": true,
@@ -17792,6 +17781,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getFieldsForWildcard.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -17840,6 +17830,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.getFieldsForIndexPattern.$1",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -17867,6 +17858,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.getFieldsForIndexPattern.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -17932,6 +17924,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.refreshFields.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -17978,6 +17971,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.fieldArrayToMap.$1",
                 "type": "Array",
                 "label": "fields",
                 "isRequired": true,
@@ -17998,6 +17992,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.fieldArrayToMap.$2",
                 "type": "Object",
                 "label": "fieldAttrs",
                 "isRequired": false,
@@ -18063,17 +18058,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.savedObjectToSpec.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<",
                   {
                     "pluginId": "data",
@@ -18093,13 +18083,7 @@
             ],
             "signature": [
               "(savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -18135,6 +18119,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.IndexPatternsService.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -18198,6 +18183,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.create.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -18217,6 +18203,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.create.$2",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -18267,6 +18254,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -18286,6 +18274,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -18301,6 +18290,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createAndSave.$3",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -18351,6 +18341,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.createSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -18370,6 +18361,7 @@
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.createSavedObject.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -18412,6 +18404,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -18427,10 +18420,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 551
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$2",
                 "type": "number",
                 "label": "saveAttempts",
                 "isRequired": true,
@@ -18440,10 +18434,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 552
                 }
               },
               {
+                "id": "def-server.IndexPatternsService.updateSavedObject.$3",
                 "type": "boolean",
                 "label": "ignoreErrors",
                 "isRequired": true,
@@ -18453,7 +18448,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 553
                 }
               }
             ],
@@ -18461,7 +18456,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 550
             }
           },
           {
@@ -18476,6 +18471,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IndexPatternsService.delete.$1",
                 "type": "string",
                 "label": "indexPatternId",
                 "isRequired": true,
@@ -18487,7 +18483,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 636
                 }
               }
             ],
@@ -18495,7 +18491,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 636
             }
           }
         ],
@@ -18569,6 +18565,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.OptionedParamType.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -18603,6 +18600,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.castEsToKbnFieldTypeName.$1",
             "type": "string",
             "label": "esType",
             "isRequired": true,
@@ -18674,6 +18672,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.getTime.$1",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -18694,6 +18693,7 @@
             }
           },
           {
+            "id": "def-server.getTime.$2",
             "type": "Object",
             "label": "timeRange",
             "isRequired": true,
@@ -18713,7 +18713,7 @@
             }
           },
           {
-            "id": "def-server.getTime.options",
+            "id": "def-server.getTime.$3.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -18721,7 +18721,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-server.getTime.options.forceNow",
+                "id": "def-server.getTime.$3.options.forceNow",
                 "type": "Object",
                 "label": "forceNow",
                 "description": [],
@@ -18735,7 +18735,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.getTime.options.fieldName",
+                "id": "def-server.getTime.$3.options.fieldName",
                 "type": "string",
                 "label": "fieldName",
                 "description": [],
@@ -18772,6 +18772,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.parseInterval.$1",
             "type": "string",
             "label": "interval",
             "isRequired": true,
@@ -18812,7 +18813,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 207
+              "lineNumber": 196
             },
             "signature": [
               "FunctionDefinition"
@@ -18826,7 +18827,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 208
+              "lineNumber": 197
             },
             "signature": [
               "FunctionDefinition"
@@ -18840,7 +18841,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 209
+              "lineNumber": 198
             },
             "signature": [
               "FunctionDefinition"
@@ -18854,7 +18855,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 210
+              "lineNumber": 199
             },
             "signature": [
               "FunctionDefinition"
@@ -18868,7 +18869,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 211
+              "lineNumber": 200
             },
             "signature": [
               "FunctionDefinition"
@@ -18882,7 +18883,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 212
+              "lineNumber": 201
             },
             "signature": [
               "FunctionDefinition"
@@ -18896,7 +18897,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 213
+              "lineNumber": 202
             },
             "signature": [
               "FunctionDefinition"
@@ -18910,7 +18911,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 214
+              "lineNumber": 203
             },
             "signature": [
               "FunctionDefinition"
@@ -18924,7 +18925,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 215
+              "lineNumber": 204
             },
             "signature": [
               "FunctionDefinition"
@@ -18938,7 +18939,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 216
+              "lineNumber": 205
             },
             "signature": [
               "FunctionDefinition"
@@ -18952,7 +18953,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 217
+              "lineNumber": 206
             },
             "signature": [
               "FunctionDefinition"
@@ -18966,7 +18967,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 218
+              "lineNumber": 207
             },
             "signature": [
               "FunctionDefinition"
@@ -18980,7 +18981,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 219
+              "lineNumber": 208
             },
             "signature": [
               "FunctionDefinition"
@@ -18994,7 +18995,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 220
+              "lineNumber": 209
             },
             "signature": [
               "FunctionDefinition"
@@ -19008,7 +19009,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 221
+              "lineNumber": 210
             },
             "signature": [
               "FunctionDefinition"
@@ -19022,7 +19023,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 222
+              "lineNumber": 211
             },
             "signature": [
               "FunctionDefinition"
@@ -19036,7 +19037,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 223
+              "lineNumber": 212
             },
             "signature": [
               "FunctionDefinition"
@@ -19050,7 +19051,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 224
+              "lineNumber": 213
             },
             "signature": [
               "FunctionDefinition"
@@ -19064,7 +19065,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 225
+              "lineNumber": 214
             },
             "signature": [
               "FunctionDefinition"
@@ -19078,7 +19079,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 226
+              "lineNumber": 215
             },
             "signature": [
               "FunctionDefinition"
@@ -19092,7 +19093,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 227
+              "lineNumber": 216
             },
             "signature": [
               "FunctionDefinition"
@@ -19106,7 +19107,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 228
+              "lineNumber": 217
             },
             "signature": [
               "FunctionDefinition"
@@ -19120,7 +19121,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 229
+              "lineNumber": 218
             },
             "signature": [
               "FunctionDefinition"
@@ -19134,7 +19135,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 230
+              "lineNumber": 219
             },
             "signature": [
               "FunctionDefinition"
@@ -19148,7 +19149,21 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 231
+              "lineNumber": 220
+            },
+            "signature": [
+              "FunctionDefinition"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.AggFunctionsMapping.aggSinglePercentile",
+            "type": "Object",
+            "label": "aggSinglePercentile",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 221
             },
             "signature": [
               "FunctionDefinition"
@@ -19162,7 +19177,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 232
+              "lineNumber": 222
             },
             "signature": [
               "FunctionDefinition"
@@ -19176,7 +19191,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 233
+              "lineNumber": 223
             },
             "signature": [
               "FunctionDefinition"
@@ -19190,7 +19205,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 234
+              "lineNumber": 224
             },
             "signature": [
               "FunctionDefinition"
@@ -19204,7 +19219,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 235
+              "lineNumber": 225
             },
             "signature": [
               "FunctionDefinition"
@@ -19218,7 +19233,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 236
+              "lineNumber": 226
             },
             "signature": [
               "FunctionDefinition"
@@ -19232,7 +19247,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 237
+              "lineNumber": 227
             },
             "signature": [
               "FunctionDefinition"
@@ -19246,7 +19261,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 238
+              "lineNumber": 228
             },
             "signature": [
               "FunctionDefinition"
@@ -19260,7 +19275,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 239
+              "lineNumber": 229
             },
             "signature": [
               "FunctionDefinition"
@@ -19269,7 +19284,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 206
+          "lineNumber": 195
         },
         "initialIsOpen": false
       },
@@ -19320,6 +19335,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AggParamOption.enabled.$1",
                 "type": "Object",
                 "label": "agg",
                 "isRequired": true,
@@ -20678,7 +20694,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/param_types/field.ts",
-          "lineNumber": 21
+          "lineNumber": 24
         },
         "signature": [
           "FieldParamType"
@@ -20802,7 +20818,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.Buckets]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.Buckets",
             "type": "string",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -20813,7 +20829,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.Metrics]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.Metrics",
             "type": "string",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -20824,7 +20840,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.None]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.None",
             "type": "string",
             "label": "[AggGroupNames.None]",
             "description": [],
@@ -21149,13 +21165,7 @@
               "lineNumber": 65
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.NodeTypes",
-                "text": "NodeTypes"
-              }
+              "NodeTypes"
             ]
           },
           {
@@ -21858,7 +21868,7 @@
                     "section": "def-common.IBucketAggConfig",
                     "text": "IBucketAggConfig"
                   },
-                  "): boolean | \"\" | undefined; } | { display: string; val: string; })[]"
+                  "): boolean; } | { display: string; val: string; })[]"
                 ]
               },
               {
@@ -22282,7 +22292,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/constants.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "signature": [
           "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; }"
@@ -22329,13 +22339,7 @@
           },
           "signature": [
             "{ register: (customFieldFormat: ",
-            {
-              "pluginId": "data",
-              "scope": "common",
-              "docId": "kibDataFieldFormatsPluginApi",
-              "section": "def-common.FieldFormatInstanceType",
-              "text": "FieldFormatInstanceType"
-            },
+            "FieldFormatInstanceType",
             ") => number; }"
           ]
         }
@@ -22432,13 +22436,7 @@
             "lineNumber": 40
           },
           "signature": [
-            {
-              "pluginId": "data",
-              "scope": "server",
-              "docId": "kibDataIndexPatternsPluginApi",
-              "section": "def-server.IndexPatternsServiceStart",
-              "text": "IndexPatternsServiceStart"
-            }
+            "IndexPatternsServiceStart"
           ]
         }
       ],
@@ -22524,6 +22522,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.KbnFieldType.Unnamed.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -22597,6 +22596,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.KQLSyntaxError.Unnamed.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -22610,6 +22610,7 @@
                 }
               },
               {
+                "id": "def-common.KQLSyntaxError.Unnamed.$2",
                 "type": "Any",
                 "label": "expression",
                 "isRequired": true,
@@ -22664,6 +22665,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.buildCustomFilter.$1",
             "type": "string",
             "label": "indexPatternString",
             "isRequired": true,
@@ -22677,6 +22679,7 @@
             }
           },
           {
+            "id": "def-common.buildCustomFilter.$2",
             "type": "Any",
             "label": "queryDsl",
             "isRequired": true,
@@ -22690,6 +22693,7 @@
             }
           },
           {
+            "id": "def-common.buildCustomFilter.$3",
             "type": "boolean",
             "label": "disabled",
             "isRequired": true,
@@ -22703,6 +22707,7 @@
             }
           },
           {
+            "id": "def-common.buildCustomFilter.$4",
             "type": "boolean",
             "label": "negate",
             "isRequired": true,
@@ -22716,6 +22721,7 @@
             }
           },
           {
+            "id": "def-common.buildCustomFilter.$5",
             "type": "CompoundType",
             "label": "alias",
             "isRequired": false,
@@ -22729,6 +22735,7 @@
             }
           },
           {
+            "id": "def-common.buildCustomFilter.$6",
             "type": "Enum",
             "label": "store",
             "isRequired": true,
@@ -22761,6 +22768,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildEmptyFilter.$1",
             "type": "boolean",
             "label": "isPinned",
             "isRequired": true,
@@ -22774,6 +22782,7 @@
             }
           },
           {
+            "id": "def-common.buildEmptyFilter.$2",
             "type": "string",
             "label": "index",
             "isRequired": false,
@@ -22856,6 +22865,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.buildEsQuery.$1",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -22876,6 +22886,7 @@
             }
           },
           {
+            "id": "def-common.buildEsQuery.$2",
             "type": "CompoundType",
             "label": "queries",
             "isRequired": true,
@@ -22906,6 +22917,7 @@
             }
           },
           {
+            "id": "def-common.buildEsQuery.$3",
             "type": "CompoundType",
             "label": "filters",
             "isRequired": true,
@@ -22936,6 +22948,7 @@
             }
           },
           {
+            "id": "def-common.buildEsQuery.$4",
             "type": "Object",
             "label": "config",
             "isRequired": true,
@@ -22970,6 +22983,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildExistsFilter.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -22989,6 +23003,7 @@
             }
           },
           {
+            "id": "def-common.buildExistsFilter.$2",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": true,
@@ -23093,6 +23108,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.buildFilter.$1",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": true,
@@ -23112,6 +23128,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$2",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -23131,6 +23148,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$3",
             "type": "Enum",
             "label": "type",
             "isRequired": true,
@@ -23150,6 +23168,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$4",
             "type": "boolean",
             "label": "negate",
             "isRequired": true,
@@ -23163,6 +23182,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$5",
             "type": "boolean",
             "label": "disabled",
             "isRequired": true,
@@ -23176,6 +23196,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$6",
             "type": "Any",
             "label": "params",
             "isRequired": true,
@@ -23189,6 +23210,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$7",
             "type": "CompoundType",
             "label": "alias",
             "isRequired": false,
@@ -23202,6 +23224,7 @@
             }
           },
           {
+            "id": "def-common.buildFilter.$8",
             "type": "CompoundType",
             "label": "store",
             "isRequired": false,
@@ -23235,6 +23258,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildPhraseFilter.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -23254,6 +23278,7 @@
             }
           },
           {
+            "id": "def-common.buildPhraseFilter.$2",
             "type": "Any",
             "label": "value",
             "isRequired": true,
@@ -23267,6 +23292,7 @@
             }
           },
           {
+            "id": "def-common.buildPhraseFilter.$3",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": true,
@@ -23327,6 +23353,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildPhrasesFilter.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -23346,6 +23373,7 @@
             }
           },
           {
+            "id": "def-common.buildPhrasesFilter.$2",
             "type": "Array",
             "label": "params",
             "isRequired": true,
@@ -23359,6 +23387,7 @@
             }
           },
           {
+            "id": "def-common.buildPhrasesFilter.$3",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": true,
@@ -23419,6 +23448,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildQueryFilter.$1",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -23432,6 +23462,7 @@
             }
           },
           {
+            "id": "def-common.buildQueryFilter.$2",
             "type": "string",
             "label": "index",
             "isRequired": true,
@@ -23445,6 +23476,7 @@
             }
           },
           {
+            "id": "def-common.buildQueryFilter.$3",
             "type": "string",
             "label": "alias",
             "isRequired": true,
@@ -23483,6 +23515,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildQueryFromFilters.$1",
             "type": "Array",
             "label": "filters",
             "isRequired": true,
@@ -23503,6 +23536,7 @@
             }
           },
           {
+            "id": "def-common.buildQueryFromFilters.$2",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -23523,6 +23557,7 @@
             }
           },
           {
+            "id": "def-common.buildQueryFromFilters.$3",
             "type": "boolean",
             "label": "ignoreFilterIfFieldNotInIndex",
             "isRequired": true,
@@ -23586,6 +23621,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.buildRangeFilter.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -23605,6 +23641,7 @@
             }
           },
           {
+            "id": "def-common.buildRangeFilter.$2",
             "type": "Object",
             "label": "params",
             "isRequired": true,
@@ -23624,6 +23661,7 @@
             }
           },
           {
+            "id": "def-common.buildRangeFilter.$3",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": true,
@@ -23643,6 +23681,7 @@
             }
           },
           {
+            "id": "def-common.buildRangeFilter.$4",
             "type": "string",
             "label": "formattedValue",
             "isRequired": false,
@@ -23705,6 +23744,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.castEsToKbnFieldTypeName.$1",
             "type": "string",
             "label": "esType",
             "isRequired": true,
@@ -23747,6 +23787,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.cleanFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -23814,6 +23855,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.datatableToCSV.$1",
             "type": "Object",
             "label": "{ columns, rows }",
             "isRequired": true,
@@ -23833,6 +23875,7 @@
             }
           },
           {
+            "id": "def-common.datatableToCSV.$2",
             "type": "Object",
             "label": "{ csvSeparator, quoteValues, formatFactory, raw }",
             "isRequired": true,
@@ -23881,6 +23924,7 @@
         ],
         "children": [
           {
+            "id": "def-common.decorateQuery.$1",
             "type": "CompoundType",
             "label": "query",
             "isRequired": true,
@@ -23902,6 +23946,7 @@
             }
           },
           {
+            "id": "def-common.decorateQuery.$2",
             "type": "CompoundType",
             "label": "queryStringOptions",
             "isRequired": true,
@@ -23917,6 +23962,7 @@
             }
           },
           {
+            "id": "def-common.decorateQuery.$3",
             "type": "string",
             "label": "dateFormatTZ",
             "isRequired": false,
@@ -23945,6 +23991,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.disableFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -23997,6 +24044,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.enableFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -24049,6 +24097,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.fromKueryExpression.$1",
             "type": "Any",
             "label": "expression",
             "isRequired": true,
@@ -24062,6 +24111,7 @@
             }
           },
           {
+            "id": "def-common.fromKueryExpression.$2",
             "type": "Object",
             "label": "parseOptions",
             "isRequired": true,
@@ -24116,6 +24166,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.fromLiteralExpression.$1",
             "type": "Any",
             "label": "expression",
             "isRequired": true,
@@ -24129,6 +24180,7 @@
             }
           },
           {
+            "id": "def-common.fromLiteralExpression.$2",
             "type": "Object",
             "label": "parseOptions",
             "isRequired": true,
@@ -24204,6 +24256,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getDisplayValueFromFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -24223,6 +24276,7 @@
             }
           },
           {
+            "id": "def-common.getDisplayValueFromFilter.$2",
             "type": "Array",
             "label": "indexPatterns",
             "isRequired": true,
@@ -24268,6 +24322,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getEsQueryConfig.$1",
             "type": "Object",
             "label": "config",
             "isRequired": true,
@@ -24294,6 +24349,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getExistsFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24360,6 +24416,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getFilterField.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -24418,6 +24475,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getFilterParams.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -24450,6 +24508,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getGeoBoundingBoxFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24495,6 +24554,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getGeoPolygonFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24569,6 +24629,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getIndexPatternFromFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -24588,6 +24649,7 @@
             }
           },
           {
+            "id": "def-common.getIndexPatternFromFilter.$2",
             "type": "Array",
             "label": "indexPatterns",
             "isRequired": true,
@@ -24621,6 +24683,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getKbnFieldType.$1",
             "type": "string",
             "label": "typeName",
             "isRequired": true,
@@ -24684,6 +24747,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getMissingFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24729,6 +24793,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getPhraseFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24774,6 +24839,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getPhraseFilterValue.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24819,6 +24885,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getPhraseScript.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -24838,6 +24905,7 @@
             }
           },
           {
+            "id": "def-common.getPhraseScript.$2",
             "type": "string",
             "label": "value",
             "isRequired": true,
@@ -24877,6 +24945,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getPhrasesFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24922,6 +24991,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getRangeFilterField.$1",
             "type": "CompoundType",
             "label": "filter",
             "isRequired": true,
@@ -24967,6 +25037,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getRangeScript.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -24986,6 +25057,7 @@
             }
           },
           {
+            "id": "def-common.getRangeScript.$2",
             "type": "Object",
             "label": "params",
             "isRequired": true,
@@ -25047,6 +25119,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isExistsFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25085,6 +25158,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isFilter.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -25123,6 +25197,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isFilterDisabled.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -25168,6 +25243,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isFilterPinned.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -25213,6 +25289,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isFilters.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -25252,6 +25329,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isGeoBoundingBoxFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25290,6 +25368,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isGeoPolygonFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25328,6 +25407,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isMatchAllFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25366,6 +25446,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isMissingFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25404,6 +25485,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isPhraseFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25442,6 +25524,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isPhrasesFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25480,6 +25563,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isQueryStringFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25518,6 +25602,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isRangeFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25556,6 +25641,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isScriptedPhraseFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25594,6 +25680,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isScriptedRangeFilter.$1",
             "type": "Any",
             "label": "filter",
             "isRequired": true,
@@ -25644,6 +25731,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.luceneStringToDsl.$1",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -25670,6 +25758,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.pinFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -25729,6 +25818,7 @@
         ],
         "children": [
           {
+            "id": "def-common.shortenDottedString.$1",
             "type": "Any",
             "label": "input",
             "isRequired": true,
@@ -25757,6 +25847,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.toElasticsearchQuery.$1",
             "type": "Object",
             "label": "node",
             "isRequired": true,
@@ -25776,6 +25867,7 @@
             }
           },
           {
+            "id": "def-common.toElasticsearchQuery.$2",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -25796,6 +25888,7 @@
             }
           },
           {
+            "id": "def-common.toElasticsearchQuery.$3",
             "type": "Object",
             "label": "config",
             "isRequired": false,
@@ -25809,6 +25902,7 @@
             }
           },
           {
+            "id": "def-common.toElasticsearchQuery.$4",
             "type": "Object",
             "label": "context",
             "isRequired": false,
@@ -25865,6 +25959,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.toggleFilterDisabled.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -25918,6 +26013,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.toggleFilterNegated.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -25971,6 +26067,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.toggleFilterPinned.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -26032,6 +26129,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.unpinFilter.$1",
             "type": "Object",
             "label": "filter",
             "isRequired": true,
@@ -26725,13 +26823,7 @@
               "lineNumber": 78
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -26764,13 +26856,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -26787,13 +26873,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -27174,6 +27254,21 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
+        "id": "def-common.KIBANA_USER_QUERY_LANGUAGE_KEY",
+        "type": "string",
+        "label": "KIBANA_USER_QUERY_LANGUAGE_KEY",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/constants.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"kibana.userQueryLanguage\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.MatchAllFilter",
         "type": "Type",
         "label": "MatchAllFilter",
@@ -27350,6 +27445,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.nodeBuilder.is.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -27363,6 +27459,7 @@
                 }
               },
               {
+                "id": "def-common.nodeBuilder.is.$2",
                 "type": "CompoundType",
                 "label": "value",
                 "isRequired": true,
@@ -27393,13 +27490,7 @@
                 "text": "KueryNode"
               },
               ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.FunctionTypeBuildNode",
-                "text": "FunctionTypeBuildNode"
-              }
+              "FunctionTypeBuildNode"
             ],
             "description": [],
             "label": "is",
@@ -27415,6 +27506,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.nodeBuilder.or.$1",
                 "type": "Array",
                 "label": "nodes",
                 "isRequired": true,
@@ -27467,6 +27559,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.nodeBuilder.and.$1",
                 "type": "Array",
                 "label": "nodes",
                 "isRequired": true,
@@ -27542,12 +27635,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "text": "src/plugins/data/common/es_query/kuery/node_types/function"
-              }
+              "src/plugins/data/common/es_query/kuery/node_types/function"
             ]
           },
           {
@@ -27562,12 +27650,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "text": "src/plugins/data/common/es_query/kuery/node_types/literal"
-              }
+              "src/plugins/data/common/es_query/kuery/node_types/literal"
             ]
           },
           {
@@ -27582,12 +27665,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "text": "src/plugins/data/common/es_query/kuery/node_types/named_arg"
-              }
+              "src/plugins/data/common/es_query/kuery/node_types/named_arg"
             ]
           },
           {
@@ -27602,12 +27680,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "text": "src/plugins/data/common/es_query/kuery/node_types/wildcard"
-              }
+              "src/plugins/data/common/es_query/kuery/node_types/wildcard"
             ]
           }
         ],
@@ -27627,7 +27700,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/constants.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "signature": [
           "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; }"

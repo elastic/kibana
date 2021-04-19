@@ -55,38 +55,15 @@ function isSameArrayValue(arrayA: string[] = [], arrayB: string[] = []) {
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useStartServices();
-  const kibanaUrlsInput = useComboInput([], (value) => {
+
+  const fleetServerHostsInput = useComboInput([], (value) => {
     if (value.length === 0) {
       return [
-        i18n.translate('xpack.fleet.settings.kibanaUrlEmptyError', {
+        i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
           defaultMessage: 'At least one URL is required',
         }),
       ];
     }
-    if (value.some((v) => !v.match(URL_REGEX))) {
-      return [
-        i18n.translate('xpack.fleet.settings.kibanaUrlError', {
-          defaultMessage: 'Invalid URL',
-        }),
-      ];
-    }
-    if (isDiffPathProtocol(value)) {
-      return [
-        i18n.translate('xpack.fleet.settings.kibanaUrlDifferentPathOrProtocolError', {
-          defaultMessage: 'Protocol and path must be the same for each URL',
-        }),
-      ];
-    }
-  });
-  const fleetServerHostsInput = useComboInput([], (value) => {
-    // TODO enable as part of https://github.com/elastic/kibana/issues/94303
-    // if (value.length === 0) {
-    //   return [
-    //     i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
-    //       defaultMessage: 'At least one URL is required',
-    //     }),
-    //   ];
-    // }
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
@@ -129,7 +106,6 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 
   const validate = useCallback(() => {
     if (
-      !kibanaUrlsInput.validate() ||
       !fleetServerHostsInput.validate() ||
       !elasticsearchUrlInput.validate() ||
       !additionalYamlConfigInput.validate()
@@ -138,7 +114,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
 
     return true;
-  }, [kibanaUrlsInput, fleetServerHostsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
+  }, [fleetServerHostsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
 
   return {
     isLoading,
@@ -157,7 +133,6 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           throw outputResponse.error;
         }
         const settingsResponse = await sendPutSettings({
-          kibana_urls: kibanaUrlsInput.value,
           fleet_server_hosts: fleetServerHostsInput.value,
         });
         if (settingsResponse.error) {
@@ -179,7 +154,6 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     },
     inputs: {
       fleetServerHosts: fleetServerHostsInput,
-      kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
       additionalYamlConfig: additionalYamlConfigInput,
     },
@@ -220,7 +194,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   useEffect(() => {
     if (settings) {
-      inputs.kibanaUrls.setValue([...settings.kibana_urls]);
       inputs.fleetServerHosts.setValue([...settings.fleet_server_hosts]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,7 +204,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       return false;
     }
     return (
-      !isSameArrayValue(settings.kibana_urls, inputs.kibanaUrls.value) ||
       !isSameArrayValue(settings.fleet_server_hosts, inputs.fleetServerHosts.value) ||
       !isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value) ||
       (output.config_yaml || '') !== inputs.additionalYamlConfig.value
@@ -329,17 +301,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerHosts.props} />
       </EuiFormRow>
 
-      <EuiSpacer size="m" />
-      {/* // TODO remove as part of https://github.com/elastic/kibana/issues/94303 */}
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {
-          defaultMessage: 'Kibana hosts',
-        })}
-        {...inputs.kibanaUrls.formRowProps}
-      >
-        <EuiComboBox fullWidth noSuggestions {...inputs.kibanaUrls.props} />
-      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth

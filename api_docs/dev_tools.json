@@ -49,26 +49,15 @@
                 "text": "CoreSetup"
               },
               "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
-              {
-                "pluginId": "devTools",
-                "scope": "public",
-                "docId": "kibDevToolsPluginApi",
-                "section": "def-public.CreateDevToolArgs",
-                "text": "CreateDevToolArgs"
-              },
+              "CreateDevToolArgs",
               ") => ",
-              {
-                "pluginId": "devTools",
-                "scope": "public",
-                "docId": "kibDevToolsPluginApi",
-                "section": "def-public.DevToolApp",
-                "text": "DevToolApp"
-              },
+              "DevToolApp",
               "; }"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.DevToolsPlugin.setup.$1",
                 "type": "Object",
                 "label": "coreSetup",
                 "isRequired": true,
@@ -89,7 +78,7 @@
                 }
               },
               {
-                "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }",
+                "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
                 "type": "Object",
                 "label": "{ urlForwarding }",
                 "tags": [],
@@ -97,7 +86,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.urlForwarding",
+                    "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding.urlForwarding",
                     "type": "Object",
                     "label": "urlForwarding",
                     "description": [],
@@ -189,21 +178,9 @@
           },
           "signature": [
             "(devTool: ",
-            {
-              "pluginId": "devTools",
-              "scope": "public",
-              "docId": "kibDevToolsPluginApi",
-              "section": "def-public.CreateDevToolArgs",
-              "text": "CreateDevToolArgs"
-            },
+            "CreateDevToolArgs",
             ") => ",
-            {
-              "pluginId": "devTools",
-              "scope": "public",
-              "docId": "kibDevToolsPluginApi",
-              "section": "def-public.DevToolApp",
-              "text": "DevToolApp"
-            }
+            "DevToolApp"
           ]
         }
       ],
