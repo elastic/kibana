@@ -43,7 +43,7 @@ export interface Presentable<Context = unknown> {
    * Returns tooltip text which should be displayed when user hovers this object.
    * Should return empty string if tooltip should not be displayed.
    */
-  getDisplayNameTooltip(context: Context): string;
+  getDisplayNameTooltip?(context: Context): string;
 
   /**
    * This method should return a link if this item can be clicked on. The link
