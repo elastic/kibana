@@ -5,5 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import type { DashboardRootState, DashboardDispatch } from './dashboard_state_store';
 
-export { useDashboardAppState } from './use_dashboard_app_state';
+export const useDashboardDispatch = () => useDispatch<DashboardDispatch>();
+export const useDashboardSelector: TypedUseSelectorHook<DashboardRootState> = useSelector;

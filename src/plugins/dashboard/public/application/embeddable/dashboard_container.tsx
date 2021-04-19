@@ -37,7 +37,7 @@ import {
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
-import { DashboardCapabilities } from '../types';
+import { DashboardCapabilities } from '../../types';
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardCapabilities;
@@ -102,7 +102,6 @@ const defaultCapabilities: DashboardCapabilities = {
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-  public switchViewMode?: (newViewMode: ViewMode) => void;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -245,7 +244,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
+          <DashboardViewport container={this} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

@@ -6,13 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { History } from 'history';
+import { DashboardConstants } from '../..';
+import { DashboardState } from '../../types';
+import { getDashboardTitle } from '../../dashboard_strings';
+import { DashboardSavedObject } from '../../saved_dashboards';
+import { getQueryParams } from '../../services/kibana_utils';
+import { createQueryParamObservable } from '../../../../kibana_utils/public';
 import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
-import { DataPublicPluginStart } from '../../services/data';
-import { DashboardAppState } from '../../types';
+import {
+  DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
+} from '../../services/data';
+
+export const getSearchSessionIdFromURL = (history: History): string | undefined =>
+  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+
+export const getSessionURLObservable = (history: History) =>
+  createQueryParamObservable<string>(history, DashboardConstants.SEARCH_SESSION_ID);
 
 export function createSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
-  getAppState: () => DashboardAppState;
+  getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
 }) {
@@ -28,6 +43,44 @@ export function createSessionRestorationDataProvider(deps: {
   };
 }
 
+export function enableDashboardSearchSessions({
+  canStoreSearchSession,
+  initialDashboardState,
+  getLatestDashboardState,
+  savedDashboard,
+  data,
+}: {
+  data: DataPublicPluginStart;
+  canStoreSearchSession: boolean;
+  savedDashboard: DashboardSavedObject;
+  initialDashboardState: DashboardState;
+  getLatestDashboardState: () => DashboardState;
+}) {
+  const dashboardTitle = getDashboardTitle(
+    initialDashboardState.title,
+    initialDashboardState.viewMode,
+    !savedDashboard.id
+  );
+
+  data.search.session.enableStorage(
+    createSessionRestorationDataProvider({
+      data,
+      getDashboardTitle: () => dashboardTitle,
+      getDashboardId: () => savedDashboard?.id || '',
+      getAppState: getLatestDashboardState,
+    }),
+    {
+      isDisabled: () =>
+        canStoreSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
+  );
+}
+
 function getUrlGeneratorState({
   data,
   getAppState,
@@ -35,7 +88,7 @@ function getUrlGeneratorState({
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
-  getAppState: () => DashboardAppState;
+  getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {

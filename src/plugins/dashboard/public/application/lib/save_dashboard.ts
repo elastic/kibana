@@ -6,40 +6,97 @@
  * Side Public License, v 1.
  */
 
-import { TimefilterContract } from '../../services/data';
+import _ from 'lodash';
+import { DashboardAppServices, DashboardRedirect, DashboardState } from '../../types';
+import { DashboardSavedObject } from '../../saved_dashboards';
 import { SavedObjectSaveOpts } from '../../services/saved_objects';
-import { updateSavedDashboard } from './update_saved_dashboard';
-import { DashboardStateManager } from '../dashboard_state_manager';
+import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
+import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
+import type { SavedObjectTagDecoratorTypeGuard } from '../../services/saved_objects_tagging_oss';
+import { NotificationsStart } from '../../services/core';
+import { dashboardSaveToastStrings } from '../../dashboard_strings';
+import { convertTimeToUTCString } from '.';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
-/**
- * Saves the dashboard.
- * @param toJson A custom toJson function. Used because the previous code used
- * the angularized toJson version, and it was unclear whether there was a reason not to use
- * JSON.stringify
- * @returns A promise that if resolved, will contain the id of the newly saved
- * dashboard.
- */
-export function saveDashboard(
-  toJson: (obj: any) => string,
-  timeFilter: TimefilterContract,
-  dashboardStateManager: DashboardStateManager,
-  saveOptions: SavedDashboardSaveOpts
-): Promise<string> {
-  const savedDashboard = dashboardStateManager.savedDashboard;
-  const appState = dashboardStateManager.appState;
-  const hasTaggingCapabilities = dashboardStateManager.hasTaggingCapabilities;
-
-  updateSavedDashboard(savedDashboard, appState, timeFilter, hasTaggingCapabilities, toJson);
-
-  return savedDashboard.save(saveOptions).then((id: string) => {
-    if (id) {
-      // reset state only when save() was successful
-      // e.g. save() could be interrupted if title is duplicated and not confirmed
-      dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
-    }
-
-    return id;
-  });
+interface SaveDashboardProps {
+  redirectTo: DashboardRedirect;
+  currentState: DashboardState;
+  timefilter: TimefilterContract;
+  saveOptions: SavedDashboardSaveOpts;
+  toasts: NotificationsStart['toasts'];
+  savedDashboard: DashboardSavedObject;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
+
+export const saveDashboard = async ({
+  redirectTo,
+  currentState,
+  timefilter,
+  saveOptions,
+  toasts,
+  savedDashboard,
+  savedObjectsTagging,
+}: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
+  const lastDashboardId = savedDashboard.id;
+  const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
+
+  savedDashboard.title = currentState.title;
+  savedDashboard.description = currentState.description;
+  savedDashboard.timeRestore = currentState.timeRestore;
+  savedDashboard.panelsJSON = JSON.stringify(currentState.panels);
+  savedDashboard.optionsJSON = JSON.stringify(currentState.options);
+
+  if (hasTaggingCapabilities(savedDashboard)) {
+    savedDashboard.setTags(currentState.tags);
+  }
+
+  savedDashboard.timeFrom = savedDashboard.timeRestore
+    ? convertTimeToUTCString(timefilter.getTime().from)
+    : undefined;
+  savedDashboard.timeTo = savedDashboard.timeRestore
+    ? convertTimeToUTCString(timefilter.getTime().to)
+    : undefined;
+  const timeRestoreObj: RefreshInterval = _.pick(timefilter.getRefreshInterval(), [
+    'display',
+    'pause',
+    'section',
+    'value',
+  ]) as RefreshInterval;
+  savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
+
+  // save only unpinned filters
+  const unpinnedFilters = savedDashboard
+    .getFilters()
+    .filter((filter) => !esFilters.isFilterPinned(filter));
+  savedDashboard.searchSource.setField('filter', unpinnedFilters);
+
+  try {
+    const newId = await savedDashboard.save(saveOptions);
+    if (newId) {
+      toasts.addSuccess({
+        title: dashboardSaveToastStrings.getSuccessString(currentState.title),
+        'data-test-subj': 'saveDashboardSuccess',
+      });
+      if (newId !== lastDashboardId) {
+        // TODO: Dashboard session storage
+        // dashboardPanelStorage.clearPanels(lastDashboardId);
+        redirectTo({
+          id: newId,
+          // editMode: true,
+          destination: 'dashboard',
+          useReplace: true,
+        });
+        return { redirected: true, id: newId };
+      }
+    }
+    return { id: newId };
+  } catch (error) {
+    toasts.addDanger({
+      title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
+      'data-test-subj': 'saveDashboardFailure',
+    });
+    return { error };
+  }
+};

@@ -14,9 +14,8 @@ import { DashboardSavedObject } from '../..';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
-import { DashboardStateManager } from '../dashboard_state_manager';
 import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardCapabilities } from '../types';
+import { DashboardCapabilities, DashboardState } from '../../types';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -24,8 +23,8 @@ interface ShowShareModalProps {
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
+  currentDashboardState: DashboardState;
   dashboardCapabilities: DashboardCapabilities;
-  dashboardStateManager: DashboardStateManager;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -41,7 +40,7 @@ export function ShowShareModal({
   anchorElement,
   savedDashboard,
   dashboardCapabilities,
-  dashboardStateManager,
+  currentDashboardState,
 }: ShowShareModalProps) {
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -106,7 +105,7 @@ export function ShowShareModal({
     allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      dashboardStateManager.getAppState(),
+      currentDashboardState,
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),
@@ -115,7 +114,8 @@ export function ShowShareModal({
     sharingData: {
       title: savedDashboard.title,
     },
-    isDirty: dashboardStateManager.getIsDirty(),
+    // TODO: IsDirty
+    isDirty: true,
     embedUrlParamExtensions: [
       {
         paramName: 'embed',

@@ -10,12 +10,12 @@ import { set } from '@elastic/safer-lodash-set';
 import { Storage } from '../../services/kibana_utils';
 import { NotificationsStart } from '../../services/core';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
-import { SavedDashboardPanel } from '..';
+import { DashboardState } from '../../types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
 
-export class DashboardPanelStorage {
+export class DashboardSessionStorage {
   private sessionStorage: Storage;
 
   constructor(private toasts: NotificationsStart['toasts'], private activeSpaceId: string) {
@@ -38,7 +38,7 @@ export class DashboardPanelStorage {
     }
   }
 
-  public getPanels(id = DASHBOARD_PANELS_UNSAVED_ID): SavedDashboardPanel[] | undefined {
+  public getState(id = DASHBOARD_PANELS_UNSAVED_ID): DashboardState | undefined {
     try {
       return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
     } catch (e) {
@@ -49,10 +49,10 @@ export class DashboardPanelStorage {
     }
   }
 
-  public setPanels(id = DASHBOARD_PANELS_UNSAVED_ID, newPanels: SavedDashboardPanel[]) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: DashboardState) {
     try {
       const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-      set(sessionStoragePanels, [this.activeSpaceId, id], newPanels);
+      set(sessionStoragePanels, [this.activeSpaceId, id], newState);
       this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
     } catch (e) {
       this.toasts.addDanger({
