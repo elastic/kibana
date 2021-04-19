@@ -484,7 +484,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       throw new Error('Unable to resolve a valid bucket length');
     }
 
-    const lookBackTimeInterval =
+    const lookBackTimeInterval: string =
       params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
@@ -505,7 +505,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             {
               range: {
                 timestamp: {
-                  gte: `now-${lookBackTimeInterval}s`,
+                  gte: `now-${lookBackTimeInterval}`,
                 },
               },
             },

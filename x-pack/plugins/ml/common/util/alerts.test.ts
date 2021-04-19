@@ -24,7 +24,7 @@ describe('resolveLookbackInterval', () => {
       },
     ] as Datafeed[];
 
-    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe(1867);
+    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe('32m');
   });
 
   test('resolves interval for bucket spans smaller than 1m', () => {
@@ -42,7 +42,7 @@ describe('resolveLookbackInterval', () => {
       },
     ] as Datafeed[];
 
-    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe(141);
+    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe('3m');
   });
 
   test('resolves interval for bucket spans smaller than 1m without query dealay', () => {
@@ -56,7 +56,7 @@ describe('resolveLookbackInterval', () => {
 
     const testDatafeeds = [{}] as Datafeed[];
 
-    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe(121);
+    expect(resolveLookbackInterval(testJobs, testDatafeeds)).toBe('3m');
   });
 });
 
@@ -73,6 +73,6 @@ describe('getLookbackInterval', () => {
       },
     ] as CombinedJobWithStats[];
 
-    expect(getLookbackInterval(testJobs)).toBe(1867);
+    expect(getLookbackInterval(testJobs)).toBe('32m');
   });
 });

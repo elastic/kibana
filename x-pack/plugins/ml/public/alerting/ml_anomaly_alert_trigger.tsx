@@ -123,8 +123,8 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const advancedSettings = useMemo(() => {
     let { lookbackInterval, topNBuckets } = alertParams;
 
-    if ((!isDefined(lookbackInterval) || lookbackInterval === '') && jobConfigs.length > 0) {
-      lookbackInterval = `${getLookbackInterval(jobConfigs)}s`;
+    if (!isDefined(lookbackInterval) && jobConfigs.length > 0) {
+      lookbackInterval = getLookbackInterval(jobConfigs);
     }
     if (!isDefined(topNBuckets) && jobConfigs.length > 0) {
       topNBuckets = getTopNBuckets(jobConfigs[0]);
