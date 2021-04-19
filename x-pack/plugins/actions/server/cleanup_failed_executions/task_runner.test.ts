@@ -27,7 +27,8 @@ describe('taskRunner', () => {
 
   const config: ActionsConfig['cleanupFailedExecutionsTask'] = {
     enabled: true,
-    interval: schema.duration().validate('5m'),
+    cleanupInterval: schema.duration().validate('5m'),
+    idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   };
 
@@ -60,6 +61,7 @@ describe('taskRunner', () => {
       success: true,
       successCount: 1,
       failureCount: 1,
+      remaining: 0,
     });
   });
 
@@ -81,7 +83,21 @@ describe('taskRunner', () => {
       });
     });
 
-    it('should return latest schedule', async () => {
+    it('should return idle schedule when no remaining tasks to cleanup', async () => {
+      const runner = taskRunner(taskRunnerOpts)({ taskInstance });
+      const { schedule } = await runner.run();
+      expect(schedule).toEqual({
+        interval: '60m',
+      });
+    });
+
+    it('should return cleanup schedule when there are some remaining tasks to cleanup', async () => {
+      jest.requireMock('./find_and_cleanup_tasks').findAndCleanupTasks.mockResolvedValue({
+        success: true,
+        successCount: 1,
+        failureCount: 1,
+        remaining: 1,
+      });
       const runner = taskRunner(taskRunnerOpts)({ taskInstance });
       const { schedule } = await runner.run();
       expect(schedule).toEqual({

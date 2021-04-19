@@ -13,14 +13,14 @@ import { TaskManagerStartContract, asInterval } from '../../../task_manager/serv
 export async function ensureScheduled(
   taskManager: TaskManagerStartContract,
   logger: Logger,
-  { interval }: ActionsConfig['cleanupFailedExecutionsTask']
+  { cleanupInterval }: ActionsConfig['cleanupFailedExecutionsTask']
 ) {
   try {
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TASK_TYPE,
       schedule: {
-        interval: asInterval(interval.asMilliseconds()),
+        interval: asInterval(cleanupInterval.asMilliseconds()),
       },
       state: {
         runs: 0,

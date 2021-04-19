@@ -52,7 +52,8 @@ export const configSchema = schema.object({
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   cleanupFailedExecutionsTask: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    interval: schema.duration({ defaultValue: '5m' }),
+    cleanupInterval: schema.duration({ defaultValue: '5m' }),
+    idleInterval: schema.duration({ defaultValue: '1h' }),
     pageSize: schema.number({ defaultValue: 100 }),
   }),
 });

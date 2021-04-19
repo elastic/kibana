@@ -46,7 +46,8 @@ describe('findAndCleanupTasks', () => {
 
   const config: ActionsConfig['cleanupFailedExecutionsTask'] = {
     enabled: true,
-    interval: schema.duration().validate('5m'),
+    cleanupInterval: schema.duration().validate('5m'),
+    idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   };
 

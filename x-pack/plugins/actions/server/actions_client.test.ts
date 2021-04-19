@@ -415,7 +415,8 @@ describe('create()', () => {
       responseTimeout: moment.duration('60s'),
       cleanupFailedExecutionsTask: {
         enabled: true,
-        interval: schema.duration().validate('15s'),
+        cleanupInterval: schema.duration().validate('5m'),
+        idleInterval: schema.duration().validate('1h'),
         pageSize: 100,
       },
     });

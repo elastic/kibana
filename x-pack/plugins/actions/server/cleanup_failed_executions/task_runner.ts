@@ -33,7 +33,10 @@ export function taskRunner(opts: TaskRunnerOpts) {
             total_cleaned_up: state.total_cleaned_up + cleanupResult.successCount,
           },
           schedule: {
-            interval: asInterval(opts.config.interval.asMilliseconds()),
+            interval:
+              cleanupResult.remaining > 0
+                ? asInterval(opts.config.cleanupInterval.asMilliseconds())
+                : asInterval(opts.config.idleInterval.asMilliseconds()),
           },
         };
       },

@@ -22,6 +22,10 @@ export interface FindAndCleanupTasksOpts {
   taskManagerIndex: string;
 }
 
+export interface FindAndCleanupTasksResult extends CleanupTasksResult {
+  remaining: number;
+}
+
 export async function findAndCleanupTasks({
   logger,
   actionTypeRegistry,
@@ -29,7 +33,7 @@ export async function findAndCleanupTasks({
   config,
   kibanaIndex,
   taskManagerIndex,
-}: FindAndCleanupTasksOpts): Promise<CleanupTasksResult> {
+}: FindAndCleanupTasksOpts): Promise<FindAndCleanupTasksResult> {
   logger.debug('Starting cleanup of failed executions');
   const [{ savedObjects, elasticsearch }, { spaces }] = await coreStartServices;
   const esClient = elasticsearch.client.asInternalUser;
@@ -69,5 +73,8 @@ export async function findAndCleanupTasks({
   logger.debug(
     `Finished cleanup of failed executions. [success=${cleanupResult.successCount}, failures=${cleanupResult.failureCount}]`
   );
-  return cleanupResult;
+  return {
+    ...cleanupResult,
+    remaining: result.total - cleanupResult.successCount,
+  };
 }

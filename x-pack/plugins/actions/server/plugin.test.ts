@@ -45,7 +45,8 @@ describe('Actions Plugin', () => {
         responseTimeout: moment.duration(60000),
         cleanupFailedExecutionsTask: {
           enabled: true,
-          interval: schema.duration().validate('15s'),
+          cleanupInterval: schema.duration().validate('5m'),
+          idleInterval: schema.duration().validate('1h'),
           pageSize: 100,
         },
       });
@@ -214,7 +215,8 @@ describe('Actions Plugin', () => {
         responseTimeout: moment.duration(60000),
         cleanupFailedExecutionsTask: {
           enabled: true,
-          interval: schema.duration().validate('15s'),
+          cleanupInterval: schema.duration().validate('5m'),
+          idleInterval: schema.duration().validate('1h'),
           pageSize: 100,
         },
       });
@@ -286,7 +288,8 @@ describe('Actions Plugin', () => {
           responseTimeout: moment.duration('60s'),
           cleanupFailedExecutionsTask: {
             enabled: true,
-            interval: schema.duration().validate('15s'),
+            cleanupInterval: schema.duration().validate('5m'),
+            idleInterval: schema.duration().validate('1h'),
             pageSize: 100,
           },
           ...overrides,
