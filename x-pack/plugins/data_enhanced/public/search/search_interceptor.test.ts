@@ -23,9 +23,12 @@ import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks
 import { BehaviorSubject } from 'rxjs';
 import * as xpackResourceNotFoundException from '../../common/search/test_data/search_phase_execution_exception.json';
 
-const timeTravel = (msToRun = 0) => {
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+const timeTravel = async (msToRun = 0) => {
+  await flushPromises();
   jest.advanceTimersByTime(msToRun);
-  return new Promise((resolve) => setImmediate(resolve));
+  return flushPromises();
 };
 
 const next = jest.fn();
@@ -39,10 +42,20 @@ let fetchMock: jest.Mock<any>;
 
 jest.useFakeTimers();
 
+jest.mock('./utils', () => ({
+  createRequestHash: jest.fn().mockImplementation((input) => {
+    return Promise.resolve(JSON.stringify(input));
+  }),
+}));
+
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation(() => {
+  fetchMock.mockImplementation((r) => {
+    if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
+    value.meta = {
+      size: 10,
+    };
     return new Promise((resolve, reject) =>
       setTimeout(() => {
         return (isError ? reject : resolve)(value);
@@ -452,7 +465,7 @@ describe('EnhancedSearchInterceptor', () => {
     });
   });
 
-  describe('session', () => {
+  describe('session tracking', () => {
     beforeEach(() => {
       const responses = [
         {
@@ -557,6 +570,542 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel(10);
       expect(sessionService.trackSearch).toBeCalledTimes(0);
+    });
+  });
+
+  describe('session client caching', () => {
+    const sessionId = 'sessionId';
+    const basicReq = {
+      params: {
+        test: 1,
+      },
+    };
+
+    const basicCompleteResponse = [
+      {
+        time: 10,
+        value: {
+          isPartial: false,
+          isRunning: false,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+    ];
+
+    const partialCompleteResponse = [
+      {
+        time: 10,
+        value: {
+          isPartial: true,
+          isRunning: true,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+      {
+        time: 20,
+        value: {
+          isPartial: false,
+          isRunning: false,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+    });
+
+    test('should be disabled if there is no session', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, {}).subscribe({ next, error, complete });
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, {}).subscribe({ next, error, complete });
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should fetch different requests in a single session', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req2 = {
+        params: {
+          test: 2,
+        },
+      };
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should fetch the same request for two different sessions', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor
+        .search(basicReq, { sessionId: 'anotherSession' })
+        .subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should track searches that come from cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const req = {
+        params: {
+          test: 200,
+        },
+      };
+
+      const response = searchInterceptor.search(req, { pollInterval: 1, sessionId });
+      const response2 = searchInterceptor.search(req, { pollInterval: 1, sessionId });
+      response.subscribe({ next, error, complete });
+      response2.subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(sessionService.trackSearch).toBeCalledTimes(2);
+      expect(untrack).not.toBeCalled();
+      await timeTravel(300);
+      // Should be called only 2 times (once per partial response)
+      expect(fetchMock).toBeCalledTimes(2);
+      expect(sessionService.trackSearch).toBeCalledTimes(2);
+      expect(untrack).toBeCalledTimes(2);
+
+      expect(next).toBeCalledTimes(4);
+      expect(error).toBeCalledTimes(0);
+      expect(complete).toBeCalledTimes(2);
+    });
+
+    test('should cache partial responses', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('should not cache error responses', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should deliver error to all replays', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(error).toBeCalledTimes(2);
+      expect(error.mock.calls[0][0].message).toEqual('Received partial response');
+      expect(error.mock.calls[1][0].message).toEqual('Received partial response');
+    });
+
+    test('should ignore anything outside params when hashing', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req = {
+        something: 123,
+        params: {
+          test: 1,
+        },
+      };
+
+      const req2 = {
+        something: 321,
+        params: {
+          test: 1,
+        },
+      };
+
+      searchInterceptor.search(req, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('should ignore preference when hashing', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req = {
+        params: {
+          test: 1,
+          preference: 123,
+        },
+      };
+
+      const req2 = {
+        params: {
+          test: 1,
+          preference: 321,
+        },
+      };
+
+      searchInterceptor.search(req, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('should return from cache for identical requests in the same session', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('aborting a search that didnt get any response should retrigger search', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const abortController = new AbortController();
+
+      // Start a search request
+      searchInterceptor
+        .search(basicReq, { sessionId, abortSignal: abortController.signal })
+        .subscribe({ next, error, complete });
+
+      // Abort the search request before it started
+      abortController.abort();
+
+      // Time travel to make sure nothing appens
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(0);
+      expect(next).toBeCalledTimes(0);
+      expect(error).toBeCalledTimes(1);
+      expect(complete).toBeCalledTimes(0);
+
+      const error2 = jest.fn();
+      const next2 = jest.fn();
+      const complete2 = jest.fn();
+
+      // Search for the same thing again
+      searchInterceptor
+        .search(basicReq, { sessionId })
+        .subscribe({ next: next2, error: error2, complete: complete2 });
+
+      // Should search again
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next2).toBeCalledTimes(1);
+      expect(error2).toBeCalledTimes(0);
+      expect(complete2).toBeCalledTimes(1);
+    });
+
+    test('aborting a running first search shouldnt clear cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const req = {
+        params: {
+          test: 200,
+        },
+      };
+
+      const abortController = new AbortController();
+
+      const response = searchInterceptor.search(req, {
+        pollInterval: 1,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response.subscribe({ next, error, complete });
+      await timeTravel(10);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next).toBeCalledTimes(1);
+      expect(error).toBeCalledTimes(0);
+      expect(complete).toBeCalledTimes(0);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).not.toBeCalled();
+
+      const next2 = jest.fn();
+      const error2 = jest.fn();
+      const complete2 = jest.fn();
+      const response2 = searchInterceptor.search(req, { pollInterval: 1, sessionId });
+      response2.subscribe({ next: next2, error: error2, complete: complete2 });
+      await timeTravel(0);
+
+      abortController.abort();
+
+      await timeTravel(300);
+      // Both searches should be tracked and untracked
+      expect(sessionService.trackSearch).toBeCalledTimes(2);
+      expect(untrack).toBeCalledTimes(2);
+
+      // First search should error
+      expect(next).toBeCalledTimes(1);
+      expect(error).toBeCalledTimes(1);
+      expect(complete).toBeCalledTimes(0);
+
+      // Second search should complete
+      expect(next2).toBeCalledTimes(2);
+      expect(error2).toBeCalledTimes(0);
+      expect(complete2).toBeCalledTimes(1);
+
+      // Should be called only 2 times (once per partial response)
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('aborting a running second search shouldnt clear cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const req = {
+        params: {
+          test: 200,
+        },
+      };
+
+      const abortController = new AbortController();
+
+      const response = searchInterceptor.search(req, { pollInterval: 1, sessionId });
+      response.subscribe({ next, error, complete });
+      await timeTravel(10);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next).toBeCalledTimes(1);
+      expect(error).toBeCalledTimes(0);
+      expect(complete).toBeCalledTimes(0);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).not.toBeCalled();
+
+      const next2 = jest.fn();
+      const error2 = jest.fn();
+      const complete2 = jest.fn();
+      const response2 = searchInterceptor.search(req, {
+        pollInterval: 0,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response2.subscribe({ next: next2, error: error2, complete: complete2 });
+      await timeTravel(0);
+
+      abortController.abort();
+
+      await timeTravel(300);
+      expect(sessionService.trackSearch).toBeCalledTimes(2);
+      expect(untrack).toBeCalledTimes(2);
+
+      expect(next).toBeCalledTimes(2);
+      expect(error).toBeCalledTimes(0);
+      expect(complete).toBeCalledTimes(1);
+
+      expect(next2).toBeCalledTimes(1);
+      expect(error2).toBeCalledTimes(1);
+      expect(complete2).toBeCalledTimes(0);
+
+      // Should be called only 2 times (once per partial response)
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('aborting both requests should cancel underlaying search only once', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+      sessionService.trackSearch.mockImplementation(() => jest.fn());
+
+      const req = {
+        params: {
+          test: 200,
+        },
+      };
+
+      const abortController = new AbortController();
+
+      const response = searchInterceptor.search(req, {
+        pollInterval: 1,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response.subscribe({ next, error, complete });
+
+      const response2 = searchInterceptor.search(req, {
+        pollInterval: 1,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response2.subscribe({ next, error, complete });
+      await timeTravel(10);
+
+      abortController.abort();
+
+      await timeTravel(300);
+
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
+    });
+
+    test('aborting both searches should stop searching and clear cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const req = {
+        params: {
+          test: 200,
+        },
+      };
+
+      const abortController = new AbortController();
+
+      const response = searchInterceptor.search(req, {
+        pollInterval: 1,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response.subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      const response2 = searchInterceptor.search(req, {
+        pollInterval: 1,
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      response2.subscribe({ next, error, complete });
+      await timeTravel(0);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      abortController.abort();
+
+      await timeTravel(300);
+
+      expect(next).toBeCalledTimes(2);
+      expect(error).toBeCalledTimes(2);
+      expect(complete).toBeCalledTimes(0);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(error.mock.calls[1][0]).toBeInstanceOf(AbortError);
+
+      // Should be called only 1 times (one partial response)
+      expect(fetchMock).toBeCalledTimes(1);
+
+      // Clear mock and research
+      fetchMock.mockReset();
+      mockFetchImplementation(partialCompleteResponse);
+      // Run the search again to see that we don't hit the cache
+      const response3 = searchInterceptor.search(req, { pollInterval: 1, sessionId });
+      response3.subscribe({ next, error, complete });
+
+      await timeTravel(10);
+      await timeTravel(10);
+      await timeTravel(300);
+
+      // Should be called 2 times (two partial response)
+      expect(fetchMock).toBeCalledTimes(2);
+      expect(complete).toBeCalledTimes(1);
+    });
+
+    test('aborting a completed search shouldnt effect cache', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const abortController = new AbortController();
+
+      // Start a search request
+      searchInterceptor
+        .search(basicReq, { sessionId, abortSignal: abortController.signal })
+        .subscribe({ next, error, complete });
+
+      // Get a final response
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      // Abort the search request
+      abortController.abort();
+
+      // Search for the same thing again
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+
+      // Get the response from cache
+      expect(fetchMock).toBeCalledTimes(1);
     });
   });
 });
