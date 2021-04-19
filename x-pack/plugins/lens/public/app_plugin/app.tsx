@@ -82,6 +82,8 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
+  const startSession = useCallback(() => data.search.session.start(), [data]);
+
   const [state, setState] = useState<LensAppState>(() => {
     return {
       query: data.query.queryString.getQuery(),
@@ -96,7 +98,7 @@ export function App({
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
-      searchSessionId: data.search.session.start(),
+      searchSessionId: startSession(),
     };
   });
 
@@ -178,7 +180,7 @@ export function App({
         setState((s) => ({
           ...s,
           filters: data.query.filterManager.getFilters(),
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
         trackUiEvent('app_filters_updated');
       },
@@ -188,7 +190,7 @@ export function App({
       next: () => {
         setState((s) => ({
           ...s,
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
       },
     });
@@ -199,7 +201,7 @@ export function App({
         tap(() => {
           setState((s) => ({
             ...s,
-            searchSessionId: data.search.session.start(),
+            searchSessionId: startSession(),
           }));
         }),
         switchMap((done) =>
@@ -234,6 +236,7 @@ export function App({
     data.query,
     history,
     initialContext,
+    startSession,
   ]);
 
   useEffect(() => {
@@ -652,7 +655,7 @@ export function App({
                 // Time change will be picked up by the time subscription
                 setState((s) => ({
                   ...s,
-                  searchSessionId: data.search.session.start(),
+                  searchSessionId: startSession(),
                 }));
                 trackUiEvent('app_query_change');
               }
