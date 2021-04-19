@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
@@ -76,13 +77,33 @@ export async function ensureInstalledPackage(options: {
     return installedPackage;
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  await installPackage({
+  const installResult = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
     pkgkey,
     esClient,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
   });
+
+  if (installResult.error) {
+    const errorPrefix =
+      installResult.installType === 'update' || installResult.installType === 'reupdate'
+        ? i18n.translate('xpack.fleet.epm.install.packageUpdateError', {
+            defaultMessage: 'Error updating {pkgName} to {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          })
+        : i18n.translate('xpack.fleet.epm.install.packageInstallError', {
+            defaultMessage: 'Error installing {pkgName} {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          });
+    throw new Error(`${errorPrefix}: ${installResult.error.message}`);
+  }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);

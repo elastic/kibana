@@ -90,13 +90,6 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
-            if (setupResponse.data.nonFatalPackageUpgradeErrors) {
-              notifications.toasts.addError(setupResponse.data.nonFatalPackageUpgradeErrors, {
-                title: i18n.translate('xpack.fleet.setup.nonFatalPackageErrorsTitle', {
-                  defaultMessage: 'One or more packages could not be successfully upgraded',
-                }),
-              });
-            }
           } catch (err) {
             setInitializationError(err);
           }
