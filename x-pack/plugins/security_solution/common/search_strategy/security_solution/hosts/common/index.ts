@@ -21,8 +21,6 @@ export enum HostsFields {
   hostName = 'hostName',
 }
 
-
-
 export interface EndpointFields {
   endpointPolicy?: Maybe<string>;
   sensorVersion?: Maybe<string>;
