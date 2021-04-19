@@ -27,7 +27,7 @@ curl -s -k \
   -H "Content-Type: application/json" \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET "${KIBANA_URL}${SPACE_URL}/api/timelines?onlyUserFavorite=false&status=$STATUS&timelineType=$TIMELINE_TYPE" \
+  -X GET "${KIBANA_URL}${SPACE_URL}/api/timelines?only_user_favorite=false&status=$STATUS&timeline_type=$TIMELINE_TYPE" \
   | jq .
 
 

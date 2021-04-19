@@ -178,3 +178,5 @@ const getNodeField = (field: HostsFields): string => {
 };
 
 export const HostsTable = React.memo(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

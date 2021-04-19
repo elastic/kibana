@@ -21,11 +21,7 @@ export enum HostsFields {
   hostName = 'hostName',
 }
 
-export interface DocValueFieldsInput {
-  field: string;
 
-  format: string;
-}
 
 export interface EndpointFields {
   endpointPolicy?: Maybe<string>;

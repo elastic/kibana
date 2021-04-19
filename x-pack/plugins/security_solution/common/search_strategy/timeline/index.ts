@@ -74,25 +74,15 @@ export type TimelineStrategyRequestType<
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;
-
   category?: Maybe<string>;
-
   columnHeaderType?: Maybe<string>;
-
   description?: Maybe<string>;
-
   example?: Maybe<string>;
-
   indexes?: Maybe<string[]>;
-
   id?: Maybe<string>;
-
   name?: Maybe<string>;
-
   placeholder?: Maybe<string>;
-
   searchable?: Maybe<boolean>;
-
   type?: Maybe<string>;
 }
 
@@ -110,71 +100,44 @@ export interface QueryMatchInput {
 
 export interface DataProviderInput {
   id?: Maybe<string>;
-
   name?: Maybe<string>;
-
   enabled?: Maybe<boolean>;
-
   excluded?: Maybe<boolean>;
-
   kqlQuery?: Maybe<string>;
-
   queryMatch?: Maybe<QueryMatchInput>;
-
   and?: Maybe<DataProviderInput[]>;
-
   type?: Maybe<DataProviderType>;
 }
 
 export interface EqlOptionsInput {
   eventCategoryField?: Maybe<string>;
-
   tiebreakerField?: Maybe<string>;
-
   timestampField?: Maybe<string>;
-
   query?: Maybe<string>;
-
   size?: Maybe<number>;
 }
 
 export interface FilterMetaTimelineInput {
   alias?: Maybe<string>;
-
   controlledBy?: Maybe<string>;
-
   disabled?: Maybe<boolean>;
-
   field?: Maybe<string>;
-
   formattedValue?: Maybe<string>;
-
   index?: Maybe<string>;
-
   key?: Maybe<string>;
-
   negate?: Maybe<boolean>;
-
   params?: Maybe<string>;
-
   type?: Maybe<string>;
-
   value?: Maybe<string>;
 }
 
 export interface FilterTimelineInput {
   exists?: Maybe<string>;
-
   meta?: Maybe<FilterMetaTimelineInput>;
-
   match_all?: Maybe<string>;
-
   missing?: Maybe<string>;
-
   query?: Maybe<string>;
-
   range?: Maybe<string>;
-
   script?: Maybe<string>;
 }
 
@@ -184,25 +147,21 @@ export interface SerializedFilterQueryInput {
 
 export interface SerializedKueryQueryInput {
   kuery?: Maybe<KueryFilterQueryInput>;
-
   serializedQuery?: Maybe<string>;
 }
 
 export interface KueryFilterQueryInput {
   kind?: Maybe<string>;
-
   expression?: Maybe<string>;
 }
 
 export interface DateRangePickerInput {
   start?: Maybe<number>;
-
   end?: Maybe<number>;
 }
 
 export interface SortTimelineInput {
   columnId?: Maybe<string>;
-
   sortDirection?: Maybe<string>;
 }
 
@@ -227,39 +186,22 @@ export enum RowRendererId {
 
 export interface TimelineInput {
   columns?: Maybe<ColumnHeaderInput[]>;
-
   dataProviders?: Maybe<DataProviderInput[]>;
-
   description?: Maybe<string>;
-
   eqlOptions?: Maybe<EqlOptionsInput>;
-
   eventType?: Maybe<string>;
-
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
-
   filters?: Maybe<FilterTimelineInput[]>;
-
   kqlMode?: Maybe<string>;
-
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
-
   indexNames?: Maybe<string[]>;
-
   title?: Maybe<string>;
-
   templateTimelineId?: Maybe<string>;
-
   templateTimelineVersion?: Maybe<number>;
-
   timelineType?: Maybe<TimelineType>;
-
   dateRange?: Maybe<DateRangePickerInput>;
-
   savedQueryId?: Maybe<string>;
-
   sort?: Maybe<SortTimelineInput[]>;
-
   status?: Maybe<TimelineStatus>;
 }
 

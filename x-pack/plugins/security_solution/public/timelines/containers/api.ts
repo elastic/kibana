@@ -62,7 +62,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
 
-const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
+const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
@@ -113,10 +113,19 @@ const patchTimeline = async ({
   version,
 }: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
+  let requestBody = null;
+  try {
+    requestBody = JSON.stringify({ timeline, timelineId, version });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
   try {
     response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
       method: 'PATCH',
-      body: JSON.stringify({ timeline, timelineId, version }),
+      body: requestBody,
     });
   } catch (err) {
     // For Future developer
@@ -134,12 +143,13 @@ export const persistTimeline = async ({
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
-      const draftTimeline = await cleanDraftTimeline({
+      const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
         templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
       });
 
+      const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
         timeline.timelineType! === TimelineType.template
           ? {
@@ -210,11 +220,19 @@ export const exportSelectedTimeline: ExportSelectedData = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
-}): Promise<Blob> => {
-  const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
+}): Promise<Blob | TimelineErrorResponse> => {
+  let requestBody;
+  try {
+    requestBody = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
   return KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
-    body,
+    body: requestBody,
     query: {
       file_name: filename,
     },
@@ -244,7 +262,8 @@ export const cleanDraftTimeline = async ({
   timelineType: TimelineType;
   templateTimelineId?: string;
   templateTimelineVersion?: number;
-}): Promise<TimelineResponse> => {
+}): Promise<TimelineResponse | TimelineErrorResponse> => {
+  let requestBody;
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
@@ -252,11 +271,19 @@ export const cleanDraftTimeline = async ({
           templateTimelineVersion,
         }
       : {};
-  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
-    body: JSON.stringify({
+  try {
+    requestBody = JSON.stringify({
       timelineType,
       ...templateTimelineInfo,
-    }),
+    });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
+    body: requestBody,
   });
 
   return decodeTimelineResponse(response);
@@ -321,16 +348,27 @@ export const persistFavorite = async ({
   templateTimelineVersion?: number | null;
   timelineType: TimelineType;
 }) => {
+  let requestBody;
+
+  try {
+    requestBody = JSON.stringify({
+      timelineId,
+      templateTimelineId,
+      templateTimelineVersion,
+      timelineType,
+    });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
+
   const response = await KibanaServices.get().http.patch<ResponseFavoriteTimeline>(
     TIMELINE_FAVORITE_URL,
     {
       method: 'PATCH',
-      body: JSON.stringify({
-        timelineId,
-        templateTimelineId,
-        templateTimelineVersion,
-        timelineType,
-      }),
+      body: requestBody,
     }
   );
 
@@ -338,9 +376,21 @@ export const persistFavorite = async ({
 };
 
 export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
+  let requestBody;
+
+  try {
+    requestBody = JSON.stringify({
+      savedObjectIds,
+    });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
   const response = await KibanaServices.get().http.delete<boolean>(TIMELINE_URL, {
     method: 'DELETE',
-    body: JSON.stringify({ savedObjectIds }),
+    body: requestBody,
   });
   return response;
 };
