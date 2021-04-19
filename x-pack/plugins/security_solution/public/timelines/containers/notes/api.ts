@@ -20,9 +20,19 @@ export const persistNote = async ({
   version?: string | null;
   overrideOwner?: boolean;
 }) => {
+  let requestBody;
+
+  try {
+    requestBody = JSON.stringify({ noteId, version, note, overrideOwner });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
   const response = await KibanaServices.get().http.patch<NoteSavedObject[]>(NOTE_URL, {
     method: 'PATCH',
-    body: JSON.stringify({ noteId, version, note, overrideOwner }),
+    body: requestBody,
   });
   return response;
 };

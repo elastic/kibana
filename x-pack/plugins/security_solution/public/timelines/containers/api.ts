@@ -98,10 +98,22 @@ const decodeResponseFavoriteTimeline = (respTimeline?: ResponseFavoriteTimeline)
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<TimelineResponse> => {
+const postTimeline = async ({
+  timeline,
+}: RequestPostTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+  let requestBody;
+  try {
+    requestBody = JSON.stringify({ timeline });
+  } catch (err) {
+    return Promise.resolve({
+      message: `Failed to stringify query: ${JSON.stringify(err)}`,
+      status_code: 500,
+    });
+  }
+
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
-    body: JSON.stringify({ timeline }),
+    body: requestBody,
   });
 
   return decodeTimelineResponse(response);
