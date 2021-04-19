@@ -11,7 +11,8 @@
     "share",
     "uiActions",
     "urlForwarding",
-    "presentationUtil"
+    "presentationUtil",
+    "visualizations"
   ],
   "optionalPlugins": [
     "home",
