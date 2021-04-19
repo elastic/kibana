@@ -25,7 +25,7 @@ const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const coreId = Symbol();
 
-const createConfigService = (value: Partial<HttpConfigType> = {}) => {
+const createConfigService = async (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
     {
       getConfig$: () =>
@@ -39,6 +39,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   configService.setSchema(config.path, config.schema);
   configService.setSchema(cspConfig.path, cspConfig.schema);
   configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
+  await configService.validate();
   return configService;
 };
 const contextSetup = contextServiceMock.createSetupContract();
@@ -57,7 +58,7 @@ afterEach(() => {
 });
 
 test('creates and sets up http server', async () => {
-  const configService = createConfigService({
+  const configService = await createConfigService({
     host: 'example.org',
     port: 1234,
   });
@@ -85,7 +86,7 @@ test('creates and sets up http server', async () => {
 });
 
 test('spins up notReady server until started if configured with `autoListen:true`', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({}),
@@ -137,7 +138,7 @@ test('spins up notReady server until started if configured with `autoListen:true
 });
 
 test('logs error if already set up', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
 
   const httpServer = {
     isListening: () => true,
@@ -155,7 +156,7 @@ test('logs error if already set up', async () => {
 });
 
 test('stops http server', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
 
   const httpServer = {
     isListening: () => false,
@@ -178,7 +179,7 @@ test('stops http server', async () => {
 });
 
 test('stops not ready server if it is running', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
   const mockHapiServer = {
     start: jest.fn(),
     stop: jest.fn(),
@@ -202,7 +203,7 @@ test('stops not ready server if it is running', async () => {
 });
 
 test('register route handler', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
 
   const registerRouterMock = jest.fn();
   const httpServer = {
@@ -225,7 +226,7 @@ test('register route handler', async () => {
 });
 
 test('returns http server contract on setup', async () => {
-  const configService = createConfigService();
+  const configService = await createConfigService();
   const httpServer = { server: fakeHapiServer, options: { someOption: true } };
 
   mockHttpServer.mockImplementation(() => ({
@@ -243,7 +244,7 @@ test('returns http server contract on setup', async () => {
 });
 
 test('does not start http server if configured with `autoListen:false`', async () => {
-  const configService = createConfigService({
+  const configService = await createConfigService({
     autoListen: false,
   });
   const httpServer = {

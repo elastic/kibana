@@ -125,13 +125,15 @@ describe('shutdownTimeout', () => {
   });
 
   test('should error if below 1s', () => {
-    expect(() =>
-      config.schema.validate({ shutdownTimeout: '100ms' })
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => config.schema.validate({ shutdownTimeout: '100ms' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
   });
 
   test('should error if over 2 minutes', () => {
-    expect(() => config.schema.validate({ shutdownTimeout: '3m' })).toThrowErrorMatchingSnapshot();
+    expect(() => config.schema.validate({ shutdownTimeout: '3m' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
   });
 });
 

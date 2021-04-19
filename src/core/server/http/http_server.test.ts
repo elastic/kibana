@@ -26,7 +26,6 @@ import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { of } from 'rxjs';
 import moment from 'moment';
 
 const cookieOptions = {
@@ -82,7 +81,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+  server = new HttpServer(loggingService, 'tests', config.shutdownTimeout);
 });
 
 afterEach(async () => {
@@ -1455,7 +1454,7 @@ describe('Graceful shutdown', () => {
         // It takes to resolve the same period of the shutdownTimeout.
         // Since we'll trigger the stop a few ms after, it should have time to finish
         await new Promise((resolve) => setTimeout(resolve, shutdownTimeout));
-        return res.ok({ body: req.route });
+        return res.ok({ body: { ok: 1 } });
       }
     );
     registerRouter(router);
@@ -1475,24 +1474,7 @@ describe('Graceful shutdown', () => {
     ]);
 
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual({
-      method: 'post',
-      path: '/',
-      options: {
-        authRequired: true,
-        xsrfRequired: true,
-        tags: [],
-        timeout: {
-          payload: 10000,
-        },
-        body: {
-          parse: true, // hapi populates the default
-          maxBytes: 1024, // hapi populates the default
-          accepts: ['application/json'],
-          output: 'data',
-        },
-      },
-    });
+    expect(response.body).toStrictEqual({ ok: 1 });
     // The server is about to be closed, we need to ask connections to close on their end (stop their keep-alive policies)
     expect(response.header.connection).toBe('close');
   });

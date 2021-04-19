@@ -18,8 +18,6 @@ import {
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import type { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
@@ -83,6 +81,7 @@ export class HttpServer {
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
   private handleServerResponseEvent?: (req: Request) => void;
+  private stopping = false;
   private stopped = false;
 
   private readonly log: Logger;
@@ -93,7 +92,7 @@ export class HttpServer {
   constructor(
     private readonly logger: LoggerFactory,
     private readonly name: string,
-    private readonly shutdownTimeout$: Observable<Duration>
+    private readonly shutdownTimeout: Duration
   ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
@@ -161,7 +160,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`start called after stop`);
       return;
     }
@@ -221,8 +220,10 @@ export class HttpServer {
   }
 
   public async stop() {
-    this.stopped = true;
+    this.stopping = true;
     if (this.server === undefined) {
+      this.stopping = false;
+      this.stopped = true;
       return;
     }
 
@@ -230,8 +231,7 @@ export class HttpServer {
     if (hasStarted) {
       this.log.debug('stopping http server');
 
-      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
-      await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
+      await this.server.stop({ timeout: this.shutdownTimeout.asMilliseconds() });
 
       this.log.debug(`http server stopped`);
 
@@ -240,6 +240,8 @@ export class HttpServer {
         this.server.events.removeListener('response', this.handleServerResponseEvent);
       }
     }
+    this.stopping = false;
+    this.stopped = true;
   }
 
   private getAuthOption(
@@ -262,7 +264,7 @@ export class HttpServer {
 
   private setupGracefulShutdownHandlers() {
     this.registerOnPreRouting((request, response, toolkit) => {
-      if (this.stopped) {
+      if (this.stopping || this.stopped) {
         return response.customError({
           statusCode: 503,
           body: { message: 'Kibana is shutting down and not accepting new incoming requests' },
@@ -292,7 +294,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupConditionalCompression called after stop`);
     }
 
@@ -322,7 +324,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupResponseLogging called after stop`);
     }
 
@@ -351,7 +353,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreAuth called after stop`);
     }
 
@@ -362,7 +364,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPostAuth called after stop`);
     }
 
@@ -373,7 +375,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreRouting called after stop`);
     }
 
@@ -384,7 +386,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreResponse called after stop`);
     }
 
@@ -398,7 +400,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`createCookieSessionStorageFactory called after stop`);
     }
     if (this.cookieSessionStorageCreated) {
@@ -418,7 +420,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerAuth called after stop`);
     }
     if (this.authRegistered) {
@@ -464,7 +466,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerStaticDir called after stop`);
     }
 
