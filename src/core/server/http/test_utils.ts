@@ -39,6 +39,7 @@ configService.atPath.mockImplementation((path) => {
         disableProtection: true,
         allowlist: [],
       },
+      securityResponseHeaders: {},
       customResponseHeaders: {},
       requestId: {
         allowFromAnyIp: true,

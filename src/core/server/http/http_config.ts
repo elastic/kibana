@@ -15,6 +15,10 @@ import type { Duration } from 'moment';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
+import {
+  securityResponseHeadersSchema,
+  parseRawSecurityResponseHeadersConfig,
+} from './security_response_headers_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -63,6 +67,7 @@ const configSchema = schema.object(
         },
       }
     ),
+    securityResponseHeaders: securityResponseHeadersSchema,
     customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
       defaultValue: {},
     }),
@@ -181,6 +186,7 @@ export class HttpConfig implements IHttpConfig {
     allowCredentials: boolean;
     allowOrigin: string[];
   };
+  public securityResponseHeaders: Record<string, string | string[]>;
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
@@ -206,6 +212,10 @@ export class HttpConfig implements IHttpConfig {
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
+    const { securityResponseHeaders, disableEmbedding } = parseRawSecurityResponseHeadersConfig(
+      rawHttpConfig.securityResponseHeaders
+    );
+    this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
       (headers, [key, value]) => {
         return {
@@ -224,7 +234,7 @@ export class HttpConfig implements IHttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig(rawCspConfig);
+    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding });
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
