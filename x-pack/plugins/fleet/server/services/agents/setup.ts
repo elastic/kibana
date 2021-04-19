@@ -9,14 +9,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
-import { outputService } from '../output';
-
-export async function isAgentsSetup(soClient: SavedObjectsClientContract): Promise<boolean> {
-  const adminUser = await outputService.getAdminUser(soClient, false);
-  const outputId = await outputService.getDefaultOutputId(soClient);
-  // If admin user (fleet_enroll) and output id exist Agents are correctly setup
-  return adminUser && outputId ? true : false;
-}
 
 /**
  * During the migration from 7.9 to 7.10 we introduce a new agent action POLICY_CHANGE per policy

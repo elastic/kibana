@@ -344,8 +344,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (!agent.policy_id) return true;
 
     const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isManaged = agentPolicy?.is_managed === true;
-    return !isManaged;
+    const isHosted = agentPolicy?.is_managed === true;
+    return !isHosted;
   };
 
   const columns = [
