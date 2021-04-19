@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
+        await setup('monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
