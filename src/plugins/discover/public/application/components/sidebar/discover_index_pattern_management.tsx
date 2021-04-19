@@ -24,7 +24,7 @@ export interface DiscoverIndexPatternManagementProps {
   /**
    * Read from the Fields API
    */
-  useNewFieldsApi?: boolean;
+  useNewFieldsApi: boolean;
   /**
    * Callback to execute on edit field action
    * @param fieldName
@@ -47,7 +47,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
     editField(undefined);
   };
 
-  const indexPatternActions = (
+  return (
     <EuiPopover
       panelPaddingSize="s"
       isOpen={isAddIndexPatternFieldPopoverOpen}
@@ -104,6 +104,4 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
       />
     </EuiPopover>
   );
-
-  return indexPatternActions;
 }
