@@ -111,7 +111,7 @@ export interface ApiDeclaration {
    * Used for an anchor link to this Api. Can't use label as there can be two labels with the same
    * text within the Client section and the Server section.
    */
-  id?: string;
+  id: string;
 
   /**
    * The name of the api.
@@ -196,4 +196,9 @@ export enum ApiScope {
 export enum Lifecycle {
   START = 'start',
   SETUP = 'setup',
+}
+
+// Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
+export interface MissingApiItemMap {
+  [key: string]: { [key: string]: string[] };
 }
