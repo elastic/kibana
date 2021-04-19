@@ -88,10 +88,7 @@ describe('Reporting Plugin', () => {
   it('logs start issues', async () => {
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger
-    plugin.logger.error = jest.fn().mockImplementation((err) => {
-      // eslint-disable-next-line no-console
-      console.log(err);
-    });
+    plugin.logger.error = jest.fn();
     plugin.setup(coreSetup, pluginSetup);
     await sleep(5);
     plugin.start(null as any, pluginStart);

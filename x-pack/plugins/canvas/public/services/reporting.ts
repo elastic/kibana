@@ -14,7 +14,7 @@ export interface ReportingService {
 export const reportingServiceFactory: CanvasServiceFactory<ReportingService> = (
   _coreSetup,
   coreStart,
-  setupPlugins,
+  _setupPlugins,
   startPlugins
 ): ReportingService => {
   const { reporting } = startPlugins;
