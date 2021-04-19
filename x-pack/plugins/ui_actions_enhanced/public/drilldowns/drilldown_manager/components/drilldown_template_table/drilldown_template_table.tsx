@@ -106,6 +106,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     <>
       <EuiInMemoryTable
         itemId="id"
+        tableLayout={'auto'}
         items={items}
         columns={columns}
         isSelectable={!!onClone}
