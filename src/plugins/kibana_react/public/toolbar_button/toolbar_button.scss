@@ -4,8 +4,10 @@
 
   // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
   min-width: 0;
-  border-width: $euiBorderWidthThin;
-  border-style: solid;
+  @include kbnThemeStyle('v8') {
+    border-width: $euiBorderWidthThin;
+    border-style: solid;
+  }
 
   &[class*='--text'] {
     // Lighten the border color for all states
