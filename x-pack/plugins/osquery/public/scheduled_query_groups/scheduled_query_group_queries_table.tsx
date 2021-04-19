@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
@@ -51,7 +52,15 @@ const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = 
     <EuiButtonIcon
       iconType="visTable"
       href={discoverUrl}
-      aria-label={`Check results of ${item.vars?.id.value} in Discover`}
+      aria-label={i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
+        {
+          defaultMessage: 'Check results of {queryName} in Discover',
+          values: {
+            queryName: item.vars?.id.value,
+          },
+        }
+      )}
     />
   );
 };
@@ -77,7 +86,15 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onDeleteClick(item)}
         iconType="trash"
-        aria-label={`Delete ${item.vars?.id.value}`}
+        aria-label={i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queriesTable.deleteActionAriaLabel',
+          {
+            defaultMessage: 'Delete {queryName}',
+            values: {
+              queryName: item.vars?.id.value,
+            },
+          }
+        )}
       />
     ),
     [onDeleteClick]
@@ -91,7 +108,15 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onEditClick(item)}
         iconType="pencil"
-        aria-label={`Edit ${item.vars?.id.value}`}
+        aria-label={i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queriesTable.editActionAriaLabel',
+          {
+            defaultMessage: 'Edit {queryName}',
+            values: {
+              queryName: item.vars?.id.value,
+            },
+          }
+        )}
       />
     ),
     [onEditClick]
@@ -115,21 +140,36 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     () => [
       {
         field: 'vars.id.value',
-        name: 'ID',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.idColumnTitle', {
+          defaultMessage: 'ID',
+        }),
         width: '20%',
       },
       {
         field: 'vars.interval.value',
-        name: 'Interval',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle', {
+          defaultMessage: 'Interval',
+        }),
         width: '100px',
       },
       {
         field: 'vars.query.value',
-        name: 'Query',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle', {
+          defaultMessage: 'Query',
+        }),
         render: renderQueryColumn,
       },
       {
-        name: editMode ? 'Actions' : 'View results',
+        name: editMode
+          ? i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
+              defaultMessage: 'Actions',
+            })
+          : i18n.translate(
+              'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
+              {
+                defaultMessage: 'View results',
+              }
+            ),
         width: '120px',
         actions: editMode
           ? [

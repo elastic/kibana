@@ -8,12 +8,16 @@
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { agentPolicyRouteService } from '../../../fleet/common';
+import {
+  agentPolicyRouteService,
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+} from '../../../fleet/common';
 
 export const useAgentPolicies = () => {
   const { http } = useKibana().services;
 
-  return useQuery(
+  return useQuery<GetAgentPoliciesResponse, unknown, GetAgentPoliciesResponseItem[]>(
     ['agentPolicies'],
     () =>
       http.get(agentPolicyRouteService.getListPath(), {
@@ -22,6 +26,8 @@ export const useAgentPolicies = () => {
         },
       }),
     {
+      initialData: { items: [], total: 0, page: 1, perPage: 100 },
+      placeholderData: [],
       keepPreviousData: true,
       select: (response) => response.items,
     }

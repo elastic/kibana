@@ -19,9 +19,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { CodeEditorField } from '../../queries/form/code_editor_field';
-
 import { Form, useForm, FormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const FORM_ID = 'addQueryFlyoutForm';
@@ -46,15 +47,24 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
     schema: {
       id: {
         type: FIELD_TYPES.TEXT,
-        label: 'ID',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
+          defaultMessage: 'ID',
+        }),
       },
       query: {
         type: FIELD_TYPES.TEXT,
-        label: 'Query',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
+          defaultMessage: 'Query',
+        }),
       },
       interval: {
         type: FIELD_TYPES.NUMBER,
-        label: 'Interval (s)',
+        label: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.intervalFieldLabel',
+          {
+            defaultMessage: 'Interval (s)',
+          }
+        ),
       },
     },
   });
@@ -66,7 +76,12 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
       <EuiFlyout size="s" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id="flyoutTitle">Attach next query</h2>
+            <h2 id="flyoutTitle">
+              <FormattedMessage
+                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
+                defaultMessage="Attach next query"
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -85,12 +100,18 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                Close
+                <FormattedMessage
+                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={submit} fill>
-                Save
+                <FormattedMessage
+                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

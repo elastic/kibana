@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable  @typescript-eslint/no-non-null-assertion */
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -48,12 +46,12 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
       <EuiFlexGroup>
         <AgentPolicyNameColumn grow={2}>
           <span className="eui-textTruncate">
-            {agentPoliciesById[option.key!]?.name ?? option.label}
+            {(option.key && agentPoliciesById[option.key]?.name) ?? option.label}
           </span>
         </AgentPolicyNameColumn>
         <AgentPolicyDescriptionColumn grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
-            {agentPoliciesById[option.key!].description}
+            {(option.key && agentPoliciesById[option.key].description) ?? ''}
           </EuiTextColor>
         </AgentPolicyDescriptionColumn>
         <EuiFlexItem grow={2} className="eui-textRight">
@@ -63,7 +61,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
               defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
-                count: agentPoliciesById[option.key!]?.agents ?? 0,
+                count: (option.key && agentPoliciesById[option.key]?.agents) ?? 0,
               }}
             />
           </EuiTextColor>
@@ -86,25 +84,36 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
       return;
 
     return (
-      agentPoliciesById[value[0]].agents + ' agents are enrolled with the selected agent policy.'
+      <FormattedMessage
+        id="xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText"
+        defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          count: agentPoliciesById[value[0]].agents ?? 0,
+        }}
+      />
     );
   }, [agentPoliciesById, value]);
+
+  const mergedEuiFieldProps = useMemo(
+    () => ({
+      onCreateOption: null,
+      singleSelection: { asPlainText: true },
+      noSuggestions: false,
+      isClearable: false,
+      selectedOptions,
+      renderOption,
+      ...euiFieldProps,
+    }),
+    [euiFieldProps, renderOption, selectedOptions]
+  );
 
   return (
     <ComboBoxField
       field={field as FieldHook}
       fullWidth={true}
       helpText={helpText}
-      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-      euiFieldProps={{
-        onCreateOption: null,
-        singleSelection: { asPlainText: true },
-        noSuggestions: false,
-        isClearable: false,
-        selectedOptions,
-        renderOption,
-        ...euiFieldProps,
-      }}
+      euiFieldProps={mergedEuiFieldProps}
     />
   );
 };

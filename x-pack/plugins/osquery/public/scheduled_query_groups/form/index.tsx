@@ -21,8 +21,11 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import { produce } from 'immer';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  AgentPolicy,
   PackagePolicy,
   PackagePolicyPackage,
   packagePolicyRouteService,
@@ -59,15 +62,14 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
-  const { data: agentPolicies = [] } = useAgentPolicies();
+  const { data: agentPolicies } = useAgentPolicies();
   const agentPoliciesById = mapKeys(agentPolicies, 'id');
   const agentPolicyOptions = useMemo(
     () =>
-      // @ts-expect-error update types
-      agentPolicies.map((agentPolicy) => ({
+      agentPolicies?.map((agentPolicy) => ({
         key: agentPolicy.id,
         label: agentPolicy.id,
-      })),
+      })) ?? [],
     [agentPolicies]
   );
 
@@ -88,12 +90,26 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
       onSuccess: (data) => {
         if (!editMode) {
           navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
-          toasts.addSuccess(`Successfully scheduled '${data.item.name}'`);
+          toasts.addSuccess(
+            i18n.translate('xpack.osquery.scheduledQueryGroup.form.createSuccessToastMessageText', {
+              defaultMessage: 'Successfully scheduled {scheduledQueryGroupName}',
+              values: {
+                scheduledQueryGroupName: data.item.name,
+              },
+            })
+          );
           return;
         }
 
         navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
-        toasts.addSuccess(`Successfully updated '${data.item.name}'`);
+        toasts.addSuccess(
+          i18n.translate('xpack.osquery.scheduledQueryGroup.form.updateSuccessToastMessageText', {
+            defaultMessage: 'Successfully updated {scheduledQueryGroupName}',
+            values: {
+              scheduledQueryGroupName: data.item.name,
+            },
+          })
+        );
       },
       onError: (error) => {
         // @ts-expect-error update types
@@ -107,23 +123,27 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     schema: {
       name: {
         type: FIELD_TYPES.TEXT,
-        label: 'Name',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.nameFieldLabel', {
+          defaultMessage: 'Name',
+        }),
       },
       description: {
         type: FIELD_TYPES.TEXT,
-        label: 'Description',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.descriptionFieldLabel', {
+          defaultMessage: 'Description',
+        }),
       },
       namespace: {
         type: FIELD_TYPES.COMBO_BOX,
-        label: 'Namespace',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.namespaceFieldLabel', {
+          defaultMessage: 'Namespace',
+        }),
       },
       policy_id: {
         type: FIELD_TYPES.COMBO_BOX,
-        label: 'Agent policy',
-      },
-      integration_type: {
-        type: FIELD_TYPES.RADIO_GROUP,
-        label: 'Integration type',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.agentPolicyFieldLabel', {
+          defaultMessage: 'Agent policy',
+        }),
       },
     },
     onSubmit: (payload) => {
@@ -186,7 +206,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     if (!policyId) {
       return {
         agentCount: 0,
-        agentPolicy: {},
+        agentPolicy: {} as AgentPolicy,
       };
     }
 
@@ -215,12 +235,24 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     <>
       <Form form={form}>
         <EuiDescribedFormGroup
-          title={<h3>{'Scheduled query group settings'}</h3>}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.form.settingsSectionTitleText"
+                defaultMessage="Scheduled query group settings"
+              />
+            </h3>
+          }
           fullWidth
-          description={`Scheduled query groups include one or more queries that are run
-              at a set interval and are associated with an agent policy.
-              When you define a scheduled query group, it is added as a new
-              Osquery Manager policy.`}
+          description={
+            <FormattedMessage
+              id="xpack.osquery.scheduledQueryGroup.form.settingsSectionDescriptionText"
+              defaultMessage="Scheduled query groups include one or more queries that are run
+                at a set interval and are associated with an agent policy.
+                When you define a scheduled query group, it is added as a new
+                Osquery Manager policy."
+            />
+          }
         >
           <CommonUseField path="name" />
 
@@ -234,7 +266,13 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           />
 
           <EuiSpacer />
-          <EuiAccordion id="accordion1" buttonContent="Advanced">
+          <EuiAccordion
+            id="accordion1"
+            buttonContent={i18n.translate(
+              'xpack.osquery.scheduledQueryGroup.form.advancedSectionToggleButtonLabel',
+              { defaultMessage: 'Advanced' }
+            )}
+          >
             <CommonUseField path="namespace" />
           </EuiAccordion>
         </EuiDescribedFormGroup>
@@ -262,7 +300,10 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" {...cancelButtonProps}>
-                  {'Cancel'}
+                  <FormattedMessage
+                    id="xpack.osquery.scheduledQueryGroup.form.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -274,7 +315,10 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
                   iconType="save"
                   onClick={handleSaveClick}
                 >
-                  {'Save query'}
+                  <FormattedMessage
+                    id="xpack.osquery.scheduledQueryGroup.form.saveQueryButtonLabel"
+                    defaultMessage="Save query"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -19,12 +19,14 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { PackagePolicyInputStream } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
-const FORM_ID = 'addQueryFlyoutForm';
+const FORM_ID = 'editQueryFlyoutForm';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -59,15 +61,24 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
     schema: {
       id: {
         type: FIELD_TYPES.TEXT,
-        label: 'ID',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
+          defaultMessage: 'ID',
+        }),
       },
       query: {
         type: FIELD_TYPES.TEXT,
-        label: 'Query',
+        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
+          defaultMessage: 'Query',
+        }),
       },
       interval: {
         type: FIELD_TYPES.NUMBER,
-        label: 'Interval',
+        label: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.intervalFieldLabel',
+          {
+            defaultMessage: 'Interval (s)',
+          }
+        ),
       },
     },
   });
@@ -79,7 +90,12 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
       <EuiFlyout size="s" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id="flyoutTitle">{'Edit query'}</h2>
+            <h2 id="flyoutTitle">
+              <FormattedMessage
+                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
+                defaultMessage="Edit query"
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -98,12 +114,18 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                Close
+                <FormattedMessage
+                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={submit} fill>
-                Save
+                <FormattedMessage
+                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

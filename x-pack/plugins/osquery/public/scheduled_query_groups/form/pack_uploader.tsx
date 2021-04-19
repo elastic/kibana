@@ -8,12 +8,17 @@
 import { mapKeys, kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 
 const ExamplePackLink = React.memo(() => (
   <EuiLink href="https://github.com/osquery/osquery/tree/master/packs" target="_blank">
-    {'Example packs'}
+    <FormattedMessage
+      id="xpack.osquery.packUploader.examplePacksLinkLabel"
+      defaultMessage="Example packs"
+    />
   </EuiLink>
 ));
 
@@ -88,9 +93,14 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
       ) {
         packName.current = '';
         setIsInvalid(
-          `File type ${
-            inputFiles[0].type
-          } is not supported please upload ${SUPPORTED_PACK_EXTENSIONS.join(' or ')} config file`
+          i18n.translate('xpack.osquery.packUploader.unsupportedFileTypeText', {
+            defaultMessage:
+              'File type {fileType} is not supported, please upload {supportedFileTypes} config file',
+            values: {
+              fileType: inputFiles[0].type,
+              supportedFileTypes: SUPPORTED_PACK_EXTENSIONS.join(' or '),
+            },
+          })
         );
         // @ts-expect-error update types
         filePickerRef.current?.removeFiles(new Event('fake'));
@@ -115,10 +125,11 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         <EuiFilePicker
           ref={filePickerRef}
           id="osquery_pack_picker"
-          initialPromptText="Select or drag and drop osquery pack config file"
+          initialPromptText={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
+            defaultMessage: 'Select or drag and drop osquery pack config file',
+          })}
           onChange={handleInputChange}
           display="large"
-          aria-label="Use aria labels when no actual label is in use"
           fullWidth
           isInvalid={!!isInvalid}
           accept={SUPPORTED_PACK_EXTENSIONS.join(',')}

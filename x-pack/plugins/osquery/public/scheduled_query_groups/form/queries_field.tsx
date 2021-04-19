@@ -9,6 +9,7 @@ import { findIndex, forEach, pullAt } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { PackagePolicyInput, PackagePolicyInputStream } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
@@ -27,13 +28,15 @@ interface GetNewStreamProps {
   id: string;
   interval: string;
   query: string;
-  scheduledQueryGroupId: string;
+  scheduledQueryGroupId?: string;
 }
 
 const getNewStream = ({ id, interval, query, scheduledQueryGroupId }: GetNewStreamProps) => ({
   data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
   enabled: true,
-  id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryGroupId}`,
+  id: scheduledQueryGroupId
+    ? `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryGroupId}`
+    : null,
   vars: {
     id: { type: 'text', value: id },
     type: 'integer',
@@ -150,7 +153,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
-            {'Add query'}
+            <FormattedMessage
+              id="xpack.osquery.scheduledQueryGroup.queriesForm.addQueryButtonLabel"
+              defaultMessage="Add query"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

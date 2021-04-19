@@ -8,6 +8,7 @@
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { PackagePolicy } from '../../../fleet/common';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { useScheduledQueryGroups } from './use_scheduled_query_groups';
@@ -40,25 +41,36 @@ const ScheduledQueryGroupsTableComponent = () => {
     () => [
       {
         field: 'name',
-        name: 'Name',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.nameColumnTitle', {
+          defaultMessage: 'Name',
+        }),
         sortable: true,
         render: renderName,
       },
       {
         field: 'policy_id',
-        name: 'Policy',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.policyColumnTitle', {
+          defaultMessage: 'Policy',
+        }),
         truncateText: true,
         render: renderAgentPolicy,
       },
       {
         field: 'inputs[0].streams',
-        name: 'Number of queries',
+        name: i18n.translate(
+          'xpack.osquery.scheduledQueryGroups.table.numberOfQueriesColumnTitle',
+          {
+            defaultMessage: 'Number of queries',
+          }
+        ),
         render: renderQueries,
         width: '150px',
       },
       {
         field: 'enabled',
-        name: 'Active',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.activeColumnTitle', {
+          defaultMessage: 'Active',
+        }),
         sortable: true,
         align: 'right',
         width: '80px',

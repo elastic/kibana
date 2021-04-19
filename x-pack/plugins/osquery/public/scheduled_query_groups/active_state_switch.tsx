@@ -10,6 +10,7 @@ import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 
 import {
   PackagePolicy,
@@ -56,9 +57,25 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       onSuccess: (response) => {
         queryClient.invalidateQueries('scheduledQueries');
         toasts.addSuccess(
-          `Successfully ${response.item.enabled ? 'activated' : 'deactivated'} '${
-            response.item.name
-          }'`
+          response.item.enabled
+            ? i18n.translate(
+                'xpack.osquery.scheduledQueryGroup.table.activatedSuccessToastMessageText',
+                {
+                  defaultMessage: 'Successfully activated {scheduledQueryGroupName}',
+                  values: {
+                    scheduledQueryGroupName: response.item.name,
+                  },
+                }
+              )
+            : i18n.translate(
+                'xpack.osquery.scheduledQueryGroup.table.deactivatedSuccessToastMessageText',
+                {
+                  defaultMessage: 'Successfully deactivated {scheduledQueryGroupName}',
+                  values: {
+                    scheduledQueryGroupName: response.item.name,
+                  },
+                }
+              )
         );
       },
     }
