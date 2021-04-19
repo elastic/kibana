@@ -1935,17 +1935,15 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
           ignoreUnavailable: true,
           body: {
             aggregations: {
-              dns_count: {
-                cardinality: {
-                  field: 'dns.question.registered_domain',
-                },
-              },
+              dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
               dns_name_query_count: {
                 terms: {
                   field: 'dns.question.registered_domain',
-                  size: 1000000,
+                  order: { unique_domains: 'desc' },
+                  size: 10,
                 },
                 aggs: {
+                  unique_domains: { cardinality: { field: 'dns.question.name' } },
                   dns_question_name: {
                     date_histogram: {
                       field: '@timestamp',
@@ -1954,47 +1952,13 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                       extended_bounds: { min: 1599579675528, max: 1599666075529 },
                     },
                   },
-                  bucket_sort: {
-                    bucket_sort: {
-                      sort: [
-                        {
-                          unique_domains: {
-                            order: 'desc',
-                          },
-                        },
-                        {
-                          _key: {
-                            order: 'asc',
-                          },
-                        },
-                      ],
-                      from: 0,
-                      size: 10,
-                    },
-                  },
-                  unique_domains: {
-                    cardinality: {
-                      field: 'dns.question.name',
-                    },
-                  },
                 },
               },
             },
             query: {
               bool: {
                 filter: [
-                  {
-                    bool: {
-                      must: [],
-                      filter: [
-                        {
-                          match_all: {},
-                        },
-                      ],
-                      should: [],
-                      must_not: [],
-                    },
-                  },
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
                   {
                     range: {
                       '@timestamp': {
@@ -2005,15 +1969,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                     },
                   },
                 ],
-                must_not: [
-                  {
-                    term: {
-                      'dns.question.type': {
-                        value: 'PTR',
-                      },
-                    },
-                  },
-                ],
+                must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
           },
