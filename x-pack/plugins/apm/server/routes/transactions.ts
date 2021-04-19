@@ -7,11 +7,11 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
-import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';

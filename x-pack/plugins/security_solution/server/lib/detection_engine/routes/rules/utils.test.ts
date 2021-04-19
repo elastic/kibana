@@ -87,14 +87,14 @@ describe('utils', () => {
     test('transforms ML Rule fields', () => {
       const mlRule = getAlertMock(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
-      mlRule.params.machineLearningJobId = 'some_job_id';
+      mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
       const rule = transformAlertToRule(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
-          machine_learning_job_id: 'some_job_id',
+          machine_learning_job_id: ['some_job_id'],
           type: 'machine_learning',
         })
       );
