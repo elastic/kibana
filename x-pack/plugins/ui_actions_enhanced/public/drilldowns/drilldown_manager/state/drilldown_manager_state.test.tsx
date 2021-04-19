@@ -11,19 +11,27 @@ import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_ma
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
 import { Trigger } from 'src/plugins/ui_actions/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { MockedKeys } from '@kbn/utility-types/target/jest';
 import { notificationServiceMock } from 'src/core/public/mocks';
 import { DrilldownState } from './drilldown_state';
 
-const createMockStore = (): MockedKeys<IStorageWrapper> => {
-  let store: Record<string, any> = {};
-  return {
-    get: jest.fn().mockImplementation((key) => store[key]),
-    set: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    remove: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
+class StorageWrapperMock implements IStorageWrapper {
+  public _data = new Map<string, unknown>();
+
+  get = (key: string) => {
+    if (!this._data.has(key)) return null;
+    return this._data.get(key);
   };
-};
+
+  set = (key: string, value: unknown) => {
+    this._data.set(key, value);
+  };
+
+  remove = (key: string) => {
+    this._data.delete(key);
+  };
+
+  clear = () => {};
+}
 
 const createDrilldownManagerState = () => {
   const factory1 = new ActionFactory(
@@ -54,6 +62,20 @@ const createDrilldownManagerState = () => {
     },
     {}
   );
+  const factory3 = new ActionFactory(
+    {
+      id: 'FACTORY3',
+      CollectConfig: () => ({ render: () => {} }),
+      supportedTriggers: () => ['TRIGGER_MISSING'],
+      isConfigValid: () => true,
+      createConfig: () => ({}),
+      create: () => ({
+        id: 'FACTOR3_ACTION',
+        execute: async () => {},
+      }),
+    },
+    {}
+  );
   const trigger1: Trigger = {
     id: 'TRIGGER1',
   };
@@ -65,15 +87,37 @@ const createDrilldownManagerState = () => {
   };
   const uiActions = uiActionsEnhancedPluginMock.createPlugin();
   const uiActionsStart = uiActions.doStart();
+  (uiActionsStart as any).attachAction = () => {};
+  (uiActionsStart as any).detachAction = () => {};
+  (uiActionsStart as any).hasActionFactory = (actionFactoryId: string): boolean => {
+    switch (actionFactoryId) {
+      case 'FACTORY1':
+      case 'FACTORY2':
+      case 'FACTORY3':
+        return true;
+    }
+    return false;
+  };
+  (uiActionsStart as any).getActionFactory = (actionFactoryId: string): ActionFactory => {
+    switch (actionFactoryId) {
+      case 'FACTORY1':
+        return factory1;
+      case 'FACTORY2':
+        return factory2;
+      case 'FACTORY3':
+        return factory3;
+    }
+    throw new Error('Action factory not found.');
+  };
   const dynamicActionManager = new DynamicActionManager({
     storage: new MemoryActionStorage(),
     isCompatible: async () => true,
     uiActions: uiActionsStart,
   });
-  const storage = createMockStore();
+  const storage = new StorageWrapperMock();
   const toastService = notificationServiceMock.createStartContract().toasts;
   const deps: DrilldownManagerStateDeps = {
-    actionFactories: [factory1, factory2],
+    actionFactories: [factory1, factory2, factory3],
     dynamicActionManager,
     getTrigger: (triggerId: string): Trigger => {
       if (triggerId === trigger1.id) return trigger1;
@@ -93,6 +137,7 @@ const createDrilldownManagerState = () => {
     deps,
     factory1,
     factory2,
+    factory3,
     trigger1,
     trigger2,
     trigger3,
@@ -149,18 +194,126 @@ test('when drilldown has more than one possible trigger, the trigger should be s
   expect(drilldownState.triggers$.getValue()).toEqual(['TRIGGER3']);
 });
 
-test('can create a drilldown', () => {});
+test('can change drilldown config', () => {
+  const { state, factory2 } = createDrilldownManagerState();
+  state.setActionFactory(factory2);
+  const drilldownState = state.getDrilldownState()!;
+  expect(drilldownState.config$.getValue()).toEqual({});
+  drilldownState.setConfig({ foo: 'bar' });
+  expect(drilldownState.config$.getValue()).toEqual({ foo: 'bar' });
+});
 
-test.todo('Can delete multiple drilldowns');
+test('can create a drilldown', async () => {
+  const { state, factory2 } = createDrilldownManagerState();
+  state.setActionFactory(factory2);
+  const drilldownState = state.getDrilldownState()!;
+  drilldownState.setName('my drill');
+  drilldownState.setTriggers(['TRIGGER3']);
+  drilldownState.setConfig({ foo: 'bar' });
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(0);
+  await state.createDrilldown();
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(1);
+  expect(state.deps.dynamicActionManager.state.get().events[0]).toEqual({
+    eventId: expect.any(String),
+    triggers: ['TRIGGER3'],
+    action: {
+      factoryId: 'FACTORY2',
+      name: 'my drill',
+      config: { foo: 'bar' },
+    },
+  });
+});
 
-test.todo('After switching between action factories state is restored');
+test('can delete delete a drilldown', async () => {
+  const { state, factory2 } = createDrilldownManagerState();
+  state.setActionFactory(factory2);
+  const drilldownState = state.getDrilldownState()!;
+  drilldownState.setName('my drill');
+  drilldownState.setTriggers(['TRIGGER3']);
+  drilldownState.setConfig({ foo: 'bar' });
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(0);
+  await state.createDrilldown();
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(1);
+  const eventId = state.deps.dynamicActionManager.state.get().events[0].eventId;
+  await state.onDelete([eventId]);
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(0);
+});
 
-test.todo("Error when can't fetch drilldown list");
+test('can delete multiple drilldowns', async () => {
+  const { state, factory1, factory2 } = createDrilldownManagerState();
 
-test.todo("Error when can't save drilldown changes");
+  state.setActionFactory(factory2);
+  const drilldownState1 = state.getDrilldownState()!;
+  drilldownState1.setName('my drill 1');
+  drilldownState1.setTriggers(['TRIGGER3']);
+  drilldownState1.setConfig({ foo: 'bar-1' });
+  await state.createDrilldown();
 
-test.todo('Should show drilldown welcome message. Should be able to dismiss it');
+  state.setActionFactory(factory2);
+  const drilldownState2 = state.getDrilldownState()!;
+  drilldownState2.setName('my drill 2');
+  drilldownState2.setTriggers(['TRIGGER2']);
+  drilldownState2.setConfig({ foo: 'bar-2' });
+  await state.createDrilldown();
 
-test.todo('Drilldown type is not shown if no supported trigger');
+  state.setActionFactory(factory1);
+  const drilldownState3 = state.getDrilldownState()!;
+  drilldownState3.setName('my drill 0');
+  drilldownState3.setTriggers(['TRIGGER2']);
+  drilldownState3.setConfig({ foo: 'bar-3' });
+  await state.createDrilldown();
 
-test.todo('Can pick a trigger');
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(3);
+  const id1 = state.deps.dynamicActionManager.state.get().events[0].eventId;
+  const id2 = state.deps.dynamicActionManager.state.get().events[1].eventId;
+  const id3 = state.deps.dynamicActionManager.state.get().events[2].eventId;
+  await state.onDelete([id1, id3]);
+  expect(state.deps.dynamicActionManager.state.get().events.length).toBe(1);
+  expect(state.deps.dynamicActionManager.state.get().events[0]).toEqual({
+    eventId: id2,
+    triggers: ['TRIGGER2'],
+    action: {
+      factoryId: 'FACTORY2',
+      name: 'my drill 2',
+      config: { foo: 'bar-2' },
+    },
+  });
+});
+
+test('after switching between action factories state is restored', async () => {
+  const { state, factory1, factory2 } = createDrilldownManagerState();
+
+  state.setActionFactory(factory2);
+  const drilldownState1 = state.getDrilldownState()!;
+  drilldownState1.setName('my drill 1');
+  drilldownState1.setTriggers(['TRIGGER3']);
+  drilldownState1.setConfig({ foo: 'bar-1' });
+
+  state.setActionFactory(factory1);
+  const drilldownState2 = state.getDrilldownState()!;
+  drilldownState2.setName('my drill 2');
+  drilldownState2.setTriggers(['TRIGGER2']);
+  drilldownState2.setConfig({ foo: 'bar-2' });
+
+  state.setActionFactory(factory2);
+  const drilldownState3 = state.getDrilldownState()!;
+  expect(drilldownState3.name$.getValue()).toBe('my drill 1');
+  expect(drilldownState3.triggers$.getValue()).toEqual(['TRIGGER3']);
+  expect(drilldownState3.config$.getValue()).toEqual({ foo: 'bar-1' });
+});
+
+describe('welcome message', () => {
+  test('should show welcome message by default', async () => {
+    const { state } = createDrilldownManagerState();
+    expect(state.hideWelcomeMessage$.getValue()).toBe(false);
+  });
+
+  test('can hide welcome message', async () => {
+    const { state, storage } = createDrilldownManagerState();
+    state.hideWelcomeMessage();
+    expect(state.hideWelcomeMessage$.getValue()).toBe(true);
+    expect(storage.get('drilldowns:hidWelcomeMessage')).toBe(true);
+  });
+});
+
+test.todo('drilldown type is not shown if no supported triggers can be picked');
