@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
+import { esKuery } from '../../../../../../src/plugins/data/server';
 import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -39,7 +40,9 @@ export async function listEnrollmentApiKeys(
     sort: 'created_at:desc',
     track_total_hits: true,
     ignore_unavailable: true,
-    q: kuery,
+    body: kuery
+      ? { query: esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kuery)) }
+      : undefined,
   });
 
   // @ts-expect-error @elastic/elasticsearch
@@ -52,6 +55,17 @@ export async function listEnrollmentApiKeys(
     page,
     perPage,
   };
+}
+
+export async function hasEnrollementAPIKeysForPolicy(
+  esClient: ElasticsearchClient,
+  policyId: string
+) {
+  const res = await listEnrollmentApiKeys(esClient, {
+    kuery: `policy_id:"${policyId}"`,
+  });
+
+  return res.total !== 0;
 }
 
 export async function getEnrollmentAPIKey(

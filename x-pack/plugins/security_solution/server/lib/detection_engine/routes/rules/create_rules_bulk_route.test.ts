@@ -13,7 +13,7 @@ import {
   getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   createBulkMlRuleRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
@@ -21,6 +21,7 @@ import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -36,7 +37,7 @@ describe('create_rules_bulk', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.alertsClient.create.mockResolvedValue(getResult()); // successful creation
+    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
