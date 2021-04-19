@@ -151,7 +151,7 @@ The default interval that *Lens* has chosen is 3 hours. To customize the time in
 [role="screenshot"]
 image::images/lens_end_to_end_3_1.png[Customize time interval]
 
-You can also decrease the time interval with a more advanced guide on <<small-time-interval, small time intervals in Lens>>.
+You can also decrease the time interval with a more advanced guide on <<custom-time-interval, small time intervals in Lens>>.
 
 This chart will be displayed in a small space in the dashboard, so to save space, hide the vertical and horizontal
 axis labels:
@@ -244,33 +244,6 @@ with a bar chart and then switch to a pie chart to display as percentage:
 . From the *Available fields* list, drag and drop `bytes` to *Break down by* in the editor, then specify the file size ranges.
 
 .. Click `bytes`.
-
-.. Click *Create custom ranges*, enter the following, then press Return:
-
-* *Ranges* &mdash; `0` -> `10240`
-
-* *Label* &mdash; `Below 10KB`
-
-.. Click *Add range*, enter the following, then press Return:
-
-* *Ranges* &mdash; `10240` -> `+∞`
-
-* *Label* &mdash; `Above 10KB`
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
-
-.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
-
-. Click *Bar vertical stacked*, then select *Pie*. Notice how the *Suggestions* update with 
-
-. Click *Save and return*.
-
-. Arrange the panel into a small square on the first row of the dashboard, less than one quarter of the screen width.
-
-.. Click the gear icon and choose *Edit panel title*.
-
-.. Enter "Sum of bytes from large requests" as the panel title, then click *Save*.
 
 [discrete]
 [[histogram]]
