@@ -441,19 +441,17 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
+      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const geoField = await this._getGeoField();
     const urlTemplate = `${mvtUrlServicePath}\
-?x={x}\
-&y={y}\
-&z={z}\
-&geometryFieldName=${this._descriptor.geoField}\
+?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
 &requestType=${this._descriptor.requestType}\
 &geoFieldType=${geoField.type}`;
+
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

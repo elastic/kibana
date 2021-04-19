@@ -28,7 +28,7 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
         {
           id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
           attributes: {
-            kibana_urls: ['http://localhost:5603'],
+            fleet_server_hosts: ['http://fleetserver:8220'],
           },
           type: 'ingest_manager_settings',
           score: 1,
@@ -171,11 +171,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -207,11 +203,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -244,11 +236,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
