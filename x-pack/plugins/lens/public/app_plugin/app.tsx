@@ -14,7 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -221,11 +221,29 @@ export function App({
       kbnUrlStateStorage
     );
 
+    const sessionSubscription = data.search.session
+      .getSession$()
+      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
+      .pipe(delay(0))
+      // then update if it didn't get updated yet
+      .subscribe((newSessionId) => {
+        if (newSessionId) {
+          setState((prevState) => {
+            if (prevState.searchSessionId !== newSessionId) {
+              return { ...prevState, searchSessionId: newSessionId };
+            } else {
+              return prevState;
+            }
+          });
+        }
+      });
+
     return () => {
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
       autoRefreshSubscription.unsubscribe();
+      sessionSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
