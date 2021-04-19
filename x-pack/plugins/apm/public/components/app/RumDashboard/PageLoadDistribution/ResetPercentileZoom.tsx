@@ -37,16 +37,10 @@ export function ResetPercentileZoom({
           size="s"
           aria-label={I18LABELS.resetZoom}
           onClick={onClick}
-          disabled={isDisabled}
         />
       </EuiShowFor>
       <EuiHideFor sizes={['xs']}>
-        <EuiButtonEmpty
-          iconType="inspect"
-          size="s"
-          onClick={onClick}
-          disabled={isDisabled}
-        >
+        <EuiButtonEmpty iconType="inspect" size="s" onClick={onClick}>
           {I18LABELS.resetZoom}
         </EuiButtonEmpty>
       </EuiHideFor>
