@@ -141,7 +141,7 @@ function getRegressionAndClassificationMessage(
           id: 'num_top_classes',
           text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesWarningMessage', {
             defaultMessage:
-              'The dependent variable has {numCategories, plural, one {# unique class} other {# unique classes}}. Probabilities will be reported for each of these values. There could be a significant effect on the size of your destination index.',
+              'Predicted probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}. If you have a large number of categories, there could be a significant effect on the size of your destination index.',
             values: {
               numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
             },
