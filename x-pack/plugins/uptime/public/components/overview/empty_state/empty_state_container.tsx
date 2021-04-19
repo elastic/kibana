@@ -23,27 +23,23 @@ export const EmptyState: React.FC = ({ children }) => {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!data || data?.docCount === 0 || data?.indexExists === false) {
-      dispatch(indexStatusAction.get());
-    }
-    // Don't add data , it will create endless loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, lastRefresh]);
+  const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
 
   useEffect(() => {
+    if (noDataInfo) {
+      // only call when we haven't fetched it already
+      dispatch(indexStatusAction.get());
+    }
+  }, [dispatch, lastRefresh, noDataInfo]);
+
+  useEffect(() => {
+    // using separate side effect, we want to call index status,
+    // every statue indices setting changes
     dispatch(indexStatusAction.get());
   }, [dispatch, heartbeatIndices]);
 
   useEffect(() => {
-    // we only want to load this when user has made some change in
-    // settings page and they have already at least once loaded index status
-    // hence have data as truthy
-    if (data) {
-      dispatch(getDynamicSettings());
-    }
-    // Don't add data , it will create endless loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dispatch(getDynamicSettings());
   }, [dispatch]);
 
   return (
