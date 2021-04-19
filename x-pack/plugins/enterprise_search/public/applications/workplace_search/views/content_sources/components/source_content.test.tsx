@@ -34,7 +34,6 @@ import { SourceContent } from './source_content';
 describe('SourceContent', () => {
   const setActivePage = jest.fn();
   const searchContentSourceDocuments = jest.fn();
-  const resetSourceState = jest.fn();
   const setContentFilterValue = jest.fn();
 
   const mockValues = {
@@ -51,7 +50,6 @@ describe('SourceContent', () => {
     setMockActions({
       setActivePage,
       searchContentSourceDocuments,
-      resetSourceState,
       setContentFilterValue,
     });
     setMockValues({ ...mockValues });
