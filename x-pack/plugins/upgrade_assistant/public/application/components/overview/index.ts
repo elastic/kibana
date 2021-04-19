@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { OverviewTab } from './overview';
+export { DeprecationsOverview } from './overview';
