@@ -17,10 +17,12 @@ interface SidebarItemProps {
   item: SidebarItem;
   renderFilterScreenReaderText?: boolean;
   onClick?: OnSidebarClick;
+  highestIndex: number;
 }
 
 export const WaterfallSidebarItem = ({
   item,
+  highestIndex,
   renderFilterScreenReaderText,
   onClick,
 }: SidebarItemProps) => {
@@ -63,6 +65,7 @@ export const WaterfallSidebarItem = ({
           ariaLabel={ariaLabel}
           onClick={handleSidebarClick}
           setButtonRef={setRef}
+          highestIndex={highestIndex}
         />
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -74,6 +77,7 @@ export const WaterfallSidebarItem = ({
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
               setButtonRef={setRef}
+              highestIndex={highestIndex}
             />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>

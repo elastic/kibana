@@ -88,6 +88,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
           item={item}
           renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
           onClick={onSidebarClick}
+          highestIndex={Math.max(...series.map((sr) => sr.x))}
         />
       );
     },

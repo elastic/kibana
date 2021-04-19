@@ -13,6 +13,7 @@ import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface Props {
   index: number;
+  highestIndex: number;
   ariaLabel: string;
   text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -38,6 +39,7 @@ const InnerContainer = styled.span`
 const IndexNumber = styled(EuiText)`
   margin-right: 5px;
   line-height: ${FIXED_AXIS_HEIGHT}px;
+  text-align: right;
 `;
 
 const FirstChunk = styled.span`
@@ -84,6 +86,7 @@ export const MiddleTruncatedText = ({
   onClick,
   setButtonRef,
   url,
+  highestIndex,
 }: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
@@ -101,9 +104,14 @@ export const MiddleTruncatedText = ({
               onClick={onClick}
               data-test-subj={`middleTruncatedTextButton${index}`}
               buttonRef={setButtonRef}
+              flush={'left'}
             >
               <InnerContainer>
-                <IndexNumber color="subdued" size="s">
+                <IndexNumber
+                  color="subdued"
+                  size="s"
+                  style={{ minWidth: String(highestIndex).length + 'ch' }}
+                >
                   {index + '.'}
                 </IndexNumber>
                 <FirstChunk>{chunks.first}</FirstChunk>
