@@ -235,14 +235,12 @@ export function getColumns({
             isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
             anchorPosition="leftCenter"
             button={
-              <EuiButtonEmpty
-                style={{ height: px(24) }}
+              <EuiButtonIcon
+                iconType="boxesHorizontal"
                 onClick={() =>
                   toggleRowActionMenu(instanceItem.serviceNodeName)
                 }
-              >
-                <EuiIcon type="boxesHorizontal" />
-              </EuiButtonEmpty>
+              />
             }
           >
             <InstanceActionsMenu
