@@ -90,6 +90,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ),
   }),
   {
+    // kbn-config-schema and Typescript interfaces don't play nice with each other,
+    // so ignore the typecheck on these defaults
     // @ts-ignore
     defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
   }
