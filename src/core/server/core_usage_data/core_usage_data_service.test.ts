@@ -191,7 +191,7 @@ describe('CoreUsageDataService', () => {
                   "disableEmbedding": false,
                   "permissionsPolicyConfigured": false,
                   "referrerPolicy": "no-referrer-when-downgrade",
-                  "strictTransportSecurity": null,
+                  "strictTransportSecurity": "NULL",
                   "xContentTypeOptions": "nosniff",
                 },
                 "socketTimeout": 120000,
