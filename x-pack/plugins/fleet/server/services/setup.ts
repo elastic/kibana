@@ -73,7 +73,10 @@ async function createSetupSideEffects(
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   await ensureAgentActionPolicyChangeExists(soClient, esClient);
 
-  return { isInitialized: true, preconfigurationError };
+  return {
+    isInitialized: true,
+    preconfigurationError,
+  };
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(
