@@ -6,27 +6,44 @@
  */
 
 import React from 'react';
-import { EuiImage } from '@elastic/eui';
+import { EuiImage, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { INITIATING_VIEW } from '../series_builder/series_builder';
 
-export function EmptyView() {
+export function EmptyView({ loading }: { loading: boolean }) {
   const {
     services: { http },
   } = useKibana();
 
   return (
     <Wrapper>
-      <EuiImage
+      {loading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          style={{
+            top: 'initial',
+          }}
+        />
+      )}
+      <EuiSpacer />
+      <ImageWrap
         alt="Visulization"
         url={http!.basePath.prepend(`/plugins/observability/assets/kibana_dashboard_light.svg`)}
       />
+      <EuiText>{INITIATING_VIEW}</EuiText>
     </Wrapper>
   );
 }
 
+const ImageWrap = styled(EuiImage)`
+  opacity: 0.4;
+`;
+
 const Wrapper = styled.div`
   text-align: center;
-  opacity: 0.4;
   height: 550px;
+  position: relative;
 `;

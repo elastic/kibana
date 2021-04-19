@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { logEntryCursorRT, logEntryRT } from '../../log_entry';
-import { logSourceColumnConfigurationRT } from '../log_sources';
+import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 

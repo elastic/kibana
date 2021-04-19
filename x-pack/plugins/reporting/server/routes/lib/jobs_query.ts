@@ -5,83 +5,59 @@
  * 2.0.
  */
 
+import { UnwrapPromise } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import { errors as elasticsearchErrors } from 'elasticsearch';
-import { get } from 'lodash';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '../../';
 import { ReportDocument } from '../../lib/store';
 import { ReportingUser } from '../../types';
 
-const esErrors = elasticsearchErrors as Record<string, any>;
-const defaultSize = 10;
-
-// TODO: use SearchRequest from elasticsearch-client
-interface QueryBody {
-  size?: number;
-  from?: number;
-  _source?: {
-    excludes: string[];
-  };
-  query: {
-    constant_score: {
-      filter: {
-        bool: {
-          must: Array<Record<string, any>>;
-        };
-      };
-    };
-  };
-}
+type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 interface GetOpts {
   includeContent?: boolean;
 }
 
-// TODO: use SearchResult from elasticsearch-client
-interface CountAggResult {
-  count: number;
-}
-
+const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
+function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
+  return {
+    _source: {
+      excludes: ['output.content'],
+    },
+    sort: [{ created_at: { order: 'desc' } }],
+    size: defaultSize,
+    ...body,
+  };
+}
+
 export function jobsQueryFactory(reportingCore: ReportingCore) {
-  const { elasticsearch } = reportingCore.getPluginSetupDeps();
-  const { callAsInternalUser } = elasticsearch.legacy.client;
-
-  function execQuery(queryType: string, body: QueryBody) {
-    const defaultBody: Record<string, object> = {
-      search: {
-        _source: {
-          excludes: ['output.content'],
-        },
-        sort: [{ created_at: { order: 'desc' } }],
-        size: defaultSize,
-      },
-    };
-
+  function getIndex() {
     const config = reportingCore.getConfig();
-    const index = config.get('index');
-    const query = {
-      index: `${index}-*`,
-      body: Object.assign(defaultBody[queryType] || {}, body),
-    };
 
-    return callAsInternalUser(queryType, query).catch((err) => {
-      if (err instanceof esErrors['401']) return;
-      if (err instanceof esErrors['403']) return;
-      if (err instanceof esErrors['404']) return;
-      throw err;
-    });
+    return `${config.get('index')}-*`;
   }
 
-  type Result = number;
+  async function execQuery<T extends (client: ElasticsearchClient) => any>(
+    callback: T
+  ): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+    try {
+      const { asInternalUser: client } = await reportingCore.getEsClient();
 
-  function getHits(query: Promise<Result>) {
-    return query.then((res) => get(res, 'hits.hits', []));
+      return await callback(client);
+    } catch (error) {
+      if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {
+        return;
+      }
+
+      throw error;
+    }
   }
 
   return {
-    list(
+    async list(
       jobTypes: string[],
       user: ReportingUser,
       page = 0,
@@ -89,32 +65,34 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       jobIds: string[] | null
     ) {
       const username = getUsername(user);
-      const body: QueryBody = {
+      const body = getSearchBody({
         size,
         from: size * page,
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
+                must: [
+                  { terms: { jobtype: jobTypes } },
+                  { term: { created_by: username } },
+                  ...(jobIds ? [{ ids: { values: jobIds } }] : []),
+                ],
               },
             },
           },
         },
-      };
+      });
 
-      if (jobIds) {
-        body.query.constant_score.filter.bool.must.push({
-          ids: { values: jobIds },
-        });
-      }
+      const response = await execQuery((elasticsearchClient) =>
+        elasticsearchClient.search({ body, index: getIndex() })
+      );
 
-      return getHits(execQuery('search', body));
+      return response?.body.hits?.hits ?? [];
     },
 
-    count(jobTypes: string[], user: ReportingUser) {
+    async count(jobTypes: string[], user: ReportingUser) {
       const username = getUsername(user);
-      const body: QueryBody = {
+      const body = {
         query: {
           constant_score: {
             filter: {
@@ -126,17 +104,21 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
         },
       };
 
-      return execQuery('count', body).then((doc: CountAggResult) => {
-        if (!doc) return 0;
-        return doc.count;
-      });
+      const response = await execQuery((elasticsearchClient) =>
+        elasticsearchClient.count({ body, index: getIndex() })
+      );
+
+      return response?.body.count ?? 0;
     },
 
-    get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<ReportDocument | void> {
-      if (!id) return Promise.resolve();
-      const username = getUsername(user);
+    async get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<ReportDocument | void> {
+      if (!id) {
+        return;
+      }
 
-      const body: QueryBody = {
+      const username = getUsername(user);
+      const body: SearchRequest['body'] = {
+        ...(opts.includeContent ? { _source: { excludes: [] } } : {}),
         query: {
           constant_score: {
             filter: {
@@ -149,22 +131,23 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
         size: 1,
       };
 
-      if (opts.includeContent) {
-        body._source = {
-          excludes: [],
-        };
+      const response = await execQuery((elasticsearchClient) =>
+        elasticsearchClient.search({ body, index: getIndex() })
+      );
+
+      if (response?.body.hits?.hits?.length !== 1) {
+        return;
       }
 
-      return getHits(execQuery('search', body)).then((hits) => {
-        if (hits.length !== 1) return;
-        return hits[0];
-      });
+      return response.body.hits.hits[0] as ReportDocument;
     },
 
     async delete(deleteIndex: string, id: string) {
       try {
+        const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
         const query = { id, index: deleteIndex, refresh: true };
-        return callAsInternalUser('delete', query);
+
+        return await elasticsearchClient.delete(query);
       } catch (error) {
         throw new Error(
           i18n.translate('xpack.reporting.jobsQuery.deleteError', {
