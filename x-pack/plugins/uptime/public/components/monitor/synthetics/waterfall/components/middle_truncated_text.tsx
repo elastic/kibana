@@ -8,7 +8,15 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiText,
+  EuiIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface Props {
@@ -82,12 +90,15 @@ export const getChunks = (text: string = '') => {
 export const MiddleTruncatedText = ({
   index,
   ariaLabel,
-  text,
+  text: fullText,
   onClick,
   setButtonRef,
   url,
   highestIndex,
 }: Props) => {
+  const secureHttps = fullText.startsWith('https://');
+  const text = fullText.replace(secureHttps ? 'https://' : 'http://', '');
+
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
@@ -95,9 +106,9 @@ export const MiddleTruncatedText = ({
   return (
     <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
       <EuiScreenReaderOnly>
-        <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
+        <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
       </EuiScreenReaderOnly>
-      <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+      <EuiToolTip content={fullText} position="top" data-test-subj="middleTruncatedTextToolTip">
         <>
           {onClick ? (
             <StyledButton
@@ -114,6 +125,16 @@ export const MiddleTruncatedText = ({
                 >
                   {index + '.'}
                 </IndexNumber>
+                {secureHttps && (
+                  <EuiIcon
+                    type="lock"
+                    size="s"
+                    color="secondary"
+                    aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
+                      defaultMessage: 'https',
+                    })}
+                  />
+                )}
                 <FirstChunk>{chunks.first}</FirstChunk>
                 <LastChunk>{chunks.last}</LastChunk>
               </InnerContainer>
