@@ -2063,7 +2063,7 @@ export const mockGetOneTimelineResult: TimelineResult = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   savedQueryId: null,
-  sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' }],
+  sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
   version: '1',
 };
 

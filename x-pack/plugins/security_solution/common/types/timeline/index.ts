@@ -172,6 +172,8 @@ const SavedSortRuntimeType = runtimeTypes.union([
   SavedSortObject,
 ]);
 
+export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
+
 /*
  *  Timeline Statuses
  */
@@ -579,55 +581,34 @@ export interface PageInfoTimeline {
 
 export interface ColumnHeaderResult {
   aggregatable?: Maybe<boolean>;
-
   category?: Maybe<string>;
-
   columnHeaderType?: Maybe<string>;
-
   description?: Maybe<string>;
-
   example?: Maybe<string>;
-
   indexes?: Maybe<string[]>;
-
   id?: Maybe<string>;
-
   name?: Maybe<string>;
-
   placeholder?: Maybe<string>;
-
   searchable?: Maybe<boolean>;
-
   type?: Maybe<string>;
 }
 
 export interface DataProviderResult {
   id?: Maybe<string>;
-
   name?: Maybe<string>;
-
   enabled?: Maybe<boolean>;
-
   excluded?: Maybe<boolean>;
-
   kqlQuery?: Maybe<string>;
-
   queryMatch?: Maybe<QueryMatchResult>;
-
   type?: Maybe<DataProviderType>;
-
   and?: Maybe<DataProviderResult[]>;
 }
 
 export interface QueryMatchResult {
   field?: Maybe<string>;
-
   displayField?: Maybe<string>;
-
   value?: Maybe<string>;
-
   displayValue?: Maybe<string>;
-
   operator?: Maybe<string>;
 }
 
@@ -640,11 +621,8 @@ export interface DateRangePickerResult {
 
 export interface EqlOptionsResult {
   eventCategoryField?: Maybe<string>;
-
   tiebreakerField?: Maybe<string>;
-
   timestampField?: Maybe<string>;
-
   query?: Maybe<string>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   size?: Maybe<any>;
@@ -652,41 +630,25 @@ export interface EqlOptionsResult {
 
 export interface FilterTimelineResult {
   exists?: Maybe<string>;
-
   meta?: Maybe<FilterMetaTimelineResult>;
-
   match_all?: Maybe<string>;
-
   missing?: Maybe<string>;
-
   query?: Maybe<string>;
-
   range?: Maybe<string>;
-
   script?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
   alias?: Maybe<string>;
-
   controlledBy?: Maybe<string>;
-
   disabled?: Maybe<boolean>;
-
   field?: Maybe<string>;
-
   formattedValue?: Maybe<string>;
-
   index?: Maybe<string>;
-
   key?: Maybe<string>;
-
   negate?: Maybe<boolean>;
-
   params?: Maybe<string>;
-
   type?: Maybe<string>;
-
   value?: Maybe<string>;
 }
 
@@ -696,88 +658,54 @@ export interface SerializedFilterQueryResult {
 
 export interface SerializedKueryQueryResult {
   kuery?: Maybe<KueryFilterQueryResult>;
-
   serializedQuery?: Maybe<string>;
 }
 
 export interface KueryFilterQueryResult {
   kind?: Maybe<string>;
-
   expression?: Maybe<string>;
 }
 
 export interface TimelineResult {
   columns?: Maybe<ColumnHeaderResult[]>;
-
   created?: Maybe<number>;
-
   createdBy?: Maybe<string>;
-
   dataProviders?: Maybe<DataProviderResult[]>;
-
   dateRange?: Maybe<DateRangePickerResult>;
-
   description?: Maybe<string>;
-
   eqlOptions?: Maybe<EqlOptionsResult>;
-
   eventIdToNoteIds?: Maybe<NoteResult[]>;
-
   eventType?: Maybe<string>;
-
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
-
   favorite?: Maybe<FavoriteTimelineResult[]>;
-
   filters?: Maybe<FilterTimelineResult[]>;
-
   kqlMode?: Maybe<string>;
-
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
-
   indexNames?: Maybe<string[]>;
-
   notes?: Maybe<NoteResult[]>;
-
   noteIds?: Maybe<string[]>;
-
   pinnedEventIds?: Maybe<string[]>;
-
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
-
   savedQueryId?: Maybe<string>;
-
   savedObjectId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sort?: Maybe<any>;
-
+  sort?: Maybe<Sort>;
   status?: Maybe<TimelineStatus>;
-
   title?: Maybe<string>;
-
   templateTimelineId?: Maybe<string>;
-
   templateTimelineVersion?: Maybe<number>;
-
   timelineType?: Maybe<TimelineType>;
-
   updated?: Maybe<number>;
-
   updatedBy?: Maybe<string>;
-
   version: string;
 }
 
 export interface ResponseTimeline {
   code?: Maybe<number>;
-
   message?: Maybe<string>;
-
   timeline: TimelineResult;
 }
 export interface SortTimeline {
   sortField: SortFieldTimeline;
-
   sortOrder: Direction;
 }
 
