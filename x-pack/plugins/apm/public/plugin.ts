@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { ConfigSchema } from '.';
-import {
-  FetchDataParams,
-  HasDataParams,
-  ObservabilityPublicSetup,
-} from '../../observability/public';
+import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
   CoreSetup,
@@ -19,29 +14,39 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
 } from '../../alerting/public';
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import {
+import type { FeaturesPluginSetup } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { MapsStartApi } from '../../maps/public';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import type {
+  FetchDataParams,
+  HasDataParams,
+  ObservabilityPublicSetup,
+} from '../../observability/public';
+import { FormatterRuleRegistry } from '../../observability/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
+import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { MapsStartApi } from '../../maps/public';
 
-export type ApmPluginSetup = void;
+export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
+export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
+
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -52,7 +57,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPublicSetup;
+  observability: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -156,6 +161,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: {} as APMRuleFieldMap,
+      ctor: FormatterRuleRegistry,
+    });
+
+    registerApmAlerts(apmRuleRegistry);
+
     core.application.register({
       id: 'ux',
       title: 'User Experience',
@@ -196,9 +209,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         );
       },
     });
+
+    return {
+      ruleRegistry: apmRuleRegistry,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-    registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
   }
 }
