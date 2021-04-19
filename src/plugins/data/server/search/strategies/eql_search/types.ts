@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-export interface EqlSearchResponse<T = unknown> extends SearchResponse<T> {
+export interface EqlSearchResponse<T = unknown> extends estypes.SearchResponse<T> {
   id?: string;
   is_partial: boolean;
   is_running: boolean;
