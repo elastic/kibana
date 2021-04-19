@@ -110,6 +110,10 @@ Object {
 }
 `;
 
+exports[`shutdownTimeout should error if below 1s 1`] = `"[shutdownTimeout]: the value should be between 1 second and 2 minutes"`;
+
+exports[`shutdownTimeout should error if over 2 minutes 1`] = `"[shutdownTimeout]: the value should be between 1 second and 2 minutes"`;
+
 exports[`throws if invalid hostname 1`] = `"[host]: value must be a valid hostname (see RFC 1123)."`;
 
 exports[`throws if invalid hostname 2`] = `"[host]: value 0 is not a valid hostname (use \\"0.0.0.0\\" to bind to all interfaces)"`;

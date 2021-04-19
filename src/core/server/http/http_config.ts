@@ -32,7 +32,15 @@ const configSchema = schema.object(
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
       })
     ),
-    shutdownTimeout: schema.duration({ defaultValue: '30s' }),
+    shutdownTimeout: schema.duration({
+      defaultValue: '30s',
+      validate: (duration) => {
+        const durationMs = duration.asMilliseconds();
+        if (durationMs < 1000 || durationMs > 2 * 60 * 1000) {
+          return 'the value should be between 1 second and 2 minutes';
+        }
+      },
+    }),
     cors: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),
