@@ -19,11 +19,11 @@ export function useHTTPRequest<Response>(
   body?: string | null,
   decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
-  toastWarning?: (input: ToastInput) => void
+  toastDanger?: (input: ToastInput) => void
 ) {
   const kibana = useKibana();
   const fetchService = fetch ? fetch : kibana.services.http?.fetch;
-  const toast = toastWarning ? toastWarning : kibana.notifications.toasts.warning;
+  const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<IHttpFetchError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
@@ -66,9 +66,15 @@ export function useHTTPRequest<Response>(
                     })}
                   </h5>
                   {err.response?.url}
+                  <h5>
+                    {i18n.translate('xpack.infra.useHTTPRequest.error.body.message', {
+                      defaultMessage: `Message`,
+                    })}
+                  </h5>
+                  {err.body?.message || err.message}
                 </>
               ) : (
-                <h5>{err.message}</h5>
+                <h5>{err.body?.message || err.message}</h5>
               )}
             </div>
           ),

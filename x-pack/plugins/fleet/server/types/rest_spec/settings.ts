@@ -22,6 +22,9 @@ export const PutSettingsRequestSchema = {
         },
       })
     ),
+    has_seen_add_data_notice: schema.maybe(schema.boolean()),
+    additional_yaml_config: schema.maybe(schema.string()),
+    // Deprecated not used
     kibana_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {
@@ -32,7 +35,5 @@ export const PutSettingsRequestSchema = {
       })
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
-    has_seen_add_data_notice: schema.maybe(schema.boolean()),
-    additional_yaml_config: schema.maybe(schema.string()),
   }),
 };

@@ -106,6 +106,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.Unnamed.$1",
                 "type": "Object",
                 "label": "initialInput",
                 "isRequired": true,
@@ -125,17 +126,12 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.Unnamed.$2",
                 "type": "Object",
                 "label": "services",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dashboard",
-                    "scope": "public",
-                    "docId": "kibDashboardPluginApi",
-                    "section": "def-public.DashboardContainerServices",
-                    "text": "DashboardContainerServices"
-                  }
+                  "DashboardContainerServices"
                 ],
                 "description": [],
                 "source": {
@@ -144,6 +140,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.Unnamed.$3",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -217,25 +214,14 @@
                 "text": "EmbeddableFactory"
               },
               "<TEmbeddableInput, any, TEmbeddable, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">, partial?: Partial<TEmbeddableInput>) => ",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardPanelState",
-                "text": "DashboardPanelState"
-              }
+              "DashboardPanelState"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.createNewPanelState.$1",
                 "type": "Object",
                 "label": "factory",
                 "isRequired": true,
@@ -248,13 +234,7 @@
                     "text": "EmbeddableFactory"
                   },
                   "<TEmbeddableInput, any, TEmbeddable, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectAttributes",
-                    "text": "SavedObjectAttributes"
-                  },
+                  "SavedObjectAttributes",
                   ">"
                 ],
                 "description": [],
@@ -264,6 +244,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.createNewPanelState.$2",
                 "type": "Object",
                 "label": "partial",
                 "isRequired": true,
@@ -290,13 +271,7 @@
             "label": "showPlaceholderUntil",
             "signature": [
               "<TPlacementMethodArgs extends ",
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.IPanelPlacementArgs",
-                "text": "IPanelPlacementArgs"
-              },
+              "IPanelPlacementArgs",
               ">(newStateComplete: Promise<Partial<",
               {
                 "pluginId": "embeddable",
@@ -306,18 +281,13 @@
                 "text": "PanelState"
               },
               "<{ id: string; }>>>, placementMethod?: ",
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.PanelPlacementMethod",
-                "text": "PanelPlacementMethod"
-              },
+              "PanelPlacementMethod",
               "<TPlacementMethodArgs> | undefined, placementArgs?: TPlacementMethodArgs | undefined) => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.$1",
                 "type": "Object",
                 "label": "newStateComplete",
                 "isRequired": true,
@@ -339,17 +309,12 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.$2",
                 "type": "Function",
                 "label": "placementMethod",
                 "isRequired": false,
                 "signature": [
-                  {
-                    "pluginId": "dashboard",
-                    "scope": "public",
-                    "docId": "kibDashboardPluginApi",
-                    "section": "def-public.PanelPlacementMethod",
-                    "text": "PanelPlacementMethod"
-                  },
+                  "PanelPlacementMethod",
                   "<TPlacementMethodArgs> | undefined"
                 ],
                 "description": [],
@@ -359,6 +324,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.$3",
                 "type": "Uncategorized",
                 "label": "placementArgs",
                 "isRequired": false,
@@ -385,13 +351,7 @@
             "label": "replacePanel",
             "signature": [
               "(previousPanelState: ",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardPanelState",
-                "text": "DashboardPanelState"
-              },
+              "DashboardPanelState",
               "<",
               {
                 "pluginId": "embeddable",
@@ -413,17 +373,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.replacePanel.$1",
                 "type": "Object",
                 "label": "previousPanelState",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dashboard",
-                    "scope": "common",
-                    "docId": "kibDashboardPluginApi",
-                    "section": "def-common.DashboardPanelState",
-                    "text": "DashboardPanelState"
-                  },
+                  "DashboardPanelState",
                   "<",
                   {
                     "pluginId": "embeddable",
@@ -441,6 +396,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.replacePanel.$2",
                 "type": "Object",
                 "label": "newPanelState",
                 "isRequired": true,
@@ -462,6 +418,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.replacePanel.$3",
                 "type": "CompoundType",
                 "label": "generateNewId",
                 "isRequired": false,
@@ -531,6 +488,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -544,6 +502,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.$2",
                 "type": "Object",
                 "label": "explicitInput",
                 "isRequired": true,
@@ -557,6 +516,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.$3",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": false,
@@ -587,6 +547,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.render.$1",
                 "type": "Object",
                 "label": "dom",
                 "isRequired": true,
@@ -613,17 +574,12 @@
             "label": "getInheritedInput",
             "signature": [
               "(id: string) => ",
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.InheritedChildInput",
-                "text": "InheritedChildInput"
-              }
+              "InheritedChildInput"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.getInheritedInput.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -737,18 +693,13 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.$1",
                 "type": "Function",
                 "label": "getStartServices",
                 "isRequired": true,
                 "signature": [
                   "() => Promise<",
-                  {
-                    "pluginId": "dashboard",
-                    "scope": "public",
-                    "docId": "kibDashboardPluginApi",
-                    "section": "def-public.DashboardContainerServices",
-                    "text": "DashboardContainerServices"
-                  },
+                  "DashboardContainerServices",
                   ">"
                 ],
                 "description": [],
@@ -826,6 +777,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.create.$1",
                 "type": "Object",
                 "label": "initialInput",
                 "isRequired": true,
@@ -845,6 +797,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.create.$2",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -951,6 +904,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createDashboardEditUrl.$1",
             "type": "string",
             "label": "id",
             "isRequired": false,
@@ -964,6 +918,7 @@
             }
           },
           {
+            "id": "def-public.createDashboardEditUrl.$2",
             "type": "CompoundType",
             "label": "editMode",
             "isRequired": false,
@@ -990,6 +945,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createDashboardUrlGenerator.$1",
             "type": "Function",
             "label": "getStartServices",
             "isRequired": true,
@@ -1078,13 +1034,7 @@
               "lineNumber": 43
             },
             "signature": [
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardCapabilities",
-                "text": "DashboardCapabilities"
-              },
+              "DashboardCapabilities",
               " | undefined"
             ]
           },
@@ -1291,13 +1241,7 @@
             },
             "signature": [
               "{ [panelId: string]: ",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardPanelState",
-                "text": "DashboardPanelState"
-              },
+              "DashboardPanelState",
               "<",
               {
                 "pluginId": "embeddable",
@@ -2105,11 +2049,102 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "id": "def-server.findByValueEmbeddables",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-server.findByValueEmbeddables.$1",
+            "type": "Object",
+            "label": "savedObjectClient",
+            "isRequired": true,
+            "signature": [
+              "Pick<Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsRepository",
+                "text": "SavedObjectsRepository"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "id": "def-server.findByValueEmbeddables.$2",
+            "type": "string",
+            "label": "embeddableType",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "signature": [
+          "(savedObjectClient: Pick<Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsRepository",
+            "text": "SavedObjectsRepository"
+          },
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: unknown; }[]>"
+        ],
+        "description": [],
+        "label": "findByValueEmbeddables",
+        "source": {
+          "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+          "lineNumber": 12
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "id": "def-server.DashboardPluginSetup",
+      "type": "Interface",
+      "label": "DashboardPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 10
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-server.DashboardPluginStart",
+      "type": "Interface",
+      "label": "DashboardPluginStart",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 12
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -2139,42 +2174,19 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.migratePanelsTo730.$1",
             "type": "Array",
             "label": "panels",
             "isRequired": true,
             "signature": [
               "(",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.RawSavedDashboardPanelTo60",
-                "text": "RawSavedDashboardPanelTo60"
-              },
+              "RawSavedDashboardPanelTo60",
               " | ",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.RawSavedDashboardPanel610",
-                "text": "RawSavedDashboardPanel610"
-              },
+              "RawSavedDashboardPanel610",
               " | ",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.RawSavedDashboardPanel620",
-                "text": "RawSavedDashboardPanel620"
-              },
+              "RawSavedDashboardPanel620",
               " | Pick<",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.RawSavedDashboardPanel620",
-                "text": "RawSavedDashboardPanel620"
-              },
+              "RawSavedDashboardPanel620",
               ", \"title\" | \"panelIndex\" | \"name\" | \"gridData\" | \"version\" | \"embeddableConfig\"> | ",
               {
                 "pluginId": "dashboard",
@@ -2191,6 +2203,7 @@
             }
           },
           {
+            "id": "def-common.migratePanelsTo730.$2",
             "type": "string",
             "label": "version",
             "isRequired": true,
@@ -2204,6 +2217,7 @@
             }
           },
           {
+            "id": "def-common.migratePanelsTo730.$3",
             "type": "boolean",
             "label": "useMargins",
             "isRequired": true,
@@ -2217,14 +2231,14 @@
             }
           },
           {
-            "id": "def-common.migratePanelsTo730.uiState",
+            "id": "def-common.migratePanelsTo730.$4.uiState",
             "type": "Object",
             "label": "uiState",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-common.migratePanelsTo730.uiState.Unnamed",
+                "id": "def-common.migratePanelsTo730.$4.uiState.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
                 "tags": [],
