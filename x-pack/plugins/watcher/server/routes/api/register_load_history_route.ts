@@ -8,10 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../shared_imports';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item/index';
 
@@ -32,15 +30,19 @@ function fetchHistoryItem(dataClient: ILegacyScopedClusterClient, watchHistoryIt
   });
 }
 
-export function registerLoadHistoryRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerLoadHistoryRoute({
+  router,
+  license,
+  lib: { isEsError },
+}: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/history/{id}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const id = request.params.id;
 
       try {
