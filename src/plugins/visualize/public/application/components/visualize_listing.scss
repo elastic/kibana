@@ -22,7 +22,7 @@
 
 .visListingCallout {
   @include kbnThemeStyle('v7') {
-    max-width: 1200px;
+    max-width: 1000px;
   }
   @include kbnThemeStyle('v8') {
     max-width: 1200px;
