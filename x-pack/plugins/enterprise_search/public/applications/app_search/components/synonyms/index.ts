@@ -6,3 +6,4 @@
  */
 
 export { SYNONYMS_TITLE } from './constants';
+export { Synonyms } from './synonyms';
