@@ -213,7 +213,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     if (
       this.getSpacesService() == null &&
       Array.isArray(options.namespaces) &&
@@ -245,7 +245,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
           error: new Error(status),
         })
       );
-      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     const typeToNamespacesMap = Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
@@ -254,7 +254,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       new Map()
     );
 
-    const response = await this.baseClient.find<T>({
+    const response = await this.baseClient.find<T, A>({
       ...options,
       typeToNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typeToNamespacesMap to prevent privilege escalation
       ...(status === 'partially_authorized' && { typeToNamespacesMap, type: '', namespaces: [] }), // the repository requires that `type` and `namespaces` must be empty if `typeToNamespacesMap` is defined

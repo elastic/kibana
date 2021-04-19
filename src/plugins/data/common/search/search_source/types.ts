@@ -7,6 +7,7 @@
  */
 
 import { NameList } from 'elasticsearch';
+import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../../index_patterns';
@@ -86,7 +87,7 @@ export interface SearchSourceFields {
   /**
    * {@link AggConfigs}
    */
-  aggs?: any;
+  aggs?: object | IAggConfigs | (() => object);
   from?: number;
   size?: number;
   source?: NameList;
