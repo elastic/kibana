@@ -32,6 +32,9 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
       {
+        field: 'monitor.name',
+      },
+      {
         field: 'monitor.id',
       },
       {
