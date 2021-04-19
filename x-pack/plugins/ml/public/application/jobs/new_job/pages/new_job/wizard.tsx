@@ -19,7 +19,7 @@ import { JobCreatorType } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';

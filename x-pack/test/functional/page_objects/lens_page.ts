@@ -18,6 +18,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const PageObjects = getPageObjects([
     'common',
@@ -753,7 +754,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await PageObjects.visualize.clickLensWidget();
+      await dashboardAddPanel.clickCreateNewLink();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

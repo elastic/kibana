@@ -69,4 +69,5 @@ export interface SearchSettings {
   boosts: Record<string, Boost[]>;
   search_fields: Record<string, SearchField>;
   result_fields?: object;
+  precision?: number;
 }
