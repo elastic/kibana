@@ -33,13 +33,14 @@ export const validateTopNBucket = numberValidator({ min: 1 });
 export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
   return (
     <EuiAccordion
-      id="mlAlertAdvancedSettings"
+      id="mlAnomalyAlertAdvancedSettings"
       buttonContent={
         <FormattedMessage
           id="xpack.ml.anomalyDetectionAlert.advancedSettingsLabel"
           defaultMessage="Advanced settings"
         />
       }
+      data-test-subj={'mlAnomalyAlertAdvancedSettingsTrigger'}
     >
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
