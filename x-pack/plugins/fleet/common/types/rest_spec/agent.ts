@@ -108,6 +108,7 @@ export interface PostAgentUnenrollRequest {
   };
   body: {
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
@@ -118,6 +119,7 @@ export interface PostBulkAgentUnenrollRequest {
   body: {
     agents: string[] | string;
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
