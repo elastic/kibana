@@ -19,13 +19,16 @@ import {
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import {
+  createIndexPatternMock,
+  createIndexPatternsStartMock,
+} from '../../../common/dependency_mocks/index_patterns';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntriesSearchRequestStateRT,
   logEntriesSearchStrategyProvider,
 } from './log_entries_search_strategy';
-import { createIndexPatternMock, createIndexPatternsStartMock } from './mocks';
 
 describe('LogEntries search strategy', () => {
   it('handles initial search requests', async () => {
