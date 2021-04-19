@@ -143,6 +143,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
       Object {
         "docCount": 0,
         "indexExists": true,
+        "indices": "heartbeat-*,synthetics-*",
       }
     }
   >
@@ -1128,6 +1129,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
       Object {
         "docCount": 1,
         "indexExists": false,
+        "indices": "heartbeat-*,synthetics-*",
       }
     }
   >
@@ -1571,6 +1573,7 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
         Object {
           "docCount": 1,
           "indexExists": true,
+          "indices": "heartbeat-*,synthetics-*",
         }
       }
     >
