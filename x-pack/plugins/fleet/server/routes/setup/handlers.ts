@@ -8,7 +8,7 @@
 import type { RequestHandler } from 'src/core/server';
 
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -46,7 +46,7 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body = await setupIngestManager(soClient, esClient);
+    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
 
     return response.ok({
       body,
