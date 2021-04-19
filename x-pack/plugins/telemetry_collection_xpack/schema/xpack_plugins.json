@@ -3959,7 +3959,7 @@
                       "rule_type": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The type of detection rule. ie eql, query.."
+                          "description": "The type of detection rule. ie eql, query..."
                         }
                       },
                       "rule_version": {

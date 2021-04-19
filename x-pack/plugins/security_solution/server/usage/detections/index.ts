@@ -8,13 +8,15 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import {
   getMlJobsUsage,
-  getMlJobMetrics,
-  getDetectionRuleMetrics,
   getRulesUsage,
   initialRulesUsage,
-  initialDetectionRulesUsage,
   initialMlJobsUsage,
-} from './detections_helpers';
+} from './detections_usage_helpers';
+import {
+  getMlJobMetrics,
+  getDetectionRuleMetrics,
+  initialDetectionRulesUsage,
+} from './detections_metrics_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
 
 interface FeatureUsage {

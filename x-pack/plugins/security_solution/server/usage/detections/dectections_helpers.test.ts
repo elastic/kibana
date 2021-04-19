@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initialDetectionRulesUsage, updateDetectionRuleUsage } from './detections_helpers';
+import { initialDetectionRulesUsage, updateDetectionRuleUsage } from './detections_metrics_helpers';
 import { DetectionRuleMetric, DetectionRulesTypeUsage } from './index';
 import { v4 as uuid } from 'uuid';
 

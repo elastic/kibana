@@ -104,13 +104,6 @@ describe('Detections Usage and Metrics', () => {
         })
       );
     });
-  });
-
-  describe('getDetectionRuleMetrics()', () => {
-    beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mlMock = mlServicesMock.createSetupContract();
-    });
 
     it('returns zeroed counts if calls are empty', async () => {
       const result = await fetchDetectionsMetrics(
