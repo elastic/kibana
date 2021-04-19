@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import {
   DrilldownTemplateTable,
@@ -48,12 +48,16 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
   }, [drilldowns, items]);
 
   return (
-    <EuiFormRow label={txtLabel} fullWidth>
+    <>
+      <EuiTitle size="xs">
+        <h4>{txtLabel}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
       <DrilldownTemplateTable
         items={tableItems}
         onCreate={drilldowns.onCreateFromTemplate}
         onClone={drilldowns.onClone}
       />
-    </EuiFormRow>
+    </>
   );
 };
