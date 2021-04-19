@@ -7,18 +7,19 @@
 
 import React, { ReactNode } from 'react';
 
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTitle, EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { ErrorCount } from '../../ErrorCount';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallItem, IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 import { SyncBadge } from './SyncBadge';
 import { Margins } from '../../../../../shared/charts/Timeline';
+import { useTheme } from '../../../../../../hooks/use_theme';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -159,6 +160,26 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   }
 }
 
+function compressedSpanStyle(item: IWaterfallSpanOrTransaction, width: number, left: number): React.CSSProperties {
+  var itemBarStyle = { left: `${left}%`, width: `${width}%` };
+
+  if (item.count !== undefined && item.durationSum !== undefined) {
+    const percNumItems = 100.0 / item.count;
+    const percDuration = percNumItems * (item.durationSum / item.duration);
+
+    itemBarStyle = {
+      ...itemBarStyle,
+      ...{
+        backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent max(${percDuration}%,1.5px),` +
+          ` rgba(255,255,255,1) max(${percDuration}%,1.5px),` +
+          ` rgba(255,255,255,1) max(${percNumItems}%,3px))`
+      }
+    };
+  }
+
+  return itemBarStyle
+}
+
 export function WaterfallItem({
   timelineMargins,
   totalDuration,
@@ -168,6 +189,7 @@ export function WaterfallItem({
   errorCount,
   onClick,
 }: IWaterfallItemProps) {
+  const theme = useTheme();
   if (!totalDuration) {
     return null;
   }
@@ -184,6 +206,8 @@ export function WaterfallItem({
     }
   );
 
+  var itemBarStyle = compressedSpanStyle(item, width, left);
+
   return (
     <Container
       type={item.docType}
@@ -194,17 +218,26 @@ export function WaterfallItem({
         onClick();
       }}
     >
-      <ItemBar // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${width}%` }}
-        color={color}
-        type={item.docType}
-      />
+      <div>
+        <ItemBar // using inline styles instead of props to avoid generating a css class for each item
+          style={itemBarStyle}
+          color={color}
+          type={item.docType}
+        />
+      </div>
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
         <SpanActionToolTip item={item}>
           <PrefixIcon item={item} />
         </SpanActionToolTip>
+        {item.nPlusOne &&
+          <EuiToolTip content={`${item.nPlusOne}`}>
+            <EuiBadge color={theme.eui.euiColorWarning}>
+              N+1 pattern!
+            </EuiBadge>
+          </EuiToolTip>
+        }
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (

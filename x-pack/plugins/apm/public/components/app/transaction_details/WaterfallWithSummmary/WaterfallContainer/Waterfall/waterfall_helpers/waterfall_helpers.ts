@@ -38,6 +38,7 @@ export interface IWaterfall {
   errorsCount: number;
   legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
+  antipatternDetected?: boolean;
 }
 
 interface IWaterfallSpanItemBase<TDocument, TDoctype>
@@ -46,6 +47,9 @@ interface IWaterfallSpanItemBase<TDocument, TDoctype>
    * Latency in us
    */
   duration: number;
+  durationSum?: number;
+  count?: number;
+  nPlusOne?: boolean;
   legendValues: Record<WaterfallLegendType, string>;
 }
 
@@ -56,6 +60,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   parent?: IWaterfallSpanOrTransaction;
   parentId?: string;
   color: string;
+
   /**
    * offset from first item in us
    */
@@ -274,7 +279,7 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
     }
   });
 
-function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
+export function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
   // find children that needs to be re-parented and map them to their correct parent id
   const childIdToParentIdMapping = Object.fromEntries(
     flatten(
@@ -302,9 +307,7 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
   });
 }
 
-const getChildrenGroupedByParentId = (
-  waterfallItems: IWaterfallSpanOrTransaction[]
-) =>
+export const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
   groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
 
 const getEntryWaterfallTransaction = (

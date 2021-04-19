@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexItem, EuiCheckbox, EuiFieldNumber, EuiBadge } from '@elastic/eui';
 import { Location } from 'history';
-import React from 'react';
+import React, { useState } from 'react';
 import { keyBy } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { IUrlParams } from '../../../../../context/url_params_context/types';
@@ -16,6 +17,9 @@ import {
 } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './Waterfall';
 import { WaterfallLegends } from './WaterfallLegends';
+import { doCompressSpans } from './compress-spans';
+import { useTheme } from '../../../../../hooks/use_theme';
+
 
 interface Props {
   urlParams: IUrlParams;
@@ -32,6 +36,10 @@ export function WaterfallContainer({
 }: Props) {
   const { serviceName } = useParams<{ serviceName: string }>();
 
+  const [compressSpans, setCompressSpans] = useState(false);
+  const [durationThreshold, setDurationThreshold] = useState(5);
+  const [nPlusOneThreshold, setNPlusOneThreshold] = useState(10);
+  const theme = useTheme();
   if (!waterfall) {
     return null;
   }
@@ -80,13 +88,56 @@ export function WaterfallContainer({
     return { ...legend, value: !legend.value ? serviceName : legend.value };
   });
 
+  const waterfallToRender = compressSpans ? doCompressSpans(waterfall, nPlusOneThreshold, durationThreshold) : waterfall;
+
   return (
     <div>
+      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+        {waterfallToRender.antipatternDetected && <EuiFlexItem style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+
+          <EuiBadge color={theme.eui.euiColorWarning}>
+            N+1 pattern detected!
+          </EuiBadge>
+
+        </EuiFlexItem>}
+        <EuiFlexItem style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <div style={{ marginLeft: '5px' }}>
+            <EuiFieldNumber
+              value={durationThreshold}
+              prepend={"Duration Threshold"}
+              append={"ms"}
+              min={1}
+              max={1000}
+              compressed
+              onChange={(e) =>  setDurationThreshold(parseInt(e.target.value)) }
+            />
+          </div>
+          <div style={{ marginLeft: '5px' }}>
+            <EuiFieldNumber
+              value={nPlusOneThreshold}
+              prepend={"N+1 Threshold"}
+              min={2}
+              max={20}
+              compressed
+              onChange={(e) => { setNPlusOneThreshold(parseInt(e.target.value)) }}
+            />
+          </div>
+          <div style={{ marginLeft: '5px' }}>
+            <EuiCheckbox
+              id="compress-spans"
+              label="Compress Spans"
+              checked={compressSpans}
+              onChange={() => setCompressSpans(!compressSpans)}
+            />
+          </div>
+        </EuiFlexItem>
+      </div>
+
       <Waterfall
         location={location}
         waterfallItemId={urlParams.waterfallItemId}
-        waterfall={waterfall}
+        waterfall={waterfallToRender}
         exceedsMax={exceedsMax}
       />
     </div>
