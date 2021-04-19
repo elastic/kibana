@@ -12,14 +12,24 @@ export class CoreHttpPlugin implements Plugin<CoreHttpPluginSetup, CoreHttpPlugi
   public setup({ http }: CoreSetup, deps: {}) {
     const tryRequestCancellation = async () => {
       const abortController = new AbortController();
-      abortController.abort();
 
-      try {
-        await http.get('/api/core_http/never_reply', { signal: abortController.signal });
-        return undefined;
-      } catch (e) {
-        return e.name;
-      }
+      const errorNamePromise = http
+        .get('/api/core_http/never_reply', { signal: abortController.signal })
+        .then(
+          () => {
+            return undefined;
+          },
+          (e) => {
+            return e.name;
+          }
+        );
+
+      // simulating 'real' cancellation by awaiting a bit
+      window.setTimeout(() => {
+        abortController.abort();
+      }, 100);
+
+      return errorNamePromise;
     };
 
     return {
