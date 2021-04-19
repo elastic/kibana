@@ -28,7 +28,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: () => TReturn,
+  fn: ({}: { signal: AbortSignal }) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -43,8 +43,16 @@ export function useFetcher<TReturn>(
   });
   const [counter, setCounter] = useState(0);
   useEffect(() => {
+    let controller: AbortController = new AbortController();
+
     async function doFetch() {
-      const promise = fn();
+      controller.abort();
+
+      controller = new AbortController();
+
+      const signal = controller.signal;
+
+      const promise = fn({ signal });
       if (!promise) {
         return;
       }
@@ -58,22 +66,34 @@ export function useFetcher<TReturn>(
 
       try {
         const data = await promise;
-        setResult({
-          data,
-          status: FETCH_STATUS.SUCCESS,
-          error: undefined,
-        } as FetcherResult<InferResponseType<TReturn>>);
+        // when http fetches are aborted, the promise will be rejected
+        // and this code is never reached. For async operations that are
+        // not cancellable, we need to check whether the signal was
+        // aborted before updating the result.
+        if (!signal.aborted) {
+          setResult({
+            data,
+            status: FETCH_STATUS.SUCCESS,
+            error: undefined,
+          } as FetcherResult<InferResponseType<TReturn>>);
+        }
       } catch (e) {
-        setResult((prevResult) => ({
-          data: preservePreviousData ? prevResult.data : undefined,
-          status: FETCH_STATUS.FAILURE,
-          error: e,
-          loading: false,
-        }));
+        if (!signal.aborted) {
+          setResult((prevResult) => ({
+            data: preservePreviousData ? prevResult.data : undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: e,
+            loading: false,
+          }));
+        }
       }
     }
 
     doFetch();
+
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counter, ...fnDeps]);
 

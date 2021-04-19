@@ -59,16 +59,6 @@ beforeEach(async () => {
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
 
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
   // @ts-ignore over-riding config method
   mockReporting.config = mockReportingConfig;
 
