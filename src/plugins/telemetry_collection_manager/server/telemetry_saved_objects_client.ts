@@ -17,7 +17,9 @@ export class TelemetrySavedObjectsClient extends SavedObjectsClient {
    * Find the SavedObjects matching the search query in all the Spaces by default
    * @param options
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     return super.find({ namespaces: ['*'], ...options });
   }
 }
