@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
@@ -31,6 +31,7 @@ import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { queryExecutor } from './executors/query';
 import { mlExecutor } from './executors/ml';
+import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -54,19 +55,13 @@ const getPayload = (
 ): RuleExecutorOptions => ({
   alertId: ruleAlert.id,
   services,
+  name: ruleAlert.name,
+  tags: ruleAlert.tags,
   params: {
     ...ruleAlert.params,
-    actions: [],
-    enabled: ruleAlert.enabled,
-    interval: ruleAlert.schedule.interval,
-    name: ruleAlert.name,
-    tags: ruleAlert.tags,
-    throttle: ruleAlert.throttle,
   },
   state: {},
   spaceId: '',
-  name: 'name',
-  tags: [],
   startedAt: new Date('2019-12-13T16:50:33.400Z'),
   previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
   createdBy: 'elastic',
@@ -154,7 +149,7 @@ describe('signal_rule_alert_type', () => {
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
       value as ApiResponse<estypes.FieldCapabilitiesResponse>
     );
-    const ruleAlert = getResult();
+    const ruleAlert = getAlertMock(getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
       type: 'type',
@@ -208,7 +203,10 @@ describe('signal_rule_alert_type', () => {
         },
         application: {},
       });
-      payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      const newRuleAlert = getAlertMock(getQueryRuleParams());
+      newRuleAlert.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
@@ -231,7 +229,10 @@ describe('signal_rule_alert_type', () => {
         },
         application: {},
       });
-      payload.params.index = ['some*', 'myfa*'];
+      const newRuleAlert = getAlertMock(getQueryRuleParams());
+      newRuleAlert.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
@@ -247,7 +248,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it("should set refresh to 'wait_for' when actions are present", async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.actions = [
         {
           actionTypeId: '.slack',
@@ -276,7 +277,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.actions = [
         {
           actionTypeId: '.slack',
@@ -306,7 +307,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.params.meta = {};
       ruleAlert.actions = [
         {
@@ -343,7 +344,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('should resolve results_link when meta is undefined use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       delete ruleAlert.params.meta;
       ruleAlert.actions = [
         {
@@ -380,7 +381,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('should resolve results_link with a custom link', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.params.meta = { kibana_siem_app_url: 'http://localhost' };
       ruleAlert.actions = [
         {
@@ -418,7 +419,7 @@ describe('signal_rule_alert_type', () => {
 
     describe('ML rule', () => {
       it('should not call checkPrivileges if ML rule', async () => {
-        const ruleAlert = getMlResult();
+        const ruleAlert = getAlertMock(getMlRuleParams());
         alertServices.savedObjectsClient.get.mockResolvedValue({
           id: 'id',
           type: 'type',

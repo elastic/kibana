@@ -77,7 +77,7 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: mockInstallation.attributes.name,
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
@@ -95,13 +95,13 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'success one',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
         {
           name: 'success two',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
@@ -111,7 +111,7 @@ describe('ensureInstalledDefaultPackages', () => {
         },
         {
           name: 'success three',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
@@ -134,7 +134,7 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'undefined package',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },

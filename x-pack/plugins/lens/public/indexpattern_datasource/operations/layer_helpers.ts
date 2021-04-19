@@ -714,7 +714,11 @@ function addBucket(
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+    columnOrder: getColumnOrder(tempLayer),
+  };
 }
 
 export function reorderByGroups(
@@ -766,7 +770,11 @@ function addMetric(
       [addedColumnId]: column,
     },
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columnOrder: getColumnOrder(tempLayer),
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+  };
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {

@@ -465,7 +465,7 @@ class LinksMenuUI extends Component {
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
-            defaultMessage="Configure rules"
+            defaultMessage="Configure job rules"
           />
         </EuiContextMenuItem>
       );

@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
-    "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
+    "incremental": true,
+    "outDir": "target",
+    "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-apm-utils/src",
     "types": [

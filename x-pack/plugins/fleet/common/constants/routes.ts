@@ -97,11 +97,6 @@ export const AGENT_API_ROUTES = {
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
 };
-export const AGENT_API_ROUTES_7_9 = {
-  CHECKIN_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/checkin`,
-  ACKS_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/acks`,
-  ENROLL_PATTERN: `${FLEET_API_ROOT_7_9}/agents/enroll`,
-};
 
 export const ENROLLMENT_API_KEY_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/enrollment-api-keys`,
