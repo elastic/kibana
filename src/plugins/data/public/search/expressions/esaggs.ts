@@ -8,7 +8,6 @@
 
 import { get } from 'lodash';
 import { StartServicesAccessor } from 'src/core/public';
-import { Adapters } from 'src/plugins/inspector/common';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
@@ -44,14 +43,14 @@ export function getFunctionDefinition({
         indexPattern,
         args.aggs!.map((agg) => agg.value)
       );
+      aggConfigs.hierarchical = args.metricsAtAllLevels;
 
       return await handleEsaggsRequest({
-        abortSignal: (abortSignal as unknown) as AbortSignal,
+        abortSignal,
         aggs: aggConfigs,
         filters: get(input, 'filters', undefined),
         indexPattern,
-        inspectorAdapters: inspectorAdapters as Adapters,
-        metricsAtAllLevels: args.metricsAtAllLevels,
+        inspectorAdapters,
         partialRows: args.partialRows,
         query: get(input, 'query', undefined) as any,
         searchSessionId: getSearchSessionId(),
