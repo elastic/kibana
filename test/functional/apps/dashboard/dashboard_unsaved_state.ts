@@ -41,8 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows the unsaved changes badge after adding panels', async () => {
       await PageObjects.dashboard.switchToEditMode();
       // add an area chart by value
-      await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.visualize.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
       await PageObjects.visualize.clickAreaChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.saveVisualizationAndReturn();

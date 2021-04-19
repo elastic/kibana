@@ -113,10 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('when a new vis is added', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-
-          await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-          await PageObjects.visualize.clickAggBasedVisualizations();
+          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.clickAggBasedVisualizations();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {

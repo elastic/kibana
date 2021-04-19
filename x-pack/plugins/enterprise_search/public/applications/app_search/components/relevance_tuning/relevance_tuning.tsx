@@ -23,10 +23,6 @@ import { RelevanceTuningPreview } from './relevance_tuning_preview';
 
 import { RelevanceTuningLogic } from '.';
 
-interface Props {
-  engineBreadcrumb: string[];
-}
-
 const EmptyCallout: React.FC = () => {
   return (
     <EuiEmptyPrompt
@@ -65,7 +61,7 @@ const EmptyCallout: React.FC = () => {
   );
 };
 
-export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const RelevanceTuning: React.FC = () => {
   const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
   const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
 
@@ -95,7 +91,7 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
   };
 
   return (
-    <RelevanceTuningLayout engineBreadcrumb={engineBreadcrumb}>
+    <RelevanceTuningLayout>
       <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
       {body()}
     </RelevanceTuningLayout>

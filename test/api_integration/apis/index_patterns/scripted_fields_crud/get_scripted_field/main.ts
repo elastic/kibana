@@ -11,10 +11,19 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('main', () => {
+    before(async () => {
+      await esArchiver.load('index_patterns/basic_index');
+    });
+
+    after(async () => {
+      await esArchiver.unload('index_patterns/basic_index');
+    });
+
     it('can fetch a scripted field', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const title = `basic_index`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
         index_pattern: {
           title,
@@ -47,6 +56,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response2.body.field.type).to.be('number');
       expect(response2.body.field.scripted).to.be(true);
       expect(response2.body.field.script).to.be("doc['field_name'].value");
+      await supertest.delete(
+        '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
+      );
     });
   });
 }

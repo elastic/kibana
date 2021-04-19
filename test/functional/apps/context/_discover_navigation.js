@@ -105,7 +105,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
-    // flaky https://github.com/elastic/kibana/issues/93670
     it('navigates to doc view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('my search');
@@ -126,7 +125,9 @@ export default function ({ getService, getPageObjects }) {
       const alert = await browser.getAlert();
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/doc');
-      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+      retry.waitFor('doc view being rendered', async () => {
+        return await PageObjects.discover.isShowingDocViewer();
+      });
     });
   });
 }
