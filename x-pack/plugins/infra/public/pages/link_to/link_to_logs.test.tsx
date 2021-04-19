@@ -25,6 +25,9 @@ const renderRoutes = (routes: React.ReactElement) => {
   const history = createMemoryHistory();
   const services = {
     http: httpServiceMock.createStartContract(),
+    data: {
+      indexPatterns: {},
+    },
   };
   const renderResult = render(
     <KibanaContextProvider services={services}>

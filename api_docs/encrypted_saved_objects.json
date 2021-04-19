@@ -37,6 +37,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.EncryptionError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -50,6 +51,7 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.$2",
                 "type": "string",
                 "label": "attributeName",
                 "isRequired": true,
@@ -63,17 +65,12 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.$3",
                 "type": "Enum",
                 "label": "operation",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "encryptedSavedObjects",
-                    "scope": "server",
-                    "docId": "kibEncryptedSavedObjectsPluginApi",
-                    "section": "def-server.EncryptionErrorOperation",
-                    "text": "EncryptionErrorOperation"
-                  }
+                  "EncryptionErrorOperation"
                 ],
                 "description": [],
                 "source": {
@@ -82,6 +79,7 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.$4",
                 "type": "Object",
                 "label": "cause",
                 "isRequired": false,
@@ -155,13 +153,7 @@
                 "text": "SavedObjectsBaseOptions"
               },
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ]
           }
@@ -204,13 +196,7 @@
             },
             "signature": [
               "ReadonlySet<string | ",
-              {
-                "pluginId": "encryptedSavedObjects",
-                "scope": "server",
-                "docId": "kibEncryptedSavedObjectsPluginApi",
-                "section": "def-server.AttributeToEncrypt",
-                "text": "AttributeToEncrypt"
-              },
+              "AttributeToEncrypt",
               ">"
             ]
           },
@@ -292,13 +278,7 @@
             "lineNumber": 37
           },
           "signature": [
-            {
-              "pluginId": "encryptedSavedObjects",
-              "scope": "server",
-              "docId": "kibEncryptedSavedObjectsPluginApi",
-              "section": "def-server.CreateEncryptedSavedObjectsMigrationFn",
-              "text": "CreateEncryptedSavedObjectsMigrationFn"
-            }
+            "CreateEncryptedSavedObjectsMigrationFn"
           ]
         }
       ],
@@ -341,13 +321,7 @@
             "lineNumber": 42
           },
           "signature": [
-            {
-              "pluginId": "encryptedSavedObjects",
-              "scope": "server",
-              "docId": "kibEncryptedSavedObjectsPluginApi",
-              "section": "def-server.ClientInstanciator",
-              "text": "ClientInstanciator"
-            }
+            "ClientInstanciator"
           ]
         }
       ],

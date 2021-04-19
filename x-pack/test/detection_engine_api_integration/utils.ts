@@ -172,7 +172,7 @@ export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRules
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -189,7 +189,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -344,7 +344,7 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,
-    machine_learning_job_id: 'some_job_id',
+    machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',
   };
 };
