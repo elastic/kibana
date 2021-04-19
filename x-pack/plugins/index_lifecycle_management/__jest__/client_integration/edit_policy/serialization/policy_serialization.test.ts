@@ -87,7 +87,7 @@ describe('<EditPolicy /> serialization', () => {
                 unknown_setting: true,
               },
             },
-            min_age: '0d',
+            min_age: '10d',
           },
         },
       });
@@ -115,7 +115,7 @@ describe('<EditPolicy /> serialization', () => {
             actions: {
               rollover: {
                 max_age: '30d',
-                max_size: '50gb',
+                max_primary_shard_size: '50gb',
               },
               set_priority: {
                 priority: 100,
@@ -153,7 +153,7 @@ describe('<EditPolicy /> serialization', () => {
             actions: {
               rollover: {
                 max_age: '30d',
-                max_size: '50gb',
+                max_primary_shard_size: '50gb',
               },
               set_priority: {
                 priority: 100,
@@ -187,33 +187,34 @@ describe('<EditPolicy /> serialization', () => {
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "forcemerge": Object {
-                    "index_codec": "best_compression",
-                    "max_num_segments": 123,
-                  },
-                  "readonly": Object {},
-                  "rollover": Object {
-                    "max_age": "123h",
-                    "max_docs": 123,
-                    "max_size": "123mb",
-                  },
-                  "set_priority": Object {
-                    "priority": 123,
-                  },
-                  "shrink": Object {
-                    "number_of_shards": 2,
-                  },
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "forcemerge": Object {
+                  "index_codec": "best_compression",
+                  "max_num_segments": 123,
                 },
-                "min_age": "0ms",
+                "readonly": Object {},
+                "rollover": Object {
+                  "max_age": "123h",
+                  "max_docs": 123,
+                  "max_primary_shard_size": "50gb",
+                  "max_size": "123mb",
+                },
+                "set_priority": Object {
+                  "priority": 123,
+                },
+                "shrink": Object {
+                  "number_of_shards": 2,
+                },
               },
+              "min_age": "0ms",
             },
-          }
-        `);
+          },
+        }
+      `);
     });
 
     test('setting searchable snapshot', async () => {
@@ -264,6 +265,7 @@ describe('<EditPolicy /> serialization', () => {
     test('default values', async () => {
       const { actions } = testBed;
       await actions.warm.enable(true);
+      await actions.warm.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
@@ -274,7 +276,7 @@ describe('<EditPolicy /> serialization', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0d",
+            "min_age": "11d",
           }
         `);
     });
@@ -282,6 +284,7 @@ describe('<EditPolicy /> serialization', () => {
     test('setting all values', async () => {
       const { actions } = testBed;
       await actions.warm.enable(true);
+      await actions.warm.setMinAgeValue('11');
       await actions.warm.setDataAllocation('node_attrs');
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
@@ -297,43 +300,43 @@ describe('<EditPolicy /> serialization', () => {
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
       // Check shape of entire policy
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "rollover": Object {
+                  "max_age": "30d",
+                  "max_primary_shard_size": "50gb",
                 },
-                "min_age": "0ms",
               },
-              "warm": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "number_of_replicas": 123,
-                    "require": Object {
-                      "test": "123",
-                    },
-                  },
-                  "forcemerge": Object {
-                    "index_codec": "best_compression",
-                    "max_num_segments": 123,
-                  },
-                  "readonly": Object {},
-                  "set_priority": Object {
-                    "priority": 123,
-                  },
-                  "shrink": Object {
-                    "number_of_shards": 123,
-                  },
-                },
-                "min_age": "0d",
-              },
+              "min_age": "0ms",
             },
-          }
-        `);
+            "warm": Object {
+              "actions": Object {
+                "allocate": Object {
+                  "number_of_replicas": 123,
+                  "require": Object {
+                    "test": "123",
+                  },
+                },
+                "forcemerge": Object {
+                  "index_codec": "best_compression",
+                  "max_num_segments": 123,
+                },
+                "readonly": Object {},
+                "set_priority": Object {
+                  "priority": 123,
+                },
+                "shrink": Object {
+                  "number_of_shards": 123,
+                },
+              },
+              "min_age": "11d",
+            },
+          },
+        }
+      `);
     });
 
     describe('policy with include and exclude', () => {
@@ -401,6 +404,7 @@ describe('<EditPolicy /> serialization', () => {
       const { actions } = testBed;
 
       await actions.cold.enable(true);
+      await actions.cold.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
@@ -411,7 +415,7 @@ describe('<EditPolicy /> serialization', () => {
                 "priority": 0,
               },
             },
-            "min_age": "0d",
+            "min_age": "11d",
           }
         `);
     });
@@ -434,43 +438,44 @@ describe('<EditPolicy /> serialization', () => {
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
 
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "cold": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "number_of_replicas": 123,
-                    "require": Object {
-                      "test": "123",
-                    },
-                  },
-                  "freeze": Object {},
-                  "readonly": Object {},
-                  "set_priority": Object {
-                    "priority": 123,
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "cold": Object {
+              "actions": Object {
+                "allocate": Object {
+                  "number_of_replicas": 123,
+                  "require": Object {
+                    "test": "123",
                   },
                 },
-                "min_age": "123s",
-              },
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
+                "freeze": Object {},
+                "readonly": Object {},
+                "set_priority": Object {
+                  "priority": 123,
                 },
-                "min_age": "0ms",
               },
+              "min_age": "123s",
             },
-          }
-        `);
+            "hot": Object {
+              "actions": Object {
+                "rollover": Object {
+                  "max_age": "30d",
+                  "max_primary_shard_size": "50gb",
+                },
+              },
+              "min_age": "0ms",
+            },
+          },
+        }
+      `);
     });
 
     // Setting searchable snapshot field disables setting replicas so we test this separately
     test('setting searchable snapshot', async () => {
       const { actions } = testBed;
       await actions.cold.enable(true);
+      await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
       await actions.savePolicy();
       const latestRequest2 = server.requests[server.requests.length - 1];
@@ -485,6 +490,7 @@ describe('<EditPolicy /> serialization', () => {
     test('default value', async () => {
       const { actions } = testBed;
       await actions.frozen.enable(true);
+      await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
 
       await actions.savePolicy();
@@ -492,7 +498,7 @@ describe('<EditPolicy /> serialization', () => {
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
       expect(entirePolicy.phases.frozen).toEqual({
-        min_age: '0d',
+        min_age: '13d',
         actions: {
           searchable_snapshot: { snapshot_repository: 'myRepo' },
         },

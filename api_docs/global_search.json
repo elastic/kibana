@@ -28,13 +28,7 @@
               "lineNumber": 89
             },
             "signature": [
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchResult",
-                "text": "GlobalSearchResult"
-              },
+              "GlobalSearchResult",
               "[]"
             ]
           }
@@ -296,13 +290,7 @@
               "lineNumber": 62
             },
             "signature": [
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderResultUrl",
-                "text": "GlobalSearchProviderResultUrl"
-              }
+              "GlobalSearchProviderResultUrl"
             ]
           },
           {
@@ -332,13 +320,7 @@
             },
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "Serializable",
               "> | undefined"
             ]
           }
@@ -377,31 +359,13 @@
             "label": "find",
             "signature": [
               "(search: ",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchFindParams",
-                "text": "GlobalSearchFindParams"
-              },
+              "GlobalSearchFindParams",
               ", options: ",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderFindOptions",
-                "text": "GlobalSearchProviderFindOptions"
-              },
+              "GlobalSearchProviderFindOptions",
               ") => ",
               "Observable",
               "<",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderResult",
-                "text": "GlobalSearchProviderResult"
-              },
+              "GlobalSearchProviderResult",
               "[]>"
             ],
             "description": [
@@ -409,17 +373,12 @@
             ],
             "children": [
               {
+                "id": "def-public.GlobalSearchResultProvider.find.$1",
                 "type": "Object",
                 "label": "search",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "globalSearch",
-                    "scope": "common",
-                    "docId": "kibGlobalSearchPluginApi",
-                    "section": "def-common.GlobalSearchFindParams",
-                    "text": "GlobalSearchFindParams"
-                  }
+                  "GlobalSearchFindParams"
                 ],
                 "description": [],
                 "source": {
@@ -428,17 +387,12 @@
                 }
               },
               {
+                "id": "def-public.GlobalSearchResultProvider.find.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "globalSearch",
-                    "scope": "common",
-                    "docId": "kibGlobalSearchPluginApi",
-                    "section": "def-common.GlobalSearchProviderFindOptions",
-                    "text": "GlobalSearchProviderFindOptions"
-                  }
+                  "GlobalSearchProviderFindOptions"
                 ],
                 "description": [],
                 "source": {
@@ -606,13 +560,7 @@
               "lineNumber": 89
             },
             "signature": [
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchResult",
-                "text": "GlobalSearchResult"
-              },
+              "GlobalSearchResult",
               "[]"
             ]
           }
@@ -704,7 +652,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -875,13 +823,7 @@
               "lineNumber": 62
             },
             "signature": [
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderResultUrl",
-                "text": "GlobalSearchProviderResultUrl"
-              }
+              "GlobalSearchProviderResultUrl"
             ]
           },
           {
@@ -911,13 +853,7 @@
             },
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "Serializable",
               "> | undefined"
             ]
           }
@@ -958,21 +894,9 @@
             "label": "find",
             "signature": [
               "(search: ",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchFindParams",
-                "text": "GlobalSearchFindParams"
-              },
+              "GlobalSearchFindParams",
               ", options: ",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderFindOptions",
-                "text": "GlobalSearchProviderFindOptions"
-              },
+              "GlobalSearchProviderFindOptions",
               ", context: ",
               {
                 "pluginId": "globalSearch",
@@ -984,30 +908,19 @@
               ") => ",
               "Observable",
               "<",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchProviderResult",
-                "text": "GlobalSearchProviderResult"
-              }
+              "GlobalSearchProviderResult"
             ],
             "description": [
               "\nMethod that should return an observable used to emit new results from the provider.\n\nSee {@GlobalSearchProviderResult | the result type} for the expected result structure.\n"
             ],
             "children": [
               {
+                "id": "def-server.GlobalSearchResultProvider.find.$1",
                 "type": "Object",
                 "label": "search",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "globalSearch",
-                    "scope": "common",
-                    "docId": "kibGlobalSearchPluginApi",
-                    "section": "def-common.GlobalSearchFindParams",
-                    "text": "GlobalSearchFindParams"
-                  }
+                  "GlobalSearchFindParams"
                 ],
                 "description": [],
                 "source": {
@@ -1016,17 +929,12 @@
                 }
               },
               {
+                "id": "def-server.GlobalSearchResultProvider.find.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "globalSearch",
-                    "scope": "common",
-                    "docId": "kibGlobalSearchPluginApi",
-                    "section": "def-common.GlobalSearchProviderFindOptions",
-                    "text": "GlobalSearchProviderFindOptions"
-                  }
+                  "GlobalSearchProviderFindOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1035,6 +943,7 @@
                 }
               },
               {
+                "id": "def-server.GlobalSearchResultProvider.find.$3",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -1109,13 +1018,7 @@
             "label": "find",
             "signature": [
               "(params: ",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchFindParams",
-                "text": "GlobalSearchFindParams"
-              },
+              "GlobalSearchFindParams",
               ", options: ",
               {
                 "pluginId": "globalSearch",
@@ -1127,13 +1030,7 @@
               ") => ",
               "Observable",
               "<",
-              {
-                "pluginId": "globalSearch",
-                "scope": "common",
-                "docId": "kibGlobalSearchPluginApi",
-                "section": "def-common.GlobalSearchBatchedResults",
-                "text": "GlobalSearchBatchedResults"
-              },
+              "GlobalSearchBatchedResults",
               ">"
             ],
             "description": [
@@ -1141,17 +1038,12 @@
             ],
             "children": [
               {
+                "id": "def-server.RouteHandlerGlobalSearchContext.find.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "globalSearch",
-                    "scope": "common",
-                    "docId": "kibGlobalSearchPluginApi",
-                    "section": "def-common.GlobalSearchFindParams",
-                    "text": "GlobalSearchFindParams"
-                  }
+                  "GlobalSearchFindParams"
                 ],
                 "description": [],
                 "source": {
@@ -1160,6 +1052,7 @@
                 }
               },
               {
+                "id": "def-server.RouteHandlerGlobalSearchContext.find.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
