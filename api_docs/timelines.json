@@ -1,0 +1,119 @@
+{
+  "id": "timelines",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-public.TimelinesPluginSetup",
+      "type": "Interface",
+      "label": "TimelinesPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-public.TimelinesPluginSetup.getTimeline",
+          "type": "Function",
+          "label": "getTimeline",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/timelines/public/types.ts",
+            "lineNumber": 4
+          },
+          "signature": [
+            "((props: ",
+            "TimelineProps",
+            ") => React.ReactElement<",
+            "TimelineProps",
+            ", string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>) | undefined"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/timelines/public/types.ts",
+        "lineNumber": 3
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-server.TimelinesPluginSetup",
+      "type": "Interface",
+      "label": "TimelinesPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "x-pack/plugins/timelines/server/types.ts",
+        "lineNumber": 2
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-server.TimelinesPluginStart",
+      "type": "Interface",
+      "label": "TimelinesPluginStart",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "x-pack/plugins/timelines/server/types.ts",
+        "lineNumber": 4
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "label": "PLUGIN_ID",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/timelines/common/index.ts",
+          "lineNumber": 1
+        },
+        "signature": [
+          "\"timelines\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/timelines/common/index.ts",
+          "lineNumber": 2
+        },
+        "signature": [
+          "\"timelines\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

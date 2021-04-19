@@ -12,7 +12,7 @@ import {
   EntriesArray,
   ExceptionListItemSchema,
 } from '../shared_imports';
-import { Type, JobStatus } from './schemas/common/schemas';
+import { Type, JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -54,6 +54,16 @@ export const normalizeThresholdField = (
     ? []
     : [thresholdField!];
 };
+
+export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
+  return {
+    ...threshold,
+    field: normalizeThresholdField(threshold.field),
+  };
+};
+
+export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
 
 export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
   value === 'partial failure' ? 'warning' : value != null ? value : null;
