@@ -41,11 +41,12 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !comparisonStart || !comparisonEnd) {
+      if (!start || !end) {
         return;
       }
       return callApmApi({
