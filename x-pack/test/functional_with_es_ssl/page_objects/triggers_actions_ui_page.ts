@@ -143,13 +143,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async toggleSwitch(testSubject: string) {
       const switchBtn = await testSubjects.find(testSubject);
-      const valueBefore = await switchBtn.getAttribute('aria-checked');
       await switchBtn.click();
-      await retry.try(async () => {
-        const switchBtnAfter = await testSubjects.find(testSubject);
-        const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
-        expect(valueAfter).not.to.eql(valueBefore);
-      });
     },
     async clickCreateAlertButton() {
       const createBtn = await find.byCssSelector(
