@@ -503,6 +503,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       patterns: [currentIndexPattern.id],
     });
     onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+    // start a new session so all charts are refreshed
+    data.search.session.start();
   }, [data, currentIndexPattern, onUpdateIndexPattern]);
 
   const editField = useMemo(

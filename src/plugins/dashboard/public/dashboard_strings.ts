@@ -377,7 +377,7 @@ export const emptyScreenStrings = {
     }),
   getEmptyWidgetTitle: () =>
     i18n.translate('dashboard.emptyWidget.addPanelTitle', {
-      defaultMessage: 'Add your first panel',
+      defaultMessage: 'Add your first visualization',
     }),
   getEmptyWidgetDescription: () =>
     i18n.translate('dashboard.emptyWidget.addPanelDescription', {
