@@ -42,30 +42,24 @@ export const getSignalsTemplate = (index: string) => {
     },
     index_patterns: [`${index}-*`],
     mappings: {
-      ...ecsMapping.mappings,
+      dynamic: false,
       properties: {
         ...ecsMapping.mappings.properties,
-        as: otherMapping.as,
-        code_signature: otherMapping.code_signature,
-        geo: otherMapping.geo,
-        hash: otherMapping.hash,
-        interface: otherMapping.interface,
-        os: otherMapping.os,
-        pe: otherMapping.pe,
+        ...otherMapping.mappings.properties,
         signal: signalsMapping.mappings.properties.signal,
         threat: {
           ...ecsMapping.mappings.properties.threat,
           properties: {
             ...ecsMapping.mappings.properties.threat.properties,
             indicator: {
+              ...otherMapping.mappings.properties.threat.properties.indicator,
               properties: {
-                ...otherMapping.threat.properties.indicator.properties,
+                ...otherMapping.mappings.properties.threat.properties.indicator.properties,
                 event: ecsMapping.mappings.properties.event,
               },
             },
           },
         },
-        vlan: otherMapping.vlan,
       },
       _meta: {
         version: SIGNALS_TEMPLATE_VERSION,
