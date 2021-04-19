@@ -6,6 +6,7 @@
  */
 
 import { getSignalsTemplate } from './get_signals_template';
+import signalsTemplateSnapshot from '../__mocks__/signals_template_snapshot.json';
 
 describe('get_signals_template', () => {
   test('it should set the lifecycle "name" and "rollover_alias" to be the name of the index passed in', () => {
@@ -41,5 +42,10 @@ describe('get_signals_template', () => {
   test('it should have a "total_fields" section that is at least 10k in size', () => {
     const template = getSignalsTemplate('test-index');
     expect(template.settings.mapping.total_fields.limit).toBeGreaterThanOrEqual(10000);
+  });
+
+  test('it should match snapshot', () => {
+    const template = getSignalsTemplate('test-index');
+    expect(template).toEqual(signalsTemplateSnapshot);
   });
 });
