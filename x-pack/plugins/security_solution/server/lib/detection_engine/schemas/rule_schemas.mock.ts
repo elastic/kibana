@@ -88,7 +88,7 @@ export const getMlRuleParams = (): MachineLearningRuleParams => {
     ...getBaseRuleParams(),
     type: 'machine_learning',
     anomalyThreshold: 42,
-    machineLearningJobId: 'my-job',
+    machineLearningJobId: ['my-job'],
   };
 };
 
