@@ -342,6 +342,12 @@ By default if you don't provide a `defaultValue` prop to `<UseField />`, it will
 
 With this handler you can listen to the field value changes. <DocLink id="formLibExampleListeningToChanges" section="using-the-onchange-handler" text="See the example" /> in the "Listening to changes" page.
 
+### onError
+
+**Type:** `(errors: string[] | null) => void`
+
+Callback that will be called whenever the field validity changes. When `null` is returned it means that the field is valid.
+
 ### children
 
 **Type:** `(field: FieldHook<T>) => JSX.Element`
