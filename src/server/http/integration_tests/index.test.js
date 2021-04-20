@@ -22,7 +22,7 @@ import * as kbnTestServer from '../../../test_utils/kbn_server';
 describe('Core app routes', () => {
   let root;
 
-  beforeAll(async function () {
+  beforeAll(async () => {
     root = kbnTestServer.createRoot({
       plugins: { initialize: false },
       server: {
@@ -31,7 +31,7 @@ describe('Core app routes', () => {
     });
 
     await root.start();
-  });
+  }, 30000);
 
   afterAll(async function () {
     await root.shutdown();
