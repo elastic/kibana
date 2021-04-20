@@ -43,7 +43,7 @@ Settings the config path or its parent path to `false` will explicitly mark this
 The collector will send `[redacted]` for non-default configs
 when setting an exact config or its parent path to `false`.
 
-Example output of the collector
+### Output of the collector
 
 ```json
 {
@@ -60,3 +60,5 @@ Example output of the collector
   }
 }
 ```
+
+Note that arrays of objects will be reported as `[redacted]` and cannot be explicitly marked as safe.

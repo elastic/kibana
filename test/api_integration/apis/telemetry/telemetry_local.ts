@@ -57,18 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should pass the schema validation', () => {
         try {
           assertTelemetryPayload(
-            {
-              root: ossRootTelemetrySchema,
-              /**
-               * set 'kibana_config_usage' type to 'pass_through'
-               * This collector is excluded in the telemetryrc.json file
-               */
-              plugins: merge(ossPluginsTelemetrySchema, {
-                properties: {
-                  kibana_config_usage: { type: 'pass_through' },
-                },
-              }),
-            },
+            { root: ossRootTelemetrySchema, plugins: ossPluginsTelemetrySchema },
             stats
           );
         } catch (err) {

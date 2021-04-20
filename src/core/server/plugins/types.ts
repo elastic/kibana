@@ -18,6 +18,8 @@ import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
+type Maybe<T> = T | undefined;
+
 /**
  * Dedicated type for plugin configuration schema.
  *
@@ -93,7 +95,14 @@ export interface PluginConfigDescriptor<T = any> {
  * @public
  */
 export type MakeUsageFromSchema<T> = {
-  [Key in keyof T]?: T[Key] extends object ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
+  [Key in keyof T]?: T[Key] extends Maybe<object[]>
+    ? // arrays of objects are always redacted
+      false
+    : T[Key] extends Maybe<any[]>
+    ? boolean
+    : T[Key] extends Maybe<object>
+    ? MakeUsageFromSchema<T[Key]> | boolean
+    : boolean;
 };
 
 /**

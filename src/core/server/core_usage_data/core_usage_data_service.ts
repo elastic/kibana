@@ -274,28 +274,26 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
 
   private getMarkedAsSafe(
     exposedConfigsToUsage: ExposedConfigsToUsage,
-    pluginId?: string,
-    usedPath?: string
+    usedPath: string,
+    pluginId?: string
   ): { explicitlyMarked: boolean; isSafe: boolean } {
-    if (!pluginId || !usedPath) return { explicitlyMarked: false, isSafe: false };
-    const exposeDetails = exposedConfigsToUsage.get(pluginId);
-    if (!exposeDetails) {
-      return { explicitlyMarked: false, isSafe: false };
-    }
+    if (pluginId) {
+      const exposeDetails = exposedConfigsToUsage.get(pluginId) || {};
+      const exposeKeyDetails = Object.keys(exposeDetails).find((exposeKey) => {
+        const fullPath = `${pluginId}.${exposeKey}`;
+        return hasConfigPathIntersection(usedPath, fullPath);
+      });
 
-    const exposeKeyDetails = Object.keys(exposeDetails).find((exposeKey) => {
-      const fullPath = `${pluginId}.${exposeKey}`;
-      const hasIntersection = hasConfigPathIntersection(usedPath, fullPath);
+      if (exposeKeyDetails) {
+        const explicitlyMarkedAsSafe = exposeDetails[exposeKeyDetails];
 
-      return hasIntersection;
-    });
-    if (!exposeKeyDetails) {
-      return { explicitlyMarked: false, isSafe: false };
-    }
-
-    const isSafe = exposeDetails[exposeKeyDetails];
-    if (typeof isSafe === 'boolean') {
-      return { explicitlyMarked: true, isSafe };
+        if (typeof explicitlyMarkedAsSafe === 'boolean') {
+          return {
+            explicitlyMarked: true,
+            isSafe: explicitlyMarkedAsSafe,
+          };
+        }
+      }
     }
 
     return { explicitlyMarked: false, isSafe: false };
@@ -310,19 +308,31 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
 
     return usedPaths.reduce((acc, usedPath) => {
-      const configValue = get(nonDefaultConfigs, usedPath);
-      const pluginId = exposedConfigsKeys.find((exposedConfigsKey) =>
-        usedPath.startsWith(exposedConfigsKey)
+      const rawConfigValue = get(nonDefaultConfigs, usedPath);
+      const pluginId = exposedConfigsKeys.find(
+        (exposedConfigsKey) =>
+          usedPath === exposedConfigsKey || usedPath.startsWith(`${exposedConfigsKey}.`)
       );
+
       const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
         exposedConfigsToUsage,
-        pluginId,
-        usedPath
+        usedPath,
+        pluginId
       );
 
       // explicitly marked as safe
       if (explicitlyMarked && isSafe) {
-        acc[usedPath] = configValue;
+        // report array of objects as redacted even if explicitly marked as safe.
+        // TS typings prevent explicitly marking arrays of objects as safe
+        // this makes sure to report redacted even if TS was bypassed.
+        if (
+          Array.isArray(rawConfigValue) &&
+          rawConfigValue.some((item) => typeof item === 'object')
+        ) {
+          acc[usedPath] = '[redacted]';
+        } else {
+          acc[usedPath] = rawConfigValue;
+        }
       }
 
       // explicitly marked as unsafe
@@ -335,14 +345,27 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
        * Report boolean and number configs if not explicitly marked as unsafe.
        */
       if (!explicitlyMarked) {
-        switch (typeof configValue) {
+        switch (typeof rawConfigValue) {
           case 'number':
           case 'boolean':
-            acc[usedPath] = configValue;
+            acc[usedPath] = rawConfigValue;
             break;
           case 'undefined':
             acc[usedPath] = 'undefined';
             break;
+          case 'object': {
+            // non-array object types are already handled
+            if (Array.isArray(rawConfigValue)) {
+              if (
+                rawConfigValue.every(
+                  (item) => typeof item === 'number' || typeof item === 'boolean'
+                )
+              ) {
+                acc[usedPath] = rawConfigValue;
+                break;
+              }
+            }
+          }
           default: {
             acc[usedPath] = '[redacted]';
           }
