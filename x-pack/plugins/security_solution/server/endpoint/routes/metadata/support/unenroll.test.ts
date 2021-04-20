@@ -103,7 +103,7 @@ describe('test find all unenrolled Agent id', () => {
       page: 1,
       perPage: 1000,
       showInactive: true,
-      kuery: '(active : false) OR (active: true AND NOT policy_id:("abc123") )',
+      kuery: '(active : false) OR (active: true AND NOT policy_id:("abc123"))',
     });
   });
 });

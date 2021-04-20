@@ -47,19 +47,19 @@ export async function findAllUnenrolledAgentIds(
     packagePolicyService,
     soClient
   );
-  const includeAgentPolicyFilter = agentPoliciesWithEndpoint.length > 0;
-  const policyIdString = `"${agentPoliciesWithEndpoint.join('" OR "')}"`;
+
+  // We want:
+  // 1.  if no endpoint policies exist, then get all Agents
+  // 2.  if we have a list of agent policies, then Agents that are Active and that are
+  //      NOT enrolled with an Agent Policy that has endpoint
+  const kuery =
+    agentPoliciesWithEndpoint.length > 0
+      ? `(active : false) OR (active: true AND NOT policy_id:("${agentPoliciesWithEndpoint.join(
+          '" OR "'
+        )}"))`
+      : undefined;
 
   const searchOptions = (pageNum: number) => {
-    // We want:
-    // 1.   agents that are not active
-    // 2a.  if we have a list of agent policies, then Agents that are Active and that are
-    //      NOT enrolled with an Agent Policy that has endpoint
-    // 2b.  If we don't have a list of agent policies, then we don't want any active agent at all
-    const kuery = `(active : false) OR (active: true${
-      includeAgentPolicyFilter ? ` AND NOT policy_id:(${policyIdString})` : ''
-    } )`;
-
     return {
       page: pageNum,
       perPage: pageSize,
