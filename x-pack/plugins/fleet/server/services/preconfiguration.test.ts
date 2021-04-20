@@ -87,7 +87,11 @@ jest.mock('./epm/packages/install', () => ({
 
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
+
     return packageInstallation;
+  },
+  ensurePackagesCompletedInstall() {
+    return [];
   },
 }));
 
