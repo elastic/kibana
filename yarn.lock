@@ -16487,7 +16487,7 @@ pngjs@3.3.1, pngjs@^3.0.0:
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.3.1.tgz#8e14e6679ee7424b544334c3b2d21cea6d8c209a"
   integrity sha512-ggXCTsqHRIsGMkHlCEhbHhUmNTA2r1lpkE0NL4Q9S8spkXbm4vE9TVmPso2AGYn90Gltdz8W5CyzhcIGg2Gejg==
 
-podium@3.x.x:
+podium@3.1.2, podium@3.x.x:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/podium/-/podium-3.1.2.tgz#b701429739cf6bdde6b3015ae6b48d400817ce9e"
   integrity sha512-18VrjJAduIdPv7d9zWsfmKxTj3cQTYC5Pv5gtKxcWujYBpGbV+mhNSPYhlHW5xeWoazYyKfB9FEsPT12r5rY1A==
