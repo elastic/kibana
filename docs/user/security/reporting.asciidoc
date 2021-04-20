@@ -18,7 +18,7 @@ For more information, see
 [[reporting-app-users]]
 Access to reporting features is limited to privileged users. In older versions of Kibana, you could only grant
 users the privilege by assigning them the `reporting_user` role in Elasticsearch. In 7.13 and above, you have
-the option to create your own roles that grant access to reporting features using <<kibana-privileges, {kib} privileges>> instead.
+the option to create your own roles that grant access to reporting features using <<kibana-privileges, {kib} privileges>>.
 
 It is recommended that you set `xpack.reporting.roles.enabled: false` in your kibana.yml to begin using Kibana
 privileges. This will allow users to only see Reporting widgets in applications when they have privilege to use
@@ -27,7 +27,7 @@ them.
 [NOTE]
 ============================================================================
 The default value of `xpack.reporting.roles.enabled` is `true` for 7.x versions of Kibana. To migrate users to the
-new method of securing access to Reporting, you must explicitly set `xpack.reporting.roles.enabled: false` in
+new method of securing access to *Reporting*, you must explicitly set `xpack.reporting.roles.enabled: false` in
 `kibana.yml`. In the next major version of Kibana, having this set to `false` will be the only valid configuration.
 ============================================================================
 
@@ -161,7 +161,7 @@ elasticsearch.username: 'custom_kibana_system'
 
 [NOTE]
 ============================================================================
-Setting a custom index for Reporting will be unsupported in the next major version of Kibana.
+Setting a custom index for *Reporting* is not supported in the next major version of Kibana.
 ============================================================================
 
 [role="xpack"]
