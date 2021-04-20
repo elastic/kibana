@@ -115,5 +115,6 @@ export async function getTableData(
         ...handleErrorResponse(panel)(err),
       };
     }
+    return meta;
   }
 }

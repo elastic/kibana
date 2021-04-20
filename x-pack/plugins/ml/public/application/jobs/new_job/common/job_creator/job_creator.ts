@@ -642,7 +642,6 @@ export class JobCreator {
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
     ) {
-      // @ts-expect-error
       return this._job_config.custom_settings[setting];
     }
     return null;
@@ -711,13 +710,14 @@ export class JobCreator {
   }
 
   private _extractRuntimeMappings() {
-    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
+    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap as
+      | RuntimeMappings
+      | undefined;
     if (runtimeFieldMap !== undefined) {
       if (this._datafeed_config.runtime_mappings === undefined) {
         this._datafeed_config.runtime_mappings = {};
       }
       Object.entries(runtimeFieldMap).forEach(([key, val]) => {
-        // @ts-expect-error
         this._datafeed_config.runtime_mappings![key] = val;
       });
     }

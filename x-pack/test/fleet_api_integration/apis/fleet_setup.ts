@@ -75,7 +75,13 @@ export default function (providerContext: FtrProviderContext) {
         .map((p: any) => p.name)
         .sort();
 
-      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'fleet_server', 'system']);
+      expect(installedPackages).to.eql([
+        'elastic_agent',
+        'endpoint',
+        'fleet_server',
+        'security_detection_engine',
+        'system',
+      ]);
     });
   });
 }
