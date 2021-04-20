@@ -8,7 +8,7 @@ Retrieve a list of alerting rule types that the user is authorized to access.
 
 Each rule type includes a list of consumer features within which the user is authorized to perform either `read` or `all` operations on rules of that type. This can be useful to determine which rule types a user can read but not create or modify.
 
-NOTE: Creating some rule types may be limited to specific features, in which case they will not be available when <<defining-alerts, defining rules>> within <<management,Stack Management>>.
+NOTE: Creating some rule types is limited to specific features.  These rule types are not available when <<defining-alerts, defining rules>> in <<management,Stack Management>>.
 
 [[list-rule-types-api-request]]
 ==== Request
