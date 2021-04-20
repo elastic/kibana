@@ -98,6 +98,7 @@ describe('TelemetryEventsSender', () => {
             id: 'X',
             name: 'Y',
             ruleset: 'Z',
+            version: '100',
           },
           file: {
             size: 3,
