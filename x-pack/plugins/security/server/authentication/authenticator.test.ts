@@ -338,7 +338,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'success' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'success' },
         })
       );
     });
@@ -354,7 +354,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'failure' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'failure' },
         })
       );
     });
