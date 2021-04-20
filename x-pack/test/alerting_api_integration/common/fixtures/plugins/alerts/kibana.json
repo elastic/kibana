@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
-  "requiredPlugins": ["taskManager", "features", "actions", "alerting", "encryptedSavedObjects"],
+  "requiredPlugins": ["taskManager", "features", "actions", "alerting", "encryptedSavedObjects", "actions"],
   "optionalPlugins": ["security",  "spaces"],
   "server": true,
   "ui": false
