@@ -249,7 +249,15 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+              triggerIcon: columnMap[accessor].hidden
+                ? 'invisible'
+                : columnMap[accessor].colorMode !== 'none' &&
+                  columnMap[accessor].palette?.params?.stops
+                ? 'colorBy'
+                : undefined,
+              palette:
+                columnMap[accessor].colorMode !== 'none' &&
+                columnMap[accessor].palette?.params?.stops,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
