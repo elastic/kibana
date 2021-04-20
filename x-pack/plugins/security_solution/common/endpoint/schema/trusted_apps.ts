@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
+import { ConditionEntry, ConditionEntryField, OperatingSystem, OperatorEntryField } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -30,7 +30,10 @@ export const GetTrustedAppsRequestSchema = {
 };
 
 const ConditionEntryTypeSchema = schema.literal('match');
-const ConditionEntryOperatorSchema = schema.literal('included');
+const ConditionEntryOperatorSchema = schema.oneOf([
+  schema.literal(OperatorEntryField.included),
+  schema.literal(OperatorEntryField.wildcard_caseless),
+]);
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
