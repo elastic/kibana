@@ -307,6 +307,7 @@ const allowlistProcessFields: AllowlistFields = {
     architecture: true,
     code_signature: true,
     dll: true,
+    malware_signature: true,
     token: {
       integrity_level_name: true,
     },
@@ -322,6 +323,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     name: true,
     path: true,
     code_signature: true,
+    malware_signature: true,
   },
   event: true,
   file: {
