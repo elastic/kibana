@@ -315,9 +315,8 @@ const allowlistProcessFields: AllowlistFields = {
   thread: true,
 };
 
-// Allow list for the data we include in the events. True means that it is deep-cloned
-// blindly. Object contents means that we only copy the fields that appear explicitly in
-// the sub-object.
+// Allow list for event-related fields, which can also be nested under events[]
+/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistBaseEventFields: AllowlistFields = {
   dll: {
     name: true,
@@ -364,6 +363,10 @@ const allowlistBaseEventFields: AllowlistFields = {
   },
 };
 
+// Allow list for the data we include in the events. True means that it is deep-cloned
+// blindly. Object contents means that we only copy the fields that appear explicitly in
+// the sub-object.
+/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
