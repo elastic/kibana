@@ -1,4 +1,7 @@
 steps:
+  - command: .buildkite/setup/pre_build.sh
+    label: Pre-Build
+  - wait
   - command: .buildkite/scripts/jobs/build.sh
     label: Build Kibana Distribution
     agents:
@@ -16,3 +19,7 @@ steps:
   - plugins:
       - junit-annotate#v1.9.0:
           artifacts: target/junit/**/*.xml
+  - wait: ~
+    continue_on_failure: true
+  - command: .buildkite/setup/post_build.sh
+    label: Post-Build
