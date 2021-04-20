@@ -8,11 +8,9 @@
 
 import expect from '@kbn/expect';
 
-import { inspect } from 'util';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
