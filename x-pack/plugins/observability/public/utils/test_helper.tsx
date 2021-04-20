@@ -31,6 +31,8 @@ export const core = ({
   },
 } as unknown) as CoreStart;
 
+const config = { unsafe: { alertingExperience: { enabled: true } } };
+
 const plugins = ({
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
 } as unknown) as ObservabilityPublicPluginsStart;
@@ -42,7 +44,7 @@ export const render = (component: React.ReactNode) => {
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core }}>
         <PluginContext.Provider
-          value={{ appMountParameters, core, plugins, observabilityRuleRegistry }}
+          value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </PluginContext.Provider>
