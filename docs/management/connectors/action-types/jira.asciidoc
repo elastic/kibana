@@ -47,6 +47,20 @@ Secrets defines sensitive information for the connector type.
 `apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
+[[define-jira-ui]]
+==== Define connector in Stack Management
+
+Define Jira connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/jira-connector.png[Jira connector]
+
+Test Jira action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/jira-params-test.png[Jira params test]
+
+[float]
 [[jira-action-configuration]]
 ==== Action configuration
 
@@ -60,6 +74,7 @@ Description:: The details about the incident.
 Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
+[float]
 [[configuring-jira]]
 ==== Configure Jira
 
