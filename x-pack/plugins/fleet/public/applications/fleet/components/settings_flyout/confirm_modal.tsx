@@ -113,7 +113,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
             title={
               <FormattedMessage
                 id="xpack.fleet.settingsConfirmModal.calloutTitle"
-                defaultMessage="This action updates all agent policies and enrolled agents."
+                defaultMessage="This action updates all agent policies and enrolled agents"
               />
             }
             color="warning"
