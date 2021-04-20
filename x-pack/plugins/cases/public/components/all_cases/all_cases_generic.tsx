@@ -56,11 +56,11 @@ const getSortField = (field: string): SortFieldCase =>
 
 interface AllCasesGenericProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelector)
-  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)
+  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
+  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
   disabledStatuses?: CaseStatuses[];
-  isSelector?: boolean;
+  isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -73,7 +73,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     configureCasesNavigation,
     createCaseNavigation,
     disabledStatuses,
-    isSelector,
+    isSelectorView,
     onRowClick,
     updateCase,
     userCanCrud,
@@ -91,7 +91,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setSelectedCases,
     } = useGetCases();
     // Post Comment to Case
-    const { postComment, isLoading: isCommentsUpdating } = usePostComment();
+    const { postComment, isLoading: isCommentUpdating } = usePostComment();
 
     const sorting = useMemo(
       () => ({
@@ -125,13 +125,13 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     const goToCreateCase = useCallback(
       (ev) => {
         ev.preventDefault();
-        if (isSelector && onRowClick != null) {
+        if (isSelectorView && onRowClick != null) {
           onRowClick();
         } else if (onCreateCaseNavClick) {
           onCreateCaseNavClick(ev);
         }
       },
-      [isSelector, onCreateCaseNavClick, onRowClick]
+      [isSelectorView, onCreateCaseNavClick, onRowClick]
     );
     const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
@@ -176,7 +176,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       [refreshCases, setQueryParams, setFilters]
     );
 
-    const showActions = userCanCrud && !isSelector;
+    const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
@@ -217,7 +217,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
-    const TableWrap = useMemo(() => (isSelector ? 'span' : Panel), [isSelector]);
+    const TableWrap = useMemo(() => (isSelectorView ? 'span' : Panel), [isSelectorView]);
 
     const tableRowProps = useCallback(
       (theCase: Case) => {
@@ -240,12 +240,12 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
         return {
           'data-test-subj': `cases-table-row-${theCase.id}`,
           className: classnames({ isDisabled: theCase.type === CaseType.collection }),
-          ...(isSelector && theCase.type !== CaseType.collection
+          ...(isSelectorView && theCase.type !== CaseType.collection
             ? { onClick: onTableRowClick }
             : {}),
         };
       },
-      [isSelector, alertData, onRowClick, postComment, updateCase]
+      [isSelectorView, alertData, onRowClick, postComment, updateCase]
     );
 
     return (
@@ -266,9 +266,12 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={(isCasesLoading || isLoading || isCommentsUpdating) && !isDataEmpty}
+          $isShow={(isCasesLoading || isLoading || isCommentUpdating) && !isDataEmpty}
         />
-        <TableWrap data-test-subj="table-wrap" loading={!isSelector ? isCasesLoading : undefined}>
+        <TableWrap
+          data-test-subj="table-wrap"
+          loading={!isSelectorView ? isCasesLoading : undefined}
+        >
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
             countOpenCases={data.countOpenCases}
@@ -291,9 +294,9 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             goToCreateCase={goToCreateCase}
             handleIsLoading={handleIsLoading}
             isCasesLoading={isCasesLoading}
-            isCommentsUpdating={isCommentsUpdating}
+            isCommentUpdating={isCommentUpdating}
             isDataEmpty={isDataEmpty}
-            isSelector={isSelector}
+            isSelectorView={isSelectorView}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             onChange={tableOnChangeCallback}
             pagination={pagination}

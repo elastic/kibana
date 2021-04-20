@@ -29,9 +29,9 @@ interface CasesTableProps {
   goToCreateCase: (e: React.MouseEvent) => void;
   handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
-  isCommentsUpdating: boolean;
+  isCommentUpdating: boolean;
   isDataEmpty: boolean;
-  isSelector?: boolean;
+  isSelectorView?: boolean;
   itemIdToExpandedRowMap: EuiBasicTableProps<Case>['itemIdToExpandedRowMap'];
   onChange: EuiBasicTableProps<Case>['onChange'];
   pagination: EuiBasicTableProps<Case>['pagination'];
@@ -51,17 +51,17 @@ const BasicTable = styled(EuiBasicTable)`
       padding: 8px 0 8px 32px;
     }
 
-    &.isSelector .euiTableRow.isDisabled {
+    &.isSelectorView .euiTableRow.isDisabled {
       cursor: not-allowed;
       background-color: ${theme.eui.euiTableHoverClickableColor};
     }
 
-    &.isSelector .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
-    &.isSelector .euiTableRow.euiTableRow-isExpandedRow:hover {
+    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
+    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow:hover {
       background-color: transparent;
     }
 
-    &.isSelector .euiTableRow.euiTableRow-isExpandedRow {
+    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow {
       .subCase:hover {
         background-color: ${theme.eui.euiTableHoverClickableColor};
       }
@@ -81,9 +81,9 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   goToCreateCase,
   handleIsLoading,
   isCasesLoading,
-  isCommentsUpdating,
+  isCommentUpdating,
   isDataEmpty,
-  isSelector,
+  isSelectorView,
   itemIdToExpandedRowMap,
   onChange,
   pagination,
@@ -116,7 +116,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         itemId="id"
         items={data.cases}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        loading={isCommentsUpdating}
+        loading={isCommentUpdating}
         noItemsMessage={
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
@@ -142,7 +142,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         rowProps={tableRowProps}
         selection={showActions ? selection : undefined}
         sorting={sorting}
-        className={classnames({ isSelector })}
+        className={classnames({ isSelectorView })}
       />
     </Div>
   );

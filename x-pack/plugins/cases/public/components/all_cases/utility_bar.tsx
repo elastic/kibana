@@ -82,27 +82,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
       dispatchResetIsUpdated();
     }
   }, [isDeleted, isUpdated, refreshCases, dispatchResetIsDeleted, dispatchResetIsUpdated]);
-  const confirmDeleteModal = useMemo(
-    () => (
-      <ConfirmDeleteCaseModal
-        caseTitle={deleteThisCase.title}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={deleteBulk.length > 0}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(
-          null,
-          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
-        )}
-      />
-    ),
-    [
-      deleteBulk,
-      deleteThisCase,
-      isDisplayConfirmDeleteModal,
-      handleToggleModal,
-      handleOnDeleteConfirm,
-    ]
-  );
+
   const toggleBulkDeleteModal = useCallback(
     (cases: Case[]) => {
       handleToggleModal();
@@ -178,7 +158,16 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
           </UtilityBarAction>
         </UtilityBarGroup>
       </UtilityBarSection>
-      {confirmDeleteModal}
+      <ConfirmDeleteCaseModal
+        caseTitle={deleteThisCase.title}
+        isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={deleteBulk.length > 0}
+        onCancel={handleToggleModal}
+        onConfirm={handleOnDeleteConfirm.bind(
+          null,
+          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
+        )}
+      />
     </UtilityBar>
   );
 };

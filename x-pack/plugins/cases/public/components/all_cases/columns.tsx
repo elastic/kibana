@@ -83,18 +83,7 @@ export const useCasesColumns = ({
     title: '',
     type: null,
   });
-  const confirmDeleteModal = useMemo(
-    () => (
-      <ConfirmDeleteCaseModal
-        caseTitle={deleteThisCase.title}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
-      />
-    ),
-    [deleteThisCase, isDisplayConfirmDeleteModal, handleToggleModal, handleOnDeleteConfirm]
-  );
+
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
       handleToggleModal();
@@ -305,7 +294,13 @@ export const useCasesColumns = ({
             name: (
               <>
                 {i18n.ACTIONS}
-                {confirmDeleteModal}
+                <ConfirmDeleteCaseModal
+                  caseTitle={deleteThisCase.title}
+                  isModalVisible={isDisplayConfirmDeleteModal}
+                  isPlural={false}
+                  onCancel={handleToggleModal}
+                  onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
+                />
               </>
             ),
             actions,
