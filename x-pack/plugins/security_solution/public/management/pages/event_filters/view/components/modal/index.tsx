@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
-import { EventFilterForm } from '../form';
-import { useEventFilterSelector } from '../../hooks';
+import { EventFiltersForm } from '../form';
+import { useEventFiltersSelector } from '../../hooks';
 import {
   getFormHasError,
   isCreationInProgress,
@@ -29,9 +29,9 @@ import {
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
-import { EventFilterNotification } from '../notification';
+import { EventFiltersNotification } from '../notification';
 
-export interface EventFilterModalProps {
+export interface EventFiltersModalProps {
   data: Ecs;
   onCancel(): void;
 }
@@ -64,17 +64,17 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, onCancel }) => {
+export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data, onCancel }) => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
-  const formHasError = useEventFilterSelector(getFormHasError);
-  const creationInProgress = useEventFilterSelector(isCreationInProgress);
-  const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
+  const formHasError = useEventFiltersSelector(getFormHasError);
+  const creationInProgress = useEventFiltersSelector(isCreationInProgress);
+  const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
 
   useEffect(() => {
     if (creationSuccessful) {
       onCancel();
       dispatch({
-        type: 'eventFilterFormStateChanged',
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'UninitialisedResourceState',
         },
@@ -85,7 +85,7 @@ export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, o
   // Initialize the store with the event passed as prop to allow render the form. It acts as componentDidMount
   useEffect(() => {
     dispatch({
-      type: 'eventFilterInitForm',
+      type: 'eventFiltersInitForm',
       payload: { entry: getInitialExceptionFromEvent(data) },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +103,7 @@ export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, o
         fill
         disabled={formHasError || creationInProgress}
         onClick={() => {
-          dispatch({ type: 'eventFilterCreateStart' });
+          dispatch({ type: 'eventFiltersCreateStart' });
         }}
         isLoading={creationInProgress}
       >
@@ -116,7 +116,7 @@ export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, o
   const modalBodyMemo = useMemo(
     () => (
       <ModalBodySection className="builder-section">
-        <EventFilterForm />
+        <EventFiltersForm />
       </ModalBodySection>
     ),
     []
@@ -139,9 +139,9 @@ export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, o
           {confirmButtonMemo}
         </EuiModalFooter>
       </Modal>
-      <EventFilterNotification />
+      <EventFiltersNotification />
     </>
   );
 });
 
-EventFilterModal.displayName = 'EventFilterModal';
+EventFiltersModal.displayName = 'EventFiltersModal';

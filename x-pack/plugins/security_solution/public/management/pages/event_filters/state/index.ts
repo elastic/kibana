@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../public/shared_imports';
+import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
-export interface EventFilterListPageState {
+export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
   form: {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;

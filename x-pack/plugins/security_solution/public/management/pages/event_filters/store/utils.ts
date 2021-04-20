@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { CreateExceptionListItemSchema } from '../../../../../public/shared_imports';
+import { CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { Ecs } from '../../../../../common/ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 

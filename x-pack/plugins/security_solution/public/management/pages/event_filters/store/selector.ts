@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { EventFilterListPageState } from '../state';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../public/shared_imports';
+import { EventFiltersListPageState } from '../state';
+import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
@@ -18,24 +15,24 @@ import {
 } from '../../../state/async_resource_state';
 
 export const getFormEntry = (
-  state: EventFilterListPageState
+  state: EventFiltersListPageState
 ): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
   return state.form.entry;
 };
 
-export const getFormHasError = (state: EventFilterListPageState): boolean => {
+export const getFormHasError = (state: EventFiltersListPageState): boolean => {
   return state.form.hasItemsError || state.form.hasNameError;
 };
 
-export const isCreationInProgress = (state: EventFilterListPageState): boolean => {
+export const isCreationInProgress = (state: EventFiltersListPageState): boolean => {
   return isLoadingResourceState(state.form.submissionResourceState);
 };
 
-export const isCreationSuccessful = (state: EventFilterListPageState): boolean => {
+export const isCreationSuccessful = (state: EventFiltersListPageState): boolean => {
   return isLoadedResourceState(state.form.submissionResourceState);
 };
 
-export const getCreationError = (state: EventFilterListPageState): ServerApiError | undefined => {
+export const getCreationError = (state: EventFiltersListPageState): ServerApiError | undefined => {
   const submissionResourceState = state.form.submissionResourceState;
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;

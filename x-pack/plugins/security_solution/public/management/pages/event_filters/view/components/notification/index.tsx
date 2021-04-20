@@ -10,13 +10,13 @@ import React, { memo, useState } from 'react';
 import { isCreationSuccessful, getFormEntry, getCreationError } from '../../../store/selector';
 
 import { useToasts } from '../../../../../../common/lib/kibana';
-import { useEventFilterSelector } from '../../hooks';
+import { useEventFiltersSelector } from '../../hooks';
 import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
-export const EventFilterNotification = memo(() => {
-  const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
-  const creationError = useEventFilterSelector(getCreationError);
-  const formEntry = useEventFilterSelector(getFormEntry);
+export const EventFiltersNotification = memo(() => {
+  const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+  const creationError = useEventFiltersSelector(getCreationError);
+  const formEntry = useEventFiltersSelector(getFormEntry);
   const toasts = useToasts();
   const [wasAlreadyHandled] = useState(new WeakSet());
 
@@ -31,4 +31,4 @@ export const EventFilterNotification = memo(() => {
   return <></>;
 });
 
-EventFilterNotification.displayName = 'EventFilterNotification';
+EventFiltersNotification.displayName = 'EventFiltersNotification';

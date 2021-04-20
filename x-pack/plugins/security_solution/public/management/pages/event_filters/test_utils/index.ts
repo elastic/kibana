@@ -10,17 +10,17 @@ import { Ecs } from '../../../../../common/ecs';
 
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-  MANAGEMENT_STORE_EVENT_FILTER_NAMESPACE,
+  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
 } from '../../../common/constants';
-import { ExceptionListItemSchema } from '../../../../../public/shared_imports';
+import { ExceptionListItemSchema } from '../../../../shared_imports';
 
-import { eventFilterPageReducer } from '../store/reducer';
+import { eventFiltersPageReducer } from '../store/reducer';
 
 export const createGlobalNoMiddlewareStore = () => {
   return createStore(
     combineReducers({
       [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: combineReducers({
-        [MANAGEMENT_STORE_EVENT_FILTER_NAMESPACE]: eventFilterPageReducer,
+        [MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE]: eventFiltersPageReducer,
       }),
     })
   );

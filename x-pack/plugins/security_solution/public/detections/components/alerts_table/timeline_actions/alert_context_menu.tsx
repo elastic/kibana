@@ -48,7 +48,7 @@ import { ExceptionListType } from '../../../../../common/shared_imports';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFilterModal } from '../../../../management/pages/event_filter/view/components/modal';
+import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -454,7 +454,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         />
       )}
       {openAddEventExceptionModal && ecsRowData != null && (
-        <EventFilterModal data={ecsRowData} onCancel={closeAddEventExceptionModal} />
+        <EventFiltersModal data={ecsRowData} onCancel={closeAddEventExceptionModal} />
       )}
     </>
   );

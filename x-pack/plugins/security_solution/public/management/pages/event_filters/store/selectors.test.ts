@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { initialEventFilterPageState } from './builders';
+import { initialEventFiltersPageState } from './builders';
 import { getFormEntry, getFormHasError } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 
-const initialState = initialEventFilterPageState();
+const initialState = initialEventFiltersPageState();
 
 describe('selectors', () => {
   describe('getFormEntry()', () => {

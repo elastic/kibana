@@ -6,19 +6,16 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../public/shared_imports';
+import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 
-export interface EventFilterService {
-  addEventFilter(
+export interface EventFiltersService {
+  addEventFilters(
     exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema>;
 }
-export class EventFilterHttpService implements EventFilterService {
+export class EventFiltersHttpService implements EventFiltersService {
   private listHasBeenCreated: boolean;
 
   constructor(private http: HttpStart) {
@@ -42,7 +39,7 @@ export class EventFilterHttpService implements EventFilterService {
     return this.http;
   }
 
-  async addEventFilter(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
+  async addEventFilters(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
     return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });

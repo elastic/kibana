@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { initialEventFilterPageState } from './builders';
-import { eventFilterPageReducer } from './reducer';
+import { initialEventFiltersPageState } from './builders';
+import { eventFiltersPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 
-const initialState = initialEventFilterPageState();
+const initialState = initialEventFiltersPageState();
 
 describe('reducer', () => {
-  describe('EventFilterForm', () => {
+  describe('EventFiltersForm', () => {
     it('sets the initial form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
-      const result = eventFilterPageReducer(initialState, {
-        type: 'eventFilterInitForm',
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
 
@@ -37,8 +37,8 @@ describe('reducer', () => {
     it('change form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
-      const result = eventFilterPageReducer(initialState, {
-        type: 'eventFilterChangeForm',
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersChangeForm',
         payload: { entry: { ...entry, name: nameChanged } },
       });
 
@@ -59,8 +59,8 @@ describe('reducer', () => {
     });
 
     it('change form status', () => {
-      const result = eventFilterPageReducer(initialState, {
-        type: 'eventFilterFormStateChanged',
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
           data: createdEventFilterEntryMock(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFilterModal } from '.';
+import { EventFiltersModal } from '.';
 import { RenderResult, act, render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { Provider } from 'react-redux';
@@ -16,7 +16,7 @@ import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../../../../../../../public/shared_imports';
+} from '../../../../../../shared_imports';
 
 jest.mock('../form');
 jest.mock('../notification');
@@ -40,7 +40,7 @@ describe('Event filter modal', () => {
       </Provider>
     );
 
-    return render(<EventFilterModal data={ecsEventMock()} onCancel={onCancelMock} />, {
+    return render(<EventFiltersModal data={ecsEventMock()} onCancel={onCancelMock} />, {
       wrapper: Wrapper,
     });
   };
@@ -52,15 +52,15 @@ describe('Event filter modal', () => {
 
   it('should renders correctly', () => {
     component = renderForm();
-    expect(component.getAllByText(MODAL_TITLE)).not.toThrow();
-    expect(component.getByText(MODAL_SUBTITLE)).not.toThrow();
-    expect(component.getAllByText(ACTIONS_CONFIRM)).not.toThrow();
-    expect(component.getByText(ACTIONS_CANCEL)).not.toThrow();
+    expect(component.getAllByText(MODAL_TITLE)).not.toBeNull();
+    expect(component.getByText(MODAL_SUBTITLE)).not.toBeNull();
+    expect(component.getAllByText(ACTIONS_CONFIRM)).not.toBeNull();
+    expect(component.getByText(ACTIONS_CANCEL)).not.toBeNull();
   });
 
   it('should dispatch action to init form store on mount', () => {
     component = renderForm();
-    expect(store.getState()!.management!.eventFilter!.form!.entry).not.toBeNull();
+    expect(store.getState()!.management!.eventFilters!.form!.entry).not.toBeNull();
   });
 
   it('should confirm form when button is disabled', () => {
@@ -69,7 +69,7 @@ describe('Event filter modal', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(store.getState()!.management!.eventFilter!.form!.submissionResourceState.type).toBe(
+    expect(store.getState()!.management!.eventFilters!.form!.submissionResourceState.type).toBe(
       'UninitialisedResourceState'
     );
   });
@@ -77,10 +77,10 @@ describe('Event filter modal', () => {
   it('should confirm form when button is enabled', () => {
     component = renderForm();
     store.dispatch({
-      type: 'eventFilterChangeForm',
+      type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(store.getState()!.management!.eventFilter!.form!
+          ...(store.getState()!.management!.eventFilters!.form!
             .entry as CreateExceptionListItemSchema),
           name: 'test',
         },
@@ -91,7 +91,7 @@ describe('Event filter modal', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(store.getState()!.management!.eventFilter!.form!.submissionResourceState.type).toBe(
+    expect(store.getState()!.management!.eventFilters!.form!.submissionResourceState.type).toBe(
       'UninitialisedResourceState'
     );
     expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
@@ -103,10 +103,10 @@ describe('Event filter modal', () => {
 
     act(() => {
       store.dispatch({
-        type: 'eventFilterFormStateChanged',
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: store.getState()!.management!.eventFilter!.form!.entry as ExceptionListItemSchema,
+          data: store.getState()!.management!.eventFilters!.form!.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -142,7 +142,7 @@ describe('Event filter modal', () => {
     component = renderForm();
     act(() => {
       store.dispatch({
-        type: 'eventFilterFormStateChanged',
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadingResourceState',
           previousState: { type: 'UninitialisedResourceState' },

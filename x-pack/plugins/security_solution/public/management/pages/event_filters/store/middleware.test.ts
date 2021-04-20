@@ -12,29 +12,29 @@ import {
   MiddlewareActionSpyHelper,
 } from '../../../../common/store/test_utils';
 import { AppAction } from '../../../../common/store/actions';
-import { createEventFilterPageMiddleware } from './middleware';
-import { eventFilterPageReducer } from './reducer';
-import { EventFilterService } from '../service';
-import { EventFilterListPageState } from '../state';
-import { initialEventFilterPageState } from './builders';
+import { createEventFiltersPageMiddleware } from './middleware';
+import { eventFiltersPageReducer } from './reducer';
+import { EventFiltersService } from '../service';
+import { EventFiltersListPageState } from '../state';
+import { initialEventFiltersPageState } from './builders';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 
-const initialState: EventFilterListPageState = initialEventFilterPageState();
+const initialState: EventFiltersListPageState = initialEventFiltersPageState();
 
-const createEventFilterServiceMock = (): jest.Mocked<EventFilterService> => ({
-  addEventFilter: jest.fn(),
+const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
+  addEventFilters: jest.fn(),
 });
 
-const createStoreSetup = (eventFilterService: EventFilterService) => {
-  const spyMiddleware = createSpyMiddleware<EventFilterListPageState>();
+const createStoreSetup = (eventFiltersService: EventFiltersService) => {
+  const spyMiddleware = createSpyMiddleware<EventFiltersListPageState>();
 
   return {
     spyMiddleware,
     store: createStore(
-      eventFilterPageReducer,
+      eventFiltersPageReducer,
       applyMiddleware(
-        createEventFilterPageMiddleware(eventFilterService),
+        createEventFiltersPageMiddleware(eventFiltersService),
         spyMiddleware.actionSpyMiddleware
       )
     ),
@@ -44,26 +44,26 @@ const createStoreSetup = (eventFilterService: EventFilterService) => {
 describe('middleware', () => {
   describe('initial state', () => {
     it('sets initial state properly', async () => {
-      expect(createStoreSetup(createEventFilterServiceMock()).store.getState()).toStrictEqual(
+      expect(createStoreSetup(createEventFiltersServiceMock()).store.getState()).toStrictEqual(
         initialState
       );
     });
   });
 
   describe('submit creation event filter', () => {
-    let service: jest.Mocked<EventFilterService>;
-    let store: Store<EventFilterListPageState>;
-    let spyMiddleware: MiddlewareActionSpyHelper<EventFilterListPageState, AppAction>;
+    let service: jest.Mocked<EventFiltersService>;
+    let store: Store<EventFiltersListPageState>;
+    let spyMiddleware: MiddlewareActionSpyHelper<EventFiltersListPageState, AppAction>;
 
     beforeEach(() => {
-      service = createEventFilterServiceMock();
+      service = createEventFiltersServiceMock();
       const storeSetup = createStoreSetup(service);
-      store = storeSetup.store as Store<EventFilterListPageState>;
+      store = storeSetup.store as Store<EventFiltersListPageState>;
       spyMiddleware = storeSetup.spyMiddleware;
     });
 
     it('does not submit when entry is undefined', async () => {
-      store.dispatch({ type: 'eventFilterCreateStart' });
+      store.dispatch({ type: 'eventFiltersCreateStart' });
       expect(store.getState()).toStrictEqual({
         ...initialState,
         form: {
@@ -74,16 +74,16 @@ describe('middleware', () => {
     });
 
     it('does submit when entry is not undefined', async () => {
-      service.addEventFilter.mockResolvedValue(createdEventFilterEntryMock());
+      service.addEventFilters.mockResolvedValue(createdEventFilterEntryMock());
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
-        type: 'eventFilterInitForm',
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
 
-      store.dispatch({ type: 'eventFilterCreateStart' });
+      store.dispatch({ type: 'eventFiltersCreateStart' });
 
-      await spyMiddleware.waitForAction('eventFilterFormStateChanged');
+      await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,
         form: {
@@ -97,18 +97,18 @@ describe('middleware', () => {
     });
 
     it('does throw error when creating', async () => {
-      service.addEventFilter.mockRejectedValue({
+      service.addEventFilters.mockRejectedValue({
         body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
       });
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
-        type: 'eventFilterInitForm',
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
 
-      store.dispatch({ type: 'eventFilterCreateStart' });
+      store.dispatch({ type: 'eventFiltersCreateStart' });
 
-      await spyMiddleware.waitForAction('eventFilterFormStateChanged');
+      await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,
         form: {

@@ -8,15 +8,15 @@
 import { useSelector } from 'react-redux';
 
 import { State } from '../../../../common/store';
-import { EventFilterListPageState } from '../state';
+import { EventFiltersListPageState } from '../state';
 
 import {
-  MANAGEMENT_STORE_EVENT_FILTER_NAMESPACE as EVENT_FILTER_NS,
+  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE as EVENT_FILTER_NS,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE as GLOBAL_NS,
 } from '../../../common/constants';
 
-export function useEventFilterSelector<R>(selector: (state: EventFilterListPageState) => R): R {
+export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPageState) => R): R {
   return useSelector((state: State) =>
-    selector(state[GLOBAL_NS][EVENT_FILTER_NS] as EventFilterListPageState)
+    selector(state[GLOBAL_NS][EVENT_FILTER_NS] as EventFiltersListPageState)
   );
 }

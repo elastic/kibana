@@ -9,18 +9,22 @@ import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 
-import { EventFilterInitForm, EventFilterChangeForm, EventFilterFormStateChanged } from './action';
+import {
+  EventFiltersInitForm,
+  EventFiltersChangeForm,
+  EventFiltersFormStateChanged,
+} from './action';
 
-import { EventFilterListPageState } from '../state';
-import { initialEventFilterPageState } from './builders';
+import { EventFiltersListPageState } from '../state';
+import { initialEventFiltersPageState } from './builders';
 
-type StateReducer = ImmutableReducer<EventFilterListPageState, AppAction>;
+type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
-  state: Immutable<EventFilterListPageState>,
+  state: Immutable<EventFiltersListPageState>,
   action: Immutable<T>
-) => Immutable<EventFilterListPageState>;
+) => Immutable<EventFiltersListPageState>;
 
-const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) => {
+const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
     ...state,
     form: {
@@ -34,7 +38,7 @@ const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) =>
   };
 };
 
-const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action) => {
+const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, action) => {
   return {
     ...state,
     form: {
@@ -52,7 +56,7 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
   };
 };
 
-const eventFilterFormStateChanged: CaseReducer<EventFilterFormStateChanged> = (state, action) => {
+const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = (state, action) => {
   return {
     ...state,
     form: {
@@ -62,17 +66,17 @@ const eventFilterFormStateChanged: CaseReducer<EventFilterFormStateChanged> = (s
   };
 };
 
-export const eventFilterPageReducer: StateReducer = (
-  state = initialEventFilterPageState(),
+export const eventFiltersPageReducer: StateReducer = (
+  state = initialEventFiltersPageState(),
   action
 ) => {
   switch (action.type) {
-    case 'eventFilterInitForm':
-      return eventFilterInitForm(state, action);
-    case 'eventFilterChangeForm':
-      return eventFilterChangeForm(state, action);
-    case 'eventFilterFormStateChanged':
-      return eventFilterFormStateChanged(state, action);
+    case 'eventFiltersInitForm':
+      return eventFiltersInitForm(state, action);
+    case 'eventFiltersChangeForm':
+      return eventFiltersChangeForm(state, action);
+    case 'eventFiltersFormStateChanged':
+      return eventFiltersFormStateChanged(state, action);
   }
 
   return state;

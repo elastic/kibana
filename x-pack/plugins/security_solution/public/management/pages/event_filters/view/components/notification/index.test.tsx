@@ -15,10 +15,10 @@ import { KibanaContextProvider } from '../../../../../../../../../../src/plugins
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../../../../../../../public/shared_imports';
+} from '../../../../../../shared_imports';
 
 import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
-import { EventFilterNotification } from '.';
+import { EventFiltersNotification } from '.';
 import { getCreationErrorMessage, getCreationSuccessMessage } from './translations';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import {
@@ -38,10 +38,10 @@ const renderNotifications = (
     </Provider>
   );
 
-  return render(<EventFilterNotification />, { wrapper: Wrapper });
+  return render(<EventFiltersNotification />, { wrapper: Wrapper });
 };
 
-describe('EventFilterNotification', () => {
+describe('EventFiltersNotification', () => {
   it('renders correctly initially', () => {
     const notifications = mockNotifications();
 
@@ -60,24 +60,24 @@ describe('EventFilterNotification', () => {
     act(() => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
-        type: 'eventFilterInitForm',
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
     });
 
     act(() => {
       store.dispatch({
-        type: 'eventFilterFormStateChanged',
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: store.getState()!.management!.eventFilter!.form!.entry as ExceptionListItemSchema,
+          data: store.getState()!.management!.eventFilters!.form!.entry as ExceptionListItemSchema,
         },
       });
     });
 
     expect(notifications.toasts.addSuccess).toBeCalledWith(
       getCreationSuccessMessage(
-        store.getState()!.management!.eventFilter!.form!.entry as CreateExceptionListItemSchema
+        store.getState()!.management!.eventFilters!.form!.entry as CreateExceptionListItemSchema
       )
     );
     expect(notifications.toasts.addDanger).not.toBeCalled();
@@ -92,19 +92,19 @@ describe('EventFilterNotification', () => {
     act(() => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
-        type: 'eventFilterInitForm',
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
     });
 
     act(() => {
       store.dispatch({
-        type: 'eventFilterFormStateChanged',
+        type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'FailedResourceState',
           error: { message: 'error message', statusCode: 500, error: 'error' },
           lastLoadedState: getLastLoadedResourceState(
-            store.getState()!.management!.eventFilter!.form!.submissionResourceState
+            store.getState()!.management!.eventFilters!.form!.submissionResourceState
           ),
         },
       });
@@ -113,7 +113,7 @@ describe('EventFilterNotification', () => {
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getCreationErrorMessage(
-        (store.getState()!.management!.eventFilter!.form!
+        (store.getState()!.management!.eventFilters!.form!
           .submissionResourceState as FailedResourceState).error
       )
     );

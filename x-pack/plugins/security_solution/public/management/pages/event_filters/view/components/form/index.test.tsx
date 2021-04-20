@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFilterForm } from '.';
+import { EventFiltersForm } from '.';
 import { RenderResult, act, render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
@@ -38,14 +38,14 @@ describe('Event filter form', () => {
       </Provider>
     );
 
-    return render(<EventFilterForm />, { wrapper: Wrapper });
+    return render(<EventFiltersForm />, { wrapper: Wrapper });
   };
 
   const renderComponentWithdata = () => {
     const entry = getInitialExceptionFromEvent(ecsEventMock());
     act(() => {
       store.dispatch({
-        type: 'eventFilterInitForm',
+        type: 'eventFiltersInitForm',
         payload: { entry },
       });
     });
@@ -71,14 +71,14 @@ describe('Event filter form', () => {
   });
   it('should renders correctly without data', () => {
     component = renderForm();
-    expect(component.getByTestId('loading-spinner')).not.toThrow();
+    expect(component.getByTestId('loading-spinner')).not.toBeNull();
   });
 
   it('should renders correctly with data', () => {
     component = renderComponentWithdata();
 
-    expect(component.getByText(ecsEventMock().process!.executable![0])).not.toThrow();
-    expect(component.getByText(NAME_ERROR)).not.toThrow();
+    expect(component.getByText(ecsEventMock().process!.executable![0])).not.toBeNull();
+    expect(component.getByText(NAME_ERROR)).not.toBeNull();
   });
 
   it('should change name', async () => {
@@ -94,8 +94,8 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilter!.form!.entry!.name).toBe('Exception name');
-    expect(store.getState()!.management!.eventFilter!.form!.hasNameError).toBeFalsy();
+    expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('Exception name');
+    expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeFalsy();
   });
 
   it('should change comments', async () => {
@@ -111,7 +111,7 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilter!.form!.entry!.comments![0].comment).toBe(
+    expect(store.getState()!.management!.eventFilters!.form!.entry!.comments![0].comment).toBe(
       'Exception comment'
     );
   });

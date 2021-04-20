@@ -12,25 +12,22 @@ import {
   ImmutableMiddlewareFactory,
 } from '../../../../common/store';
 
-import { EventFilterHttpService, EventFilterService } from '../service';
+import { EventFiltersHttpService, EventFiltersService } from '../service';
 
-import { EventFilterListPageState } from '../state';
+import { EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
-import {
-  CreateExceptionListItemSchema,
-  transformNewItemOutput,
-} from '../../../../../public/shared_imports';
+import { CreateExceptionListItemSchema, transformNewItemOutput } from '../../../../shared_imports';
 
-const eventFilterCreate = async (
-  store: ImmutableMiddlewareAPI<EventFilterListPageState, AppAction>,
-  eventFilterService: EventFilterService
+const eventFiltersCreate = async (
+  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
+  eventFiltersService: EventFiltersService
 ) => {
   const submissionResourceState = store.getState().form.submissionResourceState;
   try {
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
     store.dispatch({
-      type: 'eventFilterFormStateChanged',
+      type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadingResourceState',
         previousState: { type: 'UninitialisedResourceState' },
@@ -39,9 +36,9 @@ const eventFilterCreate = async (
 
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
 
-    const exception = await eventFilterService.addEventFilter(sanitizedEntry);
+    const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
     store.dispatch({
-      type: 'eventFilterFormStateChanged',
+      type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadedResourceState',
         data: exception,
@@ -49,7 +46,7 @@ const eventFilterCreate = async (
     });
   } catch (error) {
     store.dispatch({
-      type: 'eventFilterFormStateChanged',
+      type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'FailedResourceState',
         error: error.body || error,
@@ -59,18 +56,18 @@ const eventFilterCreate = async (
   }
 };
 
-export const createEventFilterPageMiddleware = (
-  eventFilterService: EventFilterService
-): ImmutableMiddleware<EventFilterListPageState, AppAction> => {
+export const createEventFiltersPageMiddleware = (
+  eventFiltersService: EventFiltersService
+): ImmutableMiddleware<EventFiltersListPageState, AppAction> => {
   return (store) => (next) => async (action) => {
     next(action);
 
-    if (action.type === 'eventFilterCreateStart') {
-      await eventFilterCreate(store, eventFilterService);
+    if (action.type === 'eventFiltersCreateStart') {
+      await eventFiltersCreate(store, eventFiltersService);
     }
   };
 };
 
-export const eventFilterPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFilterListPageState> = (
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
   coreStart
-) => createEventFilterPageMiddleware(new EventFilterHttpService(coreStart.http));
+) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
