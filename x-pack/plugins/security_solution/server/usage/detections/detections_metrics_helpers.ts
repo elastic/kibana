@@ -193,15 +193,12 @@ export const getDetectionRuleMetrics = async (
     filterPath: [],
     ignoreUnavailable: true,
     index: kibanaIndex,
-    size: 10_000,
+    size: 1,
   };
-
-  let detectionAlertsResp: AlertsAggregationResponse;
 
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
-
-    ({ body: detectionAlertsResp } = (await esClient.search({
+    const { body: detectionAlertsResp } = (await esClient.search({
       index: `${signalsIndex}*`,
       size: 0,
       body: {
@@ -225,7 +222,7 @@ export const getDetectionRuleMetrics = async (
           },
         },
       },
-    })) as { body: AlertsAggregationResponse });
+    })) as { body: AlertsAggregationResponse };
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
       type: 'cases-comments',
