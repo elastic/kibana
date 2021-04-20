@@ -114,7 +114,7 @@ export function getColumns(
         <EuiToolTip
           content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
             defaultMessage:
-              'A normalized score between 0-100, which indicates the relative significance of each anomaly',
+              'A normalized score between 0-100, which indicates the relative significance of each anomaly.',
           })}
         >
           <span>
