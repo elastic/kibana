@@ -51,10 +51,9 @@ import {
   AgentPolicyDeletionError,
   IngestManagerError,
 } from '../errors';
-import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
 import { getPackageInfo } from './epm/packages';
-import { createAgentPolicyAction, getAgentsByKuery } from './agents';
+import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -477,7 +476,7 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+      throw new IngestManagerError(`Cannot update integrations of hosted agent policy ${id}`);
     }
 
     return await this._update(
@@ -508,7 +507,7 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
+      throw new IngestManagerError(`Cannot remove integrations of hosted agent policy ${id}`);
     }
 
     return await this._update(
@@ -551,7 +550,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.is_managed) {
-      throw new AgentPolicyDeletionError(`Cannot delete managed policy ${id}`);
+      throw new AgentPolicyDeletionError(`Cannot delete hosted agent policy ${id}`);
     }
 
     const {
@@ -609,35 +608,6 @@ class AgentPolicyService {
     }
 
     await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
-
-    return this.createFleetPolicyChangeActionSO(soClient, esClient, agentPolicyId);
-  }
-
-  public async createFleetPolicyChangeActionSO(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ) {
-    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy || !policy.revision) {
-      return;
-    }
-    const packages = policy.inputs.reduce<string[]>((acc, input) => {
-      const packageName = input.meta?.package?.name;
-      if (packageName && acc.indexOf(packageName) < 0) {
-        acc.push(packageName);
-      }
-      return acc;
-    }, []);
-
-    await createAgentPolicyAction(soClient, esClient, {
-      type: 'POLICY_CHANGE',
-      data: { policy },
-      ack_data: { packages },
-      created_at: new Date().toISOString(),
-      policy_id: policy.id,
-      policy_revision: policy.revision,
-    });
   }
 
   public async createFleetPolicyChangeFleetServer(
@@ -775,7 +745,13 @@ class AgentPolicyService {
           cluster: ['monitor'],
           indices: [
             {
-              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              names: [
+                'logs-*',
+                'metrics-*',
+                'traces-*',
+                '.logs-endpoint.diagnostic.collection-*',
+                'synthetics-*',
+              ],
               privileges: ['auto_configure', 'create_doc'],
             },
           ],
@@ -795,15 +771,6 @@ class AgentPolicyService {
       if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
         fullAgentPolicy.fleet = {
           hosts: settings.fleet_server_hosts,
-        };
-      } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-      else {
-        if (!settings.kibana_urls || !settings.kibana_urls.length)
-          throw new Error('kibana_urls is missing');
-
-        fullAgentPolicy.fleet = {
-          hosts: settings.kibana_urls,
-          kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
         };
       }
     }

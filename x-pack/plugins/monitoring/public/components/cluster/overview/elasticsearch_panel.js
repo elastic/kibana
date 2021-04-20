@@ -356,7 +356,7 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
-                  <HealthLabel status={clusterStats.status} />
+                  <HealthLabel status={clusterStats.status} product={'es'} />
                 </EuiHealth>
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
