@@ -42,8 +42,8 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
         expectSnapshot(response.body).toMatchInline(`
           Object {
             "hasData": true,
-            "serviceName": "client",
             "indices": "traces-apm*,apm-*",
+            "serviceName": "client",
           }
         `);
       });
