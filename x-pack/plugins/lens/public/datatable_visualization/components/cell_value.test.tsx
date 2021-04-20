@@ -173,18 +173,18 @@ describe('datatable cell renderer', () => {
 
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 100 } },
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
           gradientHelpers: { a: gradientHelper },
         });
 
+        // 123 is exactly the max range of 123 set, so it picks the last color
         expect(setCellProps).toHaveBeenCalledWith({
-          // 123 is above the max range of 100 set, so it picks the last color
           style: expect.objectContaining({ backgroundColor: '#ccc' }),
         });
         expect(gradientHelper).not.toHaveBeenCalled();
       });
 
-      it('should set the coloring of the cell when enabled with a single value range', async () => {
+      it('should not set the color of the cell if vaue is out of range', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
 
@@ -193,10 +193,8 @@ describe('datatable cell renderer', () => {
           gradientHelpers: {},
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          // 123 is above the max range of 100 set, so it picks the last color
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
-        });
+        // 123 is above the max range of 100 set
+        expect(setCellProps).not.toHaveBeenCalled();
       });
 
       it('should set the coloring of the text when enabled', async () => {
@@ -205,18 +203,32 @@ describe('datatable cell renderer', () => {
 
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 100 } },
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
           gradientHelpers: { a: gradientHelper },
         });
-
+        // 123 is exactly the max range of 123 set, so it picks the last color
         expect(setCellProps).toHaveBeenCalledWith({
-          // 123 is above the max range of 100 set, so it picks the last color
-          style: { color: '#ccc' },
+          style: expect.objectContaining({ color: '#ccc' }),
         });
         expect(gradientHelper).not.toHaveBeenCalled();
       });
 
-      it('should set the coloring of the cell when enabled - over numeric rangeMax', async () => {
+      it('should set the coloring of the cell when enabled - within numeric rangeMax', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.range = 'number';
+        columnConfig.columns[0].palette!.params!.rangeMax = 123;
+
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
+        });
+
+        expect(setCellProps).toHaveBeenCalledWith({
+          style: expect.objectContaining({ backgroundColor: '#ccc' }),
+        });
+      });
+
+      it('should not set the coloring of the cell when enabled - over numeric rangeMax', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.range = 'number';
@@ -226,12 +238,25 @@ describe('datatable cell renderer', () => {
           minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
         });
 
+        expect(setCellProps).not.toHaveBeenCalled();
+      });
+
+      it('should set the coloring of the cell when enabled - over numeric rangeMin', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.range = 'number';
+        columnConfig.columns[0].palette!.params!.rangeMin = 75;
+
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
+        });
+
         expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
+          style: expect.objectContaining({ backgroundColor: '#bbb' }),
         });
       });
 
-      it('should set the coloring of the cell when enabled - below numeric rangeMin', async () => {
+      it('should not set the coloring of the cell when enabled - below numeric rangeMin', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.range = 'number';
@@ -241,31 +266,42 @@ describe('datatable cell renderer', () => {
           minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#aaa' }),
-        });
+        expect(setCellProps).not.toHaveBeenCalled();
       });
 
-      it('should set the coloring of the cell when enabled - below percent rangeMin', async () => {
+      it('should set the coloring of the cell when enabled - over percent rangeMin', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.range = 'percent';
-        columnConfig.columns[0].palette!.params!.rangeMin = 75;
+        columnConfig.columns[0].palette!.params!.rangeMin = 10;
 
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
         });
 
         expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#aaa' }),
+          style: expect.objectContaining({ backgroundColor: '#bbb' }),
         });
       });
 
-      it('should set the coloring of the cell when enabled - above percent rangeMax', async () => {
+      it('should not set the coloring of the cell when enabled - below percent rangeMin', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.range = 'percent';
-        columnConfig.columns[0].palette!.params!.rangeMax = 75;
+        columnConfig.columns[0].palette!.params!.rangeMin = 90; // > 123 / (155 - 12) = 86%
+
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
+        });
+
+        expect(setCellProps).not.toHaveBeenCalled();
+      });
+
+      it('should set the coloring of the cell when enabled - below percent rangeMax', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.range = 'percent';
+        columnConfig.columns[0].palette!.params!.rangeMax = 95;
 
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
@@ -274,6 +310,19 @@ describe('datatable cell renderer', () => {
         expect(setCellProps).toHaveBeenCalledWith({
           style: expect.objectContaining({ backgroundColor: '#ccc' }),
         });
+      });
+
+      it('should not set the coloring of the cell when enabled - over percent rangeMax', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.range = 'percent';
+        columnConfig.columns[0].palette!.params!.rangeMax = 50;
+
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
+        });
+
+        expect(setCellProps).not.toHaveBeenCalled();
       });
 
       it('should set the coloring of the cell when enabled - use custom stops', async () => {
@@ -296,7 +345,7 @@ describe('datatable cell renderer', () => {
         columnConfig.columns[0].palette!.params!.colors = ['#aaa', '#bbb', '#000']; // black for higher contrast
 
         const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 100 } },
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
         });
 
         expect(setCellProps).toHaveBeenCalledWith({
@@ -308,7 +357,7 @@ describe('datatable cell renderer', () => {
         });
       });
 
-      it('should apply the palette stops only to the passed range, extending extremities colors for outbound values - numeric range', async () => {
+      it('should apply the palette stops only to the passed range, not extending extremities colors for outbound values - numeric range', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
@@ -320,12 +369,10 @@ describe('datatable cell renderer', () => {
           minMaxByColumnId: { a: { min: 0, max: 150 } },
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
-        });
+        expect(setCellProps).not.toHaveBeenCalled();
       });
 
-      it('should apply the palette stops only to the passed range, extending extremities colors for outbound values - percent range', async () => {
+      it('should apply the palette stops only to the passed range, not extending extremities colors for outbound values - percent range', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
@@ -337,9 +384,7 @@ describe('datatable cell renderer', () => {
           minMaxByColumnId: { a: { min: 0, max: 150 } },
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
-        });
+        expect(setCellProps).not.toHaveBeenCalled();
       });
     });
 
@@ -418,14 +463,35 @@ describe('datatable cell renderer', () => {
         });
       });
 
-      it('should apply the palette stops only to the passed range, extending extremities colors for outbound values - numeric range', async () => {
+      it('should apply the palette stops only to the passed range - numeric range', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.gradient = true;
-        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
+        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 123];
         columnConfig.columns[0].palette!.params!.range = 'number';
         columnConfig.columns[0].palette!.params!.rangeMin = 10;
-        columnConfig.columns[0].palette!.params!.rangeMax = 50;
+        columnConfig.columns[0].palette!.params!.rangeMax = 123;
+
+        const gradientHelper = jest.fn(() => '#000');
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
+          gradientHelpers: { a: gradientHelper },
+        });
+
+        expect(setCellProps).toHaveBeenCalledWith({
+          style: expect.objectContaining({ backgroundColor: '#000' }),
+        });
+        expect(gradientHelper).toHaveBeenCalled();
+      });
+
+      it('should apply the palette stops only to the passed range, not extending extremities colors for outbound values - numeric range', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.gradient = true;
+        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 150];
+        columnConfig.columns[0].palette!.params!.range = 'number';
+        columnConfig.columns[0].palette!.params!.rangeMin = 10;
+        columnConfig.columns[0].palette!.params!.rangeMax = 100;
 
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
@@ -433,13 +499,32 @@ describe('datatable cell renderer', () => {
           gradientHelpers: { a: gradientHelper },
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
-        });
+        expect(setCellProps).not.toHaveBeenCalled();
         expect(gradientHelper).not.toHaveBeenCalled();
       });
 
-      it('should apply the palette stops only to the passed range, extending extremities colors for outbound values - percent range', async () => {
+      it('should apply the palette stops only to the passed range - percent range', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+        columnConfig.columns[0].palette!.params!.gradient = true;
+        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
+        columnConfig.columns[0].palette!.params!.range = 'percent';
+        columnConfig.columns[0].palette!.params!.rangeMin = 10;
+        columnConfig.columns[0].palette!.params!.rangeMax = 100;
+
+        const gradientHelper = jest.fn(() => '#000');
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
+          gradientHelpers: { a: gradientHelper },
+        });
+
+        expect(setCellProps).toHaveBeenCalledWith({
+          style: expect.objectContaining({ backgroundColor: '#000' }),
+        });
+        expect(gradientHelper).toHaveBeenCalled();
+      });
+
+      it('should apply the palette stops only to the passed range, not extending color for outbound - percent range', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'cell';
         columnConfig.columns[0].palette!.params!.gradient = true;
@@ -450,13 +535,11 @@ describe('datatable cell renderer', () => {
 
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 150 } },
+          minMaxByColumnId: { a: { min: 0, max: 123 } },
           gradientHelpers: { a: gradientHelper },
         });
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#ccc' }),
-        });
+        expect(setCellProps).not.toHaveBeenCalled();
         expect(gradientHelper).not.toHaveBeenCalled();
       });
     });

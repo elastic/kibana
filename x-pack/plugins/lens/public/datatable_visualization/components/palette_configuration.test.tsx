@@ -21,7 +21,7 @@ describe('palette utilities', () => {
       expect(applyPaletteParams(paletteRegistry, { type: 'palette', name: 'positive' })).toEqual({
         colorStops: [
           { color: 'blue', stop: 0 },
-          { color: 'yellow', stop: 1 },
+          { color: 'yellow', stop: 10 },
         ],
         mode: 'fixed',
       });
@@ -37,7 +37,7 @@ describe('palette utilities', () => {
       ).toEqual({
         colorStops: [
           { color: 'blue', stop: 0 },
-          { color: 'yellow', stop: 1 },
+          { color: 'yellow', stop: 10 },
         ],
         mode: 'gradient',
       });
@@ -53,7 +53,7 @@ describe('palette utilities', () => {
       ).toEqual({
         colorStops: [
           { color: 'yellow', stop: 0 },
-          { color: 'blue', stop: 1 },
+          { color: 'blue', stop: 10 }, // default steps is set to 10
         ],
         mode: 'fixed',
       });
@@ -123,9 +123,10 @@ describe('palette utilities', () => {
           },
         })
       ).toEqual({
+        // color change here is dictated from paletteRegistryMock
         colorStops: [
           { color: 'blue', stop: 0 },
-          { color: 'yellow', stop: 1 },
+          { color: 'yellow', stop: 100 / 3 }, // side effect of palette mock, as preconfigured palette is usually made of 10 colors
         ],
         mode: 'fixed',
       });
@@ -383,21 +384,24 @@ describe('palette panel', () => {
       ).toEqual(true);
     });
 
-    it('should not show any min/max range inputs when in auto', () => {
+    it('should show disabled min/max range inputs when in auto', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
       expect(
-        instance.find('[data-test-subj="lnsDatatable_dynamicColoring_max_range"]').exists()
-      ).toBe(false);
+        instance
+          .find('[data-test-subj="lnsDatatable_dynamicColoring_max_range"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
     });
 
-    it('should change to numeric range when switching off auto', () => {
+    it('should change to percent range when switching off auto', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
       toggleAutoRange(instance, false);
       expect(props.setPalette).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            rangeType: 'number',
+            rangeType: 'percent',
           }),
         })
       );

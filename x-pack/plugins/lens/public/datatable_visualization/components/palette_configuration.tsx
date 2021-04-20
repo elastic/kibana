@@ -87,6 +87,7 @@ function getPaletteColors(
     (activePaletteParams.rangeMin ?? DEFAULT_MIN_STOP);
 
   const stopFactor = interval / visualSteps;
+
   // If stops are already declared just return them
   if (
     activePaletteParams?.stops != null &&
