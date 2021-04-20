@@ -117,7 +117,7 @@ POST /_security/role/custom_reporting_user
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
 [float]
-=== If you are using an external identity provider
+=== When using an external provider
 
 If you are using an external identity provider, such as
 LDAP or Active Directory, you can either assign
