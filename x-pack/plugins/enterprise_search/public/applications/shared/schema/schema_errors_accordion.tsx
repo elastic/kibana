@@ -62,10 +62,12 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xl">
-              <EuiFlexItem className="field-error__field-name">
+              <EuiFlexItem>
+                <strong>
                 <TruncatedContent content={fieldName} length={32} />
+                </strong>
               </EuiFlexItem>
-              <EuiFlexItem className="field-error__field-type">{schema[fieldName]}</EuiFlexItem>
+              <EuiFlexItem>{schema[fieldName]}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -81,7 +83,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         <EuiAccordion
           key={fieldNameIndex}
           id={`accordion${fieldNameIndex}`}
-          className="euiAccordionForm field-error"
+          className="schemaFieldError"
           buttonClassName="euiAccordionForm__button field-error__header"
           buttonContent={accordionHeader}
           paddingSize="xl"
@@ -103,21 +105,15 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                 );
 
                 return (
-                  <EuiTableRow
-                    key={`schema-change-document-error-${fieldName}-${errorIndex} field-error-document`}
-                  >
-                    <EuiTableRowCell className="field-error-document__id">
-                      <div className="data-type--id">
+                  <EuiTableRow key={`schema-change-document-error-${fieldName}-${errorIndex}`}>
+                    <EuiTableRowCell>
                         <TruncatedContent
                           tooltipType="title"
                           content={error.external_id}
                           length={22}
                         />
-                      </div>
                     </EuiTableRowCell>
-                    <EuiTableRowCell className="field-error-document__field-content">
-                      {error.error}
-                    </EuiTableRowCell>
+                    <EuiTableRowCell>{error.error}</EuiTableRowCell>
                     {viewButton}
                   </EuiTableRow>
                 );
