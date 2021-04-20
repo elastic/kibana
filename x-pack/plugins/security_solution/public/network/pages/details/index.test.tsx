@@ -11,9 +11,7 @@ import { Router, useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { FlowTarget } from '../../../graphql/types';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -23,6 +21,7 @@ import {
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
 import { NetworkDetails } from './index';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -109,22 +108,10 @@ describe('Network Details', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders', () => {
