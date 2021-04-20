@@ -39,7 +39,6 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    // Recreate it
     const { body: tokenResponse } = await esClient.transport.request({
       method: 'POST',
       path: `_security/service/elastic/fleet-server/credential/token/token-${Date.now()}`,

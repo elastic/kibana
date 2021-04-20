@@ -67,11 +67,11 @@ const OnPremInstructions: React.FC = () => {
     }
     switch (platform) {
       case 'linux-mac':
-        return `./elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
+        return `sudo ./elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
       case 'windows':
         return `.\\elastic-agent.exe install --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
       case 'deb-rpm':
-        return `elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}
+        return `sudo elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}
 sudo systemctl enable elastic-agent
 sudo systemctl start elastic-agent`;
       default:
@@ -88,7 +88,7 @@ sudo systemctl start elastic-agent`;
       }
     } catch (err) {
       notifications.toasts.addError(err, {
-        title: i18n.translate('fleet.fleet.fleetServerSetup.errorGeneratingTokenTitleText', {
+        title: i18n.translate('xpack.fleet.fleetServerSetup.errorGeneratingTokenTitleText', {
           defaultMessage: 'Error generating token',
         }),
       });
@@ -164,7 +164,7 @@ sudo systemctl start elastic-agent`;
                     <EuiCallOut size="s">
                       <FormattedMessage
                         id="xpack.fleet.fleetServerSetup.saveServiceTokenDescription"
-                        defaultMessage="Save your service token information to register a Fleet Server again in the future. This will be shown only once."
+                        defaultMessage="Save your service token information. This will be shown only once."
                       />
                     </EuiCallOut>
                     <EuiSpacer size="m" />
