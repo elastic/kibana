@@ -35,6 +35,7 @@ import {
   UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
+  transformDocs,
   waitForIndexStatusYellow,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
@@ -940,7 +941,44 @@ describe('migration actions', () => {
   });
 
   describe('transformDocs', () => {
-    it.todo('all the tests'); // add at least one test for id transformed
+    it('applies "transformRawDocs" and writes result into an index', async () => {
+      const index = 'transform_docs_index';
+      const originalDocs = [
+        { _id: 'foo:1', _source: { type: 'dashboard', value: 1 } },
+        { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
+      ];
+
+      await createIndex(client, index, {
+        dynamic: true,
+        properties: {},
+      })();
+
+      const result = (await transformDocs(
+        client,
+        async function (docs) {
+          for (const doc of docs) {
+            doc._source.value += 1;
+          }
+          return docs;
+        },
+        originalDocs,
+        index,
+        'wait_for'
+      )()) as Either.Right<'bulk_index_succeeded'>;
+
+      expect(result.right).toBe('bulk_index_succeeded');
+
+      const { body } = await client.search<{ value: number }>({
+        index,
+      });
+      const hits = body.hits.hits;
+
+      const foo1 = hits.find((h) => h._id === 'foo:1');
+      expect(foo1?._source?.value).toBe(2);
+
+      const foo2 = hits.find((h) => h._id === 'foo:2');
+      expect(foo2?._source?.value).toBe(3);
+    });
   });
 
   describe('searchForOutdatedDocuments', () => {
