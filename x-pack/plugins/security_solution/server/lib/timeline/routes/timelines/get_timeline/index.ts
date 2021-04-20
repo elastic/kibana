@@ -16,13 +16,8 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import { buildSiemResponse, transformError } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineByIdSchemaQuery } from '../../../schemas/timelines';
-import {
-  getTimelineTemplateOrNull,
-  getTimelineOrNull,
-  getAllTimeline,
-} from '../../../saved_object/timelines';
-import { TimelineStatus } from '../../../../../../common/types/timeline';
+import { getTimelineQuerySchema } from '../../../schemas/timelines';
+import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 
 export const getTimelineRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,8 +26,10 @@ export const getTimelineRoute = (
 ) => {
   router.get(
     {
-      path: `${TIMELINE_URL}`,
-      validate: { query: buildRouteValidationWithExcess(getTimelineByIdSchemaQuery) },
+      path: TIMELINE_URL,
+      validate: {
+        query: buildRouteValidationWithExcess(getTimelineQuerySchema),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -42,34 +39,18 @@ export const getTimelineRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
+
         let res = null;
+
         if (templateTimelineId != null && id == null) {
           res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
         } else if (templateTimelineId == null && id != null) {
           res = await getTimelineOrNull(frameworkRequest, id);
-        } else if (templateTimelineId == null && id == null) {
-          const tempResult = await getAllTimeline(
-            frameworkRequest,
-            false,
-            { pageSize: 1, pageIndex: 1 },
-            null,
-            null,
-            TimelineStatus.active,
-            null
-          );
-
-          res = await getAllTimeline(
-            frameworkRequest,
-            false,
-            { pageSize: tempResult?.totalCount ?? 0, pageIndex: 1 },
-            null,
-            null,
-            TimelineStatus.active,
-            null
-          );
+        } else {
+          throw new Error('please provide id or template_timeline_id');
         }
 
-        return response.ok({ body: res ?? {} });
+        return response.ok({ body: res ? { data: { getOneTimeline: res } } : {} });
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

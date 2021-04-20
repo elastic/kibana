@@ -75,6 +75,7 @@ describe('ServiceOverview', () => {
         agentName: 'java',
         transactionType: 'request',
         transactionTypes: ['request'],
+        alerts: [],
       });
     jest
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')

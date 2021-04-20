@@ -13,7 +13,6 @@ import {
   EuiProgress,
   EuiSearchBarProps,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { History } from 'history';
 
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
@@ -33,10 +32,6 @@ import { ReferenceErrorModal } from '../../../../../components/value_lists_manag
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
-
-// Known lost battle with Eui :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 export type Func = () => Promise<void>;
 
@@ -317,7 +312,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       () => ({
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
-        totalItemCount: pagination.total,
+        totalItemCount: pagination.total || 0,
         pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
       }),
       [pagination]
@@ -368,7 +363,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
                 />
-                <MyEuiBasicTable
+                <EuiBasicTable
                   data-test-subj="exceptions-table"
                   columns={exceptionsColumns}
                   isSelectable={!hasNoPermissions ?? false}
