@@ -34,6 +34,7 @@ export interface MlSummaryJob {
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;
   awaitingNodeAssignment: boolean;
+  alertingRuleIds?: string[];
 }
 
 export interface AuditMessage {

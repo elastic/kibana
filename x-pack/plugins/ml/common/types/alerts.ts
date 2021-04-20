@@ -101,3 +101,7 @@ export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
   MlAnomalyDetectionAlertParams,
   'lookbackInterval' | 'topNBuckets'
 >;
+
+export interface JobAlertingRuleStats {
+  alerting_rule_ids?: string[];
+}
