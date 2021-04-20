@@ -31,6 +31,8 @@ import {
 import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
+import { ensureAuthorized, getAuthorizationFilter } from '../utils';
+import { Operations } from '../../authorization';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
@@ -48,6 +50,7 @@ export interface GetAllArgs {
   caseID: string;
   includeSubCaseComments?: boolean;
   subCaseID?: string;
+  owner?: string;
 }
 
 export interface GetArgs {
@@ -115,12 +118,26 @@ export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const { attachmentService, savedObjectsClient: soClient, logger } = clientArgs;
+  const {
+    attachmentService,
+    savedObjectsClient: soClient,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     const comment = await attachmentService.get({
       soClient,
       attachmentId: attachmentID,
+    });
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: [comment.attributes.owner],
+      savedObjectIDs: [comment.id],
+      operation: Operations.getComment,
     });
 
     return CommentResponseRt.encode(flattenCommentSavedObject(comment));
@@ -138,10 +155,16 @@ export async function get(
  * collections. If the entity is a sub case, pass in the subCaseID.
  */
 export async function getAll(
-  { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,
+  { caseID, includeSubCaseComments, subCaseID, owner }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { savedObjectsClient: soClient, caseService, logger } = clientArgs;
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     let comments: SavedObjectsFindResponse<CommentAttributes>;
@@ -154,6 +177,17 @@ export async function getAll(
         'The sub case id and include sub case comments fields are not supported when the case connector feature is disabled'
       );
     }
+
+    // TODO: finish this call combineFieldWithKueryNodeFilter
+    const {
+      filter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = getAuthorizationFilter({
+      authorization,
+      auditLogger,
+      operation: Operations.getAllComments,
+    });
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({

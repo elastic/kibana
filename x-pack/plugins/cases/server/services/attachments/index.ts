@@ -21,6 +21,7 @@ interface GetAttachmentArgs extends ClientArgs {
 interface CreateAttachmentArgs extends ClientArgs {
   attributes: AttachmentAttributes;
   references: SavedObjectReference[];
+  id: string;
 }
 
 interface UpdateArgs {
@@ -61,11 +62,12 @@ export class AttachmentService {
     }
   }
 
-  public async create({ soClient, attributes, references }: CreateAttachmentArgs) {
+  public async create({ soClient, attributes, references, id }: CreateAttachmentArgs) {
     try {
       this.log.debug(`Attempting to POST a new comment`);
       return await soClient.create<AttachmentAttributes>(CASE_COMMENT_SAVED_OBJECT, attributes, {
         references,
+        id,
       });
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);

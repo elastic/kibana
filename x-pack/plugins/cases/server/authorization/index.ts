@@ -6,7 +6,7 @@
  */
 
 import { EventType } from '../../../security/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -81,5 +81,62 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  // comments operations
+  [WriteOperations.CreateComment]: {
+    type: EventType.CREATION,
+    name: WriteOperations.CreateComment,
+    action: 'create-comment',
+    verbs: createVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteAllComments]: {
+    type: EventType.DELETION,
+    name: WriteOperations.DeleteAllComments,
+    action: 'delete-all-comments',
+    verbs: deleteVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteComment]: {
+    type: EventType.DELETION,
+    name: WriteOperations.DeleteComment,
+    action: 'delete-comment',
+    verbs: deleteVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateComments]: {
+    type: EventType.DELETION,
+    name: WriteOperations.UpdateComments,
+    action: 'update-comments',
+    verbs: updateVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetComment]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetComment,
+    action: 'get-comment',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetAllComments]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetAllComments,
+    action: 'get-all-comment',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.FindComments]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.FindComments,
+    action: 'find-comments',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
 };

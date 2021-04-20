@@ -23,6 +23,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
           schema.object({
             includeSubCaseComments: schema.maybe(schema.boolean()),
             subCaseId: schema.maybe(schema.string()),
+            owner: schema.maybe(schema.string()),
           })
         ),
       },
@@ -36,6 +37,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
             caseID: request.params.case_id,
             includeSubCaseComments: request.query?.includeSubCaseComments,
             subCaseID: request.query?.subCaseId,
+            owner: request.query?.owner,
           }),
         });
       } catch (error) {

@@ -19,10 +19,18 @@ export const getOwnersFilter = (savedObjectType: string, owners: string[]): Kuer
 };
 
 export const combineFilterWithAuthorizationFilter = (
-  filter: KueryNode,
-  authorizationFilter: KueryNode
+  filter: KueryNode | undefined,
+  authorizationFilter: KueryNode | undefined
 ) => {
-  return nodeBuilder.and([filter, authorizationFilter]);
+  if (!filter && !authorizationFilter) {
+    return;
+  }
+
+  const kueries = [
+    ...(filter !== undefined ? [filter] : []),
+    ...(authorizationFilter !== undefined ? [authorizationFilter] : []),
+  ];
+  return nodeBuilder.and(kueries);
 };
 
 export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean => {

@@ -118,21 +118,27 @@ export const addStatusFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+interface FilterField {
+  filters?: string | string[];
+  field: string;
+  operator: 'and' | 'or';
+  type?: string;
+}
+
 export const buildFilter = ({
   filters,
   field,
   operator,
   type = CASE_SAVED_OBJECT,
-}: {
-  filters: string | string[];
-  field: string;
-  operator: 'or' | 'and';
-  type?: string;
-}): KueryNode | null => {
+}: FilterField): KueryNode | undefined => {
+  if (filters === undefined) {
+    return;
+  }
+
   const filtersAsArray = Array.isArray(filters) ? filters : [filters];
 
   if (filtersAsArray.length === 0) {
-    return null;
+    return;
   }
 
   return nodeBuilder[operator](
@@ -220,10 +226,7 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null && caseFilters != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
       };
@@ -245,17 +248,11 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
         subCase: {
-          filter:
-            authorizationFilter != null && subCaseFilters != null
-              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
-              : subCaseFilters,
+          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
           sortField,
         },
       };
@@ -296,23 +293,25 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
         subCase: {
-          filter:
-            authorizationFilter != null && subCaseFilters != null
-              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
-              : subCaseFilters,
+          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
           sortField,
         },
       };
     }
   }
 };
+
+/**
+ * Combines a string field with a kuery node to build a complete kuery node for use in the find API.
+ */
+export function combineFieldWithKueryNodeFilter(filterField: FilterField, kueryNode?: KueryNode) {
+  const filter = buildFilter(filterField);
+  return combineFilterWithAuthorizationFilter(filter, kueryNode);
+}
 
 interface CompareArrays {
   addedItems: string[];
@@ -484,6 +483,12 @@ interface OwnerEntity {
   id: string;
 }
 
+interface AuthFilterHelpers {
+  filter?: KueryNode;
+  ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => void;
+  logSuccessfulAuthorization: () => void;
+}
+
 /**
  * Wraps the Authorization class' method for determining which found saved objects the user making the request
  * is authorized to interact with.
@@ -496,7 +501,7 @@ export async function getAuthorizationFilter({
   operation: OperationDetails;
   authorization: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
-}) {
+}): Promise<AuthFilterHelpers> {
   try {
     const {
       filter,
