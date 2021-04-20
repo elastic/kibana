@@ -61,7 +61,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
                     {
                       id: 'generate_report',
                       name: i18n.translate('xpack.canvas.features.reporting.pdf', {
-                        defaultMessage: 'Generate PDF Reports',
+                        defaultMessage: 'Generate PDF reports',
                       }),
                       includeIn: 'all',
                       management: { insightsAndAlerting: ['reporting'] },
