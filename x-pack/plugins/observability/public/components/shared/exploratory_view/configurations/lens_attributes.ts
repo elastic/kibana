@@ -41,7 +41,7 @@ function buildNumberColumn(sourceField: string) {
   return {
     sourceField,
     dataType: 'number' as DataType,
-    isBucketed: true,
+    isBucketed: false,
     scale: 'ratio' as OperationMetadata['scale'],
   };
 }
@@ -118,7 +118,7 @@ export class LensAttributes {
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
-      isBucketed: false,
+      isBucketed: true,
       params: {
         size: 3,
         orderBy: { type: 'column', columnId: 'y-axis-column' },
