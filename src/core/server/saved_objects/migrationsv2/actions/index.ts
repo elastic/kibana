@@ -476,6 +476,9 @@ export const readWithPit = (
         pit: { id: pitId, keep_alive: pitKeepAlive },
         size: batchSize,
         search_after: searchAfter,
+        // Improve performance by not calculating the total number of hits
+        // matching the query.
+        track_total_hits: false,
         // Exclude saved object types
         query: Option.isSome(unusedTypesQuery) ? unusedTypesQuery.value : undefined,
       },
