@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy } from '../../../../types';
+import { sendGetOneAgentPolicy } from '../../../../hooks';
+import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 
@@ -48,10 +50,12 @@ export const AgentPolicySelectionStep = ({
   agentPolicies,
   setSelectedAPIKeyId,
   setSelectedPolicyId,
+  setIsFleetServerPolicySelected,
 }: {
   agentPolicies?: AgentPolicy[];
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedPolicyId?: (policyId: string) => void;
+  setIsFleetServerPolicySelected?: (selected: boolean) => void;
 }) => {
   const regularAgentPolicies = Array.isArray(agentPolicies)
     ? agentPolicies.filter((policy) => policy && !policy.is_managed)
@@ -65,7 +69,24 @@ export const AgentPolicySelectionStep = ({
         agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={setSelectedPolicyId}
+        onAgentPolicyChange={async (policyID) => {
+          if (setSelectedPolicyId) {
+            setSelectedPolicyId(policyID);
+          }
+          if (setIsFleetServerPolicySelected) {
+            const agentPolicyRequest = await sendGetOneAgentPolicy(policyID);
+            if (
+              agentPolicyRequest.data?.item &&
+              agentPolicyRequest.data.item.package_policies.some(
+                (packagePolicy) => packagePolicy.package.name === FLEET_SERVER_PACKAGE
+              )
+            ) {
+              setIsFleetServerPolicySelected(true);
+            } else {
+              setIsFleetServerPolicySelected(false);
+            }
+          }
+        }}
       />
     ),
   };
