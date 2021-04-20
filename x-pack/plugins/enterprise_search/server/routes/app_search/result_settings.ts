@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
+
 import { RouteDependencies } from '../../plugin';
 
 export function registerResultSettingsRoutes({
@@ -28,32 +30,28 @@ export function registerResultSettingsRoutes({
   );
 
   router.put(
-    {
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/result_settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.buffer(),
       },
-      options: { body: { parse: false } },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/result_settings',
     })
   );
 
   router.post(
-    {
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/sample_response_search',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.buffer(),
       },
-      options: { body: { parse: false } },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/sample_response_search',
     })

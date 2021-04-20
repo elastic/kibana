@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+const mockBuffer = {};
+jest.mock('@kbn/config-schema', () => ({
+  schema: {
+    buffer: () => mockBuffer,
+    object: () => ({}),
+  },
+}));
+
+const mockSchema = schema.object({});
+
+import { skipBodyValidation } from './route_config_helpers';
+
+describe('skipBodyValidation', () => {
+  it('adds body validation options to a route config, persisting previous properties like "path"', () => {
+    expect(
+      skipBodyValidation({
+        path: '/example/path',
+        validate: {},
+      })
+    ).toEqual({
+      path: '/example/path',
+      validate: {
+        body: mockBuffer,
+      },
+      options: { body: { parse: false } },
+    });
+  });
+
+  it('will persist non-"body" properties on "options" and "validate"', () => {
+    expect(
+      skipBodyValidation({
+        path: '/example/path',
+        validate: {
+          params: mockSchema,
+        },
+        options: {
+          authRequired: true,
+        },
+      })
+    ).toEqual({
+      path: '/example/path',
+      validate: {
+        params: mockSchema,
+        body: mockBuffer,
+      },
+      options: {
+        authRequired: true,
+        body: { parse: false },
+      },
+    });
+  });
+
+  it('will keep validate to set to "false" if "false"', () => {
+    expect(
+      skipBodyValidation<'post'>({
+        path: '/example/path',
+        validate: false,
+      })
+    ).toEqual({
+      path: '/example/path',
+      validate: false,
+      options: { body: { parse: false } },
+    });
+  });
+
+  it('will throw if body validation is already applied in the config', () => {
+    expect(() =>
+      skipBodyValidation({
+        path: '/example/path',
+        validate: {
+          body: mockSchema,
+        },
+      })
+    ).toThrow('validate.body cannot be set when using "skipBodyValidation"');
+  });
+
+  it('will throw if options.body is already applied in the config', () => {
+    expect(() =>
+      skipBodyValidation({
+        path: '/example/path',
+        validate: {},
+        options: {
+          body: {
+            output: 'stream',
+          },
+        },
+      })
+    ).toThrow('options.body cannot be set when using "skipBodyValidation"');
+  });
+});
