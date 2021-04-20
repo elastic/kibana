@@ -244,10 +244,9 @@ export function getSuggestion(
 
       break;
     case SUGGESTION_TYPE.ARGUMENT_VALUE:
-      const param = suggestion.name.split(':');
-
-      if (param.length === 1 || param[1]) {
-        insertText = `${param.length === 1 ? insertText : param[1]},`;
+      const defaultText = (suggestion as TimelionFunctionArgs).insertText;
+      if (defaultText) {
+        insertText = `${defaultText},`;
       }
 
       command = {

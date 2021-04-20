@@ -19,10 +19,12 @@ import {
   getFlyoutDisplay,
 } from '../../../../../selectors/ui_selectors';
 import {
+  fitToLayerExtent,
   setSelectedLayer,
   updateFlyout,
   hideTOCDetails,
   showTOCDetails,
+  toggleLayerVisible,
 } from '../../../../../actions';
 
 function mapStateToProps(state = {}, ownProps) {
@@ -40,6 +42,9 @@ function mapStateToProps(state = {}, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    fitToBounds: (layerId) => {
+      dispatch(fitToLayerExtent(layerId));
+    },
     openLayerPanel: async (layerId) => {
       await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
@@ -49,6 +54,9 @@ function mapDispatchToProps(dispatch) {
     },
     showTOCDetails: (layerId) => {
       dispatch(showTOCDetails(layerId));
+    },
+    toggleVisible: (layerId) => {
+      dispatch(toggleLayerVisible(layerId));
     },
   };
 }
