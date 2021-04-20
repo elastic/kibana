@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
+  const docTable = getService('docTable');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -85,6 +86,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
             expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
           );
+        });
+
+        it('should load snapshot URL with empty sort param correctly', async function () {
+          const expectedUrl =
+            baseUrl +
+            '/app/discover?_t=1453775307251#' +
+            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
+            ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
+            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
+            "*',interval:auto,query:(language:kuery,query:'')" +
+            ',sort:!())';
+          await browser.navigateTo(expectedUrl);
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          const url = await browser.getCurrentUrl();
+          // url fallback default sort should have been pushed to URL
+          expect(url).to.contain('sort:!(!(%27@timestamp%27,desc))');
+          const firstRow = await docTable.getRow({ rowIndex: 0 });
+          const firstRowText = await firstRow.getVisibleText();
+          // sorting requested by ES should be correct
+          expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
