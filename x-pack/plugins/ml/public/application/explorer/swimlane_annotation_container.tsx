@@ -86,15 +86,15 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       annotationsData.forEach((d) => {
         const annotationWidth = d.end_timestamp
           ? xScale(Math.min(d.end_timestamp, domain.max)) - xScale(d.timestamp)
-          : ANNOTATION_MIN_WIDTH;
+          : 0;
 
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
-          .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
+          .attr('x', xScale(d.timestamp))
           .attr('y', ANNOTATION_MARGIN)
           .attr('height', ANNOTATION_HEIGHT)
-          .attr('width', annotationWidth)
+          .attr('width', Math.max(annotationWidth, ANNOTATION_MIN_WIDTH))
           .attr('rx', ANNOTATION_MARGIN)
           .attr('ry', ANNOTATION_MARGIN)
           .on('mouseover', function () {
