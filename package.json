@@ -137,7 +137,7 @@
     "@hapi/good-squeeze": "^6.0.0",
     "@hapi/h2o2": "^8.3.2",
     "@hapi/hapi": "npm:@commercial/hapi@^17.9.4",
-    "@hapi/hoek": "^6.2.4",
+    "@hapi/hoek": "npm:@commercial/hoek@^6.2.5",
     "@hapi/inert": "^5.2.2",
     "@hapi/oppsy": "^2.1.2",
     "@hapi/podium": "^3.4.3",

@@ -1191,10 +1191,10 @@
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.0.tgz#f3933a44e365864f4dad5db94158106d511e8131"
   integrity sha512-sqKVVVOe5ivCaXDWivIJYVSaEgdQK9ul7a4Kity5Iw7u9+wBAPbX1RMSnLLmp7O4Vzj0WOWwMAJsTL00xwaNug==
 
-"@hapi/hoek@^6.2.4":
-  version "6.2.4"
-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-6.2.4.tgz#4b95fbaccbfba90185690890bdf1a2fbbda10595"
-  integrity sha512-HOJ20Kc93DkDVvjwHyHawPwPkX44sIrbXazAUDiUXaY2R9JwQGo2PhFfnQtdrsIe4igjG2fPgMra7NYw7qhy0A==
+"@hapi/hoek@npm:@commercial/hoek@^6.2.5":
+  version "6.2.5"
+  resolved "https://registry.yarnpkg.com/@commercial/hoek/-/hoek-6.2.5.tgz#d22748f858a04d13d7cc521c25a16e4c28cec630"
+  integrity sha512-+X82McCKOEcPDTlHDl1btPLPa6FYV+TiifHRXhiilcl7izygV+wkUw7HnhKAv0Kdewb5OzfSwimfuXHM2dN6hQ==
 
 "@hapi/inert@^5.2.2":
   version "5.2.2"
