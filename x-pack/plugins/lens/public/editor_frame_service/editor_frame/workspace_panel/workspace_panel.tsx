@@ -596,7 +596,9 @@ export const InnerVisualizationWrapper = ({
 
                       {localState.expandError
                         ? visibleErrorMessages.map((visibleErrorMessage) => (
-                            <p className="eui-textBreakWord">{visibleErrorMessage}</p>
+                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                              {visibleErrorMessage}
+                            </p>
                           ))
                         : null}
                     </>
