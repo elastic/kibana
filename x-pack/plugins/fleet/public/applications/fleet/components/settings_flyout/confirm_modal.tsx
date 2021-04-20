@@ -178,7 +178,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
           <EuiButton onClick={onConfirm} fill>
             <FormattedMessage
               id="xpack.fleet.settingsConfirmModal.confirmButton"
-              defaultMessage="Confirm changes"
+              defaultMessage="Apply settings"
             />
           </EuiButton>
         </EuiModalFooter>
