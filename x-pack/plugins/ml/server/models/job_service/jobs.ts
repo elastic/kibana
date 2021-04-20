@@ -217,7 +217,7 @@ export function jobsProvider(
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
-        alertingRuleIds: job.alerting_rule_ids,
+        alertingRules: job.alerting_rules,
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -432,7 +432,6 @@ export function jobsProvider(
 
         mlAlertingRules.data.forEach((curr) => {
           const {
-            id,
             params: {
               jobSelection: { jobIds: ruleJobIds, groupIds: ruleGroupIds },
             },
@@ -446,10 +445,10 @@ export function jobsProvider(
                 j.groups.some((g) => ruleGroupIds.includes(g)));
 
             if (isIncluded) {
-              if (Array.isArray(j.alerting_rule_ids)) {
-                j.alerting_rule_ids.push(id);
+              if (Array.isArray(j.alerting_rules)) {
+                j.alerting_rules.push(curr);
               } else {
-                j.alerting_rule_ids = [id];
+                j.alerting_rules = [curr];
               }
             }
           });

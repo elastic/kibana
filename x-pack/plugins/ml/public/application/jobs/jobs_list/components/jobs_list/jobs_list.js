@@ -186,12 +186,12 @@ export class JobsList extends Component {
         render: (item) => <JobIcon message={item} showTooltip={true} />,
       },
       {
-        field: 'alertingRuleIds',
+        field: 'alertingRules',
         name: (
           <EuiScreenReaderOnly>
             <p>
               <FormattedMessage
-                id="xpack.ml.jobsList.alertingRuleIds.screenReaderDescription"
+                id="xpack.ml.jobsList.alertingRules.screenReaderDescription"
                 defaultMessage="This column display icons when there are alert rules associated with a job"
               />
             </p>
@@ -204,7 +204,7 @@ export class JobsList extends Component {
               position="bottom"
               content={
                 <FormattedMessage
-                  id="xpack.ml.jobsList.alertingRuleIds.tooltipContent"
+                  id="xpack.ml.jobsList.alertingRules.tooltipContent"
                   defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
                   values={{ rulesCount: item.length }}
                 />

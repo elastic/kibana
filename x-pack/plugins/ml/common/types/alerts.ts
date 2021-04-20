@@ -7,7 +7,7 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { AlertTypeParams } from '../../../alerting/common';
+import type { AlertTypeParams, Alert } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -102,6 +102,8 @@ export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
   'lookbackInterval' | 'topNBuckets'
 >;
 
+export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertParams>, 'apiKey'>;
+
 export interface JobAlertingRuleStats {
-  alerting_rule_ids?: string[];
+  alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
