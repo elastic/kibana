@@ -4,8 +4,14 @@ set -euo pipefail
 
 # source "$(dirname "${0}")/env.sh"
 
+export BUILD_TS_REFS_CACHE_ENABLE=true
+export DISABLE_BOOTSTRAP_VALIDATION=true
+
 export CI_GROUP=${CI_GROUP:-$(( BUILDKITE_PARALLEL_JOB + 1))}
 export JOB=kibana-default-ciGroup${CI_GROUP}
+
+echo '--- Bootstrap'
+.buildkite/scripts/bootstrap.sh
 
 echo '--- Downloading Distribution and Plugin artifacts'
 
