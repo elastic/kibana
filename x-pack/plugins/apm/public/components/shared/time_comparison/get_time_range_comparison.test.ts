@@ -11,12 +11,23 @@ import {
 
 describe('getTimeRangeComparison', () => {
   describe('return empty object', () => {
+    it('when comparison is disabled', () => {
+      const end = '2021-01-28T15:00:00.000Z';
+      const result = getTimeRangeComparison({
+        start: undefined,
+        end,
+        comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: false,
+      });
+      expect(result).toEqual({});
+    });
     it('when start is not defined', () => {
       const end = '2021-01-28T15:00:00.000Z';
       const result = getTimeRangeComparison({
         start: undefined,
         end,
         comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: true,
       });
       expect(result).toEqual({});
     });
@@ -27,6 +38,7 @@ describe('getTimeRangeComparison', () => {
         start,
         end: undefined,
         comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: true,
       });
       expect(result).toEqual({});
     });
@@ -39,6 +51,7 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.DayBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
@@ -52,6 +65,7 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
@@ -67,6 +81,7 @@ describe('getTimeRangeComparison', () => {
           start,
           end,
           comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonEnabled: true,
         });
         expect(result).toEqual({
           comparisonStart: '2021-02-09T14:24:02.174Z',
@@ -83,6 +98,7 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
@@ -98,6 +114,7 @@ describe('getTimeRangeComparison', () => {
       const end = '2021-01-18T15:00:00.000Z';
       const result = getTimeRangeComparison({
         comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonEnabled: true,
         start,
         end,
       });
@@ -110,6 +127,7 @@ describe('getTimeRangeComparison', () => {
       const end = '2021-01-31T15:00:00.000Z';
       const result = getTimeRangeComparison({
         comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonEnabled: true,
         start,
         end,
       });
