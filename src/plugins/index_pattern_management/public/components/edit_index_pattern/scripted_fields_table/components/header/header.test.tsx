@@ -19,16 +19,6 @@ import { Header } from './header';
 describe('Header', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
   test('should render normally', () => {
-    /*
-    const component = render(
-      <Header.WrappedComponent
-        indexPatternId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
-      />
-    );
-    */
     const component = mount(
       <Header.WrappedComponent
         indexPatternId="test"
