@@ -2904,8 +2904,6 @@
     "indexPatternManagement.testScript.resultsTitle": "結果を表示",
     "indexPatternManagement.testScript.submitButtonLabel": "スクリプトを実行",
     "indexPatternManagement.typeLabel": "型",
-    "indexPatternManagement.warningCallOut.descriptionLabel": "計算値の表示と集約にスクリプトフィールドが使用できます。そのため非常に遅い場合があり、適切に行わないとKibanaが使用できなくなる可能性もあります。この場合安全策はありません。入力ミスがあると、あちこちに予期せぬ例外が起こります！",
-    "indexPatternManagement.warningCallOutHeader": "十分ご注意ください",
     "indexPatternManagement.warningCallOutLabel.callOutDetail": "スクリプトフィールドを使う前に、{scripFields}と{scriptsInAggregation}についてよく理解するようにしてください。",
     "indexPatternManagement.warningCallOutLabel.scripFieldsLink": "スクリプトフィールド",
     "indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink": "集約におけるスクリプト",
