@@ -21,8 +21,8 @@ export function MachineLearningDashboardJobSelectionTableProvider({
 
   return {
     async assertJobSelectionTableExists(): Promise<void> {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlCustomSelectionTable');
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.existOrFail('mlCustomSelectionTable', { timeout: 2000 });
       });
     },
 

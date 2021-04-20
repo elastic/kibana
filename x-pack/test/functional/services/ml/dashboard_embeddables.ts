@@ -96,9 +96,9 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async openJobSelectionFlyout() {
-      await retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await testSubjects.existOrFail('dashboardEditorContextMenu');
+        await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
 
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
         await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
