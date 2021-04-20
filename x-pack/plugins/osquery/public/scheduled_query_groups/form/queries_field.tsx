@@ -39,8 +39,8 @@ const getNewStream = ({ id, interval, query, scheduledQueryGroupId }: GetNewStre
     : null,
   vars: {
     id: { type: 'text', value: id },
-    type: 'integer',
     interval: {
+      type: 'integer',
       value: interval,
     },
     query: { type: 'text', value: query },
