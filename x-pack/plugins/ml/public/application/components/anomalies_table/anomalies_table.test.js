@@ -120,7 +120,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'found for',
+          name: 'Found for',
         }),
       ])
     );
@@ -150,7 +150,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'influenced by',
+          name: 'Influenced by',
         }),
       ])
     );
@@ -180,7 +180,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'actual',
+          name: 'Actual',
         }),
       ])
     );
@@ -210,7 +210,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'typical',
+          name: 'Typical',
         }),
       ])
     );
