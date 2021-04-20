@@ -247,6 +247,7 @@ export class Server {
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
+      exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
     this.coreStart = {
