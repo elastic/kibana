@@ -15,7 +15,7 @@ import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
-import { Ecs } from '../../common/ecs_types';
+import { Ecs } from '../../../common';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();

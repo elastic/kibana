@@ -7,10 +7,10 @@
 
 import { isObject, get, isString, isNumber } from 'lodash';
 import { useMemo } from 'react';
-import { Ecs } from '../../../../common/ecs';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { Ecs } from '../../../../../cases/common';
 
 // TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
 export const buildAlertsQuery = (alertIds: string[]) => {
