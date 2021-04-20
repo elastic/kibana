@@ -15,6 +15,8 @@
     "jsx": "react",
     // Enables all strict type checking options.
     "strict": true,
+    // Do not check d.ts files by default
+    "skipLibCheck": true,
     // enables "core language features"
     "lib": [
       // ESNext auto includes previous versions all the way back to es5
