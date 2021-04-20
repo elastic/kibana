@@ -16,7 +16,8 @@ import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { observabilityRuleRegistrySettings } from '../common/observability_rule_registry';
+import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
+import { observabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
@@ -50,9 +51,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const observabilityRuleRegistry = plugins.ruleRegistry.create(
-      observabilityRuleRegistrySettings
-    );
+    const observabilityRuleRegistry = plugins.ruleRegistry.create({
+      ...observabilityRuleRegistrySettings,
+      fieldMap: observabilityRuleFieldMap,
+    });
 
     registerRoutes({
       core: {

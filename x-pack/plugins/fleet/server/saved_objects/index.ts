@@ -61,9 +61,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
-        // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-        kibana_urls: { type: 'keyword' },
-        kibana_ca_sha256: { type: 'keyword' },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
