@@ -390,11 +390,10 @@ export function copyAllowlistedFields(
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        const subValues = eventValue.filter((v) => typeof v === 'object');
         return {
           ...newEvent,
-          [allowKey]: (eventValue as BaseSearchType[]).map((v) =>
-            typeof v === 'object' ? copyAllowlistedFields(allowValue, v as TelemetryEvent) : v
-          ),
+          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
         };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
         const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
