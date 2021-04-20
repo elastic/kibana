@@ -218,7 +218,7 @@ async function main() {
       * 2.0.
       */
 
-      import { BeatFields } from '../../../common/search_strategy/security_solution/beat_fields';
+      import { BeatFields } from '../../../common/search_strategy/index_fields';
 
       /* eslint-disable @typescript-eslint/naming-convention */
       export const fieldsBeat: BeatFields =
