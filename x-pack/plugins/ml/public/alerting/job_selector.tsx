@@ -66,12 +66,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           }),
           options: jobIdOptions.map((v) => ({ label: v })),
         },
-        {
-          label: i18n.translate('xpack.ml.jobSelector.groupOptionsLabel', {
-            defaultMessage: 'Groups',
-          }),
-          options: groupIdOptions.map((v) => ({ label: v })),
-        },
       ]);
     } catch (e) {
       // TODO add error handling
