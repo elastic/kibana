@@ -6,7 +6,6 @@
  */
 
 import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { PLUGIN_ID } from '../../common/constants/app';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { AnomalyResultType } from '../../common/types/anomalies';
@@ -21,9 +20,9 @@ export interface MlUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup) {
+export function registerCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
   const collector = usageCollection.makeUsageCollector<MlUsageData>({
-    type: PLUGIN_ID,
+    type: 'ml',
     schema: {
       alertRules: {
         [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
@@ -35,10 +34,10 @@ export function registerCollector(usageCollection: UsageCollectionSetup) {
         },
       },
     },
-    isReady: () => true,
+    isReady: () => !!kibanaIndex,
     fetch: async ({ esClient }) => {
       const result = await esClient.search({
-        index: '.kibana*',
+        index: kibanaIndex,
         size: 0,
         body: {
           query: {
