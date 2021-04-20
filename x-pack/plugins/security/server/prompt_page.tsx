@@ -76,7 +76,7 @@ export function PromptPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiPage paddingSize="none" style={{ minHeight: '100vh' }}>
+          <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
             <EuiPageBody>
               <EuiPageContent verticalPosition="center" horizontalPosition="center">
                 <EuiEmptyPrompt

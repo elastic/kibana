@@ -47,6 +47,15 @@ import {
 import { Tokens } from './tokens';
 
 /**
+ * List of query string parameters used to pass various authentication related metadata that should
+ * be stripped away from URL as soon as they are no longer needed.
+ */
+const AUTH_METADATA_QUERY_STRING_PARAMETERS = [
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+];
+
+/**
  * The shape of the login attempt.
  */
 export interface ProviderLoginAttempt {
@@ -460,9 +469,7 @@ export class Authenticator {
   ) {
     const originalURLSearchParams = [
       ...[...request.url.searchParams.entries()].filter(
-        ([key]) =>
-          key !== AUTH_URL_HASH_QUERY_STRING_PARAMETER &&
-          key !== AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
+        ([key]) => !AUTH_METADATA_QUERY_STRING_PARAMETERS.includes(key)
       ),
       ...(additionalQueryStringParameters ?? []),
     ];

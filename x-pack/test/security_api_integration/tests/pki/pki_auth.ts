@@ -62,7 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
         .ca(CA_CERT)
         .pfx(UNTRUSTED_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
+    });
+
+    it('should fail if untrusted certificate is used', async () => {
+      const unauthenticatedResponse = await supertest
+        .get('/security/account')
+        .ca(CA_CERT)
+        .pfx(UNTRUSTED_CLIENT_CERT)
         .expect(401);
+
+      expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+        `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      );
+      expect(unauthenticatedResponse.text).to.contain('You could not log in');
     });
 
     it('does not prevent basic login', async () => {

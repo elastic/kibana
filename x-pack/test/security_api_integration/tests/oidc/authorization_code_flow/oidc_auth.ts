@@ -19,7 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
     it('does not prevent basic login', async () => {
@@ -169,24 +172,31 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('You could not log in');
       });
 
       it('should fail if state is not matching', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('You could not log in');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
@@ -246,7 +256,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code2&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
@@ -305,7 +314,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -382,7 +390,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
@@ -466,7 +473,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
@@ -558,7 +564,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 

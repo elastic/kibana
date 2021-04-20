@@ -95,6 +95,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
+    it('can login after `Unauthorized` error preserving original URL', async () => {
+      await getService('supertest')
+        .post('/authentication/app/setup')
+        .send({ simulateUnauthorized: true })
+        .expect(200);
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+      await browser.get(`${deployment.getHostPort()}/authentication/app?one=two`);
+
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be(
+        'You could not log in. Please try again.'
+      );
+
+      await getService('supertest')
+        .post('/authentication/app/setup')
+        .send({ simulateUnauthorized: false })
+        .expect(200);
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.path).to.eql('/authentication/app?one=two');
+    });
+
     it('should show toast with error if SSO fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('saml', 'unknown_saml');
 

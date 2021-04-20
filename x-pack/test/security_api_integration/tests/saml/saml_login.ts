@@ -74,7 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('SAML authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
     it('does not prevent basic login', async () => {
@@ -181,17 +184,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if SAML response is not complemented with handshake cookie', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('You could not log in');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
@@ -211,7 +217,6 @@ export default function ({ getService }: FtrProviderContext) {
         // Don't pass handshake cookie and don't include `inResponseTo` into SAML response to simulate IdP initiated login.
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
 
@@ -225,14 +230,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if SAML response is not valid', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({ inResponseTo: 'some-invalid-request-id' }),
           })
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('You could not log in');
       });
     });
 
@@ -243,7 +252,6 @@ export default function ({ getService }: FtrProviderContext) {
         // Imitate IdP initiated login.
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
 
@@ -316,7 +324,6 @@ export default function ({ getService }: FtrProviderContext) {
         idpSessionIndex = String(randomness.naturalNumber());
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({
@@ -454,7 +461,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
@@ -549,7 +555,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
@@ -663,7 +668,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({
@@ -684,7 +688,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           const samlAuthenticationResponse = await supertest
             .post('/api/security/saml/callback')
-            .set('kbn-xsrf', 'xxx')
             .set('Cookie', existingSessionCookie.cookieString())
             .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) })
             .expect(302);
@@ -714,7 +717,6 @@ export default function ({ getService }: FtrProviderContext) {
           const newUsername = 'c@d.e';
           const samlAuthenticationResponse = await supertest
             .post('/api/security/saml/callback')
-            .set('kbn-xsrf', 'xxx')
             .set('Cookie', existingSessionCookie.cookieString())
             .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
             .expect(302);

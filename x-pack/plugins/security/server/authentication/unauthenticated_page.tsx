@@ -39,7 +39,7 @@ export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Prop
         </p>
       }
       actions={[
-        <EuiButton color="primary" fill href={originalURL} data-test-subj="LogInButton">
+        <EuiButton color="primary" fill href={originalURL} data-test-subj="logInButton">
           <FormattedMessage id="xpack.security.unauthorized.login" defaultMessage="Log in" />
         </EuiButton>,
       ]}
