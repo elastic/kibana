@@ -102,13 +102,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         !preconfiguredAgentPolicy.is_default &&
         !preconfiguredAgentPolicy.is_default_fleet_server
       ) {
-        throw new Error(
-          i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
-            defaultMessage:
-              '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
-            values: { agentPolicyName: preconfiguredAgentPolicy.name },
-          })
-        );
+        const e = {
+          error: new Error(
+            i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
+              defaultMessage:
+                '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
+              values: { agentPolicyName: preconfiguredAgentPolicy.name },
+            })
+          ),
+          agentPolicy: { name: preconfiguredAgentPolicy.name },
+        };
+        throw e;
       }
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
@@ -254,15 +258,19 @@ function overridePackageInputs(
   for (const override of inputsOverride) {
     const originalInput = inputs.find((i) => i.type === override.type);
     if (!originalInput) {
-      throw new Error(
-        i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
-          defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
-          values: {
-            inputType: override.type,
-            packageName,
-          },
-        })
-      );
+      const e = {
+        error: new Error(
+          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
+            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
+            values: {
+              inputType: override.type,
+              packageName,
+            },
+          })
+        ),
+        package: { name: packageName, version: basePackagePolicy.package!.version },
+      };
+      throw e;
     }
 
     if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
@@ -271,16 +279,21 @@ function overridePackageInputs(
       try {
         deepMergeVars(override, originalInput);
       } catch (e) {
-        throw new Error(
-          i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
-            defaultMessage: 'Var {varName} does not exist on {inputType} of package {packageName}',
-            values: {
-              varName: e.message,
-              inputType: override.type,
-              packageName,
-            },
-          })
-        );
+        const err = {
+          error: new Error(
+            i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
+              defaultMessage:
+                'Var {varName} does not exist on {inputType} of package {packageName}',
+              values: {
+                varName: e.message,
+                inputType: override.type,
+                packageName,
+              },
+            })
+          ),
+          package: { name: packageName, version: basePackagePolicy.package!.version },
+        };
+        throw err;
       }
     }
 
@@ -290,17 +303,21 @@ function overridePackageInputs(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
         if (!originalStream) {
-          throw new Error(
-            i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
-              defaultMessage:
-                'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
-              values: {
-                streamSet: stream.data_stream.dataset,
-                inputType: override.type,
-                packageName,
-              },
-            })
-          );
+          const e = {
+            error: new Error(
+              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
+                defaultMessage:
+                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
+                values: {
+                  streamSet: stream.data_stream.dataset,
+                  inputType: override.type,
+                  packageName,
+                },
+              })
+            ),
+            package: { name: packageName, version: basePackagePolicy.package!.version },
+          };
+          throw e;
         }
 
         if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
@@ -309,18 +326,22 @@ function overridePackageInputs(
           try {
             deepMergeVars(stream as InputsOverride, originalStream);
           } catch (e) {
-            throw new Error(
-              i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
-                defaultMessage:
-                  'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
-                values: {
-                  varName: e.message,
-                  streamSet: stream.data_stream.dataset,
-                  inputType: override.type,
-                  packageName,
-                },
-              })
-            );
+            const err = {
+              error: new Error(
+                i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
+                  defaultMessage:
+                    'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
+                  values: {
+                    varName: e.message,
+                    streamSet: stream.data_stream.dataset,
+                    inputType: override.type,
+                    packageName,
+                  },
+                })
+              ),
+              package: { name: packageName, version: basePackagePolicy.package!.version },
+            };
+            throw err;
           }
         }
       }

@@ -51,10 +51,14 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
     return response.ok({
       body: {
         ...body,
-        nonFatalErrors: body.nonFatalErrors?.map((e) => ({
-          name: e.error.name,
-          message: e.error.message,
-        })),
+        nonFatalErrors: body.nonFatalErrors?.map((e) => {
+          // JSONify the error object so it can be displayed properly in the UI
+          const error = e.error ?? e;
+          return {
+            name: error.name,
+            message: error.message,
+          };
+        }),
       },
     });
   } catch (error) {
