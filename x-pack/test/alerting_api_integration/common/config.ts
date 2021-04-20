@@ -197,28 +197,28 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             },
             'custom.tls.noCustom': {
               actionTypeId: '.webhook',
-              name: `custom.tls.noCustom ${tlsWebhookServers.noCustom}`,
+              name: `${tlsWebhookServers.noCustom}`,
               config: {
                 url: tlsWebhookServers.noCustom,
               },
             },
             'custom.tls.rejectUnauthorizedFalse': {
               actionTypeId: '.webhook',
-              name: `custom.tls.rejectUnauthorizedFalse ${tlsWebhookServers.rejectUnauthorizedFalse}`,
+              name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedFalse,
               },
             },
             'custom.tls.rejectUnauthorizedTrue': {
               actionTypeId: '.webhook',
-              name: `custom.tls.rejectUnauthorizedTrue ${tlsWebhookServers.rejectUnauthorizedTrue}`,
+              name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedTrue,
               },
             },
             'custom.tls.caFile': {
               actionTypeId: '.webhook',
-              name: `custom.tls.caFile ${tlsWebhookServers.caFile}`,
+              name: `${tlsWebhookServers.caFile}`,
               config: {
                 url: tlsWebhookServers.caFile,
               },
