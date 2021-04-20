@@ -4,7 +4,7 @@
     "id": "M92ScEJT9M9QusfIi3hpEb0AAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -30,7 +30,7 @@
         "category": [
           "host"
         ],
-        "created": 1579881969541,
+        "created": 1618841405309,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
         "ingested": "2020-09-09T18:25:15.853783Z",
@@ -72,7 +72,7 @@
     "id": "OU3RgCJaNnR90byeDEHutp8AAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -98,7 +98,7 @@
         "category": [
           "host"
         ],
-        "created": 1579881969541,
+        "created": 1618841405309,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
         "ingested": "2020-09-09T18:25:14.919526Z",
@@ -143,7 +143,7 @@
     "id": "YjqDCEuI6JmLeLOSyZx_NhMAAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -169,7 +169,7 @@
         "category": [
           "host"
         ],
-        "created": 1579881969541,
+        "created": 1618841405309,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
         "ingested": "2020-09-09T18:25:15.853404Z",
