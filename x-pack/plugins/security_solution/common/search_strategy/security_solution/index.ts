@@ -194,3 +194,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : never;
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
+}

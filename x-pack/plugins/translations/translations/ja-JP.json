@@ -18341,8 +18341,6 @@
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription": "Elasticから事前にパッケージ化されているタイムラインテンプレートをインストールしました",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "ルールとタイムラインを取得できませんでした",
     "xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription": "タグを取得できませんでした",
-    "xpack.securitySolution.containers.errors.dataFetchFailureTitle": "データの取得に失敗",
-    "xpack.securitySolution.containers.errors.networkFailureTitle": "ネットワーク障害",
     "xpack.securitySolution.containers.errors.stopJobFailureTitle": "ジョブ停止エラー",
     "xpack.securitySolution.customizeEventRenderers.customizeEventRenderersDescription": "イベントレンダラーは、イベントで最も関連性が高い詳細情報を自動的に表示し、ストーリーを明らかにします",
     "xpack.securitySolution.customizeEventRenderers.customizeEventRenderersTitle": "イベントレンダラーのカスタマイズ",
