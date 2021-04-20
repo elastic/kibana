@@ -831,14 +831,16 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
 }
 
 /**
- * Resolves the longest bucket span from the list.
- * @param bucketSpans Collection of bucket spans
+ * Resolves the longest time interval from the list.
+ * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
  */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return Math.max(
-    ...bucketSpans
+export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefined {
+  const result = Math.max(
+    ...timeIntervals
       .map((b) => parseInterval(b))
       .filter(isDefined)
       .map((v) => v.asSeconds())
   );
+
+  return Number.isFinite(result) ? result : undefined;
 }

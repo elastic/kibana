@@ -10,13 +10,13 @@ import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
-import { FlowTarget } from '../../graphql/types';
 
 import { NetworkDetails } from './details';
 import { Network } from './network';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
+import { FlowTarget } from '../../../common/search_strategy';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 

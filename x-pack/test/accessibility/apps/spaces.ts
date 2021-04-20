@@ -18,17 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  // flaky
-  // https://github.com/elastic/kibana/issues/77933
-  // https://github.com/elastic/kibana/issues/96625
-  describe.skip('Kibana spaces page meets a11y validations', () => {
+  describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
-    it.skip('a11y test for manage spaces menu from top nav on Kibana home', async () => {
-      await PageObjects.spaceSelector.openSpacesNav();
+    it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
+      await testSubjects.click('space-avatar-default');
       await retry.waitFor(
         'Manage spaces option visible',
         async () => await testSubjects.exists('manageSpaces')
@@ -36,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('a11y test for manage spaces page', async () => {
+    it('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await toasts.dismissAllToasts();

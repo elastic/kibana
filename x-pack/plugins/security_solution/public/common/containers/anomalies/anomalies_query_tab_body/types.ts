@@ -9,9 +9,9 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 import { GlobalTimeArgs } from '../../use_global_time';
-import { FlowTarget } from '../../../../graphql/types';
 import { HostsType } from '../../../../hosts/store/model';
 import { NetworkType } from '../../../../network/store//model';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType;
