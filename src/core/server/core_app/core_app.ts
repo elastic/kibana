@@ -39,7 +39,6 @@ export class CoreApp {
         },
       });
     });
-
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
@@ -62,7 +61,6 @@ export class CoreApp {
       }
     );
   }
-
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 
@@ -72,4 +70,3 @@ export class CoreApp {
     );
   }
 }
-
