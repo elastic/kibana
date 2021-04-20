@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/96372
-  describe.skip('Security', () => {
+  describe('Security', () => {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
