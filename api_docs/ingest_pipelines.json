@@ -37,6 +37,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IngestPipelinesUrlGenerator.Unnamed.$1",
                 "type": "Function",
                 "label": "getAppBasePath",
                 "isRequired": true,
@@ -76,6 +77,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.IngestPipelinesUrlGenerator.createUrl.$1",
                 "type": "CompoundType",
                 "label": "state",
                 "isRequired": true,

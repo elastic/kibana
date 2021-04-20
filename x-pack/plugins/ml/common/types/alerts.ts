@@ -93,4 +93,11 @@ export type MlAnomalyDetectionAlertParams = {
   severity: number;
   resultType: AnomalyResultType;
   includeInterim: boolean;
+  lookbackInterval: string | null | undefined;
+  topNBuckets: number | null | undefined;
 } & AlertTypeParams;
+
+export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
+  MlAnomalyDetectionAlertParams,
+  'lookbackInterval' | 'topNBuckets'
+>;

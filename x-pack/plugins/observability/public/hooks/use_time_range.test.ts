@@ -10,6 +10,7 @@ import * as pluginContext from './use_plugin_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
+import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -23,6 +24,7 @@ describe('useTimeRange', () => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       core: {} as CoreStart,
       appMountParameters: {} as AppMountParameters,
+      config: { unsafe: { alertingExperience: { enabled: true } } },
       plugins: ({
         data: {
           query: {
@@ -37,6 +39,7 @@ describe('useTimeRange', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
+      observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
       from: '2020-10-08T05:00:00.000Z',
@@ -63,6 +66,7 @@ describe('useTimeRange', () => {
         jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
           core: {} as CoreStart,
           appMountParameters: {} as AppMountParameters,
+          config: { unsafe: { alertingExperience: { enabled: true } } },
           plugins: ({
             data: {
               query: {
@@ -77,6 +81,7 @@ describe('useTimeRange', () => {
               },
             },
           } as unknown) as ObservabilityPublicPluginsStart,
+          observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {
