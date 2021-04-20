@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -99,11 +99,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ',sort:!())';
           await browser.navigateTo(expectedUrl);
           await PageObjects.discover.waitUntilSearchingHasFinished();
-          const url = await browser.getCurrentUrl();
-          // url fallback default sort should have been pushed to URL
-          expect(url).to.contain('sort:!(!(%27@timestamp%27,desc))');
-          const firstRow = await docTable.getRow({ rowIndex: 0 });
-          const firstRowText = await firstRow.getVisibleText();
+          await retry.waitFor('url to contain default sorting', async () => {
+            // url fallback default sort should have been pushed to URL
+            const url = await browser.getCurrentUrl();
+            return url.includes('sort:!(!(%27@timestamp%27,desc))');
+          });
+
+          const row = await dataGrid.getRow({ rowIndex: 0 });
+          const firstRowText = await Promise.all(
+            row.map(async (cell) => await cell.getVisibleText())
+          );
+
           // sorting requested by ES should be correct
           expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
         });
