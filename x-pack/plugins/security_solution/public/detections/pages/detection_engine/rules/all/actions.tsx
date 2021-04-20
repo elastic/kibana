@@ -40,7 +40,7 @@ export const duplicateRulesAction = async (
   ruleIds: string[],
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>
-) => {
+): Promise<Rule[] | undefined> => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
     const response = await duplicateRules({
@@ -48,7 +48,7 @@ export const duplicateRulesAction = async (
       // and the two types conflict with each other.
       rules: rules.map((rule) => transformOutput(rule as CreateRulesSchema) as Rule),
     });
-    const { errors } = bucketRulesResponse(response);
+    const { errors, rules: createdRules } = bucketRulesResponse(response);
     if (errors.length > 0) {
       displayErrorToast(
         i18n.DUPLICATE_RULE_ERROR,
@@ -59,6 +59,8 @@ export const duplicateRulesAction = async (
       displaySuccessToast(i18n.SUCCESSFULLY_DUPLICATED_RULES(ruleIds.length), dispatchToaster);
     }
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+
+    return createdRules;
   } catch (error) {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
     errorToToaster({ title: i18n.DUPLICATE_RULE_ERROR, error, dispatchToaster });

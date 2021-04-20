@@ -57,8 +57,8 @@ const NewLiveQueryPageComponent = () => {
                 id="xpack.osquery.newLiveQuery.pageTitle"
                 defaultMessage="New live query"
               />
-              <BetaBadge />
             </h1>
+            <BetaBadge />
           </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>

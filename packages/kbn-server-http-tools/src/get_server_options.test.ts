@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { getServerOptions } from './get_server_options';
 import { IHttpConfig } from './types';
@@ -24,6 +25,7 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   port: 5601,
   socketTimeout: 120000,
   keepaliveTimeout: 120000,
+  shutdownTimeout: moment.duration(30, 'seconds'),
   maxPayload: ByteSizeValue.parse('1048576b'),
   ...parts,
   cors: {
