@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HostsFields } from '../../../common/search_strategy/security_solution/hosts';
-import { Direction } from '../../graphql/types';
+import { Direction } from '../../../common/search_strategy';
+import { HostsFields } from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',

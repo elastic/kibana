@@ -19,12 +19,11 @@ import {
 
 import { AppMountParameters, AppSearchDeepLink } from '../../../../../src/core/public';
 import { StartServices } from '../types';
-import { AppFrontendLibs } from '../common/lib/lib';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-export interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
+export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
   SubPluginRoutes: React.FC;

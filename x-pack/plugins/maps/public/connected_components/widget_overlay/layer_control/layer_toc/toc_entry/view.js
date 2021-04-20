@@ -11,6 +11,12 @@ import classNames from 'classnames';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
+import {
+  getVisibilityToggleIcon,
+  getVisibilityToggleLabel,
+  EDIT_LAYER_LABEL,
+  FIT_TO_DATA_LABEL,
+} from './action_labels';
 
 function escapeLayerName(name) {
   return name ? name.split(' ').join('_') : '';
@@ -21,12 +27,14 @@ export class TOCEntry extends React.Component {
     displayName: null,
     hasLegendDetails: false,
     shouldShowModal: false,
+    supportsFitToBounds: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
     this._loadHasLegendDetails();
+    this._loadSupportsFitToBounds();
   }
 
   componentWillUnmount() {
@@ -45,6 +53,13 @@ export class TOCEntry extends React.Component {
       this.props.showTOCDetails(this.props.layer.getId());
     }
   };
+
+  async _loadSupportsFitToBounds() {
+    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  }
 
   async _loadHasLegendDetails() {
     const hasLegendDetails =
@@ -83,6 +98,14 @@ export class TOCEntry extends React.Component {
     this.props.openLayerPanel(this.props.layer.getId());
   };
 
+  _fitToBounds = () => {
+    this.props.fitToBounds(this.props.layer.getId());
+  };
+
+  _toggleVisible = () => {
+    this.props.toggleVisible(this.props.layer.getId());
+  };
+
   _renderCancelModal() {
     if (!this.state.shouldShowModal) {
       return null;
@@ -115,28 +138,40 @@ export class TOCEntry extends React.Component {
     );
   }
 
-  _renderLayerIcons() {
-    if (this.props.isReadOnly) {
-      return null;
+  _renderQuickActions() {
+    const quickActions = [
+      <EuiButtonIcon
+        iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
+        title={getVisibilityToggleLabel(this.props.layer.isVisible())}
+        aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
+        onClick={this._toggleVisible}
+      />,
+    ];
+
+    if (this.state.supportsFitToBounds) {
+      quickActions.push(
+        <EuiButtonIcon
+          iconType="expand"
+          title={FIT_TO_DATA_LABEL}
+          aria-label={FIT_TO_DATA_LABEL}
+          onClick={this._fitToBounds}
+        />
+      );
     }
 
-    return (
-      <div className="mapTocEntry__layerIcons">
+    if (!this.props.isReadOnly) {
+      quickActions.push(
         <EuiButtonIcon
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
-          aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
-            defaultMessage: 'Edit layer',
-          })}
-          title={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonTitle', {
-            defaultMessage: 'Edit layer',
-          })}
+          aria-label={EDIT_LAYER_LABEL}
+          title={EDIT_LAYER_LABEL}
           onClick={this._openLayerPanelWithCheck}
         />
-
+      );
+      quickActions.push(
         <EuiButtonIcon
           iconType="grab"
-          color="subdued"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}
@@ -146,8 +181,10 @@ export class TOCEntry extends React.Component {
           className="mapTocEntry__grab"
           {...this.props.dragHandleProps}
         />
-      </div>
-    );
+      );
+    }
+
+    return <div className="mapTocEntry__layerIcons">{quickActions}</div>;
   }
 
   _renderDetailsToggle() {
@@ -206,9 +243,10 @@ export class TOCEntry extends React.Component {
           escapedDisplayName={escapeLayerName(this.state.displayName)}
           editLayer={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
+          supportsFitToBounds={this.state.supportsFitToBounds}
         />
 
-        {this._renderLayerIcons()}
+        {this._renderQuickActions()}
       </div>
     );
   }

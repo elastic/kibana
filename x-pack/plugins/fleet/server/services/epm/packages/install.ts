@@ -12,7 +12,12 @@ import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } fro
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
 import { defaultPackages } from '../../../../common';
-import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
+import type {
+  BulkInstallPackageInfo,
+  InstallablePackage,
+  InstallSource,
+  DefaultPackagesInstallationError,
+} from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -45,11 +50,17 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
+export interface DefaultPackagesInstallationResult {
+  installations: Installation[];
+  nonFatalPackageUpgradeErrors: DefaultPackagesInstallationError[];
+}
+
 export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
-): Promise<Installation[]> {
+): Promise<DefaultPackagesInstallationResult> {
   const installations = [];
+  const nonFatalPackageUpgradeErrors = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
     packagesToInstall: Object.values(defaultPackages),
@@ -58,19 +69,27 @@ export async function ensureInstalledDefaultPackages(
 
   for (const resp of bulkResponse) {
     if (isBulkInstallError(resp)) {
-      throw resp.error;
+      if (resp.installType && (resp.installType === 'update' || resp.installType === 'reupdate')) {
+        nonFatalPackageUpgradeErrors.push({ installType: resp.installType, error: resp.error });
+      } else {
+        throw resp.error;
+      }
     } else {
       installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
     }
   }
 
   const retrievedInstallations = await Promise.all(installations);
-  return retrievedInstallations.map((installation, index) => {
+  const verifiedInstallations = retrievedInstallations.map((installation, index) => {
     if (!installation) {
       throw new Error(`could not get installation ${bulkResponse[index].name}`);
     }
     return installation;
   });
+  return {
+    installations: verifiedInstallations,
+    nonFatalPackageUpgradeErrors,
+  };
 }
 
 async function isPackageVersionOrLaterInstalled(options: {
@@ -181,6 +200,7 @@ export async function handleInstallPackageFailure({
 export interface IBulkInstallPackageError {
   name: string;
   error: Error;
+  installType?: InstallType;
 }
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
