@@ -168,7 +168,6 @@ describe('filterByAgent', () => {
 
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
-        'capture_body',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
