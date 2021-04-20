@@ -49,23 +49,23 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
     },
     subFeatures: [
       ...(includeReporting
-        ? [
+        ? ([
             {
               name: i18n.translate('xpack.canvas.features.reporting.pdfFeatureName', {
                 defaultMessage: 'Reporting',
               }),
               privilegeGroups: [
                 {
-                  groupType: 'independent' as 'independent',
+                  groupType: 'independent',
                   privileges: [
                     {
                       id: 'generate_report',
                       name: i18n.translate('xpack.canvas.features.reporting.pdf', {
                         defaultMessage: 'Generate PDF Reports',
                       }),
-                      includeIn: 'all' as 'all',
+                      includeIn: 'all',
                       management: { insightsAndAlerting: ['reporting'] },
-                      minimumLicense: 'platinum' as 'platinum',
+                      minimumLicense: 'platinum',
                       savedObject: { all: [], read: [] },
                       api: ['generateReport'],
                       ui: ['generatePdf'],
@@ -74,7 +74,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
                 },
               ],
             },
-          ]
+          ] as const)
         : []),
     ],
   };
