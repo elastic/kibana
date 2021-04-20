@@ -125,7 +125,6 @@ describe('SourceEnginesLogic', () => {
 
       SourceEnginesLogic.actions.fetchSourceEngines();
       await nextTick();
-      await nextTick(); // I think I need this for multiple http.get calls
 
       expect(SourceEnginesLogic.actions.setSourceEngines).toHaveBeenCalledWith([
         // First page

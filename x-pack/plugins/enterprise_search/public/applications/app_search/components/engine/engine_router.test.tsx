@@ -22,9 +22,8 @@ import { CurationsRouter } from '../curations';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
-import { Synonyms } from '../synonyms';
-
 import { SourceEngines } from '../source_engines';
+import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
 

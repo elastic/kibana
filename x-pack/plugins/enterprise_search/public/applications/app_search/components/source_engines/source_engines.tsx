@@ -23,7 +23,7 @@ import { SourceEnginesLogic } from './source_engines_logic';
 const SOURCE_ENGINES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.souceEngines.title',
   {
-    defaultMessage: 'Manage Engines',
+    defaultMessage: 'Manage engines',
   }
 );
 
@@ -38,11 +38,11 @@ export const SourceEngines: React.FC = () => {
   if (dataLoading) return <Loading />;
 
   return (
-    <div>
+    <>
       <SetPageChrome trail={getEngineBreadcrumbs([SOURCE_ENGINES_TITLE])} />
       <EuiPageHeader pageTitle={SOURCE_ENGINES_TITLE} />
       <FlashMessages />
       <EuiCodeBlock language="json">{JSON.stringify(sourceEngines, null, 2)}</EuiCodeBlock>
-    </div>
+    </>
   );
 };

@@ -23,7 +23,7 @@ interface SourceEnginesLogicValues {
   sourceEngines: EngineDetails[];
 }
 
-interface SourceEngineLogicActions {
+interface SourceEnginesLogicActions {
   fetchSourceEngines: () => void;
   setSourceEngines: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
@@ -31,9 +31,9 @@ interface SourceEngineLogicActions {
 }
 
 export const SourceEnginesLogic = kea<
-  MakeLogicType<SourceEnginesLogicValues, SourceEngineLogicActions>
+  MakeLogicType<SourceEnginesLogicValues, SourceEnginesLogicActions>
 >({
-  path: ['enterprise_search', 'app_search', 'curations_logic'],
+  path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
     fetchSourceEngines: true,
     setSourceEngines: (sourceEngines) => ({ sourceEngines }),

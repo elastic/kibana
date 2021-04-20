@@ -6,8 +6,8 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockActions, setMockValues } from '../../../__mocks__';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -20,9 +20,7 @@ import { Loading } from '../../../shared/loading';
 import { SourceEngines } from '.';
 
 const MOCK_ACTIONS = {
-  // FlashMessagesLogic
-  dismissToastMessage: jest.fn(),
-  // SourceEnginesLogiuc
+  // SourceEnginesLogic
   fetchSourceEngines: jest.fn(),
 };
 
@@ -40,7 +38,7 @@ describe('SourceEngines', () => {
   describe('non-happy-path states', () => {
     it('renders a loading component before data has loaded', () => {
       setMockValues({ ...MOCK_VALUES, dataLoading: true });
-      const wrapper = shallow(<SourceEngines engineBreadcrumb={[]} />);
+      const wrapper = shallow(<SourceEngines />);
 
       expect(wrapper.find(Loading)).toHaveLength(1);
     });
@@ -49,7 +47,7 @@ describe('SourceEngines', () => {
   describe('happy-path states', () => {
     it('renders and calls a function to initialize data', () => {
       setMockValues(MOCK_VALUES);
-      const wrapper = shallow(<SourceEngines engineBreadcrumb={[]} />);
+      const wrapper = shallow(<SourceEngines />);
 
       expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
       expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
