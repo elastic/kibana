@@ -51,8 +51,9 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { registerMlAlerts } from './alerting/register_ml_alerts';
+import { registerMlAlerts, registerNavigation } from './alerting/register_ml_alerts';
 import { FileUploadPluginStart } from '../../file_upload/public';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -79,6 +80,7 @@ export interface MlSetupDependencies {
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  alerting?: AlertingSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -134,6 +136,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.triggersActionsUi) {
       registerMlAlerts(pluginsSetup.triggersActionsUi);
+    }
+
+    if (pluginsSetup.alerting) {
+      registerNavigation(pluginsSetup.alerting);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));

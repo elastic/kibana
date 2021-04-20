@@ -8,8 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
+import { PLUGIN_ID } from '../../common/constants/app';
+import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
 
 export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
   // async import validators to reduce initial bundle size
@@ -117,5 +120,19 @@ Alerts are raised based on real-time scores. Remember that scores may be adjuste
 `,
       }
     ),
+  });
+}
+
+export function registerNavigation(alerting: AlertingSetup) {
+  alerting.registerNavigation(PLUGIN_ID, ML_ALERT_TYPES.ANOMALY_DETECTION, (alert) => {
+    const alertParams = alert.params as MlAnomalyDetectionAlertParams;
+    const jobIds = [
+      ...new Set([
+        ...(alertParams.jobSelection.jobIds ?? []),
+        ...(alertParams.jobSelection.groupIds ?? []),
+      ]),
+    ];
+
+    return createExplorerUrl('', { jobIds });
   });
 }

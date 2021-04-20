@@ -123,7 +123,7 @@ interface EditRuleFlyoutProps {
   initialAlert: MlAnomalyDetectionAlertRule;
 }
 
-export const EditAlertRuleFlyout: FC<EditRuleFlyoutProps> = ({ initialAlert }) => {
+export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <>
