@@ -9,7 +9,6 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { timelineActions } from '../../../../../store/timeline';
-import { Direction } from '../../../../../../graphql/types';
 import { TestProviders } from '../../../../../../common/mock';
 import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { Sort } from '../../sort';
@@ -18,6 +17,7 @@ import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
+import { Direction } from '../../../../../../../common/search_strategy';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

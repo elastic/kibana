@@ -733,7 +733,13 @@ class AgentPolicyService {
           cluster: ['monitor'],
           indices: [
             {
-              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              names: [
+                'logs-*',
+                'metrics-*',
+                'traces-*',
+                '.logs-endpoint.diagnostic.collection-*',
+                'synthetics-*',
+              ],
               privileges: ['auto_configure', 'create_doc'],
             },
           ],
