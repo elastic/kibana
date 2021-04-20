@@ -152,7 +152,7 @@ export function applyPaletteParams(
 function mergePaletteParams(
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: Partial<RequiredParamTypes>
-) {
+): PaletteOutput<CustomPaletteParams> {
   return {
     ...activePalette,
     params: {
@@ -210,7 +210,7 @@ export function CustomizablePalette({
     [minLocalValue, maxLocalValue]
   );
 
-  const setMinMaxLocalValues = useCallback(
+  const updateRangeValues = useCallback(
     (min: string, max: string) => {
       // update both min/max
       setMinLocalValue(min);
@@ -226,26 +226,24 @@ export function CustomizablePalette({
           { newInterval, oldInterval },
           { prevMin: Number(minLocalValue), newMin: Number(min) }
         );
-
-        setPalette(
-          mergePaletteParams(activePalette, {
-            stops:
-              progressionType !== 'stepped'
-                ? newControlColorStops
-                : getPaletteColors(
-                    palettes,
-                    { ...activePalette.params, controlStops: newControlColorStops },
-                    {
-                      shouldShift: false,
-                    }
-                  ),
-            controlStops: newControlColorStops,
-            steps:
-              progressionType === 'stepped'
-                ? activePalette.params!.steps!
-                : (newControlColorStops || []).length,
-          })
-        );
+        // return a palette object with the new stops + controlStops remapped
+        return mergePaletteParams(activePalette, {
+          stops:
+            progressionType !== 'stepped'
+              ? newControlColorStops
+              : getPaletteColors(
+                  palettes,
+                  { ...activePalette.params, controlStops: newControlColorStops },
+                  {
+                    shouldShift: false,
+                  }
+                ),
+          controlStops: newControlColorStops,
+          steps:
+            progressionType === 'stepped'
+              ? activePalette.params!.steps!
+              : (newControlColorStops || []).length,
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -343,11 +341,19 @@ export function CustomizablePalette({
           checked={isAutoRange}
           onChange={(newValue) => {
             const isNewAutoRange = newValue.target.checked;
+            // update the stops first
+            const moreParams = updateRangeValues(
+              String(defaultParams.rangeMin),
+              String(defaultParams.rangeMax)
+            ) || { params: {} };
+            // now update with the range type
             setPalette(
               mergePaletteParams(activePalette, {
-                rangeType: isNewAutoRange ? 'auto' : 'number',
-                rangeMax: isNewAutoRange ? undefined : activePalette.params?.rangeMax,
-                rangeMin: isNewAutoRange ? undefined : activePalette.params?.rangeMin,
+                ...moreParams.params,
+                // override the range data
+                rangeType: isNewAutoRange ? 'auto' : 'percent',
+                rangeMin: isNewAutoRange ? undefined : defaultParams.rangeMin,
+                rangeMax: isNewAutoRange ? undefined : defaultParams.rangeMax,
               })
             );
           }}
@@ -397,8 +403,8 @@ export function CustomizablePalette({
             setPalette(
               mergePaletteParams(activePalette, {
                 rangeType: newRangeType,
-                rangeMax: activePalette.params?.rangeMax || defaultParams.rangeMax,
-                rangeMin: activePalette.params?.rangeMin || defaultParams.rangeMin,
+                rangeMax: Number(maxLocalValue),
+                rangeMin: Number(minLocalValue),
               })
             );
           }}
@@ -441,7 +447,10 @@ export function CustomizablePalette({
           data-test-subj="lnsDatatable_dynamicColoring_min_range"
           value={minLocalValue}
           onChange={({ target }) => {
-            setMinMaxLocalValues(target.value, maxLocalValue);
+            const paramsToUpdate = updateRangeValues(target.value, maxLocalValue);
+            if (paramsToUpdate) {
+              setPalette(paramsToUpdate);
+            }
           }}
           append={rangeType === 'number' ? undefined : '%'}
           isInvalid={!isMaxMinValid}
@@ -485,7 +494,10 @@ export function CustomizablePalette({
           data-test-subj="lnsDatatable_dynamicColoring_max_range"
           value={maxLocalValue}
           onChange={({ target }) => {
-            setMinMaxLocalValues(minLocalValue, target.value);
+            const paramsToUpdate = updateRangeValues(minLocalValue, target.value);
+            if (paramsToUpdate) {
+              setPalette(paramsToUpdate);
+            }
           }}
           append={rangeType === 'number' ? undefined : '%'}
           isInvalid={!isMaxMinValid}
@@ -513,7 +525,7 @@ export function CustomizablePalette({
                   ? colorSteps
                       // sort them to make it consistent for reverse
                       .sort(({ stop: stopA }, { stop: stopB }) => stopA - stopB)
-                  : controlStops || colorStops;
+                  : controlStops!;
               // the minimum and maximum stops must be at min and max value,
               // so make sure to restore them in case the user changes them
               stops[0].stop = Number(minLocalValue);
@@ -534,7 +546,7 @@ export function CustomizablePalette({
                   steps:
                     progressionType === 'stepped'
                       ? activePalette.params!.steps!
-                      : (colorSteps || []).length,
+                      : (stops || []).length,
                 })
               );
             }}

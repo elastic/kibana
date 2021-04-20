@@ -51,10 +51,7 @@ function getNormalizedValueByRange(
   minMax: { min: number; max: number }
 ) {
   let result = value;
-  if (stops.length && range !== 'percent') {
-    result = (100 * (value - minMax.min)) / ((rangeMax ?? minMax.max) - (rangeMin ?? minMax.min));
-  }
-  if (range === 'percent') {
+  if (range === 'percent' || (range === 'auto' && stops.length)) {
     result = (100 * (value - minMax.min)) / (minMax.max - minMax.min);
   }
   // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
@@ -73,20 +70,24 @@ function workoutColorForCell(
   if (value == null) {
     return '';
   }
+  const { colors, stops, range, rangeMin, rangeMax, gradient } = params;
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-  const { colors, stops, range, rangeMin, rangeMax, gradient } = params;
   const extraRangeArguments = range === 'auto' ? [] : [rangeMin, rangeMax];
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
   const maxValue = rangeMax ?? minMax.max;
   const minValue = rangeMin ?? minMax.min;
-  // Stops are always within the 0-100 range
-  const normalizedMaxValue =
-    stops.length && range !== 'percent' ? (100 * maxValue) / (minMax.max || 1) : maxValue;
-  const normalizedMinValue =
-    stops.length && range !== 'percent' ? minValue / (minMax.min || 1) : minValue;
+  // Auto mode works in percent for custom mode
+  const shouldNormalizeInPercent = stops.length && range === 'auto';
+
+  const normalizedMaxValue = !shouldNormalizeInPercent
+    ? maxValue
+    : (100 * maxValue) / minMax.max || 1; // 100%
+  const normalizedMinValue = !shouldNormalizeInPercent
+    ? minValue
+    : minValue / (minMax.min || 1) - 1; // 0%
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
   if (comparisonFn(normalizedValue, normalizedMaxValue) > 0) {
