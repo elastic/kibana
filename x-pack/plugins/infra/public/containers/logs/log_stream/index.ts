@@ -23,7 +23,7 @@ interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string | Query | BuiltEsQuery;
+  query?: BuiltEsQuery;
   center?: LogEntryCursor;
   columns?: LogSourceConfigurationProperties['logColumns'];
 }
@@ -77,27 +77,15 @@ export function useLogStream({
     }
   }, [prevEndTimestamp, endTimestamp, setState]);
 
-  const parsedQuery = useMemo(() => {
-    if (!query) {
-      return undefined;
-    } else if (typeof query === 'string') {
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
-    } else if ('language' in query) {
-      return getEsQueryFromQueryObject(query);
-    } else {
-      return query;
-    }
-  }, [query]);
-
   const commonFetchArguments = useMemo(
     () => ({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query: parsedQuery,
+      query,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, parsedQuery, sourceId, startTimestamp]
+    [columns, endTimestamp, query, sourceId, startTimestamp]
   );
 
   const {

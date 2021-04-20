@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esQuery } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';
 
@@ -99,11 +99,28 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     sourceConfiguration,
     loadSourceConfiguration,
     isLoadingSourceConfiguration,
+    derivedIndexPattern,
   } = useLogSource({
     sourceId,
     fetch: services.http.fetch,
     indexPatternsService: services.data.indexPatterns,
   });
+
+  const parsedQuery = useMemo(() => {
+    try {
+      if (query == null) {
+        return undefined;
+      } else if (typeof query === 'string') {
+        return esQuery.buildEsQuery(derivedIndexPattern, { language: 'kuery', query }, []);
+      } else if ('language' in query && 'query' in query) {
+        return esQuery.buildEsQuery(derivedIndexPattern, query, []);
+      } else {
+        return query;
+      }
+    } catch {
+      return undefined;
+    }
+  }, [derivedIndexPattern, query]);
 
   // Internal state
   const {
@@ -119,7 +136,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     sourceId,
     startTimestamp,
     endTimestamp,
-    query,
+    query: parsedQuery,
     center,
     columns: customColumns,
   });

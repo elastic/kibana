@@ -34,7 +34,10 @@ const TabComponent = (props: TabProps) => {
     if (textQuery) {
       query += ` and message: ${textQuery}`;
     }
-    return query;
+    return {
+      language: 'kuery',
+      query,
+    };
   }, [options, nodeType, node.id, textQuery]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

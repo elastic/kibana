@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import { RendererFunction } from '../../../utils/typed_react';
@@ -37,7 +37,7 @@ export const WithSummary = ({
     sourceId,
     throttledStartTimestamp,
     throttledEndTimestamp,
-    filterQuery
+    filterQuery?.serializedQuery ?? null
   );
 
   return children({ buckets, start, end });
