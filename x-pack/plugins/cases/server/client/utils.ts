@@ -140,6 +140,18 @@ export const buildFilter = ({
   );
 };
 
+export const combineAuthorizedAndOwnerFilter = (
+  owner?: string[] | string,
+  authorizationFilter?: KueryNode
+): KueryNode | undefined => {
+  const filters = Array.isArray(owner) ? owner : owner != null ? [owner] : [];
+  const ownerFilter = buildFilter({ filters, field: 'owner', operator: 'or' });
+
+  return authorizationFilter != null && ownerFilter != null
+    ? combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter)
+    : ownerFilter ?? undefined;
+};
+
 /**
  * Constructs the filters used for finding cases and sub cases.
  * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases

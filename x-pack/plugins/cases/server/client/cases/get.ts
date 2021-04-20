@@ -28,7 +28,11 @@ import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { constructQueryOptions, ensureAuthorized, getAuthorizationFilter } from '../utils';
+import {
+  combineAuthorizedAndOwnerFilter,
+  ensureAuthorized,
+  getAuthorizationFilter,
+} from '../utils';
 
 interface GetParams {
   id: string;
@@ -141,15 +145,11 @@ export async function getTags(
       auditLogger,
     });
 
-    const queryArgs = {
-      owner: queryParams.owner,
-    };
-
-    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
     return await caseService.getTags({
       soClient,
-      filter: caseQueries.case.filter,
+      filter,
     });
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
@@ -183,14 +183,11 @@ export async function getReporters(
       auditLogger,
     });
 
-    const queryArgs = {
-      owner: queryParams.owner,
-    };
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const reporters = await caseService.getReporters({
       soClient,
-      filter: caseQueries.case.filter,
+      filter,
     });
 
     return UsersRt.encode(reporters);
