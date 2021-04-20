@@ -16,6 +16,14 @@ Object {
       },
       "agent": Object {
         "properties": Object {
+          "build": Object {
+            "properties": Object {
+              "original": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
           "ephemeral_id": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -99,6 +107,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "continent_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "continent_name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -118,11 +130,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -152,6 +172,10 @@ Object {
             "type": "long",
           },
           "registered_domain": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "subdomain": Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
@@ -213,6 +237,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
         },
@@ -222,6 +250,10 @@ Object {
           "account": Object {
             "properties": Object {
               "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -251,6 +283,18 @@ Object {
               },
             },
           },
+          "project": Object {
+            "properties": Object {
+              "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
           "provider": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -258,6 +302,14 @@ Object {
           "region": Object {
             "ignore_above": 1024,
             "type": "keyword",
+          },
+          "service": Object {
+            "properties": Object {
+              "name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
           },
         },
       },
@@ -353,6 +405,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "continent_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "continent_name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -372,11 +428,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -406,6 +470,10 @@ Object {
             "type": "long",
           },
           "registered_domain": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "subdomain": Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
@@ -467,6 +535,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
         },
@@ -478,11 +550,19 @@ Object {
               "exists": Object {
                 "type": "boolean",
               },
+              "signing_id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "status": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "subject_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "team_id": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -512,6 +592,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "ssdeep": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
           "name": Object {
@@ -524,6 +608,10 @@ Object {
           },
           "pe": Object {
             "properties": Object {
+              "architecture": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "company": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -533,6 +621,10 @@ Object {
                 "type": "keyword",
               },
               "file_version": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "imphash": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -727,6 +819,10 @@ Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
+          "reason": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
           "reference": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -774,11 +870,19 @@ Object {
               "exists": Object {
                 "type": "boolean",
               },
+              "signing_id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "status": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "subject_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "team_id": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -838,6 +942,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "ssdeep": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
           "inode": Object {
@@ -875,6 +983,10 @@ Object {
           },
           "pe": Object {
             "properties": Object {
+              "architecture": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "company": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -884,6 +996,10 @@ Object {
                 "type": "keyword",
               },
               "file_version": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "imphash": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -917,6 +1033,112 @@ Object {
           "uid": Object {
             "ignore_above": 1024,
             "type": "keyword",
+          },
+          "x509": Object {
+            "properties": Object {
+              "alternative_names": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "issuer": Object {
+                "properties": Object {
+                  "common_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "country": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "distinguished_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "locality": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "organization": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "organizational_unit": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "state_or_province": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
+              "not_after": Object {
+                "type": "date",
+              },
+              "not_before": Object {
+                "type": "date",
+              },
+              "public_key_algorithm": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "public_key_curve": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "public_key_exponent": Object {
+                "doc_values": false,
+                "index": false,
+                "type": "long",
+              },
+              "public_key_size": Object {
+                "type": "long",
+              },
+              "serial_number": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "signature_algorithm": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "subject": Object {
+                "properties": Object {
+                  "common_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "country": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "distinguished_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "locality": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "organization": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "organizational_unit": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "state_or_province": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
+              "version_number": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
           },
         },
       },
@@ -997,6 +1219,32 @@ Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
+          "cpu": Object {
+            "properties": Object {
+              "usage": Object {
+                "scaling_factor": 1000,
+                "type": "scaled_float",
+              },
+            },
+          },
+          "disk": Object {
+            "properties": Object {
+              "read": Object {
+                "properties": Object {
+                  "bytes": Object {
+                    "type": "long",
+                  },
+                },
+              },
+              "write": Object {
+                "properties": Object {
+                  "bytes": Object {
+                    "type": "long",
+                  },
+                },
+              },
+            },
+          },
           "domain": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -1004,6 +1252,10 @@ Object {
           "geo": Object {
             "properties": Object {
               "city_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "continent_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1026,11 +1278,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1054,6 +1314,30 @@ Object {
           "name": Object {
             "ignore_above": 1024,
             "type": "keyword",
+          },
+          "network": Object {
+            "properties": Object {
+              "egress": Object {
+                "properties": Object {
+                  "bytes": Object {
+                    "type": "long",
+                  },
+                  "packets": Object {
+                    "type": "long",
+                  },
+                },
+              },
+              "ingress": Object {
+                "properties": Object {
+                  "bytes": Object {
+                    "type": "long",
+                  },
+                  "packets": Object {
+                    "type": "long",
+                  },
+                },
+              },
+            },
           },
           "os": Object {
             "properties": Object {
@@ -1086,6 +1370,10 @@ Object {
                 "type": "keyword",
               },
               "platform": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "type": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1156,6 +1444,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
         },
@@ -1184,7 +1476,15 @@ Object {
               "bytes": Object {
                 "type": "long",
               },
+              "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "method": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "mime_type": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1215,6 +1515,10 @@ Object {
               },
               "bytes": Object {
                 "type": "long",
+              },
+              "mime_type": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
               },
               "status_code": Object {
                 "type": "long",
@@ -1248,6 +1552,14 @@ Object {
       },
       "log": Object {
         "properties": Object {
+          "file": Object {
+            "properties": Object {
+              "path": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
           "level": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -1436,6 +1748,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "continent_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "continent_name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -1455,11 +1771,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1548,6 +1872,10 @@ Object {
                 "type": "keyword",
               },
               "platform": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "type": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1729,11 +2057,19 @@ Object {
               "exists": Object {
                 "type": "boolean",
               },
+              "signing_id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "status": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "subject_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "team_id": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -1790,6 +2126,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "ssdeep": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
           },
           "name": Object {
@@ -1816,11 +2156,19 @@ Object {
                   "exists": Object {
                     "type": "boolean",
                   },
+                  "signing_id": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
                   "status": Object {
                     "ignore_above": 1024,
                     "type": "keyword",
                   },
                   "subject_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "team_id": Object {
                     "ignore_above": 1024,
                     "type": "keyword",
                   },
@@ -1877,6 +2225,10 @@ Object {
                     "ignore_above": 1024,
                     "type": "keyword",
                   },
+                  "ssdeep": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
                 },
               },
               "name": Object {
@@ -1888,6 +2240,38 @@ Object {
                 },
                 "ignore_above": 1024,
                 "type": "keyword",
+              },
+              "pe": Object {
+                "properties": Object {
+                  "architecture": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "company": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "description": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "file_version": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "imphash": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "original_file_name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "product": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
               },
               "pgid": Object {
                 "type": "long",
@@ -1939,6 +2323,10 @@ Object {
           },
           "pe": Object {
             "properties": Object {
+              "architecture": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "company": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -1948,6 +2336,10 @@ Object {
                 "type": "keyword",
               },
               "file_version": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "imphash": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -2051,6 +2443,10 @@ Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
+          "hosts": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
           "ip": Object {
             "type": "ip",
           },
@@ -2144,6 +2540,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "continent_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "continent_name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -2163,11 +2563,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -2197,6 +2605,10 @@ Object {
             "type": "long",
           },
           "registered_domain": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "subdomain": Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
@@ -2255,6 +2667,10 @@ Object {
                     "type": "text",
                   },
                 },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "roles": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -2761,6 +3177,10 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "continent_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "continent_name": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
@@ -2780,11 +3200,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "postal_code": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
               "region_iso_code": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
               "region_name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "timezone": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
@@ -2814,6 +3242,10 @@ Object {
             "type": "long",
           },
           "registered_domain": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "subdomain": Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
@@ -2875,7 +3307,19 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
             },
+          },
+        },
+      },
+      "span": Object {
+        "properties": Object {
+          "id": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
           },
         },
       },
@@ -2992,6 +3436,10 @@ Object {
                     "type": "keyword",
                   },
                   "provider": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "reason": Object {
                     "ignore_above": 1024,
                     "type": "keyword",
                   },
@@ -3156,6 +3604,28 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "subtechnique": Object {
+                "properties": Object {
+                  "id": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "name": Object {
+                    "fields": Object {
+                      "text": Object {
+                        "norms": false,
+                        "type": "text",
+                      },
+                    },
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "reference": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
             },
           },
         },
@@ -3218,6 +3688,112 @@ Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
+              "x509": Object {
+                "properties": Object {
+                  "alternative_names": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "issuer": Object {
+                    "properties": Object {
+                      "common_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "country": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "distinguished_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "locality": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organization": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organizational_unit": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "state_or_province": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                    },
+                  },
+                  "not_after": Object {
+                    "type": "date",
+                  },
+                  "not_before": Object {
+                    "type": "date",
+                  },
+                  "public_key_algorithm": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "public_key_curve": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "public_key_exponent": Object {
+                    "doc_values": false,
+                    "index": false,
+                    "type": "long",
+                  },
+                  "public_key_size": Object {
+                    "type": "long",
+                  },
+                  "serial_number": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "signature_algorithm": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "subject": Object {
+                    "properties": Object {
+                      "common_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "country": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "distinguished_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "locality": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organization": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organizational_unit": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "state_or_province": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                    },
+                  },
+                  "version_number": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
             },
           },
           "curve": Object {
@@ -3277,6 +3853,112 @@ Object {
               "subject": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
+              },
+              "x509": Object {
+                "properties": Object {
+                  "alternative_names": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "issuer": Object {
+                    "properties": Object {
+                      "common_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "country": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "distinguished_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "locality": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organization": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organizational_unit": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "state_or_province": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                    },
+                  },
+                  "not_after": Object {
+                    "type": "date",
+                  },
+                  "not_before": Object {
+                    "type": "date",
+                  },
+                  "public_key_algorithm": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "public_key_curve": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "public_key_exponent": Object {
+                    "doc_values": false,
+                    "index": false,
+                    "type": "long",
+                  },
+                  "public_key_size": Object {
+                    "type": "long",
+                  },
+                  "serial_number": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "signature_algorithm": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "subject": Object {
+                    "properties": Object {
+                      "common_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "country": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "distinguished_name": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "locality": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organization": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "organizational_unit": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                      "state_or_province": Object {
+                        "ignore_above": 1024,
+                        "type": "keyword",
+                      },
+                    },
+                  },
+                  "version_number": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
               },
             },
           },
@@ -3363,6 +4045,10 @@ Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
+          "subdomain": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
           "top_level_domain": Object {
             "ignore_above": 1024,
             "type": "keyword",
@@ -3375,9 +4061,129 @@ Object {
       },
       "user": Object {
         "properties": Object {
+          "changes": Object {
+            "properties": Object {
+              "domain": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "email": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "full_name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "group": Object {
+                "properties": Object {
+                  "domain": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
+              "hash": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
           "domain": Object {
             "ignore_above": 1024,
             "type": "keyword",
+          },
+          "effective": Object {
+            "properties": Object {
+              "domain": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "email": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "full_name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "group": Object {
+                "properties": Object {
+                  "domain": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
+              "hash": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
           },
           "email": Object {
             "ignore_above": 1024,
@@ -3426,6 +4232,70 @@ Object {
             },
             "ignore_above": 1024,
             "type": "keyword",
+          },
+          "roles": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "target": Object {
+            "properties": Object {
+              "domain": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "email": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "full_name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "group": Object {
+                "properties": Object {
+                  "domain": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                  "name": Object {
+                    "ignore_above": 1024,
+                    "type": "keyword",
+                  },
+                },
+              },
+              "hash": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "id": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "name": Object {
+                "fields": Object {
+                  "text": Object {
+                    "norms": false,
+                    "type": "text",
+                  },
+                },
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "roles": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
           },
         },
       },
@@ -3484,6 +4354,10 @@ Object {
                 "type": "keyword",
               },
               "platform": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "type": Object {
                 "ignore_above": 1024,
                 "type": "keyword",
               },
