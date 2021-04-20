@@ -254,7 +254,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.settings.globalOutputDescription"
-          defaultMessage="These settings are applied globally to the {outputs} section of all agent policies and will affect all enrolled agents if changed."
+          defaultMessage="These settings are applied globally to the {outputs} section of all agent policies and affect all enrolled agents."
           values={{
             outputs: <EuiCode>outputs</EuiCode>,
           }}
