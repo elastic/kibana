@@ -49,7 +49,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
-import { Ecs } from '../../common/ecs_types';
+import { Ecs } from '../../../common';
 export interface UserActionTreeProps {
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   caseServices: CaseServices;

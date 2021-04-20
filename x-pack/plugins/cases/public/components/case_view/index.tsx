@@ -39,7 +39,7 @@ import {
 } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
-import { Ecs } from '../../common/ecs_types';
+import { Ecs } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
