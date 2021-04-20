@@ -28,10 +28,10 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
-  'observability:enableAlertingExperience': boolean;
   'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;

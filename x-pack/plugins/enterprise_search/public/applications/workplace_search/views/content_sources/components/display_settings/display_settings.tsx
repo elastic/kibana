@@ -20,18 +20,10 @@ import {
 } from '@elastic/eui';
 
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
-import { KibanaLogic } from '../../../../../shared/kibana';
 import { Loading } from '../../../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
-import { AppLogic } from '../../../../app_logic';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { SAVE_BUTTON } from '../../../../constants';
-
-import {
-  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
-  DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
-  getContentSourcePath,
-} from '../../../../routes';
 
 import {
   UNSAVED_MESSAGE,
@@ -42,7 +34,7 @@ import {
   SEARCH_RESULTS_LABEL,
   RESULT_DETAIL_LABEL,
 } from './constants';
-import { DisplaySettingsLogic } from './display_settings_logic';
+import { DisplaySettingsLogic, TabId } from './display_settings_logic';
 import { FieldEditorModal } from './field_editor_modal';
 import { ResultDetail } from './result_detail';
 import { SearchResults } from './search_results';
@@ -52,19 +44,20 @@ interface DisplaySettingsProps {
 }
 
 export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
-  const { initializeDisplaySettings, setServerData } = useActions(DisplaySettingsLogic);
+  const { initializeDisplaySettings, setServerData, handleSelectedTabChanged } = useActions(
+    DisplaySettingsLogic
+  );
 
   const {
     dataLoading,
-    sourceId,
     addFieldModalVisible,
     unsavedChanges,
     exampleDocuments,
+    navigatingBetweenTabs,
   } = useValues(DisplaySettingsLogic);
 
-  const { isOrganization } = useValues(AppLogic);
-
   const hasDocuments = exampleDocuments.length > 0;
+  const hasUnsavedChanges = hasDocuments && unsavedChanges;
 
   useEffect(() => {
     initializeDisplaySettings();
@@ -87,12 +80,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
   ] as EuiTabbedContentTab[];
 
   const onSelectedTabChanged = (tab: EuiTabbedContentTab) => {
-    const path =
-      tab.id === tabs[1].id
-        ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
-        : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
-
-    KibanaLogic.values.navigateToUrl(path);
+    handleSelectedTabChanged(tab.id as TabId);
   };
 
   const handleFormSubmit = (e: FormEvent) => {
@@ -103,7 +91,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
   return (
     <>
       <UnsavedChangesPrompt
-        hasUnsavedChanges={hasDocuments && unsavedChanges}
+        hasUnsavedChanges={!navigatingBetweenTabs && hasUnsavedChanges}
         messageText={UNSAVED_MESSAGE}
       />
       <form onSubmit={handleFormSubmit}>
@@ -125,7 +113,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
             onTabClick={onSelectedTabChanged}
           />
         ) : (
-          <EuiPanel>
+          <EuiPanel hasShadow={false} color="subdued">
             <EuiEmptyPrompt
               iconType="indexRollupApp"
               title={<h2>{DISPLAY_SETTINGS_EMPTY_TITLE}</h2>}
