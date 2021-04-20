@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
 import { ValuesType } from 'utility-types';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
@@ -17,8 +16,8 @@ import { useServiceTransactionTypesFetcher } from './use_service_transaction_typ
 import { useUrlParams } from '../url_params_context/use_url_params';
 import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
 import { IUrlParams } from '../url_params_context/types';
-import { useFetcher } from '../../hooks/use_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
@@ -39,9 +38,6 @@ export function ApmServiceContextProvider({
   const { urlParams } = useUrlParams();
   const { agentName } = useServiceAgentNameFetcher();
 
-  const { start, end, environment } = urlParams;
-  const { serviceName } = useParams<{ serviceName?: string }>();
-
   const transactionTypes = useServiceTransactionTypesFetcher();
 
   const transactionType = getTransactionType({
@@ -50,29 +46,8 @@ export function ApmServiceContextProvider({
     agentName,
   });
 
-  const { data: { alerts } = { alerts: [] as APMServiceAlert[] } } = useFetcher(
-    (callApmApi) => {
-      if (!start || !end || !serviceName || !transactionType) {
-        return;
-      }
+  const { alerts } = useServiceAlertsFetcher(transactionType);
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/alerts',
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            transactionType,
-            environment,
-          },
-        },
-      });
-    },
-    [start, end, serviceName, transactionType, environment]
-  );
   return (
     <APMServiceContext.Provider
       value={{

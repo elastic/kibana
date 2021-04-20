@@ -695,7 +695,9 @@ const serviceAlertsRoute = createApmServerRoute({
     );
 
     if (!apmRuleRegistryClient) {
-      throw Boom.failedDependency();
+      throw Boom.failedDependency(
+        'xpack.ruleRegistry.unsafe.write.enabled is set to false'
+      );
     }
 
     return {

@@ -82,6 +82,9 @@ exports[`Home component should render services 1`] = `
             },
           },
         },
+        "observability": Object {
+          "isAlertingExperienceEnabled": [Function],
+        },
       },
     }
   }
@@ -173,6 +176,9 @@ exports[`Home component should render traces 1`] = `
               "useHash": false,
             },
           },
+        },
+        "observability": Object {
+          "isAlertingExperienceEnabled": [Function],
         },
       },
     }
