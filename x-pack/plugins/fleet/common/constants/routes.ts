@@ -76,6 +76,7 @@ export const SETTINGS_API_ROUTES = {
 // App API routes
 export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
+  REGENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service-token`,
 };
 
 // Agent API routes

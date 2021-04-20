@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,10 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DownloadStep } from '../components/agent_enrollment_flyout/steps';
-import { useStartServices, useGetOutputs } from '../../../hooks';
+import { useStartServices, useGetOutputs, sendRegenerateServiceToken } from '../../../hooks';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
+  max-width: 100%;
 `;
 
 export const ContentWrapper = styled(EuiFlexGroup)`
@@ -38,8 +39,13 @@ export const ContentWrapper = styled(EuiFlexGroup)`
   max-width: 800px;
 `;
 
-type OS_TYPE = 'linux-mac' | 'windows' | 'deb-rpm';
-const OS_OPTIONS: Array<{ text: string; value: OS_TYPE }> = [
+// Otherwise the copy button is over the text
+const CommandCode = styled.pre({
+  overflow: 'scroll',
+});
+
+type PLATFORM_TYPE = 'linux-mac' | 'windows' | 'deb-rpm';
+const PLATFORM_OPTIONS: Array<{ text: string; value: PLATFORM_TYPE }> = [
   { text: 'Linux / macOS', value: 'linux-mac' },
   { text: 'Windows', value: 'windows' },
   { text: 'RPM / DEB', value: 'deb-rpm' },
@@ -48,7 +54,8 @@ const OS_OPTIONS: Array<{ text: string; value: OS_TYPE }> = [
 const OnPremInstructions: React.FC = () => {
   const outputsRequest = useGetOutputs();
   const [serviceToken, setServiceToken] = useState<string>();
-  const [os, setOS] = useState<OS_TYPE>('linux-mac');
+  const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
+  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux-mac');
 
   const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
@@ -57,7 +64,7 @@ const OnPremInstructions: React.FC = () => {
     if (!serviceToken || !esHost) {
       return '';
     }
-    switch (os) {
+    switch (platform) {
       case 'linux-mac':
         return `./elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
       case 'windows':
@@ -69,7 +76,16 @@ sudo systemctl start elastic-agent`;
       default:
         return '';
     }
-  }, [serviceToken, esHost, os]);
+  }, [serviceToken, esHost, platform]);
+
+  const getServiceToken = useCallback(async () => {
+    setIsLoadingServiceToken(true);
+    const { data } = await sendRegenerateServiceToken();
+    if (data?.value) {
+      setServiceToken(data?.value);
+    }
+    setIsLoadingServiceToken(false);
+  }, []);
 
   return (
     <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>
@@ -116,17 +132,23 @@ sudo systemctl start elastic-agent`;
                 </EuiText>
                 <EuiSpacer size="m" />
                 {!serviceToken ? (
-                  <EuiButton
-                    fill
-                    onClick={() => {
-                      setServiceToken('test123');
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.fleetServerSetup.generateServiceTokenButton"
-                      defaultMessage="Generate service token"
-                    />
-                  </EuiButton>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        isLoading={isLoadingServiceToken}
+                        isDisabled={isLoadingServiceToken}
+                        onClick={() => {
+                          getServiceToken();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.fleetServerSetup.generateServiceTokenButton"
+                          defaultMessage="Generate service token"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 ) : (
                   <>
                     <EuiCallOut size="s">
@@ -136,7 +158,7 @@ sudo systemctl start elastic-agent`;
                       />
                     </EuiCallOut>
                     <EuiSpacer size="m" />
-                    <EuiFlexGroup alignItems="center">
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <strong>
                           <FormattedMessage
@@ -145,11 +167,11 @@ sudo systemctl start elastic-agent`;
                           />
                         </strong>
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <FlexItemWithMinWidth>
                         <EuiCodeBlock paddingSize="m" isCopyable>
-                          {serviceToken}
+                          <CommandCode>{serviceToken}</CommandCode>
                         </EuiCodeBlock>
-                      </EuiFlexItem>
+                      </FlexItemWithMinWidth>
                     </EuiFlexGroup>
                   </>
                 )}
@@ -174,21 +196,30 @@ sudo systemctl start elastic-agent`;
                   prepend={
                     <EuiText>
                       <FormattedMessage
-                        id="xpack.fleet.fleetServerSetup.osSelectLabel"
-                        defaultMessage="OS"
+                        id="xpack.fleet.fleetServerSetup.platformSelectLabel"
+                        defaultMessage="Platform"
                       />
                     </EuiText>
                   }
-                  options={OS_OPTIONS}
-                  value={os}
-                  onChange={(e) => setOS(e.target.value as OS_TYPE)}
-                  aria-label={i18n.translate('xpack.fleet.fleetServerSetup.osSelectAriaLabel', {
-                    defaultMessage: 'Operating system',
-                  })}
+                  options={PLATFORM_OPTIONS}
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
+                  aria-label={i18n.translate(
+                    'xpack.fleet.fleetServerSetup.platformSelectAriaLabel',
+                    {
+                      defaultMessage: 'Platform',
+                    }
+                  )}
                 />
                 <EuiSpacer size="s" />
-                <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m" language="console">
-                  {installCommand}
+                <EuiCodeBlock
+                  fontSize="m"
+                  isCopyable={true}
+                  paddingSize="m"
+                  language="console"
+                  whiteSpace="pre"
+                >
+                  <CommandCode>{installCommand}</CommandCode>
                 </EuiCodeBlock>
               </>
             ) : null,

@@ -164,6 +164,7 @@ export const settingsRoutesService = {
 
 export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getRegenerateServiceTokenPath: () => APP_API_ROUTES.REGENERATE_SERVICE_TOKEN_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {
