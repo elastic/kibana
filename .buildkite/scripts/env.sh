@@ -66,3 +66,5 @@ export KIBANA_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
 if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
   export BUILD_TS_REFS_CACHE_ENABLE=false
 fi
+
+export BUILD_TS_REFS_DISABLE=true
