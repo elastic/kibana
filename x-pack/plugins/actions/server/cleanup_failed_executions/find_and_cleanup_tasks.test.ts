@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
 import { spacesMock } from '../../../spaces/server/mocks';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -94,6 +95,39 @@ describe('findAndCleanupTasks', () => {
       sortField: 'runAt',
       sortOrder: 'asc',
     });
+    expect(esKuery.toElasticsearchQuery(savedObjectsRepository.find.mock.calls[0][0].filter))
+      .toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "task.attributes.status": "failed",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "task.attributes.taskType": "actions:my-action-type",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 
   it('should call the cleanupTasks function with proper parameters', async () => {
@@ -115,6 +149,7 @@ describe('findAndCleanupTasks', () => {
       success: true,
       successCount: 0,
       failureCount: 0,
+      remaining: 0,
     });
   });
 
