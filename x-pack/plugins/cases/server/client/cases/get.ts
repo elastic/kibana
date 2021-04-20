@@ -27,8 +27,8 @@ import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
-import { AuthorizationFilter, Operations } from '../../authorization';
-import { constructQueryOptions, createAuditMsg } from '../utils';
+import { Operations } from '../../authorization';
+import { constructQueryOptions, ensureAuthorized, getAuthorizationFilter } from '../utils';
 
 interface GetParams {
   id: string;
@@ -73,14 +73,13 @@ export const get = async (
       });
     }
 
-    try {
-      await auth.ensureAuthorized([theCase.attributes.owner], Operations.getCase);
-    } catch (error) {
-      auditLogger?.log(
-        createAuditMsg({ operation: Operations.getCase, error, savedObjectID: theCase.id })
-      );
-      throw error;
-    }
+    await ensureAuthorized({
+      operation: Operations.getCase,
+      owners: [theCase.attributes.owner],
+      authorization: auth,
+      auditLogger,
+      savedObjectIDs: [theCase.id],
+    });
 
     if (!includeComments) {
       return CaseResponseRt.encode(
@@ -136,15 +135,12 @@ export async function getTags(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    let authFindHelpers: AuthorizationFilter;
-    try {
-      authFindHelpers = await auth.getFindAuthorizationFilter(Operations.getTags);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
-      throw error;
-    }
+    const { filter: authorizationFilter } = await getAuthorizationFilter({
+      authorization: auth,
+      operation: Operations.getTags,
+      auditLogger,
+    });
 
-    const { filter: authorizationFilter } = authFindHelpers;
     const queryArgs = {
       owner: queryParams.owner,
     };
@@ -181,15 +177,12 @@ export async function getReporters(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    let authFindHelpers: AuthorizationFilter;
-    try {
-      authFindHelpers = await auth.getFindAuthorizationFilter(Operations.getReporters);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
-      throw error;
-    }
+    const { filter: authorizationFilter } = await getAuthorizationFilter({
+      authorization: auth,
+      operation: Operations.getReporters,
+      auditLogger,
+    });
 
-    const { filter: authorizationFilter } = authFindHelpers;
     const queryArgs = {
       owner: queryParams.owner,
     };

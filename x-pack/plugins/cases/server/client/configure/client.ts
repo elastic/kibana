@@ -18,7 +18,6 @@ import {
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import {
-  createAuditMsg,
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';
@@ -32,6 +31,7 @@ import { getMappings } from './get_mappings';
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
+import { createAuditMsg, ensureAuthorized } from '../utils';
 
 interface ConfigurationGetFields {
   connectorId: string;
@@ -241,19 +241,19 @@ async function create(
     let error = null;
 
     const savedObjectID = SavedObjectsUtils.generateId();
-    try {
-      await authorization.ensureAuthorized(configuration.owner, Operations.createConfiguration);
-    } catch (e) {
-      auditLogger?.log(
-        createAuditMsg({ operation: Operations.createConfiguration, error: e, savedObjectID })
-      );
-      throw e;
-    }
+
+    await ensureAuthorized({
+      operation: Operations.createConfiguration,
+      owners: [configuration.owner],
+      authorization,
+      auditLogger,
+      savedObjectIDs: [savedObjectID],
+    });
 
     // log that we're attempting to create a configuration
     auditLogger?.log(
       createAuditMsg({
-        operation: Operations.createCase,
+        operation: Operations.createConfiguration,
         outcome: EventOutcome.UNKNOWN,
         savedObjectID,
       })
