@@ -118,7 +118,7 @@
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
-    "@hapi/boom": "^7.4.11",
+    "@hapi/boom": "npm:@commercial/boom@^7.4.12",
     "@hapi/oppsy": "^2.1.2",
     "@hapi/statehood": "^6.1.2",
     "@kbn/babel-preset": "1.0.0",

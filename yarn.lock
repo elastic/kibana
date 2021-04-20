@@ -764,7 +764,7 @@
   dependencies:
     "@commercial/hoek" "^8.5.1"
 
-"@commercial/boom@^7.4.11":
+"@commercial/boom@^7.4.11", "@hapi/boom@npm:@commercial/boom@^7.4.12":
   version "7.4.12"
   resolved "https://registry.yarnpkg.com/@commercial/boom/-/boom-7.4.12.tgz#31398c7cb8018d8a23e7963baf44c89d71fe9b72"
   integrity sha512-UAQ8Xol2rEpJ+DcFrICCw7EwP4pk9D6rcOaYLr0X3VBsFcvtul7SiQOvPQOIy0aggDlma4++UMm5XRpkC1PeZA==
@@ -1100,7 +1100,7 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
-"@hapi/boom@7.x.x", "@hapi/boom@^7.4.11":
+"@hapi/boom@7.x.x":
   version "7.4.11"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.11.tgz#37af8417eb9416aef3367aa60fa04a1a9f1fc262"
   integrity sha512-VSU/Cnj1DXouukYxxkes4nNJonCnlogHvIff1v1RVoN4xzkKhMXX+GRmb3NyH1iar10I9WFPDv2JPwfH3GaV0A==

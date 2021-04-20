@@ -133,7 +133,7 @@
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
-    "@hapi/boom": "^7.4.11",
+    "@hapi/boom": "npm:@commercial/boom@^7.4.12",
     "@hapi/good-squeeze": "^6.0.0",
     "@hapi/h2o2": "^8.3.2",
     "@hapi/hapi": "npm:@commercial/hapi@^17.9.4",
