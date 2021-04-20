@@ -296,6 +296,7 @@ interface AllowlistFields {
 // Allow list process fields within events.  This includes "process" and "Target.process".'
 /* eslint-disable @typescript-eslint/naming-convention */
 const allowlistProcessFields: AllowlistFields = {
+  args: true,
   name: true,
   executable: true,
   command_line: true,
@@ -310,44 +311,19 @@ const allowlistProcessFields: AllowlistFields = {
       integrity_level_name: true,
     },
   },
-  parent: {
-    name: true,
-    executable: true,
-    command_line: true,
-    hash: true,
-    Ext: {
-      architecture: true,
-      code_signature: true,
-      dll: true,
-      token: {
-        integrity_level_name: true,
-      },
-    },
-    uptime: true,
-    pid: true,
-    ppid: true,
-  },
   thread: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
-const allowlistEventFields: AllowlistFields = {
-  '@timestamp': true,
-  agent: true,
-  Endpoint: true,
-  Memory_protection: true,
-  Ransomware: true,
-  data_stream: true,
-  ecs: true,
-  elastic: true,
-  event: true,
-  rule: {
-    id: true,
+const allowlistBaseEventFields: AllowlistFields = {
+  dll: {
     name: true,
-    ruleset: true,
+    path: true,
+    code_signature: true,
   },
+  event: true,
   file: {
     name: true,
     path: true,
@@ -365,13 +341,48 @@ const allowlistEventFields: AllowlistFields = {
       quarantine_message: true,
     },
   },
+  process: {
+    parent: allowlistProcessFields,
+    ...allowlistProcessFields,
+  },
+  network: {
+    direction: true,
+  },
+  registry: {
+    hive: true,
+    key: true,
+    path: true,
+    value: true,
+  },
+  Target: {
+    process: {
+      parent: allowlistProcessFields,
+      ...allowlistProcessFields,
+    },
+  },
+};
+
+const allowlistEventFields: AllowlistFields = {
+  '@timestamp': true,
+  agent: true,
+  Endpoint: true,
+  Memory_protection: true,
+  Ransomware: true,
+  data_stream: true,
+  ecs: true,
+  elastic: true,
+  // behavioral protection re-nests some field sets under events.*
+  events: allowlistBaseEventFields,
+  rule: {
+    id: true,
+    name: true,
+    ruleset: true,
+    version: true,
+  },
   host: {
     os: true,
   },
-  process: allowlistProcessFields,
-  Target: {
-    process: allowlistProcessFields,
-  },
+  ...allowlistBaseEventFields,
 };
 
 export function copyAllowlistedFields(
@@ -383,6 +394,14 @@ export function copyAllowlistedFields(
     if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        return {
+          ...newEvent,
+          // cast to object[] to be a valid SearchTypes variant
+          [allowKey]: (eventValue as object[]).map((v) =>
+            copyAllowlistedFields(allowValue, v as TelemetryEvent)
+          ),
+        };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
         const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
         return {
