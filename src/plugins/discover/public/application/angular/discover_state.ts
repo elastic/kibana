@@ -170,7 +170,7 @@ export function getState({
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 
-  if (appStateFromUrl && appStateFromUrl.sort && !appStateFromUrl.sort.length) {
+  if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {
     // If there's an empty array given in the URL, the sort prop should be removed
     // This allows the sort prop to be overwritten with the default sorting
     delete appStateFromUrl.sort;
