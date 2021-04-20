@@ -161,6 +161,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.splitField,
           cs.intervalMs,
           jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
 
@@ -184,6 +185,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
               fields: await chartLoader.loadFieldExampleValues(
                 field,
                 jobCreator.runtimeMappings,
+                // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
                 jobCreator.datafeedConfig.indices_options
               ),
             };

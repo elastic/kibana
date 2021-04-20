@@ -246,6 +246,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       job.data_description.time_field,
       query,
       datafeed.runtime_mappings,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       datafeed.indices_options
     );
 
@@ -377,6 +378,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const data = {
       index: datafeed.indices,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeed.indices_options ?? {}),
     };
 

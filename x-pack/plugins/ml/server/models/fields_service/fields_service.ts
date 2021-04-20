@@ -185,6 +185,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -406,6 +407,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 

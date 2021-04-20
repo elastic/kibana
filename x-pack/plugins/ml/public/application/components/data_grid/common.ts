@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import type { estypes } from '@elastic/elasticsearch';
 import {
   IndexPattern,
   IFieldType,
