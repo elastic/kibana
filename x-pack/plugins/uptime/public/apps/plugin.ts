@@ -85,11 +85,11 @@ export class UptimePlugin
 
     if (plugins.observability) {
       plugins.observability.dashboard.register({
-        appName: 'uptime',
+        appName: 'synthetics',
         hasData: async () => {
           const dataHelper = await getUptimeDataHelper();
           const status = await dataHelper.indexStatus();
-          return status.docCount > 0;
+          return { hasData: status.docCount > 0, indices: status.indices };
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getUptimeDataHelper();
