@@ -38,6 +38,7 @@ mkdir -p "$KIBANA_BUILD_LOCATION"
 cp -pR install/kibana/. "$KIBANA_BUILD_LOCATION/"
 
 echo "--- Archive built plugins"
+shopt -s globstar
 tar -zcf \
   target/kibana-default-plugins.tar.gz \
   x-pack/plugins/**/target/public \
