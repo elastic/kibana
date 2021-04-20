@@ -49,6 +49,11 @@ import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
+import { Ecs } from '@kbn/logging';
+import { EcsEventCategory } from '@kbn/logging';
+import { EcsEventKind } from '@kbn/logging';
+import { EcsEventOutcome } from '@kbn/logging';
+import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { estypes } from '@elastic/elasticsearch';
 import { ExistsParams } from 'elasticsearch';
@@ -885,6 +890,16 @@ export interface DiscoveredPlugin {
     readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+export { Ecs }
+
+export { EcsEventCategory }
+
+export { EcsEventKind }
+
+export { EcsEventOutcome }
+
+export { EcsEventType }
 
 // @public
 export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
@@ -2779,7 +2794,7 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
     // (undocumented)
-    error: (msg: string, meta: LogMeta) => void;
+    error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
