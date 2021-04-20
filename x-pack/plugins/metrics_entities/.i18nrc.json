@@ -1,7 +1,0 @@
-{
-  "prefix": "metricsEntities",
-  "paths": {
-    "metricsEntities": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
