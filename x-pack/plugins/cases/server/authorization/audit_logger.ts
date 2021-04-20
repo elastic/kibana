@@ -7,6 +7,7 @@
 
 import { OperationDetails } from '.';
 import { AuditLogger, EventCategory, EventOutcome } from '../../../security/server';
+import { createAuditMsg, CreateAuditMsgParams } from '../common';
 
 enum AuthorizationResult {
   Unauthorized = 'Unauthorized',
@@ -20,19 +21,19 @@ export class AuthorizationAuditLogger {
     this.auditLogger = logger;
   }
 
-  private static createMessage({
+  private createMessage({
     result,
-    owners,
+    owner,
     operation,
   }: {
     result: AuthorizationResult;
-    owners?: string[];
+    owner?: string;
     operation: OperationDetails;
   }): string {
-    const ownerMsg = owners == null ? 'of any owner' : `of owner(s) "${owners.join(',')}"`;
+    const ownerMsg = owner == null ? 'of any owner' : `with "${owner}" as the owner`;
     /**
      * This will take the form:
-     * `Unauthorized to create case of owner(s) "securitySolution"`
+     * `Unauthorized to create case with "securitySolution" as the owner`
      * `Unauthorized to find cases of any owner`.
      */
     return `${result} to ${operation.verbs.present} ${operation.docType} ${ownerMsg}`;
@@ -63,18 +64,25 @@ export class AuthorizationAuditLogger {
     });
   }
 
+  /**
+   * Passthrough method for creating a generic audit message.
+   */
+  public genericOperation(params: CreateAuditMsgParams) {
+    this.auditLogger?.log(createAuditMsg(params));
+  }
+
   public failure({
     username,
-    owners,
+    owner,
     operation,
   }: {
     username?: string;
-    owners?: string[];
+    owner?: string;
     operation: OperationDetails;
   }): string {
-    const message = AuthorizationAuditLogger.createMessage({
+    const message = this.createMessage({
       result: AuthorizationResult.Unauthorized,
-      owners,
+      owner,
       operation,
     });
     this.auditLogger?.log({
@@ -98,17 +106,33 @@ export class AuthorizationAuditLogger {
   public success({
     username,
     operation,
+    owner,
+  }: {
+    username: string;
+    owner: string;
+    operation: OperationDetails;
+  }): string {
+    const message = this.createMessage({
+      result: AuthorizationResult.Authorized,
+      owner,
+      operation,
+    });
+    this.logSuccessEvent({ message, operation, username });
+    return message;
+  }
+
+  public bulkSuccess({
+    username,
+    operation,
     owners,
   }: {
     username?: string;
     owners: string[];
     operation: OperationDetails;
   }): string {
-    const message = AuthorizationAuditLogger.createMessage({
-      result: AuthorizationResult.Authorized,
-      owners,
-      operation,
-    });
+    const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
+      operation.docType
+    } of owner: ${owners.join(', ')}`;
     this.logSuccessEvent({ message, operation, username });
     return message;
   }
