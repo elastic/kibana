@@ -43,8 +43,7 @@ babel(
       "$(locations :srcs)",
       "--out-dir",
       "$(@D)",
-      "--copy-files",
-      "--quiet"
+      "--copy-files"
   ],
 )
 
