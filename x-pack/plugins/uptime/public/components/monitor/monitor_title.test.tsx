@@ -143,14 +143,15 @@ describe('MonitorTitle component', () => {
     }) as HTMLAnchorElement;
     expect(betaLink).toBeInTheDocument();
     expect(betaLink.href).toBe('https://www.elastic.co/what-is/synthetic-monitoring');
-    expect(screen.getByText('Beta')).toBeInTheDocument();
+    expect(screen.getByText('Browser (BETA)')).toBeInTheDocument();
   });
 
   it('does not render beta disclaimer for http', () => {
     render(<MonitorPageTitle />, {
       state: { monitorStatus: { status: defaultMonitorStatus, loading: false } },
     });
-    expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    expect(screen.getByText('HTTP ping')).toBeInTheDocument();
+    expect(screen.queryByText(/BETA/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'See more External link' })).not.toBeInTheDocument();
   });
 
@@ -158,15 +159,17 @@ describe('MonitorTitle component', () => {
     render(<MonitorPageTitle />, {
       state: { monitorStatus: { status: defaultTCPMonitorStatus, loading: false } },
     });
-    expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    expect(screen.getByText('TCP ping')).toBeInTheDocument();
+    expect(screen.queryByText(/BETA/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'See more External link' })).not.toBeInTheDocument();
   });
 
-  it('does not render beta disclaimer for icmp', () => {
+  it('renders badge and does not render beta disclaimer for icmp', () => {
     render(<MonitorPageTitle />, {
       state: { monitorStatus: { status: defaultICMPMonitorStatus, loading: false } },
     });
-    expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    expect(screen.getByText('ICMP ping')).toBeInTheDocument();
+    expect(screen.queryByText(/BETA/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'See more External link' })).not.toBeInTheDocument();
   });
 });
