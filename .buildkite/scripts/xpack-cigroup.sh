@@ -17,14 +17,14 @@ echo '--- Downloading Distribution and Plugin artifacts'
 
 cd "$WORKSPACE"
 
-buildkite-agent artifact download kibana-default.tar.gz
-buildkite-agent artifact download kibana-default-plugins.tar.gz
+buildkite-agent artifact download kibana-default.tar.gz .
+buildkite-agent artifact download kibana-default-plugins.tar.gz .
 
 tar -xvf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION"
 
 cd "$KIBANA_DIR"
 
-tar -xvf kibana-default-plugins.tar.gz
+tar -xvf ../kibana-default-plugins.tar.gz
 
 echo "--- Running $JOB"
 
