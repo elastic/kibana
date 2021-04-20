@@ -8,6 +8,7 @@
 
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
 
@@ -125,9 +126,16 @@ export function assertTelemetryPayload(
 ): void {
   const fullSchema = telemetrySchema.root;
 
-  merge(
+  const mergedPluginsSchema = merge(
+    {},
     get(fullSchema, 'properties.stack_stats.properties.kibana.properties.plugins'),
     telemetrySchema.plugins
+  );
+
+  set(
+    fullSchema,
+    'properties.stack_stats.properties.kibana.properties.plugins',
+    mergedPluginsSchema
   );
 
   const ossTelemetryValidationSchema = convertSchemaToConfigSchema(fullSchema);
