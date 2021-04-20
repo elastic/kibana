@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -132,17 +133,11 @@ export class ToolsControl extends Component<Props, State> {
         name: DRAW_BOUNDS_LABEL,
         panel: 2,
       },
-    ];
-
-    const hasGeoPoints = this.props.geoFields.some(({ geoFieldType }) => {
-      return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-    });
-    if (hasGeoPoints) {
-      tools.push({
+      {
         name: DRAW_DISTANCE_LABEL,
         panel: 3,
-      });
-    }
+      },
+    ];
 
     return [
       {
@@ -199,9 +194,7 @@ export class ToolsControl extends Component<Props, State> {
           <DistanceFilterForm
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_DISTANCE_LABEL_SHORT}
-            geoFields={this.props.geoFields.filter(({ geoFieldType }) => {
-              return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-            })}
+            geoFields={this.props.geoFields}
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             onSubmit={this._initiateDistanceDraw}
@@ -213,18 +206,20 @@ export class ToolsControl extends Component<Props, State> {
 
   _renderToolsButton() {
     return (
-      <EuiButtonIcon
-        className="mapToolbarOverlay__button"
-        color="text"
-        iconType="wrench"
-        onClick={this._togglePopover}
-        aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
-          defaultMessage: 'Tools',
-        })}
-        title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
-          defaultMessage: 'Tools',
-        })}
-      />
+      <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
+        <EuiButtonIcon
+          size="s"
+          color="text"
+          iconType="wrench"
+          onClick={this._togglePopover}
+          aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+            defaultMessage: 'Tools',
+          })}
+          title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+            defaultMessage: 'Tools',
+          })}
+        />
+      </EuiPanel>
     );
   }
 

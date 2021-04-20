@@ -30,17 +30,18 @@ interface Pipeline {
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
   let pipelinesCreated: string[] = [];
 
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const createPipeline = (pipeline: Pipeline, cachePipeline?: boolean) => {
     if (cachePipeline) {
       pipelinesCreated.push(pipeline.id);
     }
 
-    return es.ingest.putPipeline(pipeline);
+    return es.ingest.putPipeline(pipeline).then(({ body }) => body);
   };
 
-  const deletePipeline = (pipelineId: string) => es.ingest.deletePipeline({ id: pipelineId });
+  const deletePipeline = (pipelineId: string) =>
+    es.ingest.deletePipeline({ id: pipelineId }).then(({ body }) => body);
 
   const cleanupPipelines = () =>
     Promise.all(pipelinesCreated.map(deletePipeline))
@@ -53,11 +54,11 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       });
 
   const createIndex = (index: { index: string; id: string; body: object }) => {
-    return es.index(index);
+    return es.index(index).then(({ body }) => body);
   };
 
   const deleteIndex = (indexName: string) => {
-    return es.indices.delete({ index: indexName });
+    return es.indices.delete({ index: indexName }).then(({ body }) => body);
   };
 
   return {

@@ -71,6 +71,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
             delete hotPhaseActions.rollover.max_docs;
           }
 
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_size) {
+            hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_primary_shard_size;
+          }
+
           if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
             hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
           } else {
@@ -266,6 +272,13 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     if (_meta.frozen?.enabled) {
       draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
       const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE MIN AGE
+       */
+      if (updatedPolicy.phases.frozen?.min_age) {
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+      }
 
       /**
        * FROZEN PHASE SEARCHABLE SNAPSHOT

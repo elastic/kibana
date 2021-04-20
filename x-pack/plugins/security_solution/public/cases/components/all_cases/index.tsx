@@ -342,7 +342,7 @@ export const AllCases = React.memo<AllCasesProps>(
           newFilterOptions.status &&
           newFilterOptions.status === CaseStatuses['in-progress']
         ) {
-          setQueryParams({ sortField: SortFieldCase.updatedAt });
+          setQueryParams({ sortField: SortFieldCase.createdAt });
         }
         setFilters(newFilterOptions);
         refreshCases(false);

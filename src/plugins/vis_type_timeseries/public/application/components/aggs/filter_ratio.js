@@ -153,24 +153,20 @@ export const FilterRatioAgg = (props) => {
 
         {model.metric_agg !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('aggField')}
+            <FieldSelect
               label={
                 <FormattedMessage
                   id="visTypeTimeseries.filterRatio.fieldLabel"
                   defaultMessage="Field"
                 />
               }
-            >
-              <FieldSelect
-                fields={fields}
-                type={model.metric_agg}
-                restrict={getSupportedFieldsByMetricType(model.metric_agg)}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-              />
-            </EuiFormRow>
+              fields={fields}
+              type={model.metric_agg}
+              restrict={getSupportedFieldsByMetricType(model.metric_agg)}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

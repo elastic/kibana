@@ -82,6 +82,7 @@ export const getMetadataListRequestHandler = function (
 
     const unenrolledAgentIds = await findAllUnenrolledAgentIds(
       agentService,
+      endpointAppContext.service.getPackagePolicyService()!,
       context.core.savedObjects.client,
       context.core.elasticsearch.client.asCurrentUser
     );

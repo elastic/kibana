@@ -8,7 +8,6 @@
 
 import { ISearchSource } from 'src/plugins/data/public';
 import { getTopNavLinks } from './get_top_nav_links';
-import { inspectorPluginMock } from '../../../../../inspector/public/mocks';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../build_services';
@@ -17,6 +16,9 @@ import { GetStateReturn } from '../../angular/discover_state';
 const services = ({
   capabilities: {
     discover: {
+      save: true,
+    },
+    advancedSettings: {
       save: true,
     },
   },
@@ -28,7 +30,6 @@ test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
     getFieldCounts: jest.fn(),
     indexPattern: indexPatternMock,
-    inspectorAdapters: inspectorPluginMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,
@@ -38,6 +39,13 @@ test('getTopNavLinks result', () => {
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "description": "Options",
+        "id": "options",
+        "label": "Options",
+        "run": [Function],
+        "testId": "discoverOptionsButton",
+      },
       Object {
         "description": "New Search",
         "id": "new",
