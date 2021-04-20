@@ -21,6 +21,7 @@ import {
 import {
   ConditionEntry,
   ConditionEntryField,
+  OperatorEntryField,
   OperatingSystem,
 } from '../../../../../../../common/endpoint/types';
 
@@ -28,7 +29,7 @@ import {
   CONDITION_FIELD_DESCRIPTION,
   CONDITION_FIELD_TITLE,
   ENTRY_PROPERTY_TITLES,
-  OPERATOR_TITLE,
+  OPERATOR_TITLES,
 } from '../../translations';
 
 const ConditionEntryCell = memo<{
@@ -113,6 +114,18 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       ];
     }, [os]);
 
+    const operatorOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+      const dropDownOptions = [
+        OperatorEntryField.included,
+        OperatorEntryField.wildcard_caseless,
+      ].map((e) => ({
+        dropdownDisplay: OPERATOR_TITLES[e],
+        inputDisplay: OPERATOR_TITLES[e],
+        value: e,
+      }));
+      return dropDownOptions;
+    }, []);
+
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
       [entry, onChange]
@@ -120,6 +133,11 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
 
     const handleFieldUpdate = useCallback(
       (newField) => onChange({ ...entry, field: newField }, entry),
+      [entry, onChange]
+    );
+
+    const handleOperatorUpdate = useCallback(
+      (newOperator) => onChange({ ...entry, operator: newOperator }, entry),
       [entry, onChange]
     );
 
@@ -149,11 +167,24 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             />
           </ConditionEntryCell>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
-            <EuiFieldText name="operator" value={OPERATOR_TITLE.included} readOnly />
-          </ConditionEntryCell>
-        </EuiFlexItem>
+        {entry.field === ConditionEntryField.PATH ? (
+          <EuiFlexItem>
+            <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+              <EuiSuperSelect
+                options={operatorOptions}
+                onChange={handleOperatorUpdate}
+                valueOfSelected={entry.operator}
+                data-test-subj={getTestId('operator')}
+              />
+            </ConditionEntryCell>
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+              <EuiFieldText name="operator" value={OPERATOR_TITLES.included} readOnly />
+            </ConditionEntryCell>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={3}>
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText

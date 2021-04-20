@@ -69,10 +69,14 @@ export enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
+export enum OperatorEntryField {
+  included = 'included',
+  wildcard_caseless = 'wildcard_caseless',
+}
 export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
   type: 'match';
-  operator: 'included';
+  operator: keyof typeof OperatorEntryField;
   value: string;
 }
 

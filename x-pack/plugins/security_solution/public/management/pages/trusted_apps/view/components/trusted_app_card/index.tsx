@@ -31,7 +31,7 @@ import {
   ENTRY_PROPERTY_TITLES,
   CARD_DELETE_BUTTON_LABEL,
   CONDITION_FIELD_TITLE,
-  OPERATOR_TITLE,
+  OPERATOR_TITLES,
   CARD_EDIT_BUTTON_LABEL,
 } from '../../translations';
 
@@ -56,7 +56,7 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     truncateText: true,
     width: '20%',
     render(field: Entry['operator'], entry: Entry) {
-      return OPERATOR_TITLE[field];
+      return OPERATOR_TITLES[field];
     },
   },
   {
