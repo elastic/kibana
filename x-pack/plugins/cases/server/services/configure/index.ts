@@ -23,6 +23,7 @@ interface FindCaseConfigureArgs extends ClientArgs {
 
 interface PostCaseConfigureArgs extends ClientArgs {
   attributes: ESCasesConfigureAttributes;
+  id: string;
 }
 
 interface PatchCaseConfigureArgs extends ClientArgs {
@@ -69,12 +70,16 @@ export class CaseConfigureService {
     }
   }
 
-  public async post({ soClient, attributes }: PostCaseConfigureArgs) {
+  public async post({ soClient, attributes, id }: PostCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      return await soClient.create<ESCasesConfigureAttributes>(CASE_CONFIGURE_SAVED_OBJECT, {
-        ...attributes,
-      });
+      return await soClient.create<ESCasesConfigureAttributes>(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        {
+          ...attributes,
+        },
+        { id }
+      );
     } catch (error) {
       this.log.debug(`Error on POST a new case configuration: ${error}`);
       throw error;

@@ -37,6 +37,7 @@ export enum WriteOperations {
   CreateCase = 'createCase',
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
+  CreateConfiguration = 'createConfiguration',
 }
 
 /**

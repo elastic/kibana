@@ -6,6 +6,7 @@
  */
 import Boom from '@hapi/boom';
 
+import { SavedObjectsUtils } from '../../../../../../src/core/server';
 import { SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
   CaseConfigureResponseRt,
@@ -17,9 +18,11 @@ import {
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import {
+  createAuditMsg,
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';
+import { EventOutcome } from '../../../../security/server';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
@@ -28,6 +31,7 @@ import { getMappings } from './get_mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
+import { Operations } from '../../authorization';
 
 interface ConfigurationGetFields {
   connectorId: string;
@@ -95,12 +99,11 @@ async function get(
   const { savedObjectsClient: soClient, caseConfigureService, logger } = clientArgs;
   try {
     let error: string | null = null;
-
     const myCaseConfigure = await caseConfigureService.find({ soClient });
-
     const { connector, ...caseConfigureWithoutConnector } = myCaseConfigure.saved_objects[0]
       ?.attributes ?? { connector: null };
     let mappings: ConnectorMappingsAttributes[] = [];
+
     if (connector != null) {
       try {
         mappings = await casesClientInternal.configuration.getMappings({
@@ -226,9 +229,35 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { savedObjectsClient: soClient, caseConfigureService, logger, user } = clientArgs;
+  const {
+    savedObjectsClient: soClient,
+    caseConfigureService,
+    logger,
+    user,
+    authorization,
+    auditLogger,
+  } = clientArgs;
   try {
     let error = null;
+
+    const savedObjectID = SavedObjectsUtils.generateId();
+    try {
+      await authorization.ensureAuthorized(configuration.owner, Operations.createConfiguration);
+    } catch (e) {
+      auditLogger?.log(
+        createAuditMsg({ operation: Operations.createConfiguration, error: e, savedObjectID })
+      );
+      throw e;
+    }
+
+    // log that we're attempting to create a configuration
+    auditLogger?.log(
+      createAuditMsg({
+        operation: Operations.createCase,
+        outcome: EventOutcome.UNKNOWN,
+        savedObjectID,
+      })
+    );
 
     const myCaseConfigure = await caseConfigureService.find({ soClient });
     if (myCaseConfigure.saved_objects.length > 0) {
@@ -251,6 +280,7 @@ async function create(
         ? e.output.payload.message
         : `Error connecting to ${configuration.connector.name} instance`;
     }
+
     const post = await caseConfigureService.post({
       soClient,
       attributes: {
@@ -261,6 +291,7 @@ async function create(
         updated_at: null,
         updated_by: null,
       },
+      id: savedObjectID,
     });
 
     return CaseConfigureResponseRt.encode({

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getConfigurationRequest,
@@ -18,9 +18,19 @@ import {
   getConfiguration,
 } from '../../../../common/lib/utils';
 
+import {
+  secOnly,
+  obsOnlyRead,
+  secOnlyRead,
+  noKibanaPrivileges,
+  globalRead,
+  obsSecRead,
+} from '../../../../common/lib/authentication/users';
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
   describe('post_configure', () => {
@@ -153,6 +163,62 @@ export default ({ getService }: FtrProviderContext): void => {
         getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
         400
       );
+    });
+
+    describe('rbac', () => {
+      it('User: security solution only - should create a configuration', async () => {
+        const configuration = await createConfiguration(
+          supertestWithoutAuth,
+          getConfigurationRequest(),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+
+        expect(configuration.owner).to.eql('securitySolutionFixture');
+      });
+
+      it('User: security solution only - should NOT create a configuration of different owner', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+          403,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT create a configuration`, async () => {
+          await createConfiguration(
+            supertestWithoutAuth,
+            { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
+            403,
+            {
+              user,
+              space: 'space1',
+            }
+          );
+        });
+      }
+
+      it('should NOT create a configuration in a space with no permissions', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
+          403,
+          {
+            user: secOnly,
+            space: 'space2',
+          }
+        );
+      });
     });
   });
 };

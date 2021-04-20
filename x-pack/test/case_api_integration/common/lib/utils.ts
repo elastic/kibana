@@ -284,6 +284,7 @@ export const getConfigurationRequest = ({
       fields,
     } as CaseConnector,
     closure_type: 'close-by-user',
+    owner: 'securitySolutionFixture',
   };
 };
 
@@ -580,13 +581,17 @@ export const findCasesAsUser = async ({
   return res;
 };
 
+interface OwnerEntity {
+  owner: string;
+}
+
 export const ensureSavedObjectIsAuthorized = (
-  cases: CaseResponse[],
+  entities: OwnerEntity[],
   numberOfExpectedCases: number,
   owners: string[]
 ) => {
-  expect(cases.length).to.eql(numberOfExpectedCases);
-  cases.forEach((theCase) => expect(owners.includes(theCase.owner)).to.be(true));
+  expect(entities.length).to.eql(numberOfExpectedCases);
+  entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
 };
 
 export const createCase = async (
@@ -735,10 +740,12 @@ export const updateComment = async (
 
 export const getConfiguration = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
-  expectedHttpCode: number = 200
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CasesConfigureResponse> => {
   const { body: configuration } = await supertest
-    .get(CASE_CONFIGURE_URL)
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send()
     .expect(expectedHttpCode);
@@ -749,10 +756,12 @@ export const getConfiguration = async (
 export const createConfiguration = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   req: CasesConfigureRequest = getConfigurationRequest(),
-  expectedHttpCode: number = 200
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CasesConfigureResponse> => {
   const { body: configuration } = await supertest
-    .post(CASE_CONFIGURE_URL)
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(req)
     .expect(expectedHttpCode);

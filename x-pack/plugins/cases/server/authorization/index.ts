@@ -6,7 +6,7 @@
  */
 
 import { EventType } from '../../../security/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -65,6 +65,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateConfiguration]: {
+    type: EventType.CREATION,
+    name: WriteOperations.CreateCase,
+    action: 'create-configuration',
+    verbs: createVerbs,
+    docType: 'case-configuration',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [ReadOperations.GetCase]: {
     type: EventType.ACCESS,
