@@ -5,4 +5,16 @@
  * 2.0.
  */
 
-// TODO: Write this
+import type { Logger } from '../../../../../../src/core/server';
+
+export const logMappingInfo = ({
+  logger,
+  id,
+  message,
+}: {
+  logger: Logger;
+  id: string;
+  message: string;
+}): void => {
+  logger.info(`mapping id: "${id}", ${message}`);
+};
