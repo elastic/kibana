@@ -182,22 +182,6 @@ export interface ReindexSourceToTempIndex extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
 }
 
-export type ReindexSourceToTempState = PostInitState & {
-  /** Reindex documents from the source index into the target index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
-  readonly sourceIndex: Option.Some<string>;
-};
-
-export type ReindexSourceToTempWaitForTaskState = PostInitState & {
-  /**
-   * Wait until reindexing documents from the source index into the target
-   * index has completed
-   */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK';
-  readonly sourceIndex: Option.Some<string>;
-  readonly reindexSourceToTargetTaskId: string;
-};
-
 export type SetTempWriteBlock = PostInitState & {
   /**
    *
