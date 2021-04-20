@@ -627,7 +627,7 @@ export class DataVisualizer {
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
-    // Combine runtime mappings from the index pattern as well as the datafeed
+    // Combine runtime fields from the index pattern as well as the datafeed
     const combinedRuntimeMappings: RuntimeMappings = {
       ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
       ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
