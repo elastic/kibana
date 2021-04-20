@@ -146,6 +146,10 @@ export function EmbeddedMapComponent({
   }
 
   return (
-    <div data-test-subj="embeddedMapContent" className="embeddedMapContent" ref={embeddableRoot} />
+    <div
+      data-test-subj="mlEmbeddedMapContent"
+      className="embeddedMapContent"
+      ref={embeddableRoot}
+    />
   );
 }
