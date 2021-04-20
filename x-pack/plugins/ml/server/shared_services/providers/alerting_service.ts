@@ -8,6 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { GetGuards } from '../shared_services';
 import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
+import { datafeedsProvider } from '../../models/job_service/datafeeds';
 
 export function getAlertingServiceProvider(getGuards: GetGuards) {
   return {
@@ -21,7 +22,9 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, scopedClient.asInternalUser).preview(...args)
+              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).preview(
+                ...args
+              )
             );
         },
         execute: async (
@@ -31,7 +34,9 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, scopedClient.asInternalUser).execute(...args)
+              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).execute(
+                ...args
+              )
             );
         },
       };
