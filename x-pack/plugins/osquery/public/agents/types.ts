@@ -7,6 +7,7 @@
 
 import { TermsAggregate } from '@elastic/elasticsearch/api/types';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { Agent } from '../../common/shared_imports';
 
 interface BaseDataPoint {
   key: string;
@@ -29,6 +30,8 @@ export interface Overlap {
 export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
+
+export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'active'>;
 
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
@@ -57,5 +60,6 @@ export enum AGENT_GROUP_KEY {
   All,
   Platform,
   Policy,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Agent,
 }
