@@ -10,7 +10,7 @@ export interface CheckPermissionsResponse {
   success: boolean;
 }
 
-export interface RegenerateServiceTokenResponse {
+export interface GenerateServiceTokenResponse {
   name: string;
   value: string;
 }

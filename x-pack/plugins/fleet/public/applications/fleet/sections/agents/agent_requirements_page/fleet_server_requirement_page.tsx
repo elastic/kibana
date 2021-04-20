@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DownloadStep } from '../components/agent_enrollment_flyout/steps';
-import { useStartServices, useGetOutputs, sendRegenerateServiceToken } from '../../../hooks';
+import { useStartServices, useGetOutputs, sendGenerateServiceToken } from '../../../hooks';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
@@ -53,6 +53,7 @@ const PLATFORM_OPTIONS: Array<{ text: string; value: PLATFORM_TYPE }> = [
 
 const OnPremInstructions: React.FC = () => {
   const outputsRequest = useGetOutputs();
+  const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
   const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux-mac');
@@ -71,7 +72,7 @@ const OnPremInstructions: React.FC = () => {
         return `.\\elastic-agent.exe install --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
       case 'deb-rpm':
         return `elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}
-sudo systemctl enable elastic-agent 
+sudo systemctl enable elastic-agent
 sudo systemctl start elastic-agent`;
       default:
         return '';
@@ -80,12 +81,21 @@ sudo systemctl start elastic-agent`;
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
-    const { data } = await sendRegenerateServiceToken();
-    if (data?.value) {
-      setServiceToken(data?.value);
+    try {
+      const { data } = await sendGenerateServiceToken();
+      if (data?.value) {
+        setServiceToken(data?.value);
+      }
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('fleet.fleetServerSetup.errorGeneratingTokenTitleText', {
+          defaultMessage: 'Error generating token',
+        }),
+      });
     }
+
     setIsLoadingServiceToken(false);
-  }, []);
+  }, [notifications]);
 
   return (
     <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>

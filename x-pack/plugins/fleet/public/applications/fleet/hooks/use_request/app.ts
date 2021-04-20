@@ -6,7 +6,7 @@
  */
 
 import { appRoutesService } from '../../services';
-import type { CheckPermissionsResponse, RegenerateServiceTokenResponse } from '../../types';
+import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
 
 import { sendRequest } from './use_request';
 
@@ -17,8 +17,8 @@ export const sendGetPermissionsCheck = () => {
   });
 };
 
-export const sendRegenerateServiceToken = () => {
-  return sendRequest<RegenerateServiceTokenResponse>({
+export const sendGenerateServiceToken = () => {
+  return sendRequest<GenerateServiceTokenResponse>({
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
   });

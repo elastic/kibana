@@ -47,7 +47,7 @@ export class AgentUnenrollmentError extends IngestManagerError {}
 export class AgentPolicyDeletionError extends IngestManagerError {}
 
 export class FleetSetupError extends IngestManagerError {}
-export class RegenerateServiceTokenError extends IngestManagerError {}
+export class GenerateServiceTokenError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {
