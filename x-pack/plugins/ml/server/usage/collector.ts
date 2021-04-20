@@ -7,14 +7,15 @@
 
 import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { AnomalyResultType } from '../../common/types/anomalies';
 
 export interface MlUsageData {
   alertRules: {
-    [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
+    'xpack.ml.anomaly_detection_alert': {
       count_by_result_type: {
-        [key in AnomalyResultType]: number;
+        record: number;
+        bucket: number;
+        influencer: number;
       };
     };
   };
@@ -25,11 +26,20 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
     type: 'ml',
     schema: {
       alertRules: {
-        [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
+        'xpack.ml.anomaly_detection_alert': {
           count_by_result_type: {
-            [ANOMALY_RESULT_TYPE.RECORD]: { type: 'long' },
-            [ANOMALY_RESULT_TYPE.INFLUENCER]: { type: 'long' },
-            [ANOMALY_RESULT_TYPE.BUCKET]: { type: 'long' },
+            record: {
+              type: 'long',
+              _meta: { description: 'total number of alerting rules using record result type' },
+            },
+            influencer: {
+              type: 'long',
+              _meta: { description: 'total number of alerting rules using influencer result type' },
+            },
+            bucket: {
+              type: 'long',
+              _meta: { description: 'total number of alerting rules using bucket result type' },
+            },
           },
         },
       },
