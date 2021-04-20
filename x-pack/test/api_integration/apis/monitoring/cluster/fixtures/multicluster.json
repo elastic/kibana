@@ -102,9 +102,7 @@
     "config": {
       "container": false
     },
-    "versions": [
-      "7.0.0-alpha1"
-    ]
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -220,9 +218,7 @@
     "config": {
       "container": false
     },
-    "versions": [
-      "7.0.0-alpha1"
-    ]
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -338,9 +334,7 @@
     "config": {
       "container": false
     },
-    "versions": [
-      "7.0.0-alpha1"
-    ]
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
