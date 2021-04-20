@@ -66,6 +66,16 @@
       },
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e"
+      },
+      "Endpoint": {
+        "policy": {
+          "applied": {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "name": "Default",
+            "status": "failure"
+          }
+        },
+        "status": "enrolled"
       }
     }
   }
