@@ -28,9 +28,10 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
+  SOURCE_TYPES,
+  SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
-  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
@@ -199,6 +200,8 @@ export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
   return !!map.mapState.drawState;
 };
 
+export const getEditModeActive = ({ map }: MapStoreState): boolean => map.mapState.editModeActive;
+
 export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;
@@ -326,6 +329,10 @@ export function getLayerById(layerId: string | null, state: MapStoreState): ILay
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
+}
+
+export function getLayersBySourceType(sourceType: SOURCE_TYPES, state: MapStoreState): ILayer[] {
+  return getLayerList(state).filter((layer) => layer.getSource().getType() === sourceType);
 }
 
 export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>

@@ -12,6 +12,7 @@ import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
+import { DRAW_MODE } from '../../common';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
@@ -20,6 +21,7 @@ export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
+export const SET_DRAW_MODE = 'SET_DRAW_MODE';
 
 export function exitFullScreen() {
   return {
@@ -85,5 +87,12 @@ export function hideTOCDetails(layerId: string) {
   return {
     type: HIDE_TOC_DETAILS,
     layerId,
+  };
+}
+
+export function setDrawMode(drawMode: DRAW_MODE) {
+  return {
+    type: SET_DRAW_MODE,
+    drawMode,
   };
 }

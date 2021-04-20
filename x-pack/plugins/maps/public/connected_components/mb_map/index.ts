@@ -10,27 +10,29 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MBMap } from './mb_map';
 import {
-  mapExtentChanged,
-  mapReady,
-  mapDestroyed,
-  setMouseCoordinates,
-  clearMouseCoordinates,
   clearGoto,
-  setMapInitError,
+  clearMouseCoordinates,
+  mapDestroyed,
+  mapExtentChanged,
   MapExtentState,
+  mapReady,
   setAreTilesLoaded,
+  setMapInitError,
+  setMouseCoordinates,
 } from '../../actions';
 import {
+  getGoto,
   getLayerList,
   getMapReady,
-  getGoto,
+  getMapSettings,
   getScrollZoom,
   getSpatialFiltersLayer,
-  getMapSettings,
+  getLayersBySourceType,
 } from '../../selectors/map_selectors';
 import { getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
+import { SOURCE_TYPES } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -42,7 +44,7 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
-    editModeActive: state.map.mapState.editModeActive,
+    editModeActive: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
   };
 }
 

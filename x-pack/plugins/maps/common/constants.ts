@@ -89,7 +89,6 @@ export enum SOURCE_TYPES {
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
-  NEW_VECTOR_LAYER = 'NEW_VECTOR_LAYER',
 }
 
 export enum FIELD_ORIGIN {
@@ -151,6 +150,12 @@ export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   type: 'FeatureCollection',
   features: [],
 };
+
+export enum DRAW_MODE {
+  DRAW_FEATURES = 'DRAW_FEATURES',
+  DRAW_FILTERS = 'DRAW_FILTERS',
+  NONE = 'NONE',
+}
 
 export enum DRAW_TYPE {
   BOUNDS = 'BOUNDS',

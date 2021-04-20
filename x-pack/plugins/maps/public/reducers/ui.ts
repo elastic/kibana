@@ -17,7 +17,9 @@ import {
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
+  SET_DRAW_MODE,
 } from '../actions';
+import { DRAW_MODE } from '../../common';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
@@ -28,6 +30,7 @@ export enum FLYOUT_STATE {
 
 export type MapUiState = {
   flyoutDisplay: FLYOUT_STATE;
+  drawMode: DRAW_MODE;
   isFullScreen: boolean;
   isReadOnly: boolean;
   isLayerTOCOpen: boolean;
@@ -38,6 +41,7 @@ export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 
 export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
+  drawMode: DRAW_MODE.NONE,
   isFullScreen: false,
   isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
@@ -51,6 +55,8 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
+    case SET_DRAW_MODE:
+      return { ...state, drawMode: action.drawMode };
     case SET_IS_LAYER_TOC_OPEN:
       return { ...state, isLayerTOCOpen: action.isLayerTOCOpen };
     case SET_FULL_SCREEN:

@@ -8,8 +8,10 @@
 import { MapStoreState } from '../reducers/store';
 
 import { FLYOUT_STATE } from '../reducers/ui';
+import { DRAW_MODE } from '../../common';
 
 export const getFlyoutDisplay = ({ ui }: MapStoreState): FLYOUT_STATE => ui.flyoutDisplay;
+export const getDrawMode = ({ ui }: MapStoreState): DRAW_MODE => ui.drawMode;
 export const getIsLayerTOCOpen = ({ ui }: MapStoreState): boolean => ui.isLayerTOCOpen;
 export const getOpenTOCDetails = ({ ui }: MapStoreState): string[] => ui.openTOCDetails;
 export const getIsFullScreen = ({ ui }: MapStoreState): boolean => ui.isFullScreen;

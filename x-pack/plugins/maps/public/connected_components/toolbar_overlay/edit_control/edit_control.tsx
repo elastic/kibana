@@ -17,8 +17,8 @@ import { IndexGeometrySelectPopoverForm } from '../../../components/index_geomet
 
 export interface Props {
   geoFields: GeoFieldWithIndex[];
-  setEditModeActive: () => void;
-  setEditModeInActive: () => void;
+  activateDrawFeatureMode: () => void;
+  deactivateDrawMode: () => void;
 }
 
 interface State {
@@ -70,7 +70,7 @@ export class EditControl extends Component<Props, State> {
         <IndexGeometrySelectPopoverForm
           className="mapDrawControl__geometryFilterForm"
           geoFields={this.props.geoFields}
-          onSubmit={this.props.setEditModeActive}
+          onSubmit={this.props.activateDrawFeatureMode}
         />
       </EuiPopover>
     );
@@ -79,7 +79,7 @@ export class EditControl extends Component<Props, State> {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{editPopoverButton}</EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton size="s" fill onClick={this.props.setEditModeInActive}>
+          <EuiButton size="s" fill onClick={this.props.deactivateDrawMode}>
             <FormattedMessage
               id="xpack.maps.tooltip.editControl.cancelDrawButtonLabel"
               defaultMessage="Cancel"

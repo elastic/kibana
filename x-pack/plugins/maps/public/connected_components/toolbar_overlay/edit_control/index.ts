@@ -9,13 +9,14 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { EditControl } from './edit_control';
-import { updateEditMode } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
+import { DRAW_MODE } from '../../../../common';
+import { setDrawMode } from '../../../actions';
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    setEditModeActive: () => dispatch(updateEditMode(true)),
-    setEditModeInActive: () => dispatch(updateEditMode(false)),
+    activateDrawFeatureMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS)),
+    deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }
 

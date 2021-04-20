@@ -10,9 +10,10 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
 import { isDrawingFilter } from '../../../selectors/map_selectors';
-import { updateDrawState } from '../../../actions';
+import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawState } from '../../../../common/descriptor_types';
+import { DRAW_MODE } from '../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -28,6 +29,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     cancelDraw: () => {
       dispatch(updateDrawState(null));
     },
+    activateDrawFilterMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS)),
+    deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }
 

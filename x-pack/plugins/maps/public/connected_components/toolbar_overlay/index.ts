@@ -8,14 +8,17 @@
 import { connect } from 'react-redux';
 import { ToolbarOverlay } from './toolbar_overlay';
 import { MapStoreState } from '../../reducers/store';
-import { getFlyoutDisplay } from '../../selectors/ui_selectors';
+import { getDrawMode, getFlyoutDisplay } from '../../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../../reducers/ui';
+import { getLayersBySourceType } from '../../selectors/map_selectors';
+import { SOURCE_TYPES } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    editModeActive: state.map.mapState.editModeActive,
+    showEditButton: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
     addDrawLayerInProgress:
       getFlyoutDisplay(state) !== FLYOUT_STATE.NONE && state.map.mapState.editModeActive,
+    drawMode: getDrawMode(state),
   };
 }
 

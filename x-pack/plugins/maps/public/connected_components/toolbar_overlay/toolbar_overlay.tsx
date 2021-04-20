@@ -58,7 +58,7 @@ export function ToolbarOverlay(props: Props) {
   }
 
   function renderFeatureDrawAndEditControls() {
-    return props.editModeActive ? (
+    return props.showEditButton ? (
       <>
         <EuiFlexItem>
           <FeatureDrawControl />

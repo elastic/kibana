@@ -18,12 +18,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import {
+  DRAW_MODE,
+  DRAW_TYPE,
+  ES_GEO_FIELD_TYPE,
+  ES_SPATIAL_RELATIONS,
+} from '../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
 import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
 import { DrawState } from '../../../../common/descriptor_types';
+import { setDrawMode } from '../../../actions';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',
@@ -59,6 +65,8 @@ export interface Props {
   isDrawingFilter: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  activateDrawFilterMode: () => void;
+  deactivateDrawMode: () => void;
 }
 
 interface State {
@@ -71,13 +79,21 @@ export class ToolsControl extends Component<Props, State> {
   };
 
   _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
+    this.setState(
+      (prevState) => ({
+        isPopoverOpen: !prevState.isPopoverOpen,
+      }),
+      () => {
+        if (this.state.isPopoverOpen) {
+          this.props.activateDrawFilterMode();
+        }
+      }
+    );
   };
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
+    this.props.deactivateDrawMode();
   };
 
   _initiateShapeDraw = (options: {
@@ -88,6 +104,7 @@ export class ToolsControl extends Component<Props, State> {
     geoFieldType: ES_GEO_FIELD_TYPE;
     relation: ES_SPATIAL_RELATIONS;
   }) => {
+    this.props.activateDrawFilterMode();
     this.props.initiateDraw({
       drawType: DRAW_TYPE.POLYGON,
       ...options,
