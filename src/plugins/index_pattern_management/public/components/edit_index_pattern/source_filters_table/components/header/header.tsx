@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = () => (
