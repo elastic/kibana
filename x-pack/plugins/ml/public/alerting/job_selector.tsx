@@ -114,6 +114,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       error={errors}
     >
       <EuiComboBox<string>
+        singleSelection
         selectedOptions={selectedOptions}
         options={options}
         onChange={onSelectionChange}

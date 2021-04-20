@@ -50,6 +50,20 @@ export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPu
         );
       }
 
+      // Since 7.13 we support single job selection only
+      if (
+        (Array.isArray(alertParams.jobSelection?.groupIds) &&
+          alertParams.jobSelection?.groupIds.length > 0) ||
+        (Array.isArray(alertParams.jobSelection?.jobIds) &&
+          alertParams.jobSelection?.jobIds.length > 1)
+      ) {
+        validationResult.errors.jobSelection.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.singleJobSelection.errorMessage', {
+            defaultMessage: 'Only one job per rule is allowed',
+          })
+        );
+      }
+
       if (alertParams.severity === undefined) {
         validationResult.errors.severity.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.severity.errorMessage', {
