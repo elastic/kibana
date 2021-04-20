@@ -124,6 +124,11 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: apmRuleFieldMap,
+    });
+
     registerRoutes({
       core: {
         setup: core,
@@ -132,6 +137,7 @@ export class APMPlugin
       logger: this.logger,
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
+      apmRuleRegistry,
       plugins: mapValues(plugins, (value, key) => {
         return {
           setup: value,
@@ -151,12 +157,6 @@ export class APMPlugin
         savedObjectsClient: await getInternalSavedObjectsClient(core),
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
-
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...apmRuleRegistrySettings,
-      fieldMap: apmRuleFieldMap,
-    });
-
     registerApmAlerts({
       registry: apmRuleRegistry,
       ml: plugins.ml,
