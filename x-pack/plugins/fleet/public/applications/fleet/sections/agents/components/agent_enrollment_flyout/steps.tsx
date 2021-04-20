@@ -10,7 +10,7 @@ import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import type { AgentPolicy } from '../../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../../types';
 import { sendGetOneAgentPolicy } from '../../../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 
@@ -77,8 +77,8 @@ export const AgentPolicySelectionStep = ({
             const agentPolicyRequest = await sendGetOneAgentPolicy(policyID);
             if (
               agentPolicyRequest.data?.item &&
-              agentPolicyRequest.data.item.package_policies.some(
-                (packagePolicy) => packagePolicy.package.name === FLEET_SERVER_PACKAGE
+              (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
+                (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
               )
             ) {
               setIsFleetServerPolicySelected(true);

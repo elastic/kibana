@@ -21,6 +21,7 @@ import {
   EuiCallOut,
   EuiSelect,
 } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,7 +60,7 @@ export const ServiceTokenStep = ({
   serviceToken?: string;
   getServiceToken: () => void;
   isLoadingServiceToken: boolean;
-}) => {
+}): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepGenerateServiceTokenTitle', {
       defaultMessage: 'Generate a service token',
@@ -131,8 +132,8 @@ export const FleetServerCommandStep = ({
   serviceToken?: string;
   installCommand: string;
   platform: string;
-  setPlatform: (platform: string) => void;
-}) => {
+  setPlatform: (platform: PLATFORM_TYPE) => void;
+}): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepInstallAgentTitle', {
       defaultMessage: 'Start Fleet Server',
