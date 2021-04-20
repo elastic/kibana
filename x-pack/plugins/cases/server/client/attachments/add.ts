@@ -180,7 +180,8 @@ const addGeneratedAlerts = async ({
 
     await ensureAuthorized({
       operation: Operations.createSubCase,
-      entities: [{ owner: caseInfo.attributes.owner, id: savedObjectID }],
+      owners: [caseInfo.attributes.owner],
+      savedObjectIDs: [savedObjectID],
       authorization,
       auditLogger,
     });
