@@ -85,7 +85,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       // Add annotation marker
       annotationsData.forEach((d) => {
         const annotationWidth = d.end_timestamp
-          ? xScale(Math.min(d.end_timestamp, domain.max)) - xScale(d.timestamp)
+          ? xScale(Math.min(d.end_timestamp, domain.max)) -
+            Math.max(xScale(d.timestamp), startingXPos)
           : 0;
 
         svg
