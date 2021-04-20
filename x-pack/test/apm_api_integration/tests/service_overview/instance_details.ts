@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Instance details when data is loaded but details not found',
     { config: 'basic', archives: [archiveName] },
     () => {
-      it('handles empty state when instance id not found', () => {
+      it('handles empty state when instance id not found', async () => {
         const response = await supertest.get(
           url.format({
             pathname: '/api/apm/services/opbeans-java/service_overview_instances/details/foo',
