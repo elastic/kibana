@@ -55,7 +55,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       throw new Error(`unable to find connector with id ${connectorId}`);
     }
 
-    const [_, url] = connector.name.split(' ');
+    const url = connector.name.split(' ')[1];
+    if (url == null) {
+      throw new Error(`connector with id ${connectorId} expected to have URL in it's name`);
+    }
+
     const parsedUrl = new URL(url);
     return parsedUrl.port;
   }
