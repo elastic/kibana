@@ -36,9 +36,10 @@ import {
   NAME_ERROR,
   NAME_PLACEHOLDER,
   OS_LABEL,
+  RULE_NAME,
 } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
-import { EVENT_FILTER_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -119,9 +120,9 @@ export const EventFilterForm: React.FC<EventFilterFormProps> = memo(({ allowSele
         autocompleteService={data.autocomplete}
         exceptionListItems={[exception as ExceptionListItemSchema]}
         listType={EVENT_FILTER_LIST_TYPE}
-        listId={EVENT_FILTER_LIST_ID}
+        listId={ENDPOINT_EVENT_FILTERS_LIST_ID}
         listNamespaceType={'agnostic'}
-        ruleName={'Endpoint Event Filtering'}
+        ruleName={RULE_NAME}
         indexPatterns={indexPatterns}
         isOrDisabled={false}
         isAndDisabled={false}

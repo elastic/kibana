@@ -28,6 +28,11 @@ export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.for
 export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
   defaultMessage: "The name can't be empty",
 });
+
 export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
   defaultMessage: 'Seelct OS',
+});
+
+export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form.rule.name', {
+  defaultMessage: 'Endpoint Event Filtering',
 });

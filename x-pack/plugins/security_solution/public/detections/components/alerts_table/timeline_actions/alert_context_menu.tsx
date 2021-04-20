@@ -369,19 +369,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddEventExceptionModal(true);
   }, [closePopover]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const addEventExceptionComponent = (
-    <EuiContextMenuItem
-      key="add-event-exception-menu-item"
-      aria-label="Add Event Exception"
-      data-test-subj="add-event-exception-menu-item"
-      id="addEventException"
-      onClick={handleAddEventExceptionClick}
-    >
-      <EuiText data-test-subj="addEventExceptionButton" size="m">
-        {i18n.ACTION_ADD_EVENT_EXCEPTION}
-      </EuiText>
-    </EuiContextMenuItem>
+  const addEventExceptionComponent = useMemo(
+    () => (
+      <EuiContextMenuItem
+        key="add-event-exception-menu-item"
+        aria-label="Add Event Exception"
+        data-test-subj="add-event-exception-menu-item"
+        id="addEventException"
+        onClick={handleAddEventExceptionClick}
+      >
+        <EuiText data-test-subj="addEventExceptionButton" size="m">
+          {i18n.ACTION_ADD_EVENT_EXCEPTION}
+        </EuiText>
+      </EuiContextMenuItem>
+    ),
+    [handleAddEventExceptionClick]
   );
 
   const statusFilters = useMemo(() => {

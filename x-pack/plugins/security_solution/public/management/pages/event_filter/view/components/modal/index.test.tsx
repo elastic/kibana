@@ -10,7 +10,7 @@ import { RenderResult, act, render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-import { createGlobalNoMiddlewareStore, event } from '../../../test_utils';
+import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 import {
@@ -40,7 +40,9 @@ describe('Event filter modal', () => {
       </Provider>
     );
 
-    return render(<EventFilterModal data={event} onCancel={onCancelMock} />, { wrapper: Wrapper });
+    return render(<EventFilterModal data={ecsEventMock()} onCancel={onCancelMock} />, {
+      wrapper: Wrapper,
+    });
   };
 
   beforeEach(() => {
@@ -50,10 +52,10 @@ describe('Event filter modal', () => {
 
   it('should renders correctly', () => {
     component = renderForm();
-    component.getAllByText(MODAL_TITLE);
-    component.getByText(MODAL_SUBTITLE);
-    component.getAllByText(ACTIONS_CONFIRM);
-    component.getByText(ACTIONS_CANCEL);
+    expect(component.getAllByText(MODAL_TITLE)).not.toThrow();
+    expect(component.getByText(MODAL_SUBTITLE)).not.toThrow();
+    expect(component.getAllByText(ACTIONS_CONFIRM)).not.toThrow();
+    expect(component.getByText(ACTIONS_CANCEL)).not.toThrow();
   });
 
   it('should dispatch action to init form store on mount', () => {

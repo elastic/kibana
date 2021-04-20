@@ -82,6 +82,7 @@ export const EventFilterModal: React.FC<EventFilterModalProps> = memo(({ data, o
     }
   }, [creationSuccessful, onCancel, dispatch]);
 
+  // Initialize the store with the event passed as prop to allow render the form. It acts as componentDidMount
   useEffect(() => {
     dispatch({
       type: 'eventFilterInitForm',

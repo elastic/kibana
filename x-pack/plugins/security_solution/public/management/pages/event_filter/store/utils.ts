@@ -8,7 +8,7 @@
 import uuid from 'uuid';
 import { CreateExceptionListItemSchema } from '../../../../../public/shared_imports';
 import { Ecs } from '../../../../../common/ecs';
-import { EVENT_FILTER_LIST_ID } from '../constants';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
 export const getInitialExceptionFromEvent = (data: Ecs): CreateExceptionListItemSchema => ({
   comments: [],
@@ -31,7 +31,7 @@ export const getInitialExceptionFromEvent = (data: Ecs): CreateExceptionListItem
         ]
       : [],
   item_id: undefined,
-  list_id: EVENT_FILTER_LIST_ID,
+  list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
   meta: {
     temporaryUuid: uuid.v4(),
   },

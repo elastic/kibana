@@ -17,7 +17,7 @@ import {
   ExceptionListItemSchema,
 } from '../../../../../../../public/shared_imports';
 
-import { createGlobalNoMiddlewareStore, event } from '../../../test_utils';
+import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
 import { EventFilterNotification } from '.';
 import { getCreationErrorMessage, getCreationSuccessMessage } from './translations';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
@@ -58,7 +58,7 @@ describe('EventFilterNotification', () => {
     renderNotifications(store, notifications);
 
     act(() => {
-      const entry = getInitialExceptionFromEvent(event);
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
         type: 'eventFilterInitForm',
         payload: { entry },
@@ -90,7 +90,7 @@ describe('EventFilterNotification', () => {
     renderNotifications(store, notifications);
 
     act(() => {
-      const entry = getInitialExceptionFromEvent(event);
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
       store.dispatch({
         type: 'eventFilterInitForm',
         payload: { entry },

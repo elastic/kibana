@@ -8,14 +8,14 @@
 import { initialEventFilterPageState } from './builders';
 import { eventFilterPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
-import { createdEventFilterEntry, event } from '../test_utils';
+import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 
 const initialState = initialEventFilterPageState();
 
 describe('reducer', () => {
   describe('EventFilterForm', () => {
     it('sets the initial form values', () => {
-      const entry = getInitialExceptionFromEvent(event);
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
       const result = eventFilterPageReducer(initialState, {
         type: 'eventFilterInitForm',
         payload: { entry },
@@ -35,7 +35,7 @@ describe('reducer', () => {
     });
 
     it('change form values', () => {
-      const entry = getInitialExceptionFromEvent(event);
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
       const result = eventFilterPageReducer(initialState, {
         type: 'eventFilterChangeForm',
@@ -63,7 +63,7 @@ describe('reducer', () => {
         type: 'eventFilterFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: createdEventFilterEntry,
+          data: createdEventFilterEntryMock(),
         },
       });
 
@@ -73,7 +73,7 @@ describe('reducer', () => {
           ...initialState.form,
           submissionResourceState: {
             type: 'LoadedResourceState',
-            data: createdEventFilterEntry,
+            data: createdEventFilterEntryMock(),
           },
         },
       });

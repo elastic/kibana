@@ -7,7 +7,7 @@
 
 import { initialEventFilterPageState } from './builders';
 import { getFormEntry, getFormHasError } from './selector';
-import { event } from '../test_utils';
+import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 
 const initialState = initialEventFilterPageState();
@@ -18,7 +18,7 @@ describe('selectors', () => {
       expect(getFormEntry(initialState)).toBe(undefined);
     });
     it('returns entry when there is an entry on form', () => {
-      const entry = getInitialExceptionFromEvent(event);
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
       const state = {
         ...initialState,
         form: {

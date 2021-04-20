@@ -26,7 +26,7 @@ export const createGlobalNoMiddlewareStore = () => {
   );
 };
 
-export const event: Ecs = {
+export const ecsEventMock = (): Ecs => ({
   _id: 'unLfz3gB2mJZsMY3ytx3',
   timestamp: '2021-04-14T15:34:15.330Z',
   _index: '.ds-logs-endpoint.events.process-default-2021.04.12-000001',
@@ -64,9 +64,9 @@ export const event: Ecs = {
     entity_id: ['9qotd1i8rf'],
     executable: ['C:\\lsass.exe'],
   },
-};
+});
 
-export const createdEventFilterEntry: ExceptionListItemSchema = {
+export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
   _version: 'WzM4MDgsMV0=',
   meta: undefined,
   comments: [],
@@ -88,4 +88,4 @@ export const createdEventFilterEntry: ExceptionListItemSchema = {
   type: 'simple',
   updated_at: '2021-04-19T10:30:36.428Z',
   updated_by: 'elastic',
-};
+});

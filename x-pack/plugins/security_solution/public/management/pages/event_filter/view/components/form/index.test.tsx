@@ -13,7 +13,7 @@ import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { Provider } from 'react-redux';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ThemeProvider } from 'styled-components';
-import { createGlobalNoMiddlewareStore, event } from '../../../test_utils';
+import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
@@ -42,7 +42,7 @@ describe('Event filter form', () => {
   };
 
   const renderComponentWithdata = () => {
-    const entry = getInitialExceptionFromEvent(event);
+    const entry = getInitialExceptionFromEvent(ecsEventMock());
     act(() => {
       store.dispatch({
         type: 'eventFilterInitForm',
@@ -71,14 +71,14 @@ describe('Event filter form', () => {
   });
   it('should renders correctly without data', () => {
     component = renderForm();
-    component.getByTestId('loading-spinner');
+    expect(component.getByTestId('loading-spinner')).not.toThrow();
   });
 
   it('should renders correctly with data', () => {
     component = renderComponentWithdata();
 
-    component.getByText(event.process!.executable![0]);
-    component.getByText(NAME_ERROR);
+    expect(component.getByText(ecsEventMock().process!.executable![0])).not.toThrow();
+    expect(component.getByText(NAME_ERROR)).not.toThrow();
   });
 
   it('should change name', async () => {
