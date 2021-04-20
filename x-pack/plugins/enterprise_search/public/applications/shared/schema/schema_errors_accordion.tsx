@@ -24,6 +24,8 @@ import { EuiButtonEmptyTo } from '../react_router_helpers';
 
 import { TruncatedContent } from '../truncate';
 
+import './schema_errors_accordion.scss';
+
 import {
   ERROR_TABLE_ID_HEADER,
   ERROR_TABLE_ERROR_HEADER,
@@ -64,7 +66,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
             <EuiFlexGroup alignItems="center" gutterSize="xl">
               <EuiFlexItem>
                 <strong>
-                <TruncatedContent content={fieldName} length={32} />
+                  <TruncatedContent content={fieldName} length={32} />
                 </strong>
               </EuiFlexItem>
               <EuiFlexItem>{schema[fieldName]}</EuiFlexItem>
@@ -107,11 +109,11 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                 return (
                   <EuiTableRow key={`schema-change-document-error-${fieldName}-${errorIndex}`}>
                     <EuiTableRowCell>
-                        <TruncatedContent
-                          tooltipType="title"
-                          content={error.external_id}
-                          length={22}
-                        />
+                      <TruncatedContent
+                        tooltipType="title"
+                        content={error.external_id}
+                        length={22}
+                      />
                     </EuiTableRowCell>
                     <EuiTableRowCell>{error.error}</EuiTableRowCell>
                     {viewButton}
