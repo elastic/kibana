@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 if [[ "${GITHUB_COMMIT_STATUS_ENABLED:-}" == "true" ]]; then
   GITHUB_COMMIT_STATUS_CONTEXT=${GITHUB_COMMIT_STATUS_CONTEXT:-"buildkite/$BUILDKITE_PIPELINE_NAME"}

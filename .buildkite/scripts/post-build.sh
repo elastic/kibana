@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 BUILD_FAILED=$(buildkite-agent meta-data get build_failed --default "false")
 export BUILD_FAILED

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 "$(dirname "${0}")/commit-status-start.sh"
 
