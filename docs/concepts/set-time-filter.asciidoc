@@ -3,16 +3,10 @@
 Display data within a
 specified time range when your index contains time-based events, and a time-field is configured for the
 selected <<index-patterns, index pattern>>.
-
-[float]
-[[use-time-filter]]
-==== Use the global time filter
-
-The global time filter offers multiple ways to get the data you want.
 The default time range is 15 minutes, but you can customize
 it in <<advanced-options,Advanced Settings>>.
 
-. Click image:images/time-filter-calendar.png[Calendar icon].
+. Click image:concepts/images/time-filter-icon.png[Calendar icon].
 
 . Choose one of the following:
 
@@ -27,27 +21,11 @@ it in <<advanced-options,Advanced Settings>>.
 * *Refresh every* to specify an automatic refresh rate.
 +
 [role="screenshot"]
-image::images/time-filter.png[Time filter menu]
+image::concepts/images/time-filter.png[Time filter menu]
 
-. To set the start and end times, click the bar next to the time filter.
+. To set start and end times, click the bar next to the time filter.
 In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
 options.
 +
 [role="screenshot"]
-image::images/time-filter-bar.png[Time filter bar]
-
-[float]
-==== Select a time from the histogram
-
-From the histogram in *Discover*, select a time range in one of the following ways:
-
-* Click the bar that represents the time range you want to zoom in on.
-
-* Click and drag to view a specific time range. You must start the selection with
-the cursor over the background of the chart&mdash;the cursor changes to a plus sign
-when you hover over a valid start point.
-
-* Click the dropdown, then select an interval.
-
-[role="screenshot"]
-image::images/Histogram-Time.png[Time range selector in Histogram dropdown]
+image::concepts/images/time-relative.png[Time filter showing relative time]

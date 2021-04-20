@@ -65,7 +65,7 @@ Each app in {kib} provides a time filter, and most apps also include semi-struct
 image:concepts/images/top-bar.png["Time filter, semi-structured search, and filters in a {kib} app"]
 
 If you frequently use any of the search options, you can click the
-save icon
+save query icon
 image:concepts/images/save-icon.png["save icon"] next to the
 semi-structured search to save or load a previously saved query.
 The saved query will always contain the semi-structured search query,
@@ -126,6 +126,7 @@ filters is combined with AND logic on the rest of the query.
 
 [role="screenshot"]
 image:concepts/images/add-filter-popup.png["Add filter popup"]
+
 
 [float]
 === Saving objects

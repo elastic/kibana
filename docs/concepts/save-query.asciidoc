@@ -1,20 +1,21 @@
 [[save-load-delete-query]]
 === Save a query
-A saved query is a portable collection of query text and filters that you can reuse in
-<<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
-* Retrieve results from the same query at a later time without having to reenter the query text,
-add the filters, or set the time filter.
-* View the results of the same query in multiple apps.
-* Share your query.
-+
+Have you ever built a query that you wanted to reuse?
+With saved queries, you can save your query text, filters, and time range for reuse anywhere a query bar is present.
+
+For example, suppose you're in *Discover*, and you've put a lot of thought into building
+a query that includes query input text, multiple filters, and a specific time range.
+Save this query, and you can reuse it in dashboards and visualizations, and share it in
+a link.
+
 [role="screenshot"]
 image:concepts/images/saved-query.png["Example of the saved query management popover with a list of saved queries"]
 
-Saved queries don't include information specific to *Discover*,
-such as the currently selected columns in the document table,
-the sort order, and the index pattern. To save your current view of
-*Discover* for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
+
+Saved queries are different than <<save-open-search,saved searches>>, which save a specific configuration in *Discover*.
+Saved searches are primarily used for adding search results to a dashboard,
+although they can also serve as the foundation for building visualizations.
 
 [role="xpack"]
 ==== Read-only access
@@ -24,17 +25,18 @@ For more information, see <<xpack-security-authorization, Granting access to Kib
 
 ==== Save a query
 
-. Click the save query icon image:concepts/images/save-icon.png["save query icon"] in the query bar.
+. Once you’ve built a query worth saving, click the save query icon image:concepts/images/save-icon.png["save query icon"].
 . In the popover, click *Save current query*.
-. Enter a name, a description, and then select the filter options that you want to include.
+. Enter a unique name to identify the query and an optional description that will appear in a tooltip in the saved query popover.
+. Choose whether to include or exclude filters and a time range.
 By default, filters are automatically included, but the time filter is not.
++
+[role="screenshot"]
+image:concepts/images/saved-query-popup.png["Example of the saved query management popover with a list of saved queries"]
+
 . Click *Save*.
-
-==== Load a saved query
-
-Use the *Saved query* popover to:
-
-* Load a saved query into the current app.
-* Clear the currently loaded query.
-* Save changes to the currently loaded query.
-* Delete saved queries.
+. To load a saved query, select it in the *Saved query* popover.
++
+The query text, filters, and time range are updated and your data refreshed.
+If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
+. To clear, modify, and delete saved queries, use the *Saved query* popover.
