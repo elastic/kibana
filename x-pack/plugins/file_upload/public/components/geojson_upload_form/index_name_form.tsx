@@ -15,7 +15,7 @@ import {
   // @ts-expect-error
 } from '../../util/indexing_service';
 
-interface Props {
+export interface Props {
   indexName: string; // Allow setting index pattern from external source
   onIndexNameChange?: (name: string, error?: string) => void;
 }

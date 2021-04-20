@@ -9,9 +9,11 @@ import React from 'react';
 import { FileUploadComponentProps, lazyLoadFileUploadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
 import { HasImportPermission } from '../../common';
+import { IndexNameFormProps } from '../';
 
 export interface FileUploadStartApi {
   getFileUploadComponent(): Promise<React.ComponentType<FileUploadComponentProps>>;
+  getIndexNameFormComponent(): Promise<React.ComponentType<IndexNameFormProps>>;
   importerFactory(format: string, options: ImportFactoryOptions): Promise<IImporter | undefined>;
   getMaxBytes(): number;
   getMaxBytesFormatted(): string;
@@ -23,6 +25,13 @@ export async function getFileUploadComponent(): Promise<
 > {
   const fileUploadModules = await lazyLoadFileUploadModules();
   return fileUploadModules.JsonUploadAndParse;
+}
+
+export async function getIndexNameFormComponent(): Promise<
+  React.ComponentType<IndexNameFormProps>
+> {
+  const fileUploadModules = await lazyLoadFileUploadModules();
+  return fileUploadModules.IndexNameForm;
 }
 
 export async function importerFactory(

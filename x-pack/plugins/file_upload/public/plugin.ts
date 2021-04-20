@@ -11,6 +11,7 @@ import {
   getFileUploadComponent,
   importerFactory,
   hasImportPermission,
+  getIndexNameFormComponent,
 } from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -39,6 +40,7 @@ export class FileUploadPlugin
     setStartServices(core, plugins);
     return {
       getFileUploadComponent,
+      getIndexNameFormComponent,
       importerFactory,
       getMaxBytes,
       getMaxBytesFormatted,
