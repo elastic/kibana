@@ -152,7 +152,7 @@
           }
         },
         "status": "enrolled"
-      },
+      }
     }
   }
 }
@@ -237,7 +237,7 @@
           }
         },
         "status": "enrolled"
-      },
+      }
     }
   }
 }
