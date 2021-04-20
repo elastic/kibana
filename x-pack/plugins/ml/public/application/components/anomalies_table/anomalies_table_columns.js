@@ -181,7 +181,7 @@ export function getColumns(
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
-            defaultMessage: 'The actual values in the record results.',
+            defaultMessage: 'The actual values in the anomaly record results.',
           })}
         >
           <span>
@@ -210,7 +210,7 @@ export function getColumns(
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
-            defaultMessage: 'The typical values in the record results.',
+            defaultMessage: 'The typical values in the anomaly record results.',
           })}
         >
           <span>
