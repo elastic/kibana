@@ -73,7 +73,8 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
         },
       },
     });
-  }, [triggersActionsUi, initialAlert, jobIds]);
+    // deps on id to avoid re-rendering on auto-refresh
+  }, [triggersActionsUi, initialAlert?.id, jobIds]);
 
   return <>{AlertFlyout}</>;
 };
