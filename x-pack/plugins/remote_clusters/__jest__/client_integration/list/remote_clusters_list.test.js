@@ -68,7 +68,6 @@ describe('<RemoteClusterList />', () => {
     let table;
     let actions;
     let component;
-    let form;
 
     const remoteClusters = [
       {
@@ -88,7 +87,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ find, table, actions, form, component } = setup());
+        ({ find, table, actions, component } = setup());
       });
 
       component.update();
