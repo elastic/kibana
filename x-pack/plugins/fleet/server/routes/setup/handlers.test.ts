@@ -46,7 +46,11 @@ describe('FleetSetupHandler', () => {
 
   it('POST /setup succeeds w/200 and body of resolved value', async () => {
     mockSetupIngestManager.mockImplementation(() =>
-      Promise.resolve({ isInitialized: true, preconfigurationError: undefined })
+      Promise.resolve({
+        isInitialized: true,
+        preconfigurationError: undefined,
+        nonFatalPackageUpgradeErrors: [],
+      })
     );
     await fleetSetupHandler(context, request, response);
 
