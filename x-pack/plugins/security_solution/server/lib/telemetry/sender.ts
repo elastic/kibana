@@ -21,16 +21,8 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './task';
 
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
+type BaseSearchType = string | number | boolean | object;
+export type SearchTypes = BaseSearchType | BaseSearchType[] | undefined;
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
@@ -400,9 +392,8 @@ export function copyAllowlistedFields(
       } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
         return {
           ...newEvent,
-          // cast to object[] to be a valid SearchTypes variant
-          [allowKey]: (eventValue as object[]).map((v) =>
-            copyAllowlistedFields(allowValue, v as TelemetryEvent)
+          [allowKey]: (eventValue as BaseSearchType[]).map((v) =>
+            typeof v === 'object' ? copyAllowlistedFields(allowValue, v as TelemetryEvent) : v
           ),
         };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
