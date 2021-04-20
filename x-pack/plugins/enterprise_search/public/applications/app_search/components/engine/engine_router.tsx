@@ -27,7 +27,7 @@ import {
   // ENGINE_CRAWLER_PATH,
   // META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
-  // ENGINE_SYNONYMS_PATH,
+  ENGINE_SYNONYMS_PATH,
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
   // ENGINE_SEARCH_UI_PATH,
@@ -39,8 +39,8 @@ import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
-
 import { ResultSettings } from '../result_settings';
+import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from './';
 
@@ -53,7 +53,7 @@ export const EngineRouter: React.FC = () => {
       // canViewEngineCrawler,
       // canViewMetaEngineSourceEngines,
       canManageEngineRelevanceTuning,
-      // canManageEngineSynonyms,
+      canManageEngineSynonyms,
       canManageEngineCurations,
       canManageEngineResultSettings,
       // canManageEngineSearchUi,
@@ -105,6 +105,11 @@ export const EngineRouter: React.FC = () => {
       {canManageEngineRelevanceTuning && (
         <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
           <RelevanceTuning />
+        </Route>
+      )}
+      {canManageEngineSynonyms && (
+        <Route path={ENGINE_SYNONYMS_PATH}>
+          <Synonyms />
         </Route>
       )}
       {canManageEngineResultSettings && (

@@ -52,7 +52,7 @@ import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -68,7 +68,6 @@ export const SourceSettings: React.FC = () => {
 
   useEffect(() => {
     getSourceConfigData(serviceType);
-    return resetSourceState;
   }, []);
 
   const {

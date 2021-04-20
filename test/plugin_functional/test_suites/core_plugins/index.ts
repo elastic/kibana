@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./rendering'));
     loadTestFile(require.resolve('./chrome_help_menu_links'));
     loadTestFile(require.resolve('./history_block'));
+    loadTestFile(require.resolve('./http'));
   });
 }
