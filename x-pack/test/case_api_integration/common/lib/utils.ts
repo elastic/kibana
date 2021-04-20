@@ -535,52 +535,6 @@ export const getSpaceUrlPrefix = (spaceId?: string | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
-export const createCaseAsUser = async ({
-  supertestWithoutAuth,
-  user,
-  space,
-  owner,
-  expectedHttpCode = 200,
-}: {
-  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
-  user: User;
-  space: string;
-  owner?: string;
-  expectedHttpCode?: number;
-}): Promise<CaseResponse> => {
-  const { body: theCase } = await supertestWithoutAuth
-    .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
-    .auth(user.username, user.password)
-    .set('kbn-xsrf', 'true')
-    .send(getPostCaseRequest({ owner }))
-    .expect(expectedHttpCode);
-
-  return theCase;
-};
-
-export const findCasesAsUser = async ({
-  supertestWithoutAuth,
-  user,
-  space,
-  expectedHttpCode = 200,
-  appendToUrl = '',
-}: {
-  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
-  user: User;
-  space: string;
-  expectedHttpCode?: number;
-  appendToUrl?: string;
-}): Promise<CasesFindResponse> => {
-  const { body: res } = await supertestWithoutAuth
-    .get(`${getSpaceUrlPrefix(space)}${CASES_URL}/_find?sortOrder=asc&${appendToUrl}`)
-    .auth(user.username, user.password)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(expectedHttpCode);
-
-  return res;
-};
-
 interface OwnerEntity {
   owner: string;
 }
@@ -852,13 +806,20 @@ export const getCase = async ({
   return theCase;
 };
 
-export const findCases = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  query: Record<string, unknown> = {},
-  expectedHttpCode: number = 200
-): Promise<CasesFindResponse> => {
+export const findCases = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
   const { body: res } = await supertest
-    .get(`${CASES_URL}/_find`)
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/_find`)
+    .auth(auth.user.username, auth.user.password)
     .query({ sortOrder: 'asc', ...query })
     .set('kbn-xsrf', 'true')
     .send()
