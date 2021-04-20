@@ -22,15 +22,14 @@ import {
   excess,
 } from '../../../common/api';
 
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CaseService } from '../../services';
 import { createCaseError } from '../../common/error';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, getAuthorizationFilter } from '../utils';
 import { Authorization } from '../../authorization/authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import { AuthorizationFilter, Operations } from '../../authorization';
+import { Operations } from '../../authorization';
 import { AuditLogger } from '../../../../security/server';
-import { createAuditMsg, transformCases } from '../../common';
+import { transformCases } from '../../common';
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -49,8 +48,8 @@ export const find = async ({
   caseService,
   logger,
   auth,
-  auditLogger,
   options,
+  auditLogger,
 }: FindParams): Promise<CasesFindResponse> => {
   try {
     const queryParams = pipe(
@@ -58,19 +57,15 @@ export const find = async ({
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    let authFindHelpers: AuthorizationFilter;
-    try {
-      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.findCases, error }));
-      throw error;
-    }
-
     const {
       filter: authorizationFilter,
-      ensureSavedObjectIsAuthorized,
+      ensureSavedObjectsAreAuthorized,
       logSuccessfulAuthorization,
-    } = authFindHelpers;
+    } = await getAuthorizationFilter({
+      authorization: auth,
+      operation: Operations.findCases,
+      auditLogger,
+    });
 
     const queryArgs = {
       tags: queryParams.tags,
@@ -100,20 +95,7 @@ export const find = async ({
       subCaseOptions: caseQueries.subCase,
     });
 
-    for (const theCase of cases.casesMap.values()) {
-      try {
-        ensureSavedObjectIsAuthorized(theCase.owner);
-        // log each of the found cases
-        auditLogger?.log(
-          createAuditMsg({ operation: Operations.findCases, savedObjectID: theCase.id })
-        );
-      } catch (error) {
-        auditLogger?.log(
-          createAuditMsg({ operation: Operations.findCases, error, savedObjectID: theCase.id })
-        );
-        throw error;
-      }
-    }
+    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
     // TODO: Make sure we do not leak information when authorization is on
     const [openCases, inProgressCases, closedCases] = await Promise.all([

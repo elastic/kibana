@@ -11,7 +11,7 @@ import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AuthorizationFilter, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
-import { AuthorizationAuditLogger, OperationDetails, Operations } from '.';
+import { AuthorizationAuditLogger, OperationDetails } from '.';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -79,19 +79,21 @@ export class Authorization {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(owner: string, operation: OperationDetails) {
+  public async ensureAuthorized(owners: string[], operation: OperationDetails) {
     const { securityAuth } = this;
-    const isOwnerAvailable = this.featureCaseOwners.has(owner);
+    const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
 
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(owner, operation.name)];
+      const requiredPrivileges: string[] = owners.map((owner) =>
+        securityAuth.actions.cases.get(owner, operation.name)
+      );
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
-      if (!isOwnerAvailable) {
+      if (!areAllOwnersAvailable) {
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown owner, but super users
@@ -99,24 +101,25 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(this.auditLogger.failure({ username, owner, operation }));
+        throw Boom.forbidden(this.auditLogger.failure({ username, owners, operation }));
       }
 
       if (hasAllRequested) {
-        this.auditLogger.success({ username, operation, owner });
+        this.auditLogger.success({ username, operation, owners });
       } else {
-        throw Boom.forbidden(this.auditLogger.failure({ owner, operation, username }));
+        throw Boom.forbidden(this.auditLogger.failure({ owners, operation, username }));
       }
-    } else if (!isOwnerAvailable) {
-      throw Boom.forbidden(this.auditLogger.failure({ owner, operation }));
+    } else if (!areAllOwnersAvailable) {
+      throw Boom.forbidden(this.auditLogger.failure({ owners, operation }));
     }
 
     // else security is disabled so let the operation proceed
   }
 
-  public async getFindAuthorizationFilter(savedObjectType: string): Promise<AuthorizationFilter> {
+  public async getFindAuthorizationFilter(
+    operation: OperationDetails
+  ): Promise<AuthorizationFilter> {
     const { securityAuth } = this;
-    const operation = Operations.findCases;
     if (securityAuth && this.shouldCheckAuthorization()) {
       const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
@@ -125,15 +128,17 @@ export class Authorization {
       }
 
       return {
-        filter: getOwnersFilter(savedObjectType, authorizedOwners),
+        filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
         ensureSavedObjectIsAuthorized: (owner: string) => {
           if (!authorizedOwners.includes(owner)) {
-            throw Boom.forbidden(this.auditLogger.failure({ username, operation, owner }));
+            throw Boom.forbidden(
+              this.auditLogger.failure({ username, operation, owners: [owner] })
+            );
           }
         },
         logSuccessfulAuthorization: () => {
           if (authorizedOwners.length) {
-            this.auditLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
+            this.auditLogger.success({ username, owners: authorizedOwners, operation });
           }
         },
       };
@@ -155,11 +160,11 @@ export class Authorization {
     const { securityAuth, featureCaseOwners } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-      const requiredPrivileges = new Map<string, [string]>();
+      const requiredPrivileges = new Map<string, string>();
 
       for (const owner of featureCaseOwners) {
         for (const operation of operations) {
-          requiredPrivileges.set(securityAuth.actions.cases.get(owner, operation.name), [owner]);
+          requiredPrivileges.set(securityAuth.actions.cases.get(owner, operation.name), owner);
         }
       }
 
@@ -174,7 +179,7 @@ export class Authorization {
           ? Array.from(featureCaseOwners)
           : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
               if (authorized && requiredPrivileges.has(privilege)) {
-                const [owner] = requiredPrivileges.get(privilege)!;
+                const owner = requiredPrivileges.get(privilege)!;
                 authorizedOwners.push(owner);
               }
 
