@@ -23,11 +23,22 @@ interface ReasonDescription {
   context?: ReasonDescription;
 }
 
+interface EsAggError {
+  message: string;
+  stack: string;
+}
+
 const isRequestError = (e: Error | RequestError): e is RequestError => {
   if ('body' in e) {
     return e.body?.attributes?.error?.caused_by !== undefined;
   }
   return false;
+};
+
+// what happens for runtime field used on indexpatterns not accessible to the user?
+// they will throw on the kibana side as data will be undefined
+const isEsAggError = (e: Error | EsAggError): e is EsAggError => {
+  return 'message' in e && 'stack' in e && !isRequestError(e as Error) && !isEsError(e);
 };
 
 function getNestedErrorClauseWithContext({
@@ -38,11 +49,21 @@ function getNestedErrorClauseWithContext({
   script,
 }: Reason): ReasonDescription[] {
   if (!causedBy) {
+    // scripted fields error has changed with no particular hint about painless in it,
+    // so it tries to lookup in the message for the script word
+    if (/script/.test(reason)) {
+      return [{ type, reason, context: { type: 'Painless script', reason: '' } }];
+    }
     return [{ type, reason }];
   }
   const [payload] = getNestedErrorClause(causedBy);
   if (lang === 'painless') {
-    return [{ ...payload, context: { type: 'Painless script', reason: `"${script}"` || reason } }];
+    return [
+      {
+        ...payload,
+        context: { type: 'Painless script', reason: `"${script}"` || reason },
+      },
+    ];
   }
   return [{ ...payload, context: { type, reason } }];
 }
@@ -79,29 +100,35 @@ function getErrorSources(e: Error) {
 export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | null): string[] {
   const errorMessages = [];
   if (error && 'original' in error && error.original) {
-    const rootErrors = uniqWith(getErrorSources(error.original), isEqual);
-    for (const rootError of rootErrors) {
-      if (rootError.context) {
-        errorMessages.push(
-          i18n.translate('xpack.lens.editorFrame.expressionFailureMessageWithContext', {
-            defaultMessage: 'Request error: {type}, {reason} in {context}',
-            values: {
-              reason: rootError.reason,
-              type: rootError.type,
-              context: `${rootError.context.reason} (${rootError.context.type})`,
-            },
-          })
-        );
-      } else {
-        errorMessages.push(
-          i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
-            defaultMessage: 'Request error: {type}, {reason}',
-            values: {
-              reason: rootError.reason,
-              type: rootError.type,
-            },
-          })
-        );
+    if (isEsAggError(error.original)) {
+      errorMessages.push(error.message);
+    } else {
+      const rootErrors = uniqWith(getErrorSources(error.original), isEqual);
+      for (const rootError of rootErrors) {
+        if (rootError.context) {
+          errorMessages.push(
+            i18n.translate('xpack.lens.editorFrame.expressionFailureMessageWithContext', {
+              defaultMessage: 'Request error: {type}, {reason} in {context}',
+              values: {
+                reason: rootError.reason,
+                type: rootError.type,
+                context: rootError.context.reason
+                  ? `${rootError.context.reason} (${rootError.context.type})`
+                  : rootError.context.type,
+              },
+            })
+          );
+        } else {
+          errorMessages.push(
+            i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
+              defaultMessage: 'Request error: {type}, {reason}',
+              values: {
+                reason: rootError.reason,
+                type: rootError.type,
+              },
+            })
+          );
+        }
       }
     }
   }
