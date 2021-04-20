@@ -120,7 +120,7 @@
     "@elastic/numeral": "2.3.2",
     "@hapi/boom": "npm:@commercial/boom@^7.4.12",
     "@hapi/oppsy": "^2.1.2",
-    "@hapi/statehood": "^6.1.2",
+    "@hapi/statehood": "npm:@commercial/statehood@^6.1.2",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
