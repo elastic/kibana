@@ -20,17 +20,17 @@ describe('buildOSSFeatures', () => {
         includeReporting: false,
       }).map((f) => f.id)
     ).toMatchInlineSnapshot(`
-      Array [
-        "discover",
-        "visualize",
-        "dashboard",
-        "dev_tools",
-        "advancedSettings",
-        "indexPatterns",
-        "savedObjectsManagement",
-        "timelion",
-      ]
-    `);
+Array [
+  "discover",
+  "visualize",
+  "dashboard",
+  "dev_tools",
+  "advancedSettings",
+  "indexPatterns",
+  "savedObjectsManagement",
+  "timelion",
+]
+`);
   });
 
   it('returns features excluding timelion', () => {
@@ -39,18 +39,18 @@ describe('buildOSSFeatures', () => {
         savedObjectTypes: ['foo', 'bar'],
         includeTimelion: false,
         includeReporting: false,
-      }).map(({ id }) => id)
+      }).map((f) => f.id)
     ).toMatchInlineSnapshot(`
-      Array [
-        "discover",
-        "visualize",
-        "dashboard",
-        "dev_tools",
-        "advancedSettings",
-        "indexPatterns",
-        "savedObjectsManagement",
-      ]
-    `);
+Array [
+  "discover",
+  "visualize",
+  "dashboard",
+  "dev_tools",
+  "advancedSettings",
+  "indexPatterns",
+  "savedObjectsManagement",
+]
+`);
   });
 
   it('returns features including reporting subfeatures', () => {
