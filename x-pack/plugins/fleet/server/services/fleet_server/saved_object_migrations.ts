@@ -67,8 +67,10 @@ async function migrateAgents() {
 
     if (res.total === 0) {
       hasMore = false;
+    } else {
+      hasAgents = true;
     }
-    hasAgents = true;
+
     for (const so of res.saved_objects) {
       try {
         const {
