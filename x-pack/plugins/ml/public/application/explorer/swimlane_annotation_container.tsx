@@ -13,12 +13,13 @@ import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_ut
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 
-const ANNOTATION_HEIGHT = 12;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
 export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
-const ANNOTATION_RECT_MARGIN = 2;
+const ANNOTATION_CONTAINER_HEIGHT = 12;
+const ANNOTATION_MARGIN = 2;
 const ANNOTATION_MIN_WIDTH = 5;
+const ANNOTATION_HEIGHT = ANNOTATION_CONTAINER_HEIGHT - 2 * ANNOTATION_MARGIN;
 
 interface SwimlaneAnnotationContainerProps {
   chartWidth: number;
@@ -51,7 +52,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       const svg = chartElement
         .append('svg')
         .attr('width', '100%')
-        .attr('height', ANNOTATION_HEIGHT);
+        .attr('height', ANNOTATION_CONTAINER_HEIGHT);
 
       const xScale = scaleTime().domain([domain.min, domain.max]).range([startingXPos, endingXPos]);
 
@@ -66,7 +67,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           })
         )
         .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
-        .attr('y', ANNOTATION_HEIGHT)
+        .attr('y', ANNOTATION_CONTAINER_HEIGHT)
         .style('fill', Y_AXIS_LABEL_FONT_COLOR)
         .style('font-size', '12px');
 
@@ -75,7 +76,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .append('rect')
         .attr('x', startingXPos)
         .attr('y', 0)
-        .attr('height', ANNOTATION_HEIGHT)
+        .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
@@ -91,11 +92,11 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .append('rect')
           .classed('mlAnnotationRect', true)
           .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
-          .attr('y', 0)
+          .attr('y', ANNOTATION_MARGIN)
           .attr('height', ANNOTATION_HEIGHT)
           .attr('width', annotationWidth)
-          .attr('rx', ANNOTATION_RECT_MARGIN)
-          .attr('ry', ANNOTATION_RECT_MARGIN)
+          .attr('rx', ANNOTATION_MARGIN)
+          .attr('ry', ANNOTATION_MARGIN)
           .on('mouseover', function () {
             const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
             const endingTime =
