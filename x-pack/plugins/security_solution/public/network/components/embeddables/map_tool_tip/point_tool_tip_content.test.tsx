@@ -13,11 +13,11 @@ import { getRenderedFieldValue, PointToolTipContentComponent } from './point_too
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
-import { FlowTarget } from '../../../../graphql/types';
 import {
   TooltipProperty,
   ITooltipProperty,
 } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('PointToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [
