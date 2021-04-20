@@ -9,7 +9,6 @@
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { get, merge } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
 import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
 
 /**

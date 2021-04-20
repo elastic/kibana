@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
-import { merge, omit } from 'lodash';
+import { omit } from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
 import { basicUsageCounters } from './__fixtures__/usage_counters';
 import type { FtrProviderContext } from '../../ftr_provider_context';
