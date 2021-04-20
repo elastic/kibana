@@ -527,18 +527,15 @@ export class SearchSource {
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
     }
-    const metaFields = this.dependencies.getConfig(UI_SETTINGS.META_FIELDS);
     const sourceFiltersValues = sourceFilters.excludes;
     const wildcardField = bodyFields.find(
       (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
     );
-    const filterSourceFields = (fieldName: string) => {
-      return (
-        fieldName &&
-        !sourceFiltersValues.some((sourceFilter) => fieldName.match(sourceFilter)) &&
-        !metaFields.includes(fieldName)
-      );
-    };
+    const filter = fieldWildcardFilter(
+      sourceFiltersValues,
+      this.dependencies.getConfig(UI_SETTINGS.META_FIELDS)
+    );
+    const filterSourceFields = (fieldName: string) => fieldName && filter(fieldName);
     if (!wildcardField) {
       // we already have an explicit list of fields, so we just remove source filters from that list
       return bodyFields.filter((fld: SearchFieldValue) =>
