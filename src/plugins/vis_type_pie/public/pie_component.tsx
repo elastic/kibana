@@ -26,7 +26,7 @@ import {
   ChartsPluginSetup,
   PaletteRegistry,
 } from '../../charts/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginStart, FieldFormat } from '../../data/public';
 import type { PersistedState } from '../../visualizations/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { PieVisParams, BucketColumns, ValueFormats } from './types';
@@ -90,9 +90,16 @@ const PieComponent = (props: PieComponentProps) => {
       clickedLayers: LayerValue[],
       bucketColumns: Array<Partial<BucketColumns>>,
       visData: Datatable,
-      splitChartDimension?: DatatableColumn | undefined
+      splitChartDimension?: DatatableColumn,
+      splitChartFormatter?: FieldFormat
     ): void => {
-      const data = getFilterClickData(clickedLayers, bucketColumns, visData, splitChartDimension);
+      const data = getFilterClickData(
+        clickedLayers,
+        bucketColumns,
+        visData,
+        splitChartDimension,
+        splitChartFormatter
+      );
       const event = {
         name: 'filterBucket',
         data: { data },
@@ -172,6 +179,11 @@ const PieComponent = (props: PieComponentProps) => {
   const metricFieldFormatter = services.fieldFormats.deserialize(
     visParams.dimensions.metric.format
   );
+  const splitChartFormatter = visParams.dimensions.splitColumn
+    ? services.fieldFormats.deserialize(visParams.dimensions.splitColumn[0].format)
+    : visParams.dimensions.splitRow
+    ? services.fieldFormats.deserialize(visParams.dimensions.splitRow[0].format)
+    : undefined;
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
     params: {
@@ -277,7 +289,8 @@ const PieComponent = (props: PieComponentProps) => {
                 args[0][0] as LayerValue[],
                 bucketColumns,
                 visData,
-                splitChartDimension
+                splitChartDimension,
+                splitChartFormatter
               );
             }}
             legendAction={getLegendActions(

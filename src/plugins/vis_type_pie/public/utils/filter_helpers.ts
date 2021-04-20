@@ -8,7 +8,7 @@
 
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '../../../expressions/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { DataPublicPluginStart, FieldFormat } from '../../../data/public';
 import { ClickTriggerEvent } from '../../../charts/public';
 import { ValueClickContext } from '../../../embeddable/public';
 import { BucketColumns } from '../types';
@@ -28,14 +28,21 @@ export const getFilterClickData = (
   clickedLayers: LayerValue[],
   bucketColumns: Array<Partial<BucketColumns>>,
   visData: Datatable,
-  splitChartDimension?: DatatableColumn
+  splitChartDimension?: DatatableColumn,
+  splitChartFormatter?: FieldFormat
 ): ValueClickContext['data']['data'] => {
   const data: ValueClickContext['data']['data'] = [];
   const matchingIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
       if (!columnId) return;
-      return row[columnId] === layer.groupByRollup;
+      let condition = row[columnId] === layer.groupByRollup;
+      if (splitChartDimension) {
+        const value =
+          splitChartFormatter?.convert(row[splitChartDimension.id]) || row[splitChartDimension.id];
+        condition = condition && value === layer.smAccessorValue;
+      }
+      return condition;
     })
   );
 
@@ -48,15 +55,15 @@ export const getFilterClickData = (
     }))
   );
 
-  // console.dir(data);
-  // if (splitChartDimension) {
-  //   data.push({
-  //     column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
-  //     row: matchingIndex
-  //     table: visData,
-  //     value:
-  //   });
-  // }
+  // Allows filtering with the small multiples value
+  if (splitChartDimension) {
+    data.push({
+      column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
+      row: matchingIndex,
+      table: visData,
+      value: clickedLayers[0].smAccessorValue,
+    });
+  }
 
   return data;
 };

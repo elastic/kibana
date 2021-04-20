@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { DatatableColumn } from '../../../expressions/public';
 import { getFilterClickData, getFilterEventData } from './filter_helpers';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
@@ -21,7 +21,7 @@ describe('getFilterClickData', () => {
         depth: 1,
         path: [],
         sortIndex: 1,
-        smAccessorValue: 'Logstash Airways',
+        smAccessorValue: '',
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
@@ -39,7 +39,7 @@ describe('getFilterClickData', () => {
         depth: 1,
         path: [],
         sortIndex: 1,
-        smAccessorValue: 'ES-Air',
+        smAccessorValue: '',
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
@@ -47,6 +47,29 @@ describe('getFilterClickData', () => {
     expect(data[0].value).toEqual('ES-Air');
     expect(data[0].row).toEqual(4);
     expect(data[0].column).toEqual(0);
+  });
+
+  it('returns the correct filters for small multiples', () => {
+    const clickedLayers = [
+      {
+        groupByRollup: 'ES-Air',
+        value: 572,
+        depth: 1,
+        path: [],
+        sortIndex: 1,
+        smAccessorValue: 1,
+      },
+    ];
+    const splitDimension = {
+      id: 'col-2-3',
+      name: 'Cancelled: Descending',
+    } as DatatableColumn;
+    const data = getFilterClickData(clickedLayers, bucketColumns, visData, splitDimension);
+    expect(data.length).toEqual(2);
+    expect(data[0].value).toEqual('ES-Air');
+    expect(data[0].row).toEqual(5);
+    expect(data[0].column).toEqual(0);
+    expect(data[1].value).toEqual(1);
   });
 });
 
