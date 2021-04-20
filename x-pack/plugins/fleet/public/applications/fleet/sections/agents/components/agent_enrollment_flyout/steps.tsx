@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -60,6 +60,29 @@ export const AgentPolicySelectionStep = ({
   const regularAgentPolicies = Array.isArray(agentPolicies)
     ? agentPolicies.filter((policy) => policy && !policy.is_managed)
     : [];
+
+  const onAgentPolicyChange = useCallback(
+    async (policyId: string) => {
+      if (setSelectedPolicyId) {
+        setSelectedPolicyId(policyId);
+      }
+      if (setIsFleetServerPolicySelected) {
+        const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
+        if (
+          agentPolicyRequest.data?.item &&
+          (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
+            (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
+          )
+        ) {
+          setIsFleetServerPolicySelected(true);
+        } else {
+          setIsFleetServerPolicySelected(false);
+        }
+      }
+    },
+    [setIsFleetServerPolicySelected, setSelectedPolicyId]
+  );
+
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'Choose an agent policy',
@@ -69,24 +92,7 @@ export const AgentPolicySelectionStep = ({
         agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={async (policyID) => {
-          if (setSelectedPolicyId) {
-            setSelectedPolicyId(policyID);
-          }
-          if (setIsFleetServerPolicySelected) {
-            const agentPolicyRequest = await sendGetOneAgentPolicy(policyID);
-            if (
-              agentPolicyRequest.data?.item &&
-              (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
-                (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-              )
-            ) {
-              setIsFleetServerPolicySelected(true);
-            } else {
-              setIsFleetServerPolicySelected(false);
-            }
-          }
-        }}
+        onAgentPolicyChange={onAgentPolicyChange}
       />
     ),
   };
