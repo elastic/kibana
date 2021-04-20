@@ -38,6 +38,7 @@ import {
   policyResponseTimestamp,
   policyVersionInfo,
   hostStatusInfo,
+  policyResponseAppliedRevision,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
@@ -149,6 +150,7 @@ const PolicyResponseFlyoutPanel = memo<{
   const error = useEndpointSelector(policyResponseError);
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const responseTimestamp = useEndpointSelector(policyResponseTimestamp);
+  const responsePolicyRevisionNumber = useEndpointSelector(policyResponseAppliedRevision);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(
@@ -197,7 +199,14 @@ const PolicyResponseFlyoutPanel = memo<{
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
-          <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyResponse.appliedOn"
+            defaultMessage="Revision {rev} applied on {date}"
+            values={{
+              rev: responsePolicyRevisionNumber,
+              date: <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />,
+            }}
+          />
         </EuiText>
         <EuiSpacer size="s" />
         {error && (
