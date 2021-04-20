@@ -21,11 +21,13 @@ export function getMemoryUsageLensConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'system.memory.used.pct',
-      label: 'Memory Usage %',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'system.memory.used.pct',
+        label: 'Memory Usage %',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],
