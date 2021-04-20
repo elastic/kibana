@@ -527,6 +527,37 @@ export const SearchExamplesApp = ({
                 </EuiText>
               </EuiText>
               <EuiSpacer />
+              <EuiTitle size="xs">
+                <h3>Handling partial results</h3>
+              </EuiTitle>
+              <EuiText>
+                The observable returned from <EuiCode>data.search</EuiCode> provides partial results
+                when the response is not yet complete. These can be handled to update a chart or
+                simply a progress bar:
+                <EuiSpacer />
+                <EuiCodeBlock language="html" fontSize="s" paddingSize="s" overflowHeight={450}>
+                  &lt;EuiProgress value=&#123;response.loaded&#125; max=&#123;response.total&#125;
+                  /&gt;
+                </EuiCodeBlock>
+                Below is an example showing a custom search strategy that emits partial Fibonacci
+                sequences up to the length provided, updates the response with each partial result,
+                and updates a progress bar (see the Response tab).
+                <EuiFieldNumber
+                  id="FibonacciN"
+                  placeholder="Number of Fibonacci numbers to generate"
+                  value={fibonacciN}
+                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
+                />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onPartialResultsClickHandler}
+                  iconType="play"
+                  data-test-subj="requestFibonacci"
+                >
+                  Request Fibonacci sequence
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
               <EuiTitle size="s">
                 <h3>Writing a custom search strategy</h3>
               </EuiTitle>
@@ -607,33 +638,6 @@ export const SearchExamplesApp = ({
                     id="searchExamples.myServerButtonText"
                     defaultMessage="Request from low-level client on the server"
                   />
-                </EuiButtonEmpty>
-              </EuiText>
-              <EuiSpacer />
-              <EuiTitle size="s">
-                <h3>Handling partial results</h3>
-              </EuiTitle>
-              <EuiText>
-                Search requests provide partial results when the response is not yet complete. These
-                can be handled to update a chart (using <EuiCode>response.rawResponse</EuiCode> or
-                simply a progress bar (using <EuiCode>response.loaded</EuiCode>&amp;
-                <EuiCode>response.total</EuiCode>. Below is an example showing a custom search
-                strategy that emits partial Fibonacci sequences up to the length provided, updates
-                the response with each partial result, and updates a progress bar.
-                <EuiSpacer />
-                <EuiFieldNumber
-                  id="FibonacciN"
-                  placeholder="Number of Fibonacci numbers to generate"
-                  value={fibonacciN}
-                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
-                />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onPartialResultsClickHandler}
-                  iconType="play"
-                  data-test-subj="requestFibonacci"
-                >
-                  Request Fibonacci sequence
                 </EuiButtonEmpty>
               </EuiText>
             </EuiFlexItem>

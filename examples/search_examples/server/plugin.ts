@@ -22,8 +22,9 @@ import {
   SearchExamplesPluginSetupDeps,
   SearchExamplesPluginStartDeps,
 } from './types';
-import { fibonacciStrategyProvider, mySearchStrategyProvider } from './my_strategy';
+import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
+import { fibonacciStrategyProvider } from './fibonacci_strategy';
 
 export class SearchExamplesPlugin
   implements
