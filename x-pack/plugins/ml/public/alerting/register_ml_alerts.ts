@@ -113,7 +113,7 @@ export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPu
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
 
-Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.
+\\{\\{context.message\\}\\}
 
 \\{\\{#context.topInfluencers.length\\}\\}
   Top influencers:

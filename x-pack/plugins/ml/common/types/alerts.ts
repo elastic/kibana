@@ -25,6 +25,7 @@ export interface AlertExecutionResult {
   bucketRange: { start: string; end: string };
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
+  message: string;
 }
 
 export interface PreviewResponse {
