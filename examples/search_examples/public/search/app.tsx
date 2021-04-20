@@ -35,12 +35,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  IMyStrategyResponse,
-  SERVER_SEARCH_ROUTE_PATH,
-} from '../../common';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 import {
   DataPublicPluginStart,
@@ -50,6 +45,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
+import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
