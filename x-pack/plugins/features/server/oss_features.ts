@@ -490,7 +490,9 @@ const reportingPrivilegeGroupName = i18n.translate(
 );
 
 const reportingFeatures: {
-  [Property in 'discoverReporting' | 'dashboardReporting' | 'visualizeReporting']: SubFeatureConfig;
+  discoverReporting: SubFeatureConfig;
+  dashboardReporting: SubFeatureConfig;
+  visualizeReporting: SubFeatureConfig;
 } = {
   discoverReporting: {
     name: reportingPrivilegeGroupName,
