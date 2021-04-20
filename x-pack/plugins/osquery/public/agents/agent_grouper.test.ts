@@ -23,7 +23,7 @@ export function genGroup(name: string) {
 
 export function genAgent(policyId: string, hostname: string, id: string): GroupedAgent {
   return {
-    active: true,
+    status: 'online',
     policy_id: policyId,
     local_metadata: {
       elastic: {

@@ -43,7 +43,7 @@ export const generateAgentOption = (
         platform: agent.local_metadata.os.platform,
       },
       id: agent.local_metadata.elastic.agent.id,
-      online: agent.active,
+      status: agent.status ?? 'unknown',
     },
   })),
 });

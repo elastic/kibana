@@ -31,7 +31,7 @@ export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
 
-export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'active'>;
+export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'status'>;
 
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
@@ -49,7 +49,7 @@ interface BaseGroupOption {
 
 export type AgentOptionValue = BaseGroupOption & {
   groups: { [groupType: string]: string };
-  online: boolean;
+  status: string;
 };
 
 export type GroupOptionValue = BaseGroupOption & {

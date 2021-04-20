@@ -38,7 +38,7 @@ export const useAllAgents = (
 
       if (searchValue) {
         kueryFragments.push(
-          `local_metadata.host.hostname:/${searchValue}/ or local_metadata.elastic.agent.id:/${searchValue}/`
+          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
         );
       }
 
@@ -46,6 +46,7 @@ export const useAllAgents = (
         query: {
           kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
           perPage,
+          showInactive: true,
         },
       });
     },
