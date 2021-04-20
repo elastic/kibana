@@ -320,6 +320,8 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   maxSignals: 100,
 };
 
+export const duplicatedRuleName = `${newThreatIndicatorRule.name} [Duplicate]`;
+
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
 
 export const editedRule = {

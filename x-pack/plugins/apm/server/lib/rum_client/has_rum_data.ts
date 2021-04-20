@@ -49,11 +49,16 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
 
     const response = await apmEventClient.search(params);
     return {
+      indices: setup.indices['apm_oss.transactionIndices']!,
       hasData: response.hits.total.value > 0,
       serviceName:
         response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
     };
   } catch (e) {
-    return { hasData: false, serviceName: undefined };
+    return {
+      hasData: false,
+      serviceName: undefined,
+      indices: setup.indices['apm_oss.transactionIndices']!,
+    };
   }
 }
