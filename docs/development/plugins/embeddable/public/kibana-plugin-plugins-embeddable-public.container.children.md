@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected readonly children: {
+readonly children: {
         [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
     };
 ```
