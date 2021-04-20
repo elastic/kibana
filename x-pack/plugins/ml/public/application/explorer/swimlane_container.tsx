@@ -71,7 +71,7 @@ const LEGEND_HEIGHT = 34;
 
 const Y_AXIS_HEIGHT = 24;
 
-export const SWIM_LANE_LABEL_WIDTH = 200;
+export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');

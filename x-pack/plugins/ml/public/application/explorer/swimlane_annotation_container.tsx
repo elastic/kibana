@@ -17,6 +17,8 @@ const ANNOTATION_HEIGHT = 12;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
 export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
+const ANNOTATION_RECT_MARGIN = 2;
+const ANNOTATION_MIN_WIDTH = 5;
 
 interface SwimlaneAnnotationContainerProps {
   chartWidth: number;
@@ -41,8 +43,10 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       const chartElement = d3.select(canvasRef.current);
       chartElement.selectAll('*').remove();
 
+      const dimensions = canvasRef.current.getBoundingClientRect();
+
       const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = startingXPos + chartWidth - Y_AXIS_LABEL_PADDING;
+      const endingXPos = dimensions.width - 2 * Y_AXIS_LABEL_PADDING - 4;
 
       const svg = chartElement
         .append('svg')
@@ -79,14 +83,19 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 
       // Add annotation marker
       annotationsData.forEach((d) => {
-        const annotationWidth = d.end_timestamp ? xScale(d.end_timestamp) - xScale(d.timestamp) : 0;
+        const annotationWidth = d.end_timestamp
+          ? xScale(Math.min(d.end_timestamp, domain.max)) - xScale(d.timestamp)
+          : ANNOTATION_MIN_WIDTH;
+
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
-          .attr('x', xScale(d.timestamp))
+          .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
           .attr('y', 0)
           .attr('height', ANNOTATION_HEIGHT)
-          .attr('width', Math.max(annotationWidth, 5))
+          .attr('width', annotationWidth)
+          .attr('rx', ANNOTATION_RECT_MARGIN)
+          .attr('ry', ANNOTATION_RECT_MARGIN)
           .on('mouseover', function () {
             const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
             const endingTime =
