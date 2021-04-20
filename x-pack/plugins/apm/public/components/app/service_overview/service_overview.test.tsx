@@ -97,8 +97,7 @@ describe('ServiceOverview', () => {
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': {
-        currentPeriod: [],
-        previousPeriod: [],
+        serviceDependencies: [],
       },
       'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
     };
