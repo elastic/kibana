@@ -47,8 +47,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    // @ts-expect-error missing size argument
-    const { body } = await this._mlClient.getCalendars({ size: 1000 });
+    const { body } = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 1000 } } });
 
     const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars as Calendar[];

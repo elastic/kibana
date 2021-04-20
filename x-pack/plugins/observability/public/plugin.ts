@@ -166,6 +166,7 @@ export class Plugin
     return {
       dashboard: { register: registerDataHandler },
       ruleRegistry: observabilityRuleRegistry,
+      isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
     };
   }
   public start({ application }: CoreStart) {
