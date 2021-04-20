@@ -85,8 +85,8 @@ describe('RewriteAppender', () => {
       const appender = new RewriteAppender(config);
       appenderMocks.forEach((mock) => appender.addAppender(...mock));
 
-      const log1 = createLogRecord({ a: 'b' });
-      const log2 = createLogRecord({ c: 'd' });
+      const log1 = createLogRecord({ user_agent: { name: 'a' } });
+      const log2 = createLogRecord({ user_agent: { name: 'b' } });
 
       appender.append(log1);
 
@@ -109,8 +109,8 @@ describe('RewriteAppender', () => {
       const appender = new RewriteAppender(config);
       appender.addAppender(...createAppenderMock('mock1'));
 
-      const log1 = createLogRecord({ a: 'b' });
-      const log2 = createLogRecord({ c: 'd' });
+      const log1 = createLogRecord({ user_agent: { name: 'a' } });
+      const log2 = createLogRecord({ user_agent: { name: 'b' } });
 
       appender.append(log1);
 
