@@ -16,15 +16,14 @@ export type InspectResponse = Inspect & { response: string[] };
 
 export const generateTablePaginationOptions = (
   activePage: number,
-  limit: number,
-  isBucketSort?: boolean
+  limit: number
 ): PaginationInputPaginated => {
   const cursorStart = activePage * limit;
   return {
     activePage,
     cursorStart,
     fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
-    querySize: isBucketSort ? limit : limit + cursorStart,
+    querySize: limit,
   };
 };
 

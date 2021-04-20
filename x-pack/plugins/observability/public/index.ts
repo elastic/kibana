@@ -21,12 +21,16 @@ export type {
 };
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
+export interface ConfigSchema {
+  unsafe: { alertingExperience: { enabled: boolean } };
+}
+
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = (context: PluginInitializerContext) => {
+> = (context: PluginInitializerContext<ConfigSchema>) => {
   return new Plugin(context);
 };
 
