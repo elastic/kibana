@@ -76,9 +76,17 @@ export interface FindFileStructureErrorResponse {
     statusCode: number;
     error: string;
     message: string;
-    attributes?: any;
+    attributes?: ErrorAttribute;
   };
   name: string;
+}
+
+interface ErrorAttribute {
+  body: {
+    error: {
+      suppressed: Array<{ reason: string }>;
+    };
+  };
 }
 
 export interface HasImportPermission {

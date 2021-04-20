@@ -83,15 +83,16 @@ export async function checkIndexExists(
 ): Promise<boolean> {
   const body = JSON.stringify({ index });
   const fileUploadModules = await lazyLoadModules();
-  return await fileUploadModules.getHttp().fetch<any>({
+  const { exists } = await fileUploadModules.getHttp().fetch<{ exists: boolean }>({
     path: `/internal/file_upload/index_exists`,
     method: 'POST',
     body,
     query: params,
   });
+  return exists;
 }
 
-export async function getTimeFieldRange(index: string, query: any, timeFieldName?: string) {
+export async function getTimeFieldRange(index: string, query: unknown, timeFieldName?: string) {
   const body = JSON.stringify({ index, timeFieldName, query });
 
   const fileUploadModules = await lazyLoadModules();

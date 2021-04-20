@@ -10,29 +10,29 @@ import React, { FC } from 'react';
 import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
 import { expandLiteralStrings, XJsonMode } from '../../shared_imports';
 
-export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
+export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
 interface MlJobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
+  mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
 }
-export const MLJobEditor: FC<MlJobEditorProps> = ({
+export const JsonEditor: FC<MlJobEditorProps> = ({
   value,
   height = '500px',
   width = '100%',
-  mode = ML_EDITOR_MODE.JSON,
+  mode = EDITOR_MODE.JSON,
   readOnly = false,
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
 }) => {
-  if (mode === ML_EDITOR_MODE.XJSON) {
+  if (mode === EDITOR_MODE.XJSON) {
     value = expandLiteralStrings(value);
   }
 

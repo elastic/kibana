@@ -53,7 +53,7 @@ export const ColumnChart: FC<Props> = ({
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
-        <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+        <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
             <Settings theme={columnChartTheme} />
             <BarSeries
@@ -70,9 +70,9 @@ export const ColumnChart: FC<Props> = ({
         </div>
       )}
       <div
-        className={classNames('mlDataGridChart__legend', {
+        className={classNames('dataGridChart__legend', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          'mlDataGridChart__legend--numeric': columnType.schema === 'number',
+          'dataGridChart__legend--numeric': columnType.schema === 'number',
         })}
         data-test-subj={`${dataTestSubj}-legend`}
       >

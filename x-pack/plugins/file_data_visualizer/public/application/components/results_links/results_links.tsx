@@ -13,6 +13,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../src/plugins/discover/public';
+import { TimeRange, RefreshInterval } from '../../../../../../../src/plugins/data/public';
 import { FindFileStructureResponse } from '../../../../../file_upload/common';
 import type { FileUploadPluginStart } from '../../../../../file_upload/public';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
@@ -27,12 +28,8 @@ interface Props {
 }
 
 interface GlobalState {
-  time?: {
-    from: string;
-    to: string;
-    mode?: 'absolute' | 'relative';
-  };
-  refreshInterval?: { pause: boolean; value: number };
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
 }
 
 const RECHECK_DELAY_MS = 3000;

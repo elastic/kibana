@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { CombinedField, CombinedFieldsForm } from '../combined_fields';
-import { MLJobEditor, ML_EDITOR_MODE } from '../ml_job_editor';
+import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { FindFileStructureResponse } from '../../../../../file_upload/common';
 const EDITOR_HEIGHT = '300px';
 
@@ -190,8 +190,8 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
         }
         fullWidth
       >
-        <MLJobEditor
-          mode={ML_EDITOR_MODE.JSON}
+        <JsonEditor
+          mode={EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -215,8 +215,8 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
         }
         fullWidth
       >
-        <MLJobEditor
-          mode={ML_EDITOR_MODE.JSON}
+        <JsonEditor
+          mode={EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -240,8 +240,8 @@ const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) =>
         }
         fullWidth
       >
-        <MLJobEditor
-          mode={ML_EDITOR_MODE.JSON}
+        <JsonEditor
+          mode={EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}

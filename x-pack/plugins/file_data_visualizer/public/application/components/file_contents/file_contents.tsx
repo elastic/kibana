@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { MLJobEditor, ML_EDITOR_MODE } from '../ml_job_editor';
+import { JsonEditor, EDITOR_MODE } from '../json_editor';
 
 interface Props {
   data: string;
@@ -19,9 +19,9 @@ interface Props {
 }
 
 export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
-  let mode = ML_EDITOR_MODE.TEXT;
-  if (format === ML_EDITOR_MODE.JSON) {
-    mode = ML_EDITOR_MODE.JSON;
+  let mode = EDITOR_MODE.TEXT;
+  if (format === EDITOR_MODE.JSON) {
+    mode = EDITOR_MODE.JSON;
   }
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
@@ -49,7 +49,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 
       <EuiSpacer size="s" />
 
-      <MLJobEditor
+      <JsonEditor
         mode={mode}
         readOnly={true}
         value={formattedData}

@@ -9,7 +9,7 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 export const ExpandedRowFieldHeader = ({ children }: { children: React.ReactNode }) => (
-  <EuiText size="xs" color={'subdued'} className={'mlFieldDataCard__valuesTitle'}>
+  <EuiText size="xs" color={'subdued'} className={'fieldDataCard__valuesTitle'}>
     {children}
   </EuiText>
 );

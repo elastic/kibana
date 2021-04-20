@@ -351,7 +351,7 @@ export class ImportView extends Component {
       return;
     }
 
-    const { exists } = await this.props.fileUpload.checkIndexExists(index);
+    const exists = await this.props.fileUpload.checkIndexExists(index);
     const indexNameError = exists ? (
       <FormattedMessage
         id="xpack.fileDataVisualizer.importView.indexNameAlreadyExistsErrorMessage"

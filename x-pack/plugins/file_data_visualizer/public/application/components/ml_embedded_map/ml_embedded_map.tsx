@@ -25,7 +25,7 @@ import {
 } from '../../../../../../../src/plugins/embeddable/public';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
 
-export function MlEmbeddedMapComponent({
+export function EmbeddedMapComponent({
   layerList,
   mapEmbeddableInput,
   renderTooltipContent,
@@ -146,10 +146,6 @@ export function MlEmbeddedMapComponent({
   }
 
   return (
-    <div
-      data-test-subj="mlEmbeddedMapContent"
-      className="mlEmbeddedMapContent"
-      ref={embeddableRoot}
-    />
+    <div data-test-subj="embeddedMapContent" className="embeddedMapContent" ref={embeddableRoot} />
   );
 }

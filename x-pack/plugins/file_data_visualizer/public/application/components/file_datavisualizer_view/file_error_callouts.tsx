@@ -136,7 +136,7 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }
-  const reason: string = error.body.attributes.body.error.suppressed[0].reason;
+  const reason = error.body.attributes.body.error.suppressed[0].reason;
   return (
     <>
       <EuiSpacer size="s" />

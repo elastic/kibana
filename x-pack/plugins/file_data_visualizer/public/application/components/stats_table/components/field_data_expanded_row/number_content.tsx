@@ -127,7 +127,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
             </ExpandedRowFieldHeader>
           </EuiFlexItem>
 
-          <EuiFlexItem className={'mlMetricDistributionChartContainer'}>
+          <EuiFlexItem className={'metricDistributionChartContainer'}>
             <MetricDistributionChart
               width={METRIC_DISTRIBUTION_CHART_WIDTH}
               height={METRIC_DISTRIBUTION_CHART_HEIGHT}

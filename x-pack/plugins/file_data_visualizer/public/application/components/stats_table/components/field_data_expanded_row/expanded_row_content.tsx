@@ -17,7 +17,7 @@ export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
     <EuiFlexGroup
       data-test-subj={dataTestSubj}
       gutterSize={'xl'}
-      className={'mlDataVisualizerExpandedRow'}
+      className={'dataVisualizerExpandedRow'}
     >
       {children}
     </EuiFlexGroup>

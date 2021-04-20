@@ -54,7 +54,7 @@ export class FileDataVisualizerView extends Component {
     };
 
     this.savedObjectsClient = props.savedObjectsClient;
-    this.maxFileUploadBytes = this.props.fileUpload.getMaxBytes();
+    this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
   }
 
   async componentDidMount() {

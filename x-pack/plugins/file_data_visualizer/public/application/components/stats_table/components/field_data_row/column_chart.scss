@@ -1,9 +1,9 @@
-.mlDataGridChart__histogram {
+.dataGridChart__histogram {
   width: 100%;
   height: $euiSizeXL + $euiSizeXXL;
 }
 
-.mlDataGridChart__legend {
+.dataGridChart__legend {
   @include euiTextTruncate;
   @include euiFontSizeXS;
 
@@ -16,17 +16,17 @@
   text-align: left;
 }
 
-.mlDataGridChart__legend--numeric {
+.dataGridChart__legend--numeric {
   text-align: right;
 }
 
-.mlDataGridChart__legendBoolean {
+.dataGridChart__legendBoolean {
   width: 100%;
   min-width: $euiButtonMinWidth;
   td { text-align: center }
 }
 
 /* Override to align column header to bottom of cell when no chart is available */
-.mlDataGrid .euiDataGridHeaderCell__content {
+.dataGrid .euiDataGridHeaderCell__content {
   margin-top: auto;
 }

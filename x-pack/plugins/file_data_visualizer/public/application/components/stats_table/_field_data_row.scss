@@ -1,4 +1,4 @@
-.mlFieldDataCard {
+.fieldDataCard {
   height: 420px;
   box-shadow: none;
   border-color: $euiBorderColor;
@@ -50,17 +50,17 @@
     border-color: $euiColorVis6;
   }
 
-  .mlFieldDataCard__content {
+  .fieldDataCard__content {
     @include euiFontSizeS;
     height: 385px;
     overflow: hidden;
   }
 
-  .mlFieldDataCard__codeContent {
+  .fieldDataCard__codeContent {
     @include euiCodeFont;
   }
 
-  .mlFieldDataCard__geoContent {
+  .fieldDataCard__geoContent {
     z-index: auto;
     flex: 1;
     display: flex;
@@ -75,12 +75,12 @@
     }
   }
 
-  .mlFieldDataCard__stats {
+  .fieldDataCard__stats {
     padding: $euiSizeS $euiSizeS 0 $euiSizeS;
     text-align: center;
   }
 
-  .mlFieldDataCard__valuesTitle {
+  .fieldDataCard__valuesTitle {
     text-transform: uppercase;
   }
 }

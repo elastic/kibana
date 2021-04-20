@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlEmbeddedMapComponent } from './ml_embedded_map';
+export { EmbeddedMapComponent } from './ml_embedded_map';

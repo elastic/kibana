@@ -30,7 +30,7 @@ export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) 
         <EuiFlexGroup
           gutterSize="s"
           alignItems="center"
-          className="mlDataVisualizerFieldCountContainer"
+          className="dataVisualizerFieldCountContainer"
           data-test-subj="mlDataVisualizerMetricFieldsSummary"
         >
           <EuiFlexItem grow={false}>

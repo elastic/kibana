@@ -11,7 +11,7 @@ import { EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
+import { getJobTypeAriaLabel } from '../../util/field_types_utils';
 import { JOB_FIELD_TYPES } from '../../../../common';
 import type { JobFieldType } from '../../../../common';
 
@@ -36,7 +36,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
   fieldName,
   needsAria = true,
 }) => {
-  const ariaLabel = getMLJobTypeAriaLabel(type);
+  const ariaLabel = getJobTypeAriaLabel(type);
 
   let iconType = 'questionInCircle';
   let color = 'euiColorVis6';

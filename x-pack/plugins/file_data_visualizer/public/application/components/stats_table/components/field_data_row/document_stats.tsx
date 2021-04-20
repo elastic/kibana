@@ -22,7 +22,7 @@ export const DocumentStat = ({ config }: FieldDataRowProps) => {
 
   return (
     <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem className={'mlDataVisualizerColumnHeaderIcon'}>
+      <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
         <EuiIcon type="document" size={'s'} />
       </EuiFlexItem>
       <EuiText size={'s'}>

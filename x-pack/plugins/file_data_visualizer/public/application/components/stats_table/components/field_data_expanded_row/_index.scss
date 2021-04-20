@@ -1,6 +1,6 @@
 @import 'number_content';
 
-.mlDataVisualizerExpandedRow {
+.dataVisualizerExpandedRow {
   @include euiBreakpoint('xs', 's', 'm') {
     flex-direction: column;
   }

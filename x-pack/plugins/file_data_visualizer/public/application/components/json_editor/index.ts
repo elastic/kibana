@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MLJobEditor, ML_EDITOR_MODE } from './ml_job_editor';
+export { EDITOR_MODE, JsonEditor } from './json_editor';

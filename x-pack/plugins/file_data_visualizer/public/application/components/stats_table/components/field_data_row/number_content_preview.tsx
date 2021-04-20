@@ -47,7 +47,7 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
 
   return (
     <div data-test-subj={dataTestSubj}>
-      <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+      <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
           height={METRIC_DISTRIBUTION_CHART_HEIGHT}
@@ -56,19 +56,16 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
           hideXAxis={true}
         />
       </div>
-      <div className={'mlDataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
+      <div className={'dataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
             <EuiSpacer size="s" />
             <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
-              <EuiFlexItem className={'mlDataGridChart__legend'}>
+              <EuiFlexItem className={'dataGridChart__legend'}>
                 {kibanaFieldFormat(legendText.min, fieldFormat)}
               </EuiFlexItem>
               <EuiFlexItem
-                className={classNames(
-                  'mlDataGridChart__legend',
-                  'mlDataGridChart__legend--numeric'
-                )}
+                className={classNames('dataGridChart__legend', 'dataGridChart__legend--numeric')}
               >
                 {kibanaFieldFormat(legendText.max, fieldFormat)}
               </EuiFlexItem>

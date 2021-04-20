@@ -2,11 +2,11 @@
 @import 'components/field_count_stats/index';
 @import 'components/field_data_row/index';
 
-.mlDataVisualizerFieldExpandedRow {
+.dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
   width: 100%;
 
-  .mlFieldDataCard__valuesTitle {
+  .fieldDataCard__valuesTitle {
     text-transform: uppercase;
     text-align: left;
     color: $euiColorDarkShade;
@@ -14,7 +14,7 @@
     padding-bottom: $euiSizeS;
   }
 
-  .mlFieldDataCard__codeContent {
+  .fieldDataCard__codeContent {
     @include euiCodeFont;
   }
 }
