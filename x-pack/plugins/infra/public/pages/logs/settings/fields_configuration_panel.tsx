@@ -10,7 +10,6 @@ import {
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
-  EuiForm,
   EuiFormRow,
   EuiLink,
   EuiSpacer,
@@ -18,27 +17,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { InputFieldProps } from '../../../components/source_configuration/input_fields';
+import React, { useMemo } from 'react';
+import { FormElement } from './form_elements';
+import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
+import { FormValidationError } from './validation_errors';
 
 interface FieldsConfigurationPanelProps {
   isLoading: boolean;
-  readOnly: boolean;
-  tiebreakerFieldProps: InputFieldProps;
-  timestampFieldProps: InputFieldProps;
+  isReadOnly: boolean;
+  tiebreakerFieldFormElement: FormElement<string, FormValidationError>;
+  timestampFieldFormElement: FormElement<string, FormValidationError>;
 }
 
 export const FieldsConfigurationPanel = ({
   isLoading,
-  readOnly,
-  tiebreakerFieldProps,
-  timestampFieldProps,
+  isReadOnly,
+  tiebreakerFieldFormElement,
+  timestampFieldFormElement,
 }: FieldsConfigurationPanelProps) => {
-  const isTimestampValueDefault = timestampFieldProps.value === '@timestamp';
-  const isTiebreakerValueDefault = tiebreakerFieldProps.value === '_doc';
+  const isTimestampValueDefault = timestampFieldFormElement.value === '@timestamp';
+  const isTiebreakerValueDefault = tiebreakerFieldFormElement.value === '_doc';
 
   return (
-    <EuiForm>
+    <>
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
@@ -101,7 +102,6 @@ export const FieldsConfigurationPanel = ({
         }
       >
         <EuiFormRow
-          error={timestampFieldProps.error}
           fullWidth
           helpText={
             <FormattedMessage
@@ -112,20 +112,24 @@ export const FieldsConfigurationPanel = ({
               }}
             />
           }
-          isInvalid={timestampFieldProps.isInvalid}
           label={
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.timestampFieldLabel"
               defaultMessage="Timestamp"
             />
           }
+          {...useMemo(() => getFormRowProps(timestampFieldFormElement), [
+            timestampFieldFormElement,
+          ])}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTimestampValueDefault}
-            readOnly={readOnly}
+            readOnly={isReadOnly}
             isLoading={isLoading}
-            {...timestampFieldProps}
+            {...useMemo(() => getStringInputFieldProps(timestampFieldFormElement), [
+              timestampFieldFormElement,
+            ])}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -146,7 +150,6 @@ export const FieldsConfigurationPanel = ({
         }
       >
         <EuiFormRow
-          error={tiebreakerFieldProps.error}
           fullWidth
           helpText={
             <FormattedMessage
@@ -157,23 +160,27 @@ export const FieldsConfigurationPanel = ({
               }}
             />
           }
-          isInvalid={tiebreakerFieldProps.isInvalid}
           label={
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
               defaultMessage="Tiebreaker"
             />
           }
+          {...useMemo(() => getFormRowProps(tiebreakerFieldFormElement), [
+            tiebreakerFieldFormElement,
+          ])}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTiebreakerValueDefault}
-            readOnly={readOnly}
+            readOnly={isReadOnly}
             isLoading={isLoading}
-            {...tiebreakerFieldProps}
+            {...useMemo(() => getStringInputFieldProps(tiebreakerFieldFormElement), [
+              tiebreakerFieldFormElement,
+            ])}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-    </EuiForm>
+    </>
   );
 };

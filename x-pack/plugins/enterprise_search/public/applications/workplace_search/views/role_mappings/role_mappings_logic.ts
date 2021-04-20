@@ -7,7 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  setSuccessMessage,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
@@ -15,7 +19,13 @@ import { AttributeName } from '../../../shared/types';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
-import { DELETE_ROLE_MAPPING_MESSAGE, DEFAULT_GROUP_NAME } from './constants';
+import {
+  DELETE_ROLE_MAPPING_MESSAGE,
+  ROLE_MAPPING_DELETED_MESSAGE,
+  ROLE_MAPPING_CREATED_MESSAGE,
+  ROLE_MAPPING_UPDATED_MESSAGE,
+  DEFAULT_GROUP_NAME,
+} from './constants';
 
 interface RoleMappingsServerDetails {
   multipleAuthProvidersConfig: boolean;
@@ -265,6 +275,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         try {
           await http.delete(route);
           navigateToUrl(ROLE_MAPPINGS_PATH);
+          setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
         }
@@ -297,9 +308,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         ? http.post('/api/workplace_search/org/role_mappings', { body })
         : http.put(`/api/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
 
+      const SUCCESS_MESSAGE = !roleMapping
+        ? ROLE_MAPPING_CREATED_MESSAGE
+        : ROLE_MAPPING_UPDATED_MESSAGE;
+
       try {
         await request;
         navigateToUrl(ROLE_MAPPINGS_PATH);
+        setSuccessMessage(SUCCESS_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
