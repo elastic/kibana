@@ -11,9 +11,6 @@ import { Router, mockHistory } from '../__mock__/router';
 import { UserActionMarkdown } from './user_action_markdown';
 import { TestProviders } from '../../../common/mock';
 import * as timelineHelpers from '../../../timelines/components/open_timeline/helpers';
-import { useApolloClient } from '../../../common/utils/apollo_context';
-const mockUseApolloClient = useApolloClient as jest.Mock;
-jest.mock('../../../common/utils/apollo_context');
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
@@ -30,7 +27,6 @@ const defaultProps = {
 describe('UserActionMarkdown ', () => {
   const queryTimelineByIdSpy = jest.spyOn(timelineHelpers, 'queryTimelineById');
   beforeEach(() => {
-    mockUseApolloClient.mockClear();
     jest.resetAllMocks();
   });
 
@@ -49,7 +45,6 @@ describe('UserActionMarkdown ', () => {
       .simulate('click');
 
     expect(queryTimelineByIdSpy).toBeCalledWith({
-      apolloClient: mockUseApolloClient(),
       graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
@@ -79,7 +74,6 @@ describe('UserActionMarkdown ', () => {
       .first()
       .simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
-      apolloClient: mockUseApolloClient(),
       graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
