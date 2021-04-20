@@ -188,11 +188,11 @@ export function register(registerParams: RegisterAlertTypesParams) {
 
             // This will show up in the alerts-as-data index as event.kind: "event"
             // and contain a copy of the source document, with basic alerts-as-data fields appended
-            writeRuleEvents({
-              events: searchResult.hits.hits,
-              id: EsQuery.ConditionMetAlertInstanceId,
-              fields: {},
-            });
+            // writeRuleEvents({
+            //   events: searchResult.hits.hits,
+            //   id: EsQuery.ConditionMetAlertInstanceId,
+            //   fields: {},
+            // });
 
             // update the timestamp based on the current search results
             const firstValidTimefieldSort = getValidTimefieldSort(
