@@ -97,7 +97,7 @@ exports[`Header should render normally 1`] = `
                       >
                         <FormattedMessage
                           defaultMessage="use runtime fields instead"
-                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                          id="indexPatternManagement.header.runtimeLink"
                           values={Object {}}
                         />
                       </EuiLink>,
@@ -116,7 +116,7 @@ exports[`Header should render normally 1`] = `
                       >
                         <FormattedMessage
                           defaultMessage="use runtime fields instead"
-                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                          id="indexPatternManagement.header.runtimeLink"
                           values={Object {}}
                         >
                           <span>
