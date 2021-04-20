@@ -57,9 +57,9 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     let capabilities = null;
 
     if (
-      indexPatternString &&
-      !isIndexPatternContainsWildcard(indexPatternString) &&
-      (!indexPattern || indexPattern.type === 'rollup')
+      (indexPatternString && !isIndexPatternContainsWildcard(indexPatternString)) ||
+      !indexPattern ||
+      indexPattern.type === 'rollup'
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
