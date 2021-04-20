@@ -242,7 +242,8 @@ class TimeseriesChartIntl extends Component {
       this.props.renderFocusChartOnly === false ||
       prevProps.svgWidth !== this.props.svgWidth ||
       prevProps.showAnnotations !== this.props.showAnnotations ||
-      prevProps.annotationData !== this.props.annotationData
+      prevProps.annotationData !== this.props.annotationData ||
+      prevProps.showForecast !== this.props.showForecast
     ) {
       this.renderChart();
       this.drawContextChartSelection();
@@ -970,6 +971,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       annotationData,
       showAnnotations,
+      showForecast,
     } = this.props;
     const data = contextChartData;
 
@@ -982,11 +984,14 @@ class TimeseriesChartIntl extends Component {
       .domain(this.calculateContextXAxisDomain());
 
     const combinedData =
-      contextForecastData === undefined ? data : data.concat(contextForecastData);
+      showForecast && Array.isArray(contextForecastData) ? data.concat(contextForecastData) : data;
+
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
     each(combinedData, (item) => {
-      valuesRange.min = Math.min(item.value, valuesRange.min);
-      valuesRange.max = Math.max(item.value, valuesRange.max);
+      const lowerBound = item.lower ?? Number.MIN_VALUE;
+      const upperBound = item.upper ?? Number.MAX_VALUE;
+      valuesRange.min = Math.min(item.value, lowerBound, valuesRange.min);
+      valuesRange.max = Math.max(item.value, upperBound, valuesRange.max);
     });
     let dataMin = valuesRange.min;
     let dataMax = valuesRange.max;
@@ -1153,12 +1158,14 @@ class TimeseriesChartIntl extends Component {
         .append('path')
         .datum(contextForecastData)
         .attr('class', 'area forecast')
-        .attr('d', contextBoundsArea);
+        .attr('d', contextBoundsArea)
+        .classed('hidden', !showForecast);
       cxtGroup
         .append('path')
         .datum(contextForecastData)
         .attr('class', 'values-line forecast')
-        .attr('d', contextValuesLine);
+        .attr('d', contextValuesLine)
+        .classed('hidden', !showForecast);
     }
 
     // Create and draw the anomaly swimlane.
