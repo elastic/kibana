@@ -8,7 +8,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -23,32 +23,34 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
   const docLinks = useKibana<IndexPatternManagmentContext>().services.docLinks?.links;
   return isVisible ? (
     <Fragment>
-      <p>
-        <FormattedMessage
-          id="indexPatternManagement.warningCallOutLabel.callOutDetail"
-          defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields.
-          Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and
-          if done incorrectly, can cause Kibana to be unusable."
-          values={{
-            scripFields: (
-              <EuiLink target="_blank" href={docLinks.scriptedFields.scriptFields}>
-                <FormattedMessage
-                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                  defaultMessage="scripted fields"
-                />
-              </EuiLink>
-            ),
-            scriptsInAggregation: (
-              <EuiLink target="_blank" href={docLinks.scriptedFields.scriptAggs}>
-                <FormattedMessage
-                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                  defaultMessage="scripts in aggregations"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.warningCallOutLabel.callOutDetail"
+            defaultMessage="Please familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature.
+            Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and,
+            if done incorrectly, can cause Kibana to become unusable."
+            values={{
+              scripFields: (
+                <EuiLink target="_blank" href={docLinks.scriptedFields.scriptFields}>
+                  <FormattedMessage
+                    id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
+                    defaultMessage="scripted fields"
+                  />
+                </EuiLink>
+              ),
+              scriptsInAggregation: (
+                <EuiLink target="_blank" href={docLinks.scriptedFields.scriptAggs}>
+                  <FormattedMessage
+                    id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
+                    defaultMessage="scripts in aggregations"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
       <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
@@ -61,20 +63,24 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
           />
         }
       >
-        <FormattedMessage
-          id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-          defaultMessage="{runtimeDocs}, which support Painless scripts and provide greater flexibility."
-          values={{
-            runtimeDocs: (
-              <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
-                <FormattedMessage
-                  id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                  defaultMessage="Use runtime fields instead"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="indexPatternManagement.scriptedFieldsDeprecatedBody"
+              defaultMessage="For greater flexibility and Painless script support, {runtimeDocs}."
+              values={{
+                runtimeDocs: (
+                  <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
+                    <FormattedMessage
+                      id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                      defaultMessage="use runtime fields"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </Fragment>
