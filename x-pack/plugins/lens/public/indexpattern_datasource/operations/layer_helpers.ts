@@ -27,6 +27,12 @@ interface ColumnChange {
   field?: IndexPatternField;
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
+  // used to insert label information to the new column when
+  // a new column is created by moving from another incompatible group
+  sourceColumnOptions?: {
+    label: string;
+    customLabel?: boolean;
+  };
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -46,6 +52,7 @@ export function insertNewColumn({
   indexPattern,
   visualizationGroups,
   targetGroup,
+  sourceColumnOptions,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -208,16 +215,15 @@ export function insertNewColumn({
       },
     };
   }
+
+  let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
+  if (sourceColumnOptions) {
+    newColumn = copyCustomLabel(newColumn, sourceColumnOptions);
+  }
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
-    addOperationFn(
-      layer,
-      operationDefinition.buildColumn({ ...baseOptions, layer, field }),
-      columnId,
-      visualizationGroups,
-      targetGroup
-    ),
+    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup),
     indexPattern
   );
 }
@@ -229,6 +235,7 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  sourceColumnOptions,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -366,9 +373,12 @@ export function replaceColumn({
         },
       };
     }
-    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-    newColumn = copyCustomLabel(newColumn, previousColumn);
 
+    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    newColumn = copyCustomLabel(
+      newColumn,
+      sourceColumnOptions ? sourceColumnOptions : previousColumn
+    );
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
@@ -387,7 +397,7 @@ export function replaceColumn({
     // Same operation, new field
     const newColumn = copyCustomLabel(
       operationDefinition.onFieldChange(previousColumn, field),
-      previousColumn
+      sourceColumnOptions ? sourceColumnOptions : previousColumn
     );
 
     const newLayer = resetIncomplete(
@@ -671,11 +681,14 @@ function applyReferenceTransition({
   );
 }
 
-function copyCustomLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
+function copyCustomLabel(
+  newColumn: IndexPatternColumn,
+  previousOptions: { customLabel?: boolean; label: string }
+) {
   const adjustedColumn = { ...newColumn };
-  if (previousColumn.customLabel) {
+  if (previousOptions.customLabel) {
     adjustedColumn.customLabel = true;
-    adjustedColumn.label = previousColumn.label;
+    adjustedColumn.label = previousOptions.label;
   }
   return adjustedColumn;
 }

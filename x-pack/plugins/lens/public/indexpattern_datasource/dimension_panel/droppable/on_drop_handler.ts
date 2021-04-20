@@ -238,6 +238,10 @@ function onMoveIncompatible(
     field: sourceField,
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
+    sourceColumnOptions: {
+      label: sourceColumn.label,
+      customLabel: sourceColumn.customLabel,
+    },
   });
 
   trackUiEvent('drop_onto_dimension');
@@ -289,6 +293,10 @@ function onSwapIncompatible({
       op: newOperationForSource,
       field: sourceField,
       visualizationGroups: dimensionGroups,
+      sourceColumnOptions: {
+        label: sourceColumn.label,
+        customLabel: sourceColumn.customLabel,
+      },
     }),
     columnId: droppedItem.columnId,
     indexPattern,
@@ -296,6 +304,10 @@ function onSwapIncompatible({
     field: targetField,
     visualizationGroups: dimensionGroups,
     targetGroup: droppedItem.groupId,
+    sourceColumnOptions: {
+      label: targetColumn.label,
+      customLabel: targetColumn.customLabel,
+    },
   });
 
   trackUiEvent('drop_onto_dimension');
