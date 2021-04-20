@@ -26,6 +26,7 @@ import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/a
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 
 interface Props {
   jobCreationDisabled: boolean;
@@ -38,6 +39,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   );
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
@@ -110,7 +112,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
           }
           actions={
             <EuiButton
-              onClick={redirectToDataFrameAnalyticsManagementPage}
+              onClick={() => setIsSourceIndexModalVisible(true)}
               color="primary"
               fill
               iconType="plusInCircle"
@@ -159,6 +161,9 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
             </EuiButton>
           </div>
         </>
+      )}
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </EuiPanel>
   );
