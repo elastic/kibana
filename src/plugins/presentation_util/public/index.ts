@@ -20,6 +20,17 @@ export {
   withSuspense,
 } from './components';
 
+export {
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  PrimaryActionPopover,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+  SolutionToolbarButton,
+  SolutionToolbarPopover,
+} from './components/solution_toolbar';
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }

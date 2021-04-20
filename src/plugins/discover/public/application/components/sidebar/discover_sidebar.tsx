@@ -34,6 +34,7 @@ import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
+import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -51,7 +52,7 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   setFieldFilter: (next: FieldFilterState) => void;
 
   /**
-   * Callback to close the flyout sidebar rendered in a flyout, close flyout
+   * Callback to close the flyout if sidebar is rendered in a flyout
    */
   closeFlyout?: () => void;
 
@@ -60,6 +61,8 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
    * @param ref reference to the field editor component
    */
   setFieldEditorRef?: (ref: () => void | undefined) => void;
+
+  editField: (fieldName?: string) => void;
 }
 
 export function DiscoverSidebar({
@@ -86,6 +89,7 @@ export function DiscoverSidebar({
   onEditRuntimeField,
   setFieldEditorRef,
   closeFlyout,
+  editField,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const { indexPatternFieldEditor } = services;
@@ -224,6 +228,37 @@ export function DiscoverSidebar({
     return map;
   }, [fields, useNewFieldsApi, selectedFields]);
 
+  const deleteField = useMemo(
+    () =>
+      canEditIndexPatternField && selectedIndexPattern
+        ? async (fieldName: string) => {
+            const ref = indexPatternFieldEditor.openDeleteModal({
+              ctx: {
+                indexPattern: selectedIndexPattern,
+              },
+              fieldName,
+              onDelete: async () => {
+                onEditRuntimeField();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
+    [
+      selectedIndexPattern,
+      canEditIndexPatternField,
+      setFieldEditorRef,
+      closeFlyout,
+      onEditRuntimeField,
+      indexPatternFieldEditor,
+    ]
+  );
+
   const getPaginated = useCallback(
     (list) => {
       return list.slice(0, fieldsToRender);
@@ -237,27 +272,6 @@ export function DiscoverSidebar({
     return null;
   }
 
-  const editField = (fieldName: string) => {
-    if (!canEditIndexPatternField) {
-      return;
-    }
-    const ref = indexPatternFieldEditor.openEditor({
-      ctx: {
-        indexPattern: selectedIndexPattern,
-      },
-      fieldName,
-      onSave: async () => {
-        onEditRuntimeField();
-      },
-    });
-    if (setFieldEditorRef) {
-      setFieldEditorRef(ref);
-    }
-    if (closeFlyout) {
-      closeFlyout();
-    }
-  };
-
   if (useFlyout) {
     return (
       <section
@@ -265,14 +279,26 @@ export function DiscoverSidebar({
           defaultMessage: 'Index and fields',
         })}
       >
-        <DiscoverIndexPattern
-          config={config}
-          selectedIndexPattern={selectedIndexPattern}
-          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-          indexPatterns={indexPatterns}
-          state={state}
-          setAppState={setAppState}
-        />
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true}>
+            <DiscoverIndexPattern
+              config={config}
+              selectedIndexPattern={selectedIndexPattern}
+              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+              indexPatterns={indexPatterns}
+              state={state}
+              setAppState={setAppState}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DiscoverIndexPatternManagement
+              services={services}
+              selectedIndexPattern={selectedIndexPattern}
+              editField={editField}
+              useNewFieldsApi={useNewFieldsApi}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </section>
     );
   }
@@ -294,14 +320,26 @@ export function DiscoverSidebar({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <DiscoverIndexPattern
-            config={config}
-            selectedIndexPattern={selectedIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-            indexPatterns={indexPatterns}
-            state={state}
-            setAppState={setAppState}
-          />
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
+              <DiscoverIndexPattern
+                config={config}
+                selectedIndexPattern={selectedIndexPattern}
+                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+                indexPatterns={indexPatterns}
+                state={state}
+                setAppState={setAppState}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DiscoverIndexPatternManagement
+                services={services}
+                selectedIndexPattern={selectedIndexPattern}
+                useNewFieldsApi={useNewFieldsApi}
+                editField={editField}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <form>
@@ -370,6 +408,7 @@ export function DiscoverSidebar({
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
+                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                               />
                             </li>
                           );
@@ -428,6 +467,7 @@ export function DiscoverSidebar({
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
+                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                               />
                             </li>
                           );
@@ -455,6 +495,7 @@ export function DiscoverSidebar({
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
+                            onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                           />
                         </li>
                       );

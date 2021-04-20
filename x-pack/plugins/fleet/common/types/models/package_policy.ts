@@ -14,6 +14,7 @@ export interface PackagePolicyPackage {
 export interface PackagePolicyConfigRecordEntry {
   type?: string;
   value?: any;
+  frozen?: boolean;
 }
 
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;

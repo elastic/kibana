@@ -1112,19 +1112,19 @@ exports[`Inspector Data View component should render single table without select
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -1472,13 +1472,13 @@ exports[`Inspector Data View component should render single table without select
                                             href="#__table_generated-id"
                                             isDisabled={true}
                                             onClick={[Function]}
-                                            size="xs"
+                                            size="s"
                                           >
                                             <button
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                                               data-test-subj="pagination-button-0"
                                               disabled={true}
                                               onClick={[Function]}
@@ -2666,19 +2666,19 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -3026,13 +3026,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                             href="#__table_generated-id"
                                             isDisabled={true}
                                             onClick={[Function]}
-                                            size="xs"
+                                            size="s"
                                           >
                                             <button
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                                               data-test-subj="pagination-button-0"
                                               disabled={true}
                                               onClick={[Function]}
