@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { SortResults } from '@elastic/elasticsearch/api/types';
+import { isEmpty } from 'lodash';
 import {
   SortOrderOrUndefined,
   TimestampOverrideOrUndefined,
@@ -18,9 +20,8 @@ interface BuildEventsSearchQuery {
   filter?: estypes.QueryContainer;
   size: number;
   sortOrder?: SortOrderOrUndefined;
-  searchAfterSortId: string | number | undefined;
+  searchAfterSortIds: SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  excludeDocsWithTimestampOverride: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -30,10 +31,9 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
-  searchAfterSortId,
+  searchAfterSortIds,
   sortOrder,
   timestampOverride,
-  excludeDocsWithTimestampOverride,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -43,36 +43,62 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  const sortField =
-    timestampOverride != null && !excludeDocsWithTimestampOverride
-      ? timestampOverride
-      : '@timestamp';
-
-  const rangeFilter: estypes.QueryContainer[] = [
-    {
-      range: {
-        [sortField]: {
-          lte: to,
-          gte: from,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
-  if (excludeDocsWithTimestampOverride) {
-    rangeFilter.push({
-      bool: {
-        must_not: {
-          exists: {
-            field: timestampOverride,
+  const rangeFilter: estypes.QueryContainer[] =
+    timestampOverride != null
+      ? [
+          {
+            range: {
+              [timestampOverride]: {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
           },
-        },
-      },
-    });
-  }
-  // @ts-expect-error undefined in not assignable to QueryContainer
-  // but tests contain undefined, so I suppose it's desired behaviour
-  const filterWithTime: estypes.QueryContainer[] = [filter, { bool: { filter: rangeFilter } }];
+          {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                      gte: from,
+                      // @ts-expect-error
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: timestampOverride,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ];
+
+  const filterWithTime: estypes.QueryContainer[] = [
+    // but tests contain undefined, so I suppose it's desired behaviour
+    // @ts-expect-error undefined in not assignable to QueryContainer
+    filter,
+    { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
+  ];
 
   const searchQuery = {
     allow_no_indices: true,
@@ -99,22 +125,39 @@ export const buildEventsSearchQuery = ({
       ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
-        {
-          [sortField]: {
-            order: sortOrder ?? 'asc',
-            unmapped_type: 'date',
-          },
-        },
+        ...(timestampOverride != null
+          ? [
+              {
+                [timestampOverride]: {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]
+          : [
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]),
       ],
     },
   };
 
-  if (searchAfterSortId) {
+  if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: [searchAfterSortId],
+        search_after: searchAfterSortIds,
       },
     };
   }
