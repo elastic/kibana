@@ -20,7 +20,7 @@ import {
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
 import { EventFiltersForm } from '../form';
-import { useEventFiltersSelector } from '../../hooks';
+import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
 import {
   getFormHasError,
   isCreationInProgress,
@@ -28,8 +28,6 @@ import {
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
-
-import { EventFiltersNotification } from '../notification';
 
 export interface EventFiltersModalProps {
   data: Ecs;
@@ -57,14 +55,12 @@ const ModalHeaderSubtitle = styled.div`
 const ModalBodySection = styled.section`
   ${({ theme }) => css`
     padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
-
-    &.builder-section {
-      overflow-y: scroll;
-    }
+    overflow-y: scroll;
   `}
 `;
 
 export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data, onCancel }) => {
+  useEventFiltersNotification();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const formHasError = useEventFiltersSelector(getFormHasError);
   const creationInProgress = useEventFiltersSelector(isCreationInProgress);
@@ -113,34 +109,24 @@ export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data,
     [dispatch, formHasError, creationInProgress]
   );
 
-  const modalBodyMemo = useMemo(
-    () => (
-      <ModalBodySection className="builder-section">
+  return (
+    <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
+      <ModalHeader>
+        <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+        <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
+      </ModalHeader>
+
+      <ModalBodySection>
         <EventFiltersForm />
       </ModalBodySection>
-    ),
-    []
-  );
 
-  return (
-    <>
-      <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
-        <ModalHeader>
-          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
-          <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
-        </ModalHeader>
-
-        {modalBodyMemo}
-
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
-            {ACTIONS_CANCEL}
-          </EuiButtonEmpty>
-          {confirmButtonMemo}
-        </EuiModalFooter>
-      </Modal>
-      <EventFiltersNotification />
-    </>
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+          {ACTIONS_CANCEL}
+        </EuiButtonEmpty>
+        {confirmButtonMemo}
+      </EuiModalFooter>
+    </Modal>
   );
 });
 

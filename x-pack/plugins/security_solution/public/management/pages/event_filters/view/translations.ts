@@ -7,11 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../../shared_imports';
-import { ServerApiError } from '../../../../../../common/types';
+import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import { ServerApiError } from '../../../../common/types';
 
 export const getCreationSuccessMessage = (
   entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined

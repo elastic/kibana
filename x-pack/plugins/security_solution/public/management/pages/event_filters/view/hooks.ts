@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
+
+import { isCreationSuccessful, getFormEntry, getCreationError } from '../store/selector';
+
+import { useToasts } from '../../../../common/lib/kibana';
+import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
 import { State } from '../../../../common/store';
 import { EventFiltersListPageState } from '../state';
@@ -20,3 +26,19 @@ export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPag
     selector(state[GLOBAL_NS][EVENT_FILTER_NS] as EventFiltersListPageState)
   );
 }
+
+export const useEventFiltersNotification = () => {
+  const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+  const creationError = useEventFiltersSelector(getCreationError);
+  const formEntry = useEventFiltersSelector(getFormEntry);
+  const toasts = useToasts();
+  const [wasAlreadyHandled] = useState(new WeakSet());
+
+  if (creationSuccessful && formEntry && !wasAlreadyHandled.has(formEntry)) {
+    wasAlreadyHandled.add(formEntry);
+    toasts.addSuccess(getCreationSuccessMessage(formEntry));
+  } else if (creationError && !wasAlreadyHandled.has(creationError)) {
+    wasAlreadyHandled.add(creationError);
+    toasts.addDanger(getCreationErrorMessage(creationError));
+  }
+};

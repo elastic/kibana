@@ -7,24 +7,21 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { NotificationsStart } from 'kibana/public';
-import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public/context';
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-} from '../../../../../../shared_imports';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
+import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../shared_imports';
 
-import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
-import { EventFiltersNotification } from '.';
+import { createGlobalNoMiddlewareStore, ecsEventMock } from '../test_utils';
+import { useEventFiltersNotification } from './hooks';
 import { getCreationErrorMessage, getCreationSuccessMessage } from './translations';
-import { getInitialExceptionFromEvent } from '../../../store/utils';
+import { getInitialExceptionFromEvent } from '../store/utils';
 import {
   getLastLoadedResourceState,
   FailedResourceState,
-} from '../../../../../state/async_resource_state';
+} from '../../../state/async_resource_state';
 
 const mockNotifications = () => coreMock.createStart({ basePath: '/mock' }).notifications;
 
@@ -37,8 +34,7 @@ const renderNotifications = (
       <KibanaContextProvider services={{ notifications }}>{children}</KibanaContextProvider>
     </Provider>
   );
-
-  return render(<EventFiltersNotification />, { wrapper: Wrapper });
+  return renderHook(useEventFiltersNotification, { wrapper: Wrapper });
 };
 
 describe('EventFiltersNotification', () => {

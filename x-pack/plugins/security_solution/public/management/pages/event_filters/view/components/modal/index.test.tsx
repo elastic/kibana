@@ -19,7 +19,15 @@ import {
 } from '../../../../../../shared_imports';
 
 jest.mock('../form');
-jest.mock('../notification');
+jest.mock('../../hooks', () => {
+  const originalModule = jest.requireActual('../../hooks');
+  const useEventFiltersNotification = jest.fn().mockImplementation(() => {});
+
+  return {
+    ...originalModule,
+    useEventFiltersNotification,
+  };
+});
 
 const mockTheme = getMockTheme({
   eui: {
