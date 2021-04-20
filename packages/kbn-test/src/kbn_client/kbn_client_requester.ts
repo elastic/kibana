@@ -117,8 +117,6 @@ export class KbnClientRequester {
           // work around https://github.com/axios/axios/issues/2791
           transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
           paramsSerializer: (params) => Qs.stringify(params),
-          responseType: options.responseType,
-          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
         });
 
         return response;
