@@ -280,7 +280,7 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
   access to the {report-features} by assigning reporting roles, specified by `xpack.reporting.roles.allow`. 
   Granting access to users this way is deprecated. Set to `false` and use
   {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
-  Defaults to `true`. +
+  Defaults to `true`.
 
 | `xpack.reporting.roles.allow`
   | deprecated:[7.13.0,This setting will be removed in 8.0] Specifies the roles,
@@ -288,7 +288,7 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
   Requires `xpack.reporting.roles.enabled` to be `true`.
   Granting access to users this way is deprecated. Use
   {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
-  Defaults to `[ "reporting_user" ]`. +
+  Defaults to `[ "reporting_user" ]`.
 
 |===
 
