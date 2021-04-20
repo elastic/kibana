@@ -27,30 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  const logTypes = (msg: string = '') => async () =>
-    log.debug(
-      `\n### Saved Object Types In Index: [.kibana] ${msg}: \n${inspect(
-        await savedObjectInfo.types(),
-        {
-          compact: false,
-          depth: 99,
-          breakLength: 80,
-          sorted: true,
-        }
-      )}`
-    );
-
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
       await esArchiver.load('empty_kibana');
-      await kibanaServer.importExport.load(
-        'discover',
-        { space: undefined },
-        // @ts-ignore
-        logTypes('### Discover Test')
-      );
+      await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
