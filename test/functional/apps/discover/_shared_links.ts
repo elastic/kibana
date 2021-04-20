@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -129,10 +129,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return url.includes('sort:!(!(%27@timestamp%27,desc))');
           });
 
-          const row = await dataGrid.getRow({ rowIndex: 0 });
-          const firstRowText = await Promise.all(
-            row.map(async (cell) => await cell.getVisibleText())
-          );
+          const row = await docTable.getRow({ rowIndex: 0 });
+          const firstRowText = await row.getVisibleText();
 
           // sorting requested by ES should be correct
           expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
