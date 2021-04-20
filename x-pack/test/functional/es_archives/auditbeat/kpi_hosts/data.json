@@ -56,7 +56,6 @@
         "name_map": {
           "uid": "root"
         },
-        "auid": "unset",
         "uid": "0"
       }
     }
@@ -75,7 +74,6 @@
         "name": "demo-stack-haproxy-01"
       },
       "user": {
-        "auid": "unset",
         "uid": "0",
         "name_map": {
           "uid": "root"
@@ -187,7 +185,6 @@
           "uid": "root"
         },
         "uid": "0",
-        "auid": "unset"
       }
     }
   }
