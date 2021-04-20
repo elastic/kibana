@@ -13,6 +13,12 @@ import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
+interface StateLogMeta extends LogMeta {
+  kibana: {
+    migrationState: State;
+  };
+}
+
 type ExecutionLog = Array<
   | {
       type: 'transition';
@@ -35,9 +41,15 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs
-      .slice(oldState.logs.length)
-      .forEach((log) => logger[log.level](logMessagePrefix + log.message));
+    newState.logs.slice(oldState.logs.length).forEach((log) => {
+      const getLogger = (level: keyof Logger) => {
+        if (level === 'error') {
+          return logger[level] as Logger['error'];
+        }
+        return logger[level] as Logger['info'];
+      };
+      getLogger(log.level)(logMessagePrefix + log.message);
+    });
   }
 
   logger.info(
@@ -58,7 +70,14 @@ const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog
   logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {
     if (log.type === 'transition') {
-      logger.info(logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`, log.state);
+      logger.info<StateLogMeta>(
+        logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
+        {
+          kibana: {
+            migrationState: log.state,
+          },
+        }
+      );
     }
     if (log.type === 'response') {
       logger.info(logMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
