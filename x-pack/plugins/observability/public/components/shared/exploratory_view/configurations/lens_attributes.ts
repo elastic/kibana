@@ -41,7 +41,7 @@ function buildNumberColumn(sourceField: string) {
   return {
     sourceField,
     dataType: 'number' as DataType,
-    isBucketed: false,
+    isBucketed: true,
     scale: 'ratio' as OperationMetadata['scale'],
   };
 }
