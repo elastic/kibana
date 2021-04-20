@@ -7,7 +7,7 @@
 
 import { roundToDecimalPlace } from './round_to_decimal_place';
 
-describe('ML - roundToDecimalPlace formatter', () => {
+describe('roundToDecimalPlace formatter', () => {
   it('returns the correct format using default decimal place', () => {
     expect(roundToDecimalPlace(12)).toBe(12);
     expect(roundToDecimalPlace(12.3)).toBe(12.3);

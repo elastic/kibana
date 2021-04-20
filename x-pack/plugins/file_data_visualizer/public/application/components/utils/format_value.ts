@@ -23,7 +23,7 @@ const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 // order to correctly format the day or week offset to the time of the anomaly.
 export function formatSingleValue(
   value: number,
-  mlFunction?: string,
+  func?: string,
   fieldFormat?: any,
   record?: any // TODO remove record, not needed for file upload
 ) {
@@ -36,14 +36,14 @@ export function formatSingleValue(
   // start of the week / day, so need to manipulate to UTC moment of the start of the week / day
   // that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
   // revert back to configured timezone for formatting.
-  if (mlFunction === 'time_of_week') {
+  if (func === 'time_of_week') {
     const d =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
     const utcMoment = moment.utc(d).startOf('week').add(value, 's');
     return moment(utcMoment.valueOf()).format('ddd HH:mm');
-  } else if (mlFunction === 'time_of_day') {
+  } else if (func === 'time_of_day') {
     const d =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)

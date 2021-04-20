@@ -7,7 +7,7 @@
 
 import { numberAsOrdinal } from './number_as_ordinal';
 
-describe('ML - numberAsOrdinal formatter', () => {
+describe('numberAsOrdinal formatter', () => {
   const tests = [
     { number: 0, asOrdinal: '0th' },
     { number: 1, asOrdinal: '1st' },

@@ -90,10 +90,10 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'mlDVBooleanContent'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
+      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
-          className={'mlDataVisualizerSummaryTable'}
+          className={'dataVisualizerSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}

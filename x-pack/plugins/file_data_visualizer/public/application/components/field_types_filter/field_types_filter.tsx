@@ -16,7 +16,7 @@ import type {
 import { FieldTypeIcon } from '../field_type_icon';
 import { JOB_FIELD_TYPES } from '../../../../common';
 
-const ML_JOB_FIELD_TYPES_OPTIONS = {
+const JOB_FIELD_TYPES_OPTIONS = {
   [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
   [JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
   [JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
@@ -54,9 +54,9 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
       if (
         type !== undefined &&
         !fieldTypesTracker.has(type) &&
-        ML_JOB_FIELD_TYPES_OPTIONS[type] !== undefined
+        JOB_FIELD_TYPES_OPTIONS[type] !== undefined
       ) {
-        const item = ML_JOB_FIELD_TYPES_OPTIONS[type];
+        const item = JOB_FIELD_TYPES_OPTIONS[type];
 
         fieldTypesTracker.add(type);
         fieldTypes.push({

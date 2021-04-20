@@ -12,7 +12,7 @@ import { expandLiteralStrings, XJsonMode } from '../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
-interface MlJobEditorProps {
+interface JobEditorProps {
   value: string;
   height?: string;
   width?: string;
@@ -22,7 +22,7 @@ interface MlJobEditorProps {
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
 }
-export const JsonEditor: FC<MlJobEditorProps> = ({
+export const JsonEditor: FC<JobEditorProps> = ({
   value,
   height = '500px',
   width = '100%',

@@ -6,9 +6,8 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { useKibana, KibanaReactContextValue } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { FileDataVisualizerStartDependencies } from '../plugin';
 
 export type StartServices = CoreStart & FileDataVisualizerStartDependencies;
 export const useFileDataVisualizerKibana = () => useKibana<StartServices>();
-export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

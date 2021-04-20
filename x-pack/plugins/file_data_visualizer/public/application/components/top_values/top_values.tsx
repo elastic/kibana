@@ -57,7 +57,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
         />
       </ExpandedRowFieldHeader>
 
-      <div data-test-subj="mlFieldDataTopValues" className={'mlFieldDataTopValuesContainer'}>
+      <div data-test-subj="mlFieldDataTopValues" className={'fieldDataTopValuesContainer'}>
         {Array.isArray(topValues) &&
           topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
@@ -65,8 +65,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                 grow={false}
                 className={classNames(
                   'eui-textTruncate',
-                  'mlTopValuesValueLabelContainer',
-                  `mlTopValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
+                  'topValuesValueLabelContainer',
+                  `topValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
                 )}
               >
                 <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
@@ -86,7 +86,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
               {progressBarMax !== undefined && (
                 <EuiFlexItem
                   grow={false}
-                  className={classNames('eui-textTruncate', 'mlTopValuesPercentLabelContainer')}
+                  className={classNames('eui-textTruncate', 'topValuesPercentLabelContainer')}
                 >
                   <EuiText size="xs" textAlign="left" color="subdued">
                     {getPercentLabel(value.doc_count, progressBarMax)}

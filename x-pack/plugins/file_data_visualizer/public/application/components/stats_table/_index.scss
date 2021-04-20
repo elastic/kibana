@@ -19,7 +19,7 @@
   }
 }
 
-.mlDataVisualizer {
+.dataVisualizer {
   .euiTableRow > .euiTableRowCell {
     border-bottom: 0;
     border-top: $euiBorderThin;
@@ -36,7 +36,7 @@
       }
     }
   }
-  .mlDataVisualizerSummaryTable {
+  .dataVisualizerSummaryTable {
     max-width: 350px;
     min-width: 250px;
     .euiTableRow > .euiTableRowCell {
@@ -46,10 +46,10 @@
       display: none;
     }
   }
-  .mlDataVisualizerSummaryTableWrapper {
+  .dataVisualizerSummaryTableWrapper {
     max-width: 300px;
   }
-  .mlDataVisualizerMapWrapper {
+  .dataVisualizerMapWrapper {
     min-height: 300px;
     min-width: 600px;
   }

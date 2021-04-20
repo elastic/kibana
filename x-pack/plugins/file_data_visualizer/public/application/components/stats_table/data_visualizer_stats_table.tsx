@@ -264,7 +264,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
       <EuiInMemoryTable<T>
-        className={'mlDataVisualizer'}
+        className={'dataVisualizer'}
         items={items}
         itemId={FIELD_NAME}
         columns={columns}

@@ -14,7 +14,7 @@ export const ExperimentalBadge: FC<{ tooltipContent: string }> = ({ tooltipConte
   return (
     <span>
       <EuiBetaBadge
-        className="ml-experimental-badge"
+        className="experimental-badge"
         label={
           <FormattedMessage
             id="xpack.fileDataVisualizer.experimentalBadge.experimentalLabel"

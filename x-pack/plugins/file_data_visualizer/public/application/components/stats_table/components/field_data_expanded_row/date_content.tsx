@@ -73,10 +73,10 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'mlDVDateContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
+      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
-          className={'mlDataVisualizerSummaryTable'}
+          className={'dataVisualizerSummaryTable'}
           data-test-subj={'mlDateSummaryTable'}
           compressed
           items={summaryTableItems}

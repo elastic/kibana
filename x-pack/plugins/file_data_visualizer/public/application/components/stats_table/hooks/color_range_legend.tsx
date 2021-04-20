@@ -64,7 +64,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
 
     const wrapper = d3
       .select(d3Container.current)
-      .classed('mlColorRangeLegend', true)
+      .classed('colorRangeLegend', true)
       .attr('width', wrapperWidth)
       .attr('height', wrapperHeight)
       .append('g')
@@ -74,7 +74,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     const gradient = wrapper
       .append('defs')
       .append('linearGradient')
-      .attr('id', 'mlColorRangeGradient')
+      .attr('id', 'colorRangeGradient')
       .attr('x1', '0%')
       .attr('y1', '0%')
       .attr('x2', '100%')
@@ -95,7 +95,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
       .attr('y1', 0)
       .attr('width', legendWidth)
       .attr('height', legendHeight)
-      .style('fill', 'url(#mlColorRangeGradient)');
+      .style('fill', 'url(#colorRangeGradient)');
 
     const axisScale = d3.scale.linear().domain([0, 1]).range([0, legendWidth]);
 

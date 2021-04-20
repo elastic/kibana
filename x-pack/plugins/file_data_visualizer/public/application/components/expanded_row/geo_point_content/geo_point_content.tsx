@@ -11,7 +11,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
-import { EmbeddedMapComponent } from '../../ml_embedded_map';
+import { EmbeddedMapComponent } from '../../embedded_map';
 import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { ExamplesList } from '../../examples_list';
@@ -38,7 +38,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
 
           geoPointsFeatures.push({
             type: 'Feature',
-            id: `ml-${config.fieldName}-${i}`,
+            id: `fileDataVisualizer-${config.fieldName}-${i}`,
             geometry: {
               type: 'Point',
               coordinates: [coordinates.lat, coordinates.lon],
@@ -69,7 +69,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
       )}
       {formattedResults && Array.isArray(formattedResults.layerList) && (
         <EuiFlexItem
-          className={'mlDataVisualizerMapWrapper'}
+          className={'dataVisualizerMapWrapper'}
           data-test-subj={'mlDataVisualizerEmbeddedMap'}
         >
           <EmbeddedMapComponent layerList={formattedResults.layerList} />

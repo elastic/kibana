@@ -101,10 +101,10 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'mlDVNumberContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
+      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
-          className={'mlDataVisualizerSummaryTable'}
+          className={'dataVisualizerSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
