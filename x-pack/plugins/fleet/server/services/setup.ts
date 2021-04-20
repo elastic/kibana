@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
+import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
 import { SO_SEARCH_LIMIT, REQUIRED_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
@@ -23,7 +24,7 @@ import { awaitIfFleetServerSetupPending } from './fleet_server';
 
 export interface SetupStatus {
   isInitialized: boolean;
-  preconfigurationError: { name: string; message: string } | undefined;
+  nonFatalErrors?: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
 export async function setupIngestManager(
@@ -64,7 +65,7 @@ async function createSetupSideEffects(
     ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  let preconfigurationError;
+  const nonFatalErrors = [];
 
   try {
     await ensurePreconfiguredPackagesAndPolicies(
@@ -75,7 +76,7 @@ async function createSetupSideEffects(
       defaultOutput
     );
   } catch (e) {
-    preconfigurationError = { name: e.name, message: e.message };
+    nonFatalErrors.push(e);
   }
 
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
@@ -83,7 +84,7 @@ async function createSetupSideEffects(
 
   return {
     isInitialized: true,
-    preconfigurationError,
+    nonFatalErrors,
   };
 }
 

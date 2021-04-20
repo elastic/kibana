@@ -65,3 +65,9 @@ export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({
 
 // these are currently identical. we can separate if they later diverge
 export const REQUIRED_PACKAGES = DEFAULT_PACKAGES;
+
+export interface PreconfigurationError {
+  package?: { name: string; version: string };
+  agentPolicy?: { name: string };
+  error: Error;
+}

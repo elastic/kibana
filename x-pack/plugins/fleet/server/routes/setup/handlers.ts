@@ -49,7 +49,13 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
     const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
 
     return response.ok({
-      body,
+      body: {
+        ...body,
+        nonFatalErrors: body.nonFatalErrors?.map((e) => ({
+          name: e.error.name,
+          message: e.error.message,
+        })),
+      },
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

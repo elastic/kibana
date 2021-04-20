@@ -114,18 +114,23 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             pkgName: pkg.name,
           });
           if (!installedPackage) {
-            throw new Error(
-              i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
-                defaultMessage:
-                  '{agentPolicyName} could not be added. {pkgName} is not installed, add {pkgName} to `{packagesConfigValue}` or remove it from {packagePolicyName}.',
-                values: {
-                  agentPolicyName: preconfiguredAgentPolicy.name,
-                  packagePolicyName: name,
-                  pkgName: pkg.name,
-                  packagesConfigValue: 'xpack.fleet.packages',
-                },
-              })
-            );
+            const e = {
+              package: { name: pkg.name, version: pkg.version },
+              agentPolicy: { name: policy?.name },
+              error: new Error(
+                i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
+                  defaultMessage:
+                    '{agentPolicyName} could not be added. {pkgName} is not installed, add {pkgName} to `{packagesConfigValue}` or remove it from {packagePolicyName}.',
+                  values: {
+                    agentPolicyName: preconfiguredAgentPolicy.name,
+                    packagePolicyName: name,
+                    pkgName: pkg.name,
+                    packagesConfigValue: 'xpack.fleet.packages',
+                  },
+                })
+              ),
+            };
+            throw e;
           }
           return { name, installedPackage, ...newPackagePolicy };
         })
