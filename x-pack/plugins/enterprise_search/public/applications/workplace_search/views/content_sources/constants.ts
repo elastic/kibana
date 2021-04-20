@@ -148,7 +148,7 @@ export const ACCESS_TOKEN_LABEL = i18n.translate(
 );
 
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
-  defaultMessage: 'ID',
+  defaultMessage: 'Source Identifier',
 });
 
 export const LEARN_CUSTOM_FEATURES_BUTTON = i18n.translate(

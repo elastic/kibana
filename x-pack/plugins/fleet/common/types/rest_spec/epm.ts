@@ -12,6 +12,7 @@ import type {
   RegistrySearchResult,
   PackageInfo,
   PackageUsageStats,
+  InstallType,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -83,8 +84,10 @@ export interface IBulkInstallPackageHTTPError {
 }
 
 export interface InstallResult {
-  assets: AssetReference[];
-  status: 'installed' | 'already_installed';
+  assets?: AssetReference[];
+  status?: 'installed' | 'already_installed';
+  error?: Error;
+  installType: InstallType;
 }
 
 export interface BulkInstallPackageInfo {
