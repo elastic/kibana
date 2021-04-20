@@ -410,7 +410,7 @@ export interface AccessorConfig {
   columnId: string;
   triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
-  palette?: string[];
+  palette?: string[] | Array<{ color: string; stop: number }>;
 }
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {

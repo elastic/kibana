@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
+import { TooltipWrapper } from '../../shared_components';
 import { CustomPaletteParams } from '../expression';
 import { useDebounceWithOptions } from '../../indexpattern_datasource/operations/definitions/helpers';
 
@@ -443,19 +444,27 @@ export function CustomizablePalette({
               })
         }
       >
-        <EuiFieldNumber
-          data-test-subj="lnsDatatable_dynamicColoring_min_range"
-          value={minLocalValue}
-          onChange={({ target }) => {
-            const paramsToUpdate = updateRangeValues(target.value, maxLocalValue);
-            if (paramsToUpdate) {
-              setPalette(paramsToUpdate);
-            }
-          }}
-          append={rangeType === 'number' ? undefined : '%'}
-          isInvalid={!isMaxMinValid}
-          disabled={isAutoRange}
-        />
+        <TooltipWrapper
+          condition={isAutoRange}
+          tooltipContent={i18n.translate('xpack.lens.table.dynamicColoring.rangeDisabled.tooltip', {
+            defaultMessage:
+              'This range value cannot be modified while the auto define range setting is enabled.',
+          })}
+        >
+          <EuiFieldNumber
+            data-test-subj="lnsDatatable_dynamicColoring_min_range"
+            value={minLocalValue}
+            onChange={({ target }) => {
+              const paramsToUpdate = updateRangeValues(target.value, maxLocalValue);
+              if (paramsToUpdate) {
+                setPalette(paramsToUpdate);
+              }
+            }}
+            append={rangeType === 'number' ? undefined : '%'}
+            isInvalid={!isMaxMinValid}
+            disabled={isAutoRange}
+          />
+        </TooltipWrapper>
       </EuiFormRow>
       <EuiFormRow
         data-test-subj="lnsDatatable_dynamicColoring_max_range_label"
@@ -490,19 +499,27 @@ export function CustomizablePalette({
               })
         }
       >
-        <EuiFieldNumber
-          data-test-subj="lnsDatatable_dynamicColoring_max_range"
-          value={maxLocalValue}
-          onChange={({ target }) => {
-            const paramsToUpdate = updateRangeValues(minLocalValue, target.value);
-            if (paramsToUpdate) {
-              setPalette(paramsToUpdate);
-            }
-          }}
-          append={rangeType === 'number' ? undefined : '%'}
-          isInvalid={!isMaxMinValid}
-          disabled={isAutoRange}
-        />
+        <TooltipWrapper
+          condition={isAutoRange}
+          tooltipContent={i18n.translate('xpack.lens.table.dynamicColoring.rangeDisabled.tooltip', {
+            defaultMessage:
+              'This range value cannot be modified while the auto define range setting is enabled.',
+          })}
+        >
+          <EuiFieldNumber
+            data-test-subj="lnsDatatable_dynamicColoring_max_range"
+            value={maxLocalValue}
+            onChange={({ target }) => {
+              const paramsToUpdate = updateRangeValues(minLocalValue, target.value);
+              if (paramsToUpdate) {
+                setPalette(paramsToUpdate);
+              }
+            }}
+            append={rangeType === 'number' ? undefined : '%'}
+            isInvalid={!isMaxMinValid}
+            disabled={isAutoRange}
+          />
+        </TooltipWrapper>
       </EuiFormRow>
       {isCustomPalette ? (
         <EuiFormRow

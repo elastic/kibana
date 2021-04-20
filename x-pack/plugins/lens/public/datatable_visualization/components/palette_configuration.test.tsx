@@ -17,10 +17,6 @@ import { ReactWrapper } from 'enzyme';
 describe('palette utilities', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
   describe('applyPaletteParams', () => {
-    it('should return empty params for no palette', () => {
-      expect(applyPaletteParams(paletteRegistry, undefined)).toEqual({});
-    });
-
     it('should return a set of colors for a basic configuration', () => {
       expect(applyPaletteParams(paletteRegistry, { type: 'palette', name: 'positive' })).toEqual({
         colorStops: [

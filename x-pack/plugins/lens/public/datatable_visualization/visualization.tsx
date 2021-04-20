@@ -247,18 +247,21 @@ export const getDatatableVisualization = ({
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({
-              columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden
-                ? 'invisible'
-                : columnMap[accessor].colorMode !== 'none' &&
-                  columnMap[accessor].palette?.params?.stops
-                ? 'colorBy'
-                : undefined,
-              palette:
+            .map((accessor) => {
+              const hasColoring = Boolean(
                 columnMap[accessor].colorMode !== 'none' &&
-                columnMap[accessor].palette?.params?.stops,
-            })),
+                  columnMap[accessor].palette?.params?.stops
+              );
+              return {
+                columnId: accessor,
+                triggerIcon: columnMap[accessor].hidden
+                  ? 'invisible'
+                  : hasColoring
+                  ? 'colorBy'
+                  : undefined,
+                palette: hasColoring ? columnMap[accessor].palette?.params?.stops : undefined,
+              };
+            }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,
