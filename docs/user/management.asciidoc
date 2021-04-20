@@ -78,9 +78,9 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<managing-alerts-and-actions, Rules&nbsp;and Connectors>>
-| Centrally manage your rules across {kib}. Create and manage reusable
-connectors for triggering actions.
+| <<alerting-getting-started, Rules&nbsp;and Connectors>>
+| Centrally <<alert-management, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
+connectors>> for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
@@ -182,15 +182,9 @@ next major version of {es}, and then reindex, if needed.
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/rules-and-connectors-intro.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/rule-management.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/rule-details.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
-
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
+
+include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 
@@ -202,13 +196,13 @@ include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-tags.asciidoc[]
-
 include::security/index.asciidoc[]
 
 include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 

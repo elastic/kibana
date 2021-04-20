@@ -16,7 +16,6 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugi
 import { inputsModel, KueryFilterQueryKind } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { DocValueFields } from '../../common/containers/query_template';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
@@ -29,6 +28,7 @@ import {
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
+  DocValueFields,
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
