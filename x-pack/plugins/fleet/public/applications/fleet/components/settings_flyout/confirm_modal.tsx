@@ -124,13 +124,13 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.settingsConfirmModal.fleetServerChangedText"
-                    defaultMessage="If agents are unable to connect at the new {fleetServerUrl}, they will log an error and report an unhealthy status. They will remain on the current agent policy version and check for updates at the old URL until they successfully connect at the new URL"
+                    defaultMessage="Agents that cannot connect to the new {fleetServerHosts} log an error. The agents remain on the current policy and check for updates at the old URL until they connect at the new URL."
                     values={{
-                      fleetServerUrl: (
+                      fleetServerHosts: (
                         <strong>
                           <FormattedMessage
-                            id="xpack.fleet.settingsConfirmModal.fleetServerUrl"
-                            defaultMessage="Fleet Server URL"
+                            id="xpack.fleet.settingsConfirmModal.fleetServerHosts"
+                            defaultMessage="Fleet Server hosts"
                           />
                         </strong>
                       ),
