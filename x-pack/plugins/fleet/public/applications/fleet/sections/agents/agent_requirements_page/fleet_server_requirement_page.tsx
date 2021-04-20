@@ -44,11 +44,11 @@ const CommandCode = styled.pre({
   overflow: 'scroll',
 });
 
-type PLATFORM_TYPE = 'linux-mac' | 'windows' | 'deb-rpm';
+type PLATFORM_TYPE = 'linux-mac' | 'windows' | 'rpm-deb';
 const PLATFORM_OPTIONS: Array<{ text: string; value: PLATFORM_TYPE }> = [
   { text: 'Linux / macOS', value: 'linux-mac' },
   { text: 'Windows', value: 'windows' },
-  { text: 'RPM / DEB', value: 'deb-rpm' },
+  { text: 'RPM / DEB', value: 'rpm-deb' },
 ];
 
 const OnPremInstructions: React.FC = () => {
@@ -67,13 +67,11 @@ const OnPremInstructions: React.FC = () => {
     }
     switch (platform) {
       case 'linux-mac':
-        return `sudo ./elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
+        return `sudo ./elastic-agent install -f --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
       case 'windows':
-        return `.\\elastic-agent.exe install --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}`;
-      case 'deb-rpm':
-        return `sudo elastic-agent install -f --fleet-server-service-token=${serviceToken} --fleet-server-es=${esHost}
-sudo systemctl enable elastic-agent
-sudo systemctl start elastic-agent`;
+        return `.\\elastic-agent.exe install --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
+      case 'rpm-deb':
+        return `sudo elastic-agent enroll -f --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
       default:
         return '';
     }
