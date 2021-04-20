@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
@@ -26,23 +26,14 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="indexPatternManagement.editIndexPattern.scriptedHeader"
-              defaultMessage="Scripted fields"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.scriptedLabel"
-              defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search
-            scripted fields."
+              defaultMessage="Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched."
             />
-          </p>
-          <p>
+            <br />
+            <EuiIcon type="alert" color="warning" style={{ marginRight: '4px' }} />
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.deprecation"
               defaultMessage="Scripted fields are deprecated, {runtimeDocs}."
