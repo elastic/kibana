@@ -26,7 +26,7 @@
     "@types/react": "16.3.14"
   },
   "devDependencies": {
-    "@hapi/hapi": "^17.9.0",
+    "@hapi/hapi": "npm:@commercial/hapi@^17.9.4",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/plugin-helpers": "7.1.5",
