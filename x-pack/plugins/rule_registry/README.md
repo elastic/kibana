@@ -78,5 +78,6 @@ The following fields are available in the root rule registry:
 - `kibana.rac.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
 - `kibana.rac.alert.ancestors`: the array of ancestors (if any) for the alert.
 - `kibana.rac.alert.depth`: the depth of the alert in the ancestral tree (default 0).
+- `kibana.rac.alert.building_block_type`: the building block type of the alert (default undefined).
 
 This list is not final - just a start. Field names might change or moved to a scoped registry. If we implement log and sequence based rule types the list of fields will grow. If a rule type needs additional fields, the recommendation would be to have the field in its own registry first (or in its producer’s registry), and if usage is more broadly adopted, it can be moved to the root registry.

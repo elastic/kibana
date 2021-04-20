@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import v4 from 'uuid/v4';
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
@@ -14,7 +15,7 @@ import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/s
 import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { SecurityRuleRegistry } from '../../../plugin';
-import { EqlSignalSearchResponse } from '../signals/types';
+import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 
 const createSecurityEQLRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
 
@@ -63,14 +64,43 @@ export const eqlAlertType = createSecurityEQLRuleType({
       request
     )) as ApiResponse<EqlSignalSearchResponse>;
 
-    type ValueType<T> = T extends Promise<infer U> ? U : T;
-    type AlertList = ValueType<ReturnType<typeof findAlerts>>;
+    type ValueFromArrayType<T> = T extends Array<infer U> ? U : T;
+    type ValueFromPromiseType<T> = T extends Promise<infer U> ? U : T;
+    type AlertListType = ValueFromPromiseType<ReturnType<typeof findAlerts>>;
+    type AlertType = ValueFromArrayType<AlertListType>;
 
-    const alerts: AlertList = [];
+    const buildSignalFromEvent = (event: BaseSignalHit): AlertType => {
+      return {
+        ...event,
+        'event.kind': 'signal',
+        'kibana.rac.alert.id': '???',
+        'kibana.rac.alert.uuid': v4(),
+        '@timestamp': new Date().toISOString(),
+      };
+    };
+
+    let alerts: AlertListType = [];
     if (response.hits.sequences !== undefined) {
-      // TODO
+      alerts = response.hits.sequences.reduce((allAlerts: AlertListType, sequence) => {
+        let previousAlertUuid: string | undefined;
+        return {
+          ...allAlerts,
+          ...sequence.events.map((event, idx) => {
+            const alert = {
+              ...buildSignalFromEvent(event),
+              'kibana.rac.alert.ancestors': previousAlertUuid != null ? [previousAlertUuid] : [],
+              'kibana.rac.alert.building_block_type': 'default',
+              'kibana.rac.alert.depth': idx,
+            };
+            previousAlertUuid = alert['kibana.rac.alert.uuid'];
+            return alert;
+          }),
+        };
+      }, []);
     } else if (response.hits.events !== undefined) {
-      // TODO
+      alerts = response.hits.events.map((event) => {
+        return buildSignalFromEvent(event);
+      }, []);
     } else {
       throw new Error(
         'eql query response should have either `sequences` or `events` but had neither'
