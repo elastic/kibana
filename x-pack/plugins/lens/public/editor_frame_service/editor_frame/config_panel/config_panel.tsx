@@ -134,7 +134,7 @@ export function LayerPanels(
         ) : null
       )}
       {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
             title={i18n.translate('xpack.lens.xyChart.addLayer', {
@@ -154,6 +154,8 @@ export function LayerPanels(
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
+              fill
+              color="text"
               onClick={() => {
                 const id = generateId();
                 dispatch({

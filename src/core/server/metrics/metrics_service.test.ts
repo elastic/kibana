@@ -182,16 +182,15 @@ describe('MetricsService', () => {
         Array [
           "",
           Object {
-            "ecs": Object {
-              "version": "1.7.0",
-            },
             "event": Object {
               "category": Array [
                 "process",
                 "host",
               ],
               "kind": "metric",
-              "type": "info",
+              "type": Array [
+                "info",
+              ],
             },
             "host": Object {
               "os": Object {

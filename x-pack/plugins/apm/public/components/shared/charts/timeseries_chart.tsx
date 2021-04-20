@@ -41,6 +41,8 @@ import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
+import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
+import { getAlertAnnotations } from './helper/get_alert_annotations';
 
 interface Props {
   id: string;
@@ -62,8 +64,8 @@ interface Props {
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
   customTheme?: Record<string, unknown>;
+  alerts?: APMServiceAlert[];
 }
-
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -76,6 +78,7 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  alerts,
 }: Props) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
@@ -193,6 +196,10 @@ export function TimeseriesChart({
             style={{ fill: anomalyTimeseries.scores.color }}
           />
         )}
+        {getAlertAnnotations({
+          alerts,
+          theme,
+        })}
       </Chart>
     </ChartContainer>
   );
