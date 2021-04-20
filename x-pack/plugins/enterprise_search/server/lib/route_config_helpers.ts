@@ -9,40 +9,40 @@ import { RouteConfig, RouteConfigOptionsBody, RouteMethod } from 'kibana/server'
 
 import { schema } from '@kbn/config-schema';
 
-// Kibana Enterprise Search Plugin API endpoints often times pass through the request
-// body to the Enterprise Search API endpoints for validation. In those cases, we do not
-// need to validate them in Kibana.
-//
-// The safe way to do that is to turn off body parsing entirely using `options.body.parse: false`.
-// The will pass a String Buffer to the route handler. The proper way to validate this when validation
-// is enabled to to use `body: schema.buffer()`.
-//
-// Example:
-//  router.put({
-//    path: '/api/app_search/engines/{engineName}/example',
-//    validate: {
-//      params: schema.object({
-//        engineName: schema.string(),
-//      }),
-//      body: schema.buffer(),
-//    },
-//    options: { body: { parse: false } },
-//  },
-//  ...
-//
-// This helper applies that pattern, while maintaining existing options:
-//
-//  router.put(skipBodyValidation({
-//    path: '/api/app_search/engines/{engineName}/example',
-//    validate: {
-//      params: schema.object({
-//        engineName: schema.string(),
-//      }),
-//    },
-//  },
-//  ...
-//
-
+/**
+ * Kibana Enterprise Search Plugin API endpoints often times pass through the request
+ * body to the Enterprise Search API endpoints for validation. In those cases, we do not
+ * need to validate them in Kibana.
+ *
+ * The safe way to do that is to turn off body parsing entirely using `options.body.parse: false`.
+ * The will pass a String Buffer to the route handler. The proper way to validate this when validation
+ * is enabled to to use `body: schema.buffer()`.
+ *
+ * Example:
+ *  router.put({
+ *    path: '/api/app_search/engines/{engineName}/example',
+ *    validate: {
+ *      params: schema.object({
+ *        engineName: schema.string(),
+ *      }),
+ *      body: schema.buffer(),
+ *    },
+ *    options: { body: { parse: false } },
+ *  },
+ *  ...
+ *
+ * This helper applies that pattern, while maintaining existing options:
+ *
+ *  router.put(skipBodyValidation({
+ *    path: '/api/app_search/engines/{engineName}/example',
+ *    validate: {
+ *      params: schema.object({
+ *        engineName: schema.string(),
+ *      }),
+ *    },
+ *  },
+ *  ...
+ */
 export const skipBodyValidation = <Method extends RouteMethod>(
   config: RouteConfig<unknown, unknown, unknown, Method>
 ): RouteConfig<unknown, unknown, unknown, Method> => {
