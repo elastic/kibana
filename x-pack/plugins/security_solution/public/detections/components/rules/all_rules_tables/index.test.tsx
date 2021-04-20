@@ -15,7 +15,7 @@ import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 describe('AllRulesTables', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables
@@ -50,7 +50,7 @@ describe('AllRulesTables', () => {
 
   it('renders rules tab when "selectedTab" is "rules"', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables
@@ -86,7 +86,7 @@ describe('AllRulesTables', () => {
 
   it('renders monitoring tab when "selectedTab" is "monitoring"', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables

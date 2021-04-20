@@ -81,10 +81,10 @@ describe('AnomaliesTable', () => {
           name: 'Influenced by',
         }),
         expect.objectContaining({
-          name: 'Actual',
+          field: 'actualSort',
         }),
         expect.objectContaining({
-          name: 'Typical',
+          field: 'typicalSort',
         }),
         expect.objectContaining({
           name: 'Description',
