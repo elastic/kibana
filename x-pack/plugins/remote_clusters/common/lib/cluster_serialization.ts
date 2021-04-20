@@ -45,7 +45,7 @@ export interface Cluster {
   hasDeprecatedProxySetting?: boolean;
 }
 
-interface ClusterPayloadEs {
+export interface ClusterPayloadEs {
   skip_unavailable?: boolean | null;
   mode?: 'sniff' | 'proxy' | null;
   proxy_address?: string | null;

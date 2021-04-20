@@ -8,15 +8,11 @@
 import { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
-import {
-  convertStringToBase64,
-  getExistingPrepackagedTimelines,
-  getAllTimeline,
-  AllTimelinesResponse,
-} from '.';
+import { convertStringToBase64, getExistingPrepackagedTimelines, getAllTimeline } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
+import { AllTimelinesResponse } from '../../../../../common/types/timeline';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
