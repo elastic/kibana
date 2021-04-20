@@ -14,7 +14,14 @@ export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
 
 export const PRECONFIGURATION_LATEST_KEYWORD = 'latest';
 
-export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicy = {
+type PreconfiguredAgentPolicyWithDefaultInputs = Omit<
+  PreconfiguredAgentPolicy,
+  'package_policies'
+> & {
+  package_policies: Array<Omit<PreconfiguredAgentPolicy['package_policies'][0], 'inputs'>>;
+};
+
+export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   name: 'Default policy',
   namespace: 'default',
   description: 'Default agent policy created by Kibana',
@@ -32,7 +39,7 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicy = {
   id: 'default-agent-policy',
 };
 
-export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicy = {
+export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   name: 'Default Fleet Server policy',
   namespace: 'default',
   description: 'Default Fleet Server agent policy created by Kibana',
