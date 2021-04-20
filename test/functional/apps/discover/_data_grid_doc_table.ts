@@ -107,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show allow adding columns from the detail panel', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+          await dataGrid.getDetailsRows();
 
           // add columns
           const fields = ['_id', '_index', 'agent'];
