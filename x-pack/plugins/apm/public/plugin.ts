@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -143,6 +144,32 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
+        searchDeepLinks: [
+          {
+            id: 'services',
+            title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+              defaultMessage: 'Services',
+            }),
+            path: '/services',
+          },
+          {
+            id: 'traces',
+            title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+              defaultMessage: 'Traces',
+            }),
+            path: '/traces',
+          },
+          {
+            id: 'service-map',
+            title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+              defaultMessage: 'Service Map',
+            }),
+            path: '/service-map',
+          },
+        ],
+      },
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
