@@ -13,15 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = () => (
   <>
-    <EuiTitle size="s">
-      <h3>
-        <FormattedMessage
-          id="indexPatternManagement.editIndexPattern.sourceHeader"
-          defaultMessage="Field filters"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiText>
+    <EuiText size="s">
       <p>
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.sourceLabel"
