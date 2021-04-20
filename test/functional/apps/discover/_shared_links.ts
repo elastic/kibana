@@ -88,6 +88,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
+        it('should allow for copying the snapshot URL as a short URL', async function () {
+          const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+          await PageObjects.share.checkShortenUrl();
+          await retry.try(async () => {
+            const actualUrl = await PageObjects.share.getSharedUrl();
+            expect(actualUrl).to.match(re);
+          });
+        });
+
+        it('should allow for copying the saved object URL', async function () {
+          const expectedUrl =
+            baseUrl +
+            '/app/discover#' +
+            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
+            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
+            "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
+            "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
+          await PageObjects.discover.loadSavedSearch('A Saved Search');
+          await PageObjects.share.clickShareTopNavButton();
+          await PageObjects.share.exportAsSavedObject();
+          const actualUrl = await PageObjects.share.getSharedUrl();
+          expect(actualUrl).to.be(expectedUrl);
+        });
+
         it('should load snapshot URL with empty sort param correctly', async function () {
           const expectedUrl =
             baseUrl +
@@ -112,30 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // sorting requested by ES should be correct
           expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
-        });
-
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-          await PageObjects.share.checkShortenUrl();
-          await retry.try(async () => {
-            const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
-          });
-        });
-
-        it('should allow for copying the saved object URL', async function () {
-          const expectedUrl =
-            baseUrl +
-            '/app/discover#' +
-            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
-            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
-            "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
-            "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
-          await PageObjects.discover.loadSavedSearch('A Saved Search');
-          await PageObjects.share.clickShareTopNavButton();
-          await PageObjects.share.exportAsSavedObject();
-          const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.be(expectedUrl);
         });
       });
     });
