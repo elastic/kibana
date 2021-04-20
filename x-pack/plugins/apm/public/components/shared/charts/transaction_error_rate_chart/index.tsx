@@ -68,6 +68,7 @@ export function TransactionErrorRateChart({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -121,7 +122,7 @@ export function TransactionErrorRateChart({
           {
             data: data.previousPeriod.transactionErrorRate,
             type: 'area',
-            color: theme.eui.euiColorLightestShade,
+            color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
               'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
               { defaultMessage: 'Previous period' }

@@ -2,6 +2,28 @@
 
 This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
+## Rules, Alerts, and Cases
+
+The Observability plugin contains experimental support for improved alerting and
+case management.
+
+If you have:
+
+```yaml
+xpack.observability.unsafe.alertingExperience.enabled: true
+```
+
+In your Kibana configuration, the Alerts and Cases pages will be available.
+
+This will only enable the UI for these pages. In order to have alert data indexed
+you'll need to enable writing in the [Rule Registry plugin](../rule_registry/README.md):
+
+```yaml
+xpack.ruleRegistry.unsafe.write.enabled: true
+```
+
+When both of the these are set to `true`, your alerts should show on the alerts page.
+
 ## Unit testing
 
 Note: Run the following commands from `kibana/x-pack/plugins/observability`.
