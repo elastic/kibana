@@ -18,6 +18,7 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -80,7 +81,7 @@ export interface ILayer {
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): string | undefined;
+  getType(): LAYER_TYPE | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -482,8 +483,8 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): string | undefined {
-    return this._descriptor.type;
+  getType(): LAYER_TYPE | undefined {
+    return this._descriptor.type as LAYER_TYPE;
   }
 
   areLabelsOnTop(): boolean {
