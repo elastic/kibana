@@ -7,22 +7,22 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-export interface JobStats extends estypes.JobStats {
+export type JobStats = estypes.JobStats & {
   model_size_stats: ModelSizeStats;
   timing_stats: TimingStats;
-}
+};
 
 export type DataCounts = estypes.DataCounts;
 
-export interface ModelSizeStats extends estypes.ModelSizeStats {
+export type ModelSizeStats = estypes.ModelSizeStats & {
   model_bytes_exceeded: number;
   model_bytes_memory_limit: number;
   peak_model_bytes?: number;
-}
+};
 
-export interface TimingStats extends estypes.TimingStats {
+export type TimingStats = estypes.TimingStats & {
   total_bucket_processing_time_ms: number;
-}
+};
 
 export type ForecastsStats = estypes.JobForecastStatistics;
 
