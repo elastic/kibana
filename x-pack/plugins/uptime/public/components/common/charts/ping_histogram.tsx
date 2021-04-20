@@ -192,7 +192,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       'pings-over-time': {
         reportType: 'upp',
         time: { from: dateRangeStart, to: dateRangeEnd },
-        breakdown: 'monitor.status',
         ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
       },
     },
