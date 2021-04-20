@@ -68,7 +68,7 @@ image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 +
 [NOTE]
 ============================================================================
-Granting users access to reporting features in any application also grants them to manage their reports in *Stack Management > Reporting*.
+Granting users access to reporting features in any application also grants them access to manage their reports in *Stack Management > Reporting*.
 ============================================================================
 +
 . Save your new role.
