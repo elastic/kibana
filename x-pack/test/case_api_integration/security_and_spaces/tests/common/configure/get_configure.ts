@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -23,11 +23,24 @@ import {
   getConfigurationRequest,
   createConnector,
   getServiceNowConnector,
+  ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/utils';
+import {
+  obsOnly,
+  secOnly,
+  obsOnlyRead,
+  secOnlyRead,
+  noKibanaPrivileges,
+  superUser,
+  globalRead,
+  obsSecRead,
+  obsSec,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
@@ -46,7 +59,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should return an empty find body correctly if no configuration is loaded', async () => {
+    // TODO: Decide what to do with no configuration (no owner)
+    it.skip('should return an empty find body correctly if no configuration is loaded', async () => {
       const configuration = await getConfiguration(supertest);
       expect(configuration).to.eql({});
     });
@@ -105,6 +119,38 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         })
       );
+    });
+
+    describe('rbac', () => {
+      it('should return the correct configuration', async () => {
+        await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+          user: secOnly,
+          space: 'space1',
+        });
+
+        for (const user of [globalRead, superUser, secOnlyRead, secOnly, obsSecRead, obsSec]) {
+          const configuration = await getConfiguration(supertestWithoutAuth, 200, {
+            user,
+            space: 'space1',
+          });
+
+          ensureSavedObjectIsAuthorized([configuration], 1, ['securitySolutionFixture']);
+        }
+      });
+
+      it('should NOT read a configuration', async () => {
+        await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+          user: secOnly,
+          space: 'space1',
+        });
+
+        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+          await getConfiguration(supertestWithoutAuth, 403, {
+            user,
+            space: 'space1',
+          });
+        }
+      });
     });
   });
 };

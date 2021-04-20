@@ -30,6 +30,7 @@ export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
   GetTags = 'getTags',
+  GetReporters = 'getReporters',
 }
 
 // TODO: comments

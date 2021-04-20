@@ -23,12 +23,12 @@ import {
   AllReportersFindRequestRt,
   AllReportersFindRequest,
 } from '../../../common/api';
-import { countAlertsForID, createAuditMsg, flattenCaseSavedObject } from '../../common';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
-import { CASE_SAVED_OBJECT, ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { AuthorizationFilter, Operations } from '../../authorization';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, createAuditMsg } from '../utils';
 
 interface GetParams {
   id: string;
@@ -74,7 +74,7 @@ export const get = async (
     }
 
     try {
-      await auth.ensureAuthorized(theCase.attributes.owner, Operations.getCase);
+      await auth.ensureAuthorized([theCase.attributes.owner], Operations.getCase);
     } catch (error) {
       auditLogger?.log(
         createAuditMsg({ operation: Operations.getCase, error, savedObjectID: theCase.id })
@@ -138,7 +138,7 @@ export async function getTags(
 
     let authFindHelpers: AuthorizationFilter;
     try {
-      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+      authFindHelpers = await auth.getFindAuthorizationFilter(Operations.getTags);
     } catch (error) {
       auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
       throw error;
@@ -183,7 +183,7 @@ export async function getReporters(
 
     let authFindHelpers: AuthorizationFilter;
     try {
-      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+      authFindHelpers = await auth.getFindAuthorizationFilter(Operations.getReporters);
     } catch (error) {
       auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
       throw error;

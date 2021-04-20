@@ -98,4 +98,12 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetReporters]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetReporters,
+    action: 'get-reporters',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };
