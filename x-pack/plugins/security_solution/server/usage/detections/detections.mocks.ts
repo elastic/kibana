@@ -303,7 +303,7 @@ export const getMockMlDatafeedStatsResponse = () => ({
   ],
 });
 
-export const getMockRuleSearchResponse = () => ({
+export const getMockRuleSearchResponse = (immutableTag: string = '__internal_immutable:true') => ({
   took: 2,
   timed_out: false,
   _shards: {
@@ -325,7 +325,7 @@ export const getMockRuleSearchResponse = () => ({
         _score: 0,
         _source: {
           alert: {
-            name: 'RDP (Remote Desktop Protocol) from the Internet',
+            name: 'Azure Diagnostic Settings Deletion',
             tags: [
               'Elastic',
               'Cloud',
@@ -334,7 +334,7 @@ export const getMockRuleSearchResponse = () => ({
               'SecOps',
               'Monitoring',
               '__internal_rule_id:5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
-              '__internal_immutable:true',
+              `${immutableTag}`,
             ],
             alertTypeId: 'siem.signals',
             consumer: 'siem',
@@ -356,10 +356,6 @@ export const getMockRuleSearchResponse = () => ({
               outputIndex: '.siem-signals',
               maxSignals: 100,
               riskScore: 47,
-              riskScoreMapping: [],
-              severity: 'medium',
-              severityMapping: [],
-              threat: [],
               timestampOverride: 'event.ingested',
               to: 'now',
               type: 'query',
@@ -379,8 +375,8 @@ export const getMockRuleSearchResponse = () => ({
             notifyWhen: 'onActiveAlert',
             apiKeyOwner: null,
             apiKey: null,
-            createdBy: 'peter.hampton',
-            updatedBy: 'peter.hampton',
+            createdBy: 'user',
+            updatedBy: 'user',
             createdAt: '2021-03-23T17:15:59.634Z',
             updatedAt: '2021-03-23T17:15:59.634Z',
             muteAll: false,
@@ -407,7 +403,7 @@ export const getMockRuleSearchResponse = () => ({
   },
 });
 
-export const getMockRuleAlertsResponse = () => ({
+export const getMockRuleAlertsResponse = (docCount: number) => ({
   took: 7,
   timed_out: false,
   _shards: {
@@ -431,23 +427,7 @@ export const getMockRuleAlertsResponse = () => ({
       buckets: [
         {
           key: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: 3400,
-        },
-        {
-          key: '6fd16c7d-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: 3300,
-        },
-        {
-          key: '6eecb1c4-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: 321,
-        },
-        {
-          key: '6eec158f-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: 156,
-        },
-        {
-          key: '6fd16c80-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: 145,
+          doc_count: docCount,
         },
       ],
     },
@@ -466,10 +446,10 @@ export const getMockAlertCasesResponse = () => ({
         associationType: 'case',
         type: 'alert',
         alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
-        index: '.siem-signals-pjhampton-default-000001',
+        index: '.siem-signals-default-000001',
         rule: {
           id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-          name: 'RDP (Remote Desktop Protocol) from the Internet',
+          name: 'Azure Diagnostic Settings Deletion',
         },
         created_at: '2021-03-31T17:47:59.449Z',
         created_by: {
@@ -489,9 +469,7 @@ export const getMockAlertCasesResponse = () => ({
           id: '3a3a4fa0-9249-11eb-85b7-254c8af1a983',
         },
       ],
-      migrationVersion: {
-        'cases-comments': '7.12.0',
-      },
+      migrationVersion: {},
       coreMigrationVersion: '8.0.0',
       updated_at: '2021-03-31T17:47:59.818Z',
       version: 'WzI3MDIyODMsNF0=',

@@ -176,10 +176,10 @@ describe('Detections Usage and Metrics', () => {
       );
     });
 
-    it('returns non zeros', async () => {
+    it('returns information with rule, alerts and cases', async () => {
       (esClientMock.search as jest.Mock)
         .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
-        .mockReturnValue({ body: getMockRuleAlertsResponse() });
+        .mockReturnValue({ body: getMockRuleAlertsResponse(3400) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
 
       const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
@@ -195,7 +195,7 @@ describe('Detections Usage and Metrics', () => {
                 elastic_rule: true,
                 enabled: false,
                 rule_id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-                rule_name: 'RDP (Remote Desktop Protocol) from the Internet',
+                rule_name: 'Azure Diagnostic Settings Deletion',
                 rule_type: 'query',
                 rule_version: 4,
                 updated_on: '2021-03-23T17:15:59.634Z',
@@ -228,6 +228,143 @@ describe('Detections Usage and Metrics', () => {
               },
               query: {
                 alerts: 3400,
+                cases: 1,
+                disabled: 1,
+                enabled: 0,
+              },
+              threat_match: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              threshold: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+            },
+          },
+          ml_jobs: [],
+        })
+      );
+    });
+
+    it('returns information with on non elastic prebuilt rule', async () => {
+      (esClientMock.search as jest.Mock)
+        .mockReturnValueOnce({ body: getMockRuleSearchResponse('not_immutable') })
+        .mockReturnValue({ body: getMockRuleAlertsResponse(800) });
+      (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
+
+      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          detection_rules: {
+            detection_rule_detail: [], // *should not* contain custom detection rule details
+            detection_rule_usage: {
+              custom_total: {
+                alerts: 800,
+                cases: 1,
+                disabled: 1,
+                enabled: 0,
+              },
+              elastic_total: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              eql: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              machine_learning: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              query: {
+                alerts: 800,
+                cases: 1,
+                disabled: 1,
+                enabled: 0,
+              },
+              threat_match: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              threshold: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+            },
+          },
+          ml_jobs: [],
+        })
+      );
+    });
+
+    it('returns information with rule, no alerts and no cases', async () => {
+      (esClientMock.search as jest.Mock)
+        .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
+        .mockReturnValue({ body: getMockRuleAlertsResponse(0) });
+      (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
+
+      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          detection_rules: {
+            detection_rule_detail: [
+              {
+                alert_count_daily: 0,
+                cases_count_daily: 1,
+                created_on: '2021-03-23T17:15:59.634Z',
+                elastic_rule: true,
+                enabled: false,
+                rule_id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+                rule_name: 'Azure Diagnostic Settings Deletion',
+                rule_type: 'query',
+                rule_version: 4,
+                updated_on: '2021-03-23T17:15:59.634Z',
+              },
+            ],
+            detection_rule_usage: {
+              custom_total: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              elastic_total: {
+                alerts: 0,
+                cases: 1,
+                disabled: 1,
+                enabled: 0,
+              },
+              eql: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              machine_learning: {
+                alerts: 0,
+                cases: 0,
+                disabled: 0,
+                enabled: 0,
+              },
+              query: {
+                alerts: 0,
                 cases: 1,
                 disabled: 1,
                 enabled: 0,
