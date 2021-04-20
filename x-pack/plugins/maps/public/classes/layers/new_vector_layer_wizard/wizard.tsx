@@ -135,7 +135,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
                   {i18n.translate(
                     'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
                     {
-                      defaultMessage: `Use the editor on the left to draw your points and shapes`,
+                      defaultMessage: `Use the editor on the left to draw your points and shapes.`,
                     }
                   )}
                 </p>
