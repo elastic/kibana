@@ -84,7 +84,7 @@ describe('ensureInstalledDefaultPackages', () => {
       ];
     });
     const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
-    expect(resp).toEqual([mockInstallation.attributes]);
+    expect(resp.installations).toEqual([mockInstallation.attributes]);
   });
   it('should throw the first Error it finds', async () => {
     class SomeCustomError extends Error {}
