@@ -6,7 +6,7 @@ selected <<index-patterns, index pattern>>.
 The default time range is 15 minutes, but you can customize
 it in <<advanced-options,Advanced Settings>>.
 
-. Click image:concepts/images/time-filter-icon.png[Calendar icon].
+. Click image:concepts/images/time-filter-icon.png[clock icon].
 
 . Choose one of the following:
 
