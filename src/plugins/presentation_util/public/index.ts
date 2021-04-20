@@ -25,6 +25,7 @@ export {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
+
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
