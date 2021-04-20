@@ -16,7 +16,7 @@ import { getFileUpload } from '../../../kibana_services';
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
-    defaultMessage: 'Draw points, lines, and polygons to Elasticsearch',
+    defaultMessage: 'Draw points, lines, and polygons to create or edit documents',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
@@ -42,6 +42,6 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     return <NewVectorLayerEditor {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.newVectorLayerWizard.title', {
-    defaultMessage: 'Draw new vector layer',
+    defaultMessage: 'Draw',
   }),
 };
