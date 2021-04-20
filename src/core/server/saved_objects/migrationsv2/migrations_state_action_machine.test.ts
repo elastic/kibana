@@ -211,86 +211,90 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_DELETE",
           Object {
-            "batchSize": 1000,
-            "controlState": "LEGACY_DELETE",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-            ],
-            "outdatedDocuments": Array [
-              "1234",
-            ],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryAttempts": 5,
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_DELETE",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                ],
+                "outdatedDocuments": Array [
+                  "1234",
+                ],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
-              },
-            },
-            "unusedTypesQuery": Object {
-              "_tag": "Some",
-              "value": Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "term": Object {
-                        "type": "fleet-agent-events",
-                      },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
                     },
-                    Object {
-                      "term": Object {
-                        "type": "tsvb-validation-telemetry",
-                      },
+                    "type": Object {
+                      "type": "keyword",
                     },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
                           },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
                           },
-                        ],
-                      },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
-                  ],
+                  },
                 },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
         Array [
@@ -303,90 +307,94 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_DELETE -> FATAL",
           Object {
-            "batchSize": 1000,
-            "controlState": "FATAL",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-              Object {
-                "level": "info",
-                "message": "Log from FATAL control state",
-              },
-            ],
-            "outdatedDocuments": Array [
-              "1234",
-            ],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryAttempts": 5,
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "FATAL",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                  Object {
+                    "level": "info",
+                    "message": "Log from FATAL control state",
+                  },
+                ],
+                "outdatedDocuments": Array [
+                  "1234",
+                ],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
-              },
-            },
-            "unusedTypesQuery": Object {
-              "_tag": "Some",
-              "value": Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "term": Object {
-                        "type": "fleet-agent-events",
-                      },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
                     },
-                    Object {
-                      "term": Object {
-                        "type": "tsvb-validation-telemetry",
-                      },
+                    "type": Object {
+                      "type": "keyword",
                     },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
                           },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
                           },
-                        ],
-                      },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
-                  ],
+                  },
                 },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
       ]
@@ -490,84 +498,88 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_REINDEX",
           Object {
-            "batchSize": 1000,
-            "controlState": "LEGACY_REINDEX",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_REINDEX control state",
-              },
-            ],
-            "outdatedDocuments": Array [],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryAttempts": 5,
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_REINDEX",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_REINDEX control state",
+                  },
+                ],
+                "outdatedDocuments": Array [],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
-              },
-            },
-            "unusedTypesQuery": Object {
-              "_tag": "Some",
-              "value": Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "term": Object {
-                        "type": "fleet-agent-events",
-                      },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
                     },
-                    Object {
-                      "term": Object {
-                        "type": "tsvb-validation-telemetry",
-                      },
+                    "type": Object {
+                      "type": "keyword",
                     },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
                           },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
                           },
-                        ],
-                      },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
-                  ],
+                  },
                 },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
         Array [
@@ -577,88 +589,92 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
           Object {
-            "batchSize": 1000,
-            "controlState": "LEGACY_DELETE",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_REINDEX control state",
-              },
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-            ],
-            "outdatedDocuments": Array [],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryAttempts": 5,
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_DELETE",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_REINDEX control state",
+                  },
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                ],
+                "outdatedDocuments": Array [],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
-              },
-            },
-            "unusedTypesQuery": Object {
-              "_tag": "Some",
-              "value": Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "term": Object {
-                        "type": "fleet-agent-events",
-                      },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
                     },
-                    Object {
-                      "term": Object {
-                        "type": "tsvb-validation-telemetry",
-                      },
+                    "type": Object {
+                      "type": "keyword",
                     },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
                           },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
                           },
-                        ],
-                      },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
-                  ],
+                  },
                 },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
       ]
