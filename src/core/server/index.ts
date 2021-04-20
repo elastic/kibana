@@ -238,6 +238,11 @@ export type { IRenderOptions } from './rendering';
 export type {
   Logger,
   LoggerFactory,
+  Ecs,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
   LogMeta,
   LogRecord,
   LogLevel,
