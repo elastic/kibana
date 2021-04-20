@@ -23,7 +23,8 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   addDrawLayerInProgress: boolean;
-  editModeActive: boolean;
+  showEditButton: boolean;
+  featureModeActive: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
@@ -44,7 +45,7 @@ export function ToolbarOverlay(props: Props) {
     );
   }
 
-  function renderEditControl() {
+  function renderEditLayerControl() {
     const { geoFields } = props;
     if (!geoFields.length || props.addDrawLayerInProgress) {
       return null;
@@ -58,7 +59,7 @@ export function ToolbarOverlay(props: Props) {
   }
 
   function renderFeatureDrawAndEditControls() {
-    return props.showEditButton ? (
+    return props.featureModeActive ? (
       <>
         <EuiFlexItem>
           <FeatureDrawControl />
@@ -88,7 +89,7 @@ export function ToolbarOverlay(props: Props) {
 
       {renderToolsControl()}
 
-      {renderEditControl()}
+      {renderEditLayerControl()}
 
       {renderFeatureDrawAndEditControls()}
     </EuiFlexGroup>

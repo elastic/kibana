@@ -15,7 +15,7 @@ import { setDrawMode } from '../../../actions';
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    activateDrawFeatureMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS)),
+    activateDrawFeatureMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FEATURES)),
     deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }

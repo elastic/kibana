@@ -75,6 +75,8 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  featureModeActive: boolean;
+  filterModeActive: boolean;
 }
 
 interface State {
@@ -421,10 +423,10 @@ export class MBMap extends Component<Props, State> {
     let scaleControl;
     if (this.state.mbMap) {
       drawFilterControl =
-        !this.props.editModeActive && this.props.addFilters ? (
+        this.props.addFilters && this.props.filterModeActive ? (
           <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
         ) : null;
-      drawFeatureControl = this.props.editModeActive ? (
+      drawFeatureControl = this.props.featureModeActive ? (
         <DrawFeatureControl mbMap={this.state.mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
