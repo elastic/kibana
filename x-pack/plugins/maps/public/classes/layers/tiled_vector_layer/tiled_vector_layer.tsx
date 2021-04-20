@@ -103,10 +103,14 @@ export class TiledVectorLayer extends VectorLayer {
           : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+      const urlTemplate = this._source.getMvtRefreshTokenParam()
+        ? newUrlTemplateAndMeta.urlTemplate +
+          `&${this._source.getMvtRefreshTokenParam()}=${urlToken}`
+        : newUrlTemplateAndMeta.urlTemplate;
       const urlTemplateAndMetaWithToken = {
         ...newUrlTemplateAndMeta,
         urlToken,
-        urlTemplate: newUrlTemplateAndMeta.urlTemplate + `&token=${urlToken}`,
+        urlTemplate,
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, urlTemplateAndMetaWithToken, {});
     } catch (error) {

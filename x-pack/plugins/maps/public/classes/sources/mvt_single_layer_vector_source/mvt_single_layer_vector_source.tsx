@@ -163,6 +163,10 @@ export class MVTSingleLayerVectorSource
     };
   }
 
+  getMvtRefreshTokenParam(): string | null {
+    return null;
+  }
+
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }

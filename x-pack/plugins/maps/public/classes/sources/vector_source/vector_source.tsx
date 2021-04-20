@@ -78,6 +78,7 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLayerName(): string;
+  getMvtRefreshTokenParam(): string | null;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {

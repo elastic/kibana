@@ -100,6 +100,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.id;
   }
 
+  getMvtRefreshTokenParam(): string | null {
+    return 'token';
+  }
+
   getApplyGlobalQuery(): boolean {
     return this._descriptor.applyGlobalQuery;
   }
