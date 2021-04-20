@@ -299,7 +299,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           defaultMessage: 'Elasticsearch hosts',
         })}
         helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
-          defaultMessage: 'Specify the Elasticsearch URLs where agents will send data.',
+          defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
         })}
         {...inputs.elasticsearchUrl.formRowProps}
       >
