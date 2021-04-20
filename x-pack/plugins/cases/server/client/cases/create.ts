@@ -91,10 +91,10 @@ export const create = async ({
 
     await ensureAuthorized({
       operation: Operations.createCase,
-      owner: query.owner,
+      owners: [query.owner],
       authorization: auth,
       auditLogger,
-      savedObjectID,
+      savedObjectIDs: [savedObjectID],
     });
 
     // log that we're attempting to create a case
