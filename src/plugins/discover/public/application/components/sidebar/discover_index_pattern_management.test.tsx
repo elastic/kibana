@@ -111,7 +111,7 @@ describe('Discover IndexPattern Management', () => {
     expect(editField).toHaveBeenCalledWith(undefined);
   });
 
-  test('click on an manage button navigates away from discover', () => {
+  test('click on a manage button navigates away from discover', () => {
     const component = mountWithIntl(
       <DiscoverIndexPatternManagement
         services={mockServices}
