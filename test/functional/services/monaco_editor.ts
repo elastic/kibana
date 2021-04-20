@@ -13,7 +13,7 @@ export function MonacoEditorProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return new (class MonacoEditor {
-    public async getCodeEditorValue(index: number = 0) {
+    public async getCodeEditorValue(nthIndex: number = 0) {
       let values: string[] = [];
 
       await retry.try(async () => {
@@ -25,7 +25,7 @@ export function MonacoEditorProvider({ getService }: FtrProviderContext) {
         );
       });
 
-      return values[index] as string;
+      return values[nthIndex] as string;
     }
   })();
 }
