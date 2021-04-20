@@ -55,6 +55,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
   <>
     {Object.keys(fieldCoercionErrors).map((fieldName, fieldNameIndex) => {
       const errorInfos = fieldCoercionErrors[fieldName];
+      const showViewButton = getRoute && itemId;
 
       const accordionHeader = (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
@@ -85,11 +86,10 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
             <EuiTableHeader>
               <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
-              <EuiTableHeaderCell />
+              {showViewButton && <EuiTableHeaderCell />}
             </EuiTableHeader>
             <EuiTableBody>
               {errorInfos.map((error, errorIndex) => {
-                const showViewButton = getRoute && itemId;
                 const documentPath = getRoute && itemId ? getRoute(itemId, error.external_id) : '';
 
                 const viewButton = showViewButton && (
@@ -121,7 +121,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                     <EuiTableRowCell className="field-error-document__field-content">
                       {error.error}
                     </EuiTableRowCell>
-                    {showViewButton ? viewButton : <EuiTableRowCell />}
+                    {viewButton}
                   </EuiTableRow>
                 );
               })}
