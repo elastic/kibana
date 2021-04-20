@@ -82,7 +82,8 @@ export interface JobSelectionMaps {
 export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage<ApplyTimeRangeConfig>(
-    ML_APPLY_TIME_RANGE_CONFIG
+    ML_APPLY_TIME_RANGE_CONFIG,
+    true
   );
 
   const selectedJobIds = globalState?.ml?.jobIds ?? [];
@@ -186,7 +187,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
             onFlyoutClose={closeFlyout}
             maps={maps}
             applyTimeRangeConfig={applyTimeRangeConfig}
-            setApplyTimeRangeConfig={setApplyTimeRangeConfig}
+            onTimeRangeConfigChange={setApplyTimeRangeConfig}
           />
         </EuiFlyout>
       );

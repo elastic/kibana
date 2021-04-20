@@ -36,7 +36,7 @@ export type PartitionFieldsConfig =
   | Partial<Record<EntityFieldType, PartitionFieldConfig>>
   | undefined;
 
-export type ApplyTimeRangeConfig = boolean;
+export type ApplyTimeRangeConfig = boolean | undefined;
 
 export type MlStorage = Partial<{
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
