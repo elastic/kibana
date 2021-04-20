@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_AGENT_POLICIES_PACKAGES, FLEET_SERVER_PACKAGE } from '../../common';
 
-import type { PackagePolicy } from '../../common';
+import type { PackagePolicy, DefaultPackagesInstallationError } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
@@ -33,6 +33,7 @@ import { awaitIfFleetServerSetupPending } from './fleet_server';
 export interface SetupStatus {
   isInitialized: boolean;
   preconfigurationError: { name: string; message: string } | undefined;
+  nonFatalPackageUpgradeErrors: DefaultPackagesInstallationError[];
 }
 
 export async function setupIngestManager(
@@ -46,7 +47,7 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [installedPackages, defaultOutput] = await Promise.all([
+  const [defaultPackagesResult, defaultOutput] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
@@ -142,7 +143,7 @@ async function createSetupSideEffects(
       );
     }
 
-    for (const installedPackage of installedPackages) {
+    for (const installedPackage of defaultPackagesResult.installations) {
       const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
         (packageName) => installedPackage.name === packageName
       );
@@ -172,7 +173,11 @@ async function createSetupSideEffects(
 
   await ensureAgentActionPolicyChangeExists(soClient, esClient);
 
-  return { isInitialized: true, preconfigurationError };
+  return {
+    isInitialized: true,
+    preconfigurationError,
+    nonFatalPackageUpgradeErrors: defaultPackagesResult.nonFatalPackageUpgradeErrors,
+  };
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(

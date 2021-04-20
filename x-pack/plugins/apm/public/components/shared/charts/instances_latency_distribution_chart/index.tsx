@@ -30,7 +30,7 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
@@ -38,7 +38,7 @@ import { CustomTooltip } from './custom_tooltip';
 
 export interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: PrimaryStatsServiceInstanceItem[];
+  items?: MainStatsServiceInstanceItem[];
   status: FETCH_STATUS;
 }
 
