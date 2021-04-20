@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip, EuiIcon } from '@elastic/eui';
 
 import React from 'react';
 import { get } from 'lodash';
@@ -178,9 +178,20 @@ export function getColumns(
     columns.push({
       field: 'actualSort',
       'data-test-subj': 'mlAnomaliesListColumnActual',
-      name: i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
-        defaultMessage: 'actual',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
+            defaultMessage: 'The actual values in the anomaly record results.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
+              defaultMessage: 'Actual',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(
           item.jobId,
@@ -196,9 +207,20 @@ export function getColumns(
     columns.push({
       field: 'typicalSort',
       'data-test-subj': 'mlAnomaliesListColumnTypical',
-      name: i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
-        defaultMessage: 'typical',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
+            defaultMessage: 'The typical values in the anomaly record results.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
+              defaultMessage: 'Typical',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(
           item.jobId,
