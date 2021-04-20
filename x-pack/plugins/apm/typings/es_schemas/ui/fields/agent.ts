@@ -13,8 +13,7 @@ export type ElasticAgentName =
   | 'nodejs'
   | 'python'
   | 'dotnet'
-  | 'ruby'
-  | 'php';
+  | 'ruby';
 
 export type OpenTelemetryAgentName =
   | 'otlp'
