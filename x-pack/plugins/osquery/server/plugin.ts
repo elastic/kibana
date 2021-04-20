@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
