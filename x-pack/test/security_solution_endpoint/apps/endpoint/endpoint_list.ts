@@ -248,21 +248,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await adminSearchBar.clearValueWithKeyboard();
         await adminSearchBar.type(
           // schema depends on applied package
-
-          // query was:
-          // 'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" ' +
-          //   'or ' +
-          //   'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
-
-          // Changed in https://github.com/elastic/kibana/pull/97191.
-          // endpoint/metadata/destination_index data appears to be inconsistent
-          // with the mapping change in:
-          // https://github.com/elastic/endpoint-package/pull/124
-          //
-          // https://github.com/elastic/kibana/pull/88012 missed JSON updates
-
-          // use agent.id because it's the only field in the same place
-          'agent.id : ("963b081e-60d1-482c-befd-a5815fa8290f" or "b3412d6f-b022-4448-8fee-21cc936ea86b")'
+          'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" ' +
+            'or ' +
+            'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
         const querySubmitButton = await testSubjects.find('querySubmitButton');
         await querySubmitButton.click();
