@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 if [[ "${GITHUB_COMMIT_STATUS_ENABLED:-}" == "true" ]]; then
   COMMIT_STATUS=success
