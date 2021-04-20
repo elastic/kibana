@@ -10,6 +10,6 @@ List of configuration values that will be exposed to usage collection. If parent
 
 ```typescript
 export declare type MakeUsageFromSchema<T> = {
-    [Key in keyof T]?: T[Key] extends object ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
+    [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
 };
 ```
