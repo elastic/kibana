@@ -91,7 +91,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
-          .attr('x', xScale(d.timestamp))
+          .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
           .attr('y', ANNOTATION_MARGIN)
           .attr('height', ANNOTATION_HEIGHT)
           .attr('width', Math.max(annotationWidth, ANNOTATION_MIN_WIDTH))
