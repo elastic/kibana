@@ -59,6 +59,7 @@ import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
+import { registerCollector } from './usage';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -210,6 +211,10 @@ export class MlServerPlugin
         logger: this.log,
         mlSharedServices: sharedServices,
       });
+    }
+
+    if (plugins.usageCollection) {
+      registerCollector(plugins.usageCollection);
     }
 
     return { ...sharedServices };
