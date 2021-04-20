@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Direction } from '../../../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { Direction } from '../../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { Sort, SortDirection } from '../../sort';
 
