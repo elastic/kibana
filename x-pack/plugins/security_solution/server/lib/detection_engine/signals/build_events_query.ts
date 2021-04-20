@@ -152,11 +152,7 @@ export const buildEventsSearchQuery = ({
     },
   };
 
-  if (
-    searchAfterSortIds != null &&
-    !isEmpty(searchAfterSortIds) &&
-    searchAfterSortIds.filter((sortId) => !isEmpty(sortId?.toString())).length > 0
-  ) {
+  if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
       body: {

@@ -845,7 +845,6 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
 
         expect(signals.length).equal(200);
-        await deleteSignalsIndex(supertest);
       });
     });
 

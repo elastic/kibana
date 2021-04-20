@@ -80,7 +80,7 @@ describe('create_signals', () => {
     });
   });
 
-  test('it builds a now-5m up to today filter with timestsampOverride', () => {
+  test('it builds a now-5m up to today filter with timestampOverride', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
       from: 'now-5m',

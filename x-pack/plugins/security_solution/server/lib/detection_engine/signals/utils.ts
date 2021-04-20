@@ -848,10 +848,6 @@ export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
   params.type === 'machine_learning';
 
-export const hasSafeSortIds = (sortIds: SortResults) => {
-  return sortIds?.every((sortId) => sortId != null && sortId < Number.MAX_SAFE_INTEGER);
-};
-
 /**
  * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
  * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
@@ -865,7 +861,9 @@ export const hasSafeSortIds = (sortIds: SortResults) => {
  */
 export const getSafeSortIds = (sortIds: SortResults | undefined) => {
   return sortIds?.map((sortId) => {
-    if (sortId != null && sortId >= Number.MAX_SAFE_INTEGER) {
+    // haven't determined when we would receive a null value for a sort id
+    // but in case we do, default to sending the stringified Java max_int
+    if (sortId == null || sortId >= Number.MAX_SAFE_INTEGER) {
       return '9223372036854775807';
     }
     return sortId;
