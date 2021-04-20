@@ -122,6 +122,7 @@ export class KbnClientImportExport {
         excludeExportDetails: true,
         includeReferencesDeep: true,
       },
+      responseType: 'text',
     });
 
     if (typeof resp.data !== 'string') {

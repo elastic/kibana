@@ -211,7 +211,10 @@ describe('context app', function () {
         []
       ).then(() => {
         expect(
-          mockSearchSource.setField.calledWith('sort', [{ '@timestamp': 'asc' }, { _doc: 'asc' }])
+          mockSearchSource.setField.calledWith('sort', [
+            { '@timestamp': { order: 'asc', format: 'strict_date_optional_time' } },
+            { _doc: 'asc' },
+          ])
         ).toBe(true);
       });
     });

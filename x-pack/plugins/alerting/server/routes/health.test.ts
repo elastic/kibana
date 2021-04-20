@@ -8,15 +8,12 @@
 import { healthRoute } from './health';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { alertsClientMock } from '../alerts_client.mock';
 import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -65,25 +62,11 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({})
-    );
-
-    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
-
-    expect(esClient.asInternalUser.transport.request.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "method": "GET",
-          "path": "/_xpack/usage",
-        },
-      ]
-    `);
   });
 
   it('evaluates whether Encrypted Saved Objects is missing encryption key', async () => {
@@ -94,13 +77,8 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({})
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -135,13 +113,8 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({})
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -176,13 +149,8 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ security: {} })
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -217,13 +185,12 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ security: { enabled: true } })
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {
+        alertsClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(false),
+      },
       {},
       ['ok']
     );
@@ -258,15 +225,12 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        security: { enabled: true, ssl: {} },
-      })
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {
+        alertsClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(false),
+      },
       {},
       ['ok']
     );
@@ -301,15 +265,8 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        security: { enabled: true, ssl: { http: { enabled: true } } },
-      })
-    );
-
     const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
