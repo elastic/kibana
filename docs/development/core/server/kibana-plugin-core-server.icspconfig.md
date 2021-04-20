@@ -16,6 +16,7 @@ export interface ICspConfig
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [disableEmbedding](./kibana-plugin-core-server.icspconfig.disableembedding.md) | <code>boolean</code> | Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled \*and\* no custom rules have been defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules. |
 |  [header](./kibana-plugin-core-server.icspconfig.header.md) | <code>string</code> | The CSP rules in a formatted directives string for use in a <code>Content-Security-Policy</code> header. |
 |  [rules](./kibana-plugin-core-server.icspconfig.rules.md) | <code>string[]</code> | The CSP rules used for Kibana. |
 |  [strict](./kibana-plugin-core-server.icspconfig.strict.md) | <code>boolean</code> | Specify whether browsers that do not support CSP should be able to use Kibana. Use <code>true</code> to block and <code>false</code> to allow. |
