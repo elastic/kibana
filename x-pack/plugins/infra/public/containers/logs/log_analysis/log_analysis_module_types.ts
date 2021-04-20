@@ -47,6 +47,7 @@ export interface ModuleDescriptor<JobType extends string> {
   validateSetupIndices: (
     indices: string[],
     timestampField: string,
+    runtimeMappings: estypes.RuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
@@ -54,6 +55,7 @@ export interface ModuleDescriptor<JobType extends string> {
     timestampField: string,
     startTime: number,
     endTime: number,
+    runtimeMappings: estypes.RuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }

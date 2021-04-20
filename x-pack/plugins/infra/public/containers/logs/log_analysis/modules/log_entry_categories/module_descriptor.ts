@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from 'src/core/public';
 import {
@@ -135,6 +136,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
+  runtimeMappings: estypes.RuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateIndicesAPI(
@@ -154,6 +156,7 @@ const validateSetupIndices = async (
           validTypes: ['text'],
         },
       ],
+      runtimeMappings,
     },
     fetch
   );
@@ -164,9 +167,13 @@ const validateSetupDatasets = async (
   timestampField: string,
   startTime: number,
   endTime: number,
+  runtimeMappings: estypes.RuntimeFields,
   fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
+  return await callValidateDatasetsAPI(
+    { indices, timestampField, startTime, endTime, runtimeMappings },
+    fetch
+  );
 };
 
 export const logEntryCategoriesModule: ModuleDescriptor<LogEntryCategoriesJobType> = {
