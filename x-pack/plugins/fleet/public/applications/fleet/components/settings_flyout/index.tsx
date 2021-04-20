@@ -251,15 +251,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   const body = settings && (
     <EuiForm>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.fleet.settings.globalOutputTitle"
-            defaultMessage="Global output"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.settings.globalOutputDescription"
