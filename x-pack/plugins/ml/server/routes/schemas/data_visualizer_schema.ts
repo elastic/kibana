@@ -6,26 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRuntimeField } from '../../../common/util/runtime_field_utils';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const indexPatternTitleSchema = schema.object({
   /** Title of the index pattern for which to return stats. */
   indexPatternTitle: schema.string(),
 });
-
-const runtimeMappingsSchema = schema.maybe(
-  schema.object(
-    {},
-    {
-      unknowns: 'allow',
-      validate: (v: object) => {
-        if (Object.values(v).some((o) => !isRuntimeField(o))) {
-          return 'Invalid runtime field';
-        }
-      },
-    }
-  )
-);
 
 export const dataVisualizerFieldHistogramsSchema = schema.object({
   /** Query to match documents in the index. */
@@ -34,7 +20,7 @@ export const dataVisualizerFieldHistogramsSchema = schema.object({
   fields: schema.arrayOf(schema.any()),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
-  /** Optional search time runtime mappings */
+  /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
 });
 
@@ -54,7 +40,7 @@ export const dataVisualizerFieldStatsSchema = schema.object({
   interval: schema.maybe(schema.number()),
   /** Maximum number of examples to return for text type fields.  */
   maxExamples: schema.number(),
-  /** Optional search time runtime mappings */
+  /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
 });
 
@@ -73,6 +59,6 @@ export const dataVisualizerOverallStatsSchema = schema.object({
   earliest: schema.maybe(schema.number()),
   /** Latest timestamp for search, as epoch ms (optional). */
   latest: schema.maybe(schema.number()),
-  /** Optional search time runtime mappings */
+  /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
 });

@@ -445,16 +445,18 @@ export async function syncExistingFields({
       ...state,
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
+      existenceFetchTimeout: false,
       existingFields: emptinessInfo.reduce((acc, info) => {
         acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
         return acc;
       }, state.existingFields),
     }));
   } catch (e) {
-    // show all fields as available if fetch failed
+    // show all fields as available if fetch failed or timed out
     setState((state) => ({
       ...state,
-      existenceFetchFailed: true,
+      existenceFetchFailed: e.res?.status !== 408,
+      existenceFetchTimeout: e.res?.status === 408,
       existingFields: indexPatterns.reduce((acc, pattern) => {
         acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
         return acc;

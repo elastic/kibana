@@ -6,22 +6,13 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+
 export type DatafeedId = string;
 
 export type Datafeed = estypes.Datafeed;
 
 export type ChunkingConfig = estypes.ChunkingConfig;
 
-export type Aggregation = Record<
-  string,
-  {
-    date_histogram: {
-      field: string;
-      fixed_interval: string;
-    };
-    aggregations?: { [key: string]: any };
-    aggs?: { [key: string]: any };
-  }
->;
+export type Aggregation = Record<string, estypes.AggregationContainer>;
 
 export type IndicesOptions = estypes.IndicesOptions;

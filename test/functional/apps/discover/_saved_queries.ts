@@ -133,10 +133,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
-      it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
-      });
-
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await queryBar.setQuery('response:503');

@@ -13,9 +13,11 @@ import {
   Logger,
   SavedObjectsClientContract,
   ElasticsearchClient,
+  UiSettingsServiceStart,
 } from 'kibana/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -25,6 +27,7 @@ import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -35,6 +38,8 @@ export interface IndexPatternsServiceStart {
 
 export interface IndexPatternsServiceSetupDeps {
   expressions: ExpressionsServerSetup;
+  logger: Logger;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface IndexPatternsServiceStartDeps {
@@ -42,10 +47,39 @@ export interface IndexPatternsServiceStartDeps {
   logger: Logger;
 }
 
+export const indexPatternsServiceFactory = ({
+  logger,
+  uiSettings,
+  fieldFormats,
+}: {
+  logger: Logger;
+  uiSettings: UiSettingsServiceStart;
+  fieldFormats: FieldFormatsStart;
+}) => async (
+  savedObjectsClient: SavedObjectsClientContract,
+  elasticsearchClient: ElasticsearchClient
+) => {
+  const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+  const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+
+  return new IndexPatternsCommonService({
+    uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+    savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+    apiClient: new IndexPatternsApiServer(elasticsearchClient),
+    fieldFormats: formats,
+    onError: (error) => {
+      logger.error(error);
+    },
+    onNotification: ({ title, text }) => {
+      logger.warn(`${title}${text ? ` : ${text}` : ''}`);
+    },
+  });
+};
+
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
-    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions }: IndexPatternsServiceSetupDeps
+    core: CoreSetup<IndexPatternsServiceStartDeps, DataPluginStart>,
+    { expressions, usageCollection }: IndexPatternsServiceSetupDeps
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -53,32 +87,18 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
     registerRoutes(core.http, core.getStartServices);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+    registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
     const { uiSettings } = core;
 
     return {
-      indexPatternsServiceFactory: async (
-        savedObjectsClient: SavedObjectsClientContract,
-        elasticsearchClient: ElasticsearchClient
-      ) => {
-        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
-
-        return new IndexPatternsCommonService({
-          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-          apiClient: new IndexPatternsApiServer(elasticsearchClient),
-          fieldFormats: formats,
-          onError: (error) => {
-            logger.error(error);
-          },
-          onNotification: ({ title, text }) => {
-            logger.warn(`${title} : ${text}`);
-          },
-        });
-      },
+      indexPatternsServiceFactory: indexPatternsServiceFactory({
+        logger,
+        uiSettings,
+        fieldFormats,
+      }),
     };
   }
 }

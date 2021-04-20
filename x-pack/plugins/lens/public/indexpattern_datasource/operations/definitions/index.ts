@@ -179,7 +179,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     columns: Record<string, IndexPatternColumn>
   ) => string;
   /**
-   * This function is called if another column in the same layer changed or got removed.
+   * This function is called if another column in the same layer changed or got added/removed.
    * Can be used to update references to other columns (e.g. for sorting).
    * Based on the current column and the other updated columns, this function has to
    * return an updated column. If not implemented, the `id` function is used instead.
@@ -311,13 +311,6 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     layer: IndexPatternLayer,
     uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
-  /**
-   * Optional function to return the suffix used for ES bucket paths and esaggs column id.
-   * This is relevant for multi metrics to pick the right value.
-   *
-   * @param column The current column
-   */
-  getEsAggsSuffix?: (column: C) => string;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *

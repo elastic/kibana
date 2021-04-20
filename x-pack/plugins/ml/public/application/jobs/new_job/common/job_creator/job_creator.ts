@@ -41,10 +41,8 @@ import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import {
-  getAggregationBucketsName,
-  getDatafeedAggregations,
-} from '../../../../../../common/util/datafeed_utils';
+import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
+import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -786,7 +784,7 @@ export class JobCreator {
     this._aggregationFields = [];
     const aggs = getDatafeedAggregations(this._datafeed_config);
     if (aggs !== undefined) {
-      const aggBucketsName = getAggregationBucketsName(aggs);
+      const aggBucketsName = getFirstKeyInObject(aggs);
       if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
         const buckets = aggs[aggBucketsName];
         collectAggs(buckets, this._aggregationFields);

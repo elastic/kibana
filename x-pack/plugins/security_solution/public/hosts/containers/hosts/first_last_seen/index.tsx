@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
-import { DocValueFields } from '../../../../../common/search_strategy';
+import { Direction, DocValueFields } from '../../../../../common/search_strategy';
 import {
   isCompleteResponse,
   isErrorResponse,
@@ -30,13 +30,13 @@ export interface FirstLastSeenHostArgs {
   errorMessage: string | null;
   firstSeen?: string | null;
   lastSeen?: string | null;
-  order: 'asc' | 'desc' | null;
+  order: Direction.asc | Direction.desc | null;
 }
 interface UseHostFirstLastSeen {
   docValueFields: DocValueFields[];
   hostName: string;
   indexNames: string[];
-  order: 'asc' | 'desc';
+  order: Direction.asc | Direction.desc;
 }
 
 export const useFirstLastSeenHost = ({

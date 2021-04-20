@@ -20,6 +20,7 @@ import { TimeComparison } from './time_comparison';
 import { useBreakPoints } from '../../hooks/use_break_points';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
   margin: ${({ theme }) =>
@@ -29,7 +30,7 @@ const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
 interface Props {
   prepend?: React.ReactNode | string;
   showTimeComparison?: boolean;
-  showCorrelations?: boolean;
+  showTransactionTypeSelector?: boolean;
 }
 
 function getRowDirection(showColumn: boolean) {
@@ -70,7 +71,7 @@ function DebugQueryCallout() {
                 <EuiLink href={advancedSettingsUrl}>
                   {i18n.translate(
                     'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description.advancedSettings',
-                    { defaultMessage: 'Advanced Setting' }
+                    { defaultMessage: 'Advanced Settings' }
                   )}
                 </EuiLink>
               ),
@@ -85,7 +86,7 @@ function DebugQueryCallout() {
 export function SearchBar({
   prepend,
   showTimeComparison = false,
-  showCorrelations = false,
+  showTransactionTypeSelector = false,
 }: Props) {
   const { isMedium, isLarge } = useBreakPoints();
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
@@ -94,8 +95,13 @@ export function SearchBar({
     <>
       <DebugQueryCallout />
       <EuiFlexGroupSpaced gutterSize="m" direction={getRowDirection(isLarge)}>
+        {showTransactionTypeSelector && (
+          <EuiFlexItem grow={false}>
+            <TransactionTypeSelect />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
-          <KueryBar prepend={prepend} />
+          <KueryBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup

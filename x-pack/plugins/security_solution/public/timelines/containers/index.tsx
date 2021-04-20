@@ -16,7 +16,6 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugi
 import { inputsModel, KueryFilterQueryKind } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { DocValueFields } from '../../common/containers/query_template';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
@@ -29,6 +28,7 @@ import {
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
+  DocValueFields,
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
@@ -98,6 +98,29 @@ export const initSortDefault = [
   },
 ];
 
+const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
+  ...(!isEmpty(eqlOptions?.eventCategoryField)
+    ? {
+        eventCategoryField: eqlOptions?.eventCategoryField,
+      }
+    : {}),
+  ...(!isEmpty(eqlOptions?.size)
+    ? {
+        size: eqlOptions?.size,
+      }
+    : {}),
+  ...(!isEmpty(eqlOptions?.tiebreakerField)
+    ? {
+        tiebreakerField: eqlOptions?.tiebreakerField,
+      }
+    : {}),
+  ...(!isEmpty(eqlOptions?.timestampField)
+    ? {
+        timestampField: eqlOptions?.timestampField,
+      }
+    : {}),
+});
+
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
@@ -143,7 +166,6 @@ export const useTimelineEvents = ({
         activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
-
       setActivePage(newActivePage);
     },
     [clearSignalsState, id]
@@ -294,26 +316,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        ...(prevEqlRequest?.eventCategoryField
-          ? {
-              eventCategoryField: prevEqlRequest?.eventCategoryField,
-            }
-          : {}),
-        ...(prevEqlRequest?.size
-          ? {
-              size: prevEqlRequest?.size,
-            }
-          : {}),
-        ...(prevEqlRequest?.tiebreakerField
-          ? {
-              tiebreakerField: prevEqlRequest?.tiebreakerField,
-            }
-          : {}),
-        ...(prevEqlRequest?.timestampField
-          ? {
-              timestampField: prevEqlRequest?.timestampField,
-            }
-          : {}),
+        ...deStructureEqlOptions(prevEqlRequest),
       };
 
       const currentSearchParameters = {
@@ -326,7 +329,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
-        ...(eqlOptions ? eqlOptions : {}),
+        ...deStructureEqlOptions(eqlOptions),
       };
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)

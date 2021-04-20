@@ -11,18 +11,10 @@ import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in dev mode in which Kibana is run as
-  // a child process together with optimizer "worker" processes that are
-  // orchestrated by a parent process (dev mode only feature).
-  isCliDevModeSupported: boolean;
-}
-
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
 }
 
 /**
@@ -30,12 +22,7 @@ interface BootstrapArgs {
  * @internal
  * @param param0 - options
  */
-export async function bootstrap({
-  configs,
-  cliArgs,
-  applyConfigOverrides,
-  features,
-}: BootstrapArgs) {
+export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   if (cliArgs.optimize) {
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
@@ -52,7 +39,6 @@ export async function bootstrap({
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
@@ -97,6 +83,11 @@ export async function bootstrap({
   try {
     await root.setup();
     await root.start();
+
+    // notify parent process know when we are ready for dev mode.
+    if (process.send) {
+      process.send(['SERVER_LISTENING']);
+    }
   } catch (err) {
     await shutdown(err);
   }

@@ -6,8 +6,19 @@
  */
 
 import { once } from 'lodash';
-import { throwError, Subscription } from 'rxjs';
-import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
+import { throwError, Subscription, from, of, fromEvent, EMPTY } from 'rxjs';
+import {
+  tap,
+  finalize,
+  catchError,
+  filter,
+  take,
+  skip,
+  switchMap,
+  shareReplay,
+  map,
+  takeUntil,
+} from 'rxjs/operators';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
@@ -16,11 +27,21 @@ import {
   IKibanaSearchRequest,
   SearchSessionState,
 } from '../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
+import { SearchResponseCache } from './search_response_cache';
+import { createRequestHash } from './utils';
+import { SearchAbortController } from './search_abort_controller';
 
+const MAX_CACHE_ITEMS = 50;
+const MAX_CACHE_SIZE_MB = 10;
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
+  private readonly responseCache: SearchResponseCache = new SearchResponseCache(
+    MAX_CACHE_ITEMS,
+    MAX_CACHE_SIZE_MB
+  );
 
   /**
    * @internal
@@ -37,6 +58,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   }
 
   public stop() {
+    this.responseCache.clear();
     this.uiSettingsSub.unsubscribe();
   }
 
@@ -46,32 +68,43 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       : TimeoutErrorMode.CONTACT;
   }
 
-  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
-      abortSignal: options.abortSignal,
-      timeout: this.searchTimeout,
-    });
-    const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
-    const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
-    const search = () => this.runSearch({ id, ...request }, searchOptions);
+  private createRequestHash$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
+    const { sessionId, isRestore } = options;
+    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
+    const { preference, ...params } = request.params || {};
+    const hashOptions = {
+      ...params,
+      sessionId,
+      isRestore,
+    };
 
-    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+    return from(sessionId ? createRequestHash(hashOptions) : of(undefined));
+  }
 
-    const untrackSearch =
-      this.deps.session.isCurrentSession(options.sessionId) &&
-      this.deps.session.trackSearch({ abort });
+  /**
+   * @internal
+   * Creates a new pollSearch that share replays its results
+   */
+  private runSearch$(
+    { id, ...request }: IKibanaSearchRequest,
+    options: IAsyncSearchOptions,
+    searchAbortController: SearchAbortController
+  ) {
+    const search = () => this.runSearch({ id, ...request }, options);
+    const { sessionId, strategy } = options;
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground = false;
     const savedToBackgroundSub =
-      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
         .pipe(
           skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
           filter(
             (state) =>
-              this.deps.session.isCurrentSession(options.sessionId) &&
+              this.deps.session.isCurrentSession(sessionId) &&
               state === SearchSessionState.BackgroundLoading
           ),
           take(1)
@@ -84,22 +117,104 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
-    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
+    return pollSearch(search, cancel, {
+      ...options,
+      abortSignal: searchAbortController.getSignal(),
+    }).pipe(
       tap((response) => (id = response.id)),
       catchError((e: Error) => {
         cancel();
-        return throwError(this.handleSearchError(e, timeoutSignal, options));
+        return throwError(e);
       }),
       finalize(() => {
-        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-        cleanup();
-        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
-          // untrack if this search still belongs to current session
-          untrackSearch();
-        }
+        searchAbortController.cleanup();
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
         }
+      }),
+      // This observable is cached in the responseCache.
+      // Using shareReplay makes sure that future subscribers will get the final response
+
+      shareReplay(1)
+    );
+  }
+
+  /**
+   * @internal
+   * Creates a new search observable and a corresponding search abort controller
+   * If requestHash is defined, tries to return them first from cache.
+   */
+  private getSearchResponse$(
+    request: IKibanaSearchRequest,
+    options: IAsyncSearchOptions,
+    requestHash?: string
+  ) {
+    const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+
+    const searchAbortController =
+      cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
+
+    // Create a new abort signal if one was not passed. This fake signal will never be aborted,
+    // So the underlaying search will not be aborted, even if the other consumers abort.
+    searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
+    const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
+
+    if (requestHash && !this.responseCache.has(requestHash)) {
+      this.responseCache.set(requestHash, {
+        response$,
+        searchAbortController,
+      });
+    }
+
+    return {
+      response$,
+      searchAbortController,
+    };
+  }
+
+  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+    const searchOptions = {
+      strategy: ENHANCED_ES_SEARCH_STRATEGY,
+      ...options,
+    };
+    const { sessionId, abortSignal } = searchOptions;
+
+    return this.createRequestHash$(request, searchOptions).pipe(
+      switchMap((requestHash) => {
+        const { searchAbortController, response$ } = this.getSearchResponse$(
+          request,
+          searchOptions,
+          requestHash
+        );
+
+        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+        const untrackSearch = this.deps.session.isCurrentSession(sessionId)
+          ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
+          : undefined;
+
+        // Abort the replay if the abortSignal is aborted.
+        // The underlaying search will not abort unless searchAbortController fires.
+        const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
+          map(() => {
+            throw new AbortError();
+          })
+        );
+
+        return response$.pipe(
+          takeUntil(aborted$),
+          catchError((e) => {
+            return throwError(
+              this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
+            );
+          }),
+          finalize(() => {
+            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+            if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
+              // untrack if this search still belongs to current session
+              untrackSearch();
+            }
+          })
+        );
       })
     );
   }
