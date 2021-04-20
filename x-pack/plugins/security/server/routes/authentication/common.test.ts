@@ -23,6 +23,7 @@ import {
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
@@ -64,7 +65,10 @@ describe('Common authentication routes', () => {
     });
 
     it('correctly defines route.', async () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({
+        authRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      });
       expect(routeConfig.validate).toEqual({
         body: undefined,
         query: expect.any(Type),

@@ -8,17 +8,13 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../';
-import { SAMLLogin } from '../../authentication';
-import { SAMLAuthenticationProvider } from '../../authentication/providers';
+import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  logger,
-  getAuthenticationService,
-}: RouteDefinitionParams) {
+export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/saml/callback',
@@ -28,7 +24,11 @@ export function defineSAMLRoutes({
           { unknowns: 'ignore' }
         ),
       },
-      options: { authRequired: false, xsrfRequired: false },
+      options: {
+        authRequired: false,
+        xsrfRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
     },
     async (context, request, response) => {
       // When authenticating using SAML we _expect_ to redirect to the Kibana target location.

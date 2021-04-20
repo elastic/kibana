@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationSetup, HttpSetup } from 'src/core/public';
+import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
 
 import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { parseNext } from '../../../common/parse_next';
@@ -13,6 +13,7 @@ import { parseNext } from '../../../common/parse_next';
 interface CreateDeps {
   application: ApplicationSetup;
   http: HttpSetup;
+  fatalErrors: FatalErrorsSetup;
 }
 
 /**
@@ -36,7 +37,7 @@ interface CreateDeps {
  */
 export const captureURLApp = Object.freeze({
   id: 'security_capture_url',
-  create({ application, http }: CreateDeps) {
+  create({ application, fatalErrors, http }: CreateDeps) {
     http.anonymousPaths.register('/internal/security/capture-url');
     application.register({
       id: this.id,
@@ -44,12 +45,17 @@ export const captureURLApp = Object.freeze({
       chromeless: true,
       appRoute: '/internal/security/capture-url',
       async mount() {
-        const url = new URL(
-          parseNext(window.location.href, http.basePath.serverBasePath),
-          window.location.origin
-        );
-        url.searchParams.append(AUTH_URL_HASH_QUERY_STRING_PARAMETER, window.location.hash);
-        window.location.replace(url.toString());
+        try {
+          const url = new URL(
+            parseNext(window.location.href, http.basePath.serverBasePath),
+            window.location.origin
+          );
+          url.searchParams.append(AUTH_URL_HASH_QUERY_STRING_PARAMETER, window.location.hash);
+          window.location.replace(url.toString());
+        } catch (err) {
+          fatalErrors.add(new Error(`Cannot parse current URL: ${err && err.message}.`));
+        }
+
         return () => {};
       },
     });

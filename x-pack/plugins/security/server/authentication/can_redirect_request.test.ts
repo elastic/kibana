@@ -7,7 +7,8 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { API_ROUTES_SUPPORTING_REDIRECTS, canRedirectRequest } from './can_redirect_request';
+import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
+import { canRedirectRequest } from './can_redirect_request';
 
 describe('can_redirect_request', () => {
   it('returns true if request does not have either a kbn-version or kbn-xsrf header', () => {
@@ -37,9 +38,20 @@ describe('can_redirect_request', () => {
     ).toBe(false);
   });
 
-  it('returns true for selected api routes', () => {
-    for (const path of API_ROUTES_SUPPORTING_REDIRECTS) {
-      expect(canRedirectRequest(httpServerMock.createKibanaRequest({ path }))).toBe(true);
+  it('returns true for the routes with the `security:canRedirect` tag', () => {
+    for (const request of [
+      httpServerMock.createKibanaRequest({ routeTags: [ROUTE_TAG_CAN_REDIRECT] }),
+      httpServerMock.createKibanaRequest({ routeTags: [ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT] }),
+      httpServerMock.createKibanaRequest({
+        path: '/api/security/some',
+        routeTags: [ROUTE_TAG_CAN_REDIRECT],
+      }),
+      httpServerMock.createKibanaRequest({
+        path: '/internal/security/some',
+        routeTags: [ROUTE_TAG_CAN_REDIRECT],
+      }),
+    ]) {
+      expect(canRedirectRequest(request)).toBe(true);
     }
   });
 });

@@ -6,8 +6,6 @@
  */
 
 // @ts-expect-error no definitions in component folder
-import { EuiButton } from '@elastic/eui/lib/components/button';
-// @ts-expect-error no definitions in component folder
 import { EuiEmptyPrompt } from '@elastic/eui/lib/components/empty_prompt';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
@@ -15,16 +13,16 @@ import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/al
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 // @ts-expect-error no definitions in component folder
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
+import type { ReactNode } from 'react';
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import type { IBasePath } from 'src/core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Fonts } from '../../../../../src/core/server/rendering/views/fonts';
+import { Fonts } from '../../../../src/core/server/rendering/views/fonts';
 
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the
@@ -34,17 +32,23 @@ appendIconComponentCache({
 });
 
 interface Props {
-  originalURL: string;
   buildNumber: number;
   basePath: IBasePath;
+  scriptPaths?: string[];
+  title: string;
+  body: ReactNode;
+  actions: ReactNode;
 }
 
-export function UnauthorizedPage({ basePath, originalURL, buildNumber }: Props) {
+export function PromptPage({
+  basePath,
+  buildNumber,
+  scriptPaths = [],
+  title,
+  body,
+  actions,
+}: Props) {
   const uiPublicURL = `${basePath.serverBasePath}/ui`;
-  const title = i18n.translate('xpack.security.unauthorized.title', {
-    defaultMessage: 'You could not log in. Please try again.',
-  });
-
   const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
@@ -64,6 +68,9 @@ export function UnauthorizedPage({ basePath, originalURL, buildNumber }: Props) 
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
         <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        {scriptPaths.map((path) => (
+          <script src={basePath.prepend(path)} key={path} />
+        ))}
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
       </head>
@@ -76,15 +83,8 @@ export function UnauthorizedPage({ basePath, originalURL, buildNumber }: Props) 
                   iconType="alert"
                   iconColor="danger"
                   title={<h2>{title}</h2>}
-                  body={<p>{title}</p>}
-                  actions={[
-                    <EuiButton color="primary" fill href={originalURL} data-test-subj="LogInButton">
-                      <FormattedMessage
-                        id="xpack.security.unauthorized.login"
-                        defaultMessage="Log in"
-                      />
-                    </EuiButton>,
-                  ]}
+                  body={body}
+                  actions={actions}
                 />
               </EuiPageContent>
             </EuiPageBody>
@@ -93,8 +93,4 @@ export function UnauthorizedPage({ basePath, originalURL, buildNumber }: Props) 
       </body>
     </html>
   );
-}
-
-export function renderUnauthorizedPage(props: Props) {
-  return renderToStaticMarkup(<UnauthorizedPage {...props} />);
 }

@@ -327,14 +327,6 @@ export class Authenticator {
       }
     }
 
-    // If there was an attempt to log in, but it couldn't be handled, we should invalidate existing
-    // session. Otherwise users may be confused and think that the existing session is tied to this
-    // failed login attempt.
-    if (existingSessionValue) {
-      this.logger.warn(`Could not handle the login attempt. Existing session will be invalidated.`);
-      await this.invalidateSessionValue(request);
-    }
-
     return AuthenticationResult.notHandled();
   }
 

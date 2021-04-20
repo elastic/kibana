@@ -190,7 +190,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     } else {
       this.logger.debug(
         `Failed to perform a login: ${
-          authenticationResult.error && authenticationResult.error.message
+          authenticationResult.error && getDetailedErrorMessage(authenticationResult.error)
         }`
       );
     }
@@ -235,7 +235,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? this.captureRedirectURL(request)
+      ? this.initiateAuthenticationHandshake(request)
       : authenticationResult;
   }
 
@@ -288,7 +288,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           return DeauthenticationResult.redirectTo(redirect);
         }
       } catch (err) {
-        this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
+        this.logger.debug(`Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -367,7 +367,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         })
       ).body as any;
     } catch (err) {
-      this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
+      this.logger.debug(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
@@ -457,7 +457,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         refreshToken: existingState.refreshToken!,
       });
     } catch (err) {
-      this.logger.debug(`Failed to perform IdP initiated local logout: ${err.message}`);
+      this.logger.debug(
+        `Failed to perform IdP initiated local logout: ${getDetailedErrorMessage(err)}`
+      );
       return AuthenticationResult.failed(err);
     }
 
@@ -488,7 +490,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
+      this.logger.debug(
+        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+      );
       return AuthenticationResult.failed(err);
     }
   }
@@ -525,7 +529,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         this.logger.debug(
           'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
         );
-        return this.captureRedirectURL(request);
+        return this.initiateAuthenticationHandshake(request);
       }
 
       return AuthenticationResult.failed(
@@ -574,8 +578,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         state: { requestId, redirectURL, realm: this.realm },
       });
     } catch (err) {
-      this.logger.debug(`Failed to initiate SAML handshake: ${err.message}`);
-      return AuthenticationResult.failed(Boom.unauthorized(getDetailedErrorMessage(err)));
+      this.logger.debug(`Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
+      return AuthenticationResult.failed(err);
     }
   }
 
@@ -634,10 +638,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Tries to capture full redirect URL (both path and fragment) and initiate SAML handshake.
+   * Tries to initiate SAML authentication handshake. If the request already includes user URL hash fragment, we will
+   * initiate handshake right away, otherwise we'll redirect user to a dedicated page where we capture URL hash fragment
+   * first and only then initiate SAML handshake.
    * @param request Request instance.
    */
-  private captureRedirectURL(request: KibanaRequest) {
+  private initiateAuthenticationHandshake(request: KibanaRequest) {
     const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(

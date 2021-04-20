@@ -21,16 +21,17 @@ import type { AuthenticatedUser } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
-import { API_ROUTES_SUPPORTING_REDIRECTS, canRedirectRequest } from './can_redirect_request';
+import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthorizedPage } from './unauthorized_page';
+import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
@@ -68,6 +69,7 @@ export interface AuthenticationServiceStart {
 export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
+  private session?: PublicMethodsOf<Session>;
 
   constructor(private readonly logger: Logger) {}
 
@@ -76,7 +78,7 @@ export class AuthenticationService {
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
     // page if possible, so that they can try other methods to log in. If not possible, we should
-    // render a dedicated `Unauthorized` page from which users can explicitly trigger a new
+    // render a dedicated `Unauthenticated` page from which users can explicitly trigger a new
     // login attempt. There are two cases when we can redirect to the login page:
     // 1. Login selector is enabled
     // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
@@ -134,8 +136,9 @@ export class AuthenticationService {
       }
 
       if (authenticationResult.failed()) {
-        this.logger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
         const error = authenticationResult.error!;
+        this.logger.info(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
+
         // proxy Elasticsearch "native" errors
         const statusCode = getErrorStatusCode(error);
         if (typeof statusCode === 'number') {
@@ -155,7 +158,7 @@ export class AuthenticationService {
       return t.notHandled();
     });
 
-    http.registerOnPreResponse((request, preResponse, toolkit) => {
+    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
         return toolkit.next();
       }
@@ -167,29 +170,35 @@ export class AuthenticationService {
       }
 
       // If users can eventually re-login we want to redirect them directly to the page they tried
-      // to access initially, but we only want to do that for non-API routes. API routes that support
-      // redirects are solely used to support various authentication flows that wouldn't make any
-      // sense after successful authentication through login page.
-      const originalURL = !API_ROUTES_SUPPORTING_REDIRECTS.includes(request.route.path)
+      // to access initially, but we only want to do that for routes that aren't part of the various
+      // authentication flows that wouldn't make any sense after successful authentication.
+      const originalURL = !request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
         ? this.authenticator.getRequestOriginalURL(request)
         : `${http.basePath.get(request)}/`;
-      if (isLoginPageAvailable) {
+      if (!isLoginPageAvailable) {
         return toolkit.render({
-          body: '<div/>',
-          headers: {
-            'Content-Security-Policy': http.csp.header,
-            Refresh: `0;url=${http.basePath.prepend(
-              `/login?msg=UNAUTHORIZED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                originalURL
-              )}`
-            )}`,
-          },
+          body: renderUnauthenticatedPage({ buildNumber, basePath: http.basePath, originalURL }),
+          headers: { 'Content-Security-Policy': http.csp.header },
         });
       }
 
+      const needsToLogout = (await this.session?.getSID(request)) !== undefined;
+      if (needsToLogout) {
+        this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
+      }
+
       return toolkit.render({
-        body: renderUnauthorizedPage({ buildNumber, basePath: http.basePath, originalURL }),
-        headers: { 'Content-Security-Policy': http.csp.header },
+        body: '<div/>',
+        headers: {
+          'Content-Security-Policy': http.csp.header,
+          Refresh: `0;url=${http.basePath.prepend(
+            `${
+              needsToLogout ? '/logout' : '/login'
+            }?msg=UNAUTHORIZED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              originalURL
+            )}`
+          )}`,
+        },
       });
     });
   }
@@ -213,6 +222,7 @@ export class AuthenticationService {
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
+    this.session = session;
     this.authenticator = new Authenticator({
       legacyAuditLogger,
       audit,

@@ -7,17 +7,10 @@
 
 import type { KibanaRequest } from 'src/core/server';
 
-const ROUTE_TAG_API = 'api';
+import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
+
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_VERSION_HEADER = 'kbn-version';
-
-export const API_ROUTES_SUPPORTING_REDIRECTS = [
-  '/api/security/logout',
-  '/api/security/saml/callback',
-  '/api/security/oidc/callback',
-  '/api/security/oidc/initiate_login',
-  '/api/security/v1/oidc',
-];
 
 /**
  * Checks whether we can reply to the request with redirect response. We can do that
@@ -32,9 +25,9 @@ export function canRedirectRequest(request: KibanaRequest) {
 
   const isApiRoute =
     route.options.tags.includes(ROUTE_TAG_API) ||
-    (route.path.startsWith('/api/') && !API_ROUTES_SUPPORTING_REDIRECTS.includes(route.path)) ||
+    route.path.startsWith('/api/') ||
     route.path.startsWith('/internal/');
   const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
-  return !isApiRoute && !isAjaxRequest;
+  return !isAjaxRequest && (!isApiRoute || route.options.tags.includes(ROUTE_TAG_CAN_REDIRECT));
 }

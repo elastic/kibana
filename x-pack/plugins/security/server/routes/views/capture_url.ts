@@ -16,7 +16,9 @@ export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams)
   httpResources.register(
     {
       path: '/internal/security/capture-url',
-      validate: { query: schema.object({ next: schema.maybe(schema.string()) }) },
+      validate: {
+        query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
+      },
       options: { authRequired: false },
     },
     (context, request, response) => response.renderAnonymousCoreApp()

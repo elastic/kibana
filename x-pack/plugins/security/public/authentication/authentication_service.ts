@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ApplicationSetup, HttpSetup, StartServicesAccessor } from 'src/core/public';
+import type {
+  ApplicationSetup,
+  FatalErrorsSetup,
+  HttpSetup,
+  StartServicesAccessor,
+} from 'src/core/public';
 
 import type { AuthenticatedUser } from '../../common/model';
 import type { ConfigType } from '../config';
@@ -19,6 +24,7 @@ import { overwrittenSessionApp } from './overwritten_session';
 
 interface SetupParams {
   application: ApplicationSetup;
+  fatalErrors: FatalErrorsSetup;
   config: ConfigType;
   http: HttpSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -39,6 +45,7 @@ export interface AuthenticationServiceSetup {
 export class AuthenticationService {
   public setup({
     application,
+    fatalErrors,
     config,
     getStartServices,
     http,
@@ -51,7 +58,7 @@ export class AuthenticationService {
         .apiKeysEnabled;
 
     accessAgreementApp.create({ application, getStartServices });
-    captureURLApp.create({ application, http });
+    captureURLApp.create({ application, fatalErrors, http });
     loginApp.create({ application, config, getStartServices, http });
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });

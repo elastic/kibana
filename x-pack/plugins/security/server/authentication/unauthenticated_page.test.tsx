@@ -9,13 +9,13 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { coreMock } from '../../../../../src/core/server/mocks';
-import { ResetSessionPage } from './reset_session_page';
+import { UnauthenticatedPage } from './unauthenticated_page';
 
 jest.mock('src/core/server/rendering/views/fonts', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 
-describe('ResetSessionPage', () => {
+describe('UnauthenticatedPage', () => {
   it('renders as expected', async () => {
     const mockCoreSetup = coreMock.createSetup();
     (mockCoreSetup.http.basePath.prepend as jest.Mock).mockImplementation(
@@ -23,8 +23,8 @@ describe('ResetSessionPage', () => {
     );
 
     const body = renderToStaticMarkup(
-      <ResetSessionPage
-        logoutUrl="/path/to/logout"
+      <UnauthenticatedPage
+        originalURL="/some/url?some-query=some-value#some-hash"
         buildNumber={100500}
         basePath={mockCoreSetup.http.basePath}
       />
