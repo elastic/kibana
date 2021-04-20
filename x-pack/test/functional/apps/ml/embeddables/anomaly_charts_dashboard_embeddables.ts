@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
-  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('anomaly charts', function () {
     this.tags(['mlqa']);
@@ -87,10 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-          await dashboardAddPanel.clickOpenAddPanel();
-          await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
-          await ml.dashboardJobSelectionTable.assertJobSelectionTableExists();
+          await ml.dashboardEmbeddables.openJobSelectionFlyout();
         });
 
         it('can select jobs', async () => {
