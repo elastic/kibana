@@ -16,16 +16,10 @@ import { PluginContext, PluginContextValue } from '../../context/plugin_context'
 import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
 import { createCallObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { AlertsFlyout } from './alerts_flyout';
-import { TopAlert } from './alerts_table';
-import { apmAlertResponseExample, dynamicIndexPattern, flyoutItemExample } from './example_data';
+import { apmAlertResponseExample, dynamicIndexPattern } from './example_data';
 
 interface PageArgs {
   items: ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>;
-}
-
-interface FlyoutArgs {
-  alert: TopAlert;
 }
 
 export default {
@@ -95,8 +89,3 @@ export function EmptyState(_args: PageArgs) {
   return <AlertsPage routeParams={{ query: {} }} />;
 }
 EmptyState.args = { items: [] } as PageArgs;
-
-export function Flyout({ alert }: FlyoutArgs) {
-  return <AlertsFlyout alert={alert} onClose={() => {}} />;
-}
-Flyout.args = { alert: flyoutItemExample } as FlyoutArgs;
