@@ -113,7 +113,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
             onTabClick={onSelectedTabChanged}
           />
         ) : (
-          <EuiPanel>
+          <EuiPanel hasShadow={false} color="subdued">
             <EuiEmptyPrompt
               iconType="indexRollupApp"
               title={<h2>{DISPLAY_SETTINGS_EMPTY_TITLE}</h2>}
