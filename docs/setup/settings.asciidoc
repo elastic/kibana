@@ -557,6 +557,9 @@ SAMEORIGIN` response header. *Default:* `false`
  | Header names and values to
 send on all responses to the client from the {kib} server. *Default: `{}`*
 
+|[[server-shutdownTimeout]] `server.shutdownTimeout:`
+| Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
+
 |[[server-host]] `server.host:`
  | This setting specifies the host of the
 back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. *Default: `"localhost"`*
