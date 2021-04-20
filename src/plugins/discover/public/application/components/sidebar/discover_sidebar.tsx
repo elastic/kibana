@@ -279,20 +279,26 @@ export function DiscoverSidebar({
           defaultMessage: 'Index and fields',
         })}
       >
-        <DiscoverIndexPattern
-          config={config}
-          selectedIndexPattern={selectedIndexPattern}
-          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-          indexPatterns={indexPatterns}
-          state={state}
-          setAppState={setAppState}
-        />
-        <DiscoverIndexPatternManagement
-          services={services}
-          selectedIndexPattern={selectedIndexPattern}
-          editField={editField}
-          useNewFieldsApi={useNewFieldsApi}
-        />
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true}>
+            <DiscoverIndexPattern
+              config={config}
+              selectedIndexPattern={selectedIndexPattern}
+              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+              indexPatterns={indexPatterns}
+              state={state}
+              setAppState={setAppState}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DiscoverIndexPatternManagement
+              services={services}
+              selectedIndexPattern={selectedIndexPattern}
+              editField={editField}
+              useNewFieldsApi={useNewFieldsApi}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </section>
     );
   }

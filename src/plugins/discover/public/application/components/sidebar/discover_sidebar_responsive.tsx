@@ -24,6 +24,8 @@ import {
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { IndexPatternAttributes, IndexPatternsContract } from '../../../../../data/common';
@@ -210,21 +212,28 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               }
             )}
           >
-            <DiscoverIndexPattern
-              config={props.config}
-              selectedIndexPattern={props.selectedIndexPattern}
-              indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
-              indexPatterns={props.indexPatterns}
-              state={props.state}
-              setAppState={props.setAppState}
-            />
-            <DiscoverIndexPatternManagement
-              services={props.services}
-              selectedIndexPattern={props.selectedIndexPattern}
-              editField={editField}
-              useNewFieldsApi={props.useNewFieldsApi}
-            />
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={true}>
+                <DiscoverIndexPattern
+                  config={props.config}
+                  selectedIndexPattern={props.selectedIndexPattern}
+                  indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+                  indexPatterns={props.indexPatterns}
+                  state={props.state}
+                  setAppState={props.setAppState}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DiscoverIndexPatternManagement
+                  services={props.services}
+                  selectedIndexPattern={props.selectedIndexPattern}
+                  editField={editField}
+                  useNewFieldsApi={props.useNewFieldsApi}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </section>
+
           <EuiSpacer size="s" />
           <EuiButton
             contentProps={{ className: 'dscSidebar__mobileButton' }}
