@@ -13,8 +13,11 @@ import {
 } from 'kibana/server';
 import { TaskInstance } from '../../../task_manager/server';
 import { SpacesPluginStart } from '../../../spaces/server';
-import { bulkDelete, extractBulkResponseDeleteFailures } from './lib';
-import { spaceIdToNamespace } from '../lib';
+import {
+  bulkDelete,
+  extractBulkResponseDeleteFailures,
+  getRawActionTaskParamsIdFromTask,
+} from './lib';
 
 export interface CleanupTasksOpts {
   logger: Logger;
@@ -59,15 +62,9 @@ export async function cleanupTasks({
   }));
 
   // Remove accumulated action task params
-  const actionTaskParamIdsToDelete = deserializedTasks.map((task) => {
-    const { spaceId, actionTaskParamsId } = task.attributes.params;
-    const namespace = spaceIdToNamespace(spaces, spaceId);
-    return savedObjectsSerializer.generateRawId(
-      namespace,
-      'action_task_params',
-      actionTaskParamsId
-    );
-  });
+  const actionTaskParamIdsToDelete = deserializedTasks.map((task) =>
+    getRawActionTaskParamsIdFromTask({ task, spaces, savedObjectsSerializer })
+  );
   const actionTaskParamBulkDeleteResult = await bulkDelete(
     esClient,
     kibanaIndex,
@@ -87,13 +84,7 @@ export async function cleanupTasks({
   // Remove accumulated tasks
   const taskIdsToDelete = deserializedTasks
     .map((task) => {
-      const { spaceId, actionTaskParamsId } = task.attributes.params;
-      const namespace = spaceIdToNamespace(spaces, spaceId);
-      const rawId = savedObjectsSerializer.generateRawId(
-        namespace,
-        'action_task_params',
-        actionTaskParamsId
-      );
+      const rawId = getRawActionTaskParamsIdFromTask({ task, spaces, savedObjectsSerializer });
       // Avoid removing tasks that failed to remove linked objects
       if (failedActionTaskParams?.find((item) => item._id === rawId)) {
         return null;
