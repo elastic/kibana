@@ -294,7 +294,6 @@ interface AllowlistFields {
 }
 
 // Allow list process fields within events.  This includes "process" and "Target.process".'
-/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistProcessFields: AllowlistFields = {
   args: true,
   name: true,
@@ -316,7 +315,6 @@ const allowlistProcessFields: AllowlistFields = {
 };
 
 // Allow list for event-related fields, which can also be nested under events[]
-/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistBaseEventFields: AllowlistFields = {
   dll: {
     name: true,
@@ -366,11 +364,11 @@ const allowlistBaseEventFields: AllowlistFields = {
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
-/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
   Memory_protection: true,
   Ransomware: true,
   data_stream: true,
