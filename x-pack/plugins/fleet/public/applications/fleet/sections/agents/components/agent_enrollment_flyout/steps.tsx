@@ -53,13 +53,16 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedPolicyId?: (policyId: string) => void;
 }) => {
+  const regularAgentPolicies = Array.isArray(agentPolicies)
+    ? agentPolicies.filter((policy) => policy && !policy.is_managed)
+    : [];
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'Choose an agent policy',
     }),
     children: (
       <EnrollmentStepAgentPolicy
-        agentPolicies={agentPolicies}
+        agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
         onAgentPolicyChange={setSelectedPolicyId}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../../graphql/types';
+import { Direction } from '../../../../../../common/search_strategy';
 import { ColumnId } from '../column_id';
 
 /** Specifies a column's sort direction */
