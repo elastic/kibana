@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const find = getService('find');
-  const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -31,8 +29,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.ensureAddPanelIsShowing();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('metrics');
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
@@ -87,39 +85,13 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await dashboardAddPanel.addSavedSearch(name);
     }
 
-    async clickAddVisualizationButton() {
-      log.debug('DashboardVisualizations.clickAddVisualizationButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
-    }
-
-    async isNewVisDialogShowing() {
-      log.debug('DashboardVisualizations.isNewVisDialogShowing');
-      return await find.existsByCssSelector('.visNewVisDialog');
-    }
-
-    async ensureNewVisualizationDialogIsShowing() {
-      let isShowing = await this.isNewVisDialogShowing();
-      log.debug(`DashboardVisualizations.ensureNewVisualizationDialogIsShowing:${isShowing}`);
-      if (!isShowing) {
-        await retry.try(async () => {
-          await this.clickAddVisualizationButton();
-          isShowing = await this.isNewVisDialogShowing();
-          log.debug(`DashboardVisualizations.ensureNewVisualizationDialogIsShowing:${isShowing}`);
-          if (!isShowing) {
-            throw new Error('New Vis Dialog still not open, trying again.');
-          }
-        });
-      }
-    }
-
     async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickMarkdownWidget();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name, {
@@ -134,10 +106,10 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickAggBasedVisualizations();
-      await PageObjects.visualize.clickMetric();
-      await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickVisType('metric');
+      await testSubjects.click('savedObjectTitlelogstash-*');
       await testSubjects.exists('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
     }
@@ -148,8 +120,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickMarkdownWidget();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await testSubjects.click('visualizesaveAndReturnButton');

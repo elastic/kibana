@@ -138,7 +138,7 @@ export interface UiActionsActionDefinition<Context extends object = object> exte
 // @public
 export interface UiActionsPresentable<Context = unknown> {
     getDisplayName(context: Context): string;
-    getDisplayNameTooltip(context: Context): string;
+    getDisplayNameTooltip?(context: Context): string;
     getHref?(context: Context): Promise<string | undefined>;
     getIconType(context: Context): string | undefined;
     readonly grouping?: UiActionsPresentableGrouping<Context>;
