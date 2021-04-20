@@ -11,6 +11,7 @@ import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import { hostname } from 'os';
 import url from 'url';
 
+import type { Duration } from 'moment';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
@@ -35,6 +36,15 @@ const configSchema = schema.object(
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
       })
     ),
+    shutdownTimeout: schema.duration({
+      defaultValue: '30s',
+      validate: (duration) => {
+        const durationMs = duration.asMilliseconds();
+        if (durationMs < 1000 || durationMs > 2 * 60 * 1000) {
+          return 'the value should be between 1 second and 2 minutes';
+        }
+      },
+    }),
     cors: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),
@@ -183,6 +193,7 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public shutdownTimeout: Duration;
 
   /**
    * @internal
@@ -228,6 +239,7 @@ export class HttpConfig implements IHttpConfig {
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
+    this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
   }
 }
 
