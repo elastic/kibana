@@ -11,7 +11,7 @@ import { Spaces } from '../scenarios';
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration spaces only', function () {
-    this.tags('ciGroup12');
+    this.tags('ciGroup25');
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));

@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('transform', function () {
-    this.tags(['ciGroup9', 'transform']);
+    this.tags(['ciGroup22', 'transform']);
 
     before(async () => {
       await transform.securityCommon.createTransformRoles();

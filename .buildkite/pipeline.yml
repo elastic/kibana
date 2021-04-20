@@ -6,7 +6,7 @@ steps:
     key: build
   - command: '.buildkite/scripts/xpack-cigroup.sh'
     label: 'Default CI Group %n (+1)'
-    parallelism: 13
+    parallelism: 26
     agents:
       queue: ci-group
     artifact_paths: target/junit/**/*.xml

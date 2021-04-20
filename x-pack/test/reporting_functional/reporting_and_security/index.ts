@@ -43,7 +43,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   };
 
   describe('Reporting Functional Tests with Role-based Security configuration enabled', function () {
-    this.tags('ciGroup2');
+    this.tags('ciGroup15');
 
     before(async () => {
       await createDataAnalystRole();

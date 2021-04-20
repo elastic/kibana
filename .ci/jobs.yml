@@ -33,6 +33,18 @@ JOB:
   - x-pack-ciGroup11
   - x-pack-ciGroup12
   - x-pack-ciGroup13
+  - x-pack-ciGroup14
+  - x-pack-ciGroup15
+  - x-pack-ciGroup16
+  - x-pack-ciGroup17
+  - x-pack-ciGroup18
+  - x-pack-ciGroup19
+  - x-pack-ciGroup21
+  - x-pack-ciGroup22
+  - x-pack-ciGroup23
+  - x-pack-ciGroup24
+  - x-pack-ciGroup25
+  - x-pack-ciGroup26
   - x-pack-accessibility
   - x-pack-visualRegression
 
