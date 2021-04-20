@@ -54,39 +54,42 @@ exports[`Header should render normally 1`] = `
         <div
           className="euiFlexItem"
         >
-          <EuiTitle
+          <EuiText
             size="s"
           >
-            <h3
-              className="euiTitle euiTitle--small"
-            >
-              <FormattedMessage
-                defaultMessage="Scripted fields"
-                id="indexPatternManagement.editIndexPattern.scriptedHeader"
-                values={Object {}}
-              >
-                <span>
-                  Scripted fields
-                </span>
-              </FormattedMessage>
-            </h3>
-          </EuiTitle>
-          <EuiText>
             <div
-              className="euiText euiText--medium"
+              className="euiText euiText--small"
             >
               <p>
                 <FormattedMessage
-                  defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields."
+                  defaultMessage="Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched."
                   id="indexPatternManagement.editIndexPattern.scriptedLabel"
                   values={Object {}}
                 >
                   <span>
-                    You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
+                    Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
                   </span>
                 </FormattedMessage>
-              </p>
-              <p>
+                <br />
+                <EuiIcon
+                  color="warning"
+                  style={
+                    Object {
+                      "marginRight": "4px",
+                    }
+                  }
+                  type="alert"
+                >
+                  <span
+                    color="warning"
+                    data-euiicon-type="alert"
+                    style={
+                      Object {
+                        "marginRight": "4px",
+                      }
+                    }
+                  />
+                </EuiIcon>
                 <FormattedMessage
                   defaultMessage="Scripted fields are deprecated, {runtimeDocs}."
                   id="indexPatternManagement.editIndexPattern.deprecation"
