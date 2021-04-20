@@ -27,7 +27,8 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
-import { ecsFieldMap, pickWithPatterns, RacPluginSetupContract } from '../../rule_registry/server';
+import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/common';
+import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -91,7 +92,7 @@ export interface SetupPlugins {
   features: FeaturesSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
-  ruleRegistry: RacPluginSetupContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
@@ -104,7 +105,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
-  ruleRegistry: RacPluginSetupContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
 }
