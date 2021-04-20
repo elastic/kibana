@@ -43,7 +43,7 @@ const initialStateDefaults: RulesTableState = {
 };
 
 export interface UseRulesTableParams {
-  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>;
+  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | null>;
   initialStateOverride?: Partial<RulesTableState>;
 }
 
