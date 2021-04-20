@@ -12,7 +12,6 @@
     "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

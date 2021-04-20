@@ -42,7 +42,10 @@ const source: InfraSource = {
     name: 'Default',
     description: '',
     metricAlias: 'metrics-*,metricbeat-*',
-    logAlias: 'logs-*,filebeat-*,kibana_sample_data_logs*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'kibana_index_pattern',
+    },
     fields: {
       container: 'container.id',
       host: 'host.name',

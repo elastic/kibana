@@ -21,12 +21,16 @@ export class DocLinksService {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        canvas: {
+          guide: `${KIBANA_DOCS}canvas.html`,
+        },
         dashboard: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
           drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
@@ -130,6 +134,7 @@ export class DocLinksService {
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        upgradeAssistant: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/upgrade-assistant.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
@@ -181,6 +186,7 @@ export class DocLinksService {
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-transport.html`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
+          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -243,10 +249,10 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
         },
         alerting: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-management.html`,
           actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
           emailAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
-          emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html#configuring-email`,
+          emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
           generalSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html`,
           esQuery: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/rule-type-es-query.html`,
@@ -395,6 +401,9 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly canvas: {
+      readonly guide: string;
+    };
     readonly dashboard: {
       readonly guide: string;
       readonly drilldowns: string;
@@ -495,6 +504,7 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
+    readonly upgradeAssistant: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
       readonly guide: string;
