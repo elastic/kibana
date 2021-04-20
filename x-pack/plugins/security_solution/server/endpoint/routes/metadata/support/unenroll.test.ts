@@ -16,7 +16,7 @@ import {
   createMockAgentService,
   createPackagePolicyServiceMock,
 } from '../../../../../../fleet/server/mocks';
-import { Agent } from '../../../../../../fleet/common/types/models';
+import { Agent, PackagePolicy } from '../../../../../../fleet/common/types/models';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 
 describe('test find all unenrolled Agent id', () => {
@@ -33,6 +33,24 @@ describe('test find all unenrolled Agent id', () => {
   });
 
   it('can find all unerolled endpoint agent ids', async () => {
+    mockPackagePolicyService.list
+      .mockResolvedValueOnce({
+        items: [
+          ({
+            id: '1',
+            policy_id: 'abc123',
+          } as unknown) as PackagePolicy,
+        ],
+        total: 1,
+        perPage: 10,
+        page: 1,
+      })
+      .mockResolvedValueOnce({
+        items: [],
+        total: 1,
+        perPage: 10,
+        page: 1,
+      });
     mockAgentService.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
@@ -72,7 +90,20 @@ describe('test find all unenrolled Agent id', () => {
       mockSavedObjectClient,
       mockElasticsearchClient
     );
+
     expect(agentIds).toBeTruthy();
     expect(agentIds).toEqual(['id1', 'id2']);
+
+    expect(mockPackagePolicyService.list).toHaveBeenNthCalledWith(1, mockSavedObjectClient, {
+      kuery: 'ingest-package-policies.package.name:endpoint',
+      page: 1,
+      perPage: 1000,
+    });
+    expect(mockAgentService.listAgents).toHaveBeenNthCalledWith(1, mockElasticsearchClient, {
+      page: 1,
+      perPage: 1000,
+      showInactive: true,
+      kuery: '(active : false) OR (active: true AND NOT policy_id:("abc123") )',
+    });
   });
 });
