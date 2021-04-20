@@ -88,7 +88,7 @@ sudo systemctl start elastic-agent`;
       }
     } catch (err) {
       notifications.toasts.addError(err, {
-        title: i18n.translate('fleet.fleetServerSetup.errorGeneratingTokenTitleText', {
+        title: i18n.translate('fleet.fleet.fleetServerSetup.errorGeneratingTokenTitleText', {
           defaultMessage: 'Error generating token',
         }),
       });
