@@ -14,7 +14,7 @@ import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
 interface ESDataStreamInfo {
   name: string;
