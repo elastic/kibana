@@ -56,7 +56,7 @@ export class KbnClientImportExport {
     return this.dir ? Path.resolve(this.dir, path) : path;
   }
 
-  async load(name: string, options?: { space?: string }, logTypesF?: unknown) {
+  async load(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
     this.log.debug('resolved import for', name, 'to', src);
 
@@ -65,9 +65,6 @@ export class KbnClientImportExport {
 
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
-
-    // @ts-ignore
-    if (logTypesF) await logTypesF();
 
     // TODO: should we clear out the existing saved objects?
     const resp = await this.req<ImportApiResponse>(options?.space, {
@@ -120,7 +117,6 @@ export class KbnClientImportExport {
     const resp = await this.req(options.space, {
       method: 'POST',
       path: '/api/saved_objects/_export',
-      responseType: 'text',
       body: {
         type: options.types,
         excludeExportDetails: true,
