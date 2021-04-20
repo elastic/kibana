@@ -454,22 +454,24 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
  * on a failure.
  */
 export async function ensureAuthorized({
-  owner,
+  owners,
   operation,
-  savedObjectID,
+  savedObjectIDs,
   authorization,
   auditLogger,
 }: {
-  owner: string;
+  owners: string[];
   operation: OperationDetails;
-  savedObjectID: string;
+  savedObjectIDs: string[];
   authorization: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
 }) {
   try {
-    return await authorization.ensureAuthorized(owner, operation);
+    return await authorization.ensureAuthorized(owners, operation);
   } catch (error) {
-    auditLogger?.log(createAuditMsg({ operation, error, savedObjectID }));
+    for (const savedObjectID of savedObjectIDs) {
+      auditLogger?.log(createAuditMsg({ operation, error, savedObjectID }));
+    }
     throw error;
   }
 }
