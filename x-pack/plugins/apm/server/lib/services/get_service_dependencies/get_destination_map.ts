@@ -8,7 +8,11 @@
 import { isEqual, keyBy, mapValues } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { pickKeys } from '../../../../common/utils/pick_keys';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import {
+  AgentName,
+  ElasticAgentName,
+  OpenTelemetryAgentName,
+} from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -26,6 +30,27 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
+export type DestinationMap = Record<
+  string,
+  {
+    id:
+      | { 'span.destination.service.resource': string }
+      | { service?: { name: string; environment: string; agentName: string } };
+    span: {
+      type?: string;
+      subtype?: string;
+      destination: { service: { resource?: string } };
+    };
+    service?: {
+      name: string;
+      environment: string;
+    };
+    agent?: {
+      name: ElasticAgentName | OpenTelemetryAgentName;
+    };
+  }
+>;
+
 export const getDestinationMap = ({
   setup,
   serviceName,
@@ -34,7 +59,7 @@ export const getDestinationMap = ({
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-}) => {
+}): Promise<DestinationMap> => {
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
 

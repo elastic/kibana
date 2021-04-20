@@ -12,7 +12,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
 import { maybe } from '../../../../common/utils/maybe';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { getDestinationMap } from './get_destination_map';
+import { DestinationMap } from './get_destination_map';
 import { getMetrics } from './get_metrics';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
@@ -22,7 +22,7 @@ export function getMetricsWithDestinationIds({
   currentPeriodMetrics,
   previousPeriodMetrics,
 }: {
-  destinationMap: PromiseReturnType<typeof getDestinationMap>;
+  destinationMap: DestinationMap;
   currentPeriodMetrics: PromiseReturnType<typeof getMetrics>;
   previousPeriodMetrics: PromiseReturnType<typeof getMetrics>;
 }) {
