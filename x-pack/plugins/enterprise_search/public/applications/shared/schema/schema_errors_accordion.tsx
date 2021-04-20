@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiAccordion,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTable,
@@ -68,7 +69,10 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <span className="field-error__control button">{ERROR_TABLE_REVIEW_CONTROL}</span>
+            {/* href is needed here because a button cannot be nested in a button or console will error and EuiAccordion uses a button to wrap this. */}
+            <EuiButton size="s" href="#">
+              {ERROR_TABLE_REVIEW_CONTROL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
