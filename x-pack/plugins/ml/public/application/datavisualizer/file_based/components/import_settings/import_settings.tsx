@@ -27,8 +27,8 @@ interface Props {
   mappingsString: string;
   pipelineString: string;
   onIndexSettingsStringChange(): void;
-  onMappingsStringChange(): void;
-  onPipelineStringChange(): void;
+  onMappingsStringChange(mappings: string): void;
+  onPipelineStringChange(pipeline: string): void;
   indexNameError: string;
   indexPatternNameError: string;
   combinedFields: CombinedField[];
