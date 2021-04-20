@@ -125,7 +125,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
             title={
               <h4>
                 {i18n.translate('xpack.maps.layers.newVectorLayerWizard.drawVectorShapes', {
-                  defaultMessage: 'Draw vector shapes',
+                  defaultMessage: 'Draw shapes',
                 })}
               </h4>
             }
@@ -135,7 +135,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
                   {i18n.translate(
                     'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
                     {
-                      defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
+                      defaultMessage: `Use the editor on the left to draw your points and shapes`,
                     }
                   )}
                 </p>
