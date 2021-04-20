@@ -390,6 +390,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
+            // @ts-expect-error @elastic-elasticsearch JobStats type is incomplete
             tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
