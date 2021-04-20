@@ -16,9 +16,7 @@ import {
   CreateSubCaseResp,
   deleteAllCaseItems,
   deleteCaseAction,
-  getSpaceUrlPrefix,
   setStatus,
-  ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/utils';
 import { getSubCasesUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import {
@@ -32,13 +30,6 @@ import {
   ContextTypeGeneratedAlertType,
   createAlertsString,
 } from '../../../../../../plugins/cases/server/connectors';
-import {
-  globalRead,
-  obsOnlyRead,
-  obsSecRead,
-  secOnlyRead,
-  superUser,
-} from '../../../../common/lib/authentication/users';
 
 interface SubCaseAttributes {
   'cases-sub-case': {
@@ -65,89 +56,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       after(async () => {
         await deleteCaseAction({ supertest, id: actionID });
-      });
-
-      describe('rbac', () => {
-        afterEach(async () => {
-          await deleteAllCaseItems(es);
-        });
-
-        it('should only find the cases the user has authorization for', async () => {
-          const { newSubCaseInfo: caseInfoSec } = await createSubCase({
-            supertest,
-            actionID,
-            caseInfo: { ...postCollectionReq, owner: 'securitySolutionFixture' },
-            space: 'space1',
-          });
-          const { newSubCaseInfo: caseInfoObs } = await createSubCase({
-            supertest,
-            actionID,
-            caseInfo: { ...postCollectionReq, owner: 'observabilityFixture' },
-            space: 'space1',
-          });
-
-          for (const scenario of [
-            {
-              user: globalRead,
-              numberOfExpectedEntities: 1,
-              owners: ['securitySolutionFixture', 'observabilityFixture'],
-              caseID: caseInfoSec.id,
-            },
-            {
-              user: superUser,
-              numberOfExpectedEntities: 1,
-              owners: ['securitySolutionFixture', 'observabilityFixture'],
-              caseID: caseInfoObs.id,
-            },
-            {
-              user: secOnlyRead,
-              numberOfExpectedEntities: 1,
-              owners: ['securitySolutionFixture'],
-              caseID: caseInfoSec.id,
-            },
-            {
-              user: secOnlyRead,
-              numberOfExpectedEntities: 0,
-              owners: ['securitySolutionFixture'],
-              caseID: caseInfoObs.id,
-            },
-            {
-              user: obsOnlyRead,
-              numberOfExpectedEntities: 1,
-              owners: ['observabilityFixture'],
-              caseID: caseInfoObs.id,
-            },
-            {
-              user: obsOnlyRead,
-              numberOfExpectedEntities: 0,
-              owners: ['observabilityFixture'],
-              caseID: caseInfoSec.id,
-            },
-            {
-              user: obsSecRead,
-              numberOfExpectedEntities: 1,
-              owners: ['securitySolutionFixture', 'observabilityFixture'],
-              caseID: caseInfoSec.id,
-            },
-            {
-              user: obsSecRead,
-              numberOfExpectedEntities: 1,
-              owners: ['securitySolutionFixture', 'observabilityFixture'],
-              caseID: caseInfoObs.id,
-            },
-          ]) {
-            const { body }: { body: SubCasesFindResponse } = await supertest
-              .get(`${getSpaceUrlPrefix('space1')}${getSubCasesUrl(scenario.caseID)}/_find`)
-              .auth(scenario.user.username, scenario.user.password)
-              .expect(200);
-
-            ensureSavedObjectIsAuthorized(
-              body.subCases,
-              scenario.numberOfExpectedEntities,
-              scenario.owners
-            );
-          }
-        });
       });
 
       describe('basic find tests', () => {

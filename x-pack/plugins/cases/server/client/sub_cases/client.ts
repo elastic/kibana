@@ -81,13 +81,18 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       caseService.getSubCases({ soClient, ids }),
     ]);
 
-    const entities = subCases.saved_objects
+    const owners = subCases.saved_objects
       .filter((subCase) => subCase.error === undefined)
-      .map((subCase) => ({ owner: subCase.attributes.owner, id: subCase.id }));
+      .map((subCase) => subCase.attributes.owner);
+
+    const savedObjectIDs = subCases.saved_objects
+      .filter((subCase) => subCase.error === undefined)
+      .map((subCase) => subCase.id);
 
     // ensure we're authorized to delete each sub case
     await ensureAuthorized({
-      entities,
+      owners,
+      savedObjectIDs,
       operation: Operations.deleteSubCases,
       authorization,
       auditLogger,
@@ -237,7 +242,8 @@ async function get(
     });
 
     await ensureAuthorized({
-      entities: [{ owner: subCase.attributes.owner, id: subCase.id }],
+      owners: [subCase.attributes.owner],
+      savedObjectIDs: [subCase.id],
       operation: Operations.getSubCase,
       authorization,
       auditLogger,

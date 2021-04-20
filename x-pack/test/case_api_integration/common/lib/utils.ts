@@ -47,6 +47,7 @@ import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
+import { superUser } from './authentication/users';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -165,23 +166,24 @@ export const createSubCase = async (args: {
  */
 export const createCaseAction = async ({
   supertest,
-  user,
+  user = superUser,
   space,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   user?: User;
   space?: string;
 }) => {
-  const req = supertest
+  const { body: createdAction } = await supertest
     .post(`${getSpaceUrlPrefix(space)}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
+    .auth(user.username, user.password)
     .send({
       name: 'A case connector',
       connector_type_id: '.case',
       config: {},
-    });
+    })
+    .expect(200);
 
-  const { body: createdAction } = await supertestAuth(req, user).expect(200);
   return createdAction.id;
 };
 
@@ -192,27 +194,17 @@ export const deleteCaseAction = async ({
   supertest,
   id,
   space,
-  user,
+  user = superUser,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   id: string;
   user?: User;
   space?: string;
 }) => {
-  const req = supertest
+  await supertest
     .delete(`${getSpaceUrlPrefix(space)}/api/actions/connector/${id}`)
-    .set('kbn-xsrf', 'foo');
-  await supertestAuth(req, user);
-};
-
-/**
- * Optionally authenticates if a user is supplied.
- */
-const supertestAuth = (supertestInstance: supertestAsPromised.Test, user?: User) => {
-  if (user) {
-    return supertestInstance.auth(user.username, user.password);
-  }
-  return supertestInstance;
+    .set('kbn-xsrf', 'foo')
+    .auth(user.username, user.password);
 };
 
 /**
@@ -228,7 +220,7 @@ export const createSubCaseComment = async ({
   forceNewSubCase = false,
   actionID,
   space,
-  user,
+  user = superUser,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   comment?: ContextTypeGeneratedAlertType;
@@ -242,7 +234,6 @@ export const createSubCaseComment = async ({
   let actionIDToUse: string;
 
   if (actionID === undefined) {
-    // TODO: update with user and space
     actionIDToUse = await createCaseAction({ supertest, user, space });
   } else {
     actionIDToUse = actionID;
@@ -251,11 +242,12 @@ export const createSubCaseComment = async ({
   let collectionID: string;
 
   if (!caseID) {
-    const req = supertest
+    const { body } = await supertest
       .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
       .set('kbn-xsrf', 'true')
-      .send(caseInfo);
-    const { body } = await supertestAuth(req, user).expect(200);
+      .auth(user?.username, user?.password)
+      .send(caseInfo)
+      .expect(200);
     collectionID = body.id;
   } else {
     collectionID = caseID;
@@ -271,7 +263,8 @@ export const createSubCaseComment = async ({
       (subCase) => subCase.status !== CaseStatuses.closed
     );
     if (nonClosed.length > 0) {
-      const req = supertest
+      // mark the sub case as closed so a new sub case will be created on the next comment
+      ({ body: closedSubCases } = await supertest
         .patch(`${getSpaceUrlPrefix(space)}${SUB_CASES_PATCH_DEL_URL}`)
         .set('kbn-xsrf', 'true')
         .send({
@@ -280,16 +273,16 @@ export const createSubCaseComment = async ({
             version: subCase.version,
             status: CaseStatuses.closed,
           })),
-        });
-
-      // mark the sub case as closed so a new sub case will be created on the next comment
-      closedSubCases = (await supertestAuth(req, user).expect(200)).body;
+        })
+        .auth(user?.username, user?.password)
+        .expect(200));
     }
   }
 
   const caseConnector = await supertest
-    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
+    .post(`${getSpaceUrlPrefix(space)}/api/actions/connector/${actionIDToUse}/_execute`)
     .set('kbn-xsrf', 'foo')
+    .auth(user?.username, user?.password)
     .send({
       params: {
         subAction: 'addComment',
@@ -300,7 +293,6 @@ export const createSubCaseComment = async ({
       },
     })
     .expect(200);
-
   expect(caseConnector.body.status).to.eql('ok');
   return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };

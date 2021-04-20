@@ -286,15 +286,20 @@ export async function update({
       ids: query.subCases.map((q) => q.id),
     });
 
-    const entities = bulkSubCases.saved_objects
+    const owners = bulkSubCases.saved_objects
       .filter((subCase) => subCase.error === undefined)
-      .map((subCase) => ({ owner: subCase.attributes.owner, id: subCase.id }));
+      .map((subCase) => subCase.attributes.owner);
+
+    const savedObjectIDs = bulkSubCases.saved_objects
+      .filter((subCase) => subCase.error === undefined)
+      .map((subCase) => subCase.id);
 
     await ensureAuthorized({
       authorization,
       auditLogger,
       operation: Operations.updateSubCases,
-      entities,
+      owners,
+      savedObjectIDs,
     });
 
     const subCasesMap = bulkSubCases.saved_objects.reduce((acc, so) => {
