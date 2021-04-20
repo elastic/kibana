@@ -20,17 +20,17 @@ describe('buildOSSFeatures', () => {
         includeReporting: false,
       }).map((f) => f.id)
     ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-  "timelion",
-]
-`);
+      Array [
+        "discover",
+        "visualize",
+        "dashboard",
+        "dev_tools",
+        "advancedSettings",
+        "indexPatterns",
+        "savedObjectsManagement",
+        "timelion",
+      ]
+    `);
   });
 
   it('returns features excluding timelion', () => {
@@ -39,18 +39,38 @@ Array [
         savedObjectTypes: ['foo', 'bar'],
         includeTimelion: false,
         includeReporting: false,
-      }).map((f) => f.id)
+      }).map(({ id }) => id)
     ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-]
-`);
+      Array [
+        "discover",
+        "visualize",
+        "dashboard",
+        "dev_tools",
+        "advancedSettings",
+        "indexPatterns",
+        "savedObjectsManagement",
+      ]
+    `);
+  });
+
+  it('returns features including reporting subfeatures', () => {
+    expect(
+      buildOSSFeatures({
+        savedObjectTypes: ['foo', 'bar'],
+        includeTimelion: false,
+        includeReporting: true,
+      }).map(({ id, subFeatures }) => ({ id, subFeatures }))
+    ).toMatchSnapshot();
+  });
+
+  it('returns features excluding reporting subfeatures', () => {
+    expect(
+      buildOSSFeatures({
+        savedObjectTypes: ['foo', 'bar'],
+        includeTimelion: false,
+        includeReporting: false,
+      }).map(({ id, subFeatures }) => ({ id, subFeatures }))
+    ).toMatchSnapshot();
   });
 
   const features = buildOSSFeatures({
