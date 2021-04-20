@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 interface IdToFlagMap {
   [key: string]: boolean;
@@ -27,7 +28,7 @@ function createIdToFlagMap(ids: string[]) {
   }, {} as any);
 }
 
-async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: LegacyAPICaller) {
+async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: ElasticsearchClient) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -46,7 +47,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: Legacy
     },
   };
 
-  const esResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search(searchParams);
 
   return get(esResponse, 'hits.hits', []).map((indexPattern: any) => {
     const { _id: savedObjectId } = indexPattern;
@@ -56,7 +57,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: Legacy
 
 async function fetchRollupSavedSearches(
   kibanaIndex: string,
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   rollupIndexPatternToFlagMap: IdToFlagMap
 ) {
   const searchParams = {
@@ -77,7 +78,7 @@ async function fetchRollupSavedSearches(
     },
   };
 
-  const esResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search(searchParams);
   const savedSearches = get(esResponse, 'hits.hits', []);
 
   // Filter for ones with rollup index patterns.
@@ -104,7 +105,7 @@ async function fetchRollupSavedSearches(
 
 async function fetchRollupVisualizations(
   kibanaIndex: string,
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   rollupIndexPatternToFlagMap: IdToFlagMap,
   rollupSavedSearchesToFlagMap: IdToFlagMap
 ) {
@@ -130,7 +131,7 @@ async function fetchRollupVisualizations(
     },
   };
 
-  const esResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search(searchParams);
   const visualizations = get(esResponse, 'hits.hits', []);
 
   let rollupVisualizations = 0;
@@ -211,13 +212,13 @@ export function registerRollupUsageCollector(
         total: { type: 'long' },
       },
     },
-    fetch: async ({ callCluster }: CollectorFetchContext) => {
-      const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
+    fetch: async ({ esClient }: CollectorFetchContext) => {
+      const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, esClient);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 
       const rollupSavedSearches = await fetchRollupSavedSearches(
         kibanaIndex,
-        callCluster,
+        esClient,
         rollupIndexPatternToFlagMap
       );
       const rollupSavedSearchesToFlagMap = createIdToFlagMap(rollupSavedSearches);
@@ -227,7 +228,7 @@ export function registerRollupUsageCollector(
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(
         kibanaIndex,
-        callCluster,
+        esClient,
         rollupIndexPatternToFlagMap,
         rollupSavedSearchesToFlagMap
       );

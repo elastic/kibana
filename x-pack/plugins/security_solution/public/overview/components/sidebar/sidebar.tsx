@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -19,7 +20,6 @@ import { FilterMode as RecentCasesFilterMode } from '../recent_cases/types';
 import { DEFAULT_FILTER_OPTIONS } from '../../../cases/containers/use_get_cases';
 import { SidebarHeader } from '../../../common/components/sidebar_header';
 import { useCurrentUser } from '../../../common/lib/kibana';
-import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import * as i18n from '../../pages/translations';
 
@@ -49,7 +49,6 @@ export const Sidebar = React.memo<{
     setRecentTimelinesFilterBy,
   }) => {
     const currentUser = useCurrentUser();
-    const apolloClient = useApolloClient();
     const recentCasesFilters = useMemo(
       () => (
         <RecentCasesFilters
@@ -97,10 +96,7 @@ export const Sidebar = React.memo<{
 
         <EuiFlexItem grow={false}>
           <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
-          <StatefulRecentTimelines
-            apolloClient={apolloClient!}
-            filterBy={recentTimelinesFilterBy}
-          />
+          <StatefulRecentTimelines filterBy={recentTimelinesFilterBy} />
         </EuiFlexItem>
 
         <Spacer />

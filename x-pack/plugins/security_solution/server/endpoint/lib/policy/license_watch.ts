@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subscription } from 'rxjs';
 
 import {
+  ElasticsearchClient,
+  ElasticsearchServiceStart,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
+import {
+  PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  UpdatePackagePolicy,
+} from '../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
@@ -23,17 +30,20 @@ import { isAtLeast, LicenseService } from '../../../../common/license/license';
 
 export class PolicyWatcher {
   private logger: Logger;
-  private soClient: SavedObjectsClientContract;
+  private esClient: ElasticsearchClient;
   private policyService: PackagePolicyServiceInterface;
   private subscription: Subscription | undefined;
+  private soStart: SavedObjectsServiceStart;
   constructor(
     policyService: PackagePolicyServiceInterface,
     soStart: SavedObjectsServiceStart,
+    esStart: ElasticsearchServiceStart,
     logger: Logger
   ) {
     this.policyService = policyService;
-    this.soClient = this.makeInternalSOClient(soStart);
+    this.esClient = esStart.client.asInternalUser;
     this.logger = logger;
+    this.soStart = soStart;
   }
 
   /**
@@ -79,7 +89,7 @@ export class PolicyWatcher {
     };
     do {
       try {
-        response = await this.policyService.list(this.soClient, {
+        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
           page: page++,
           perPage: 100,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
@@ -91,18 +101,39 @@ export class PolicyWatcher {
         return;
       }
       response.items.forEach(async (policy) => {
-        const policyConfig = policy.inputs[0].config?.policy.value;
+        const updatePolicy: UpdatePackagePolicy = {
+          name: policy.name,
+          description: policy.description,
+          namespace: policy.namespace,
+          enabled: policy.enabled,
+          policy_id: policy.policy_id,
+          output_id: policy.output_id,
+          package: policy.package,
+          inputs: policy.inputs,
+          version: policy.version,
+        };
+        const policyConfig = updatePolicy.inputs[0].config?.policy.value;
         if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-          policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
+          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
             policyConfig,
             license
           );
           try {
-            await this.policyService.update(this.soClient, policy.id, policy);
+            await this.policyService.update(
+              this.makeInternalSOClient(this.soStart),
+              this.esClient,
+              policy.id,
+              updatePolicy
+            );
           } catch (e) {
             // try again for transient issues
             try {
-              await this.policyService.update(this.soClient, policy.id, policy);
+              await this.policyService.update(
+                this.makeInternalSOClient(this.soStart),
+                this.esClient,
+                policy.id,
+                updatePolicy
+              );
             } catch (ee) {
               this.logger.warn(
                 `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`

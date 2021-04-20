@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PowerShell spawning Cmd",
   "query": "event.category:process and event.type:(start or process_started) and process.parent.name:powershell.exe and process.name:cmd.exe",
   "risk_score": 21,
@@ -34,16 +35,19 @@
         {
           "id": "T1059",
           "name": "Command and Scripting Interpreter",
-          "reference": "https://attack.mitre.org/techniques/T1059/"
-        },
-        {
-          "id": "T1086",
-          "name": "PowerShell",
-          "reference": "https://attack.mitre.org/techniques/T1086/"
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

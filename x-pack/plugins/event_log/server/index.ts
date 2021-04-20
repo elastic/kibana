@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializerContext } from 'src/core/server';
@@ -18,6 +19,10 @@ export {
   QueryEventsBySavedObjectResult,
   SAVED_OBJECT_REL_PRIMARY,
 } from './types';
+
+export { ClusterClientAdapter } from './es/cluster_client_adapter';
+
+export { createReadySignal } from './lib/ready_signal';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (context: PluginInitializerContext) => new Plugin(context);

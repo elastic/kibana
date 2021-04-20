@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { CoreSetup } from 'kibana/public';
@@ -78,6 +79,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:

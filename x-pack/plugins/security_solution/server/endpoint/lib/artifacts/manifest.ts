@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '../../../../common/validate';
+import { validate } from '../../../../common';
 import {
   InternalArtifactSchema,
   InternalManifestSchema,
-  internalArtifactCompleteSchema,
-  InternalArtifactCompleteSchema,
+  InternalManifestEntrySchema,
 } from '../../schemas/artifacts';
 import {
   ManifestSchemaVersion,
@@ -18,21 +20,46 @@ import {
 } from '../../../../common/endpoint/schema/common';
 import { manifestSchema, ManifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
-import { maybeCompressArtifact, isCompressed } from './lists';
 import { getArtifactId } from './common';
 import { ManifestVersion, manifestVersion } from '../../schemas/artifacts/manifest';
 
+function createInternalManifestEntries(
+  artifactIds: string[],
+  policyId?: string
+): InternalManifestEntrySchema[] {
+  return artifactIds.map((artifactId) => ({ policyId, artifactId }));
+}
+
 export interface ManifestDiff {
-  type: string;
-  id: string;
+  additions: InternalArtifactSchema[];
+  removals: InternalArtifactSchema[];
+  transitions: InternalArtifactSchema[];
+}
+
+export function isEmptyManifestDiff(diff: ManifestDiff) {
+  return diff.additions.length === 0 && diff.removals.length === 0 && diff.transitions.length === 0;
+}
+
+interface ManifestEntryDescriptor {
+  isDefaultEntry: boolean;
+  specificTargetPolicies: Set<string>;
+  entry: ManifestEntry;
+}
+
+function addValueToSet<T>(set?: Set<T>, value?: T) {
+  return new Set([...(set?.values() || []), ...(value !== undefined ? [value] : [])]);
 }
 
 export class Manifest {
-  private entries: Record<string, ManifestEntry>;
+  private readonly allEntries: Map<string, ManifestEntryDescriptor>;
+  private readonly defaultEntries: Map<string, ManifestEntry>;
+  private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
   private version: ManifestVersion;
 
   constructor(version?: Partial<ManifestVersion>) {
-    this.entries = {};
+    this.allEntries = new Map();
+    this.defaultEntries = new Map();
+    this.policySpecificEntries = new Map();
 
     const decodedVersion = {
       schemaVersion: version?.schemaVersion ?? 'v1',
@@ -52,54 +79,12 @@ export class Manifest {
     return new Manifest({ schemaVersion, semanticVersion: '1.0.0' });
   }
 
-  public static fromArtifacts(
-    artifacts: InternalArtifactCompleteSchema[],
-    oldManifest: Manifest,
-    schemaVersion?: ManifestSchemaVersion
-  ): Manifest {
-    const manifest = new Manifest({
-      schemaVersion,
-      semanticVersion: oldManifest.getSemanticVersion(),
-      soVersion: oldManifest.getSavedObjectVersion(),
-    });
-    artifacts.forEach((artifact) => {
-      const id = getArtifactId(artifact);
-      const existingArtifact = oldManifest.getArtifact(id);
-      if (existingArtifact) {
-        manifest.addEntry(existingArtifact);
-      } else {
-        manifest.addEntry(artifact);
-      }
-    });
-    return manifest;
-  }
-
   public bumpSemanticVersion() {
     const newSemanticVersion = semver.inc(this.getSemanticVersion(), 'patch');
     if (!semanticVersion.is(newSemanticVersion)) {
       throw new Error(`Invalid semver: ${newSemanticVersion}`);
     }
     this.version.semanticVersion = newSemanticVersion;
-  }
-
-  public async compressArtifact(id: string): Promise<Error | null> {
-    try {
-      const artifact = this.getArtifact(id);
-      if (artifact == null) {
-        throw new Error(`Corrupted manifest detected. Artifact ${id} not in manifest.`);
-      }
-
-      const compressedArtifact = await maybeCompressArtifact(artifact);
-      if (!isCompressed(compressedArtifact)) {
-        throw new Error(`Unable to compress artifact: ${id}`);
-      } else if (!internalArtifactCompleteSchema.is(compressedArtifact)) {
-        throw new Error(`Incomplete artifact detected: ${id}`);
-      }
-      this.addEntry(compressedArtifact);
-    } catch (err) {
-      return err;
-    }
-    return null;
   }
 
   public getSchemaVersion(): ManifestSchemaVersion {
@@ -114,53 +99,85 @@ export class Manifest {
     return this.version.semanticVersion;
   }
 
-  public addEntry(artifact: InternalArtifactSchema) {
-    const entry = new ManifestEntry(artifact);
-    this.entries[entry.getDocId()] = entry;
+  public addEntry(artifact: InternalArtifactSchema, policyId?: string) {
+    const existingDescriptor = this.allEntries.get(getArtifactId(artifact));
+    const descriptor = {
+      isDefaultEntry: existingDescriptor?.isDefaultEntry || policyId === undefined,
+      specificTargetPolicies: addValueToSet(existingDescriptor?.specificTargetPolicies, policyId),
+      entry: existingDescriptor?.entry || new ManifestEntry(artifact),
+    };
+
+    this.allEntries.set(descriptor.entry.getDocId(), descriptor);
+
+    if (policyId) {
+      const entries = this.policySpecificEntries.get(policyId) || new Map();
+      entries.set(descriptor.entry.getDocId(), descriptor.entry);
+
+      this.policySpecificEntries.set(policyId, entries);
+    } else {
+      this.defaultEntries.set(descriptor.entry.getDocId(), descriptor.entry);
+    }
   }
 
-  public contains(artifactId: string): boolean {
-    return artifactId in this.entries;
-  }
-
-  public getEntries(): Record<string, ManifestEntry> {
-    return this.entries;
-  }
-
-  public getEntry(artifactId: string): ManifestEntry | undefined {
-    return this.entries[artifactId];
+  public getAllArtifacts(): InternalArtifactSchema[] {
+    return [...this.allEntries.values()].map((descriptor) => descriptor.entry.getArtifact());
   }
 
   public getArtifact(artifactId: string): InternalArtifactSchema | undefined {
-    return this.getEntry(artifactId)?.getArtifact();
+    return this.allEntries.get(artifactId)?.entry.getArtifact();
   }
 
-  public diff(manifest: Manifest): ManifestDiff[] {
-    const diffs: ManifestDiff[] = [];
+  public containsArtifact(artifact: InternalArtifactSchema): boolean {
+    return this.allEntries.has(getArtifactId(artifact));
+  }
 
-    for (const id in manifest.getEntries()) {
-      if (!this.contains(id)) {
-        diffs.push({ type: 'delete', id });
+  public isDefaultArtifact(artifact: InternalArtifactSchema): boolean | undefined {
+    return this.allEntries.get(getArtifactId(artifact))?.isDefaultEntry;
+  }
+
+  public getArtifactTargetPolicies(artifact: InternalArtifactSchema): Set<string> | undefined {
+    return this.allEntries.get(getArtifactId(artifact))?.specificTargetPolicies;
+  }
+
+  public diff(manifest: Manifest): ManifestDiff {
+    const diff: ManifestDiff = {
+      additions: [],
+      removals: [],
+      transitions: [],
+    };
+
+    for (const artifact of manifest.getAllArtifacts()) {
+      if (!this.containsArtifact(artifact)) {
+        diff.removals.push(artifact);
+      } else if (
+        this.isDefaultArtifact(artifact) !== manifest.isDefaultArtifact(artifact) ||
+        !isEqual(
+          this.getArtifactTargetPolicies(artifact),
+          manifest.getArtifactTargetPolicies(artifact)
+        )
+      ) {
+        diff.transitions.push(artifact);
       }
     }
 
-    for (const id in this.entries) {
-      if (!manifest.contains(id)) {
-        diffs.push({ type: 'add', id });
+    for (const artifact of this.getAllArtifacts()) {
+      if (!manifest.containsArtifact(artifact)) {
+        diff.additions.push(artifact);
       }
     }
 
-    return diffs;
+    return diff;
   }
 
-  public toEndpointFormat(): ManifestSchema {
+  public toPackagePolicyManifest(policyId?: string): ManifestSchema {
+    const entries = (!!policyId && this.policySpecificEntries.get(policyId)) || this.defaultEntries;
     const manifestObj: ManifestSchema = {
       manifest_version: this.getSemanticVersion(),
       schema_version: this.getSchemaVersion(),
       artifacts: {},
     };
 
-    for (const entry of Object.values(this.entries)) {
+    for (const entry of entries.values()) {
       manifestObj.artifacts[entry.getIdentifier()] = entry.getRecord();
     }
 
@@ -174,7 +191,15 @@ export class Manifest {
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      ids: Object.keys(this.getEntries()),
+      artifacts: [
+        ...createInternalManifestEntries([...this.defaultEntries.keys()]),
+        ...flatMap([...this.policySpecificEntries.keys()], (policyId) =>
+          createInternalManifestEntries(
+            [...(this.policySpecificEntries.get(policyId)?.keys() || [])],
+            policyId
+          )
+        ),
+      ],
       schemaVersion: this.getSchemaVersion(),
       semanticVersion: this.getSemanticVersion(),
     };

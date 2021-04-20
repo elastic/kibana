@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CompleteTimeline } from '../../objects/timeline';
@@ -97,14 +98,17 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
 export const deleteTimeline = (timelineId: string) => {
   cy.request({
     method: 'POST',
-    url: 'api/solutions/security/graphql',
+    url: 'api/timeline',
     body: {
-      operationName: 'DeleteTimelineMutation',
-      variables: {
-        id: [timelineId],
-      },
-      query: 'mutation DeleteTimelineMutation($id: [ID!]!) {\n  deleteTimeline(id: $id)\n}\n',
+      id: [timelineId],
     },
     headers: { 'kbn-xsrf': 'delete-signals' },
   });
 };
+
+export const getTimelineById = (timelineId: string) =>
+  cy.request({
+    method: 'GET',
+    url: `api/timeline?id=${timelineId}`,
+    headers: { 'kbn-xsrf': 'timeline-by-id' },
+  });

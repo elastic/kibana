@@ -47,8 +47,9 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 <EuiToken
   aria-label="conflict"
   className="kbnFieldIcon"
-  color="euiVisColor9"
+  color="euiColorVis9"
   iconType="alert"
+  shape="square"
   size="s"
   title="conflict"
 />
@@ -61,6 +62,16 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
   iconType="tokenDate"
   size="s"
   title="date"
+/>
+`;
+
+exports[`FieldIcon renders known field types date_range is rendered 1`] = `
+<EuiToken
+  aria-label="date_range"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date_range"
 />
 `;
 
@@ -94,6 +105,16 @@ exports[`FieldIcon renders known field types ip is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types ip_range is rendered 1`] = `
+<EuiToken
+  aria-label="ip_range"
+  className="kbnFieldIcon"
+  iconType="tokenIP"
+  size="s"
+  title="ip_range"
+/>
+`;
+
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
@@ -121,6 +142,16 @@ exports[`FieldIcon renders known field types number is rendered 1`] = `
   iconType="tokenNumber"
   size="s"
   title="number"
+/>
+`;
+
+exports[`FieldIcon renders known field types number_range is rendered 1`] = `
+<EuiToken
+  aria-label="number_range"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="number_range"
 />
 `;
 

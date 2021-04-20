@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
-import {
-  RouteConfig,
-  HttpResources,
-  HttpResourcesRequestHandler,
-  RequestHandlerContext,
-} from '../../../../../../src/core/server';
-import { defineCaptureURLRoutes } from './capture_url';
+import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineCaptureURLRoutes } from './capture_url';
 
 describe('Capture URL view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
@@ -92,7 +89,7 @@ describe('Capture URL view routes', () => {
     const request = httpServerMock.createKibanaRequest();
     const responseFactory = httpResourcesMock.createResponseFactory();
 
-    await routeHandler(({} as unknown) as RequestHandlerContext, request, responseFactory);
+    await routeHandler(({} as unknown) as SecurityRequestHandlerContext, request, responseFactory);
 
     expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });

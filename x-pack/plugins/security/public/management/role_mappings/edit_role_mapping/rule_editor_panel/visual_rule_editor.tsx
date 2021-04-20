@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { Rule, RuleGroup } from '../../model';
+import { AllRule, FieldRule } from '../../model';
+import { isRuleGroup } from '../services/is_rule_group';
+import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
-import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
-import { Rule, FieldRule, RuleGroup, AllRule } from '../../model';
-import { isRuleGroup } from '../services/is_rule_group';
 
 interface Props {
   rules: Rule | null;

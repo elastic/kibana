@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import { ALL_SPACES_ID } from '../../common/constants';
-import { SpacesService } from '../plugin';
-import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './types';
+import type { SpacesService } from '../plugin';
+import type { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest

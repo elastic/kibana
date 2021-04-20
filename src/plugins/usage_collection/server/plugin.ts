@@ -1,23 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Logger,
@@ -27,35 +15,78 @@ import {
   Plugin,
 } from 'src/core/server';
 import { ConfigType } from './config';
-import { CollectorSet, CollectorSetPublic } from './collector';
+import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSetPublic;
-export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+import { UsageCountersService } from './usage_counters';
+import type { UsageCountersServiceSetup } from './usage_counters';
+
+export interface UsageCollectionSetup {
+  /**
+   * Creates and registers a usage counter to collect daily aggregated plugin counter events
+   */
+  createUsageCounter: UsageCountersServiceSetup['createUsageCounter'];
+  /**
+   * Returns a usage counter by type
+   */
+  getUsageCounterByType: UsageCountersServiceSetup['getUsageCounterByType'];
+  /**
+   * Creates a usage collector to collect plugin telemetry data.
+   * registerCollector must be called to connect the created collecter with the service.
+   */
+  makeUsageCollector: CollectorSet['makeUsageCollector'];
+  /**
+   * Register a usage collector or a stats collector.
+   * Used to connect the created collector to telemetry.
+   */
+  registerCollector: CollectorSet['registerCollector'];
+  /**
+   * Returns a usage collector by type
+   */
+  getCollectorByType: CollectorSet['getCollectorByType'];
+  /* internal: telemetry use */
+  areAllCollectorsReady: CollectorSet['areAllCollectorsReady'];
+  /* internal: telemetry use */
+  bulkFetch: CollectorSet['bulkFetch'];
+  /* internal: telemetry use */
+  toObject: CollectorSet['toObject'];
+  /* internal: monitoring use */
+  toApiFieldNames: CollectorSet['toApiFieldNames'];
+  /* internal: telemtery and monitoring use */
+  makeStatsCollector: CollectorSet['makeStatsCollector'];
+}
+
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
+  private usageCountersService?: UsageCountersService;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
-    const config = await this.initializerContext.config
-      .create<ConfigType>()
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup): UsageCollectionSetup {
+    const config = this.initializerContext.config.get<ConfigType>();
 
     const collectorSet = new CollectorSet({
-      logger: this.logger.get('collector-set'),
+      logger: this.logger.get('usage-collection', 'collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    this.usageCountersService = new UsageCountersService({
+      logger: this.logger.get('usage-collection', 'usage-counters-service'),
+      retryCount: config.usageCounters.retryCount,
+      bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
+    });
 
+    const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
+
+    const uiCountersUsageCounter = createUsageCounter('uiCounter');
+    const globalConfig = this.initializerContext.config.legacy.get();
     const router = core.http.createRouter();
     setupRoutes({
       router,
+      uiCountersUsageCounter,
       getSavedObjects: () => this.savedObjects,
       collectorSet,
       config: {
@@ -69,15 +100,38 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       overallStatus$: core.status.overall$,
     });
 
-    return collectorSet;
+    return {
+      areAllCollectorsReady: collectorSet.areAllCollectorsReady,
+      bulkFetch: collectorSet.bulkFetch,
+      getCollectorByType: collectorSet.getCollectorByType,
+      makeStatsCollector: collectorSet.makeStatsCollector,
+      makeUsageCollector: collectorSet.makeUsageCollector,
+      registerCollector: collectorSet.registerCollector,
+      toApiFieldNames: collectorSet.toApiFieldNames,
+      toObject: collectorSet.toObject,
+      createUsageCounter,
+      getUsageCounterByType,
+    };
   }
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
+    const config = this.initializerContext.config.get<ConfigType>();
+    if (!this.usageCountersService) {
+      throw new Error('plugin setup must be called first.');
+    }
+
     this.savedObjects = savedObjects.createInternalRepository();
+    if (config.usageCounters.enabled) {
+      this.usageCountersService.start({ savedObjects });
+    } else {
+      // call stop() to complete observers.
+      this.usageCountersService.stop();
+    }
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.usageCountersService?.stop();
   }
 }

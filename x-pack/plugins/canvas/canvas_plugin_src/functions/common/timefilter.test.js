@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
-import { emptyFilter } from './__tests__/fixtures/test_filters';
+import { emptyFilter } from './__fixtures__/test_filters';
 import { timefilter } from './timefilter';
 
 const errors = getFunctionErrors().timefilter;

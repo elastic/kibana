@@ -1,25 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Subscription } from 'rxjs';
-import { map, distinctUntilKeyChanged } from 'rxjs/operators';
-import {
-  Logger,
-  LoggingServiceSetup,
-  KibanaRequest,
+import type { Subscription } from 'rxjs';
+import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+
+import type {
   HttpServiceSetup,
+  KibanaRequest,
+  Logger,
   LoggerContextConfigInput,
-} from '../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { ConfigType } from '../config';
-import { SpacesPluginSetup } from '../../../spaces/server';
-import { AuditEvent, httpRequestEvent } from './audit_events';
-import { SecurityPluginSetup } from '..';
+  LoggingServiceSetup,
+} from 'src/core/server';
+
+import type { SpacesPluginSetup } from '../../../spaces/server';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import type { ConfigType } from '../config';
+import type { SecurityPluginSetup } from '../plugin';
+import type { AuditEvent } from './audit_events';
+import { httpRequestEvent } from './audit_events';
 
 export const ECS_VERSION = '1.6.0';
+export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 /**
  * @deprecated
@@ -58,6 +63,7 @@ interface AuditServiceSetupParams {
   getSpaceId(
     request: KibanaRequest
   ): ReturnType<SpacesPluginSetup['spacesService']['getSpaceId']> | undefined;
+  recordAuditLoggingUsage(): void;
 }
 
 export class AuditService {
@@ -69,8 +75,8 @@ export class AuditService {
    * @deprecated
    */
   private allowLegacyAuditLogging = false;
-
   private ecsLogger: Logger;
+  private usageIntervalId?: NodeJS.Timeout;
 
   constructor(private readonly logger: Logger) {
     this.ecsLogger = logger.get('ecs');
@@ -84,6 +90,7 @@ export class AuditService {
     getCurrentUser,
     getSID,
     getSpaceId,
+    recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled && !config.appender) {
       this.licenseFeaturesSubscription = license.features$.subscribe(
@@ -100,6 +107,20 @@ export class AuditService {
         createLoggingConfig(config)
       )
     );
+
+    // Record feature usage at a regular interval if enabled and license allows
+    if (config.enabled && config.appender) {
+      license.features$.subscribe((features) => {
+        clearInterval(this.usageIntervalId!);
+        if (features.allowAuditLogging) {
+          recordAuditLoggingUsage();
+          this.usageIntervalId = setInterval(recordAuditLoggingUsage, RECORD_USAGE_INTERVAL);
+          if (this.usageIntervalId.unref) {
+            this.usageIntervalId.unref();
+          }
+        }
+      });
+    }
 
     /**
      * Creates an {@link AuditLogger} scoped to the current request.
@@ -198,6 +219,7 @@ export class AuditService {
       this.licenseFeaturesSubscription.unsubscribe();
       this.licenseFeaturesSubscription = undefined;
     }
+    clearInterval(this.usageIntervalId!);
   }
 }
 
@@ -205,16 +227,16 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
     appenders: {
       auditTrailAppender: config.appender ?? {
-        kind: 'console',
+        type: 'console',
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           highlight: true,
         },
       },
     },
     loggers: [
       {
-        context: 'audit.ecs',
+        name: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

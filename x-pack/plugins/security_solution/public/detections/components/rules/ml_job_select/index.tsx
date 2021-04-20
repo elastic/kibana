@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 
@@ -25,6 +27,13 @@ import {
   ML_JOB_SELECT_PLACEHOLDER_TEXT,
   ENABLE_ML_JOB_WARNING,
 } from '../step_define_rule/translations';
+
+interface MlJobValue {
+  id: string;
+  description: string;
+}
+
+type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;
 
 const HelpTextWarningContainer = styled.div`
   margin-top: 10px;
@@ -64,9 +73,9 @@ const HelpText: React.FC<{ href: string; showEnableWarning: boolean }> = ({
   </>
 );
 
-const JobDisplay: React.FC<{ title: string; description: string }> = ({ title, description }) => (
+const JobDisplay: React.FC<MlJobValue> = ({ id, description }) => (
   <>
-    <strong>{title}</strong>
+    <strong>{id}</strong>
     <EuiText size="xs" color="subdued">
       <p>{description}</p>
     </EuiText>
@@ -78,45 +87,44 @@ interface MlJobSelectProps {
   field: FieldHook;
 }
 
+const renderJobOption = (option: MlJobOption) => (
+  <JobDisplay id={option.value!.id} description={option.value!.description} />
+);
+
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
-  const jobId = field.value as string;
+  const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { loading, jobs } = useSecurityJobs(false);
   const mlUrl = useKibana().services.application.getUrlForApp('ml');
-  const handleJobChange = useCallback(
-    (machineLearningJobId: string) => {
-      field.setValue(machineLearningJobId);
+  const handleJobSelect = useCallback(
+    (selectedJobOptions: MlJobOption[]): void => {
+      const selectedJobIds = selectedJobOptions.map((option) => option.value!.id);
+      field.setValue(selectedJobIds);
     },
     [field]
   );
-  const placeholderOption = {
-    value: 'placeholder',
-    inputDisplay: ML_JOB_SELECT_PLACEHOLDER_TEXT,
-    dropdownDisplay: ML_JOB_SELECT_PLACEHOLDER_TEXT,
-    disabled: true,
-  };
 
   const jobOptions = jobs.map((job) => ({
-    value: job.id,
-    inputDisplay: job.id,
-    dropdownDisplay: <JobDisplay title={job.id} description={job.description} />,
+    value: {
+      id: job.id,
+      description: job.description,
+    },
+    label: job.id,
   }));
 
-  const options = [placeholderOption, ...jobOptions];
+  const selectedJobOptions = jobOptions.filter((option) => jobIds.includes(option.value.id));
 
-  const isJobRunning = useMemo(() => {
-    // If the selected job is not found in the list, it means the placeholder is selected
-    // and so we don't want to show the warning, thus isJobRunning will be true when 'job == null'
-    const job = jobs.find(({ id }) => id === jobId);
-    return job == null || isJobStarted(job.jobState, job.datafeedState);
-  }, [jobs, jobId]);
+  const allJobsRunning = useMemo(() => {
+    const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));
+    return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+  }, [jobs, jobIds]);
 
   return (
     <MlJobSelectEuiFlexGroup>
       <EuiFlexItem>
         <EuiFormRow
           label={field.label}
-          helpText={<HelpText href={mlUrl} showEnableWarning={!isJobRunning} />}
+          helpText={<HelpText href={mlUrl} showEnableWarning={!allJobsRunning} />}
           isInvalid={isInvalid}
           error={errorMessage}
           data-test-subj="mlJobSelect"
@@ -124,12 +132,14 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
         >
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiSuperSelect
-                hasDividers
+              <EuiComboBox
                 isLoading={loading}
-                onChange={handleJobChange}
-                options={options}
-                valueOfSelected={jobId || 'placeholder'}
+                onChange={handleJobSelect}
+                options={jobOptions}
+                placeholder={ML_JOB_SELECT_PLACEHOLDER_TEXT}
+                renderOption={renderJobOption}
+                rowHeight={50}
+                selectedOptions={selectedJobOptions}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

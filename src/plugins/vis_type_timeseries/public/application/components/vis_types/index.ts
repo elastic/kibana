@@ -1,29 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy } from 'react';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
-import { TimeseriesVisParams } from '../../../metrics_fn';
-import { TimeseriesVisData } from '../../../../common/types';
+import { TimeseriesVisParams } from '../../../types';
+import { TimeseriesVisData, PanelData } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
@@ -54,7 +44,7 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
-  onBrush: (gte: string, lte: string) => void;
+  onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
   onUiState: (
     field: string,
     value: {
@@ -65,4 +55,6 @@ export interface TimeseriesVisProps {
   uiState: PersistedState;
   visData: TimeseriesVisData;
   getConfig: IUiSettingsClient['get'];
+  syncColors: boolean;
+  palettesService: PaletteRegistry;
 }

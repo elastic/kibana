@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyValue } from '../../../common/components/empty_value';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { PortOrServiceNameLink } from '../../../common/components/links';
 
 export const CLIENT_PORT_FIELD_NAME = 'client.port';
@@ -39,7 +39,6 @@ export const Port = React.memo<{
     value={value}
   >
     <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
-    <ExternalLinkIcon />
   </DefaultDraggable>
 ));
 

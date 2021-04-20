@@ -1,27 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteMethod,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
 import { difference } from 'lodash';
+import type { BeatsManagementRequestHandlerContext } from '../lib/types';
 
-export function wrapRouteWithSecurity<P, Q, B>(
+export function wrapRouteWithSecurity<
+  P,
+  Q,
+  B,
+  Context extends BeatsManagementRequestHandlerContext
+>(
   {
     requiredLicense = [],
     requiredRoles = [],
   }: { requiredLicense?: string[]; requiredRoles?: string[] },
-  handler: RequestHandler<P, Q, B>
-): RequestHandler<P, Q, B> {
+  handler: RequestHandler<P, Q, B, Context>
+): RequestHandler<P, Q, B, Context> {
   return async (
-    context: RequestHandlerContext,
+    context: Context,
     request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {

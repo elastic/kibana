@@ -1,32 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {
-  function wrapInContext(testProps: any) {
+  function wrapInContext(testProps: QueryLanguageSwitcherProps) {
     const services = {
       uiSettings: startMock.uiSettings,
       docLinks: startMock.docLinks,
@@ -65,5 +54,92 @@ describe('LanguageSwitcher', () => {
     component.find(EuiButtonEmpty).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
     expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+  });
+
+  it('should toggle off if language is text', () => {
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'text',
+        onSelectLanguage: () => {
+          return;
+        },
+      })
+    );
+    component.find(EuiButtonEmpty).simulate('click');
+    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeFalsy();
+  });
+  it('it set language on nonKql mode text', () => {
+    const onSelectLanguage = jest.fn();
+
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'kuery',
+        nonKqlMode: 'text',
+        onSelectLanguage,
+      })
+    );
+    component.find(EuiButtonEmpty).simulate('click');
+    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+
+    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+
+    expect(onSelectLanguage).toHaveBeenCalledWith('text');
+  });
+  it('it set language on nonKql mode lucene', () => {
+    const onSelectLanguage = jest.fn();
+
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'kuery',
+        nonKqlMode: 'lucene',
+        onSelectLanguage,
+      })
+    );
+    component.find(EuiButtonEmpty).simulate('click');
+    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+
+    expect(onSelectLanguage).toHaveBeenCalledWith('lucene');
+  });
+
+  it('it set language on kuery mode with nonKqlMode text', () => {
+    const onSelectLanguage = jest.fn();
+
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'text',
+        nonKqlMode: 'text',
+        onSelectLanguage,
+      })
+    );
+
+    expect(component.find(EuiIcon).prop('type')).toBe('boxesVertical');
+
+    component.find(EuiButtonEmpty).simulate('click');
+    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+
+    expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
+  });
+
+  it('it set language on kuery mode with nonKqlMode lucene', () => {
+    const onSelectLanguage = jest.fn();
+
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'lucene',
+        nonKqlMode: 'lucene',
+        onSelectLanguage,
+      })
+    );
+
+    expect(component.find('[data-test-subj="switchQueryLanguageButton"]').at(0).text()).toBe(
+      'Lucene'
+    );
+
+    component.find(EuiButtonEmpty).simulate('click');
+    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+
+    expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
   });
 });

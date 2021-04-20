@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import url from 'url';
+
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import url from 'url';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import {
@@ -15,16 +18,22 @@ import {
   EuiFilterGroup,
   EuiPanel,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
+import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
+
 import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
+import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';
-import { Agent } from '../../../../../types';
+import type { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
+
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
@@ -181,7 +190,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
   );
 
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
-  const isLogLevelSelectionAvailable = useMemo(() => {
+  const isLogFeatureAvailable = useMemo(() => {
     if (!agentVersion) {
       return false;
     }
@@ -191,6 +200,38 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     }
     return semverGte(agentVersionWithPrerelease, '7.11.0');
   }, [agentVersion]);
+
+  // Set absolute height on logs component (needed to render correctly in Safari)
+  // based on available height, or 600px, whichever is greater
+  const [logsPanelRef, { height: measuredlogPanelHeight }] = useMeasure<HTMLDivElement>();
+  const logPanelHeight = useMemo(() => Math.max(measuredlogPanelHeight, 600), [
+    measuredlogPanelHeight,
+  ]);
+
+  if (!isLogFeatureAvailable) {
+    return (
+      <EuiCallOut
+        size="m"
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.agentLogs.oldAgentWarningTitle"
+            defaultMessage="The Logs view requires Elastic Agent 7.11 or higher. To upgrade an agent, go to the Actions menu, or {downloadLink} a newer version."
+            values={{
+              downloadLink: (
+                <EuiLink href="https://ela.st/download-elastic-agent" external target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.downloadLink"
+                    defaultMessage="download"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
+    );
+  }
 
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
@@ -259,20 +300,18 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel paddingSize="none">
+        <EuiPanel paddingSize="none" panelRef={logsPanelRef}>
           <LogStream
-            height="100%"
+            height={logPanelHeight}
             startTimestamp={dateRangeTimestamps.start}
             endTimestamp={dateRangeTimestamps.end}
             query={logStreamQuery}
           />
         </EuiPanel>
       </EuiFlexItem>
-      {isLogLevelSelectionAvailable && (
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel agent={agent} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <SelectLogLevel agent={agent} />
+      </EuiFlexItem>
     </WrapperFlexGroup>
   );
 });

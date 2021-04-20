@@ -1,6 +1,7 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
+Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
 
 It supports:
 - Single-run and recurring tasks
@@ -45,6 +46,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `max_poll_inactivity_cycles` - How many poll intervals is work allowed to block polling for before it's timed out. This does not include task execution, as task execution does not block the polling, but rather includes work needed to manage Task Manager's state.
 - `index` - **deprecated** The name of the index that the task_manager will use. This is deprecated, and will be removed starting in 8.0
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
+- `version_conflict_threshold` - The threshold percentage for workers experiencing version conflicts for shifting the polling interval
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 - `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
   - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by tasks of type `reporting`
@@ -84,10 +86,10 @@ export class Plugin {
         // This defaults to what is configured at the task manager level.
         maxAttempts: 5,
 
-        // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-        // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
-        // overridden by the `override_num_workers` config value, if specified.
-        numWorkers: 2,
+        // The maximum number tasks of this type that can be run concurrently per Kibana instance.
+        // Setting this value will force Task Manager to poll for this task type seperatly from other task types which 
+        // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
+        maxConcurrency: 1,
 
         // The createTaskRunner function / method returns an object that is responsible for
         // performing the work of the task. context: { taskInstance }, is documented below.
@@ -494,20 +496,20 @@ Our current model, then, is this:
 
 ## Limitations in v1.0
 
-In v1, the system only understands 1 minute increments (e.g. '1m', '7m'). Tasks which need something more robust will need to specify their own "runAt" in their run method's return value.
-
 There is only a rudimentary mechanism for coordinating tasks and handling expired tasks. Tasks are considered expired if their runAt has arrived, and their status is still 'running'.
 
-There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
+There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion.
 
 The task manager's public API is create / delete / list. Updates aren't directly supported, and listing should be scoped so that users only see their own tasks.
 
 ## Testing
 
 - Unit tests:
+
+   Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
    ```
-   cd x-pack
-   node scripts/jest --testPathPattern=task_manager --watch
+   yarn test:jest x-pack/plugins/task_manager --watch
    ```
 - Integration tests:
    ```
@@ -519,4 +521,5 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 Task Manager exposes runtime statistics which enable basic observability into its inner workings and makes it possible to monitor the system from external services.
 
-Learn More: [./MONITORING](./MONITORING.MD)
+Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-health-monitoring.html
+Developer Documentation: [./MONITORING](./MONITORING.MD)

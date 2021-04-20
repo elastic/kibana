@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -211,13 +212,18 @@ export type Tags = t.TypeOf<typeof tags>;
 export const tagsOrUndefined = t.union([tags, t.undefined]);
 export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
-export const exceptionListType = t.keyof({ detection: null, endpoint: null });
+export const exceptionListType = t.keyof({
+  detection: null,
+  endpoint: null,
+  endpoint_events: null,
+});
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
 export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
+  ENDPOINT_EVENTS = 'endpoint_events',
 }
 
 export const exceptionListItemType = t.keyof({ simple: null });

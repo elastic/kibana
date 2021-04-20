@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useReducer } from 'react';
@@ -20,10 +21,10 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 
 import { Form, UseField, useForm } from '../../../shared_imports';
-import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
+import { ConnectorTypeFields } from '../../../../../cases/common/api/connectors';
 import { ConnectorSelector } from '../connector_selector/form';
-import { ActionConnector } from '../../../../../case/common/api/cases';
-import { SettingFieldsForm } from '../settings/fields_form';
+import { ActionConnector } from '../../../../../cases/common/api';
+import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
@@ -33,7 +34,6 @@ import * as i18n from './translations';
 interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
-  disabled?: boolean;
   isLoading: boolean;
   onSubmit: (
     connectorId: string,
@@ -43,6 +43,8 @@ interface EditConnectorProps {
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
+  disabled?: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -104,6 +106,7 @@ export const EditConnector = React.memo(
     caseFields,
     connectors,
     disabled = false,
+    hideConnectorServiceNowSir = false,
     isLoading,
     onSubmit,
     selectedConnector,
@@ -233,6 +236,7 @@ export const EditConnector = React.memo(
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
                       disabled,
+                      hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,
@@ -243,7 +247,7 @@ export const EditConnector = React.memo(
               </EuiFlexGroup>
             </Form>
           </DisappearingFlexItem>
-          <EuiFlexItem data-test-subj="edit-connector-settings-fields-form-flex-item">
+          <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
             {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
               !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
               !editConnector && (
@@ -251,7 +255,7 @@ export const EditConnector = React.memo(
                   <span>{i18n.NO_CONNECTOR}</span>
                 </EuiText>
               )}
-            <SettingFieldsForm
+            <ConnectorFieldsForm
               connector={currentConnector}
               fields={fields}
               isEdit={editConnector}

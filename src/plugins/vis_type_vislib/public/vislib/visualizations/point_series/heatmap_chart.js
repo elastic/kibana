@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,6 +13,8 @@ import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '../../../../../../plugins/charts/public';
+import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const defaults = {
   color: undefined, // todo
@@ -40,8 +31,10 @@ const defaults = {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class HeatmapChart extends PointSeries {
-  constructor(handler, chartEl, chartData, seriesConfigArgs, deps) {
-    super(handler, chartEl, chartData, seriesConfigArgs, deps);
+  constructor(handler, chartEl, chartData, seriesConfigArgs, uiSettings) {
+    super(handler, chartEl, chartData, seriesConfigArgs, uiSettings);
+
+    this.uiSettings = uiSettings;
 
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
 
@@ -59,6 +52,10 @@ export class HeatmapChart extends PointSeries {
 
   getHeatmapLabels(cfg) {
     const percentageMode = cfg.get('percentageMode');
+    const percentageFormatPattern = cfg.get(
+      'percentageFormatPattern',
+      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+    );
     const colorsNumber = cfg.get('colorsNumber');
     const colorsRange = cfg.get('colorsRange');
     const zAxisConfig = this.getValueAxis().axisConfig;
@@ -82,9 +79,9 @@ export class HeatmapChart extends PointSeries {
         let val = i / colorsNumber;
         let nextVal = (i + 1) / colorsNumber;
         if (percentageMode) {
-          val = Math.ceil(val * 100);
-          nextVal = Math.ceil(nextVal * 100);
-          label = `${val}% - ${nextVal}%`;
+          val = getValueForPercentageMode(val, percentageFormatPattern);
+          nextVal = getValueForPercentageMode(nextVal, percentageFormatPattern);
+          label = `${val} - ${nextVal}`;
         } else {
           val = val * (max - min) + min;
           nextVal = nextVal * (max - min) + min;

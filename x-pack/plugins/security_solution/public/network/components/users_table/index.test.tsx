@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
-import { FlowTarget } from '../../../graphql/types';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -26,29 +24,18 @@ import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('Rendering', () => {
@@ -77,26 +64,20 @@ describe('Users Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <UsersTable
-              data={mockUsersData.edges}
-              flowTarget={FlowTarget.source}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
-              id="user"
-              isInspect={false}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockUsersData.pageInfo
-              )}
-              totalCount={1}
-              type={networkModel.NetworkType.details}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <UsersTable
+            data={mockUsersData.edges}
+            flowTarget={FlowTarget.source}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            id="user"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
+            totalCount={1}
+            type={networkModel.NetworkType.details}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',

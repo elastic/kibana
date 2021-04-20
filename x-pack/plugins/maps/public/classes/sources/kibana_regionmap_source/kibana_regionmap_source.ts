@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
-import { getKibanaRegionList } from '../../../meta';
+import { fetchGeoJson, getKibanaRegionList } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
-import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
-import { LayerConfig } from '../../../../../../../src/plugins/region_map/config';
+import type { LayerConfig } from '../../../../../../../src/plugins/maps_ems/public';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
@@ -78,11 +79,12 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const vectorFileMeta = await this.getVectorFileMeta();
-    const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: vectorFileMeta.format.type as FORMAT_TYPE,
-      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
-      fetchUrl: vectorFileMeta.url,
-    });
+    const featureCollection = await fetchGeoJson(
+      vectorFileMeta.url,
+      vectorFileMeta.format.type as FORMAT_TYPE,
+      vectorFileMeta.meta.feature_collection_path
+    );
+
     return {
       data: featureCollection,
       meta: {},

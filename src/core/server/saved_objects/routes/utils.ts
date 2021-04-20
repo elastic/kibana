@@ -1,24 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Readable } from 'stream';
-import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
+import {
+  RequestHandlerWrapper,
+  SavedObject,
+  SavedObjectsExportResultDetails,
+} from 'src/core/server';
 import {
   createSplitStream,
   createMapStream,
@@ -27,6 +20,7 @@ import {
   createListStream,
   createConcatStream,
 } from '@kbn/utils';
+import Boom from '@hapi/boom';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -63,3 +57,30 @@ export function validateObjects(
       .join(', ')}`;
   }
 }
+
+/**
+ * Catches errors thrown by saved object route handlers and returns an error
+ * with the payload and statusCode of the boom error.
+ *
+ * This is very close to the core `router.handleLegacyErrors` except that it
+ * throws internal errors (statusCode: 500) so that the internal error's
+ * message get logged by Core.
+ *
+ * TODO: Remove once https://github.com/elastic/kibana/issues/65291 is fixed.
+ */
+export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
+  return async (context, request, response) => {
+    try {
+      return await handler(context, request, response);
+    } catch (e) {
+      if (Boom.isBoom(e) && e.output.statusCode !== 500) {
+        return response.customError({
+          body: e.output.payload,
+          statusCode: e.output.statusCode,
+          headers: e.output.headers as { [key: string]: string },
+        });
+      }
+      throw e;
+    }
+  };
+};

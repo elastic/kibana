@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 require('../../../../src/setup_node_env');
@@ -161,8 +162,9 @@ async function main() {
 
       const body = `/*
           * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-          * or more contributor license agreements. Licensed under the Elastic License;
-          * you may not use this file except in compliance with the Elastic License.
+          * or more contributor license agreements. Licensed under the Elastic License
+          * 2.0; you may not use this file except in compliance with the Elastic License
+          * 2.0.
           */
 
           import { i18n } from '@kbn/i18n';
@@ -192,7 +194,7 @@ async function main() {
 
           /**
            * A full object of Mitre Attack Threat data that is taken directly from the \`mitre_tactics_techniques.ts\` file
-           * 
+           *
            * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
            */
           export const mockThreatData = ${JSON.stringify(

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -226,17 +215,25 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
+    let linkId = 0;
     return this.walkAst(cloneDeep(ast), (fn, link) => {
-      link.arguments = fn.inject(link.arguments, references);
+      link.arguments = fn.inject(
+        link.arguments,
+        references
+          .filter((r) => r.name.includes(`l${linkId}_`))
+          .map((r) => ({ ...r, name: r.name.replace(`l${linkId}_`, '') }))
+      );
+      linkId++;
     });
   }
 
   public extract(ast: ExpressionAstExpression) {
+    let linkId = 0;
     const allReferences: SavedObjectReference[] = [];
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { state, references } = fn.extract(link.arguments);
       link.arguments = state;
-      allReferences.push(...references);
+      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId++}_${r.name}` })));
     });
     return { state: newAst, references: allReferences };
   }

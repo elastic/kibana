@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import styled from 'styled-components';
 import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { usePackageIconType, UsePackageIconType } from '../../../hooks';
+
+import type { UsePackageIconType } from '../../../hooks';
+import { usePackageIconType } from '../../../hooks';
 import { Loading } from '../../../components';
 
 const PanelWrapper = styled.div`

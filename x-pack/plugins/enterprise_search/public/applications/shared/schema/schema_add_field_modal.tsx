@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
@@ -19,11 +20,11 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { CANCEL_BUTTON_LABEL } from '../constants';
 import { TEXT, fieldTypeSelectOptions } from '../constants/field_types';
 
 import {
@@ -31,7 +32,6 @@ import {
   FIELD_NAME_CORRECTED_PREFIX,
   FIELD_NAME_MODAL_TITLE,
   FIELD_NAME_MODAL_DESCRIPTION,
-  FIELD_NAME_MODAL_CANCEL,
   FIELD_NAME_MODAL_ADD_FIELD,
 } from './constants';
 
@@ -78,71 +78,69 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
     );
 
   return (
-    <EuiOverlayMask>
+    <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
       <form onSubmit={submitForm}>
-        <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{FIELD_NAME_MODAL_TITLE}</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <p>{FIELD_NAME_MODAL_DESCRIPTION}</p>
-            <EuiForm>
-              <EuiSpacer />
-              <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label="Field name"
-                    helpText={fieldNameNote}
-                    fullWidth={true}
-                    data-test-subj="SchemaAddFieldNameRow"
-                    error={addFieldFormErrors}
-                    isInvalid={!!addFieldFormErrors}
-                  >
-                    <EuiFieldText
-                      placeholder="name"
-                      type="text"
-                      onChange={handleChange}
-                      required={true}
-                      value={rawFieldName}
-                      fullWidth={true}
-                      autoFocus={true}
-                      isLoading={loading}
-                      data-test-subj="SchemaAddFieldNameField"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Field type" data-test-subj="SchemaAddFieldTypeRow">
-                    <EuiSelect
-                      name="select-add"
-                      required
-                      value={newFieldType}
-                      options={fieldTypeSelectOptions}
-                      disabled={disableForm}
-                      onChange={(e) => updateNewFieldType(e.target.value)}
-                      data-test-subj="SchemaSelect"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeAddFieldModal}>{FIELD_NAME_MODAL_CANCEL}</EuiButtonEmpty>
-            <EuiButton
-              color="primary"
-              fill={true}
-              disabled={disableForm}
-              type="submit"
-              isLoading={loading}
-              data-test-subj="SchemaAddFieldAddFieldButton"
-            >
-              {FIELD_NAME_MODAL_ADD_FIELD}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{FIELD_NAME_MODAL_TITLE}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <p>{FIELD_NAME_MODAL_DESCRIPTION}</p>
+          <EuiForm>
+            <EuiSpacer />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormRow
+                  label="Field name"
+                  helpText={fieldNameNote}
+                  fullWidth
+                  data-test-subj="SchemaAddFieldNameRow"
+                  error={addFieldFormErrors}
+                  isInvalid={!!addFieldFormErrors}
+                >
+                  <EuiFieldText
+                    placeholder="name"
+                    type="text"
+                    onChange={handleChange}
+                    required
+                    value={rawFieldName}
+                    fullWidth
+                    autoFocus
+                    isLoading={loading}
+                    data-test-subj="SchemaAddFieldNameField"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow label="Field type" data-test-subj="SchemaAddFieldTypeRow">
+                  <EuiSelect
+                    name="select-add"
+                    required
+                    value={newFieldType}
+                    options={fieldTypeSelectOptions}
+                    disabled={disableForm}
+                    onChange={(e) => updateNewFieldType(e.target.value)}
+                    data-test-subj="SchemaSelect"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+          <EuiButton
+            color="primary"
+            fill
+            disabled={disableForm}
+            type="submit"
+            isLoading={loading}
+            data-test-subj="SchemaAddFieldAddFieldButton"
+          >
+            {FIELD_NAME_MODAL_ADD_FIELD}
+          </EuiButton>
+        </EuiModalFooter>
       </form>
-    </EuiOverlayMask>
+    </EuiModal>
   );
 };
 

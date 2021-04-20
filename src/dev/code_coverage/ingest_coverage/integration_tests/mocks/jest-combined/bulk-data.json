@@ -1,0 +1,2602 @@
+{
+  "total": {
+    "lines": {
+      "total": 14988,
+      "covered": 3370,
+      "skipped": 0,
+      "pct": 22.48
+    },
+    "statements": {
+      "total": 16232,
+      "covered": 3446,
+      "skipped": 0,
+      "pct": 21.23
+    },
+    "functions": {
+      "total": 3388,
+      "covered": 654,
+      "skipped": 0,
+      "pct": 19.3
+    },
+    "branches": {
+      "total": 8392,
+      "covered": 1439,
+      "skipped": 0,
+      "pct": 17.15
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/bar/bar.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/bar/bar_section.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/button/button.js": {
+    "lines": {
+      "total": 33,
+      "covered": 28,
+      "skipped": 0,
+      "pct": 84.85
+    },
+    "functions": {
+      "total": 7,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 85.71
+    },
+    "statements": {
+      "total": 33,
+      "covered": 28,
+      "skipped": 0,
+      "pct": 84.85
+    },
+    "branches": {
+      "total": 21,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 76.19
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/button/button_group/button_group.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/button/button_icon/button_icon.js": {
+    "lines": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/collapse_button/collapse_button.js": {
+    "lines": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/empty_table_prompt/empty_table_prompt.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/empty_table_prompt/empty_table_prompt_actions.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/empty_table_prompt/empty_table_prompt_message.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/empty_table_prompt/empty_table_prompt_panel.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/check_box/check_box.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/check_box/check_box_label.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/label/label.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/select/select.js": {
+    "lines": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/text_area/text_area.js": {
+    "lines": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form/text_input/text_input.js": {
+    "lines": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form_layout/field_group.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/form_layout/field_group_section.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_nav.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_nav_row.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_nav_row_section.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_tab.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_tabs.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/local_nav/local_title.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/pager/pager.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 4,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 75
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/pager/pager_button_group.js": {
+    "lines": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/controlled_table.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_body.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_header.js": {
+    "lines": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_header_cell.js": {
+    "lines": {
+      "total": 12,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 50
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 12,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 50
+    },
+    "branches": {
+      "total": 6,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 16.67
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_header_check_box_cell.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_info.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_row.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_row_cell.js": {
+    "lines": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/table_row_check_box_cell.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table.js": {
+    "lines": {
+      "total": 20,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 80
+    },
+    "functions": {
+      "total": 11,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 72.73
+    },
+    "statements": {
+      "total": 22,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 72.73
+    },
+    "branches": {
+      "total": 14,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 64.29
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_create_button.js": {
+    "lines": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_delete_button.js": {
+    "lines": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_loading_prompt.js": {
+    "lines": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_no_matches_prompt.js": {
+    "lines": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_row.js": {
+    "lines": {
+      "total": 11,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 90.91
+    },
+    "functions": {
+      "total": 4,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 75
+    },
+    "statements": {
+      "total": 11,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 90.91
+    },
+    "branches": {
+      "total": 6,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 83.33
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_tool_bar.js": {
+    "lines": {
+      "total": 6,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 66.67
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 6,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 66.67
+    },
+    "branches": {
+      "total": 4,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/table/listing_table/listing_table_tool_bar_footer.js": {
+    "lines": {
+      "total": 8,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 75
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 8,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 75
+    },
+    "branches": {
+      "total": 4,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tabs/tab.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tabs/tabs.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar_footer.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar_footer_section.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar_search_box.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar_section.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/tool_bar/tool_bar_text.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/components/typography/typography.js": {
+    "lines": {
+      "total": 12,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 12,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/alignment.js": {
+    "lines": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/key_codes.js": {
+    "lines": {
+      "total": 8,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 8,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/accessibility/accessible_click_keys.js": {
+    "lines": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/accessibility/cascading_menu_key_codes.js": {
+    "lines": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/accessibility/combo_box_key_codes.js": {
+    "lines": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/accessibility/html_id_generator.js": {
+    "lines": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/packages/kbn-ui-framework/src/services/sort/sortable_properties.js": {
+    "lines": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 9,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 18,
+      "covered": 18,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 10,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/constants.js": {
+    "lines": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/either.js": {
+    "lines": {
+      "total": 24,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 16,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 24,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/index.js": {
+    "lines": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 9,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/ingest.js": {
+    "lines": {
+      "total": 35,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 12,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 38,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 12,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/json_stream.js": {
+    "lines": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/process.js": {
+    "lines": {
+      "total": 16,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 17,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/transforms.js": {
+    "lines": {
+      "total": 61,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 29,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 77,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 12,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/utils.js": {
+    "lines": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 9,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 14,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined/block-navigation.js": {
+    "lines": {
+      "total": 28,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 28,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 15,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined/prettify.js": {
+    "lines": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 29,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 536,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 286,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined/sorter.js": {
+    "lines": {
+      "total": 77,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 17,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 77,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 22,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/apm_oss/index.js": {
+    "lines": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/data/public/actions/filters/create_filters_from_event.js": {
+    "lines": {
+      "total": 39,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 7.69
+    },
+    "functions": {
+      "total": 10,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 41,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 7.32
+    },
+    "branches": {
+      "total": 30,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/data/public/search/expressions/create_filter.js": {
+    "lines": {
+      "total": 25,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 26,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 19,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/elasticsearch/index.js": {
+    "lines": {
+      "total": 28,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 29,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/elasticsearch/lib/version_health_check.js": {
+    "lines": {
+      "total": 10,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 90
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 10,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 90
+    },
+    "branches": {
+      "total": 4,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 75
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/elasticsearch/server/lib/abortable_request_handler.js": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/elasticsearch/server/lib/create_proxy.js": {
+    "lines": {
+      "total": 10,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 4,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 10,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/elasticsearch/server/lib/handle_es_error.js": {
+    "lines": {
+      "total": 13,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 13,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 18,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/index.js": {
+    "lines": {
+      "total": 32,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 22,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 33,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/inject_vars.js": {
+    "lines": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/ui_setting_defaults.js": {
+    "lines": {
+      "total": 9,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 3,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 9,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/common/utils/no_white_space.js": {
+    "lines": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/common/utils/shorten_dotted_string.js": {
+    "lines": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/migrations/migrations.js": {
+    "lines": {
+      "total": 264,
+      "covered": 250,
+      "skipped": 0,
+      "pct": 94.7
+    },
+    "functions": {
+      "total": 37,
+      "covered": 35,
+      "skipped": 0,
+      "pct": 94.59
+    },
+    "statements": {
+      "total": 269,
+      "covered": 252,
+      "skipped": 0,
+      "pct": 93.68
+    },
+    "branches": {
+      "total": 190,
+      "covered": 149,
+      "skipped": 0,
+      "pct": 78.42
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/kibana.js": {
+    "lines": {
+      "total": 8,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 8,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/dashboard/np_ready/legacy_app.js": {
+    "lines": {
+      "total": 64,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 27,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 66,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 14,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/dashboard/np_ready/listing/dashboard_listing.js": {
+    "lines": {
+      "total": 11,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 90.91
+    },
+    "functions": {
+      "total": 5,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 80
+    },
+    "statements": {
+      "total": 11,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 90.91
+    },
+    "branches": {
+      "total": 8,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context.js": {
+    "lines": {
+      "total": 27,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 27,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 5,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context_app.js": {
+    "lines": {
+      "total": 25,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 13,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 26,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 10,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/discover.js": {
+    "lines": {
+      "total": 313,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 86,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 325,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 137,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/response_handler.js": {
+    "lines": {
+      "total": 44,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 45,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 22,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/api/anchor.js": {
+    "lines": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 7,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/helpers/call_after_bindings_workaround.js": {
+    "lines": {
+      "total": 3,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 3,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 3,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/query/actions.js": {
+    "lines": {
+      "total": 57,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 30,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 68,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 13,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/query/constants.js": {
+    "lines": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/query/index.js": {
+    "lines": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/query/state.js": {
+    "lines": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/query_parameters/actions.js": {
+    "lines": {
+      "total": 17,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "functions": {
+      "total": 12,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 22,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  }
+}

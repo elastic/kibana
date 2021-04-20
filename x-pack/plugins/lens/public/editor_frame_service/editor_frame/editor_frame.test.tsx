@@ -1,17 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+
+// Tests are executed in a jsdom environment who does not have sizing methods,
+// thus the AutoSizer will always compute a 0x0 size space
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+    disableHeight?: boolean;
+  }) {
+    const { children, disableHeight, ...otherProps } = props;
+    return (
+      // js-dom may complain that a non-DOM attributes are used when appending props
+      // Handle the disableHeight case using native DOM styling
+      <div {...otherProps} style={disableHeight ? { height: 0 } : {}}>
+        {children({ width: 100, height: 100 })}
+      </div>
+    );
+  };
+});
+
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
+import { fromExpression } from '@kbn/interpreter/common';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -51,7 +73,7 @@ function getDefaultProps() {
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    core: coreMock.createSetup(),
+    core: coreMock.createStart(),
     plugins: {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
@@ -60,6 +82,7 @@ function getDefaultProps() {
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
+    searchSessionId: 'sessionId',
   };
 }
 
@@ -81,6 +104,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -92,6 +116,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
@@ -187,8 +212,12 @@ describe('editor_frame', () => {
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined, {
+        isFullEditor: true,
+      });
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined, {
+        isFullEditor: true,
+      });
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
@@ -264,6 +293,7 @@ describe('editor_frame', () => {
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         availablePalettes: defaultProps.palettes,
+        searchSessionId: 'sessionId',
       });
     });
 
@@ -420,42 +450,9 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "layerIds": Array [
-                  "first",
-                ],
-                "tables": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-              },
-              "function": "lens_merge_tables",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "vis",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
+        "kibana
+        | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+        | vis"
       `);
     });
 
@@ -503,7 +500,9 @@ describe('editor_frame', () => {
 
       instance.update();
 
-      expect(instance.find(expressionRendererMock).prop('expression')).toEqual({
+      expect(
+        fromExpression(instance.find(expressionRendererMock).prop('expression') as string)
+      ).toEqual({
         type: 'expression',
         chain: expect.arrayContaining([
           expect.objectContaining({
@@ -511,7 +510,8 @@ describe('editor_frame', () => {
           }),
         ]),
       });
-      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+      expect(fromExpression(instance.find(expressionRendererMock).prop('expression') as string))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -602,7 +602,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -630,16 +630,19 @@ describe('editor_frame', () => {
         );
       });
 
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
+
+      mockDatasource.renderDataPanel.mockClear();
+
       const updatedState = {
         title: 'shazm',
       };
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
-        .setState;
       act(() => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
       expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
@@ -682,7 +685,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1196,7 +1199,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(4);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(5);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -1313,7 +1316,10 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: 'draggedField' },
+                    });
                   }
                 },
               },
@@ -1329,10 +1335,15 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: { label: 'draggedField' },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1354,6 +1365,7 @@ describe('editor_frame', () => {
             icon: 'empty',
             id: 'testVis3',
             label: 'TEST3',
+            groupLabel: 'testVis3Group',
           },
         ],
         getSuggestions: () => [
@@ -1410,7 +1422,10 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: '1' },
+                    });
                   }
                 },
               },
@@ -1426,10 +1441,17 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: {
+              label: 'label',
+            },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

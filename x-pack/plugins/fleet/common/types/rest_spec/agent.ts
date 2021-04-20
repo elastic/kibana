@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   Agent,
   AgentAction,
   NewAgentAction,
@@ -62,7 +63,6 @@ export interface PostAgentCheckinResponse {
 export interface PostAgentEnrollRequest {
   body: {
     type: AgentType;
-    shared_id?: string;
     metadata: {
       local: Record<string, any>;
       user_provided: Record<string, any>;
@@ -108,6 +108,7 @@ export interface PostAgentUnenrollRequest {
   };
   body: {
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
@@ -118,11 +119,17 @@ export interface PostBulkAgentUnenrollRequest {
   body: {
     agents: string[] | string;
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUnenrollResponse {}
+export type PostBulkAgentUnenrollResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -141,8 +148,14 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
   };
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUpgradeResponse {}
+
+export type PostBulkAgentUpgradeResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -164,12 +177,13 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export interface PostBulkAgentReassignResponse {
-  [key: string]: {
+export type PostBulkAgentReassignResponse = Record<
+  Agent['id'],
+  {
     success: boolean;
-    error?: Error;
-  };
-}
+    error?: string;
+  }
+>;
 
 export interface GetOneAgentEventsRequest {
   params: {
@@ -219,5 +233,6 @@ export interface GetAgentStatusResponse {
     error: number;
     offline: number;
     other: number;
+    updating: number;
   };
 }

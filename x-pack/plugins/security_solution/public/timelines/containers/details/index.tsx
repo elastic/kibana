@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -38,6 +40,7 @@ export const useTimelineEventsDetails = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     timelineDetailsRequest,
@@ -50,16 +53,15 @@ export const useTimelineEventsDetails = ({
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
-      if (request == null || skip) {
+      if (request == null || skip || isEmpty(request.eventId)) {
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             request,
             {
@@ -70,35 +72,27 @@ export const useTimelineEventsDetails = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setTimelineDetailsResponse(response.data || []);
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setTimelineDetailsResponse(response.data || []);
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+                setLoading(false);
                 // TODO: Make response error status clearer
                 notifications.toasts.addWarning('An error has occurred');
-                searchSubscription$.unsubscribe();
+                searchSubscription$.current.unsubscribe();
               }
             },
-            error: () => {
-              if (!didCancel) {
-                setLoading(false);
-              }
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              setLoading(false);
+              notifications.toasts.addDanger({ title: 'Failed to run search', text: msg.message });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -121,6 +115,10 @@ export const useTimelineEventsDetails = ({
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

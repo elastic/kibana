@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
-import { SPACES_USAGE_STATS_TYPE, SPACES_USAGE_STATS_ID } from './constants';
-import {
-  UsageStatsClient,
+
+import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
+import type {
   IncrementCopySavedObjectsOptions,
   IncrementResolveCopySavedObjectsErrorsOptions,
+} from './usage_stats_client';
+import {
   COPY_STATS_PREFIX,
   RESOLVE_COPY_STATS_PREFIX,
+  UsageStatsClient,
 } from './usage_stats_client';
 
 describe('UsageStatsClient', () => {
@@ -22,7 +26,7 @@ describe('UsageStatsClient', () => {
     return { usageStatsClient, debugLoggerMock, repositoryMock };
   };
 
-  const firstPartyRequestHeaders = { 'kbn-version': 'a', origin: 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
+  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' }; // as long as these two header fields are truthy, this will be treated like a first-party request
   const incrementOptions = { refresh: false };
 
   describe('#getUsageStats', () => {

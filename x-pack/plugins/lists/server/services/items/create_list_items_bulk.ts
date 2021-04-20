@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { transformListItemToElasticQuery } from '../utils';
 import {
@@ -23,7 +24,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -37,7 +38,7 @@ export const createListItemsBulk = async ({
   deserializer,
   serializer,
   value,
-  callCluster,
+  esClient,
   listItemIndex,
   user,
   meta,
@@ -81,7 +82,7 @@ export const createListItemsBulk = async ({
     []
   );
   try {
-    await callCluster('bulk', {
+    await esClient.bulk({
       body,
       index: listItemIndex,
       refresh: 'wait_for',

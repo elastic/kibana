@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   mockGlobalState,
-  apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
@@ -27,13 +28,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mockClosePopover = jest.fn();
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;

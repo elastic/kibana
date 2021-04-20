@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface KeyCountBucket {
@@ -58,7 +59,7 @@ export interface AvailableTotal {
   total: number;
 }
 
-type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
 export interface LayoutCounts {
   print: number;
   preserve_layout: number;
@@ -105,14 +106,8 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
+export type ExportType = 'csv' | 'csv_searchsource' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
 export interface KeyCountBucket {
   key: string;
@@ -152,7 +147,7 @@ export interface AggregationResultBuckets {
   doc_count: number;
 }
 
-export interface SearchResponse {
+export interface ReportingUsageSearchResponse {
   aggregations: {
     ranges: {
       buckets: {

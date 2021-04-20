@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
@@ -155,7 +156,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
     <ExpressionWithPopover
       isInvalid={isInvalid}
       value={indexPattern.title}
-      defaultValue={'Select an index pattern and geo shape/point field'}
+      defaultValue={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexSelect', {
+        defaultMessage: 'Select an index pattern and geo point field',
+      })}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexLabel', {
         defaultMessage: 'index',

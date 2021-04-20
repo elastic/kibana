@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -43,7 +44,7 @@ import {
   timeline_id,
   timeline_title,
   type,
-  threat,
+  threats,
   threshold,
   throttle,
   job_status,
@@ -69,6 +70,7 @@ import {
   threat_filters,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 } from '../types/threat_mapping';
 
 import { DefaultListArray } from '../types/lists_default_array';
@@ -106,7 +108,7 @@ export const requiredRulesSchema = t.type({
   tags,
   to,
   type,
-  threat,
+  threat: threats,
   created_at,
   updated_at,
   created_by,
@@ -150,6 +152,7 @@ export const dependentRulesSchema = t.partial({
   items_per_search,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 });
 
 /**
@@ -285,6 +288,9 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
       t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
       t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(
+        t.partial({ threat_indicator_path: dependentRulesSchema.props.threat_indicator_path })
+      ),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
       t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
       t.exact(

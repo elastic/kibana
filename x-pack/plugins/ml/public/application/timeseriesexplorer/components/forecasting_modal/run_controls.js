@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -26,7 +27,7 @@ import {
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
 import { ForecastProgress } from './forecast_progress';
-import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { currentMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -40,7 +41,7 @@ function getRunInputDisabledState(job, isForecastRequested) {
   // - No canForecastJob permission
   // - Job is not in an OPENED or CLOSED state
   // - A new forecast has been requested
-  if (mlNodesAvailable() === false) {
+  if (currentMlNodesAvailable() === false) {
     return {
       isDisabled: true,
       isDisabledToolTipText: i18n.translate(

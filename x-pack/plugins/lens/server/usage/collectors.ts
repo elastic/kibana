@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -12,15 +13,23 @@ import { TaskManagerStartContract } from '../../../task_manager/server';
 import { LensUsage, LensTelemetryState } from './types';
 import { lensUsageSchema } from './schema';
 
+const emptyUsageCollection = {
+  saved_overall: {},
+  saved_30_days: {},
+  saved_90_days: {},
+  saved_overall_total: 0,
+  saved_30_days_total: 0,
+  saved_90_days_total: 0,
+  events_30_days: {},
+  events_90_days: {},
+  suggestion_events_30_days: {},
+  suggestion_events_90_days: {},
+};
+
 export function registerLensUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
   const lensUsageCollector = usageCollection.makeUsageCollector<LensUsage>({
     type: 'lens',
     async fetch() {
@@ -33,6 +42,7 @@ export function registerLensUsageCollector(
         const suggestions = getDataByDate(state.suggestionsByDate);
 
         return {
+          ...emptyUsageCollection,
           ...state.saved,
           events_30_days: events.last30,
           events_90_days: events.last90,
@@ -40,22 +50,13 @@ export function registerLensUsageCollector(
           suggestion_events_90_days: suggestions.last90,
         };
       } catch (err) {
-        return {
-          saved_overall_total: 0,
-          saved_30_days_total: 0,
-          saved_90_days_total: 0,
-          saved_overall: {},
-          saved_30_days: {},
-          saved_90_days: {},
-
-          events_30_days: {},
-          events_90_days: {},
-          suggestion_events_30_days: {},
-          suggestion_events_90_days: {},
-        };
+        return emptyUsageCollection;
       }
     },
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     schema: lensUsageSchema,
   });
 

@@ -1,0 +1,181 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fields from job.columns (7.13+ generated) cells can be multi-value 1`] = `
+"product,category
+coconut,\\"cool, rad\\"
+"
+`;
+
+exports[`fields from job.columns (7.13+ generated) columns can be top-level fields such as _id and _index 1`] = `
+"\\"_id\\",\\"_index\\",product,category
+\\"my-cool-id\\",\\"my-cool-index\\",coconut,\\"cool, rad\\"
+"
+`;
+
+exports[`fields from job.columns (7.13+ generated) empty columns defaults to using searchSource.getFields() 1`] = `
+"product
+coconut
+"
+`;
+
+exports[`fields from job.searchSource.getFields() (7.12 generated) cells can be multi-value 1`] = `
+"\\"_id\\",sku
+\\"my-cool-id\\",\\"This is a cool SKU., This is also a cool SKU.\\"
+"
+`;
+
+exports[`fields from job.searchSource.getFields() (7.12 generated) provides top-level underscored fields as columns 1`] = `
+"\\"_id\\",\\"_index\\",date,message
+\\"my-cool-id\\",\\"my-cool-index\\",\\"2020-12-31T00:14:28.000Z\\",\\"it's nice to see you\\"
+"
+`;
+
+exports[`fields from job.searchSource.getFields() (7.12 generated) sorts the fields when they are to be used as table column names 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",date,\\"message_t\\",\\"message_u\\",\\"message_v\\",\\"message_w\\",\\"message_x\\",\\"message_y\\",\\"message_z\\"
+\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"'-\\",\\"2020-12-31T00:14:28.000Z\\",\\"test field T\\",\\"test field U\\",\\"test field V\\",\\"test field W\\",\\"test field X\\",\\"test field Y\\",\\"test field Z\\"
+"
+`;
+
+exports[`formats a search result to CSV content 1`] = `
+"date,ip,message
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\"
+"
+`;
+
+exports[`formats an empty search result to CSV content 1`] = `
+"date,ip,message
+"
+`;
+
+exports[`formulas can check for formulas, without escaping them 1`] = `
+"date,ip,message
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"=SUM(A1:A2)\\"
+"
+`;
+
+exports[`formulas escapes formula values in a cell, doesn't warn the csv contains formulas 1`] = `
+"date,ip,message
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"'=SUM(A1:A2)\\"
+"
+`;
+
+exports[`formulas escapes formula values in a header, doesn't warn the csv contains formulas 1`] = `
+"date,ip,\\"'=SUM(A1:A2)\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is great data\\"
+"
+`;
+
+exports[`uses the scrollId to page all the data 1`] = `
+"date,ip,message
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from a subsequent scroll\\"
+"
+`;
+
+exports[`warns if max size was reached 1`] = `
+"date,ip,message
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
+"
+`;

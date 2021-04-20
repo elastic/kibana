@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -15,7 +16,10 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
+    }),
+    query: schema.object({
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
@@ -27,7 +31,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
-    if (result === null) {
+    if (result === null || !result.blob) {
       return response.notFound();
     }
     return response.ok({

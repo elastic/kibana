@@ -1,4 +1,4 @@
-<td colspan="{{ columns.length + 2 }}">
+<td colspan="{{ (columns.length || 1) + 2 }}">
   <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--justifyContentSpaceBetween">
     <div class="euiFlexItem euiFlexItem--flexGrowZero euiText euiText--small">
       <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow">
@@ -31,7 +31,7 @@
           <a
             class="euiLink"
             data-test-subj="docTableRowAction"
-            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}?id={{uriEncodedId}}"
+            ng-href="{{ getSingleDocHref() }}"
             i18n-id="discover.docTable.tableRow.viewSingleDocumentLinkText"
             i18n-default-message="View single document"
           ></a>

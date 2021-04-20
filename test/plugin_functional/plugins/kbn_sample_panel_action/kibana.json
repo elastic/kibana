@@ -1,5 +1,5 @@
 {
-  "id": "kbn_sample_panel_action",
+  "id": "kbnSamplePanelAction",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["kbn_sample_panel_action"],

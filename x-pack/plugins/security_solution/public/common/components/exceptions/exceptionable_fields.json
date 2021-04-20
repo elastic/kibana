@@ -127,5 +127,6 @@
   "user.domain",
   "user.email",
   "user.hash",
-  "user.id"
+  "user.id",
+  "Ransomware.feature"
 ]

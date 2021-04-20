@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -20,15 +19,15 @@ function deleteWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   });
 }
 
-export function registerDeleteRoute(deps: RouteDependencies) {
-  deps.router.delete(
+export function registerDeleteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {
@@ -43,7 +42,7 @@ export function registerDeleteRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

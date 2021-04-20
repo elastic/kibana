@@ -1,27 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   StatsGetter,
   StatsCollectionContext,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
+import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
 import { getNodesUsage } from './get_nodes_usage';
@@ -38,7 +28,7 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  */
 export function handleLocalStats(
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  { cluster_name, cluster_uuid, version }: ESClusterInfo,
+  { cluster_name, cluster_uuid, version }: estypes.RootNodeInfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,
@@ -71,7 +61,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
   config,
   context
 ) => {
-  const { callCluster, usageCollection, esClient, soClient, kibanaRequest } = config;
+  const { usageCollection, esClient, soClient, kibanaRequest } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
@@ -79,7 +69,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, callCluster, esClient, soClient, kibanaRequest),
+        getKibana(usageCollection, esClient, soClient, kibanaRequest),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

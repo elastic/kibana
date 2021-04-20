@@ -1,18 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import React from 'react';
+import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
+import {
+  elementOrChildrenHasFocus,
+  getFocusedDataColindexCell,
+  getTableSkipFocus,
+  handleSkipFocus,
+  stopPropagationAndPreventDefault,
+} from '../accessibility/helpers';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
-import { ToStringArray } from '../../../graphql/types';
 
 import * as i18n from './translations';
 
@@ -40,8 +49,40 @@ export interface Item {
   field: JSX.Element;
   fieldId: string;
   type: string;
-  values: ToStringArray;
+  values: string[];
 }
+
+export interface AlertSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    value: string;
+    fieldType: string;
+    linkValue: string | undefined;
+  };
+}
+
+export interface ThreatSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    values: string[];
+  };
+}
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}
+
+export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -104,6 +145,7 @@ export const getIconFromType = (type: string | null) => {
     case 'date':
       return 'clock';
     case 'ip':
+    case 'geo_point':
       return 'globe';
     case 'object':
       return 'questionInCircle';
@@ -112,4 +154,84 @@ export const getIconFromType = (type: string | null) => {
     default:
       return 'questionInCircle';
   }
+};
+
+export const EVENT_FIELDS_TABLE_CLASS_NAME = 'event-fields-table';
+
+/**
+ * Returns `true` if the Event Details "event fields" table, or it's children,
+ * has focus
+ */
+export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${EVENT_FIELDS_TABLE_CLASS_NAME}`)
+  );
+
+/**
+ * This function has a side effect. It will skip focus "after" or "before"
+ * the Event Details table, with exceptions as noted below.
+ *
+ * If the currently-focused table cell has additional focusable children,
+ * i.e. draggables or always-open popover content, the browser's "natural"
+ * focus management will determine which element is focused next.
+ */
+export const onEventDetailsTabKeyPressed = ({
+  containerElement,
+  keyboardEvent,
+  onSkipFocusBeforeEventsTable,
+  onSkipFocusAfterEventsTable,
+}: {
+  containerElement: HTMLElement | null;
+  keyboardEvent: React.KeyboardEvent;
+  onSkipFocusBeforeEventsTable: () => void;
+  onSkipFocusAfterEventsTable: () => void;
+}) => {
+  const { shiftKey } = keyboardEvent;
+
+  const eventFieldsTableSkipFocus = getTableSkipFocus({
+    containerElement,
+    getFocusedCell: getFocusedDataColindexCell,
+    shiftKey,
+    tableHasFocus,
+    tableClassName: EVENT_FIELDS_TABLE_CLASS_NAME,
+  });
+
+  if (eventFieldsTableSkipFocus !== 'SKIP_FOCUS_NOOP') {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    handleSkipFocus({
+      onSkipFocusBackwards: onSkipFocusBeforeEventsTable,
+      onSkipFocusForward: onSkipFocusAfterEventsTable,
+      skipFocus: eventFieldsTableSkipFocus,
+    });
+  }
+};
+
+const getTitle = (title: string) => (
+  <EuiTitle size="xxs">
+    <h5>{title}</h5>
+  </EuiTitle>
+);
+getTitle.displayName = 'getTitle';
+
+export const getSummaryColumns = (
+  DescriptionComponent:
+    | React.FC<ThreatSummaryRow['description']>
+    | React.FC<AlertSummaryRow['description']>
+    | React.FC<ThreatDetailsRow['description']>
+): Array<EuiBasicTableColumn<SummaryRow>> => {
+  return [
+    {
+      field: 'title',
+      truncateText: false,
+      render: getTitle,
+      width: '160px',
+      name: '',
+    },
+    {
+      field: 'description',
+      truncateText: false,
+      render: DescriptionComponent,
+      name: '',
+    },
+  ];
 };

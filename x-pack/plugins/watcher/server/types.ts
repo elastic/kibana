@@ -1,16 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import type { ILegacyScopedClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { License, isEsError } from './shared_imports';
 
-export interface Dependencies {
+export interface SetupDependencies {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+}
+
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
 }
 
 export interface ServerShim {
@@ -21,11 +27,28 @@ export interface ServerShim {
 }
 
 export interface RouteDependencies {
-  router: IRouter;
-  getLicenseStatus: () => LicenseStatus;
+  router: WatcherRouter;
+  license: License;
+  lib: {
+    isEsError: typeof isEsError;
+  };
 }
 
-export interface LicenseStatus {
-  hasRequired: boolean;
-  message?: string;
+/**
+ * @internal
+ */
+export interface WatcherContext {
+  client: ILegacyScopedClusterClient;
 }
+
+/**
+ * @internal
+ */
+export interface WatcherRequestHandlerContext extends RequestHandlerContext {
+  watcher: WatcherContext;
+}
+
+/**
+ * @internal
+ */
+export type WatcherRouter = IRouter<WatcherRequestHandlerContext>;

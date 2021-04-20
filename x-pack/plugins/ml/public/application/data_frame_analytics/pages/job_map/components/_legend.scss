@@ -28,19 +28,10 @@
   display: 'inline-block';
 }
 
-.mlJobMapLegend__trainedModel {
-  width: 0;
-  height: 0;
-  border-left: $euiSizeS solid $euiColorGhost;
-  border-right: $euiSizeS solid $euiColorGhost;
-  border-bottom: $euiSizeM solid $euiColorVis3;
-  display: 'inline-block';
-}
-
 .mlJobMapLegend__sourceNode {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: $euiColorLightShade;
+  background-color: $euiColorWarning;
   border: $euiBorderThin;
   border-radius: $euiBorderRadius;
   display: 'inline-block';

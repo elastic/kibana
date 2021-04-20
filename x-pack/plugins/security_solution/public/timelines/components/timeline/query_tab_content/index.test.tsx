@@ -1,27 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { Direction } from '../../../../graphql/types';
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
+import { defaultRowRenderers } from '../body/renderers';
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { Direction } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -67,6 +70,7 @@ describe('Timeline', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -94,9 +98,8 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      expandedEvent: {},
       eventType: 'all',
-      showEventDetails: false,
+      expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
       isLive: false,
@@ -105,12 +108,17 @@ describe('Timeline', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
+      showExpandedDetails: false,
       sort,
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 
@@ -142,7 +150,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
@@ -159,7 +169,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -170,7 +182,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -181,7 +195,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 

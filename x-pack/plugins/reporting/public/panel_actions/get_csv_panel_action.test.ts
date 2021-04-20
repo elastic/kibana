@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of } from 'rxjs';
@@ -15,6 +16,7 @@ describe('GetCsvReportPanelAction', () => {
   let core: any;
   let context: any;
   let mockLicense$: any;
+  let mockSearchSource: any;
 
   beforeAll(() => {
     if (typeof window.URL.revokeObjectURL === 'undefined') {
@@ -48,10 +50,20 @@ describe('GetCsvReportPanelAction', () => {
       },
     } as any;
 
+    mockSearchSource = {
+      createCopy: () => mockSearchSource,
+      removeField: jest.fn(),
+      setField: jest.fn(),
+      getField: jest.fn(),
+      getSerializedFields: jest.fn().mockImplementation(() => ({})),
+    };
+
     context = {
       embeddable: {
         type: 'search',
-        getSavedSearch: () => ({ id: 'lebowski' }),
+        getSavedSearch: () => {
+          return { searchSource: mockSearchSource };
+        },
         getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({
@@ -63,6 +75,49 @@ describe('GetCsvReportPanelAction', () => {
         }),
       },
     } as any;
+  });
+
+  it('translates empty embeddable context into job params', async () => {
+    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+
+    await panel.execute(context);
+
+    expect(core.http.post).toHaveBeenCalledWith(
+      '/api/reporting/v1/generate/immediate/csv_searchsource',
+      {
+        body: '{"searchSource":{},"columns":[],"browserTimezone":"America/New_York"}',
+      }
+    );
+  });
+
+  it('translates embeddable context into job params', async () => {
+    // setup
+    mockSearchSource = {
+      createCopy: () => mockSearchSource,
+      removeField: jest.fn(),
+      setField: jest.fn(),
+      getField: jest.fn(),
+      getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
+    };
+    context.embeddable.getSavedSearch = () => {
+      return {
+        searchSource: mockSearchSource,
+        columns: ['column_a', 'column_b'],
+      };
+    };
+
+    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+
+    // test
+    await panel.execute(context);
+
+    expect(core.http.post).toHaveBeenCalledWith(
+      '/api/reporting/v1/generate/immediate/csv_searchsource',
+      {
+        body:
+          '{"searchSource":{"testData":"testDataValue"},"columns":["column_a","column_b"],"browserTimezone":"America/New_York"}',
+      }
+    );
   });
 
   it('allows downloading for valid licenses', async () => {

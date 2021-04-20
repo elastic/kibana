@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { FiltersIndexPatternColumn } from '.';
+import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '../index';
-import { IndexPatternPrivateState } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
+import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
+
+const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
+  indexPattern: createMockedIndexPattern(),
 };
 
 // mocking random id generator function
@@ -38,48 +43,39 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('filters', () => {
-  let state: IndexPatternPrivateState;
+  let layer: IndexPatternLayer;
   const InlineOptions = filtersOperation.paramEditor!;
 
   beforeEach(() => {
-    state = {
-      indexPatternRefs: [],
-      indexPatterns: {},
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            col1: {
-              label: 'filters',
-              dataType: 'document',
-              operationType: 'filters',
-              scale: 'ordinal',
-              isBucketed: true,
-              params: {
-                filters: [
-                  {
-                    input: { query: 'bytes >= 1', language: 'kuery' },
-                    label: 'More than one',
-                  },
-                  {
-                    input: { query: 'src : 2', language: 'kuery' },
-                    label: '',
-                  },
-                ],
+    layer = {
+      indexPatternId: '1',
+      columnOrder: ['col1', 'col2'],
+      columns: {
+        col1: {
+          label: 'filters',
+          dataType: 'document',
+          operationType: 'filters',
+          scale: 'ordinal',
+          isBucketed: true,
+          params: {
+            filters: [
+              {
+                input: { query: 'bytes >= 1', language: 'kuery' },
+                label: 'More than one',
               },
-            },
-            col2: {
-              label: 'Count',
-              dataType: 'number',
-              isBucketed: false,
-              sourceField: 'Records',
-              operationType: 'count',
-            },
+              {
+                input: { query: 'src : 2', language: 'kuery' },
+                label: '',
+              },
+            ],
           },
+        },
+        col2: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
         },
       },
     };
@@ -88,9 +84,11 @@ describe('filters', () => {
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const esAggsFn = filtersOperation.toEsAggsFn(
-        state.layers.first.columns.col1 as FiltersIndexPatternColumn,
+        layer.columns.col1 as FiltersIndexPatternColumn,
         'col1',
-        state.indexPatterns['1']
+        createMockedIndexPattern(),
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -133,15 +131,14 @@ describe('filters', () => {
     }));
 
     it('should update state when changing a filter', () => {
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
+          layer={layer}
+          updateLayer={updateLayerSpy}
           columnId="col1"
-          currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
-          layerId="first"
+          currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
         />
       );
 
@@ -156,34 +153,29 @@ describe('filters', () => {
         });
       });
       instance.update();
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  filters: [
-                    {
-                      input: {
-                        query: 'dest : 5',
-                        language: 'lucene',
-                      },
-                      label: 'Dest5',
-                    },
-                    {
-                      input: {
-                        language: 'kuery',
-                        query: 'src : 2',
-                      },
-                      label: '',
-                    },
-                  ],
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              filters: [
+                {
+                  input: {
+                    query: 'dest : 5',
+                    language: 'lucene',
+                  },
+                  label: 'Dest5',
                 },
-              },
+                {
+                  input: {
+                    language: 'kuery',
+                    query: 'src : 2',
+                  },
+                  label: '',
+                },
+              ],
             },
           },
         },
@@ -192,15 +184,14 @@ describe('filters', () => {
 
     describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
         const instance = mount(
           <InlineOptions
             {...defaultProps}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
         );
         expect(
@@ -218,15 +209,14 @@ describe('filters', () => {
       });
 
       it('should remove filter', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
         const instance = mount(
           <InlineOptions
             {...defaultProps}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
         );
 
@@ -234,27 +224,22 @@ describe('filters', () => {
           .find('[data-test-subj="lns-customBucketContainer-remove"]')
           .at(2)
           .simulate('click');
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    filters: [
-                      {
-                        input: {
-                          language: 'kuery',
-                          query: 'bytes >= 1',
-                        },
-                        label: 'More than one',
-                      },
-                    ],
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                filters: [
+                  {
+                    input: {
+                      language: 'kuery',
+                      query: 'bytes >= 1',
+                    },
+                    label: 'More than one',
                   },
-                },
+                ],
               },
             },
           },

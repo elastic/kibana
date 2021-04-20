@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -216,7 +217,7 @@ describe('Header', () => {
     );
 
     expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
-      '9 categories'
+      '10 categories'
     );
   });
 
@@ -253,6 +254,6 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('25 fields');
+    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('27 fields');
   });
 });

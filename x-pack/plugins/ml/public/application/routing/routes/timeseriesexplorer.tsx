@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -11,12 +12,12 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../contexts/kibana';
+import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
-import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { mlForecastService } from '../../services/forecast_service';
@@ -42,7 +43,8 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeRangeBounds } from '../../util/time_buckets';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -93,6 +95,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [
     timeSeriesExplorerUrlState,
@@ -249,7 +252,12 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       setLastRefresh(Date.now());
       appStateHandler(APP_STATE_ACTION.CLEAR);
     }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    const validatedJobId = validateJobSelection(
+      jobsWithTimeRange,
+      selectedJobIds,
+      setGlobalState,
+      toasts
+    );
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }

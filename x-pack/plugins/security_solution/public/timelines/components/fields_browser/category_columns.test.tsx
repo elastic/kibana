@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -11,49 +12,40 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 
 import { CATEGORY_PANE_WIDTH, getFieldCount } from './helpers';
 import { CategoriesPane } from './categories_pane';
-import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 const timelineId = 'test';
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('getCategoryColumns', () => {
   Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the ${categoryId} category name (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <CategoriesPane
-            browserFields={mockBrowserFields}
-            filteredBrowserFields={mockBrowserFields}
-            width={CATEGORY_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-          />
-        </ThemeProvider>
+        <CategoriesPane
+          filteredBrowserFields={mockBrowserFields}
+          width={CATEGORY_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
       );
+
+      const fieldCount = Object.keys(mockBrowserFields[categoryId].fields ?? {}).length;
 
       expect(
         wrapper.find(`.field-browser-category-pane-${categoryId}-${timelineId}`).first().text()
-      ).toEqual(categoryId);
+      ).toEqual(`${categoryId}${fieldCount}`);
     });
   });
 
   Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the correct field count for the ${categoryId} category (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <CategoriesPane
-            browserFields={mockBrowserFields}
-            filteredBrowserFields={mockBrowserFields}
-            width={CATEGORY_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-          />
-        </ThemeProvider>
+        <CategoriesPane
+          filteredBrowserFields={mockBrowserFields}
+          width={CATEGORY_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
       );
 
       expect(
@@ -66,21 +58,20 @@ describe('getCategoryColumns', () => {
     const selectedCategoryId = 'auditd';
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={jest.fn()}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).at(1)
+      wrapper
+        .find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`)
+        .find('[data-test-subj="categoryName"]')
+        .at(1)
     ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
@@ -89,21 +80,20 @@ describe('getCategoryColumns', () => {
     const notTheSelectedCategoryId = 'base';
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={jest.fn()}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).at(1)
+      wrapper
+        .find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`)
+        .find('[data-test-subj="categoryName"]')
+        .at(1)
     ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
   });
 
@@ -114,17 +104,13 @@ describe('getCategoryColumns', () => {
     const onCategorySelected = jest.fn();
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={onCategorySelected}
-          onUpdateColumns={jest.fn()}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={onCategorySelected}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     wrapper

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
@@ -17,10 +19,13 @@ import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { defaultRowRenderers } from './renderers';
 
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
+    columnType: 'number',
     sortDirection: Direction.desc,
   },
 ];
@@ -36,8 +41,8 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useShallowEqualSelector: () => mockTimelineModel,
+  useDeepEqualSelector: () => mockTimelineModel,
 }));
 
 jest.mock('../../../../common/components/link_to');
@@ -61,6 +66,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const props: StatefulBodyProps = {
+    activePage: 0,
     browserFields: mockBrowserFields,
     clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
@@ -72,10 +78,14 @@ describe('Body', () => {
     loadingEventIds: [],
     pinnedEventIds: {},
     refetch: jest.fn(),
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
+    tabType: TimelineTabs.query,
+    totalPages: 1,
   };
 
   describe('rendering', () => {
@@ -215,6 +225,83 @@ describe('Body', () => {
           id: 'timeline-test',
         })
       );
+    });
+  });
+
+  describe('event details', () => {
+    beforeEach(() => {
+      mockDispatch.mockReset();
+    });
+    test('call the right reduce action to show event details for query tab', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...props} />
+        </TestProviders>
+      );
+
+      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      wrapper.update();
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        payload: {
+          panelView: 'eventDetail',
+          params: {
+            eventId: '1',
+            indexName: undefined,
+          },
+          tabType: 'query',
+          timelineId: 'timeline-test',
+        },
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+      });
+    });
+
+    test('call the right reduce action to show event details for pinned tab', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...props} tabType={TimelineTabs.pinned} />
+        </TestProviders>
+      );
+
+      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      wrapper.update();
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        payload: {
+          panelView: 'eventDetail',
+          params: {
+            eventId: '1',
+            indexName: undefined,
+          },
+          tabType: 'pinned',
+          timelineId: 'timeline-test',
+        },
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+      });
+    });
+
+    test('call the right reduce action to show event details for notes tab', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...props} tabType={TimelineTabs.notes} />
+        </TestProviders>
+      );
+
+      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      wrapper.update();
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        payload: {
+          panelView: 'eventDetail',
+          params: {
+            eventId: '1',
+            indexName: undefined,
+          },
+          tabType: 'notes',
+          timelineId: 'timeline-test',
+        },
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+      });
     });
   });
 });

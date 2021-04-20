@@ -1,28 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
+import { RowRenderer } from './body/renderers/row_renderer';
+import { CellValueElementProps } from './cell_rendering';
+import { isTab } from '../../../common/components/accessibility/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
+import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -32,10 +38,12 @@ const TimelineTemplateBadge = styled.div`
 `;
 
 export interface Props {
-  timelineId: string;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
 }
 
-const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
+const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
@@ -46,8 +54,13 @@ const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
 
-const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({
+  renderCellValue,
+  rowRenderers,
+  timelineId,
+}) => {
   const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
   const { graphEventId, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
@@ -56,7 +69,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-  const { timelineFullScreen } = useTimelineFullScreen();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -65,7 +78,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
           id: timelineId,
           columns: defaultHeaders,
           indexNames: selectedPatterns,
-          expandedEvent: activeTimeline.getExpandedEvent(),
+          expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
         })
       );
@@ -73,19 +86,66 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
+      EXIT_FULL_SCREEN_CLASS_NAME
+    );
+
+    if (exitFullScreenButton != null) {
+      exitFullScreenButton.focus();
+    } else {
+      containerElement.current
+        ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
+        ?.focus();
+    }
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    containerElement.current
+      ?.querySelector<HTMLButtonElement>(`.${EVENTS_COUNT_BUTTON_CLASS_NAME}`)
+      ?.focus();
+  }, [containerElement]);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
   return (
-    <TimelineContainer data-test-subj="timeline" data-timeline-id={timelineId}>
+    <TimelineContainer
+      data-test-subj="timeline"
+      data-timeline-id={timelineId}
+      onKeyDown={onKeyDown}
+      ref={containerElement}
+    >
       <TimelineSavingProgress timelineId={timelineId} />
       {timelineType === TimelineType.template && (
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <FlyoutHeaderPanel timelineId={timelineId} />
       <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeaderPanel timelineId={timelineId} />
         <FlyoutHeader timelineId={timelineId} />
       </HideShowContainer>
 
-      <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
+      <TabsContent
+        graphEventId={graphEventId}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
+        setTimelineFullScreen={setTimelineFullScreen}
+        timelineId={timelineId}
+        timelineType={timelineType}
+        timelineFullScreen={timelineFullScreen}
+      />
     </TimelineContainer>
   );
 };

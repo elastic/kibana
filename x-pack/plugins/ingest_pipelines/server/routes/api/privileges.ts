@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { RouteDependencies } from '../../types';
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
@@ -34,36 +36,21 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
         return res.ok({ body: privilegesResult });
       }
 
+      const { client: clusterClient } = ctx.core.elasticsearch;
+
       const {
-        core: {
-          elasticsearch: {
-            legacy: { client },
-          },
-        },
-      } = ctx;
+        body: { has_all_requested: hasAllPrivileges, cluster },
+      } = await clusterClient.asCurrentUser.security.hasPrivileges({
+        body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
+      });
 
-      try {
-        const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
-          'transport.request',
-          {
-            path: '/_security/user/_has_privileges',
-            method: 'POST',
-            body: {
-              cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
-            },
-          }
-        );
-
-        if (!hasAllPrivileges) {
-          privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-        }
-
-        privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
-        return res.ok({ body: privilegesResult });
-      } catch (e) {
-        return res.internalError({ body: e });
+      if (!hasAllPrivileges) {
+        privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
       }
+
+      privilegesResult.hasAllPrivileges = hasAllPrivileges;
+
+      return res.ok({ body: privilegesResult });
     })
   );
 };

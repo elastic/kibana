@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -96,3 +97,10 @@ export const TRANSFORM_MODE = {
 
 const transformModes = Object.values(TRANSFORM_MODE);
 export type TransformMode = typeof transformModes[number];
+
+export const TRANSFORM_FUNCTION = {
+  PIVOT: 'pivot',
+  LATEST: 'latest',
+} as const;
+
+export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];

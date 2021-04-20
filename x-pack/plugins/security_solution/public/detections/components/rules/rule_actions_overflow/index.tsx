@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -23,6 +24,7 @@ import { displaySuccessToast, useStateToaster } from '../../../../common/compone
 import {
   deleteRulesAction,
   duplicateRulesAction,
+  editRuleAction,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { GenericDownloader } from '../../../../common/components/generic_downloader';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -73,7 +75,15 @@ const RuleActionsOverflowComponent = ({
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 setIsPopoverOpen(false);
-                await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
+                const createdRules = await duplicateRulesAction(
+                  [rule],
+                  [rule.id],
+                  noop,
+                  dispatchToaster
+                );
+                if (createdRules?.length) {
+                  editRuleAction(createdRules[0], history);
+                }
               }}
             >
               <EuiToolTip

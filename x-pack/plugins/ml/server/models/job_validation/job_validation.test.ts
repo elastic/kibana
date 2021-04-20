@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
-import { JobValidationMessage } from '../../../common/constants/messages';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../common/types/es_client';
 import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
+  search: () =>
+    Promise.resolve({
+      body: { hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } } },
+    }),
 };
 
 const mlClusterClient = ({
@@ -274,7 +278,6 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65865
   it('basic validation passes, extended checks return some messages', () => {
     const payload = getBasicPayload();
     return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
@@ -288,7 +291,6 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65866
   it('categorization job using mlcategory passes aggregatable field check', () => {
     const payload: any = {
       job: {
@@ -355,7 +357,6 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65867
   it('script field not reported as non aggregatable', () => {
     const payload: any = {
       job: {
@@ -396,29 +397,6 @@ describe('ML - validateJob', () => {
         'time_field_invalid',
         'influencer_low_suggestion',
       ]);
-    });
-  });
-
-  // the following two tests validate the correct template rendering of
-  // urls in messages with {{version}} in them to be replaced with the
-  // specified version. (defaulting to 'current')
-  const docsTestPayload = getBasicPayload() as any;
-  docsTestPayload.job.analysis_config.detectors = [{ function: 'count', by_field_name: 'airline' }];
-  it('creates a docs url pointing to the current docs version', () => {
-    return validateJob(mlClusterClient, mlClient, docsTestPayload).then((messages) => {
-      const message = messages[
-        messages.findIndex((m) => m.id === 'field_not_aggregatable')
-      ] as JobValidationMessage;
-      expect(message.url!.search('/current/')).not.toBe(-1);
-    });
-  });
-
-  it('creates a docs url pointing to the master docs version', () => {
-    return validateJob(mlClusterClient, mlClient, docsTestPayload, 'master').then((messages) => {
-      const message = messages[
-        messages.findIndex((m) => m.id === 'field_not_aggregatable')
-      ] as JobValidationMessage;
-      expect(message.url!.search('/master/')).not.toBe(-1);
     });
   });
 });

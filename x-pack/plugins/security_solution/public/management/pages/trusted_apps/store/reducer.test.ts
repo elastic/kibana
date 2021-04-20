@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AsyncResourceState } from '../state';
@@ -30,20 +31,30 @@ describe('reducer', () => {
         initialState,
         createUserChangedUrlAction(
           '/trusted_apps',
-          '?page_index=5&page_size=50&show=create&view_type=list'
+          '?page_index=5&page_size=50&show=create&view_type=list&filter=test'
         )
       );
 
       expect(result).toStrictEqual({
         ...initialState,
-        location: { page_index: 5, page_size: 50, show: 'create', view_type: 'list' },
+        location: {
+          page_index: 5,
+          page_size: 50,
+          show: 'create',
+          view_type: 'list',
+          id: undefined,
+          filter: 'test',
+        },
         active: true,
       });
     });
 
     it('extracts default pagination parameters when invalid provided', () => {
       const result = trustedAppsPageReducer(
-        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
+        {
+          ...initialState,
+          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+        },
         createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60&show=a&view_type=c')
       );
 
@@ -52,7 +63,10 @@ describe('reducer', () => {
 
     it('extracts default pagination parameters when none provided', () => {
       const result = trustedAppsPageReducer(
-        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
+        {
+          ...initialState,
+          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+        },
         createUserChangedUrlAction('/trusted_apps')
       );
 

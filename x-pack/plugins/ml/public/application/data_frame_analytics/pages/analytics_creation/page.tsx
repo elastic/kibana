@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -24,13 +25,20 @@ import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
-import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
+import {
+  AdvancedStep,
+  ConfigurationStep,
+  CreateStep,
+  DetailsStep,
+  ValidationStepWrapper,
+} from './components';
 import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
   ADVANCED,
   DETAILS,
+  VALIDATION,
   CREATE,
 }
 
@@ -40,7 +48,13 @@ interface Props {
 
 export const Page: FC<Props> = ({ jobId }) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
-  const [activatedSteps, setActivatedSteps] = useState<boolean[]>([true, false, false, false]);
+  const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
+    true,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
@@ -62,7 +76,7 @@ export const Page: FC<Props> = ({ jobId }) => {
     if (currentIndexPattern) {
       (async function () {
         if (jobId !== undefined) {
-          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
           if (
             Array.isArray(analyticsConfigs.data_frame_analytics) &&
             analyticsConfigs.data_frame_analytics.length > 0
@@ -90,6 +104,7 @@ export const Page: FC<Props> = ({ jobId }) => {
       children: (
         <ConfigurationStep
           {...createAnalyticsForm}
+          isClone={jobId !== undefined}
           setCurrentStep={setCurrentStep}
           step={currentStep}
           stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
@@ -125,6 +140,21 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+    },
+    {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.validationStepTitle', {
+        defaultMessage: 'Validation',
+      }),
+      children: (
+        <ValidationStepWrapper
+          {...createAnalyticsForm}
+          setCurrentStep={setCurrentStep}
+          step={currentStep}
+          stepActivated={activatedSteps[ANALYTICS_STEPS.VALIDATION]}
+        />
+      ),
+      status:
+        currentStep >= ANALYTICS_STEPS.VALIDATION ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {

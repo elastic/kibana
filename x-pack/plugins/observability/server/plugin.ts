@@ -1,37 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { take } from 'rxjs/operators';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
-  ScopedAnnotationsClient,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
+import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { uiSettings } from './ui_settings';
+import { registerRoutes } from './routes/register_routes';
+import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
+import { observabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
 
-type LazyScopedAnnotationsClientFactory = (
-  ...args: Parameters<ScopedAnnotationsClientFactory>
-) => Promise<ScopedAnnotationsClient | undefined>;
-
-export interface ObservabilityPluginSetup {
-  getScopedAnnotationsClient: LazyScopedAnnotationsClientFactory;
-}
+export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
+export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public async setup(core: CoreSetup, plugins: {}): Promise<ObservabilityPluginSetup> {
-    const config$ = this.initContext.config.create<ObservabilityConfig>();
-
-    const config = await config$.pipe(take(1)).toPromise();
+  public setup(
+    core: CoreSetup,
+    plugins: {
+      ruleRegistry: RuleRegistryPluginSetupContract;
+    }
+  ) {
+    const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
+
+    core.uiSettings.register(uiSettings);
 
     if (config.annotations.enabled) {
       annotationsApiPromise = bootstrapAnnotations({
@@ -45,11 +51,27 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
+    const observabilityRuleRegistry = plugins.ruleRegistry.create({
+      ...observabilityRuleRegistrySettings,
+      fieldMap: observabilityRuleFieldMap,
+    });
+
+    registerRoutes({
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+      ruleRegistry: observabilityRuleRegistry,
+      logger: this.initContext.logger.get(),
+      repository: getGlobalObservabilityServerRouteRepository(),
+    });
+
     return {
-      getScopedAnnotationsClient: async (...args) => {
+      getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
+      ruleRegistry: observabilityRuleRegistry,
     };
   }
 

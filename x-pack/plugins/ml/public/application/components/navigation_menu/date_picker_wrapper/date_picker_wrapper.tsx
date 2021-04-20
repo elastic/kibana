@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
+
+interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
 
 interface Duration {
   start: string;
@@ -70,6 +78,19 @@ export const DatePickerWrapper: FC = () => {
   );
 
   const dateFormat = config.get('dateFormat');
+  const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      timePickerQuickRanges.map(({ from, to, display }) => ({
+        start: from,
+        end: to,
+        label: display,
+      })),
+    [timePickerQuickRanges]
+  );
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -122,24 +143,26 @@ export const DatePickerWrapper: FC = () => {
     setRefreshInterval({ pause, value });
   }
 
-  return (
-    <Fragment>
-      {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
-        <div className="mlNavigationMenu__datePickerWrapper">
-          <EuiSuperDatePicker
-            start={time.from}
-            end={time.to}
-            isPaused={refreshInterval.pause}
-            isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-            refreshInterval={refreshInterval.value}
-            onTimeChange={updateFilter}
-            onRefresh={updateLastRefresh}
-            onRefreshChange={updateInterval}
-            recentlyUsedRanges={recentlyUsedRanges}
-            dateFormat={dateFormat}
-          />
-        </div>
-      )}
-    </Fragment>
-  );
+  /**
+   * Enforce pause when it's set to false with 0 refresh interval.
+   */
+  const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
+
+  return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
+    <div className="mlNavigationMenu__datePickerWrapper">
+      <EuiSuperDatePicker
+        start={time.from}
+        end={time.to}
+        isPaused={isPaused}
+        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+        refreshInterval={refreshInterval.value}
+        onTimeChange={updateFilter}
+        onRefresh={updateLastRefresh}
+        onRefreshChange={updateInterval}
+        recentlyUsedRanges={recentlyUsedRanges}
+        dateFormat={dateFormat}
+        commonlyUsedRanges={commonlyUsedRanges}
+      />
+    </div>
+  ) : null;
 };

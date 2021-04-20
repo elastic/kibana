@@ -1,4 +1,5 @@
 @import '@elastic/eui/src/global_styling/variables/header';
+@import '../../../../../src/core/public/mixins';
 
 /**
  * This is a very brittle way of preventing the editor and other content from disappearing
@@ -39,11 +40,11 @@ $bottomBarHeight: $euiSize * 3;
   line-height: 0;
 }
 
-// This value is calculated to static value using SCSS because calc in calc has issues in IE11
-$headerOffset: $euiHeaderHeightCompensation * 3;
+// adding dev tool top bar + bottom bar height to the body offset
+$bodyOffset: $euiHeaderHeightCompensation + $bottomBarHeight;
 
 .painlessLabMainContainer {
-  height: calc(100vh - #{$headerOffset} - #{$bottomBarHeight});
+  @include kibanaFullBodyHeight($bodyOffset);
 }
 
 .painlessLabPanelsContainer {

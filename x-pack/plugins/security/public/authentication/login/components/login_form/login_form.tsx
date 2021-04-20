@@ -1,34 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './login_form.scss';
 
-import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
 import {
   EuiButton,
-  EuiIcon,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
-  EuiLoadingSpinner,
-  EuiLink,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import ReactMarkdown from 'react-markdown';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
@@ -221,6 +225,7 @@ export class LoginForm extends Component<Props, State> {
             {...this.validator.validateUsername(this.state.username)}
           >
             <EuiFieldText
+              autoComplete="off"
               id="username"
               name="username"
               data-test-subj="loginUsername"

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
 
@@ -18,6 +21,8 @@ export interface MetaPage {
 export interface Meta {
   page: MetaPage;
 }
+
+export type Role = 'admin' | 'user';
 
 export interface Group {
   id: string;
@@ -101,7 +106,7 @@ export interface ContentSourceDetails extends ContentSource {
   isFederatedSource: boolean;
   searchable: boolean;
   supportedByLicense: boolean;
-  errorReason: number;
+  errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
 }
@@ -130,7 +135,6 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   groups: Group[];
   custom: boolean;
   accessToken: string;
-  key: string;
   urlField: string;
   titleField: string;
   licenseSupportsPermissions: boolean;
@@ -177,13 +181,12 @@ export enum FeatureIds {
 
 export interface CustomSource {
   accessToken: string;
-  key: string;
   name: string;
   id: string;
 }
 
 export interface Result {
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 export interface OptionValue {
@@ -203,4 +206,14 @@ export interface SearchResultConfig {
   urlField: string | null;
   color: string;
   detailFields: DetailField[];
+}
+
+export interface RoleGroup {
+  id: string;
+  name: string;
+}
+
+export interface WSRoleMapping extends RoleMapping {
+  allGroups: boolean;
+  groups: RoleGroup[];
 }

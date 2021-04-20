@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,10 +17,13 @@ import { camelCase } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import {
+  Threats,
+  ThreatSubtechnique,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { subtechniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import { FieldHook } from '../../../../shared_imports';
-import { IMitreAttack, IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 
@@ -33,7 +37,7 @@ interface AddSubtechniqueProps {
   techniqueIndex: number;
   idAria: string;
   isDisabled: boolean;
-  onFieldChange: (threats: IMitreEnterpriseAttack[]) => void;
+  onFieldChange: (threats: Threats) => void;
 }
 
 export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
@@ -44,58 +48,59 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   techniqueIndex,
   onFieldChange,
 }): JSX.Element => {
-  const values = field.value as IMitreEnterpriseAttack[];
+  const values = field.value as Threats;
 
   const technique = useMemo(() => {
-    return values[threatIndex].technique[techniqueIndex];
-  }, [values, threatIndex, techniqueIndex]);
+    return [...(values[threatIndex].technique ?? [])];
+  }, [values, threatIndex]);
 
   const removeSubtechnique = useCallback(
     (index: number) => {
-      const threats = [...(field.value as IMitreEnterpriseAttack[])];
-      const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
+      const threats = [...(field.value as Threats)];
+      const subtechniques = technique[techniqueIndex].subtechnique ?? [];
       if (subtechniques != null) {
         subtechniques.splice(index, 1);
 
-        threats[threatIndex].technique[techniqueIndex] = {
-          ...threats[threatIndex].technique[techniqueIndex],
+        technique[techniqueIndex] = {
+          ...technique[techniqueIndex],
           subtechnique: subtechniques,
         };
+        threats[threatIndex].technique = technique;
         onFieldChange(threats);
       }
     },
-    [field, threatIndex, onFieldChange, techniqueIndex]
+    [field, onFieldChange, techniqueIndex, technique, threatIndex]
   );
 
   const addMitreAttackSubtechnique = useCallback(() => {
-    const threats = [...(field.value as IMitreEnterpriseAttack[])];
+    const threats = [...(field.value as Threats)];
 
-    const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
+    const subtechniques = technique[techniqueIndex].subtechnique;
 
     if (subtechniques != null) {
-      threats[threatIndex].technique[techniqueIndex] = {
-        ...threats[threatIndex].technique[techniqueIndex],
+      technique[techniqueIndex] = {
+        ...technique[techniqueIndex],
         subtechnique: [...subtechniques, { id: 'none', name: 'none', reference: 'none' }],
       };
     } else {
-      threats[threatIndex].technique[techniqueIndex] = {
-        ...threats[threatIndex].technique[techniqueIndex],
+      technique[techniqueIndex] = {
+        ...technique[techniqueIndex],
         subtechnique: [{ id: 'none', name: 'none', reference: 'none' }],
       };
     }
-
+    threats[threatIndex].technique = technique;
     onFieldChange(threats);
-  }, [field, threatIndex, onFieldChange, techniqueIndex]);
+  }, [field, onFieldChange, techniqueIndex, technique, threatIndex]);
 
   const updateSubtechnique = useCallback(
     (index: number, value: string) => {
-      const threats = [...(field.value as IMitreEnterpriseAttack[])];
+      const threats = [...(field.value as Threats)];
       const { id, reference, name } = subtechniquesOptions.find((t) => t.value === value) || {
         id: '',
         name: '',
         reference: '',
       };
-      const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
+      const subtechniques = technique[techniqueIndex].subtechnique;
 
       if (subtechniques != null) {
         onFieldChange([
@@ -103,9 +108,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
           {
             ...threats[threatIndex],
             technique: [
-              ...threats[threatIndex].technique.slice(0, techniqueIndex),
+              ...technique.slice(0, techniqueIndex),
               {
-                ...threats[threatIndex].technique[techniqueIndex],
+                ...technique[techniqueIndex],
                 subtechnique: [
                   ...subtechniques.slice(0, index),
                   {
@@ -116,19 +121,21 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                   ...subtechniques.slice(index + 1),
                 ],
               },
-              ...threats[threatIndex].technique.slice(techniqueIndex + 1),
+              ...technique.slice(techniqueIndex + 1),
             ],
           },
           ...threats.slice(threatIndex + 1),
         ]);
       }
     },
-    [threatIndex, techniqueIndex, onFieldChange, field]
+    [threatIndex, techniqueIndex, onFieldChange, field, technique]
   );
 
   const getSelectSubtechnique = useCallback(
-    (index: number, disabled: boolean, subtechnique: IMitreAttack) => {
-      const options = subtechniquesOptions.filter((t) => t.techniqueId === technique.id);
+    (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
+      const options = subtechniquesOptions.filter(
+        (t) => t.techniqueId === technique[techniqueIndex].id
+      );
 
       return (
         <>
@@ -162,13 +169,17 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
         </>
       );
     },
-    [field, updateSubtechnique, technique]
+    [field, updateSubtechnique, technique, techniqueIndex]
   );
+
+  const subtechniques = useMemo(() => {
+    return technique[techniqueIndex].subtechnique;
+  }, [technique, techniqueIndex]);
 
   return (
     <SubtechniqueContainer>
-      {technique.subtechnique != null &&
-        technique.subtechnique.map((subtechnique, index) => (
+      {subtechniques != null &&
+        subtechniques.map((subtechnique, index) => (
           <div key={index}>
             <EuiSpacer size="s" />
             <EuiFormRow

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { memoize } from 'lodash/fp';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { CaseStatuses } from '../../../../../case/common/api';
-import { Status, statuses } from '../status';
+import { caseStatuses, CaseStatuses } from '../../../../../cases/common/api';
+import { Status } from '../status';
 
 interface Props {
   currentStatus: CaseStatuses;
@@ -33,7 +34,6 @@ const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusCh
     [closePopover, onStatusChanged]
   );
 
-  const caseStatuses = Object.keys(statuses) as CaseStatuses[];
   const panelItems = caseStatuses.map((status: CaseStatuses) => (
     <EuiContextMenuItem
       key={status}

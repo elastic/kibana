@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { resolverStoreFactory } from '../store';
 import { StartServices } from '../../types';
@@ -27,8 +29,16 @@ export const Resolver = React.memo((props: ResolverProps) => {
     return resolverStoreFactory(dataAccessLayer);
   }, [dataAccessLayer]);
 
+  const [activeStore, updateActiveStore] = useState(store);
+
+  useEffect(() => {
+    if (props.shouldUpdate) {
+      updateActiveStore(resolverStoreFactory(dataAccessLayer));
+    }
+  }, [dataAccessLayer, props.shouldUpdate]);
+
   return (
-    <Provider store={store}>
+    <Provider store={activeStore}>
       <ResolverWithoutProviders {...props} />
     </Provider>
   );

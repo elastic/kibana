@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
@@ -12,6 +13,7 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -20,6 +22,7 @@ import {
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
+import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 interface Props {
   height?: number;
@@ -31,10 +34,16 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
+function filterNil<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
+
 export function LatencyChart({ height }: Props) {
   const history = useHistory();
+  const theme = useTheme();
+  const comparisonChartTheme = getComparisonChartTheme(theme);
   const { urlParams } = useUrlParams();
-  const { latencyAggregationType } = urlParams;
+  const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
   const {
@@ -42,17 +51,27 @@ export function LatencyChart({ height }: Props) {
     latencyChartsStatus,
   } = useTransactionLatencyChartsFetcher();
 
-  const { latencyTimeseries, anomalyTimeseries, mlJobId } = latencyChartsData;
+  const {
+    currentPeriod,
+    previousPeriod,
+    anomalyTimeseries,
+    mlJobId,
+  } = latencyChartsData;
 
-  const latencyMaxY = getMaxY(latencyTimeseries);
+  const timeseries = [
+    currentPeriod,
+    comparisonEnabled ? previousPeriod : undefined,
+  ].filter(filterNil);
+
+  const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
@@ -98,9 +117,10 @@ export function LatencyChart({ height }: Props) {
           height={height}
           fetchStatus={latencyChartsStatus}
           id="latencyChart"
-          timeseries={latencyTimeseries}
+          customTheme={comparisonChartTheme}
+          timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalySeries={anomalyTimeseries}
+          anomalyTimeseries={anomalyTimeseries}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

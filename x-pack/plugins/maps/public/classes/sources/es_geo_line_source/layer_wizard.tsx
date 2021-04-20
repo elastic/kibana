@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,14 +12,14 @@ import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_g
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { LAYER_WIZARD_CATEGORY, STYLE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { TracksLayerIcon } from '../../layers/icons/tracks_layer_icon';
 
 export const geoLineLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGeoLineDescription', {
-    defaultMessage: 'Connect points into lines',
+    defaultMessage: 'Create lines from points',
   }),
   disabledReason: REQUIRES_GOLD_LICENSE_MSG,
   icon: TracksLayerIcon,

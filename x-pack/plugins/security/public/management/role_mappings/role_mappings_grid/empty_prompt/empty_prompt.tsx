@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import React, { Fragment } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
+import type { ScopedHistory } from 'src/core/public';
+
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
 interface EmptyPromptProps {

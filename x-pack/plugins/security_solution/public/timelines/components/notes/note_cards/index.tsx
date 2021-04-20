@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiPanel, EuiScreenReaderOnly } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { appSelectors } from '../../../../common/store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { getNotesContainerClassName } from '../../../../common/components/accessibility/helpers';
 import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
 import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
+
+import * as i18n from '../translations';
 
 const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
@@ -40,17 +42,16 @@ const NotesContainer = styled(EuiFlexGroup)`
 NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
+  ariaRowindex: number;
   associateNote: AssociateNote;
-  noteIds: string[];
+  notes: TimelineResultNote[];
   showAddNote: boolean;
   toggleShowAddNote: () => void;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
-    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
-    const notesById = useDeepEqualSelector(getNotesByIds);
+  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -61,23 +62,19 @@ export const NoteCards = React.memo<Props>(
       [associateNote, toggleShowAddNote]
     );
 
-    const notes: TimelineResultNote[] = useMemo(
-      () =>
-        appSelectors.getNotes(notesById, noteIds).map((note) => ({
-          savedObjectId: note.saveObjectId,
-          note: note.note,
-          noteId: note.id,
-          updated: (note.lastEdit ?? note.created).getTime(),
-          updatedBy: note.user,
-        })),
-      [notesById, noteIds]
-    );
-
     return (
       <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
-            <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
+            <NotesContainer
+              className={getNotesContainerClassName(ariaRowindex)}
+              data-test-subj="notes"
+              direction="column"
+              gutterSize="none"
+            >
+              <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+                <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
+              </EuiScreenReaderOnly>
               <NotePreviews notes={notes} />
             </NotesContainer>
           </NotePreviewsContainer>

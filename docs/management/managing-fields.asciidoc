@@ -18,6 +18,7 @@ To format a field:
 . Open the main menu, and click *Stack Management > Index Patterns*.
 . Click the index pattern that contains the field you want to format.
 . Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
+. Enter a custom label for the field, if needed.
 . Select a format and fill in the details.
 +
 [role="screenshot"]
@@ -56,9 +57,15 @@ include::field-formatters/string-formatter.asciidoc[]
 [[field-formatters-numeric]]
 === Numeric field formatters
 
-Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
+Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `Histogram`, `String`, and `Color` formatters.
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
+the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
+
+The `Histogram` formatter is only used for the {ref}/histogram.html[histogram field type]. When using the `Histogram` formatter,
+you can apply the `Number`, `Bytes`, or `Percentage` format to the aggregated data.
+
+`Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
 
 include::field-formatters/url-formatter.asciidoc[]
@@ -71,6 +78,7 @@ include::field-formatters/color-formatter.asciidoc[]
 
 [[scripted-fields]]
 === Scripted fields
+deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility.]
 
 Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {kib} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {kib} default
@@ -80,7 +88,7 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 {kib} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
+When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the
 {ref}/modules-scripting-painless.html[Painless] scripting language.
 
 You can reference any single value numeric field in your expressions, for example:

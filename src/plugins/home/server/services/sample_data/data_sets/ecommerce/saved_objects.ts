@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint max-len: 0 */
@@ -34,7 +23,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[eCommerce] Sales by Category',
       }),
       visState:
-        '{"title":"[eCommerce] Sales by Category","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Sum of total_quantity"}}],"seriesParams":[{"show":"true","type":"area","mode":"stacked","data":{"label":"Sum of total_quantity","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"linear","valueAxis":"ValueAxis-1"}],"addTooltip":true,"addLegend":true,"legendPosition":"top","times":[],"addTimeMarker":false},"aggs":[{"id":"1","enabled":true,"type":"sum","schema":"metric","params":{"field":"total_quantity"}},{"id":"2","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"order_date","interval":"auto","time_zone":"America/New_York","drop_partials":false,"customInterval":"2h","min_doc_count":1,"extended_bounds":{}}},{"id":"3","enabled":true,"type":"terms","schema":"group","params":{"field":"category.keyword","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
+        '{"title":"[eCommerce] Sales by Category","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Sum of total_quantity"}}],"seriesParams":[{"show":"true","type":"area","mode":"stacked","data":{"label":"Sum of total_quantity","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"linear","valueAxis":"ValueAxis-1"}],"addTooltip":true,"addLegend":true,"legendPosition":"top","times":[],"addTimeMarker":false,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"sum","schema":"metric","params":{"field":"total_quantity"}},{"id":"2","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"order_date","interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}}},{"id":"3","enabled":true,"type":"terms","schema":"group","params":{"field":"category.keyword","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -120,7 +109,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[eCommerce] Promotion Tracking',
       }),
       visState:
-        '{"title":"[eCommerce] Promotion Tracking","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"ea20ae70-b88d-11e8-a451-f37365e9f268","color":"rgba(240,138,217,1)","split_mode":"everything","metrics":[{"id":"ea20ae71-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*trouser*","label":"Revenue Trousers","value_template":"${{value}}"},{"id":"062d77b0-b88e-11e8-a451-f37365e9f268","color":"rgba(191,240,129,1)","split_mode":"everything","metrics":[{"id":"062d77b1-b88e-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*watch*","label":"Revenue Watches","value_template":"${{value}}"},{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(23,233,230,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*bag*","label":"Revenue Bags","value_template":"${{value}}"},{"id":"faa2c170-b88d-11e8-a451-f37365e9f268","color":"rgba(235,186,180,1)","split_mode":"everything","metrics":[{"id":"faa2c171-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*cocktail dress*","label":"Revenue Cocktail Dresses","value_template":"${{value}}"}],"time_field":"order_date","index_pattern":"kibana_sample_data_ecommerce","interval":">=12h","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"legend_position":"bottom","annotations":[{"fields":"taxful_total_price","template":"Ring the bell! ${{taxful_total_price}}","index_pattern":"kibana_sample_data_ecommerce","query_string":"taxful_total_price:>250","id":"c8c30be0-b88f-11e8-a451-f37365e9f268","color":"rgba(25,77,51,1)","time_field":"order_date","icon":"fa-bell","ignore_global_filters":1,"ignore_panel_filters":1}]},"aggs":[]}',
+        '{"title":"[eCommerce] Promotion Tracking","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"ea20ae70-b88d-11e8-a451-f37365e9f268","color":"rgba(240,138,217,1)","split_mode":"everything","metrics":[{"id":"ea20ae71-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*trouser*","label":"Revenue Trousers","value_template":"${{value}}"},{"id":"062d77b0-b88e-11e8-a451-f37365e9f268","color":"rgba(191,240,129,1)","split_mode":"everything","metrics":[{"id":"062d77b1-b88e-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*watch*","label":"Revenue Watches","value_template":"${{value}}"},{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(23,233,230,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*bag*","label":"Revenue Bags","value_template":"${{value}}"},{"id":"faa2c170-b88d-11e8-a451-f37365e9f268","color":"rgba(235,186,180,1)","split_mode":"everything","metrics":[{"id":"faa2c171-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"0.7","stacked":"none","filter":"products.product_name:*cocktail dress*","label":"Revenue Cocktail Dresses","value_template":"${{value}}"}],"time_field":"order_date","index_pattern_ref_name":"ref_1_index_pattern","interval":">=12h","use_kibana_indexes":true,"axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"legend_position":"bottom","annotations":[{"fields":"taxful_total_price","template":"Ring the bell! ${{taxful_total_price}}","index_pattern_ref_name":"ref_2_index_pattern","query_string":"taxful_total_price:>250","id":"c8c30be0-b88f-11e8-a451-f37365e9f268","color":"rgba(25,77,51,1)","time_field":"order_date","icon":"fa-bell","ignore_global_filters":1,"ignore_panel_filters":1}]},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -128,7 +117,18 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
-    references: [],
+    references: [
+      {
+        name: 'ref_1_index_pattern',
+        type: 'index_pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      },
+      {
+        name: 'ref_2_index_pattern',
+        type: 'index_pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      },
+    ],
   },
   {
     id: '10f1a240-b891-11e8-a6d9-e546fe2bba5f',
@@ -163,7 +163,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[eCommerce] Sold Products per Day',
       }),
       visState:
-        '{"title":"[eCommerce] Sold Products per Day","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#68BC00","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Trxns / day"}],"time_field":"order_date","index_pattern":"kibana_sample_data_ecommerce","interval":"1d","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"gauge_color_rules":[{"value":150,"id":"6da070c0-b891-11e8-b645-195edeb9de84","gauge":"rgba(104,188,0,1)","operator":"gte"},{"value":150,"id":"9b0cdbc0-b891-11e8-b645-195edeb9de84","gauge":"rgba(244,78,59,1)","operator":"lt"}],"gauge_width":"15","gauge_inner_width":10,"gauge_style":"half","filter":"","gauge_max":"300"},"aggs":[]}',
+        '{"title":"[eCommerce] Sold Products per Day","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#68BC00","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Trxns / day"}],"time_field":"order_date","index_pattern_ref_name":"ref_1_index_pattern","interval":"1d","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"gauge_color_rules":[{"value":150,"id":"6da070c0-b891-11e8-b645-195edeb9de84","gauge":"rgba(104,188,0,1)","operator":"gte"},{"value":150,"id":"9b0cdbc0-b891-11e8-b645-195edeb9de84","gauge":"rgba(244,78,59,1)","operator":"lt"}],"gauge_width":"15","gauge_inner_width":10,"gauge_style":"half","filter":"","gauge_max":"300","use_kibana_indexes":true},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -171,7 +171,13 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
-    references: [],
+    references: [
+      {
+        name: 'ref_1_index_pattern',
+        type: 'index_pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      },
+    ],
   },
   {
     id: '4b3ec120-b892-11e8-a6d9-e546fe2bba5f',

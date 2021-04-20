@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
@@ -20,11 +21,10 @@ export interface Props {
   reportType: string;
   layoutId: string | undefined;
   objectId?: string;
-  objectType: string;
   getJobParams: () => BaseParams;
   options?: ReactElement<any>;
-  isDirty: boolean;
-  onClose: () => void;
+  isDirty?: boolean;
+  onClose?: () => void;
   intl: InjectedIntl;
 }
 
@@ -32,6 +32,7 @@ interface State {
   isStale: boolean;
   absoluteUrl: string;
   layoutId: string;
+  objectType: string;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -40,10 +41,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    // Get objectType from job params
+    const { objectType } = props.getJobParams();
+
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
+      objectType,
     };
   }
 
@@ -104,7 +109,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         description="Here 'reportingType' can be 'PDF' or 'CSV'"
         values={{
           reportingType: this.prettyPrintReportingType(),
-          objectType: this.props.objectType,
+          objectType: this.state.objectType,
         }}
       />
     );
@@ -168,7 +173,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     switch (this.props.reportType) {
       case PDF_REPORT_TYPE:
         return 'PDF';
-      case 'csv':
+      case 'csv_searchsource':
         return CSV_REPORT_TYPE;
       case 'png':
         return PNG_REPORT_TYPE;
@@ -209,17 +214,29 @@ class ReportingPanelContentUi extends Component<Props, State> {
               id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
-            { objectType: this.props.objectType }
+            { objectType: this.state.objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in Management"
+              defaultMessage="Track its progress in {path}"
+              values={{
+                path: (
+                  <a href={this.props.apiClient.getManagementLink()}>
+                    <FormattedMessage
+                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+                    />
+                  </a>
+                ),
+              }}
             />
           ),
           'data-test-subj': 'queueReportSuccess',
         });
-        this.props.onClose();
+        if (this.props.onClose) {
+          this.props.onClose();
+        }
       })
       .catch((error: any) => {
         if (error.message === 'not exportable') {
@@ -229,7 +246,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
                 id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
                 defaultMessage: 'Only saved {objectType} can be exported',
               },
-              { objectType: this.props.objectType }
+              { objectType: this.state.objectType }
             ),
             text: toMountPoint(
               <FormattedMessage

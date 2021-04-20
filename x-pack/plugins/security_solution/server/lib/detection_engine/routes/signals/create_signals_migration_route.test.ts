@@ -1,87 +1,100 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { requestContextMock, requestMock, serverMock } from '../__mocks__';
-import { createSignalsMigrationRoute } from './create_signals_migration_route';
-import {
-  getIndexMappingsResponseMock,
-  getMigrationStatusSearchResponseMock,
-} from '../../migrations/get_migration_status.mock';
+import { requestMock, serverMock } from '../__mocks__';
+import { SetupPlugins } from '../../../../plugin';
 import { SignalsReindexOptions } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema.mock';
+import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
+import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
+import { createMigration } from '../../migrations/create_migration';
+import { getIndexAliases } from '../../index/get_index_aliases';
+import { getTemplateVersion } from '../index/check_template_version';
+import { createSignalsMigrationRoute } from './create_signals_migration_route';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
-describe('query for signal', () => {
+jest.mock('../index/check_template_version');
+jest.mock('../../index/get_index_aliases');
+jest.mock('../../migrations/create_migration');
+jest.mock('../../migrations/get_index_versions_by_index');
+jest.mock('../../migrations/get_signal_versions_by_index');
+
+describe('creating signals migrations route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
 
-    // @ts-expect-error mocking the bare minimum of our queries
-    // get our migration status
-    clients.newClusterClient.asCurrentUser.search.mockResolvedValueOnce({
-      body: getMigrationStatusSearchResponseMock(['my-index']),
-    });
+    (getIndexAliases as jest.Mock).mockResolvedValue([
+      { index: 'my-signals-index', isWriteIndex: false },
+    ]);
+    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION);
+    (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
+    (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    // @ts-expect-error mocking the bare minimum of our queries
-    // get our signals aliases
-    clients.newClusterClient.asCurrentUser.indices.getAlias.mockResolvedValueOnce({
-      body: { 'my-index': { aliases: {} } },
-    });
+    const securityMock = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
+      },
+    } as unknown) as SetupPlugins['security'];
 
-    // @ts-expect-error mocking the bare minimum of our queries
-    // get our index version
-    clients.newClusterClient.asCurrentUser.indices.getMapping.mockResolvedValueOnce({
-      body: getIndexMappingsResponseMock('my-index'),
-    });
-
-    createSignalsMigrationRoute(server.router);
+    createSignalsMigrationRoute(server.router, securityMock);
   });
 
-  test('passes reindex options along to the reindex call', async () => {
+  it('passes options to the createMigration', async () => {
     const reindexOptions: SignalsReindexOptions = { requests_per_second: 4, size: 10, slices: 2 };
     const request = requestMock.create({
       method: 'post',
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
-      body: { ...getCreateSignalsMigrationSchemaMock('my-index'), ...reindexOptions },
+      body: { ...getCreateSignalsMigrationSchemaMock('my-signals-index'), ...reindexOptions },
     });
 
-    const response = await server.inject(request, context);
+    const response = await server.inject(request);
 
     expect(response.status).toEqual(200);
-    expect(clients.newClusterClient.asCurrentUser.reindex).toHaveBeenCalledWith(
+    expect(createMigration).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          source: {
-            index: 'my-index',
-            size: reindexOptions.size,
-          },
-        }),
-        requests_per_second: reindexOptions.requests_per_second,
-        slices: reindexOptions.slices,
+        reindexOptions,
+        index: 'my-signals-index',
       })
     );
   });
 
-  it('returns an inline error if write index is out of date but specified', async () => {
-    clients.appClient.getSignalsIndex.mockReturnValue('my-alias');
-    // @ts-expect-error mocking the bare minimum of our queries
-    // stub index to be write index.
-    clients.newClusterClient.asCurrentUser.indices.getAlias.mockReset().mockResolvedValueOnce({
-      body: { 'my-index': { aliases: { 'my-alias': { is_write_index: true } } } },
+  it('rejects the request if template is not up to date', async () => {
+    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION - 1);
+    const request = requestMock.create({
+      method: 'post',
+      path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
+      body: getCreateSignalsMigrationSchemaMock('my-signals-index'),
     });
+    const response = await server.inject(request);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message: expect.stringMatching(
+        /Cannot migrate due to the signals template being out of date\. Latest version: \[\d+\], template version: \[\d+\]\. Please visit Detections to automatically update your template, then try again\./
+      ),
+      status_code: 400,
+    });
+  });
+
+  it('returns an inline error if write index is out of date but specified', async () => {
+    // stub index to be write index.
+    (getIndexAliases as jest.Mock).mockResolvedValue([
+      { index: 'my-signals-index', isWriteIndex: true },
+    ]);
 
     const request = requestMock.create({
       method: 'post',
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
-      body: getCreateSignalsMigrationSchemaMock('my-index'),
+      body: getCreateSignalsMigrationSchemaMock('my-signals-index'),
     });
-    const response = await server.inject(request, context);
+    const response = await server.inject(request);
 
     expect(response.status).toEqual(200);
     expect(response.body.indices).toEqual([
@@ -90,10 +103,9 @@ describe('query for signal', () => {
           message: 'The specified index is a write index and cannot be migrated.',
           status_code: 400,
         },
-        index: 'my-index',
+        index: 'my-signals-index',
+        migration_id: null,
         migration_index: null,
-        migration_task_id: null,
-        migration_token: null,
       },
     ]);
   });

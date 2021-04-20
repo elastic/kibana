@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 // @ts-expect-error no definitions in component folder
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 // @ts-expect-error no definitions in component folder
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
-// @ts-expect-error no definitions in component folder
 import { EuiEmptyPrompt } from '@elastic/eui/lib/components/empty_prompt';
+// @ts-expect-error no definitions in component folder
+import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 // @ts-expect-error no definitions in component folder
-import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
+import React from 'react';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '../../../../../src/core/server/rendering/views/fonts';
@@ -46,37 +47,15 @@ export function ResetSessionPage({
           <link href={path} rel="stylesheet" key={path} />
         ))}
         <Fonts url={uiPublicUrl} />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
-        />
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
-        <link
-          rel="mask-icon"
-          color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
-        />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <script src={`${basePath}/internal/security/reset_session_page.js`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
+        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body>
         <I18nProvider>
-          <EuiPage style={{ minHeight: '100vh' }}>
+          <EuiPage paddingSize="none" style={{ minHeight: '100vh' }}>
             <EuiPageBody>
               <EuiPageContent verticalPosition="center" horizontalPosition="center">
                 <EuiEmptyPrompt

@@ -1,22 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
-// @ts-ignore
-import numeral from '@elastic/numeral';
-import { ml } from '../../../../services/ml_api_service';
-import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
-import {
-  MAX_FILE_SIZE,
-  MAX_FILE_SIZE_BYTES,
-  ABSOLUTE_MAX_FILE_SIZE_BYTES,
-  FILE_SIZE_DISPLAY_FORMAT,
-} from '../../../../../../common/constants/file_datavisualizer';
-import { getUiSettings } from '../../../../util/dependency_cache';
-import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
+import { AnalysisResult, InputOverrides } from '../../../../../../../file_upload/common';
+import { MB } from '../../../../../../../file_upload/public';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
@@ -48,7 +39,7 @@ export function readFile(file: File) {
           if (data === null || typeof data === 'string') {
             return reject();
           }
-          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const size = UPLOAD_SIZE_MB * MB;
           const fileContents = decoder.decode(data.slice(0, size));
 
           if (fileContents === '') {
@@ -62,20 +53,6 @@ export function readFile(file: File) {
       reject();
     }
   });
-}
-
-export function getMaxBytes() {
-  const maxFileSize = getUiSettings().get(FILE_DATA_VISUALIZER_MAX_FILE_SIZE, MAX_FILE_SIZE);
-  // @ts-ignore
-  const maxBytes = numeral(maxFileSize.toUpperCase()).value();
-  if (maxBytes < MAX_FILE_SIZE_BYTES) {
-    return MAX_FILE_SIZE_BYTES;
-  }
-  return maxBytes <= ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
-}
-
-export function getMaxBytesFormatted() {
-  return numeral(getMaxBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
 }
 
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
@@ -157,28 +134,4 @@ export function processResults({ results, overrides }: AnalysisResult) {
     grokPattern: results.grok_pattern,
     linesToSample,
   };
-}
-
-/**
- * A check for the minimum privileges needed to create and ingest data into an index.
- * If called with no indexName, the check will just look for the minimum cluster privileges.
- * @param {string} indexName
- * @returns {Promise<boolean>}
- */
-export async function hasImportPermission(indexName: string) {
-  const priv: { cluster: string[]; index?: any } = {
-    cluster: ['cluster:admin/ingest/pipeline/put'],
-  };
-
-  if (indexName !== undefined) {
-    priv.index = [
-      {
-        names: [indexName],
-        privileges: ['indices:data/write/bulk', 'indices:data/write/index', 'indices:admin/create'],
-      },
-    ];
-  }
-
-  const resp = await ml.hasPrivileges(priv);
-  return resp.securityDisabled === true || resp.has_all_requested === true;
 }

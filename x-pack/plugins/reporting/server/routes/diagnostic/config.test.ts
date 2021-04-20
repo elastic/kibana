@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
-import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockReportingCore,
+  createMockLevelLogger,
+  createMockPluginSetup,
+} from '../../test_helpers';
 import { registerDiagnoseConfig } from './config';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -20,17 +28,19 @@ describe('POST /diagnose/config', () => {
   let core: ReportingCore;
   let mockSetupDeps: any;
   let config: any;
+  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
   const mockLogger = createMockLevelLogger();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
-    mockSetupDeps = ({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
+    mockSetupDeps = createMockPluginSetup({
       router: httpSetup.createRouter(''),
     } as unknown) as any;
 
@@ -48,6 +58,7 @@ describe('POST /diagnose/config', () => {
     };
 
     core = await createMockReportingCore(config, mockSetupDeps);
+    mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
   });
 
   afterEach(async () => {
@@ -55,15 +66,15 @@ describe('POST /diagnose/config', () => {
   });
 
   it('returns a 200 by default when configured properly', async () => {
-    mockSetupDeps.elasticsearch.legacy.client.callAsInternalUser.mockImplementation(() =>
-      Promise.resolve({
+    mockEsClient.cluster.getSettings.mockResolvedValueOnce({
+      body: {
         defaults: {
           http: {
             max_content_length: '100mb',
           },
         },
-      })
-    );
+      },
+    } as any);
     registerDiagnoseConfig(core, mockLogger);
 
     await server.start();
@@ -84,15 +95,15 @@ describe('POST /diagnose/config', () => {
 
   it('returns a 200 with help text when not configured properly', async () => {
     config.get.mockImplementation(() => 10485760);
-    mockSetupDeps.elasticsearch.legacy.client.callAsInternalUser.mockImplementation(() =>
-      Promise.resolve({
+    mockEsClient.cluster.getSettings.mockResolvedValueOnce({
+      body: {
         defaults: {
           http: {
             max_content_length: '5mb',
           },
         },
-      })
-    );
+      },
+    } as any);
     registerDiagnoseConfig(core, mockLogger);
 
     await server.start();

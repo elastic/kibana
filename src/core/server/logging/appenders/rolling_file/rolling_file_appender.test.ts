@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -31,20 +20,20 @@ import { LogLevel, LogRecord } from '@kbn/logging';
 import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
-  kind: 'rolling-file',
-  path: '/var/log/kibana.log',
+  type: 'rolling-file',
+  fileName: '/var/log/kibana.log',
   layout: {
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
     highlight: false,
   },
   policy: {
-    kind: 'time-interval',
+    type: 'time-interval',
     interval: moment.duration(4, 'hour'),
     modulate: true,
   },
   strategy: {
-    kind: 'numeric',
+    type: 'numeric',
     max: 5,
     pattern: '-%i',
   },
@@ -110,7 +99,7 @@ describe('RollingFileAppender', () => {
 
   it('constructs its delegates with the correct parameters', () => {
     expect(RollingFileContextMock).toHaveBeenCalledTimes(1);
-    expect(RollingFileContextMock).toHaveBeenCalledWith(config.path);
+    expect(RollingFileContextMock).toHaveBeenCalledWith(config.fileName);
 
     expect(RollingFileManagerMock).toHaveBeenCalledTimes(1);
     expect(RollingFileManagerMock).toHaveBeenCalledWith(context);

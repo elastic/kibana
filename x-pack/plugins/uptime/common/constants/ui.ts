@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const MONITOR_ROUTE = '/monitor/:monitorId?';
@@ -13,6 +14,8 @@ export const SETTINGS_ROUTE = '/settings';
 export const CERTIFICATES_ROUTE = '/certificates';
 
 export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
+
+export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
 export enum STATUS {
   UP = 'up',
@@ -62,3 +65,5 @@ export enum CERT_STATUS {
   EXPIRED = 'EXPIRED',
   TOO_OLD = 'TOO_OLD',
 }
+
+export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';

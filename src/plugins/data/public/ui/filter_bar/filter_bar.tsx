@@ -1,33 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
-import { IIndexPattern } from '../..';
+import { IDataPluginServices, IIndexPattern } from '../..';
 import {
   buildEmptyFilter,
   Filter,
@@ -47,16 +36,16 @@ interface Props {
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
   appName: string;
-  // Track UI Metrics
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 function FilterBarUI(props: Props) {
+  const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
-  const kibana = useKibana();
-
-  const uiSettings = kibana.services.uiSettings;
+  const kibana = useKibana<IDataPluginServices>();
+  const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
+
+  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
   function onFiltersUpdated(filters: Filter[]) {
     if (props.onFiltersUpdated) {
@@ -111,6 +100,7 @@ function FilterBarUI(props: Props) {
           anchorPosition="downLeft"
           panelPaddingSize="none"
           initialFocus=".filterEditor__hiddenItem"
+          ownFocus
           repositionOnScroll
         >
           <EuiFlexItem grow={false}>
@@ -130,66 +120,66 @@ function FilterBarUI(props: Props) {
   }
 
   function onAdd(filter: Filter) {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
     setIsAddFilterPopoverOpen(false);
-    if (props.trackUiMetric) {
-      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_added`);
-    }
+
     const filters = [...props.filters, filter];
     onFiltersUpdated(filters);
   }
 
   function onRemove(i: number) {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:removed`);
     const filters = [...props.filters];
     filters.splice(i, 1);
     onFiltersUpdated(filters);
+    groupRef.current?.focus();
   }
 
   function onUpdate(i: number, filter: Filter) {
-    if (props.trackUiMetric) {
-      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_edited`);
-    }
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:edited`);
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);
   }
 
   function onEnableAll() {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
     const filters = props.filters.map(enableFilter);
     onFiltersUpdated(filters);
   }
 
   function onDisableAll() {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
     const filters = props.filters.map(disableFilter);
     onFiltersUpdated(filters);
   }
 
   function onPinAll() {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
     const filters = props.filters.map(pinFilter);
     onFiltersUpdated(filters);
   }
 
   function onUnpinAll() {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
     const filters = props.filters.map(unpinFilter);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllNegated() {
-    if (props.trackUiMetric) {
-      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_invertInclusion`);
-    }
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
     const filters = props.filters.map(toggleFilterNegated);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllDisabled() {
-    if (props.trackUiMetric) {
-      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_toggleAllDisabled`);
-    }
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:toggle_all`);
     const filters = props.filters.map(toggleFilterDisabled);
     onFiltersUpdated(filters);
   }
 
   function onRemoveAll() {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
     onFiltersUpdated([]);
   }
 
@@ -216,11 +206,13 @@ function FilterBarUI(props: Props) {
 
       <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
+          ref={groupRef}
           className={classes}
           wrap={true}
           responsive={false}
           gutterSize="xs"
           alignItems="center"
+          tabIndex={-1}
         >
           {renderItems()}
           {renderAddFilter()}

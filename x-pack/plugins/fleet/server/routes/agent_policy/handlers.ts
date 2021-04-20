@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, ResponseHeaders } from 'src/core/server';
+
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
-import { listAgents } from '../../services/agents';
+import { getAgentsByKuery } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import {
+import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
   CreateAgentPolicyRequestSchema,
@@ -18,10 +21,10 @@ import {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
-  AgentPolicy,
-  NewPackagePolicy,
 } from '../../types';
-import {
+import type { AgentPolicy, NewPackagePolicy } from '../../types';
+import { defaultPackages } from '../../../common';
+import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetOneAgentPolicyResponse,
@@ -30,7 +33,6 @@ import {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
-  defaultPackages,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -39,6 +41,7 @@ export const getAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
@@ -55,7 +58,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(soClient, {
+        getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
@@ -100,7 +103,7 @@ export const createAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
@@ -109,7 +112,7 @@ export const createAgentPolicyHandler: RequestHandler<
       AgentPolicy,
       NewPackagePolicy | undefined
     >([
-      agentPolicyService.create(soClient, request.body, {
+      agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
       // If needed, retrieve System package information and build a new package policy for the system package
@@ -126,7 +129,7 @@ export const createAgentPolicyHandler: RequestHandler<
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
       newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
-      await packagePolicyService.create(soClient, callCluster, newSysPackagePolicy, {
+      await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
         user,
         bumpRevision: false,
       });
@@ -152,10 +155,12 @@ export const updateAgentPolicyHandler: RequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
+      esClient,
       request.params.agentPolicyId,
       request.body,
       {
@@ -177,10 +182,12 @@ export const copyAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.copy(
       soClient,
+      esClient,
       request.params.agentPolicyId,
       request.body,
       {
@@ -203,9 +210,11 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
+      esClient,
       request.body.agentPolicyId
     );
     return response.ok({

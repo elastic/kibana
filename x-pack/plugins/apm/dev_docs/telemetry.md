@@ -14,7 +14,7 @@ Telemetry data is uploaded to the "xpack-phone-home" indices.
 
 Information that can be derived from a cluster's APM indices is queried and sent
 to the telemetry cluster using the
-[Usage Collection plugin](../../../../src/plugins/usage_collection/README.md).
+[Usage Collection plugin](../../../../src/plugins/usage_collection/README.mdx).
 
 During the APM server-side plugin's setup phase a
 [Saved Object](https://www.elastic.co/guide/en/kibana/master/managing-saved-objects.html)

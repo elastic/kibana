@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -47,11 +49,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: [],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -75,11 +83,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: [],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -99,11 +113,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is required.'],
-        method: [],
-        user: [],
-        password: ['Password is required when username is used.'],
+      config: {
+        errors: {
+          url: ['URL is required.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: ['Password is required when username is used.'],
+        },
       },
     });
   });
@@ -125,11 +145,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is invalid.'],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: ['URL is invalid.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });

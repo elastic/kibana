@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
@@ -15,7 +16,7 @@ jest.mock('../../../common/machine_learning/has_ml_admin_permissions');
 
 describe('isMlAdmin', () => {
   it('returns true if hasMlAdminPermissions is true', async () => {
-    const mockMl = mlServicesMock.create();
+    const mockMl = mlServicesMock.createSetupContract();
     const request = httpServerMock.createKibanaRequest();
     const savedObjectsClient = savedObjectsClientMock.create();
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
@@ -24,7 +25,7 @@ describe('isMlAdmin', () => {
   });
 
   it('returns false if hasMlAdminPermissions is false', async () => {
-    const mockMl = mlServicesMock.create();
+    const mockMl = mlServicesMock.createSetupContract();
     const request = httpServerMock.createKibanaRequest();
     const savedObjectsClient = savedObjectsClientMock.create();
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
@@ -55,13 +56,13 @@ describe('hasMlLicense', () => {
 
 describe('mlAuthz', () => {
   let licenseMock: ReturnType<typeof licensingMock.createLicenseMock>;
-  let mlMock: ReturnType<typeof mlServicesMock.create>;
+  let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
   let request: KibanaRequest;
   let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
     licenseMock = licensingMock.createLicenseMock();
-    mlMock = mlServicesMock.create();
+    mlMock = mlServicesMock.createSetupContract();
     request = httpServerMock.createKibanaRequest();
     savedObjectsClient = savedObjectsClientMock.create();
   });

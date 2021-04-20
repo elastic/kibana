@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -10,7 +11,6 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import { createRange } from './../../models/time_range';
 import { ResolverAction } from '../actions';
 
 /**
@@ -32,7 +32,7 @@ export function CurrentRelatedEventFetcher(
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     const oldParams = last;
     last = newParams;
@@ -48,6 +48,7 @@ export function CurrentRelatedEventFetcher(
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
       });
+      const timeRangeFilters = selectors.timeRangeFilters(state);
 
       let result: SafeResolverEvent | null = null;
       try {
@@ -58,7 +59,7 @@ export function CurrentRelatedEventFetcher(
           eventID: currentEventID,
           winlogRecordID,
           indexPatterns: indices,
-          timeRange: createRange(),
+          timeRange: timeRangeFilters,
         });
       } catch (error) {
         api.dispatch({

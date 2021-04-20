@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -32,15 +31,15 @@ function fetchVisualizeData(dataClient: ILegacyScopedClusterClient, index: any, 
   return dataClient.callAsCurrentUser('search', params);
 }
 
-export function registerVisualizeRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerVisualizeRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/watch/visualize',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
       const body = watch.getVisualizeQuery(options);
@@ -61,7 +60,7 @@ export function registerVisualizeRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ObservabilityApp } from '../../../typings/common';
 import { UXMetrics } from '../../components/shared/core_web_vitals';
-
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   value: number;
@@ -14,7 +14,7 @@ export interface Stat {
 
 export interface Coordinates {
   x: number;
-  y?: number;
+  y?: number | null;
 }
 
 export interface Series {
@@ -66,12 +66,33 @@ export interface LogsFetchDataResponse extends FetchDataResponse {
   series: Record<string, Series & { label: string }>;
 }
 
+export type StringOrNull = string | null;
+export type NumberOrNull = number | null;
+
+export interface MetricsFetchDataSeries {
+  id: string;
+  name: StringOrNull;
+  platform: StringOrNull;
+  provider: StringOrNull;
+  cpu: NumberOrNull;
+  iowait: NumberOrNull;
+  load: NumberOrNull;
+  uptime: NumberOrNull;
+  rx: NumberOrNull;
+  tx: NumberOrNull;
+  timeseries: Array<{
+    timestamp: number;
+    cpu: NumberOrNull;
+    iowait: NumberOrNull;
+    load: NumberOrNull;
+    rx: NumberOrNull;
+    tx: NumberOrNull;
+  }>;
+}
+
 export interface MetricsFetchDataResponse extends FetchDataResponse {
-  stats: {
-    hosts: Stat;
-    cpu: Stat;
-    memory: Stat;
-  };
+  sort: (by: string, direction: string) => Promise<MetricsFetchDataResponse>;
+  series: MetricsFetchDataSeries[];
 }
 
 export interface UptimeFetchDataResponse extends FetchDataResponse {
@@ -104,6 +125,7 @@ export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
+  synthetics: UptimeFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
 }
@@ -113,5 +135,6 @@ export interface ObservabilityHasDataResponse {
   infra_metrics: boolean;
   infra_logs: boolean;
   uptime: boolean;
+  synthetics: boolean;
   ux: UXHasDataResponse;
 }

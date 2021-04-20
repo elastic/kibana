@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -11,7 +12,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 
 import { useInitSourcerer } from '.';
-import { mockPatterns, mockSource } from './mocks';
+import { mockPatterns } from './mocks';
 // import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -21,14 +22,12 @@ import {
   initialState as userInfoState,
 } from '../../../detections/components/user_info';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-const mockSourceDefaults = mockSource;
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -70,6 +69,7 @@ jest.mock('../../lib/kibana', () => ({
             subscribe: jest.fn().mockImplementation(() => ({
               error: jest.fn(),
               next: jest.fn(),
+              unsubscribe: jest.fn(),
             })),
           })),
         },
@@ -78,11 +78,6 @@ jest.mock('../../lib/kibana', () => ({
     },
   }),
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
-}));
-jest.mock('../../utils/apollo_context', () => ({
-  useApolloClient: jest.fn().mockReturnValue({
-    query: jest.fn().mockImplementation(() => Promise.resolve(mockSourceDefaults)),
-  }),
 }));
 
 describe('Sourcerer Hooks', () => {
@@ -110,24 +105,12 @@ describe('Sourcerer Hooks', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {

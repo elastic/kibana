@@ -1,32 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
-import { oneTimelineQuery } from '../../containers/one/index.gql_query';
-import {
-  TimelineResult,
-  GetOneTimeline,
-  NoteResult,
-  FilterTimelineResult,
-  ColumnHeaderResult,
-  PinnedEvent,
-  DataProviderResult,
-} from '../../../graphql/types';
 
 import {
   DataProviderType,
   TimelineId,
   TimelineStatus,
   TimelineType,
+  TimelineTabs,
+  TimelineResult,
+  ColumnHeaderResult,
+  FilterTimelineResult,
+  DataProviderResult,
 } from '../../../../common/types/timeline';
 
 import {
@@ -42,11 +37,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import {
-  ColumnHeaderOptions,
-  TimelineModel,
-  TimelineTabs,
-} from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -68,6 +59,9 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import { getTimeline } from '../../containers/api';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -312,7 +306,6 @@ export const formatTimelineResultToModel = (
 
 export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
   timelineId: string;
@@ -331,7 +324,6 @@ export interface QueryTimelineById<TCache> {
 
 export const queryTimelineById = <TCache>({
   activeTimelineTab = TimelineTabs.query,
-  apolloClient,
   duplicate = false,
   graphEventId = '',
   timelineId,
@@ -342,51 +334,44 @@ export const queryTimelineById = <TCache>({
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  if (apolloClient) {
-    apolloClient
-      .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
-        query: oneTimelineQuery,
-        fetchPolicy: 'no-cache',
-        variables: { id: timelineId },
-      })
-      .then((result) => {
-        const timelineToOpen: TimelineResult = omitTypenameInTimeline(
-          getOr({}, 'data.getOneTimeline', result)
-        );
+  Promise.resolve(getTimeline(timelineId))
+    .then((result) => {
+      const timelineToOpen: TimelineResult = omitTypenameInTimeline(
+        getOr({}, 'data.getOneTimeline', result)
+      );
 
-        const { timeline, notes } = formatTimelineResultToModel(
-          timelineToOpen,
+      const { timeline, notes } = formatTimelineResultToModel(
+        timelineToOpen,
+        duplicate,
+        timelineType
+      );
+
+      if (onOpenTimeline != null) {
+        onOpenTimeline(timeline);
+      } else if (updateTimeline) {
+        const { from, to } = normalizeTimeRange({
+          from: getOr(null, 'dateRange.start', timeline),
+          to: getOr(null, 'dateRange.end', timeline),
+        });
+        updateTimeline({
           duplicate,
-          timelineType
-        );
-
-        if (onOpenTimeline != null) {
-          onOpenTimeline(timeline);
-        } else if (updateTimeline) {
-          const { from, to } = normalizeTimeRange({
-            from: getOr(null, 'dateRange.start', timeline),
-            to: getOr(null, 'dateRange.end', timeline),
-          });
-          updateTimeline({
-            duplicate,
-            from,
-            id: TimelineId.active,
-            notes,
-            timeline: {
-              ...timeline,
-              activeTab: activeTimelineTab,
-              graphEventId,
-              show: openTimeline,
-              dateRange: { start: from, end: to },
-            },
-            to,
-          })();
-        }
-      })
-      .finally(() => {
-        updateIsLoading({ id: TimelineId.active, isLoading: false });
-      });
-  }
+          from,
+          id: TimelineId.active,
+          notes,
+          timeline: {
+            ...timeline,
+            activeTab: activeTimelineTab,
+            graphEventId,
+            show: openTimeline,
+            dateRange: { start: from, end: to },
+          },
+          to,
+        })();
+      }
+    })
+    .finally(() => {
+      updateIsLoading({ id: TimelineId.active, isLoading: false });
+    });
 };
 
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
@@ -436,7 +421,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
         id,
         filterQuery: {
           kuery: {
-            kind: 'kuery',
+            kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
             expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
           },
           serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',

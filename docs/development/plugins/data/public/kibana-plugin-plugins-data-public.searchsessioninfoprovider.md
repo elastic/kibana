@@ -4,7 +4,7 @@
 
 ## SearchSessionInfoProvider interface
 
-Provide info about current search session to be stored in backgroundSearch saved object
+Provide info about current search session to be stored in the Search Session saved object
 
 <b>Signature:</b>
 
@@ -16,6 +16,7 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getName](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.getname.md) | <code>() =&gt; Promise&lt;string&gt;</code> | User-facing name of the session. e.g. will be displayed in background sessions management list |
+|  [appendSessionStartTimeToName](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.appendsessionstarttimetoname.md) | <code>boolean</code> | Append session start time to a session name, <code>true</code> by default |
+|  [getName](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.getname.md) | <code>() =&gt; Promise&lt;string&gt;</code> | User-facing name of the session. e.g. will be displayed in saved Search Sessions management list |
 |  [getUrlGeneratorData](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.geturlgeneratordata.md) | <code>() =&gt; Promise&lt;{</code><br/><code>        urlGeneratorId: ID;</code><br/><code>        initialState: UrlGeneratorStateMapping[ID]['State'];</code><br/><code>        restoreState: UrlGeneratorStateMapping[ID]['State'];</code><br/><code>    }&gt;</code> |  |
 

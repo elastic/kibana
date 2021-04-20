@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or modification of a K Desktop Environment (KDE) AutoStart script or desktop file that will execute upon each user logon. Adversaries may abuse this method for persistence.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via KDE AutoStart Script or Desktop File Modification",
+  "query": "file where event.type != \"deletion\" and\n  file.extension in (\"sh\", \"desktop\") and\n  file.path :\n    (\n      \"/home/*/.config/autostart/*\", \"/root/.config/autostart/*\",\n      \"/home/*/.kde/Autostart/*\", \"/root/.kde/Autostart/*\",\n      \"/home/*/.kde4/Autostart/*\", \"/root/.kde4/Autostart/*\",\n      \"/home/*/.kde/share/autostart/*\", \"/root/.kde/share/autostart/*\",\n      \"/home/*/.kde4/share/autostart/*\", \"/root/.kde4/share/autostart/*\",\n      \"/home/*/.local/share/autostart/*\", \"/root/.local/share/autostart/*\",\n      \"/home/*/.config/autostart-scripts/*\", \"/root/.config/autostart-scripts/*\",\n      \"/etc/xdg/autostart/*\", \"/usr/share/autostart/*\"\n    )\n",
+  "references": [
+    "https://userbase.kde.org/System_Settings/Autostart",
+    "https://www.amnesty.org/en/latest/research/2020/09/german-made-finspy-spyware-found-in-egypt-and-mac-and-linux-versions-revealed/",
+    "https://www.intezer.com/blog/research/operation-electrorat-attacker-creates-fake-companies-to-drain-your-crypto-wallets/"
+  ],
+  "risk_score": 47,
+  "rule_id": "e3e904b3-0a8e-4e68-86a8-977a163e21d3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

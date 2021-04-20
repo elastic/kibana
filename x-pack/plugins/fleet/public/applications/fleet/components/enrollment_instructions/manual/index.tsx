@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import styled from 'styled-components';
 import { EuiText, EuiSpacer, EuiLink, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EnrollmentAPIKey } from '../../../types';
+
+import type { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
-  kibanaUrl: string;
+  fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
-  kibanaCASha256?: string;
 }
 
 // Otherwise the copy button is over the text
@@ -21,14 +22,15 @@ const CommandCode = styled.pre({
   overflow: 'scroll',
 });
 
+function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
+}
+
 export const ManualInstructions: React.FunctionComponent<Props> = ({
-  kibanaUrl,
   apiKey,
-  kibanaCASha256,
+  fleetServerHosts,
 }) => {
-  const enrollArgs = `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
-    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
-  }`;
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
   const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
 
@@ -72,7 +74,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-          defaultMessage="See the {link} for more instructions and options."
+          defaultMessage="See the {link} for RPM / DEB deploy instructions."
           values={{
             link: (
               <EuiLink

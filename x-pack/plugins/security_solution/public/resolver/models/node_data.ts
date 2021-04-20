@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
@@ -142,6 +143,9 @@ export function updateWithReceivedNodes({
 /**
  * This is used for displaying information in the node panel mainly and we should be able to remove it eventually in
  * favor of showing all the node data associated with a node in the tree.
+ *
+ * NOTE: The events are actually in descending order by the timestamp field because of the `/events` api. So this
+ * returns the "newest" event.
  *
  * @param data node data for a specific node ID
  * @returns the first event or undefined if the node data passed in was undefined

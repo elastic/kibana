@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getNewsFeed } from './get_news_feed';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 
 describe('getNewsFeed', () => {
   const originalConsole = global.console;
@@ -23,7 +25,7 @@ describe('getNewsFeed', () => {
           throw new Error('Boom');
         },
       },
-    } as unknown) as AppMountContext['core'];
+    } as unknown) as CoreStart;
 
     const newsFeed = await getNewsFeed({ core });
     expect(newsFeed.items).toEqual([]);
@@ -99,7 +101,7 @@ describe('getNewsFeed', () => {
           };
         },
       },
-    } as unknown) as AppMountContext['core'];
+    } as unknown) as CoreStart;
 
     const newsFeed = await getNewsFeed({ core });
     expect(newsFeed.items.length).toEqual(3);

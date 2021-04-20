@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -39,6 +29,7 @@ import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -59,6 +50,9 @@ export { contextServiceMock } from './context/context_service.mock';
 export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+
+type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -78,17 +72,24 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     },
   };
 
-  const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
-    legacy: { globalConfig$: of(globalConfig) },
+  const mock: MockedPluginInitializerConfig<T> = {
+    legacy: {
+      globalConfig$: of(globalConfig),
+      get: () => globalConfig,
+    },
     create: jest.fn().mockReturnValue(of(config)),
-    createIfExists: jest.fn().mockReturnValue(of(config)),
+    get: jest.fn().mockReturnValue(config),
   };
 
   return mock;
 }
 
+type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+  config: MockedPluginInitializerConfig<T>;
+};
+
 function pluginInitializerContextMock<T>(config: T = {} as T) {
-  const mock: PluginInitializerContext<T> = {
+  const mock: PluginInitializerContextMock<T> = {
     opaqueId: Symbol(),
     logger: loggingSystemMock.create(),
     env: {
@@ -144,6 +145,7 @@ function createCoreSetupMock({
     uiSettings: uiSettingsMock,
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
+    deprecations: deprecationsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -181,6 +183,7 @@ function createInternalCoreSetupMock() {
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    deprecations: deprecationsServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
@@ -203,6 +206,9 @@ function createCoreRequestHandlerContextMock() {
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
+      getClient: savedObjectsClientMock.create,
+      getExporter: savedObjectsServiceMock.createExporter,
+      getImporter: savedObjectsServiceMock.createImporter,
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),

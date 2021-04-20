@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly } from '@elastic/eui';
 import { Datasource, FramePublicAPI, Visualization } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
 import { Action } from '../state_management';
@@ -59,7 +54,7 @@ export function WorkspacePanelWrapper({
       dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
-        newState,
+        updater: newState,
         clearStagedPreview: false,
       });
     },
@@ -129,9 +124,7 @@ export function WorkspacePanelWrapper({
               })}
           </h1>
         </EuiScreenReaderOnly>
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {children}
-        </EuiPageContentBody>
+        {children}
       </EuiPageContent>
     </>
   );

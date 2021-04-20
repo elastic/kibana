@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -25,6 +26,7 @@ import { useDispatch } from 'react-redux';
 
 import { LoadingPanel } from '../../loading';
 import { OnChangePage } from '../events';
+import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -144,6 +146,7 @@ export const EventsCountComponent = ({
             <EuiBadge data-test-subj="local-events-count" color="hollow">
               {itemsCount}
               <EuiButtonEmpty
+                className={EVENTS_COUNT_BUTTON_CLASS_NAME}
                 size="s"
                 color="text"
                 iconType="arrowDown"

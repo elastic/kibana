@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { CommentType } from '../../../../../../plugins/case/common/api';
-import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { CommentType } from '../../../../../../plugins/cases/common/api';
+import {
+  userActionPostResp,
+  defaultUser,
+  postCaseReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -20,14 +26,25 @@ import {
 } from '../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const actionsRemover = new ActionsRemover(supertest);
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_all_user_actions', () => {
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
     afterEach(async () => {
       await deleteCases(es);
       await deleteComments(es);
@@ -61,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
-      expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
+      expect(JSON.parse(body[0].new_value)).to.eql(userActionPostResp);
     });
 
     it(`on close case, user action: 'update' should be called with actionFields: ['status']`, async () => {
@@ -135,10 +152,18 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['connector']);
       expect(body[1].action).to.eql('update');
-      expect(body[1].old_value).to.eql(`{"id":"none","name":"none","type":".none","fields":null}`);
-      expect(body[1].new_value).to.eql(
-        `{"id":"123","name":"Connector","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}`
-      );
+      expect(JSON.parse(body[1].old_value)).to.eql({
+        id: 'none',
+        name: 'none',
+        type: '.none',
+        fields: null,
+      });
+      expect(JSON.parse(body[1].new_value)).to.eql({
+        id: '123',
+        name: 'Connector',
+        type: '.jira',
+        fields: { issueType: 'Task', priority: 'High', parent: null },
+      });
     });
 
     it(`on update tags, user action: 'add' and 'delete' should be called with actionFields: ['tags']`, async () => {
@@ -272,7 +297,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['comment']);
       expect(body[1].action).to.eql('create');
       expect(body[1].old_value).to.eql(null);
-      expect(body[1].new_value).to.eql(JSON.stringify(postCommentUserReq));
+      expect(JSON.parse(body[1].new_value)).to.eql(postCommentUserReq);
     });
 
     it(`on update comment, user action: 'update' should be called with actionFields: ['comments']`, async () => {
@@ -305,20 +330,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(3);
       expect(body[2].action_field).to.eql(['comment']);
       expect(body[2].action).to.eql('update');
-      expect(body[2].old_value).to.eql(JSON.stringify(postCommentUserReq));
-      expect(body[2].new_value).to.eql(
-        JSON.stringify({
-          comment: newComment,
-          type: CommentType.user,
-        })
-      );
+      expect(JSON.parse(body[2].old_value)).to.eql(postCommentUserReq);
+      expect(JSON.parse(body[2].new_value)).to.eql({
+        comment: newComment,
+        type: CommentType.user,
+      });
     });
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
@@ -344,21 +370,21 @@ export default ({ getService }: FtrProviderContext): void => {
             id: connector.id,
             name: connector.name,
             type: connector.actionTypeId,
-            fields: { urgency: null, impact: null, severity: null },
+            fields: {
+              urgency: '2',
+              impact: '2',
+              severity: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
           }).connector,
         })
         .expect(200);
 
       await supertest
-        .post(`${CASES_URL}/${postedCase.id}/_push`)
+        .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
         .set('kbn-xsrf', 'true')
-        .send({
-          connector_id: configure.connector.id,
-          connector_name: configure.connector.name,
-          external_id: 'external_id',
-          external_title: 'external_title',
-          external_url: 'external_url',
-        })
+        .send({})
         .expect(200);
 
       const { body } = await supertest

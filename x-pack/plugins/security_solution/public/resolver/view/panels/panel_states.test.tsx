@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
@@ -65,6 +66,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -111,6 +114,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         memoryHistory.push({
           search: queryStringWithEventDetailSelected,
@@ -150,6 +155,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -207,6 +214,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({

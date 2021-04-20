@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -40,13 +41,11 @@ export function ConnectionStatus({ isConnected, mode }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <span className="eui-displayBlock">{icon}</span>
+      </EuiFlexItem>
 
-          <EuiFlexItem className="remoteClustersConnectionStatus__message">
-            <EuiText size="s">{message}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem grow={false} className="remoteClustersConnectionStatus__message">
+        <EuiText size="s">{message}</EuiText>
       </EuiFlexItem>
 
       {!isConnected && mode === SNIFF_MODE && (

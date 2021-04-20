@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -13,11 +14,9 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
-  createMockedReferenceOperation,
-} from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
+import { createMockedReferenceOperation } from './operations/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +171,7 @@ describe('IndexPattern Data Source', () => {
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -474,6 +474,123 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
+    it('should wrap filtered metrics in filtered metric aggregation', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+                filter: {
+                  language: 'kuery',
+                  query: 'bytes > 5',
+                },
+              },
+              col2: {
+                label: 'Average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'bytes',
+                operationType: 'average',
+                timeScale: 'h',
+              },
+              col3: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "customBucket": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "filter": Array [
+                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                          ],
+                          "id": Array [
+                            "col1-filter",
+                          ],
+                          "schema": Array [
+                            "bucket",
+                          ],
+                        },
+                        "function": "aggFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "customMetric": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1-metric",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "id": Array [
+                  "col1",
+                ],
+                "schema": Array [
+                  "metric",
+                ],
+              },
+              "function": "aggFilteredMetric",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
+    });
+
     it('should add time_scale and format function if time scale is set and supported', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
@@ -495,7 +612,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
@@ -530,6 +647,9 @@ describe('IndexPattern Data Source', () => {
           "outputColumnId": Array [
             "col1",
           ],
+          "outputColumnName": Array [
+            "Count of records",
+          ],
           "targetUnit": Array [
             "h",
           ],
@@ -552,6 +672,55 @@ describe('IndexPattern Data Source', () => {
           "type": "function",
         }
       `);
+    });
+
+    it('should put column formatters after calculated columns', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['bucket', 'metric', 'calculated'],
+            columns: {
+              bucket: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              calculated: {
+                label: 'Moving average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'moving_average',
+                references: ['metric'],
+                params: {
+                  window: 5,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
+      const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
+      expect(calculationIndex).toBeLessThan(formatIndex);
     });
 
     it('should rename the output from esaggs when using flat query', () => {
@@ -619,7 +788,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 isBucketed: false,
                 sourceField: 'timefield',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               col2: {
                 label: 'Date',
@@ -669,7 +838,7 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   isBucketed: false,
                   sourceField: 'timefield',
-                  operationType: 'cardinality',
+                  operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
@@ -855,183 +1024,47 @@ describe('IndexPattern Data Source', () => {
       it('should return null for non-existant columns', () => {
         expect(publicAPI.getOperationForColumnId('col2')).toBe(null);
       });
+
+      it('should return null for referenced columns', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as IndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as IndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getOperationForColumnId('col1')).toEqual(null);
+      });
     });
   });
 
   describe('#getErrorMessages', () => {
-    it('should detect a missing reference in a layer', () => {
-      const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo',
-                operationType: 'count', // <= invalid
-                sourceField: 'bytes',
-              },
-            },
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
-      expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual({
-        shortMessage: 'Invalid reference.',
-        longMessage: '"Foo" has an invalid reference.',
-      });
-    });
-
-    it('should detect and batch missing references in a layer', () => {
-      const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo',
-                operationType: 'count', // <= invalid
-                sourceField: 'bytes',
-              },
-              col2: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo2',
-                operationType: 'count', // <= invalid
-                sourceField: 'memory',
-              },
-            },
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
-      expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual({
-        shortMessage: 'Invalid references.',
-        longMessage: '"Foo", "Foo2" have invalid reference.',
-      });
-    });
-
-    it('should detect and batch missing references in multiple layers', () => {
-      const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo',
-                operationType: 'count', // <= invalid
-                sourceField: 'bytes',
-              },
-              col2: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo2',
-                operationType: 'count', // <= invalid
-                sourceField: 'memory',
-              },
-            },
-          },
-          second: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                dataType: 'string',
-                isBucketed: false,
-                label: 'Foo',
-                operationType: 'count', // <= invalid
-                sourceField: 'source',
-              },
-            },
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
-      expect(messages).toHaveLength(2);
-      expect(messages).toEqual([
-        {
-          shortMessage: 'Invalid references on Layer 1.',
-          longMessage: 'Layer 1 has invalid references in "Foo", "Foo2".',
-        },
-        {
-          shortMessage: 'Invalid reference on Layer 2.',
-          longMessage: 'Layer 2 has an invalid reference in "Foo".',
-        },
-      ]);
-    });
-
-    it('should return no errors if all references are satified', () => {
-      const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Foo',
-                operationType: 'avg',
-                sourceField: 'bytes',
-              },
-            },
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      expect(
-        indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
-      ).toBeUndefined();
-    });
-
-    it('should return no errors with layers with no columns', () => {
-      const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      expect(indexPatternDatasource.getErrorMessages(state)).toBeUndefined();
-    });
-
-    it('should bubble up invalid configuration from operations', () => {
+    it('should use the results of getErrorMessages directly when single layer', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
       const state: IndexPatternPrivateState = {
@@ -1049,10 +1082,39 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
-        { shortMessage: 'error 1', longMessage: '' },
-        { shortMessage: 'error 2', longMessage: '' },
+        { longMessage: 'error 1', shortMessage: '' },
+        { longMessage: 'error 2', shortMessage: '' },
       ]);
       expect(getErrorMessages).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prepend each error with its layer number on multi-layer chart', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
+        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -1074,7 +1136,7 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Foo',
-                    operationType: 'avg',
+                    operationType: 'average',
                     sourceField: 'bytes',
                   },
                 },
@@ -1101,7 +1163,7 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: {
-              col1: { operationType: 'avg' as const },
+              col1: { operationType: 'average' as const },
               col2: { operationType: 'sum' as const },
             },
           },

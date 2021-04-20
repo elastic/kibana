@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -108,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('primary basic cluster shows cluster metrics', async () => {
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');

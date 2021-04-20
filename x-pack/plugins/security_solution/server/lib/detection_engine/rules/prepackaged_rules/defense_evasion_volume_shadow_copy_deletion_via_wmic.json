@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Volume Shadow Copy Deletion via WMIC",
   "query": "event.category:process and event.type:(start or process_started) and process.name:WMIC.exe and process.args:(delete and shadowcopy)",
   "risk_score": 73,
@@ -32,13 +33,21 @@
       },
       "technique": [
         {
-          "id": "T1107",
-          "name": "File Deletion",
-          "reference": "https://attack.mitre.org/techniques/T1107/"
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.004",
+              "name": "File Deletion",
+              "reference": "https://attack.mitre.org/techniques/T1070/004/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 8
 }

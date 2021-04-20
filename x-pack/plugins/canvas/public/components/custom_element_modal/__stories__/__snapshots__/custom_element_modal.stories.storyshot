@@ -17,7 +17,8 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
   >
     <button
       aria-label="Closes this modal window"
-      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -211,8 +212,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -260,6 +260,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -280,6 +281,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -323,7 +325,8 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
   >
     <button
       aria-label="Closes this modal window"
-      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -517,8 +520,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
               >
                 <div
                   className="euiCard__top"
@@ -541,14 +543,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -569,6 +564,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -589,6 +585,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -633,7 +630,8 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
   >
     <button
       aria-label="Closes this modal window"
-      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -827,8 +825,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -848,14 +845,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   >
                     My Chart
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -876,6 +866,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -896,6 +887,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -938,7 +930,8 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
   >
     <button
       aria-label="Closes this modal window"
-      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -1132,8 +1125,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -1153,14 +1145,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -1181,6 +1166,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -1201,6 +1187,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {

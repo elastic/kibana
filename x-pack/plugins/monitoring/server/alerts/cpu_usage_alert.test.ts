@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { CpuUsageAlert } from './cpu_usage_alert';
 import { ALERT_CPU_USAGE } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -81,7 +84,7 @@ describe('CpuUsageAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,
@@ -125,6 +128,13 @@ describe('CpuUsageAlert', () => {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
             cpuUsage,
+            itemLabel: undefined,
+            meta: {
+              clusterUuid,
+              cpuUsage,
+              nodeId,
+              nodeName,
+            },
             nodeId,
             nodeName,
             ui: {

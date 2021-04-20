@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -19,7 +20,7 @@ import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
+import { AppStateSelectedCells } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 import { ExplorerAppState } from '../../../common/types/ml_url_generator';
 
@@ -106,6 +107,9 @@ const setFilterDataActionCreator = (
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
+  clearExplorerData: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
+  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
@@ -114,9 +118,6 @@ export const explorerService = {
   },
   updateJobSelection: (selectedJobIds: string[]) => {
     explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
-  },
-  setBounds: (payload: TimeRangeBounds) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });
   },
   setCharts: (payload: ExplorerChartsData) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS, payload });
@@ -139,6 +140,9 @@ export const explorerService = {
   setFilterData: (payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>) => {
     explorerAction$.next(setFilterDataActionCreator(payload));
   },
+  setChartsDataLoading: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
+  },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
@@ -158,3 +162,5 @@ export const explorerService = {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
   },
 };
+
+export type ExplorerService = typeof explorerService;

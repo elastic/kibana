@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -9,9 +10,9 @@ import {
   testCaseFailures,
   getTestScenarios,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import { TestInvoker } from '../../common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { shareAddTestSuiteFactory } from '../../common/suites/share_add';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -66,7 +67,7 @@ const createMultiTestCases = () => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: TestInvoker) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -39,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       daily_model_snapshot_retention_after_days: 1,
       allow_lazy_open: false,
     };
+    // @ts-expect-error not full interface
     const datafeedConfig: Datafeed = {
       datafeed_id: `datafeed-${jobId}`,
       indices: ['ft_module_sample_logs'],
@@ -49,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
     return {
       testDescription: `stop_on_warn is ${stopOnWarn}`,
       jobId,
+      // @ts-expect-error not full interface
       jobConfig: {
         job_id: jobId,
         ...commonJobConfig,

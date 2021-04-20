@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+
+import type { EsAssetReference } from '../../../../../common/types/models';
+
 import { deleteTransformRefs } from './remove';
-import { EsAssetReference } from '../../../../../common/types/models';
 
 describe('test transform install', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;

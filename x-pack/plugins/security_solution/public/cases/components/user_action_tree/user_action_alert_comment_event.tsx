@@ -1,28 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiLink } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { getRuleDetailsUrl } from '../../../common/components/link_to';
+import { getRuleDetailsUrl, useFormatUrl } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 
-import { Alert } from '../case_view';
 import * as i18n from './translations';
+import { CommentType } from '../../../../../cases/common/api';
+import { LinkAnchor } from '../../../common/components/links';
 
 interface Props {
-  alert: Alert | undefined;
+  alertId: string;
+  commentType: CommentType;
+  ruleId?: string | null;
+  ruleName?: string | null;
+  alertsCount?: number;
+  loadingAlertData?: boolean;
 }
 
-const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
-  const ruleName = alert?.rule?.name ?? null;
-  const ruleId = alert?.rule?.id ?? null;
+const AlertCommentEventComponent: React.FC<Props> = ({
+  alertId,
+  loadingAlertData = false,
+  ruleId,
+  ruleName,
+  alertsCount,
+  commentType,
+}) => {
   const { navigateToApp } = useKibana().services.application;
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.detections);
 
   const onLinkClick = useCallback(
     (ev: { preventDefault: () => void }) => {
@@ -34,13 +48,37 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
     [ruleId, navigateToApp]
   );
 
-  return ruleId != null && ruleName != null ? (
+  return commentType !== CommentType.generatedAlert ? (
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-      <EuiLink onClick={onLinkClick}>{ruleName}</EuiLink>
+      {loadingAlertData && <EuiLoadingSpinner size="m" />}
+      {!loadingAlertData && !isEmpty(ruleId) && (
+        <LinkAnchor
+          onClick={onLinkClick}
+          href={formatUrl(getRuleDetailsUrl(ruleId ?? '', urlSearch))}
+          data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
+        >
+          {ruleName ?? i18n.UNKNOWN_RULE}
+        </LinkAnchor>
+      )}
+      {!loadingAlertData && isEmpty(ruleId) && i18n.UNKNOWN_RULE}
     </>
   ) : (
-    <>{i18n.ALERT_RULE_DELETED_COMMENT_LABEL}</>
+    <>
+      <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
+      {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
+      {loadingAlertData && <EuiLoadingSpinner size="m" />}
+      {!loadingAlertData && ruleId !== '' && (
+        <LinkAnchor
+          onClick={onLinkClick}
+          href={formatUrl(getRuleDetailsUrl(ruleId ?? '', urlSearch))}
+          data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
+        >
+          {ruleName}
+        </LinkAnchor>
+      )}
+      {!loadingAlertData && ruleId === '' && <EuiText>{ruleName}</EuiText>}
+    </>
   );
 };
 

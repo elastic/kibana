@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+
+import type { AgentPolicy } from '../../../../types';
+
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
-import { AgentPolicy } from '../../../../types';
 
 export const DownloadStep = () => {
   return {
@@ -50,13 +53,16 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedPolicyId?: (policyId: string) => void;
 }) => {
+  const regularAgentPolicies = Array.isArray(agentPolicies)
+    ? agentPolicies.filter((policy) => policy && !policy.is_managed)
+    : [];
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'Choose an agent policy',
     }),
     children: (
       <EnrollmentStepAgentPolicy
-        agentPolicies={agentPolicies}
+        agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
         onAgentPolicyChange={setSelectedPolicyId}

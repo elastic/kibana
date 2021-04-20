@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectMigrationContext } from 'kibana/server';
@@ -92,6 +81,57 @@ Object {
       };
 
       expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+    });
+  });
+
+  describe('7.11.0', () => {
+    const migrationFn = indexPatternSavedObjectTypeMigrations['7.11.0'];
+
+    test('should set allowNoIndex', () => {
+      const input = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {},
+      };
+      const expected = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          allowNoIndex: true,
+        },
+      };
+
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+
+      const input2 = {
+        type: 'index-pattern',
+        id: 'metrics-*',
+        attributes: {},
+      };
+      const expected2 = {
+        type: 'index-pattern',
+        id: 'metrics-*',
+        attributes: {
+          allowNoIndex: true,
+        },
+      };
+
+      expect(migrationFn(input2, savedObjectMigrationContext)).toEqual(expected2);
+
+      const input3 = {
+        type: 'index-pattern',
+        id: 'xxx',
+        attributes: {},
+      };
+      const expected3 = {
+        type: 'index-pattern',
+        id: 'xxx',
+        attributes: {
+          allowNoIndex: undefined,
+        },
+      };
+
+      expect(migrationFn(input3, savedObjectMigrationContext)).toEqual(expected3);
     });
   });
 });

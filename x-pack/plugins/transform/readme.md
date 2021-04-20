@@ -67,30 +67,32 @@ These data sets are now ready to be used for creating transforms in Kibana.
 
 ### Jest tests
 
-Run the test following jest tests from `kibana/x-pack`.
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+Run the test following jest tests from `kibana/x-pack/plugins/transform.
 
 New snapshots, all plugins:   
 
 ```
-node scripts/jest
+yarn test:jest
 ```
  
 Update snapshots for the transform plugin: 
 
 ```
-node scripts/jest plugins/transform -u
+yarn test:jest -u
 ```
 
 Update snapshots for a specific directory only: 
 
 ```
-node scripts/jest x-pack/plugins/transform/public/app/sections
+yarn test:jest public/app/sections
 ```
 
 Run tests with verbose output: 
 
 ```
-node scripts/jest plugins/transform --verbose
+yarn test:jest --verbose
 ```
 
 ### Functional tests
@@ -129,3 +131,12 @@ and Kibana instance that the tests will be run against.
         node scripts/functional_test_runner.js --config test/api_integration_basic/config.ts --include-tag transform
         
    Transform API integration `Basic` license tests are located in `x-pack/test/api_integration_basic/apis/ml`.
+   
+1.  Accessibility tests:
+
+    We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of Transforms (for example, users relying on screen readers).
+
+         node scripts/functional_tests_server --config test/accessibility/config.ts
+         node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=transform
+
+    Transform accessibility tests are located in `x-pack/test/accessibility/apps`.

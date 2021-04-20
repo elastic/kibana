@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { Alert } from '../../../../../alerts/common';
-import { AlertsClient } from '../../../../../alerts/server';
+import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
+import { AlertsClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 
@@ -14,8 +15,8 @@ export const installPrepackagedRules = (
   alertsClient: AlertsClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
-): Array<Promise<Alert>> =>
-  rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
+): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
+  rules.reduce<Array<Promise<SanitizedAlert<AlertTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
@@ -55,6 +56,7 @@ export const installPrepackagedRules = (
       items_per_search: itemsPerSearch,
       threat_query: threatQuery,
       threat_index: threatIndex,
+      threat_indicator_path: threatIndicatorPath,
       threshold,
       timestamp_override: timestampOverride,
       references,
@@ -109,6 +111,7 @@ export const installPrepackagedRules = (
         itemsPerSearch,
         threatQuery,
         threatIndex,
+        threatIndicatorPath,
         threshold,
         timestampOverride,
         references,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -39,7 +40,8 @@ jest.mock('../../containers/use_update_comment');
 jest.mock('./user_action_timestamp');
 
 const patchComment = jest.fn();
-describe('UserActionTree ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/96362
+describe.skip('UserActionTree ', () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -54,6 +56,9 @@ describe('UserActionTree ', () => {
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    jest
+      .spyOn(routeData, 'useParams')
+      .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
@@ -288,7 +293,8 @@ describe('UserActionTree ', () => {
       ).toEqual(false);
       expect(patchComment).toBeCalledWith({
         commentUpdate: sampleData.content,
-        caseId: props.data.id,
+        caseId: 'case-id',
+        subCaseId: 'sub-case-id',
         commentId: props.data.comments[0].id,
         fetchUserActions,
         updateCase,

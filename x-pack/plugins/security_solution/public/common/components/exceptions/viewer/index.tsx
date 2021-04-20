@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
@@ -17,11 +18,11 @@ import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import {
-  useExceptionList,
+  useExceptionListItems,
   ExceptionListIdentifiers,
   ExceptionListTypeEnum,
   ExceptionListItemSchema,
-  UseExceptionListSuccess,
+  UseExceptionListItemsSuccess,
   useApi,
 } from '../../../../../public/lists_plugin_deps';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
@@ -105,7 +106,10 @@ const ExceptionsViewerComponent = ({
   const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
 
   const setExceptions = useCallback(
-    ({ exceptions: newExceptions, pagination: newPagination }: UseExceptionListSuccess): void => {
+    ({
+      exceptions: newExceptions,
+      pagination: newPagination,
+    }: UseExceptionListItemsSuccess): void => {
       dispatch({
         type: 'setExceptions',
         lists: exceptionListsMeta,
@@ -115,7 +119,7 @@ const ExceptionsViewerComponent = ({
     },
     [dispatch, exceptionListsMeta]
   );
-  const [loadingList, , , fetchListItems] = useExceptionList({
+  const [loadingList, , , fetchListItems] = useExceptionListItems({
     http: services.http,
     lists: exceptionListsMeta,
     filterOptions:

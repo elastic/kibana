@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -356,15 +357,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const { status, body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
           consumer: 'alerts',
           enabled: true,
-          alertTypeId: ALERT_TYPE_ID,
+          rule_type_id: ALERT_TYPE_ID,
           schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
           actions: [action],
+          notify_when: 'onActiveAlert',
           params: {
             index: ES_TEST_INDEX_NAME,
             timeField: params.timeField || 'date',
@@ -386,7 +388,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       return alertId;
     }
@@ -395,11 +397,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { statusCode, body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for index threshold FT',
-      actionTypeId: ACTION_TYPE_ID,
+      connector_type_id: ACTION_TYPE_ID,
       config: {
         index: ES_TEST_OUTPUT_INDEX_NAME,
       },
@@ -412,7 +414,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
   expect(statusCode).to.be(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
+  objectRemover.add(Spaces.space1.id, actionId, 'connector', 'actions');
 
   return actionId;
 }

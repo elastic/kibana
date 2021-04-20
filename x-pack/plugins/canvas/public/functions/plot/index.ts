@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
 import { groupBy, get, keyBy, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
@@ -17,7 +17,7 @@ import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../i18n';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Legend } from '../../../types';
 
-interface Arguments {
+export interface Arguments {
   seriesStyle: SeriesStyle[];
   defaultStyle: SeriesStyle;
   palette: PaletteOutput;

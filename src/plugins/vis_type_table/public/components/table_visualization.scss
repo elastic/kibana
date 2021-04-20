@@ -1,0 +1,46 @@
+// Prefix all styles with "tbv" to avoid conflicts.
+// Examples
+//   tbvChart
+//   tbvChart__legend
+//   tbvChart__legend--small
+//   tbvChart__legend-isLoading
+
+.tbvChart {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+  overflow: auto;
+
+  @include euiScrollBar;
+
+  // Sticky footer doesn't correct work with inline-flex in Firefox.
+  // As footer the last element I don't see any reason to use inline-flex for this element.
+  // Display: flex fixes jumping on hover in Firefox.
+  // Created issue on EUI (https://github.com/elastic/eui/issues/4729).
+  // Once addressed, we can remove this local fix.
+  .euiDataGrid--stickyFooter .euiDataGridFooter {
+    display: flex;
+  }
+}
+
+.tbvChart__split {
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeL;
+
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+
+  > h3 {
+    text-align: center;
+  }
+}
+
+.tbvChart__splitColumns {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.tbvChartCellContent {
+  @include euiTextTruncate;
+}

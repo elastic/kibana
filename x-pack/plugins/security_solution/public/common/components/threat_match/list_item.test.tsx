@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
@@ -15,6 +15,13 @@ import { fields } from '../../../../../../../src/plugins/data/common/index_patte
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';
 import { IndexPattern } from 'src/plugins/data/public';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorLightShade: '#ece',
+  },
+});
 
 jest.mock('../../../common/lib/kibana');
 
@@ -65,10 +72,9 @@ describe('ListItemComponent', () => {
   describe('and badge logic', () => {
     test('it renders "and" badge with extra top padding for the first item when "andLogicIncluded" is "true"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={0}
             indexPattern={
               {
@@ -99,10 +105,9 @@ describe('ListItemComponent', () => {
 
     test('it renders "and" badge when more than one item entry exists and it is not the first item', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -131,10 +136,9 @@ describe('ListItemComponent', () => {
 
     test('it renders indented "and" badge when "andLogicIncluded" is "true" and only one entry exists', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -165,10 +169,9 @@ describe('ListItemComponent', () => {
 
     test('it renders no "and" badge when "andLogicIncluded" is "false"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -210,7 +213,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={item}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -242,7 +244,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -274,7 +275,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={1}
           indexPattern={
             {
@@ -308,7 +308,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -341,7 +340,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {

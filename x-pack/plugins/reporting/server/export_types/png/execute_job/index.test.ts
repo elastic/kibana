@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as Rx from 'rxjs';
@@ -58,16 +59,6 @@ beforeEach(async () => {
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
 
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
   // @ts-ignore over-riding config method
   mockReporting.config = mockReportingConfig;
 

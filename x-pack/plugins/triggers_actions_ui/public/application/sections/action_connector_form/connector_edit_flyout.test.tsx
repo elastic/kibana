@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import ConnectorEditFlyout from './connector_edit_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -45,20 +47,19 @@ describe('connector_edit_flyout', () => {
       config: {},
     };
 
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'test-action-type-id',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -90,20 +91,19 @@ describe('connector_edit_flyout', () => {
       config: {},
     };
 
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'test-action-type-id',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;

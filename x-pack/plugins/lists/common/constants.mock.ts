@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 
 import { OsTypeArray } from './schemas/common';
-import { EntriesArray } from './schemas/types';
+import { EntriesArray, Entry, EntryMatch, EntryNested } from './schemas/types';
 import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
@@ -41,6 +43,7 @@ export const NESTED_FIELD = 'parent.field';
 // Exception List specific
 export const ID = 'uuid_here';
 export const ITEM_ID = 'some-list-item-id';
+export const DETECTION_TYPE = 'detection';
 export const ENDPOINT_TYPE = 'endpoint';
 export const FIELD = 'host.name';
 export const OPERATOR = 'included';
@@ -68,6 +71,34 @@ export const ENDPOINT_ENTRIES: EndpointEntriesArray = [
     type: 'nested',
   },
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
+];
+// ENTRIES_WITH_IDS should only be used to mock out functionality of a collection of transforms
+// that are UI specific and useful for UI concerns that are inserted between the
+// API and the actual user interface. In some ways these might be viewed as
+// technical debt or to compensate for the differences and preferences
+// of how ReactJS might prefer data vs. how we want to model data.
+export const ENTRIES_WITH_IDS: EntriesArray = [
+  {
+    entries: [
+      {
+        field: 'nested.field',
+        id: '123',
+        operator: 'included',
+        type: 'match',
+        value: 'some value',
+      } as EntryMatch & { id: string },
+    ],
+    field: 'some.parentField',
+    id: '123',
+    type: 'nested',
+  } as EntryNested & { id: string },
+  {
+    field: 'some.not.nested.field',
+    id: '123',
+    operator: 'included',
+    type: 'match',
+    value: 'some value',
+  } as Entry & { id: string },
 ];
 export const ITEM_TYPE = 'simple';
 export const OS_TYPES: OsTypeArray = ['windows'];

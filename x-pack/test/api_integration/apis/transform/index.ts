@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -31,8 +32,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./start_transforms'));
     loadTestFile(require.resolve('./stop_transforms'));
     loadTestFile(require.resolve('./transforms'));
+    loadTestFile(require.resolve('./transforms_nodes'));
     loadTestFile(require.resolve('./transforms_preview'));
     loadTestFile(require.resolve('./transforms_stats'));
     loadTestFile(require.resolve('./transforms_update'));
+    loadTestFile(require.resolve('./transforms_create'));
   });
 }

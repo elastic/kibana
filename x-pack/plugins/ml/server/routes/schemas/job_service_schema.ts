@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
+import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
@@ -15,6 +19,8 @@ export const categorizationFieldExamplesSchema = {
   start: schema.number(),
   end: schema.number(),
   analyzer: schema.any(),
+  runtimeMappings: runtimeMappingsSchema,
+  indicesOptions: indicesOptionsSchema,
 };
 
 export const chartSchema = {
@@ -27,6 +33,8 @@ export const chartSchema = {
   aggFieldNamePairs: schema.arrayOf(schema.any()),
   splitFieldName: schema.maybe(schema.nullable(schema.string())),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
+  runtimeMappings: runtimeMappingsSchema,
+  indicesOptions: indicesOptionsSchema,
 };
 
 export const datafeedIdsSchema = schema.object({
@@ -37,6 +45,11 @@ export const forceStartDatafeedSchema = schema.object({
   datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
+});
+
+export const jobIdSchema = schema.object({
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.string()),
 });
 
 export const jobIdsSchema = schema.object({
@@ -83,6 +96,16 @@ export const revertModelSnapshotSchema = schema.object({
     )
   ),
 });
+
+export const datafeedPreviewSchema = schema.oneOf([
+  schema.object({
+    job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
+    datafeed: schema.maybe(datafeedConfigSchema),
+  }),
+  schema.object({
+    datafeedId: schema.maybe(schema.string()),
+  }),
+]);
 
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),

@@ -6,6 +6,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -22,6 +23,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -201,6 +203,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -217,6 +220,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -404,6 +408,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -420,6 +425,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -607,6 +613,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -623,6 +630,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -802,6 +810,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -818,6 +827,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -1005,6 +1015,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -1021,6 +1032,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -1216,6 +1228,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
 >
   <Connect(SpecInstance)
     baseTheme={Object {}}
+    debugState={false}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -1232,6 +1245,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }

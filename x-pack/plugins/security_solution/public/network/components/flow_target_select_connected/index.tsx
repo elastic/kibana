@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Location } from 'history';
@@ -10,11 +11,11 @@ import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { FlowDirection, FlowTarget } from '../../../graphql/types';
 import * as i18nIp from '../details/translations';
 
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../timelines/components/field_renderers/field_renderers';
+import { FlowTarget, FlowDirection } from '../../../../common/search_strategy';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;

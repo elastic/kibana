@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -74,6 +75,16 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       ...destinationId(spaceId !== SPACE_2_ID),
     },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail409(!overwrite && spaceId === DEFAULT_SPACE_ID),
+      ...destinationId(spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      ...fail409(!overwrite && spaceId === SPACE_1_ID),
+      ...destinationId(spaceId !== SPACE_1_ID),
+    },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_1B_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
@@ -98,7 +109,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } = importTestSuiteFactory(
     es,
@@ -123,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
               'globaltype',
               'isolatedtype',
               'sharedtype',
+              'sharecapabletype',
             ]),
           }),
         ].flat(),

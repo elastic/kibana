@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -31,7 +32,7 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
@@ -76,6 +77,7 @@ interface Props {
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort[];
+  tabType: TimelineTabs;
   timelineId: string;
 }
 
@@ -122,6 +124,7 @@ export const ColumnHeadersComponent = ({
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
+  tabType,
   timelineId,
 }: Props) => {
   const dispatch = useDispatch();
@@ -186,9 +189,10 @@ export const ColumnHeadersComponent = ({
           header={header}
           isDragging={draggingIndex === draggableIndex}
           sort={sort}
+          tabType={tabType}
         />
       )),
-    [columnHeaders, timelineId, draggingIndex, sort]
+    [columnHeaders, timelineId, draggingIndex, sort, tabType]
   );
 
   const fullScreen = useMemo(
@@ -230,11 +234,12 @@ export const ColumnHeadersComponent = ({
           id: timelineId,
           sort: cols.map(({ id, direction }) => ({
             columnId: id,
+            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
             sortDirection: direction as SortDirection,
           })),
         })
       ),
-    [dispatch, timelineId]
+    [columnHeaders, dispatch, timelineId]
   );
   const sortedColumns = useMemo(
     () => ({
@@ -263,7 +268,7 @@ export const ColumnHeadersComponent = ({
           isEventViewer={isEventViewer}
         >
           {showSelectAllCheckbox && (
-            <EventsTh>
+            <EventsTh role="checkbox">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
@@ -275,7 +280,7 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulFieldsBrowser
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -286,14 +291,14 @@ export const ColumnHeadersComponent = ({
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
                 <EuiButtonIcon
@@ -304,23 +309,29 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
-          <EventsTh>
-            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-              <EuiToolTip content={i18n.SORT_FIELDS}>
-                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
-              </EuiToolTip>
-            </EventsThContent>
-          </EventsTh>
+          {tabType !== TimelineTabs.eql && (
+            <EventsTh role="button" data-test-subj="timeline-sorting-fields">
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EuiToolTip content={i18n.SORT_FIELDS}>
+                  <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+                </EuiToolTip>
+              </EventsThContent>
+            </EventsTh>
+          )}
 
           {showEventsSelect && (
-            <EventsTh>
+            <EventsTh role="button">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>
@@ -330,7 +341,7 @@ export const ColumnHeadersComponent = ({
 
         <Droppable
           direction={'horizontal'}
-          droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+          droppableId={`${droppableTimelineColumnsPrefix}-${tabType}.${timelineId}`}
           isDropDisabled={false}
           type={DRAG_TYPE_FIELD}
           renderClone={renderClone}
@@ -354,5 +365,6 @@ export const ColumnHeaders = React.memo(
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineId === nextProps.timelineId &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    prevProps.tabType === nextProps.tabType &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)
 );

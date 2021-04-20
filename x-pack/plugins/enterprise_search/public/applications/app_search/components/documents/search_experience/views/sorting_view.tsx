@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Option {
   label: string;
@@ -33,8 +34,9 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
   const selectedValue = value && !valuesFromOptions.includes(value) ? undefined : value;
 
   return (
-    <div>
+    <>
       <EuiSelect
+        fullWidth
         options={options.map(wrapSortingOptionForEuiSelect)}
         value={selectedValue}
         prepend={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.sortBy', {
@@ -48,6 +50,6 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
           }
         )}
       />
-    </div>
+    </>
   );
 };

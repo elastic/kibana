@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,14 +20,8 @@ import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
-import {
-  DEFAULT_LINES_TO_SAMPLE,
-  getMaxBytes,
-  readFile,
-  createUrlOverrides,
-  processResults,
-  hasImportPermission,
-} from '../utils';
+import { DEFAULT_LINES_TO_SAMPLE, readFile, createUrlOverrides, processResults } from '../utils';
+import { getFileUpload } from '../../../../util/dependency_cache';
 
 import { MODE } from './constants';
 
@@ -59,14 +54,17 @@ export class FileDataVisualizerView extends Component {
     this.originalSettings = {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
-    this.maxFileUploadBytes = getMaxBytes();
+    this.maxFileUploadBytes = getFileUpload().getMaxBytes();
   }
 
   async componentDidMount() {
     // check the user has the correct permission to import data.
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
-    const hasPermissionToImport = await hasImportPermission();
+    const hasPermissionToImport = await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: false,
+      checkHasManagePipeline: true,
+    });
     this.setState({ hasPermissionToImport });
   }
 
@@ -228,7 +226,6 @@ export class FileDataVisualizerView extends Component {
   };
 
   setOverrides = (overrides) => {
-    console.log('setOverrides', overrides);
     this.setState(
       {
         loading: true,

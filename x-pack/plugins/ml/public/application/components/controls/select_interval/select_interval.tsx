@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -9,7 +10,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '../../../util/url_state';
 
-interface TableInterval {
+export interface TableInterval {
   display: string;
   val: string;
 }
@@ -51,7 +52,7 @@ function optionValueToInterval(value: string) {
   return interval;
 }
 
-const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
+export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
 export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
   return usePageUrlState<TableInterval>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);
@@ -63,8 +64,16 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 export const SelectInterval: FC = () => {
   const [interval, setInterval] = useTableInterval();
 
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setInterval(optionValueToInterval(e.target.value));
+  return <SelectIntervalUI interval={interval} onChange={setInterval} />;
+};
+
+interface SelectIntervalUIProps {
+  interval: TableInterval;
+  onChange: (interval: TableInterval) => void;
+}
+export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange }) => {
+  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange(optionValueToInterval(e.target.value));
   };
 
   return (
@@ -72,7 +81,7 @@ export const SelectInterval: FC = () => {
       options={OPTIONS}
       className="ml-select-interval"
       value={interval.val}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
   );
 };

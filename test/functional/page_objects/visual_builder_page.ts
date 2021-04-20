@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
@@ -61,6 +50,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       let isPresent = false;
       await retry.try(async () => {
         isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+        if (!isPresent) {
+          isPresent = await testSubjects.exists('visNoResult', { timeout: 1000 });
+        }
       });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
@@ -162,7 +154,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getMarkdownText(): Promise<string> {
-      const el = await find.byCssSelector('.tvbEditorVisualization');
+      const el = await find.byCssSelector('.tvbVis');
       const text = await el.getVisibleText();
       return text;
     }
@@ -439,10 +431,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async setIndexPatternValue(value: string) {
-      const el = await testSubjects.find('metricsIndexPatternInput');
-      await el.clearValue();
-      await el.type(value, { charByChar: true });
+    public async clickDataTab(tabName: string) {
+      await testSubjects.click(`${tabName}EditorDataBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
+      await testSubjects.click('switchIndexPatternSelectionModePopover');
+      await testSubjects.setEuiSwitch(
+        'switchIndexPatternSelectionMode',
+        useKibanaIndices ? 'check' : 'uncheck'
+      );
+    }
+
+    public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
+      const metricsIndexPatternInput = 'metricsIndexPatternInput';
+
+      if (useKibanaIndices !== undefined) {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      }
+
+      if (useKibanaIndices === false) {
+        const el = await testSubjects.find(metricsIndexPatternInput);
+        await el.clearValue();
+        if (value) {
+          await el.type(value, { charByChar: true });
+        }
+      } else {
+        await comboBox.clearInputField(metricsIndexPatternInput);
+        if (value) {
+          await comboBox.setCustom(metricsIndexPatternInput, value);
+        }
+      }
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -613,7 +634,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
       await PageObjects.common.sleep(1000);
       const byField = await testSubjects.find('groupByField');
-      await comboBox.setElement(byField, field, { clickWithMouse: true });
+      await comboBox.setElement(byField, field);
     }
 
     public async checkSelectedMetricsGroupByValue(value: string) {
@@ -621,6 +642,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
       );
       return await comboBox.isOptionSelected(groupBy, value);
+    }
+
+    public async setMetricsDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.setElement(dataTimeRangeMode, value);
+    }
+
+    public async checkSelectedDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.isOptionSelected(dataTimeRangeMode, value);
     }
   }
 

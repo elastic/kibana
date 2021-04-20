@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -19,7 +20,8 @@ export const exportTimeline = (timelineId: string) => {
 };
 
 export const openTimeline = (id: string) => {
-  cy.get(TIMELINE(id)).click();
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE(id)).should('be.visible').pipe(click);
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

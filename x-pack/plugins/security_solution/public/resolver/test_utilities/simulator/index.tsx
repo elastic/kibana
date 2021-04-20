@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,7 +14,13 @@ import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
+import {
+  ResolverState,
+  DataAccessLayer,
+  SpyMiddleware,
+  SideEffectSimulator,
+  TimeFilters,
+} from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
@@ -75,6 +82,8 @@ export class Simulator {
     databaseDocumentID,
     indices,
     history,
+    filters,
+    shouldUpdate,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -93,6 +102,8 @@ export class Simulator {
      */
     databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
+    filters: TimeFilters;
+    shouldUpdate: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -131,6 +142,8 @@ export class Simulator {
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
         indices={indices}
+        filters={filters}
+        shouldUpdate={shouldUpdate}
       />
     );
   }
@@ -168,6 +181,25 @@ export class Simulator {
    */
   public get indices(): string[] {
     return this.wrapper.prop('indices');
+  }
+
+  /**
+   * Change the shouldUpdate prop (updates the React component props.)
+   */
+  public set shouldUpdate(value: boolean) {
+    this.wrapper.setProps({ shouldUpdate: value });
+  }
+
+  public get shouldUpdate(): boolean {
+    return this.wrapper.prop('shouldUpdate');
+  }
+
+  public set filters(value: TimeFilters) {
+    this.wrapper.setProps({ filters: value });
+  }
+
+  public get filters(): TimeFilters {
+    return this.wrapper.prop('filters');
   }
 
   /**

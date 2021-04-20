@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
-import { newJobCapsService } from '../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { getDefaultFieldsFromJobCaps, DataFrameAnalyticsConfig } from '../common';
 
@@ -18,7 +19,7 @@ export const getIndexFields = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   needsDestIndexFields: boolean
 ) => {
-  const { fields } = newJobCapsService;
+  const { fields } = newJobCapsServiceAnalytics;
   if (jobConfig !== undefined) {
     const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
       fields,

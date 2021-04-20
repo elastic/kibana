@@ -1,31 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
 import { ApmConfiguration } from './config';
+import { ApmAgentConfig } from './types';
+
+let apmConfig: ApmConfiguration | undefined;
 
 /**
  * Load the APM configuration.
  *
  * @param argv the `process.argv` arguments
  * @param rootDir The root directory of kibana (where the sources and the `package.json` file are)
- * @param production true for production builds, false otherwise
+ * @param isDistributable true for production builds, false otherwise
  */
 export const loadConfiguration = (
   argv: string[],
@@ -35,5 +27,19 @@ export const loadConfiguration = (
   const configPaths = getConfigurationFilePaths(argv);
   const rawConfiguration = getConfigFromFiles(configPaths);
   applyConfigOverrides(rawConfiguration, argv);
-  return new ApmConfiguration(rootDir, rawConfiguration, isDistributable);
+
+  apmConfig = new ApmConfiguration(rootDir, rawConfiguration, isDistributable);
+  return apmConfig;
+};
+
+export const getConfiguration = (serviceName: string): ApmAgentConfig | undefined => {
+  // integration test runner starts a kibana server that import the module without initializing APM.
+  // so we need to check initialization of the config.
+  // note that we can't just load the configuration during this module's import
+  // because jest IT are ran with `--config path-to-jest-config.js` which conflicts with the CLI's `config` arg
+  // causing the config loader to try to load the jest js config as yaml and throws.
+  if (apmConfig) {
+    return apmConfig.getConfig(serviceName);
+  }
+  return undefined;
 };

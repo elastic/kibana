@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse, stringify } from 'query-string';
@@ -73,7 +74,9 @@ export const urlStateStore = createContext<UrlState>({
   searchString: '',
   setUrlState: () => {},
 });
+
 const { Provider } = urlStateStore;
+
 export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
@@ -162,7 +165,14 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
-type AppStateKey = 'mlSelectSeverity' | 'mlSelectInterval' | 'mlAnomaliesTable' | MlPages;
+type LegacyUrlKeys = 'mlExplorerSwimlane';
+
+export type AppStateKey =
+  | 'mlSelectSeverity'
+  | 'mlSelectInterval'
+  | 'mlAnomaliesTable'
+  | MlPages
+  | LegacyUrlKeys;
 
 /**
  * Hook for managing the URL state of the page.

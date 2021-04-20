@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
@@ -26,6 +29,8 @@ import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -35,7 +40,7 @@ jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => (
 
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const scopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
@@ -58,9 +63,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
     preconfiguredActions: [],
@@ -402,14 +405,20 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfiguredAlertHistoryEsIndex: false,
+      preconfigured: {},
+      proxyRejectUnauthorizedCertificates: true,
+      rejectUnauthorized: true,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      maxResponseContentLength: new ByteSizeValue(1000000),
+      responseTimeout: moment.duration('60s'),
     });
 
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-      ),
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
       preconfiguredActions: [],
@@ -741,12 +750,15 @@ describe('getAll()', () => {
         ],
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
@@ -812,12 +824,15 @@ describe('getAll()', () => {
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       await actionsClient.getAll();
 
@@ -870,12 +885,15 @@ describe('getAll()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-      aggregations: {
-        '1': { doc_count: 6 },
-        testPreconfigured: { doc_count: 2 },
-      },
-    });
+    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      })
+    );
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -940,12 +958,15 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
@@ -1008,12 +1029,15 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       await actionsClient.getBulk(['1']);
 
@@ -1063,12 +1087,15 @@ describe('getBulk()', () => {
         },
       ],
     });
-    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-      aggregations: {
-        '1': { doc_count: 6 },
-        testPreconfigured: { doc_count: 2 },
-      },
-    });
+    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      })
+    );
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,

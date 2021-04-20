@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DefaultThreatArray } from './default_threat_array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '../../../test_utils';
-import { Threat } from '../common/schemas';
+import { Threats } from '../common/schemas';
 
 describe('default_threat_null', () => {
   test('it should validate an empty array', () => {
-    const payload: Threat = [];
+    const payload: Threats = [];
     const decoded = DefaultThreatArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -21,7 +22,7 @@ describe('default_threat_null', () => {
   });
 
   test('it should validate an array of threats', () => {
-    const payload: Threat = [
+    const payload: Threats = [
       {
         framework: 'MITRE ATTACK',
         technique: [{ reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' }],
