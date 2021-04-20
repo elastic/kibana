@@ -225,7 +225,7 @@ export const getEuiContextMapping = () => {
           'Screen reader text to describe the composite behavior of the color stops component.',
       }),
     'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
-      i18n.translate('core.euiColumnActions.sortAsc', {
+      i18n.translate('core.euiColumnActions.sort', {
         defaultMessage: 'Sort {schemaLabel}',
         values: { schemaLabel },
       }),
