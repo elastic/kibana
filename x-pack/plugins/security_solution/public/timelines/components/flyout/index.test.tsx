@@ -11,7 +11,6 @@ import React from 'react';
 import '../../../common/mock/react_beautiful_dnd';
 
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -78,7 +77,6 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
         kibanaObservable,
         storage
       );

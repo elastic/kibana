@@ -103,7 +103,7 @@ export class DevServer {
   /**
    * Run the Kibana server
    *
-   * The observable will error if the child process failes to spawn for some reason, but if
+   * The observable will error if the child process fails to spawn for some reason, but if
    * the child process is successfully spawned then the server will be run until it completes
    * and restart when the watcher indicates it should. In order to restart the server as
    * quickly as possible we kill it with SIGKILL and spawn the process again.

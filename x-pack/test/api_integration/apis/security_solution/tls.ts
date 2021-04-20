@@ -84,8 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/91360
-  describe.skip('Tls Test with Packetbeat', () => {
+  describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
       before(() => esArchiver.load('packetbeat/tls'));
       after(() => esArchiver.unload('packetbeat/tls'));
