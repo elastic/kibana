@@ -30,11 +30,11 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   const isLegacy = uiSettings.get('doc_table:legacy');
 
   const mode = isLegacy
-    ? i18n.translate('discover.openOptionsPopover.dataGridText', {
-        defaultMessage: 'Data grid',
-      })
-    : i18n.translate('discover.openOptionsPopover.legacyTableText', {
+    ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
         defaultMessage: 'Legacy table',
+      })
+    : i18n.translate('discover.openOptionsPopover.dataGridText', {
+        defaultMessage: 'Data grid',
       });
 
   return (
