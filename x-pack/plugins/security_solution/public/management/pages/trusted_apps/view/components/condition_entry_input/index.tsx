@@ -181,7 +181,12 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
         ) : (
           <EuiFlexItem>
             <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
-              <EuiFieldText name="operator" value={OPERATOR_TITLES.included} readOnly />
+              <EuiFieldText
+                name="operator"
+                value={OPERATOR_TITLES.included}
+                data-test-subj={getTestId('operator')}
+                readOnly
+              />
             </ConditionEntryCell>
           </EuiFlexItem>
         )}
