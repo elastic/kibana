@@ -38,4 +38,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     uiCounters: true,
   },
+  exposeToUsage: {
+    usageCounters: {
+      bufferDuration: true,
+    },
+  },
 };

@@ -94,6 +94,10 @@ describe('kibana_usage_collection', () => {
           "type": "core",
         },
         Object {
+          "isReady": false,
+          "type": "kibana_config_usage",
+        },
+        Object {
           "isReady": true,
           "type": "localization",
         },
