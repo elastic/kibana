@@ -25,11 +25,11 @@ export const metricsVisDefinition = {
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: uuid.v1(),
+      id: uuid.v4(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: uuid.v1(),
+          id: uuid.v4(),
           color: '#68BC00',
           split_mode: 'everything',
           palette: {
@@ -38,7 +38,7 @@ export const metricsVisDefinition = {
           },
           metrics: [
             {
-              id: uuid.v1(),
+              id: uuid.v4(),
               type: 'count',
             },
           ],
