@@ -61,7 +61,7 @@ const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
+  { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
   fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
@@ -81,6 +81,12 @@ const setUpModule = async (
           bucketSpan,
         },
       },
+    },
+  ];
+  const datafeedOverrides = [
+    {
+      job_id: 'log-entry-rate' as const,
+      runtime_mappings: runtimeMappings,
     },
   ];
   const query =
@@ -107,6 +113,7 @@ const setUpModule = async (
       sourceId,
       indexPattern: indexNamePattern,
       jobOverrides,
+      datafeedOverrides,
       query,
     },
     fetch

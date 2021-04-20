@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from 'src/core/public';
+import { estypes } from '@elastic/elasticsearch';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -62,4 +63,5 @@ export interface ModuleSourceConfiguration {
   sourceId: string;
   spaceId: string;
   timestampField: string;
+  runtimeMappings: estypes.RuntimeFields;
 }
