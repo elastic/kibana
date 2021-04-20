@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_AGENT_POLICIES_PACKAGES, FLEET_SERVER_PACKAGE } from '../../common';
 
-import type { PackagePolicy } from '../../common';
+import type { PackagePolicy, DefaultPackagesInstallationError } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
@@ -31,12 +30,10 @@ import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 
-const FLEET_ENROLL_USERNAME = 'fleet_enroll';
-const FLEET_ENROLL_ROLE = 'fleet_enroll';
-
 export interface SetupStatus {
   isInitialized: boolean;
   preconfigurationError: { name: string; message: string } | undefined;
+  nonFatalPackageUpgradeErrors: DefaultPackagesInstallationError[];
 }
 
 export async function setupIngestManager(
@@ -50,7 +47,7 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [installedPackages, defaultOutput] = await Promise.all([
+  const [defaultPackagesResult, defaultOutput] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
@@ -146,7 +143,7 @@ async function createSetupSideEffects(
       );
     }
 
-    for (const installedPackage of installedPackages) {
+    for (const installedPackage of defaultPackagesResult.installations) {
       const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
         (packageName) => installedPackage.name === packageName
       );
@@ -176,7 +173,11 @@ async function createSetupSideEffects(
 
   await ensureAgentActionPolicyChangeExists(soClient, esClient);
 
-  return { isInitialized: true, preconfigurationError };
+  return {
+    isInitialized: true,
+    preconfigurationError,
+    nonFatalPackageUpgradeErrors: defaultPackagesResult.nonFatalPackageUpgradeErrors,
+  };
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(
@@ -212,67 +213,4 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
       });
     })
   );
-}
-
-async function putFleetRole(esClient: ElasticsearchClient) {
-  return await esClient.security.putRole({
-    name: FLEET_ENROLL_ROLE,
-    body: {
-      cluster: ['monitor', 'manage_api_key'],
-      indices: [
-        {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-          privileges: ['auto_configure', 'create_doc'],
-        },
-      ],
-    },
-  });
-}
-
-// TODO Deprecated should be removed as part of https://github.com/elastic/kibana/issues/94303
-export async function setupFleet(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options?: { forceRecreate?: boolean }
-) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const { body: res } = await putFleetRole(esClient);
-
-  // If the role is already created skip the rest unless you have forceRecreate set to true
-  if (options?.forceRecreate !== true && res.role.created === false) {
-    return;
-  }
-  const password = generateRandomPassword();
-  // Create fleet enroll user
-  await esClient.security.putUser({
-    username: FLEET_ENROLL_USERNAME,
-    body: {
-      password,
-      roles: [FLEET_ENROLL_ROLE],
-      metadata: {
-        updated_at: new Date().toISOString(),
-      },
-    },
-  });
-
-  // save fleet admin user
-  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-  if (!defaultOutputId) {
-    throw new Error(
-      i18n.translate('xpack.fleet.setup.defaultOutputError', {
-        defaultMessage: 'Default output does not exist',
-      })
-    );
-  }
-  await outputService.updateOutput(soClient, defaultOutputId, {
-    fleet_enroll_username: FLEET_ENROLL_USERNAME,
-    fleet_enroll_password: password,
-  });
-
-  outputService.invalidateCache();
-}
-
-function generateRandomPassword() {
-  return Buffer.from(uuid.v4()).toString('base64');
 }

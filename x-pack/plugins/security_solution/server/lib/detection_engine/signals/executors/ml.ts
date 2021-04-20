@@ -58,20 +58,28 @@ export const mlExecutor = async ({
   const fakeRequest = {} as KibanaRequest;
   const summaryJobs = await ml
     .jobServiceProvider(fakeRequest, services.savedObjectsClient)
-    .jobsSummary([ruleParams.machineLearningJobId]);
-  const jobSummary = summaryJobs.find((job) => job.id === ruleParams.machineLearningJobId);
+    .jobsSummary(ruleParams.machineLearningJobId);
+  const jobSummaries = summaryJobs.filter((job) =>
+    ruleParams.machineLearningJobId.includes(job.id)
+  );
 
-  if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
+  if (
+    jobSummaries.length < 1 ||
+    jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
+  ) {
     const errorMessage = buildRuleMessage(
-      'Machine learning job is not started:',
-      `job id: "${ruleParams.machineLearningJobId}"`,
-      `job status: "${jobSummary?.jobState}"`,
-      `datafeed status: "${jobSummary?.datafeedState}"`
+      'Machine learning job(s) are not started:',
+      ...jobSummaries.map((job) =>
+        [
+          `job id: "${job.id}"`,
+          `job status: "${job.jobState}"`,
+          `datafeed status: "${job.datafeedState}"`,
+        ].join(', ')
+      )
     );
     logger.warn(errorMessage);
     result.warning = true;
-    // TODO: change this to partialFailure since we don't immediately exit rule function and still do actions at the end?
-    await ruleStatusService.error(errorMessage);
+    await ruleStatusService.partialFailure(errorMessage);
   }
 
   const anomalyResults = await findMlSignals({
@@ -80,7 +88,7 @@ export const mlExecutor = async ({
     // currently unused by the mlAnomalySearch function.
     request: ({} as unknown) as KibanaRequest,
     savedObjectsClient: services.savedObjectsClient,
-    jobId: ruleParams.machineLearningJobId,
+    jobIds: ruleParams.machineLearningJobId,
     anomalyThreshold: ruleParams.anomalyThreshold,
     from: ruleParams.from,
     to: ruleParams.to,
