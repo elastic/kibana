@@ -178,7 +178,7 @@ export class JobsList extends Component {
             <p>
               <FormattedMessage
                 id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
-                defaultMessage="This column display icons when there are errors or warnings for the job in the past 24 hours"
+                defaultMessage="This column displays icons when there are errors or warnings for the job in the past 24 hours"
               />
             </p>
           </EuiScreenReaderOnly>
@@ -192,7 +192,7 @@ export class JobsList extends Component {
             <p>
               <FormattedMessage
                 id="xpack.ml.jobsList.alertingRules.screenReaderDescription"
-                defaultMessage="This column display icons when there are alert rules associated with a job"
+                defaultMessage="This column displays icons when there are alert rules associated with a job"
               />
             </p>
           </EuiScreenReaderOnly>
