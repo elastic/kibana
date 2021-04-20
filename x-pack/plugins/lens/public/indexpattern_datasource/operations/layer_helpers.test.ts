@@ -539,7 +539,7 @@ describe('state_helpers', () => {
       });
     });
 
-    it('should not carry over a label if sourceColumnOptions is passed with customLabel set to false', () => {
+    it('should not carry over a label if shouldResetLabel is set', () => {
       expect(
         insertNewColumn({
           layer: {
@@ -565,53 +565,11 @@ describe('state_helpers', () => {
           op: 'terms',
           field: indexPattern.fields[2],
           visualizationGroups: [],
-          sourceColumnOptions: {
-            label: 'This is not a custom label',
-            customLabel: false,
-          },
+          shouldResetLabel: true,
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
           label: 'Top values of bytes',
-        })
-      );
-    });
-
-    it('should carry over a label if sourceColumnOptions is passed with customLabel set to true', () => {
-      expect(
-        insertNewColumn({
-          layer: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'Date histogram of timestamp',
-                dataType: 'date',
-                isBucketed: true,
-
-                // Private
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                params: {
-                  interval: 'h',
-                },
-              },
-            },
-          },
-          columnId: 'col2',
-          indexPattern,
-          op: 'terms',
-          field: indexPattern.fields[2],
-          visualizationGroups: [],
-          sourceColumnOptions: {
-            label: 'Custom label from sourceColumnOptions',
-            customLabel: true,
-          },
-        }).columns.col2
-      ).toEqual(
-        expect.objectContaining({
-          label: 'Custom label from sourceColumnOptions',
-          customLabel: true,
         })
       );
     });
@@ -929,7 +887,7 @@ describe('state_helpers', () => {
         );
       });
 
-      it('should not carry over a label if sourceColumnOptions is passed with customLabel set to false', () => {
+      it('should not carry over a label if shouldResetLabel is set', () => {
         expect(
           replaceColumn({
             layer: {
@@ -955,50 +913,9 @@ describe('state_helpers', () => {
             op: 'average',
             field: indexPattern.fields[2], // bytes field
             visualizationGroups: [],
-            sourceColumnOptions: {
-              label: 'This is not custom label',
-              customLabel: false,
-            },
+            shouldResetLabel: true,
           }).columns.col1
         ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
-      });
-      it('should carry over a label if sourceColumnOptions is passed with customLabel set to true', () => {
-        expect(
-          replaceColumn({
-            layer: {
-              indexPatternId: '1',
-              columnOrder: ['col1', 'col2'],
-              columns: {
-                col1: {
-                  label: 'Top values of source',
-                  dataType: 'string',
-                  isBucketed: true,
-                  operationType: 'terms',
-                  sourceField: 'source',
-                  params: {
-                    orderBy: { type: 'alphabetical' },
-                    orderDirection: 'asc',
-                    size: 5,
-                  },
-                },
-              },
-            },
-            indexPattern,
-            columnId: 'col1',
-            op: 'average',
-            field: indexPattern.fields[2], // bytes field
-            visualizationGroups: [],
-            sourceColumnOptions: {
-              label: 'Custom label from sourceColumnOptions',
-              customLabel: true,
-            },
-          }).columns.col1
-        ).toEqual(
-          expect.objectContaining({
-            label: 'Custom label from sourceColumnOptions',
-            customLabel: true,
-          })
-        );
       });
     });
 

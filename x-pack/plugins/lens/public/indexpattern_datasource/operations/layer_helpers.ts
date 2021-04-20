@@ -27,12 +27,7 @@ interface ColumnChange {
   field?: IndexPatternField;
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
-  // used to insert label information to the new column when
-  // a new column is created by moving from another incompatible group
-  sourceColumnOptions?: {
-    label: string;
-    customLabel?: boolean;
-  };
+  shouldResetLabel?: boolean;
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -52,7 +47,7 @@ export function insertNewColumn({
   indexPattern,
   visualizationGroups,
   targetGroup,
-  sourceColumnOptions,
+  shouldResetLabel,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -216,10 +211,7 @@ export function insertNewColumn({
     };
   }
 
-  let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
-  if (sourceColumnOptions) {
-    newColumn = copyCustomLabel(newColumn, sourceColumnOptions);
-  }
+  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
@@ -235,7 +227,7 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
-  sourceColumnOptions,
+  shouldResetLabel,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -375,10 +367,9 @@ export function replaceColumn({
     }
 
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-    newColumn = copyCustomLabel(
-      newColumn,
-      sourceColumnOptions ? sourceColumnOptions : previousColumn
-    );
+    if (!shouldResetLabel) {
+      newColumn = copyCustomLabel(newColumn, previousColumn);
+    }
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
@@ -395,10 +386,10 @@ export function replaceColumn({
     previousColumn.sourceField !== field.name
   ) {
     // Same operation, new field
-    const newColumn = copyCustomLabel(
-      operationDefinition.onFieldChange(previousColumn, field),
-      sourceColumnOptions ? sourceColumnOptions : previousColumn
-    );
+    let newColumn = operationDefinition.onFieldChange(previousColumn, field);
+    if (!shouldResetLabel) {
+      newColumn = copyCustomLabel(newColumn, previousColumn);
+    }
 
     const newLayer = resetIncomplete(
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
