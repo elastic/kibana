@@ -224,6 +224,13 @@ export interface CoreConfigUsageData {
       supportedProtocols: string[];
       clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+    };
   };
 
   logging: {

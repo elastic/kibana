@@ -205,6 +205,13 @@ describe('CoreUsageDataService', () => {
                   "ipAllowlistConfigured": false,
                 },
                 "rewriteBasePath": false,
+                "securityResponseHeaders": Object {
+                  "disableEmbedding": false,
+                  "permissionsPolicyConfigured": false,
+                  "referrerPolicy": "no-referrer-when-downgrade",
+                  "strictTransportSecurity": "NULL",
+                  "xContentTypeOptions": "nosniff",
+                },
                 "socketTimeout": 120000,
                 "ssl": Object {
                   "certificateAuthoritiesConfigured": false,

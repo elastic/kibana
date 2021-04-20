@@ -445,6 +445,13 @@ export interface CoreConfigUsageData {
             supportedProtocols: string[];
             clientAuthentication: 'none' | 'optional' | 'required';
         };
+        securityResponseHeaders: {
+            strictTransportSecurity: string;
+            xContentTypeOptions: string;
+            referrerPolicy: string;
+            permissionsPolicyConfigured: boolean;
+            disableEmbedding: boolean;
+        };
     };
     // (undocumented)
     logging: {
@@ -761,6 +768,8 @@ export class CspConfig implements ICspConfig {
     constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
+    // (undocumented)
+    readonly disableEmbedding: boolean;
     // (undocumented)
     readonly header: string;
     // (undocumented)
@@ -1118,6 +1127,7 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 
 // @public
 export interface ICspConfig {
+    readonly disableEmbedding: boolean;
     readonly header: string;
     readonly rules: string[];
     readonly strict: boolean;

@@ -231,6 +231,16 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             keystoreConfigured: isConfigured.record(http.ssl.keystore),
             truststoreConfigured: isConfigured.record(http.ssl.truststore),
           },
+          securityResponseHeaders: {
+            // ES does not index `null` and it cannot be searched, so we coalesce these to string values instead
+            strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity ?? 'NULL',
+            xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions ?? 'NULL',
+            referrerPolicy: http.securityResponseHeaders.referrerPolicy ?? 'NULL',
+            permissionsPolicyConfigured: isConfigured.string(
+              http.securityResponseHeaders.permissionsPolicy ?? undefined
+            ),
+            disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+          },
         },
 
         logging: {

@@ -18,14 +18,11 @@ import {
   PinnedEventSavedObject,
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
+  PinnedEvent as PinnedEventResponse,
 } from '../../../../../common/types/timeline/pinned_event';
+import { PageInfoNote, SortNote } from '../../../../../common/types/timeline/note';
 import { FrameworkRequest } from '../../../framework';
 
-import {
-  PageInfoNote,
-  SortNote,
-  PinnedEvent as PinnedEventResponse,
-} from '../../../../graphql/types';
 import { pickSavedTimeline } from '../../saved_object/timelines';
 import { convertSavedObjectToSavedTimeline } from '../timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';

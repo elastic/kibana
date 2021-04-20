@@ -15,7 +15,6 @@ import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -27,6 +26,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
+import { FlowTargetSourceDest, PageInfoPaginated } from '../../../../common/search_strategy';
 
 const ID = 'networkTlsQuery';
 

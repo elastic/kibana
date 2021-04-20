@@ -20,14 +20,14 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import {
   PAGE_SIZE,
-  PrimaryStatsServiceInstanceItem,
+  MainStatsServiceInstanceItem,
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
-type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;
@@ -38,26 +38,26 @@ export interface TableOptions {
 }
 
 interface Props {
-  primaryStatsItems: PrimaryStatsServiceInstanceItem[];
+  mainStatsItems: MainStatsServiceInstanceItem[];
   serviceName: string;
-  primaryStatsStatus: FETCH_STATUS;
-  primaryStatsItemCount: number;
+  mainStatsStatus: FETCH_STATUS;
+  mainStatsItemCount: number;
   tableOptions: TableOptions;
   onChangeTableOptions: (newTableOptions: {
     page?: { index: number };
     sort?: { field: string; direction: SortDirection };
   }) => void;
-  comparisonStatsData?: ServiceInstanceComparisonStatistics;
+  detailedStatsData?: ServiceInstanceDetailedStatistics;
   isLoading: boolean;
 }
 export function ServiceOverviewInstancesTable({
-  primaryStatsItems = [],
-  primaryStatsItemCount,
+  mainStatsItems = [],
+  mainStatsItemCount,
   serviceName,
-  primaryStatsStatus: status,
+  mainStatsStatus: status,
   tableOptions,
   onChangeTableOptions,
-  comparisonStatsData: comparisonStatsData,
+  detailedStatsData: detailedStatsData,
   isLoading,
 }: Props) {
   const { agentName } = useApmServiceContext();
@@ -72,14 +72,14 @@ export function ServiceOverviewInstancesTable({
     agentName,
     serviceName,
     latencyAggregationType,
-    comparisonStatsData,
+    detailedStatsData,
     comparisonEnabled,
   });
 
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: primaryStatsItemCount,
+    totalItemCount: mainStatsItemCount,
     hidePerPageOptions: true,
   };
 
@@ -97,11 +97,11 @@ export function ServiceOverviewInstancesTable({
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
-            isEmptyAndLoading={primaryStatsItemCount === 0 && isLoading}
+            isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
               loading={isLoading}
-              items={primaryStatsItems}
+              items={mainStatsItems}
               columns={columns}
               pagination={pagination}
               sorting={{ sort: { field, direction } }}
