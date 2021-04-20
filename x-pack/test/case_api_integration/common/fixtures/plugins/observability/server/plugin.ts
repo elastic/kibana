@@ -10,7 +10,6 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
-import { SAVED_OBJECT_TYPES as casesSavedObjectTypes } from '../../../../../../../plugins/cases/common/constants';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -20,6 +19,19 @@ export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
+
+/**
+ * These are a copy of the values here: x-pack/plugins/cases/common/constants.ts because when the plugin attempts to
+ * import them from the constants.ts file it gets an error.
+ */
+const casesSavedObjectTypes = [
+  'cases',
+  'cases-connector-mappings',
+  'cases-sub-case',
+  'cases-user-actions',
+  'cases-comments',
+  'cases-configure',
+];
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {

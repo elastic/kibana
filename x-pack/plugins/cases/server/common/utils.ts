@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject } from 'kibana/server';
 import { isEmpty } from 'lodash';
 import { AlertInfo } from '.';
-import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
+
 import {
   AssociationType,
   CaseConnector,
@@ -34,7 +34,6 @@ import {
   User,
 } from '../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
-import { OperationDetails } from '../authorization';
 import { UpdateAlertRequest } from '../client/alerts/client';
 
 /**
@@ -415,52 +414,6 @@ export const countAlertsForID = ({
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
 };
-
-/**
- * Creates an AuditEvent describing the state of a request.
- */
-export function createAuditMsg({
-  operation,
-  outcome,
-  error,
-  savedObjectID,
-}: {
-  operation: OperationDetails;
-  savedObjectID?: string;
-  outcome?: EventOutcome;
-  error?: Error;
-}): AuditEvent {
-  const doc =
-    savedObjectID != null
-      ? `${operation.savedObjectType} [id=${savedObjectID}]`
-      : `a ${operation.docType}`;
-  const message = error
-    ? `Failed attempt to ${operation.verbs.present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
-    ? `User is ${operation.verbs.progressive} ${doc}`
-    : `User has ${operation.verbs.past} ${doc}`;
-
-  return {
-    message,
-    event: {
-      action: operation.action,
-      category: EventCategory.DATABASE,
-      type: operation.type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
-    },
-    ...(savedObjectID != null && {
-      kibana: {
-        saved_object: { type: operation.savedObjectType, id: savedObjectID },
-      },
-    }),
-    ...(error != null && {
-      error: {
-        code: error.name,
-        message: error.message,
-      },
-    }),
-  };
-}
 
 /**
  * If subCaseID is defined and the case connector feature is disabled this throws an error.

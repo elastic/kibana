@@ -22,14 +22,13 @@ import {
   CaseType,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { getConnectorFromConfiguration } from '../utils';
+import { createAuditMsg, ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import { EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  createAuditMsg,
   flattenCaseSavedObject,
   transformCaseConnectorToEsConnector,
   transformNewCase,
@@ -74,12 +73,14 @@ export const create = async (
 
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
-    try {
-      await auth.ensureAuthorized(query.owner, Operations.createCase);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error, savedObjectID }));
-      throw error;
-    }
+
+    await ensureAuthorized({
+      operation: Operations.createCase,
+      owners: [query.owner],
+      authorization: auth,
+      auditLogger,
+      savedObjectIDs: [savedObjectID],
+    });
 
     // log that we're attempting to create a case
     auditLogger?.log(
