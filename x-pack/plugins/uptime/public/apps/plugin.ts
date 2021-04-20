@@ -27,9 +27,14 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
+import { FleetStart } from '../../../fleet/public';
 import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  LazySyntheticsPolicyCreateExtension,
+  LazySyntheticsPolicyEditExtension,
+} from '../components/fleet_package';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -42,6 +47,7 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  fleet?: FleetStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -143,6 +149,22 @@ export class UptimePlugin
         plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
+
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-create',
+        component: LazySyntheticsPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-edit',
+        component: LazySyntheticsPolicyEditExtension,
+      });
+    }
   }
 
   public stop(): void {}
