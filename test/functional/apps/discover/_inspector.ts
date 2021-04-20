@@ -8,13 +8,9 @@
 
 import expect from '@kbn/expect';
 
-import { inspect } from 'util';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const savedObjectInfo = getService('savedObjectInfo');
-  const log = getService('log');
-  const es = getService('legacyEs');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -34,47 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }
 
-  const logTypes = (msg: string = '') => async () =>
-    log.debug(
-      `\n### Saved Object Types In Index: [.kibana] ${msg}: \n${inspect(
-        await savedObjectInfo.types(),
-        {
-          compact: false,
-          depth: 99,
-          breakLength: 80,
-          sorted: true,
-        }
-      )}`
-    );
-
-  const logEsInfo = async () => {
-    log.debug(
-      // @ts-expect-error
-      await es.transport.request({
-        path: '/_cat/indices',
-        method: 'GET',
-      })
-    );
-    log.debug(
-      // @ts-expect-error
-      await es.transport.request({
-        path: '/_cat/aliases',
-        method: 'GET',
-      })
-    );
-  };
-
   describe('inspect', () => {
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await logEsInfo();
 
-      await kibanaServer.importExport.load(
-        'discover',
-        { space: undefined },
-        // @ts-ignore
-        logTypes('[Inspector Test]')
-      );
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
