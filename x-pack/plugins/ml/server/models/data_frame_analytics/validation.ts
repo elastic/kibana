@@ -156,7 +156,7 @@ function getRegressionAndClassificationMessage(
           id: 'num_top_classes',
           text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesSuccessMessage', {
             defaultMessage:
-              'The dependent variable has {numCategories, plural, one {# unique class} other {# unique classes}}. Probabilities will be reported for each of these values.',
+              'Predicted probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}.',
             values: {
               numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
             },
