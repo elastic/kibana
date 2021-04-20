@@ -16,7 +16,7 @@ export const PRECONFIGURATION_LATEST_KEYWORD = 'latest';
 
 type PreconfiguredAgentPolicyWithDefaultInputs = Omit<
   PreconfiguredAgentPolicy,
-  'package_policies'
+  'package_policies' | 'id'
 > & {
   package_policies: Array<Omit<PreconfiguredAgentPolicy['package_policies'][0], 'inputs'>>;
 };
@@ -36,7 +36,6 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   is_default: true,
   is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
-  id: 'default-agent-policy',
 };
 
 export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
@@ -55,7 +54,6 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   is_default_fleet_server: true,
   is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
-  id: 'default-fleet-server-agent-policy',
 };
 
 export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({

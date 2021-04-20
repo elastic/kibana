@@ -83,19 +83,32 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
     policies.map(async (preconfiguredAgentPolicy) => {
-      // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
-      const preconfigurationId = String(preconfiguredAgentPolicy.id);
-      const searchParams = {
-        searchFields: ['preconfiguration_id'],
-        search: escapeSearchQueryPhrase(preconfigurationId),
-      };
-      const deletionRecords = await soClient.find({
-        type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-        ...searchParams,
-      });
-      const wasDeleted = deletionRecords.total > 0;
-      if (wasDeleted) {
-        return { created: false, deleted: preconfigurationId };
+      if (preconfiguredAgentPolicy.id) {
+        // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
+        const preconfigurationId = String(preconfiguredAgentPolicy.id);
+        const searchParams = {
+          searchFields: ['preconfiguration_id'],
+          search: escapeSearchQueryPhrase(preconfigurationId),
+        };
+        const deletionRecords = await soClient.find({
+          type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+          ...searchParams,
+        });
+        const wasDeleted = deletionRecords.total > 0;
+        if (wasDeleted) {
+          return { created: false, deleted: preconfigurationId };
+        }
+      } else if (
+        !preconfiguredAgentPolicy.is_default &&
+        !preconfiguredAgentPolicy.is_default_fleet_server
+      ) {
+        throw new Error(
+          i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
+            defaultMessage:
+              '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
+            values: { agentPolicyName: preconfiguredAgentPolicy.name },
+          })
+        );
       }
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(

@@ -117,22 +117,44 @@ class AgentPolicyService {
     policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
-    const preconfigurationId = String(id);
-    const searchParams = {
-      searchFields: ['preconfiguration_id'],
-      search: escapeSearchQueryPhrase(preconfigurationId),
-    };
-
     const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    const newAgentPolicy = {
-      ...newAgentPolicyDefaults,
-      ...preconfiguredAgentPolicy,
-      preconfiguration_id: preconfigurationId,
-    } as NewAgentPolicy;
+    let searchParams;
+    let newAgentPolicy;
+    if (id) {
+      const preconfigurationId = String(id);
+      searchParams = {
+        searchFields: ['preconfiguration_id'],
+        search: escapeSearchQueryPhrase(preconfigurationId),
+      };
+
+      newAgentPolicy = {
+        ...newAgentPolicyDefaults,
+        ...preconfiguredAgentPolicy,
+        preconfiguration_id: preconfigurationId,
+      } as NewAgentPolicy;
+    } else if (
+      preconfiguredAgentPolicy.is_default ||
+      preconfiguredAgentPolicy.is_default_fleet_server
+    ) {
+      searchParams = {
+        searchFields: [
+          preconfiguredAgentPolicy.is_default_fleet_server
+            ? 'is_default_fleet_server'
+            : 'is_default',
+        ],
+        search: 'true',
+      };
+
+      newAgentPolicy = {
+        ...newAgentPolicyDefaults,
+        ...preconfiguredAgentPolicy,
+      } as NewAgentPolicy;
+    }
+    if (!newAgentPolicy || !searchParams) throw new Error('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
