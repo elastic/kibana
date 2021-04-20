@@ -14,8 +14,6 @@ import { AbstractSource, ISource } from '../../../../../../classes/sources/sourc
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
-let supportsFitToBounds: boolean;
-
 class MockSource extends AbstractSource implements ISource {}
 
 class LayerMock extends AbstractLayer implements ILayer {
@@ -29,10 +27,6 @@ class LayerMock extends AbstractLayer implements ILayer {
       sourceDescriptor,
     };
     super({ layerDescriptor, source });
-  }
-
-  async supportsFitToBounds(): Promise<boolean> {
-    return supportsFitToBounds;
   }
 
   isVisible() {
@@ -51,13 +45,10 @@ const defaultProps = {
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
+  supportsFitToBounds: true,
 };
 
 describe('TOCEntryActionsPopover', () => {
-  beforeEach(() => {
-    supportsFitToBounds = true;
-  });
-
   test('is rendered', async () => {
     const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
 
@@ -81,8 +72,9 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
-    supportsFitToBounds = false;
-    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(
+      <TOCEntryActionsPopover {...defaultProps} supportsFitToBounds={false} />
+    );
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
