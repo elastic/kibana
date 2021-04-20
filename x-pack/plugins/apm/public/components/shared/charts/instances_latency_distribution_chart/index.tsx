@@ -103,7 +103,7 @@ export function InstancesLatencyDistributionChart({
     max: Math.max(maxThroughput, maxComparisonThroughput),
   };
 
-  const commonBubleStyle = { point: { strokeWidth: 0, radius: 4 } };
+  const commonBubbleStyle = { point: { strokeWidth: 0, radius: 4 } };
 
   return (
     <EuiPanel>
@@ -137,9 +137,9 @@ export function InstancesLatencyDistributionChart({
               yScaleType={ScaleType.Linear}
               color={theme.eui.euiColorMediumShade}
               bubbleSeriesStyle={{
-                ...commonBubleStyle,
+                ...commonBubbleStyle,
                 point: {
-                  ...commonBubleStyle.point,
+                  ...commonBubbleStyle.point,
                   fill: theme.eui.euiColorMediumShade,
                 },
               }}
@@ -158,9 +158,9 @@ export function InstancesLatencyDistributionChart({
             yAccessors={[(item) => item.latency]}
             yScaleType={ScaleType.Linear}
             bubbleSeriesStyle={{
-              ...commonBubleStyle,
+              ...commonBubbleStyle,
               point: {
-                ...commonBubleStyle.point,
+                ...commonBubbleStyle.point,
                 fill: theme.eui.euiColorVis1,
               },
             }}
