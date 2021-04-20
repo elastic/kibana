@@ -52,8 +52,8 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
   ),
 };
 
-  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
 export const OPERATOR_TITLES: { [K in ConditionEntry['operator']]: string } = {
+  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
     defaultMessage: 'is',
   }),
   wildcard_caseless: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
