@@ -50,8 +50,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="discover.topNav.openOptionsPopover.description"
-            defaultMessage="The new data grid layout includes better data sorting, drag-and-drop columns, and a full
-                screen view. Toggle between data grid and legacy mode in Advanced Settings."
+            defaultMessage="The new data grid layout includes enhanced data sorting, drag-and-drop columns, multi-document selection, and a full screen view. Toggle 'Use legacy table' in Advanced Settings to switch modes."
           />
         </EuiText>
         <EuiSpacer />
