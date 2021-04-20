@@ -39,70 +39,70 @@ image::images/lens_end_to_end_1_1.png[New visualization popover]
 
 . Make sure the *kibana_sample_data_ecommerce* index appears.
 
-[discrete]
-[[add-a-data-layer-advanced]]
-=== Quickly copy a metric
+// [discrete]
+// [[add-a-data-layer-advanced]]
+// === Quickly copy a metric
 
-*Lens* will copy of a function when you drag it to the *Drop a field or click to add*
-button within the same group, or when you drag to the *Duplicate* label on a different group.
-Dragging and dropping can also be done fully by keyboard.
+// *Lens* will copy of a function when you drag it to the *Drop a field or click to add*
+// button within the same group, or when you drag to the *Duplicate* label on a different group.
+// Dragging and dropping can also be done fully by keyboard.
 
-To quickly create many copies of a percentile metric which will show distribution of price over time:
+// To quickly create many copies of a percentile metric which will show distribution of price over time:
 
-. From the *Chart Type* dropdown, select *Line*.
+// . From the *Chart Type* dropdown, select *Line*.
 
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+// . From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
 
-* Drag and drop *products.price* to the *Vertical axis* field.
+// * Drag and drop *products.price* to the *Vertical axis* field.
 
-* Drag and drop *order_date* to the *Horizontal axis* field.
+// * Drag and drop *order_date* to the *Horizontal axis* field.
 
-. Create the 95th percentile.
+// . Create the 95th percentile.
 
-.. In the editor, click *Median of products.price*.
+// .. In the editor, click *Median of products.price*.
 
-.. From *Select a function*, click *Percentile*.
+// .. From *Select a function*, click *Percentile*.
 
-.. In the *Display name* field, enter `95th`, then click *Close*.
+// .. In the *Display name* field, enter `95th`, then click *Close*.
 
-. To create the 90th percentile, duplicate the `95th` percentile.
+// . To create the 90th percentile, duplicate the `95th` percentile.
 
-.. Drag and drop *95th* to *Drop a field or click to add*.
+// .. Drag and drop *95th* to *Drop a field or click to add*.
 
-.. Click *95th [1]*, then enter `90` in the *Percentile* field.
+// .. Click *95th [1]*, then enter `90` in the *Percentile* field.
 
-.. In the *Display name* field enter `90th`, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
+// .. In the *Display name* field enter `90th`, then click *Close*.
+// +
+// [role="screenshot"]
+// image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
 
-. Create the 50th percentile. 
+// . Create the 50th percentile. 
 
-.. Drag and drop *90th* to *Drop a field or click to add*.
+// .. Drag and drop *90th* to *Drop a field or click to add*.
 
-.. Click *90th [1]*, then enter `50` in the *Percentile* field.
+// .. Click *90th [1]*, then enter `50` in the *Percentile* field.
 
-.. In the *Display name* field enter `50th`, then click *Close*.
+// .. In the *Display name* field enter `50th`, then click *Close*.
 
-. Create the 10th percentile. 
+// . Create the 10th percentile. 
 
-.. Drag and drop *50th* to *Drop a field or click to add*.
+// .. Drag and drop *50th* to *Drop a field or click to add*.
 
-.. Click *50th [1]*, then enter `10` in the *Percentile* field.
+// .. Click *50th [1]*, then enter `10` in the *Percentile* field.
 
-.. In the *Display name* field enter `10th`, then click *Close*.
+// .. In the *Display name* field enter `10th`, then click *Close*.
 
-. To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1_1.png[Left Axis menu]
-+
-You have a line chart that shows you the price distribution of products sold over time.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
+// . To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
+// +
+// [role="screenshot"]
+// image::images/lens_advanced_3_1_1.png[Left Axis menu]
+// +
+// You have a line chart that shows you the price distribution of products sold over time.
+// +
+// [role="screenshot"]
+// image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
 
-. Click *Save and return*.
+// . Click *Save and return*.
 
 [discrete]
 [[add-a-data-layer]]
@@ -172,7 +172,7 @@ image::images/lens_end_to_end_3_5.png[legend position]
 
 
 [discrete]
-[[view-the-number-of-transactions-per-day]]
+[[small-time-interval]]
 === View a date histogram with a small time interval
 
 Most *Lens* users use the automatic date histogram interval, but sometimes you want more control over the
@@ -222,6 +222,67 @@ You have a bar chart that shows you how many orders were made at your store ever
 image::images/lens_advanced_1_2.png[Orders per day]
 
 . Click *Save and return*.
+
+[discrete]
+[[percentage-stacked-area]]
+=== Compare the change in percentage over time
+
+Combine *filters* and *date histogram* functions to see the change over time in specific
+sets of documents. To view this as a percentage, use a *stacked percentage* bar or area chart.
+
+To see the error rate change of HTTP status codes change over time:
+
+. Drag and drop *Records* to the *Vertical axis* field.
+
+. Drag and drop *@timestamp* to the *Horizontal axis* field.
+
+. Click *Bar vertical stacked*, then select *Bar vertical percentage*.
+
+For each response code that you want to break down, create a filter. 
+
+. In the editor, click the *Drop a field or click to add* field for *Break down by*.
+
+. From *Select a function*, click *Filters*.
+
+. Add the filter for the successful response codes. 
+
+.. Click *All records*.
+
+.. In the *KQL* field, enter `response.keyword>=200 AND response.keyword<300`. 
+
+.. In the *Label* field, enter `2XX`, then press Return.
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
+
+. Add the filter for the redirect codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=300 AND response.keyword<400`. 
+
+.. In the *Label* field, enter `3XX`, then press Return.
+
+. Add the filter for the client error codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=400 AND response.keyword<500`. 
+
+.. In the *Label* field, enter `4XX`, then press Return.
+
+. Add the filter for the server error codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=500 AND response.keyword<600`. 
+
+.. In the *Label* field, enter `5XX`, then press Return.
+
+. To change the color palette, select *Status* from the *Color palette* dropdown, then click *Close*.
+
+. Click *Save and return*.
+
 
 [discrete]
 [[view-the-cumulative-number-of-products-sold-over-time]]

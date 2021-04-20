@@ -4,7 +4,7 @@
 Learn the most common ways to build a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
 at website logs, but this type of dashboard works on any type of data.
-Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>
+Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
@@ -50,21 +50,39 @@ a different index pattern from the menu.
 
 [discrete]
 [[view-the-number-of-website-visitors]]
-=== View the unique count of a field
+=== Build your first visualization
 
-The simplest visualization in Lens is the Metric. It lets you display a big
-number using an {es} aggregation function. Use "unique count", also known
-as cardinality, to get an approximate count of the unique values in your field.
+Every time you build a visualization in *Lens*, you will follow these steps:
 
-To determine how many users have visited your website within the last 90 days, build
-a metric visualization on the IP address field:
+. Do you know which chart type you'd like to use? If you do, select the type before
+dragging any fields. If you don't, you can change the chart types after configuring your functions.
 
-. From the *Chart Type* dropdown, select *Metric*.
+. Do you know exactly which functions you want? If so, click the dimension and
+configure it manually.
+
+. Do you want to use a specific field in a chart, but aren't sure which function? Drag the field
+to a specific dimension and Lens will pick a function for you.
+
+. Do you want to use a specific field, but want Lens to assign it automatically? Drag the field
+onto the main Lens workspace and it will get added to your chart.
+
+. Don't like your chart? Delete a specific dimension or reset the entire chart.
+
+To put this into practice, pick a field like `clientip` which you want to analyze. If you want
+to analyze only this field, you can use the *metric* chart type to show a big number.
+The only number function that you can use with `clientip` is the *unique count* function
+You know that the *unique count* function, also known as cardinality, will get an approximate count
+of the unique IP addresses in the data. Putting this together, build a metric chart:
+
+. Click *Bar vertical stacked* to open the chart type dropdown, then select *Metric*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
 
-. From the *Available fields* list, drag and drop *clientip* to the visualization builder.
+. From the *Available fields* list, drag and drop *clientip* to the main workspace.
+Lens will select the unique count function because it is the only numeric function
+that works for IP addresses. You could also drag *clientip* onto
+the empty dimension for the same result.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
@@ -79,25 +97,47 @@ image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
 . Click *Save and return*. You will return to the dashboard, where you can customize
-the layout and size of the newly added panel.
+the newly added panel:
+
+.. Drag the bottom corner of the panel until the metric takes up one quarter of the screen
+width. The row for the metric will have 4 items on it later.
+
+. Click *Save* on the dashboard menu
+
+. Enter the title "Logs dashboard"
+
+. Check the *Store time with dashboard* box, then click *Save*
+
+. After the dashboard refreshes, click *Edit* again.
 
 [discrete]
 [[mixed-multiaxis]]
 === View a metric over time
 
-*Lens* will add the default time field if you drag a numeric field into the main panel.
-If your data has multiple time fields, drag and drop your
-specific time field to replace the default.
+If your index pattern has a default time field, *Lens* will add that field automatically
+when you drag a numeric field onto the workspace panel. This is a helpful shortcut.
+If your data has multiple time fields you can drag to replace the previous time field.
 
-To see bytes over time, drag and drop *bytes* from the field list to the visualization builder. 
+For this example, you want to visualize the `bytes` field over time, but you may not have
+chosen a specific function yet:
 
-*Lens* chooses a date interval automatically. To zoom in on the data you want to view,
+. Drag `bytes` from the field list to the workspace panel to have *Lens* automatically
+create a chart. It will create a bar chart using the *median of bytes* as the metric.
+
+. *Lens* chooses a date interval automatically. To zoom in on the data you want to view,
 click and drag your cursor across the bars. 
 
 [role="screenshot"]
 image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
 
-If you want more control over the time interval, customize it:
+Bar charts are a good default chart, but for this metric a line chart is more appropriate.
+Switch to a line chart one of three ways:
+
+* Click the line chart that appears under *Suggestions*
+* Click *Bar vertical stacked* and choose the *Line* chart type
+* Click the chart type icon above *Horizontal axis*
+
+The default interval that *Lens* has chosen is 3 hours. To customize the time interval:
 
 . In the editor, click *timestamp*.
 
@@ -108,44 +148,93 @@ If you want more control over the time interval, customize it:
 [role="screenshot"]
 image::images/lens_end_to_end_3_1.png[Customize time interval]
 
-Bar charts are not always the best way to display metrics. You can switch the chart
-type at any time. Open the chart switcher and choose *Area* now.
+You can also decrease the time interval with a more advanced guide on <<small-time-interval, small time intervals in Lens>>.
+
+This chart will be displayed in a small space in the dashboard, so to save space, hide the vertical and horizontal
+axis labels:
+
+. In the toolbar next to *Line* click the *Left axis* icon, then deselect *Show*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_3.png[Turn off axis name]
+
+. Click the *Bottom axis* icon, then deselect *Show*.
+
+. Click *Save and return*
+
+. Arrange the panel so that it is in the same row as the *Metric* visualization. The two should
+take up half the screen width.
+
+. Add a panel title to explain the visualization.
+
+.. Click the gear icon and choose *Edit panel title*.
+
+.. Enter "Median of bytes" as the panel title, then click *Save*.
+
+. Click *Save* on the entire dashboard.
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
-=== View the distribution of frequent values as a percentage
+=== View the most frequent values
 
-The *top values* function finds the most frequent values of a field and ranks them.
-The values must be exact matches, so the terms `win 10` and `win xp` are distinct.
-The proportion chart types in *Lens* display the percentage of the total,
-grouped by a function that you choose. Combine these two ideas to see the
-most frequent operating systems as a percentage:
+When you drag a text or IP address field into the *Lens* workspace you will see
+the most frequent values of that field using the *top values* function. The values
+are ranked based on another metric like *Count of records*. Only exact matches count:
+`win 10` and `win xp` are distinct.
 
-. Open *Lens* and select a proportion chart like *Donut* from the *Chart Type* dropdown.
+For this tutorial, you have decided to see the most frequently viewed URLs on your website
+ranked by the `Unique count of clientip` metric, but you have not yet determined which chart type to use.
 
-. Drag and drop *clientip* to the *Size by* field.
+. Starting with the default bar chart, drag the `clientip` field onto the *Vertical axis*.
+This will produce the `Unique count of clientip` metric. Do not drop the field into the main workspace,
+because the *top values* function will be used instead.
 
-. Drag and drop *machine.os.keyword* to the *Slice by* field.
+. Drag and drop `request.keyword` to the main workspace, and *Lens* will add `Top value of request.keyword`
+to the *Horizontal axis*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os.keyword fields]
+image::images/lens_end_to_end_2_1_1.png[Vertical bar chart with top values of request.keyword by most unique visitors]
 
-*Lens* chooses a default color palette and adds a visual indicator to the dimension that controls
-the color. To change the color:
+This chart is hard to read because the `request.keyword` field contains long text. You could try
+using one of the *Suggestions*, but the suggestions also have issues with long text. Instead, switch
+to a *Table* visualization:
 
-. In the editor, click on *Top values of machine.os.keyword*, which has a color indicator. 
+. Click *Bar vertical stacked* to open the chart switcher
 
-. From the *Color palette* dropdown, select *Compatibility*.
+. Click *Table*
++
+[role="screenshot"]
+image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
+
+Customize the table even more:
+
+. Click *Top values of request.keyword*
+
+.. Increase the *Number of values*. The maximum allowed value is 1000.
+
+.. In the *Display name* field, enter `Page URL`.
 
 . Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
 . Click *Save and return*.
 
-Because *top values* uses exact matches, there is no deduplication of similar values like "win 7" and "win 8".
-The following tutorials will explain how to break down using more customizable groups.
+. Arrange the table panel so that it has its own row, but keep the default width of half the screen.
+
+// The proportion chart types in *Lens* display the percentage of the total,
+// grouped by a function that you choose. Combine these two ideas to see the
+// most frequent operating systems as a percentage:
+
+// *Lens* chooses a default color palette and adds a visual indicator to the dimension that controls
+// the color. To change the color:
+
+// . In the editor, click on *Top values of machine.os.keyword*, which has a color indicator. 
+
+// . From the *Color palette* dropdown, select *Compatibility*.
+
+// . Click *Close*.
+// +
+// [role="screenshot"]
+// image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
 [discrete]
 [[custom-ranges]]
@@ -158,13 +247,13 @@ is recommended instead. Use a proportion chart to display the values as a percen
 To determine if your users transfer more small files versus large files, create two non-overlapping intervals. Start
 with a bar chart and then switch to a pie chart to display as percentage:
 
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor.
+. From the *Available fields* list, drag and drop `bytes` to *Vertical axis* in the editor.
 
 . Click *Median of bytes* and then select *Sum* instead. Then *Close*.
 
-. From the *Available fields* list, drag and drop *bytes* to *Break down by* in the editor, then specify the file size ranges.
+. From the *Available fields* list, drag and drop `bytes` to *Break down by* in the editor, then specify the file size ranges.
 
-.. Click *bytes*.
+.. Click `bytes`.
 
 .. Click *Create custom ranges*, enter the following, then press Return:
 
@@ -183,77 +272,14 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 
 .. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 
-. From the *Chart Type* dropdown, select *Pie*.
+. Click *Bar vertical stacked*, then select *Pie*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_6_2.png[Files size distribution]
 
 . Click *Save and return*.
 
-[discrete]
-[[percentage-stacked-area]]
-=== Compare the change in percentage over time
-
-Combine *filters* and *date histogram* functions to see the change over time in specific
-sets of documents. To view this as a percentage, use a *stacked percentage* bar or area chart.
-
-To see the error rate change of HTTP status codes change over time:
-
-. Drag and drop *Records* to the *Vertical axis* field.
-
-. Drag and drop *@timestamp* to the *Horizontal axis* field.
-
-. From the *Chart Type* dropdown, select *Bar vertical percentage*.
-
-. To remove the vertical axis label, click *Left axis*, then deselect *Show*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_4_3.png[Turn off axis name]
-
-For each response code that you want to break down, create a filter. 
-
-. In the editor, click the *Drop a field or click to add* field for *Break down by*.
-
-. From *Select a function*, click *Filters*.
-
-. Add the filter for the successful response codes. 
-
-.. Click *All records*.
-
-.. In the *KQL* field, enter `response.keyword>=200 AND response.keyword<300`. 
-
-.. In the *Label* field, enter `2XX`, then press Return.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
-
-. Add the filter for the redirect codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=300 AND response.keyword<400`. 
-
-.. In the *Label* field, enter `3XX`, then press Return.
-
-. Add the filter for the client error codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=400 AND response.keyword<500`. 
-
-.. In the *Label* field, enter `4XX`, then press Return.
-
-. Add the filter for the server error codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=500 AND response.keyword<600`. 
-
-.. In the *Label* field, enter `5XX`, then press Return.
-
-. To change the color palette, select *Status* from the *Color palette* dropdown, then click *Close*.
-
-. Click *Save and return*.
+. Arrange the panel into a small square on the first row of the dashboard, less than one quarter of the screen width.
 
 [discrete]
 [[histogram]]
@@ -263,7 +289,7 @@ Use the *intervals* function in *Lens* to see an evenly spaced numeric distribut
 For logs data, this might be used to find the best time to shut down your website for maintenance.
 To create a numeric histogram showing total traffic per hour:
 
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor.
+. From the *Available fields* list, drag and drop `bytes` to *Vertical axis* in the editor.
 
 . Click *Median of bytes* and choose the *Sum* function instead.
 
@@ -280,15 +306,18 @@ image::images/lens_end_to_end_5_2.png[Create custom ranges]
 
 . Click *Save and return*.
 
+. Shrink the panel size, then drag it to the first row next to the *Median of bytes* panel. There
+should be four panels in a row.
+
 [discrete]
 [[treemap]]
-=== Create a multi-level break down
+=== Create a multi-level chart
 
-*Lens* supports multi-level breakdowns in the data table and proportion charts. For example,
+*Lens* supports multi-level functions in the data table and proportion charts. For example,
 to create a chart which breaks down the traffic sources and user geography, use the *filters*
 function and *top values* function:
 
-. From the *Chart Type* dropdown, select *Treemap*.
+. Click *Bar vertical stacked*, then select *Treemap*.
 
 . From the *Available fields* list, drag and drop *Records* to the *Size by* field in the editor. 
 
@@ -310,7 +339,7 @@ function and *top values* function:
 
 .. Click *Add a filter*, enter the following, then press Return:
 
-* *KQL* &mdash; `NOT referer : *twitter* OR NOT referer: *facebook.com*`
+* *KQL* &mdash; `NOT referer : *twitter.com* OR NOT referer: *facebook.com*`
 
 * *Label* &mdash; `Other`
 
@@ -318,7 +347,7 @@ function and *top values* function:
 
 Then add the next break down by geography:
 
-. From the *Available fields* list, drag and drop *geo.src* to the visualization builder. 
+. From the *Available fields* list, drag and drop *geo.src* to the main workspace.
 
 . To change the *Group by* order, click and drag *Top values of geo.src* so that it appears first in the editor.
 +
@@ -336,6 +365,8 @@ image::images/lens_end_to_end_7_3.png[Group other values as Other]
 
 . Click *Save and return*.
 
+. Arrange the panel so that it is in the same row as the table.
+
 [discrete]
 === Save the dashboard
 
@@ -344,3 +375,5 @@ Now that you have a complete overview of your web server data, save the dashboar
 . In the toolbar, click *Save*.
 
 . On the *Save dashboard* window, enter `Web server data`, then click *Save*.
+
+. If this was not the first time you saved the dashboard, click *Switch to view mode*
