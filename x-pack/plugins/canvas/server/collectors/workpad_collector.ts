@@ -59,40 +59,156 @@ export interface WorkpadTelemetry {
 }
 
 export const workpadSchema: MakeSchemaFrom<WorkpadTelemetry> = {
-  workpads: { total: { type: 'long' } },
+  workpads: {
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of Canvas Workpads in the cluster',
+      },
+    },
+  },
   pages: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of pages across all Canvas Workpads',
+      },
+    },
     per_workpad: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of pages across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of pages found in a Canvas Workpad',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of pages found in a Canvas Workpad',
+        },
+      },
     },
   },
   elements: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of elements across all Canvas Workpads',
+      },
+    },
     per_page: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of elements per page across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of elements on a page across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of elements on a page across all Canvas Workpads',
+        },
+      },
     },
   },
   functions: {
-    total: { type: 'long' },
-    in_use: { type: 'array', items: { type: 'keyword' } },
-    in_use_30d: { type: 'array', items: { type: 'keyword' } },
-    in_use_90d: { type: 'array', items: { type: 'keyword' } },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of functions in use across all Canvas Workpads',
+      },
+    },
+    in_use: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'A function in use in any Canvas Workpad',
+        },
+      },
+    },
+    in_use_30d: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'A function in use in a Canvas Workpad that has been modified in the last 30 days',
+        },
+      },
+    },
+    in_use_90d: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'A function in use in a Canvas Workpad that has been modified in the last 90 days',
+        },
+      },
+    },
     per_element: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'Average number of functions used per element across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description:
+            'The minimum number of functions used in an element across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description:
+            'The maximum number of functions used in an element across all Canvas Workpads',
+        },
+      },
     },
   },
   variables: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of variables defined across all Canvas Workpads',
+      },
+    },
+
     per_workpad: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of variables set per Canvas Workpad',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number variables set across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of variables set across all Canvas Workpads',
+        },
+      },
     },
   },
 };
