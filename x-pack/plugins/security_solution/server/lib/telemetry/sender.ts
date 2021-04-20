@@ -21,8 +21,8 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './task';
 
-type BaseSearchType = string | number | boolean | object;
-export type SearchTypes = BaseSearchType | BaseSearchType[] | undefined;
+type BaseSearchTypes = string | number | boolean | object;
+export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
