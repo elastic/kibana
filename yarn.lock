@@ -913,7 +913,7 @@
   resolved "https://registry.yarnpkg.com/@commercial/pinpoint/-/pinpoint-1.0.2.tgz#04bdb015b00839962bffe2b1cc5908e478906912"
   integrity sha512-+ny+n7pUFlfIYLf95F+Nl47ams2cWGAH10Rg3/iE3BsUYqUZQfeG07pK4McxhNM4unmJGOSQvJQElPqtuiLDWQ==
 
-"@commercial/podium@^3.4.3":
+"@commercial/podium@^3.4.3", "@hapi/podium@npm:@commercial/podium@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@commercial/podium/-/podium-3.4.3.tgz#b25ca90a205b34e1997dada42b910c0d1cfa9fd2"
   integrity sha512-CfK9bl8AQojDjO0wGRtrWQkYjkAmrKwdbsSASYaQ75wTJtajZSmoT7sOmvg+aWczXfEh8IbRltUGAt0NQ8EpQQ==
@@ -1241,14 +1241,6 @@
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/pinpoint/-/pinpoint-1.0.2.tgz#025b7a36dbbf4d35bf1acd071c26b20ef41e0d13"
   integrity sha512-dtXC/WkZBfC5vxscazuiJ6iq4j9oNx1SHknmIr8hofarpKUZKmlUVYVIhNVzIEgK5Wrc4GMHL5lZtt1uS2flmQ==
-
-"@hapi/podium@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-3.4.3.tgz#d28935870ae1372e2f983a7161e710c968a60de1"
-  integrity sha512-QJlnYLEYZWlKQ9fSOtuUcpANyoVGwT68GA9P0iQQCAetBK0fI+nbRBt58+aMixoifczWZUthuGkNjqKxgPh/CQ==
-  dependencies:
-    "@hapi/hoek" "8.x.x"
-    "@hapi/joi" "16.x.x"
 
 "@hapi/statehood@^6.1.2":
   version "6.1.2"
