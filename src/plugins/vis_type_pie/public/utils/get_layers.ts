@@ -7,11 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datum, PartitionFillLabel, PartitionLayer, ShapeTreeNode } from '@elastic/charts';
+import {
+  Datum,
+  PartitionFillLabel,
+  PartitionLayer,
+  ShapeTreeNode,
+  ArrayEntry,
+} from '@elastic/charts';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { DatatableRow } from '../../../expressions/public';
-import { BucketColumns, PieVisParams } from '../types';
+import { BucketColumns, PieVisParams, SplitDimensionParams } from '../types';
 import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -121,6 +127,27 @@ export const getLayers = (
           return formatter.deserialize(col.format).convert(d) ?? '';
         }
         return String(d);
+      },
+      sortPredicate: ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
+        const params = col?.meta?.sourceParams?.params as SplitDimensionParams;
+        const sort: string | undefined = params?.orderBy;
+        // metric sorting
+        if (sort !== '_key') {
+          if (params?.order === 'desc') {
+            return node2.value - node1.value;
+          } else {
+            return node1.value - node2.value;
+          }
+          // alphabetical sorting
+        } else {
+          if (name1 > name2) {
+            return params?.order === 'desc' ? -1 : 1;
+          }
+          if (name2 > name1) {
+            return params?.order === 'desc' ? 1 : -1;
+          }
+        }
+        return 0;
       },
       fillLabel,
       shape: {

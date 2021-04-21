@@ -68,3 +68,8 @@ export interface PieTypeProps {
   palettes?: ChartsPluginSetup['palettes'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
+
+export interface SplitDimensionParams {
+  order?: string;
+  orderBy?: string;
+}

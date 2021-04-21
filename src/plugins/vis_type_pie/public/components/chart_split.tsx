@@ -9,15 +9,12 @@
 import React from 'react';
 import { Accessor, AccessorFn, GroupBy, GroupBySort, SmallMultiples } from '@elastic/charts';
 import { DatatableColumn } from '../../../expressions/public';
+import { SplitDimensionParams } from '../types';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
   splitDimension?: DatatableColumn;
-}
-
-interface SplitDimensionParams {
-  order?: string;
 }
 
 const CHART_SPLIT_ID = '__pie_chart_split__';
