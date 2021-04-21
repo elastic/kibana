@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -305,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
 
@@ -336,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
     });

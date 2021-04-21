@@ -137,6 +137,19 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
       endTimestamp={endTimestamp + framePaddingMs}
       query={`trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`}
       height={640}
+      columns={[
+        { type: 'timestamp' },
+        {
+          type: 'field',
+          field: 'service.name',
+          header: i18n.translate(
+            'xpack.apm.propertiesTable.tabs.logs.serviceName',
+            { defaultMessage: 'Service Name' }
+          ),
+          width: 200,
+        },
+        { type: 'message' },
+      ]}
     />
   );
 }

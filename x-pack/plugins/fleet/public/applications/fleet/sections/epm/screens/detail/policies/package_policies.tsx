@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -16,8 +15,7 @@ import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import { InstallStatus } from '../../../../../types';
 import { useLink, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { LinkAndRevisionProps } from '../../../../../components';
-import { LinkAndRevision } from '../../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
 import { useGetPackageInstallStatus } from '../../../hooks';
 
@@ -42,27 +40,6 @@ const IntegrationDetailsLink = memo<{
     </EuiLink>
   );
 });
-
-const AgentPolicyDetailLink = memo<{
-  agentPolicyId: string;
-  revision: LinkAndRevisionProps['revision'];
-  children: ReactNode;
-}>(({ agentPolicyId, revision, children }) => {
-  const { getHref } = useLink();
-
-  return (
-    <LinkAndRevision
-      className="eui-textTruncate"
-      revision={revision}
-      href={getHref('policy_details', {
-        policyId: agentPolicyId,
-      })}
-    >
-      {children}
-    </LinkAndRevision>
-  );
-});
-
 interface PackagePoliciesPanelProps {
   name: string;
   version: string;
@@ -112,11 +89,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         truncateText: true,
         render(id, { agentPolicy }) {
-          return (
-            <AgentPolicyDetailLink agentPolicyId={id} revision={agentPolicy.revision}>
-              {agentPolicy.name ?? id}
-            </AgentPolicyDetailLink>
-          );
+          return <AgentPolicySummaryLine policy={agentPolicy} />;
         },
       },
       {
