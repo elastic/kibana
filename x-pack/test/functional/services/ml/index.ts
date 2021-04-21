@@ -60,7 +60,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const customUrls = MachineLearningCustomUrlsProvider(context);
 
   const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
-  const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(context, commonUI);
+  const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
+    context,
+    commonUI,
+    dashboardJobSelectionTable
+  );
 
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(

@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import * as Rx from 'rxjs';
 import type { CoreSetup } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
 import {
   loadSharingDataHelpers,
@@ -32,22 +34,38 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> {
+interface Params {
+  core: CoreSetup;
+  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
+  license$: LicensingPluginSetup['license$'];
+  usesUiCapabilities: boolean;
+}
+
+export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
-  private canDownloadCSV: boolean = false;
+  private licenseHasDownloadCsv: boolean = false;
+  private capabilityHasDownloadCsv: boolean = false;
   private core: CoreSetup;
 
-  constructor(core: CoreSetup, license$: LicensingPluginSetup['license$']) {
+  constructor({ core, startServices$, license$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
     this.core = core;
 
     license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
       const { showLinks } = checkLicense(results);
-      this.canDownloadCSV = showLinks;
+      this.licenseHasDownloadCsv = showLinks;
     });
+
+    if (usesUiCapabilities) {
+      startServices$.subscribe(([{ application }]) => {
+        this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
+      });
+    } else {
+      this.capabilityHasDownloadCsv = true; // deprecated
+    }
   }
 
   public getIconType() {
@@ -70,7 +88,7 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public isCompatible = async (context: ActionContext) => {
-    if (!this.canDownloadCSV) {
+    if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
       return false;
     }
 
@@ -82,7 +100,7 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
   public execute = async (context: ActionContext) => {
     const { embeddable } = context;
 
-    if (!isSavedSearchEmbeddable(embeddable)) {
+    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }
 
@@ -93,6 +111,10 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     const savedSearch = embeddable.getSavedSearch();
     const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
 
+    // If the TZ is set to the default "Browser", it will not be useful for
+    // server-side export. We need to derive the timezone and pass it as a param
+    // to the export API.
+    // TODO: create a helper utility in Reporting. This is repeated in a few places.
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
     const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const immediateJobParams: JobParamsDownloadCSV = {

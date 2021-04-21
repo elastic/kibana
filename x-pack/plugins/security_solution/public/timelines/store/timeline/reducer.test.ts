@@ -22,7 +22,6 @@ import {
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../../common/mock';
 
 import {
@@ -49,6 +48,7 @@ import {
 import { ColumnHeaderOptions, TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {
