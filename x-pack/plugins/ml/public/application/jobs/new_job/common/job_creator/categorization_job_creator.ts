@@ -148,6 +148,7 @@ export class CategorizationJobCreator extends JobCreator {
     };
   }
 
+  // Check to see if the examples failed due to a cross-cluster search being used
   private _checkCcsFailure(
     examples: CategoryFieldExample[],
     status: CATEGORY_EXAMPLES_VALIDATION_STATUS,
