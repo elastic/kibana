@@ -86,11 +86,11 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
           key={fieldNameIndex}
           id={`accordion${fieldNameIndex}`}
           className="schemaFieldError"
-          buttonClassName="euiAccordionForm__button field-error__header"
+          buttonClassName="euiAccordionForm__button"
           buttonContent={accordionHeader}
           paddingSize="xl"
         >
-          <EuiTable>
+          <EuiTable tableLayout="auto">
             <EuiTableHeader>
               <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
