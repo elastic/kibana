@@ -1,7 +1,7 @@
 .filter-button {
-  opacity: .3;
-  width: 16px;
-  height: 18px;
+  opacity: .5;
+  width: $euiSize;
+  height: $euiSize;
 
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
