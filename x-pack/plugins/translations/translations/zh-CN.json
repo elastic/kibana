@@ -8723,7 +8723,6 @@
     "xpack.fleet.settings.elasticHostError": "URL 无效",
     "xpack.fleet.settings.elasticsearchUrlLabel": "Elasticsearch URL",
     "xpack.fleet.settings.flyoutTitle": "Fleet 设置",
-    "xpack.fleet.settings.globalOutputTitle": "全局输出",
     "xpack.fleet.settings.invalidYamlFormatErrorMessage": "YAML 无效：{reason}",
     "xpack.fleet.settings.saveButtonLabel": "保存设置",
     "xpack.fleet.settings.success.message": "设置已保存",
