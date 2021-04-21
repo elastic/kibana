@@ -64,7 +64,8 @@ export const DocumentCountChart: FC<Props> = ({
       ];
     }
     return chartPoints;
-  }, [chartPoints]);
+  }, [chartPoints, timeRangeEarliest, timeRangeLatest]);
+
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataDocumentCountChart">
       <Chart
