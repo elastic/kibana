@@ -45,10 +45,10 @@ pegjs(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [
+  srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
     ":grammar"
-  ] + NPM_MODULE_EXTRA_FILES,
+  ],
   deps = DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
