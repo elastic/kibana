@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
+import { CoreStart } from 'src/core/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
-import { GetCsvReportPanelAction } from './get_csv_panel_action';
+import { ReportingCsvPanelAction } from './get_csv_panel_action';
 
 type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
 
@@ -17,6 +18,8 @@ describe('GetCsvReportPanelAction', () => {
   let context: any;
   let mockLicense$: any;
   let mockSearchSource: any;
+  let mockStartServicesPayload: [CoreStart, object, unknown];
+  let mockStartServices$: Rx.Subject<typeof mockStartServicesPayload>;
 
   beforeAll(() => {
     if (typeof window.URL.revokeObjectURL === 'undefined') {
@@ -30,10 +33,19 @@ describe('GetCsvReportPanelAction', () => {
 
   beforeEach(() => {
     mockLicense$ = (state: LicenseResults = 'valid') => {
-      return (of({
+      return (Rx.of({
         check: jest.fn().mockImplementation(() => ({ state })),
       }) as unknown) as LicensingPluginSetup['license$'];
     };
+
+    mockStartServices$ = new Rx.Subject<[CoreStart, object, unknown]>();
+    mockStartServicesPayload = [
+      ({
+        application: { capabilities: { dashboard: { downloadCsv: true } } },
+      } as unknown) as CoreStart,
+      {},
+      null,
+    ];
 
     core = {
       http: {
@@ -78,7 +90,14 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('translates empty embeddable context into job params', async () => {
-    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
 
     await panel.execute(context);
 
@@ -91,7 +110,6 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('translates embeddable context into job params', async () => {
-    // setup
     mockSearchSource = {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
@@ -106,9 +124,15 @@ describe('GetCsvReportPanelAction', () => {
       };
     };
 
-    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
 
-    // test
+    mockStartServices$.next(mockStartServicesPayload);
+
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith(
@@ -121,7 +145,14 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('allows downloading for valid licenses', async () => {
-    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
 
     await panel.execute(context);
 
@@ -129,7 +160,14 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('shows a good old toastie when it successfully starts', async () => {
-    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
 
     await panel.execute(context);
 
@@ -144,7 +182,14 @@ describe('GetCsvReportPanelAction', () => {
         post: jest.fn().mockImplementation(() => Promise.reject('No more ram!')),
       },
     };
-    const panel = new GetCsvReportPanelAction(coreFails, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core: coreFails,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
 
     await panel.execute(context);
 
@@ -152,15 +197,76 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it(`doesn't allow downloads with bad licenses`, async () => {
-    const licenseMock = mockLicense$('invalid');
-    const plugin = new GetCsvReportPanelAction(core, licenseMock);
-    await licenseMock.pipe(first()).toPromise();
+    const licenseMock$ = mockLicense$('invalid');
+    const plugin = new ReportingCsvPanelAction({
+      core,
+      license$: licenseMock$,
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
+
+    await licenseMock$.pipe(first()).toPromise();
+
     expect(await plugin.isCompatible(context)).toEqual(false);
   });
 
   it('sets a display and icon type', () => {
-    const panel = new GetCsvReportPanelAction(core, mockLicense$());
+    const panel = new ReportingCsvPanelAction({
+      core,
+      license$: mockLicense$(),
+      startServices$: mockStartServices$,
+      usesUiCapabilities: true,
+    });
+
+    mockStartServices$.next(mockStartServicesPayload);
+
     expect(panel.getIconType()).toMatchInlineSnapshot(`"document"`);
     expect(panel.getDisplayName()).toMatchInlineSnapshot(`"Download CSV"`);
+  });
+
+  describe('Application UI Capabilities', () => {
+    it(`doesn't allow downloads when UI capability is not enabled`, async () => {
+      const plugin = new ReportingCsvPanelAction({
+        core,
+        license$: mockLicense$(),
+        startServices$: mockStartServices$,
+        usesUiCapabilities: true,
+      });
+
+      mockStartServices$.next([
+        ({ application: { capabilities: {} } } as unknown) as CoreStart,
+        {},
+        null,
+      ]);
+
+      expect(await plugin.isCompatible(context)).toEqual(false);
+    });
+
+    it(`allows downloads when license is valid and UI capability is enabled`, async () => {
+      mockStartServices$ = new Rx.Subject();
+      const plugin = new ReportingCsvPanelAction({
+        core,
+        license$: mockLicense$(),
+        startServices$: mockStartServices$,
+        usesUiCapabilities: true,
+      });
+
+      mockStartServices$.next(mockStartServicesPayload);
+
+      expect(await plugin.isCompatible(context)).toEqual(true);
+    });
+
+    it(`allows download when license is valid and deprecated roles config is enabled`, async () => {
+      const plugin = new ReportingCsvPanelAction({
+        core,
+        license$: mockLicense$(),
+        startServices$: mockStartServices$,
+        usesUiCapabilities: false,
+      });
+
+      expect(await plugin.isCompatible(context)).toEqual(true);
+    });
   });
 });
