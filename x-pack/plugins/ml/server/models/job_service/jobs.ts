@@ -188,6 +188,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(
           dataCounts?.latest_record_timestamp,
+          // @ts-expect-error @elastic/elasticsearch data counts missing is missing latest_bucket_timestamp
           dataCounts?.latest_bucket_timestamp,
           parseTimeIntervalForJob(job.analysis_config?.bucket_span)
         ),
@@ -203,6 +204,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         earliestTimestampMs: dataCounts?.earliest_record_timestamp,
         latestResultsTimestampMs: getLatestDataOrBucketTimestamp(
           dataCounts?.latest_record_timestamp,
+          // @ts-expect-error @elastic/elasticsearch data counts missing is missing latest_bucket_timestamp
           dataCounts?.latest_bucket_timestamp
         ),
         isSingleMetricViewerJob: errorMessage === undefined,
@@ -244,6 +246,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       if (dataCounts !== undefined) {
         timeRange.to = getLatestDataOrBucketTimestamp(
           dataCounts.latest_record_timestamp as number,
+          // @ts-expect-error @elastic/elasticsearch data counts missing is missing latest_bucket_timestamp
           dataCounts.latest_bucket_timestamp as number
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
@@ -319,7 +322,6 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
             (ds) => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
-            // @ts-expect-error
             datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
           }
         }
@@ -388,7 +390,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
-            // @ts-expect-error
+            // @ts-expect-error @elastic-elasticsearch JobStats type is incomplete
             tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
@@ -401,6 +403,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
             const latestBucketTimestamp =
               latestBucketTimestampByJob && latestBucketTimestampByJob[tempJob.job_id];
             if (latestBucketTimestamp) {
+              // @ts-expect-error @elastic/elasticsearch data counts missing is missing latest_bucket_timestamp
               tempJob.data_counts.latest_bucket_timestamp = latestBucketTimestamp;
             }
           }

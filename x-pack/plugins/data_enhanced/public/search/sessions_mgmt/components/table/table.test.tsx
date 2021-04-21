@@ -13,7 +13,7 @@ import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SearchSessionStatus } from '../../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../../src/plugins/data/common';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
