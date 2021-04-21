@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { AppLogic } from '../../../app_logic';
+import { EngineIcon } from '../../../icons';
 import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
@@ -32,12 +33,12 @@ export const EmptyState: React.FC = () => {
   return (
     <>
       <EnginesOverviewHeader />
-      <EuiPageContent hasBorder className="emptyState">
+      <EuiPageContent color="subdued" className="emptyState">
         {canManageEngines ? (
           <EuiEmptyPrompt
             data-test-subj="AdminEmptyEnginesPrompt"
             className="emptyState__prompt"
-            iconType="eyeClosed"
+            iconType={EngineIcon}
             title={
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.title', {
@@ -72,7 +73,7 @@ export const EmptyState: React.FC = () => {
                     { defaultMessage: 'Create an engine' }
                   )}
                 </EuiButtonTo>
-                <EuiSpacer size="xl" />
+                <EuiSpacer size="xxl" />
                 <SampleEngineCreationCta />
               </>
             }
@@ -81,7 +82,7 @@ export const EmptyState: React.FC = () => {
           <EuiEmptyPrompt
             data-test-subj="NonAdminEmptyEnginesPrompt"
             className="emptyState__prompt"
-            iconType="eyeClosed"
+            iconType={EngineIcon}
             title={
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.nonAdmin.title', {
