@@ -73,6 +73,14 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
           error.body.attributes.body.error.caused_by?.caused_by?.reason ||
           error.body.attributes.body.error.caused_by?.reason;
       }
+      if (
+        Array.isArray(error.body.attributes.body.error.root_cause) &&
+        typeof error.body.attributes.body.error.root_cause[0] === 'object' &&
+        error.body.attributes.body.error.root_cause[0]?.script
+      ) {
+        errObj.causedBy = error.body.attributes.body.error.root_cause[0]?.script;
+        errObj.message += `: '${error.body.attributes.body.error.root_cause[0]?.script}'`;
+      }
       return errObj;
     } else {
       return {
