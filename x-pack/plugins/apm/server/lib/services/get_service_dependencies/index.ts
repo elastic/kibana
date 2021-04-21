@@ -5,40 +5,34 @@
  * 2.0.
  */
 
-import { keyBy, merge } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { Coordinate } from '../../../../typings/timeseries';
+import { merge } from 'lodash';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { joinByKey } from '../../../../common/utils/join_by_key';
 import { maybe } from '../../../../common/utils/maybe';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getDestinationMap } from './get_destination_map';
 import { getMetrics } from './get_metrics';
+import { getDestinationMap } from './get_destination_map';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type ServiceDependencyItem = {
   name: string;
   latency: {
     value: number | null;
-    timeseries: Coordinate[];
-    previousPeriodTimeseries?: Coordinate[];
+    timeseries: Array<{ x: number; y: number | null }>;
   };
   throughput: {
     value: number | null;
-    timeseries: Coordinate[];
-    previousPeriodTimeseries?: Coordinate[];
+    timeseries: Array<{ x: number; y: number | null }>;
   };
   errorRate: {
     value: number | null;
-    timeseries: Coordinate[];
-    previousPeriodTimeseries?: Coordinate[];
+    timeseries: Array<{ x: number; y: number | null }>;
   };
   impact: number;
-  previousPeriodImpact?: number;
 } & (
   | {
       type: 'service';
@@ -49,37 +43,30 @@ export type ServiceDependencyItem = {
   | { type: 'external'; spanType?: string; spanSubtype?: string }
 );
 
-function getServiceDependencies({
+export function getServiceDependencies({
   setup,
   serviceName,
   environment,
   numBuckets,
-  start,
-  end,
 }: {
   serviceName: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
   environment?: string;
   numBuckets: number;
-  start: number;
-  end: number;
-}) {
+}): Promise<ServiceDependencyItem[]> {
   return withApmSpan('get_service_dependencies', async () => {
+    const { start, end } = setup;
     const [allMetrics, destinationMap] = await Promise.all([
       getMetrics({
         setup,
         serviceName,
         environment,
         numBuckets,
-        start,
-        end,
       }),
       getDestinationMap({
         setup,
         serviceName,
         environment,
-        start,
-        end,
       }),
     ]);
 
@@ -239,85 +226,5 @@ function getServiceDependencies({
         impact,
       };
     });
-  });
-}
-
-export async function getServiceDependenciesPeriods({
-  setup,
-  serviceName,
-  environment,
-  numBuckets,
-  comparisonStart,
-  comparisonEnd,
-}: {
-  serviceName: string;
-  setup: Setup & SetupTimeRange;
-  environment?: string;
-  numBuckets: number;
-  comparisonStart?: number;
-  comparisonEnd?: number;
-}): Promise<{ serviceDependencies: ServiceDependencyItem[] }> {
-  return withApmSpan('get_service_dependencies_periods', async () => {
-    const { start, end } = setup;
-
-    const commonProps = {
-      serviceName,
-      environment,
-      setup,
-      numBuckets,
-    };
-
-    const previousPeriodPromise =
-      comparisonStart && comparisonEnd
-        ? getServiceDependencies({
-            ...commonProps,
-            start: comparisonStart,
-            end: comparisonEnd,
-          }).then((dependencies) => {
-            return keyBy(dependencies, 'name');
-          })
-        : undefined;
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceDependencies({ ...commonProps, start, end }),
-      previousPeriodPromise,
-    ]);
-
-    return {
-      serviceDependencies: currentPeriod.map((currentDependency) => {
-        const previousDependency = previousPeriod?.[currentDependency.name];
-        if (!previousDependency) {
-          return currentDependency;
-        }
-
-        return {
-          ...currentDependency,
-          latency: {
-            ...currentDependency.latency,
-            previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentDependency.latency.timeseries,
-              previousPeriodTimeseries: previousDependency.latency?.timeseries,
-            }),
-          },
-          throughput: {
-            ...currentDependency.throughput,
-            previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentDependency.throughput.timeseries,
-              previousPeriodTimeseries:
-                previousDependency.throughput?.timeseries,
-            }),
-          },
-          errorRate: {
-            ...currentDependency.errorRate,
-            previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentDependency.errorRate.timeseries,
-              previousPeriodTimeseries:
-                previousDependency.errorRate?.timeseries,
-            }),
-          },
-          previousPeriodImpact: previousDependency.impact,
-        };
-      }),
-    };
   });
 }

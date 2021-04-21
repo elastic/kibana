@@ -17,7 +17,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { Setup } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export const getMetrics = ({
@@ -25,18 +25,14 @@ export const getMetrics = ({
   serviceName,
   environment,
   numBuckets,
-  start,
-  end,
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
   numBuckets: number;
-  start: number;
-  end: number;
 }) => {
   return withApmSpan('get_service_destination_metrics', async () => {
-    const { apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const response = await apmEventClient.search({
       apm: {

@@ -17,7 +17,7 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceAlerts } from '../lib/services/get_service_alerts';
-import { getServiceDependenciesPeriods } from '../lib/services/get_service_dependencies';
+import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
 import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
@@ -30,7 +30,6 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -40,6 +39,7 @@ import {
   kueryRt,
   rangeRt,
 } from './default_api_types';
+import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -601,7 +601,6 @@ export const serviceDependenciesRoute = createApmServerRoute({
       }),
       environmentRt,
       rangeRt,
-      comparisonRangeRt,
     ]),
   }),
   options: {
@@ -611,21 +610,16 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      environment,
-      numBuckets,
-      comparisonStart,
-      comparisonEnd,
-    } = params.query;
+    const { environment, numBuckets } = params.query;
 
-    return getServiceDependenciesPeriods({
+    const serviceDependencies = await getServiceDependencies({
       serviceName,
       environment,
       setup,
       numBuckets,
-      comparisonStart,
-      comparisonEnd,
     });
+
+    return { serviceDependencies };
   },
 });
 
