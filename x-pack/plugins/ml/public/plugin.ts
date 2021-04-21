@@ -180,7 +180,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
 
-          const canUseMlAlerts = capabilities.ml.canUseMlAlerts;
+          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
           if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
             registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
           }
