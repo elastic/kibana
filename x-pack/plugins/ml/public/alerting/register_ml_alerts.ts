@@ -14,7 +14,10 @@ import type { PluginSetupContract as AlertingSetup } from '../../../alerting/pub
 import { PLUGIN_ID } from '../../common/constants/app';
 import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
 
-export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+export async function registerMlAlerts(
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
+  alerting?: AlertingSetup
+) {
   // async import validators to reduce initial bundle size
   const { validateLookbackInterval, validateTopNBucket } = await import('./validators');
 
@@ -135,6 +138,10 @@ export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPu
       }
     ),
   });
+
+  // if (alerting) {
+  //   registerNavigation(alerting);
+  // }
 }
 
 export function registerNavigation(alerting: AlertingSetup) {
