@@ -29,7 +29,7 @@ interface Props {
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
-  interval: number;
+  interval?: number;
 }
 
 const SPEC_ID = 'document_count';
@@ -59,7 +59,10 @@ export const DocumentCountChart: FC<Props> = ({
     // If chart has only one bucket
     // it won't show up correctly unless we add an extra data point
     if (chartPoints.length === 1) {
-      return [...chartPoints, { time: Number(chartPoints[0].time) + interval, value: 0 }];
+      return [
+        ...chartPoints,
+        { time: interval ? Number(chartPoints[0].time) + interval : timeRangeEarliest, value: 0 },
+      ];
     }
     return chartPoints;
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
