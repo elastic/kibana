@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
@@ -69,7 +69,8 @@ export class HttpService
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
-    this.httpServer = new HttpServer(logger, 'Kibana');
+    const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
+    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -167,7 +168,7 @@ export class HttpService
       return;
     }
 
-    this.configSubscription.unsubscribe();
+    this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
 
     if (this.notReadyServer) {
@@ -179,7 +180,7 @@ export class HttpService
 
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.logger, 'NotReady');
+    const httpServer = new HttpServer(this.logger, 'NotReady', of(config.shutdownTimeout));
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
     // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers

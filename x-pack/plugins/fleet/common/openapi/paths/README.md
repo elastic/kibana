@@ -30,9 +30,6 @@ paths/
 ├── agents@enroll.yaml
 ├── agents@setup.yaml
 ├── agents@{agent_id}.yaml
-├── agents@{agent_id}@acks.yaml
-├── agents@{agent_id}@checkin.yaml
-├── agents@{agent_id}@events.yaml
 ├── agents@{agent_id}@unenroll.yaml
 ├── agents@{agent_id}@upgrade.yaml
 ├── enrollment_api_keys.yaml

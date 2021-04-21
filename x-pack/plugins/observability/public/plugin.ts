@@ -32,6 +32,7 @@ import { registerDataHandler } from './data_handler';
 import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
+import { ConfigSchema } from '.';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export type ObservabilityRuleRegistry = ObservabilityPublicSetup['ruleRegistry'];
@@ -60,7 +61,9 @@ export class Plugin
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.initializerContext = initializerContext;
+  }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart>,
@@ -68,6 +71,7 @@ export class Plugin
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+    const config = this.initializerContext.config.get();
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -84,6 +88,7 @@ export class Plugin
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
       return renderApp({
+        config,
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
@@ -104,7 +109,7 @@ export class Plugin
       updater$,
     });
 
-    if (coreSetup.uiSettings.get('observability:enableAlertingExperience')) {
+    if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
         title: 'Alerts',
@@ -161,6 +166,7 @@ export class Plugin
     return {
       dashboard: { register: registerDataHandler },
       ruleRegistry: observabilityRuleRegistry,
+      isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
     };
   }
   public start({ application }: CoreStart) {
