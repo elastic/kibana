@@ -7,24 +7,21 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
-import { MessagesStorage } from '../../containers/messages_storage';
+import { addMessage, getMessages } from '../../containers/messages_storage';
 import { TestProviders } from '../../common/mock';
 import { createCalloutId } from './helpers';
 import { CaseCallOut, CaseCallOutProps } from '.';
 
 jest.mock('../../containers/messages_storage');
+const mockAddMessage = addMessage as jest.Mock;
+const mockGetMessages = getMessages as jest.Mock;
 
-const useSecurityLocalStorageMock = MessagesStorage as jest.Mock;
-const securityLocalStorageMock = {
-  getMessages: jest.fn(() => []),
-  addMessage: jest.fn(),
-};
+mockGetMessages.mockImplementation(() => []);
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useSecurityLocalStorageMock.mockImplementation(() => securityLocalStorageMock);
+    mockGetMessages.mockImplementation(() => []);
   });
 
   it('renders a callout correctly', () => {
@@ -111,9 +108,9 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('case');
+    expect(mockGetMessages).toHaveBeenCalled();
     wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('case', id);
+    expect(mockAddMessage).toHaveBeenCalledWith(id);
   });
 
   it('do not show the callout if is in the localStorage', () => {
@@ -126,11 +123,7 @@ describe('CaseCallOut ', () => {
 
     const id = createCalloutId(['message-one']);
 
-    useSecurityLocalStorageMock.mockImplementation(() => ({
-      ...securityLocalStorageMock,
-      getMessages: jest.fn(() => [id]),
-    }));
-
+    mockGetMessages.mockImplementation(() => [id]);
     const wrapper = mount(
       <TestProviders>
         <CaseCallOut {...props} />
@@ -162,7 +155,7 @@ describe('CaseCallOut ', () => {
     const id = createCalloutId(['message-one']);
     wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
+    expect(mockAddMessage).not.toHaveBeenCalled();
   });
 
   it('do not persist a callout of type warning', () => {
@@ -187,7 +180,7 @@ describe('CaseCallOut ', () => {
     const id = createCalloutId(['message-one']);
     wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
+    expect(mockAddMessage).not.toHaveBeenCalled();
   });
 
   it('do not persist a callout of type success', () => {
@@ -212,6 +205,6 @@ describe('CaseCallOut ', () => {
     const id = createCalloutId(['message-one']);
     wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
+    expect(mockAddMessage).not.toHaveBeenCalled();
   });
 });

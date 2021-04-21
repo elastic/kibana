@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState, useMemo } from 'react';
 
-import { MessagesStorage } from '../../containers/messages_storage';
+import { addMessage, getMessages } from '../../containers/messages_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
@@ -32,19 +32,17 @@ interface CalloutVisibility {
 }
 
 const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
-  const { getMessages, addMessage } = new MessagesStorage();
-
-  const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
+  const casesMessages = useMemo(() => getMessages(), []);
   const dismissedCallouts = useMemo(
     () =>
-      caseMessages.reduce<CalloutVisibility>(
+      casesMessages.reduce<CalloutVisibility>(
         (acc, id) => ({
           ...acc,
           [id]: false,
         }),
         {}
       ),
-    [caseMessages]
+    [casesMessages]
   );
 
   const [calloutVisibility, setCalloutVisibility] = useState(dismissedCallouts);
@@ -52,10 +50,10 @@ const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
     (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
       if (type === 'primary') {
-        addMessage('case', id);
+        addMessage(id);
       }
     },
-    [setCalloutVisibility, addMessage]
+    [setCalloutVisibility]
   );
 
   const groupedByTypeErrorMessages = useMemo(

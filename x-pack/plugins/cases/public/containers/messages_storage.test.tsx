@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { MessagesStorage } from './messages_storage';
+import {
+  addMessage,
+  clearAllMessages,
+  hasMessage,
+  getMessages,
+  removeMessage,
+} from './messages_storage';
 
 describe('useLocalStorage', () => {
-  const storage = new MessagesStorage();
   beforeEach(() => {
     localStorage.clear();
   });
@@ -17,45 +22,39 @@ describe('useLocalStorage', () => {
   });
 
   it('should return an empty array when there is no messages', async () => {
-    const { getMessages } = storage;
-    expect(getMessages('case')).toEqual([]);
+    expect(getMessages()).toEqual([]);
   });
 
   it('should add a message', async () => {
-    const { getMessages, addMessage } = storage;
-    addMessage('case', 'id-1');
-    expect(getMessages('case')).toEqual(['id-1']);
+    addMessage('id-1');
+    expect(getMessages()).toEqual(['id-1']);
   });
 
   it('should add multiple messages', async () => {
-    const { getMessages, addMessage } = storage;
-    addMessage('case', 'id-1');
-    addMessage('case', 'id-2');
-    expect(getMessages('case')).toEqual(['id-1', 'id-2']);
+    addMessage('id-1');
+    addMessage('id-2');
+    expect(getMessages()).toEqual(['id-1', 'id-2']);
   });
 
   it('should remove a message', async () => {
-    const { getMessages, addMessage, removeMessage } = storage;
-    addMessage('case', 'id-1');
-    addMessage('case', 'id-2');
-    removeMessage('case', 'id-2');
-    expect(getMessages('case')).toEqual(['id-1']);
+    addMessage('id-1');
+    addMessage('id-2');
+    removeMessage('id-2');
+    expect(getMessages()).toEqual(['id-1']);
   });
 
   it('should return presence of a message', async () => {
-    const { hasMessage, addMessage, removeMessage } = storage;
-    addMessage('case', 'id-1');
-    addMessage('case', 'id-2');
-    removeMessage('case', 'id-2');
-    expect(hasMessage('case', 'id-1')).toEqual(true);
-    expect(hasMessage('case', 'id-2')).toEqual(false);
+    addMessage('id-1');
+    addMessage('id-2');
+    removeMessage('id-2');
+    expect(hasMessage('id-1')).toEqual(true);
+    expect(hasMessage('id-2')).toEqual(false);
   });
 
   it('should clear all messages', async () => {
-    const { getMessages, addMessage, clearAllMessages } = storage;
-    addMessage('case', 'id-1');
-    addMessage('case', 'id-2');
-    clearAllMessages('case');
-    expect(getMessages('case')).toEqual([]);
+    addMessage('id-1');
+    addMessage('id-2');
+    clearAllMessages();
+    expect(getMessages()).toEqual([]);
   });
 });

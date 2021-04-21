@@ -6,37 +6,36 @@
  */
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
-let instance: MessagesStorage;
-export class MessagesStorage {
-  private storage;
-  constructor() {
-    if (!instance) {
-      instance = this;
-      this.storage = new Storage(localStorage);
-    }
-    return instance;
-  }
+/**
+ * Storage is essentially just a helper for stringifying and parsing data in the
+ * storage container provided. We default to localStorage, so multiple instances
+ * of storage will end up using the same state.
+ */
 
-  addMessage = (plugin: string, id: string) => {
-    const pluginStorage = this.storage?.get(`${plugin}-messages`) ?? [];
-    this.storage?.set(`${plugin}-messages`, [...pluginStorage, id]);
-  };
+export const addMessage = (id: string, storageSource = localStorage) => {
+  const storage = new Storage(storageSource);
+  const pluginStorage = storage?.get('cases-messages') ?? [];
+  storage?.set('cases-messages', [...pluginStorage, id]);
+};
 
-  clearAllMessages = (plugin: string): void => {
-    return this.storage?.remove(`${plugin}-messages`);
-  };
+export const clearAllMessages = (storageSource = localStorage): void => {
+  const storage = new Storage(storageSource);
+  storage?.remove('cases-messages');
+};
 
-  getMessages = (plugin: string): string[] => {
-    return this.storage?.get(`${plugin}-messages`) ?? [];
-  };
+export const getMessages = (storageSource = localStorage): string[] => {
+  const storage = new Storage(storageSource);
+  return storage?.get('cases-messages') ?? [];
+};
 
-  hasMessage = (plugin: string, id: string) => {
-    const pluginStorage = this.storage?.get(`${plugin}-messages`) ?? [];
-    return pluginStorage.filter((val: string) => val === id).length > 0;
-  };
+export const hasMessage = (id: string, storageSource = localStorage) => {
+  const storage = new Storage(storageSource);
+  const pluginStorage = storage?.get('cases-messages') ?? [];
+  return pluginStorage.filter((val: string) => val === id).length > 0;
+};
 
-  removeMessage = (plugin: string, id: string) => {
-    const pluginStorage = this.storage?.get(`${plugin}-messages`) ?? [];
-    this.storage?.set(`${plugin}-messages`, [...pluginStorage.filter((val: string) => val !== id)]);
-  };
-}
+export const removeMessage = (id: string, storageSource = localStorage) => {
+  const storage = new Storage(storageSource);
+  const pluginStorage = storage?.get('cases-messages') ?? [];
+  storage?.set('cases-messages', [...pluginStorage.filter((val: string) => val !== id)]);
+};
