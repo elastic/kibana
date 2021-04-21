@@ -55,7 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await button.click();
   };
 
-  describe('saved objects edition page', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load('saved_objects_management/edit_saved_object');
     });
