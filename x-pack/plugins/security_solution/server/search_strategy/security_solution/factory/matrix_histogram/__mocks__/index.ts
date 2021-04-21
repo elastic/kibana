@@ -983,6 +983,9 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
                 filter: [
                   { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
                   {
+                    exists: { field: 'event.action' },
+                  },
+                  {
                     range: {
                       '@timestamp': {
                         gte: '2020-09-08T16:11:26.215Z',

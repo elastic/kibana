@@ -66,6 +66,7 @@ export const expectedDsl = {
       bool: {
         filter: [
           { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+          { exists: { field: mockOptions.stackByField } },
           {
             range: {
               '@timestamp': {
@@ -122,6 +123,7 @@ export const expectedThresholdDsl = {
       bool: {
         filter: [
           { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+          { exists: { field: 'event.action' } },
           {
             range: {
               '@timestamp': {
@@ -176,6 +178,7 @@ export const expectedThresholdMissingFieldDsl = {
       bool: {
         filter: [
           { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+          { exists: { field: 'event.action' } },
           {
             range: {
               '@timestamp': {
@@ -226,6 +229,7 @@ export const expectedThresholdWithCardinalityDsl = {
       bool: {
         filter: [
           { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
+          { exists: { field: 'event.action' } },
           {
             range: {
               '@timestamp': {
