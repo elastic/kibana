@@ -51,11 +51,8 @@ import {
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import {
-  GeoJsonWithMeta,
-  ITiledSingleLayerVectorSource,
-  SourceTooltipConfig,
-} from '../vector_source';
+import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';

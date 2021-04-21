@@ -264,7 +264,7 @@ export class VectorStyleEditor extends Component<Props, State> {
       this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR &&
       !this.props.layer.getSource().isESSource()
     ) {
-      // This handles and ege-case
+      // This handles and edge-case
       // 3rd party lines and polygons from mvt sources cannot be labeled, because they do not have label-centroid geometries inside the tile.
       // These label-centroids are only added for ES-sources
       return;

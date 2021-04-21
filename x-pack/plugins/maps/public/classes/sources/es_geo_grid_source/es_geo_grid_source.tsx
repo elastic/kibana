@@ -38,7 +38,8 @@ import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { GeoJsonWithMeta } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
