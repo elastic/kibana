@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteConfig, RouteConfigOptionsBody, RouteMethod } from 'kibana/server';
+import { DestructiveRouteMethod, RouteConfig, RouteConfigOptions } from 'kibana/server';
 
 import { schema } from '@kbn/config-schema';
 
@@ -46,11 +46,12 @@ import { schema } from '@kbn/config-schema';
  *  },
  *  ...
  */
-export const skipBodyValidation = <Method extends RouteMethod>(
+export const skipBodyValidation = <Method extends DestructiveRouteMethod>(
+  // DestructiveRouteMethod is the Kibana type for everything except 'get' and 'options'.
+  // Body configuration doesn't apply to those types so we disallow it with this helper.
   config: RouteConfig<unknown, unknown, unknown, Method>
 ): RouteConfig<unknown, unknown, unknown, Method> => {
   const options = config.options || {};
-  const bodyOptions = config.options?.body || {};
 
   // We throw here rather than overwriting the existing settings to avoid confusion
   if (config.validate && config.validate.body) {
@@ -59,7 +60,6 @@ export const skipBodyValidation = <Method extends RouteMethod>(
   if (options.body) {
     throw new Error('options.body cannot be set when using "skipBodyValidation"');
   }
-
   return {
     ...config,
     validate:
@@ -70,14 +70,10 @@ export const skipBodyValidation = <Method extends RouteMethod>(
             body: schema.buffer(),
           },
     options: {
-      ...options,
+      ...(config.options || {}),
       body: {
-        ...bodyOptions,
         parse: false,
-        // This is casted explicitly to the expected type to work around TS errors.
-        // skipBodyValidation should never be used on 'get' or 'options' requests which
-        // would have no body
-      } as Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody,
+      } as RouteConfigOptions<Method>['body'],
     },
   };
 };
