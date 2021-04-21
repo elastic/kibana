@@ -61,6 +61,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {

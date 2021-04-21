@@ -22,14 +22,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('test large strings', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
-      await esArchiver.load('empty_kibana');
+
+      await kibanaServer.importExport.load('testlargestring');
       await esArchiver.loadIfNeeded('hamlet');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
     it('verify the large string book present', async function () {
       const ExpectedDoc =
-        'mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare' +
+        'mybookProject Gutenberg EBook of Hamlet, by William Shakespeare' +
         ' This eBook is for the use of anyone anywhere in the United States' +
         ' and most other parts of the world at no cost and with almost no restrictions whatsoever.' +
         ' You may copy it, give it away or re-use it under the terms of the' +
@@ -73,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('hamlet');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });
 }

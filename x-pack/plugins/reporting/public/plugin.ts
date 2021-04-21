@@ -35,17 +35,13 @@ import {
 } from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
-import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
-import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
+import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
-  poll: {
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
+  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
+  roles: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
@@ -90,11 +86,7 @@ export class ReportingPublicPlugin
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
     > {
-  private readonly contract: ReportingStart = {
-    components: { ScreenCapturePanel },
-    getDefaultLayoutSelectors,
-    ReportingAPIClient,
-  };
+  private readonly contract: ReportingStart;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -106,22 +98,30 @@ export class ReportingPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+
+    this.contract = {
+      ReportingAPIClient,
+      components: { ScreenCapturePanel },
+      getDefaultLayoutSelectors,
+      usesUiCapabilities: () => this.config.roles?.enabled === false,
+    };
   }
 
-  public setup(
-    core: CoreSetup,
-    { home, management, licensing, uiActions, share }: ReportingPublicPluginSetupDendencies
-  ) {
+  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
+    const { http, notifications, getStartServices, uiSettings } = core;
+    const { toasts } = notifications;
     const {
-      http,
-      notifications: { toasts },
-      getStartServices,
-      uiSettings,
-    } = core;
-    const { license$ } = licensing;
+      home,
+      management,
+      licensing: { license$ },
+      share,
+      uiActions,
+    } = setupDeps;
+
+    const startServices$ = Rx.from(getStartServices());
+    const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = new ReportingAPIClient(http);
-    const action = new GetCsvReportPanelAction(core, license$);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -136,6 +136,7 @@ export class ReportingPublicPlugin
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
+
     management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
@@ -157,15 +158,29 @@ export class ReportingPublicPlugin
       },
     });
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+    uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+    );
 
-    share.register(csvReportingProvider({ apiClient, toasts, license$, uiSettings }));
     share.register(
-      reportingPDFPNGProvider({
+      ReportingCsvShareProvider({
         apiClient,
         toasts,
         license$,
+        startServices$,
         uiSettings,
+        usesUiCapabilities,
+      })
+    );
+    share.register(
+      reportingScreenshotShareProvider({
+        apiClient,
+        toasts,
+        license$,
+        startServices$,
+        uiSettings,
+        usesUiCapabilities,
       })
     );
 

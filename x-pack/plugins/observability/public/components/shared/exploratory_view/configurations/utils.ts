@@ -55,3 +55,11 @@ export function buildPhraseFilter(field: string, value: any, indexPattern: IInde
   }
   return [];
 }
+
+export function buildExistsFilter(field: string, indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
+  }
+  return [];
+}
