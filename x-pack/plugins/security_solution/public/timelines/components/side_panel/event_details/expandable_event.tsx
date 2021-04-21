@@ -32,8 +32,6 @@ import {
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
-import { SelectCaseContent } from '../../../../common/components/host_isolation/content';
-import { CompactCasesTable } from '../../../../cases/components/all_cases/compact_columns';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

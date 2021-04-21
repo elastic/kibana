@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { useCallback, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { isSecurityAppError } from '../../../../common/utils/api';

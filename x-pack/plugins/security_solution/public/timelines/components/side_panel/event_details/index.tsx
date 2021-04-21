@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { some } from 'lodash/fp';
-import _ from 'lodash';
+import { find, some } from 'lodash/fp';
 import {
   EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -29,6 +27,9 @@ import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
+import { ISOLATE_HOST } from '../../../../detections/components/host_isolation/translations';
+import { ALERT_DETAILS } from './translations';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -76,10 +77,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setHostIsolationPanel(false);
   }, []);
 
+  const showHostIsolationPanel = useCallback(() => {
+    setHostIsolationPanel(true);
+  }, []);
+
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
-  const isEndpointAlert =
-    _.find(detailsData, { category: 'agent', field: 'agent.type' })?.values[0] === 'endpoint';
+  const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, detailsData)?.values;
+
+  const isEndpointAlert = findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
 
   if (!expandedEvent?.eventId) {
     return null;
@@ -97,21 +103,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
               onClick={() => showAlertDetails()}
             >
               <EuiText size="xs">
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.hostIsolation.backToAlertDetails"
-                    defaultMessage="Alert details"
-                  />
-                </p>
+                <p>{ALERT_DETAILS}</p>
               </EuiText>
             </EuiButtonEmpty>
             <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
-                  defaultMessage="Isolate host"
-                />
-              </h2>
+              <h2>{ISOLATE_HOST}</h2>
             </EuiTitle>
           </>
         ) : (
@@ -135,23 +131,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       </StyledEuiFlyoutBody>
       {isEndpointAlert && hostIsolationPanelOpen === false && (
         <EuiFlyoutFooter>
-          <EuiFlexGroup>
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                iconSide="right"
-                fill
-                iconType="arrowDown"
-                onClick={() => {
-                  setHostIsolationPanel(true);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.eventDetails.actionsMenu"
-                  defaultMessage="Take action"
-                />
-              </EuiButton>
+              <TakeActionDropdown showPanelCallback={showHostIsolationPanel} />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="l" />
           <EuiSpacer size="l" />
         </EuiFlyoutFooter>
       )}

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { find } from 'lodash/fp';
 import {
   EuiCallOut,
   EuiTitle,
@@ -19,32 +20,44 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import {
+  CANCEL,
+  CASES_ASSOCIATED_WITH_ALERT,
+  COMMENT,
+  COMMENT_PLACEHOLDER,
+  CONFIRM,
+  RETURN_TO_ALERT_DETAILS,
+} from './translations';
+import { Maybe } from '../../../../../observability/common/typings';
 
 export const HostIsolationPanel = React.memo(
   ({
     details,
     cancelCallback,
   }: {
-    details: TimelineEventsDetailsItem[];
+    details: Maybe<TimelineEventsDetailsItem[]>;
     cancelCallback: () => void;
   }) => {
     const [comment, setComment] = useState('');
+    const [isIsolated, setIsolated] = useState(false);
 
-    const agentId = _.find(details, { category: 'agent', field: 'agent.id' })?.values[0];
-    const hostName = _.find(details, { category: 'host', field: 'host.name' })?.values[0];
-    // TODO what is the correct value this should display
-    const alertName = _.find(details, { category: 'file', field: 'file.path.text' })?.values[0];
+    const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
+    const agentId = findAgentId ? findAgentId[0] : '';
+    const findHostName = find({ category: 'host', field: 'host.name' }, details)?.values;
+    const hostName = findHostName ? findHostName[0] : '';
+    const findAlertRule = find({ category: 'signal', field: 'signal.rule.name' }, details)?.values;
+    const alertRule = findAlertRule ? findAlertRule[0] : '';
 
     const { loading, isolateHost } = useHostIsolation({ agentId, comment });
-    const [isIsolated, setIsolated] = useState(false);
 
     const confirmHostIsolation = async () => {
       const hostIsolated = await isolateHost();
       setIsolated(hostIsolated);
     };
+
+    const caseCount: number = 1;
 
     return isIsolated ? (
       <>
@@ -53,18 +66,43 @@ export const HostIsolationPanel = React.memo(
           iconType="check"
           color="success"
           title={i18n.translate('xpack.securitySolution.hostIsolation.successfulIsolation.title', {
-            defaultMessage: 'Host Isolation on [hostname] successfully submitted',
+            defaultMessage: 'Host Isolation on {hostname} successfully submitted',
+            values: { hostname: hostName },
           })}
         >
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolation.successfulIsolation.cases"
-                defaultMessage="This case has been attached to the following cases:"
-              />
-            </p>
-          </EuiText>
+          {caseCount > 0 && (
+            <>
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.hostIsolation.successfulIsolation.cases"
+                    defaultMessage="This case has been attached to the following {caseCount, plural, one {case} other {cases}}:"
+                    values={{ caseCount }}
+                  />
+                </p>
+              </EuiText>
+              <EuiText size="s">
+                <ul>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.securitySolution.hostIsolation.placeholderCase"
+                      defaultMessage="Case"
+                    />
+                  </li>
+                </ul>
+              </EuiText>
+            </>
+          )}
         </EuiCallOut>
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="right" onClick={() => cancelCallback()}>
+              <EuiText size="s">
+                <p>{RETURN_TO_ALERT_DETAILS}</p>
+              </EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     ) : (
       <>
@@ -73,27 +111,28 @@ export const HostIsolationPanel = React.memo(
           <p>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
-              defaultMessage="Isolate host {hostName} from network. This action will be added to the # cases associated with the {alertName}."
-              values={{ hostName, alertName }}
+              defaultMessage="Isolate host {hostname} from network. This action will be added to the {cases}."
+              values={{
+                hostname: <b>{hostName}</b>,
+                cases: (
+                  <b>
+                    {caseCount}
+                    {CASES_ASSOCIATED_WITH_ALERT}
+                    {alertRule}
+                  </b>
+                ),
+              }}
             />
           </p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolation.comment"
-              defaultMessage="Comment"
-            />
-          </h4>
+          <h4>{COMMENT}</h4>
         </EuiTitle>
         <EuiTextArea
           data-test-subj="host_isolation_comment"
           fullWidth={true}
-          placeholder={i18n.translate(
-            'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
-            { defaultMessage: 'You may leave an optional note here.' }
-          )}
+          placeholder={COMMENT_PLACEHOLDER}
           value={comment}
           onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
             setComment(event.target.value)
@@ -102,19 +141,11 @@ export const HostIsolationPanel = React.memo(
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => cancelCallback()}>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolation.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => cancelCallback()}>{CANCEL}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={confirmHostIsolation} isLoading={loading}>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolation.confirm"
-                defaultMessage="Confirm"
-              />
+              {CONFIRM}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
