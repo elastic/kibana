@@ -109,6 +109,7 @@ function getCompProps(): DiscoverSidebarProps {
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
     onEditRuntimeField: jest.fn(),
+    editField: jest.fn(),
   };
 }
 
