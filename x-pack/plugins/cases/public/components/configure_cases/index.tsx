@@ -156,7 +156,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     }
   }, [connectors, connector, isLoadingConnectors]);
 
-  const ConnectorAddFlyout = useCallback(
+  const ConnectorAddFlyout = useMemo(
     () =>
       addFlyoutVisible
         ? triggersActionsUi.getAddConnectorFlyout({
@@ -170,7 +170,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     [addFlyoutVisible, supportedActionTypes]
   );
 
-  const ConnectorEditFlyout = useCallback(
+  const ConnectorEditFlyout = useMemo(
     () =>
       editedConnectorItem && editFlyoutVisible
         ? triggersActionsUi.getEditConnectorFlyout({
@@ -217,8 +217,8 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
         />
       </SectionWrapper>
-      <ConnectorAddFlyout />
-      <ConnectorEditFlyout />
+      {ConnectorAddFlyout}
+      {ConnectorEditFlyout}
     </FormWrapper>
   );
 };
