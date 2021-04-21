@@ -27,14 +27,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  async function getAlert(alertId: string) {
-    const { body: alert } = await supertest
-      .get(`/api/alerting/rule/${alertId}`)
-      .set('kbn-xsrf', 'foo')
-      .expect(200);
-    return alert;
-  }
-
   async function createFailingAlert() {
     return await createAlert({
       rule_type_id: 'test.failing',
@@ -136,6 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -151,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -163,7 +156,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -179,7 +172,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -195,7 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -207,7 +200,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
+      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
