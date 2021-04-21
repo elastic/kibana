@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   // Failing ES snapshot promotion: https://github.com/elastic/kibana/issues/70535
   describe.skip('Endpoint plugin', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup20');
     loadTestFile(require.resolve('./metadata'));
   });
 }

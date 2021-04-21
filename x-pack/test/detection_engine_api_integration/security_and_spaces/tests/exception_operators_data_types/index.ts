@@ -30,7 +30,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     });
 
     describe('', function () {
-      this.tags('ciGroup13');
+      this.tags('ciGroup26');
 
       loadTestFile(require.resolve('./text'));
       loadTestFile(require.resolve('./text_array'));
