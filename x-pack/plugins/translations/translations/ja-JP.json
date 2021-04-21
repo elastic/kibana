@@ -18323,7 +18323,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription": "このルールを実行するElasticsearchインデックスのパターンを入力します。デフォルトでは、セキュリティソリューション詳細設定で定義されたインデックスパターンが含まれます。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText": "手始めに使えるように、一般的なジョブがいくつか提供されています。独自のカスタムジョブを追加するには、{machineLearning} アプリケーションでジョブに「security」のグループを割り当て、ここに表示されるようにします。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired": "機械学習ジョブが必要です。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobWarningTitle": "このMLジョブは現在実行されていません。このルールを有効にする前に、このジョブを「MLジョブ設定」で実行するように設定してください。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText": "ジョブを選択してください",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError": "インデックスパターンが最低1つ必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError": "URLの形式が無効です",
