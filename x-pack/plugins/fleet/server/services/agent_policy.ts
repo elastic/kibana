@@ -216,6 +216,7 @@ class AgentPolicyService {
       SAVED_OBJECT_TYPE,
       {
         ...agentPolicy,
+        status: 'active',
         is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
