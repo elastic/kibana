@@ -11,8 +11,8 @@ yarn kbn bootstrap --verbose
 ###
 ### upload ts-refs-cache artifacts as quickly as possible so they are available for download
 ###
-echo "--- Upload ts-refs-cache"
 if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
+  echo "--- Upload ts-refs-cache"
   cd "$KIBANA_DIR/target/ts_refs_cache"
   gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
   cd "$KIBANA_DIR"
