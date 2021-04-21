@@ -163,7 +163,7 @@ export function SelectableUrlList({
 
   function PopOverTitle() {
     return (
-      <EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">
         <EuiFlexGroup ref={titleRef} gutterSize="xs">
           <EuiFlexItem style={{ justifyContent: 'center' }}>
             {loading ? <EuiLoadingSpinner /> : titleText}
@@ -229,7 +229,7 @@ export function SelectableUrlList({
               </StyledRow>
             )}
             {list}
-            <EuiPopoverFooter>
+            <EuiPopoverFooter paddingSize="s">
               <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
