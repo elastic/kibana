@@ -28,8 +28,36 @@ steps:
     artifact_paths: target/junit/**/*.xml
     depends_on: build-oss
 
+  - command: .buildkite/scripts/oss-firefox.sh
+    label: 'OSS Firefox Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/oss-accessibility.sh
+    label: 'OSS Accessibility Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/plugin_functional.sh
+    label: 'Plugin and Interpreter Functional Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
   - command: .buildkite/scripts/xpack-firefox.sh
     label: 'Default Firefox Smoke Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/xpack-accessibility.sh
+    label: 'Default Accessibility Tests'
     agents:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
