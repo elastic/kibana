@@ -8,11 +8,10 @@
 import React from 'react';
 
 import { ThreatSummaryView } from './threat_summary_view';
-import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { mockAlertDetailsData } from './__mocks__';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
   return {

@@ -19,7 +19,7 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
 import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
@@ -34,7 +34,6 @@ const Divider = styled.div`
 `;
 
 const ScheduledQueryGroupDetailsPageComponent = () => {
-  const hasSaveUICapabilities = useKibana().services.application.capabilities.osquery.save;
   const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
   const scheduledQueryGroupsListProps = useRouterNavigate('scheduled_query_groups');
   const editQueryLinkProps = useRouterNavigate(
@@ -98,24 +97,20 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        {hasSaveUICapabilities ? (
-          <>
-            <EuiFlexItem grow={false} key="agents_failed_count_divider">
-              <Divider />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} key="edit_button">
-              <EuiButton fill {...editQueryLinkProps} iconType="pencil">
-                <FormattedMessage
-                  id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
-                  defaultMessage="Edit"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </>
-        ) : undefined}
+        <EuiFlexItem grow={false} key="agents_failed_count_divider">
+          <Divider />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} key="edit_button">
+          <EuiButton fill {...editQueryLinkProps} iconType="pencil">
+            <FormattedMessage
+              id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
+              defaultMessage="Edit"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.policy_id, editQueryLinkProps, hasSaveUICapabilities]
+    [data?.policy_id, editQueryLinkProps]
   );
 
   return (

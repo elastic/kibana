@@ -49,6 +49,7 @@ test('uses default memory buffer logger until config is provided', () => {
 
   // We shouldn't create new buffer appender for another context name.
   const anotherLogger = system.get('test', 'context2');
+  // @ts-expect-error ECS custom meta
   anotherLogger.fatal('fatal message', { some: 'value' });
 
   expect(bufferAppendSpy).toHaveBeenCalledTimes(2);
@@ -62,6 +63,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   const logger = system.get('test', 'context');
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
@@ -159,6 +161,7 @@ test('attaches appenders to appenders that declare refs', async () => {
   );
 
   const testLogger = system.get('tests');
+  // @ts-expect-error ECS custom meta
   testLogger.warn('This message goes to a test context.', { a: 'hi', b: 'remove me' });
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -233,6 +236,7 @@ test('asLoggerFactory() only allows to create new loggers.', async () => {
   );
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 

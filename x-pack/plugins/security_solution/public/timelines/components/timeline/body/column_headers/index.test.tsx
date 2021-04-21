@@ -11,7 +11,6 @@ import React from 'react';
 import '../../../../../common/mock/match_media';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
-import { Direction } from '../../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -21,6 +20,7 @@ import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { Direction } from '../../../../../../common/search_strategy';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
