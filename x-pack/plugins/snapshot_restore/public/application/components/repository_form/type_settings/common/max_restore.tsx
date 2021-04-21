@@ -38,7 +38,7 @@ export const MaxRestoreField: React.FunctionComponent<Props> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryForm.commonFields.maxRestoreBytesDescription"
-          defaultMessage="The snapshot restore rate for each node."
+          defaultMessage="Maximum snapshot restore rate for each node."
         />
       }
       fullWidth
