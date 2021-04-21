@@ -6,7 +6,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButton,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-expect-error
@@ -42,18 +49,21 @@ export class EditControl extends Component<Props, State> {
 
   _renderEditButton() {
     return (
-      <EuiButtonIcon
-        className="mapToolbarOverlay__button"
-        color="text"
-        iconType="pencil"
-        onClick={this._togglePopover}
-        aria-label={i18n.translate('xpack.maps.toolbarOverlay.editControlTitle', {
-          defaultMessage: 'Add features to existing layer',
-        })}
-        title={i18n.translate('xpack.maps.toolbarOverlay.editControlTitle', {
-          defaultMessage: 'Add features to existing layer',
-        })}
-      />
+      <EuiPanel paddingSize="none">
+        <EuiButtonIcon
+          size="s"
+          className="mapToolbarOverlay__button"
+          color="text"
+          iconType="pencil"
+          onClick={this._togglePopover}
+          aria-label={i18n.translate('xpack.maps.toolbarOverlay.editControlTitle', {
+            defaultMessage: 'Add features to existing layer',
+          })}
+          title={i18n.translate('xpack.maps.toolbarOverlay.editControlTitle', {
+            defaultMessage: 'Add features to existing layer',
+          })}
+        />
+      </EuiPanel>
     );
   }
 

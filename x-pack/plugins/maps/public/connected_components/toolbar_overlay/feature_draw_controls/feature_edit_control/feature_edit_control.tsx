@@ -27,34 +27,47 @@ export function FeatureEditControl(props: Props) {
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
       <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
         <EuiFlexItem key={'line'} grow={false}>
-          <EuiButtonIcon
+          <EuiPanel
+            paddingSize="none"
             className={`mapToolbarOverlay__button${editFeaturesSelected ? '__selected' : ''}`}
-            onClick={() => props.initiateDraw(DRAW_TYPE.SIMPLE_SELECT)}
-            iconType="documentEdit"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.editFeaturesLabel', {
-              defaultMessage: 'Edit features',
-            })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.editFeaturesTitle', {
-              defaultMessage: 'Edit features',
-            })}
-            aria-pressed={editFeaturesSelected}
-            isSelected={editFeaturesSelected}
-          />
+          >
+            <EuiButtonIcon
+              size="s"
+              onClick={() => props.initiateDraw(DRAW_TYPE.SIMPLE_SELECT)}
+              iconType="documentEdit"
+              aria-label={i18n.translate(
+                'xpack.maps.toolbarOverlay.featureEdit.editFeaturesLabel',
+                {
+                  defaultMessage: 'Edit features',
+                }
+              )}
+              title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.editFeaturesTitle', {
+                defaultMessage: 'Edit features',
+              })}
+              aria-pressed={editFeaturesSelected}
+              isSelected={editFeaturesSelected}
+            />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem key={'polygon'} grow={false}>
-          <EuiButtonIcon
+          <EuiPanel
+            paddingSize="none"
             className={`mapToolbarOverlay__button${deleteFeaturesSelected ? '__selected' : ''}`}
-            onClick={() => props.initiateDraw(DRAW_TYPE.TRASH)}
-            iconType="trash"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteLabel', {
-              defaultMessage: 'Remove feature',
-            })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteTitle', {
-              defaultMessage: 'Remove feature',
-            })}
-            aria-pressed={deleteFeaturesSelected}
-            isSelected={deleteFeaturesSelected}
-          />
+          >
+            <EuiButtonIcon
+              size="s"
+              onClick={() => props.initiateDraw(DRAW_TYPE.TRASH)}
+              iconType="trash"
+              aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteLabel', {
+                defaultMessage: 'Remove feature',
+              })}
+              title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteTitle', {
+                defaultMessage: 'Remove feature',
+              })}
+              aria-pressed={deleteFeaturesSelected}
+              isSelected={deleteFeaturesSelected}
+            />
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -21,6 +21,10 @@
     }
   }
 
+  .euiButtonIcon {
+    color: $euiTextColor !important;
+  }
+
   &:hover {
     transform: translateY(-1px);
   }
@@ -39,27 +43,24 @@
 }
 
 .mapToolbarOverlay__button__selected {
-  @include size($euiSizeXL);
+  position: relative;
+  transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
   // sass-lint:disable-block no-important
   color: $euiTextColor !important;
   background-color: $euiColorLightShade !important;
-  pointer-events: all;
-  position: relative;
 
-  &:enabled,
-  &:enabled:hover,
-  &:enabled:focus {
-    @include euiBottomShadowLarge;
+  @include kbnThemeStyle($theme: 'v7') {
+    // Overrides the .euiPanel default border
+    // sass-lint:disable-block no-important
+    border: none !important;
+
+    // Overrides the .euiPanel--hasShadow
+    &.euiPanel.euiPanel--hasShadow {
+      @include euiBottomShadowLarge;
+    }
   }
-}
-
-.mapToolbarOverlay__buttonGroup {
-  @include mapToolbarButtonGroupBorderRadius;
-  display: flex;
-  flex-direction: column;
 
   .euiButtonIcon {
-    border-radius: 0;
+    color: $euiTextColor !important;
   }
 }
-
