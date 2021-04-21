@@ -56,7 +56,7 @@ export const MaxSnapshotsField: React.FunctionComponent<Props> = ({
         helpText={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.commonFields.maxSnapshotBytesHelpText"
-            defaultMessage="Accepts byte size units, for example: {example1}, {example2}, {example3}, {example4}. Defaults to {defaultSize} per second."
+            defaultMessage="Accepts byte size units, such as {example1}, {example2}, {example3}, or {example4}. Defaults to {defaultSize} per second."
             values={{
               example1: <EuiCode>1g</EuiCode>,
               example2: <EuiCode>10mb</EuiCode>,
