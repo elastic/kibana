@@ -21,7 +21,6 @@ import styled from 'styled-components';
 
 import { onFocusReFocusDraggable } from '../accessibility/helpers';
 import { BrowserFields } from '../../containers/source';
-import { ToStringArray } from '../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
@@ -175,7 +174,7 @@ export const getColumns = ({
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
+    render: (values: string[] | null | undefined, data: EventFieldsData) => (
       <FullWidthFlexGroup
         direction="column"
         alignItems="flexStart"
