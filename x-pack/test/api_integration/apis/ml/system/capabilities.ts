@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have the right number of capabilities', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER);
-        expect(Object.keys(capabilities).length).to.eql(29);
+        expect(Object.keys(capabilities).length).to.eql(30);
       });
 
       it('should get viewer capabilities', async () => {
