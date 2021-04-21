@@ -39,18 +39,25 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
-async function isPackageVersionOrLaterInstalled(options: {
+export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-}): Promise<Installation | false> {
+}): Promise<{ package: Installation; installType: InstallType } | false> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedPackage = installedPackageObject?.attributes;
   if (
     installedPackage &&
     (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
   ) {
-    return installedPackage;
+    let installType: InstallType;
+    try {
+      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
+    } catch (e) {
+      installType = 'unknown';
+    }
+    return { package: installedPackage, installType };
   }
   return false;
 }
@@ -68,13 +75,13 @@ export async function ensureInstalledPackage(options: {
     ? { name: pkgName, version: pkgVersion }
     : await Registry.fetchFindLatestPackage(pkgName);
 
-  const installedPackage = await isPackageVersionOrLaterInstalled({
+  const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
-  if (installedPackage) {
-    return installedPackage;
+  if (installedPackageResult) {
+    return installedPackageResult.package;
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
   const installResult = await installPackage({

@@ -11,7 +11,9 @@ import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import { installPackage } from './install';
+import type { InstallResult } from '../../../types';
+
+import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
@@ -41,11 +43,33 @@ export async function bulkInstallPackages({
     packagesResults.map(async (result, index) => {
       const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
       if (result.status === 'fulfilled') {
-        const latestPackage = result.value;
+        const pkgKeyProps = result.value;
+        const installedPackageResult = await isPackageVersionOrLaterInstalled({
+          savedObjectsClient,
+          pkgName: pkgKeyProps.name,
+          pkgVersion: pkgKeyProps.version,
+        });
+        if (installedPackageResult) {
+          const {
+            name,
+            version,
+            installed_es: installedEs,
+            installed_kibana: installedKibana,
+          } = installedPackageResult.package;
+          return {
+            name,
+            version,
+            result: {
+              assets: [...installedEs, ...installedKibana],
+              status: 'already_installed',
+              installType: installedPackageResult.installType,
+            } as InstallResult,
+          };
+        }
         const installResult = await installPackage({
           savedObjectsClient,
           esClient,
-          pkgkey: Registry.pkgToPkgKey(latestPackage),
+          pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
           installSource,
           skipPostInstall: true,
           force,
@@ -59,7 +83,7 @@ export async function bulkInstallPackages({
         } else {
           return {
             name: packageName,
-            version: latestPackage.version,
+            version: pkgKeyProps.version,
             result: installResult,
           };
         }
