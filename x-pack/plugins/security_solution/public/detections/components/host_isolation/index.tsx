@@ -57,7 +57,7 @@ export const HostIsolationPanel = React.memo(
       setIsolated(hostIsolated);
     };
 
-    const caseCount: number = 1;
+    const caseCount: number = 0;
 
     return isIsolated ? (
       <>
