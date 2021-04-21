@@ -24,6 +24,7 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
+  VALIDATION_RESULT,
 } from '../../../../../../common/types/categories';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
@@ -43,6 +44,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
   private _partitionFieldName: string | null = null;
+  private _ccsVersionFailure: boolean = false;
 
   constructor(
     indexPattern: IndexPattern,
@@ -126,9 +128,37 @@ export class CategorizationJobCreator extends JobCreator {
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
+    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    if (this._ccsVersionFailure === true) {
+      // if the index pattern contains a cross-cluster search, one of the clusters may
+      // be on a version which doesn't support the fields API (e.g. 6.8)
+      // and so the categorization examples endpoint will fail
+      // if this is the case, we need to allow the user to progress in the wizard.
+      this._overallValidStatus = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
+    }
+
     this._wizardInitialized$.next(true);
 
-    return { examples, sampleSize, overallValidStatus, validationChecks };
+    return {
+      examples,
+      sampleSize,
+      overallValidStatus,
+      validationChecks,
+      ccsVersionFailure: this._ccsVersionFailure,
+    };
+  }
+
+  private _checkCcsFailure(
+    examples: CategoryFieldExample[],
+    status: CATEGORY_EXAMPLES_VALIDATION_STATUS,
+    checks: FieldExampleCheck[]
+  ) {
+    return (
+      this.indexPatternTitle.includes(':') &&
+      examples.length === 0 &&
+      status === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID &&
+      checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES
+    );
   }
 
   public get categoryFieldExamples() {
