@@ -13,16 +13,19 @@ export function MonacoEditorProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return new (class MonacoEditor {
-    public async getCodeEditorValue() {
-      let request: string = '';
+    public async getCodeEditorValue(nthIndex: number = 0) {
+      let values: string[] = [];
 
       await retry.try(async () => {
-        request = await browser.execute(
-          () => (window as any).MonacoEnvironment.monaco.editor.getModels()[0].getValue() as string
+        values = await browser.execute(
+          () =>
+            (window as any).MonacoEnvironment.monaco.editor
+              .getModels()
+              .map((model: any) => model.getValue()) as string[]
         );
       });
 
-      return request;
+      return values[nthIndex] as string;
     }
   })();
 }

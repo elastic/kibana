@@ -13,7 +13,7 @@ import { coreMock } from 'src/core/public/mocks';
 import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import type { SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
