@@ -86,7 +86,7 @@ describe('ResultSettings', () => {
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
-  it('renders the "save" button as disabled if everything is disablec', () => {
+  it('renders the "save" button as disabled if everything is disabled', () => {
     setMockValues({
       ...values,
       stagedUpdates: true,
