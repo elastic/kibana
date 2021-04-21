@@ -1415,8 +1415,6 @@
     "data.search.timeoutIncreaseSetting": "クエリがタイムアウトしました。検索タイムアウト詳細設定で実行時間を延長します。",
     "data.search.timeoutIncreaseSettingActionText": "設定を編集",
     "data.search.unableToGetSavedQueryToastTitle": "保存したクエリ {savedQueryId} を読み込めません",
-    "data.search.upgradeLicense": "クエリがタイムアウトしました。無料のベーシックティアではクエリがタイムアウトすることはありません。",
-    "data.search.upgradeLicenseActionText": "今すぐアップグレード",
     "data.searchSessionIndicator.noCapability": "検索セッションを作成するアクセス権がありません。",
     "data.triggers.applyFilterDescription": "Kibanaフィルターが適用されるとき。単一の値または範囲フィルターにすることができます。",
     "data.triggers.applyFilterTitle": "フィルターを適用",

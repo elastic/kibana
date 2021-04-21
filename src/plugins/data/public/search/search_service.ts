@@ -15,7 +15,7 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
 import {
@@ -148,9 +148,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       usageCollector: this.usageCollector!,
-      __enhance: (enhancements: SearchEnhancements) => {
-        this.searchInterceptor = enhancements.searchInterceptor;
-      },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
     };
@@ -192,5 +189,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public stop() {
     this.aggsService.stop();
     this.searchSourceService.stop();
+    this.searchInterceptor.stop();
   }
 }

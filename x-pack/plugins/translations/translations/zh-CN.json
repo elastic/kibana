@@ -1423,8 +1423,6 @@
     "data.search.timeoutIncreaseSetting": "您的查询已超时。使用搜索超时高级设置延长运行时间。",
     "data.search.timeoutIncreaseSettingActionText": "编辑设置",
     "data.search.unableToGetSavedQueryToastTitle": "无法加载已保存查询 {savedQueryId}",
-    "data.search.upgradeLicense": "您的查询已超时。使用我们免费的基本级许可，您的查询永不会超时。",
-    "data.search.upgradeLicenseActionText": "立即升级",
     "data.searchSessionIndicator.noCapability": "您无权创建搜索会话。",
     "data.triggers.applyFilterDescription": "应用 kibana 筛选时。可能是单个值或范围筛选。",
     "data.triggers.applyFilterTitle": "应用筛选",
