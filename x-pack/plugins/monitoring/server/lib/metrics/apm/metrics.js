@@ -615,4 +615,37 @@ export const metrics = {
       defaultMessage: 'HTTP Requests received by agent configuration managemen',
     }),
   }),
+  apm_cgroup_memory_usage: new ApmMetric({
+    field: 'beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes',
+    label: i18n.translate('xpack.monitoring.metrics.apmInstance.memory.memoryUsageLabel', {
+      defaultMessage: 'Memory Utilization (cgroup)',
+    }),
+    title: instanceMemoryTitle,
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.memory.memoryUsageDescription',
+      {
+        defaultMessage: 'Memory usage of the container',
+      }
+    ),
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B',
+  }),
+
+  apm_cgroup_memory_limit: new ApmMetric({
+    field: 'beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes',
+    label: i18n.translate('xpack.monitoring.metrics.apmInstance.memory.memoryLimitLabel', {
+      defaultMessage: 'Memory Limit',
+    }),
+    title: instanceMemoryTitle,
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.memory.memoryLimitDescription',
+      {
+        defaultMessage: 'Memory limit of the container',
+      }
+    ),
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B',
+  }),
 };
