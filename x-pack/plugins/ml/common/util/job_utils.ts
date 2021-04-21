@@ -8,7 +8,7 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -819,7 +819,7 @@ export function getLatestDataOrBucketTimestamp(
  * in the job wizards and so would be lost in a clone.
  */
 export function processCreatedBy(customSettings: CustomSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by!)) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by as CREATED_BY_LABEL)) {
     delete customSettings.created_by;
   }
 }
@@ -831,14 +831,16 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
 }
 
 /**
- * Resolves the longest bucket span from the list.
- * @param bucketSpans Collection of bucket spans
+ * Resolves the longest time interval from the list.
+ * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
  */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return Math.max(
-    ...bucketSpans
+export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefined {
+  const result = Math.max(
+    ...timeIntervals
       .map((b) => parseInterval(b))
       .filter(isDefined)
       .map((v) => v.asSeconds())
   );
+
+  return Number.isFinite(result) ? result : undefined;
 }

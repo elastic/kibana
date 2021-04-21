@@ -16,7 +16,6 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import {
@@ -29,6 +28,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { PageInfoPaginated } from '../../../../common/search_strategy';
 
 const ID = 'networkUsersQuery';
 
