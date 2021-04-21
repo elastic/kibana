@@ -38,7 +38,11 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('happy path', () => {
       it('should delete a comment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
         const comment = await deleteComment(supertest, postedCase.id, patchedCase.comments![0].id);
 
         expect(comment).to.eql({});
@@ -48,7 +52,11 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('unhappy path', () => {
       it('404s when comment belongs to different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
         const error = (await deleteComment(
           supertest,
           'fake-id',

@@ -47,6 +47,7 @@ import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
+import { superUser } from './authentication/users';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -527,7 +528,7 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const getSpaceUrlPrefix = (spaceId: string) => {
+export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
@@ -577,13 +578,17 @@ export const findCasesAsUser = async ({
   return res;
 };
 
+interface OwnerEntity {
+  owner: string;
+}
+
 export const ensureSavedObjectIsAuthorized = (
-  cases: CaseResponse[],
+  entities: OwnerEntity[],
   numberOfExpectedCases: number,
   owners: string[]
 ) => {
-  expect(cases.length).to.eql(numberOfExpectedCases);
-  cases.forEach((theCase) => expect(owners.includes(theCase.owner)).to.be(true));
+  expect(entities.length).to.eql(numberOfExpectedCases);
+  entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
 };
 
 export const createCase = async (
@@ -624,15 +629,25 @@ export const deleteCases = async ({
   return body;
 };
 
-export const createComment = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  params: CommentRequest,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse> => {
+export const createComment = async ({
+  supertest,
+  caseId,
+  params,
+  space,
+  user = superUser,
+  expectedHttpCode = 200,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  params: CommentRequest;
+  space?: string;
+  user?: User;
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
-    .post(`${CASES_URL}/${caseId}/comments`)
+    .post(`${getSpaceUrlPrefix(space)}${CASES_URL}/${caseId}/comments`)
     .set('kbn-xsrf', 'true')
+    .auth(user.username, user.password)
     .send(params)
     .expect(expectedHttpCode);
 

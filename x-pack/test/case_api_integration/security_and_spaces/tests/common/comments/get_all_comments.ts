@@ -33,8 +33,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should get multiple comments for a single case', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      await createComment(supertest, postedCase.id, postCommentUserReq);
-      await createComment(supertest, postedCase.id, postCommentUserReq);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
       const comments = await getAllComments(supertest, postedCase.id);
 
       expect(comments.length).to.eql(2);

@@ -67,7 +67,11 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('happy path', () => {
       it('should post a comment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
           patchedCase.comments![0] as AttributesTypeUser
         );
@@ -89,7 +93,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should post an alert', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
           patchedCase.comments![0] as AttributesTypeAlerts
         );
@@ -113,7 +121,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('creates a user action', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
         const userActions = await getAllUserAction(supertest, postedCase.id);
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
@@ -133,44 +145,45 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('unhappy path', () => {
       it('400s when type is missing', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await createComment(
+        await createComment({
           supertest,
-          postedCase.id,
-          {
+          caseId: postedCase.id,
+          params: {
             // @ts-expect-error
             bad: 'comment',
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when missing attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await createComment(
+        await createComment({
           supertest,
-          postedCase.id,
+          caseId: postedCase.id,
           // @ts-expect-error
-          {
+          params: {
             type: CommentType.user,
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when adding excess attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         for (const attribute of ['alertId', 'index']) {
-          await createComment(
+          await createComment({
             supertest,
-            postedCase.id,
-            {
+            caseId: postedCase.id,
+            params: {
               type: CommentType.user,
               [attribute]: attribute,
               comment: 'a comment',
+              owner: 'securitySolution',
             },
-            400
-          );
+            expectedHttpCode: 400,
+          });
         }
       });
 
@@ -198,10 +211,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         for (const attribute of ['comment']) {
-          await createComment(
+          await createComment({
             supertest,
-            postedCase.id,
-            {
+            caseId: postedCase.id,
+            params: {
               type: CommentType.alert,
               [attribute]: attribute,
               alertId: 'test-id',
@@ -210,22 +223,23 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
+              owner: 'securitySolution',
             },
-            400
-          );
+            expectedHttpCode: 400,
+          });
         }
       });
 
       it('400s when case is missing', async () => {
-        await createComment(
+        await createComment({
           supertest,
-          'not-exists',
-          {
+          caseId: 'not-exists',
+          params: {
             // @ts-expect-error
             bad: 'comment',
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when adding an alert to a closed case', async () => {
@@ -245,13 +259,23 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+          expectedHttpCode: 400,
+        });
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
       it.skip('400s when adding an alert to a collection case', async () => {
         const postedCase = await createCase(supertest, postCollectionReq);
-        await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when adding a generated alert to an individual case', async () => {
@@ -312,14 +336,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await createComment(supertest, postedCase.id, {
-          alertId: alert._id,
-          index: alert._index,
-          rule: {
-            id: 'id',
-            name: 'name',
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: alert._id,
+            index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+            owner: 'securitySolution',
+            type: CommentType.alert,
           },
-          type: CommentType.alert,
         });
 
         const { body: updatedAlert } = await supertest
@@ -360,14 +389,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await createComment(supertest, postedCase.id, {
-          alertId: alert._id,
-          index: alert._index,
-          rule: {
-            id: 'id',
-            name: 'name',
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: alert._id,
+            index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+            owner: 'securitySolution',
+            type: CommentType.alert,
           },
-          type: CommentType.alert,
         });
 
         const { body: updatedAlert } = await supertest
@@ -391,12 +425,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-          await createComment(
+          await createComment({
             supertest,
-            postedCase.id,
-            { ...postCommentAlertReq, alertId, index, type: type as AlertComment },
-            400
-          );
+            caseId: postedCase.id,
+            params: { ...postCommentAlertReq, alertId, index, type: type as AlertComment },
+            expectedHttpCode: 400,
+          });
         });
       }
 
@@ -406,17 +440,17 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-          await createComment(
+          await createComment({
             supertest,
-            postedCase.id,
-            {
+            caseId: postedCase.id,
+            params: {
               ...postCommentAlertReq,
               alertId,
               index,
               type: type as AlertComment,
             },
-            200
-          );
+            expectedHttpCode: 200,
+          });
         });
       }
     });

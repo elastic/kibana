@@ -32,7 +32,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should get a comment', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
       const comment = await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
 
       expect(comment).to.eql(patchedCase.comments![0]);

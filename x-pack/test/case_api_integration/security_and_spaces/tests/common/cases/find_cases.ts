@@ -134,8 +134,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         // post 2 comments
-        await createComment(supertest, postedCase.id, postCommentUserReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
 
         const cases = await findCases(supertest);
         expect(cases).to.eql({
@@ -542,14 +546,14 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases', async () => {
         await Promise.all([
           // Create case owned by the security solution user
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: secOnly,
             space: 'space1',
             owner: 'securitySolutionFixture',
           }),
           // Create case owned by the observability user
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: obsOnly,
             space: 'space1',
@@ -614,14 +618,14 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
         await Promise.all([
           // super user creates a case with owner securitySolutionFixture
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: superUser,
             space: 'space1',
             owner: 'securitySolutionFixture',
           }),
           // super user creates a case with owner observabilityFixture
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: superUser,
             space: 'space1',
@@ -677,13 +681,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respect the owner filter when having permissions', async () => {
         await Promise.all([
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: obsSec,
             space: 'space1',
             owner: 'securitySolutionFixture',
           }),
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: obsSec,
             space: 'space1',
@@ -703,13 +707,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         await Promise.all([
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: obsSec,
             space: 'space1',
             owner: 'securitySolutionFixture',
           }),
-          await createCaseAsUser({
+          createCaseAsUser({
             supertestWithoutAuth,
             user: obsSec,
             space: 'space1',

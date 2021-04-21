@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return a case with comments', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      await createComment(supertest, postedCase.id, postCommentUserReq);
+      await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
       const theCase = await getCase(supertest, postedCase.id, true);
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
