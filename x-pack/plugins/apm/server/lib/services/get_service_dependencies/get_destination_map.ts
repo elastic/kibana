@@ -23,20 +23,24 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export const getDestinationMap = ({
   setup,
   serviceName,
   environment,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   environment?: string;
+  start: number;
+  end: number;
 }) => {
   return withApmSpan('get_service_destination_map', async () => {
-    const { start, end, apmEventClient } = setup;
+    const { apmEventClient } = setup;
 
     const response = await withApmSpan('get_exit_span_samples', async () =>
       apmEventClient.search({

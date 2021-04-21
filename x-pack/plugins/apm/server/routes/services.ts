@@ -17,7 +17,7 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceAlerts } from '../lib/services/get_service_alerts';
-import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceDependenciesPeriods } from '../lib/services/get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
 import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
@@ -601,6 +601,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
       }),
       environmentRt,
       rangeRt,
+      comparisonRangeRt,
     ]),
   }),
   options: {
@@ -610,16 +611,21 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, numBuckets } = params.query;
+    const {
+      environment,
+      numBuckets,
+      comparisonStart,
+      comparisonEnd,
+    } = params.query;
 
-    const serviceDependencies = await getServiceDependencies({
+    return getServiceDependenciesPeriods({
       serviceName,
       environment,
       setup,
       numBuckets,
+      comparisonStart,
+      comparisonEnd,
     });
-
-    return { serviceDependencies };
   },
 });
 
