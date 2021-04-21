@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   EuiPagination,
   EuiSelect,
+  EuiSelectOption,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,12 +18,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TooltipFeature } from '../../../../common/descriptor_types';
+import { ILayer } from '../../../classes/layers/layer';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
 
-export class Footer extends Component {
-  state = {
+interface Props {
+  features: TooltipFeature[];
+  isLocked: boolean;
+  findLayerById: (layerId: string) => ILayer | undefined;
+  setCurrentFeature: (feature: TooltipFeature) => void;
+}
+
+interface State {
+  filteredFeatures: TooltipFeature[];
+  pageNumber: number;
+  selectedLayerId: string;
+  layerOptions: EuiSelectOption[];
+}
+
+export class Footer extends Component<Props, State> {
+  private _isMounted = false;
+  private _prevFeatures: TooltipFeature[] | null = null;
+  state: State = {
     filteredFeatures: this.props.features,
     pageNumber: DEFAULT_PAGE_NUMBER,
     selectedLayerId: ALL_LAYERS,
@@ -31,7 +50,6 @@ export class Footer extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._prevFeatures = null;
     this._loadUniqueLayers();
   }
 
@@ -50,7 +68,7 @@ export class Footer extends Component {
 
     this._prevFeatures = this.props.features;
 
-    const countByLayerId = new Map();
+    const countByLayerId = new Map<string, number>();
     for (let i = 0; i < this.props.features.length; i++) {
       let count = countByLayerId.get(this.props.features[i].layerId);
       if (!count) {
@@ -60,9 +78,12 @@ export class Footer extends Component {
       countByLayerId.set(this.props.features[i].layerId, count);
     }
 
-    const layers = [];
+    const layers: ILayer[] = [];
     countByLayerId.forEach((count, layerId) => {
-      layers.push(this.props.findLayerById(layerId));
+      const layer = this.props.findLayerById(layerId);
+      if (layer) {
+        layers.push(layer);
+      }
     });
     const layerNamePromises = layers.map((layer) => {
       return layer.getDisplayName();
@@ -88,12 +109,12 @@ export class Footer extends Component {
     }
   };
 
-  _onPageChange = (pageNumber) => {
+  _onPageChange = (pageNumber: number) => {
     this.setState({ pageNumber });
     this.props.setCurrentFeature(this.state.filteredFeatures[pageNumber]);
   };
 
-  _onLayerChange = (e) => {
+  _onLayerChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newLayerId = e.target.value;
     if (this.state.selectedLayerId === newLayerId) {
       return;

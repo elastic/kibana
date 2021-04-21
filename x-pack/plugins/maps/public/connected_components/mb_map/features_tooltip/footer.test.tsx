@@ -8,23 +8,19 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Footer } from './footer';
-
-class MockLayer {
-  constructor(id) {
-    this._id = id;
-  }
-  async getDisplayName() {
-    return `display + ${this._id}`;
-  }
-  getId() {
-    return this._id;
-  }
-}
+import { ILayer } from '../../../classes/layers/layer';
 
 const defaultProps = {
   isLocked: false,
-  findLayerById: (id) => {
-    return new MockLayer(id);
+  findLayerById: (id: string) => {
+    return ({
+      async getDisplayName() {
+        return `display + ${id}`;
+      },
+      getId() {
+        return id;
+      },
+    } as unknown) as ILayer;
   },
   setCurrentFeature: () => {},
 };
@@ -35,6 +31,7 @@ describe('Footer', () => {
       {
         id: 'feature1',
         layerId: 'layer1',
+        mbProperties: {},
       },
     ];
     describe('mouseover (unlocked)', () => {
@@ -56,10 +53,12 @@ describe('Footer', () => {
       {
         id: 'feature1',
         layerId: 'layer1',
+        mbProperties: {},
       },
       {
         id: 'feature2',
         layerId: 'layer1',
+        mbProperties: {},
       },
     ];
     describe('mouseover (unlocked)', () => {
@@ -97,14 +96,17 @@ describe('Footer', () => {
       {
         id: 'feature1',
         layerId: 'layer1',
+        mbProperties: {},
       },
       {
         id: 'feature2',
         layerId: 'layer1',
+        mbProperties: {},
       },
       {
         id: 'feature1',
         layerId: 'layer2',
+        mbProperties: {},
       },
     ];
     describe('mouseover (unlocked)', () => {

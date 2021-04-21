@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -15,11 +15,51 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { GeoJsonProperties } from 'geojson';
+import { Filter } from 'src/plugins/data/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
 import { isUrlDrilldown } from '../../../trigger_actions/trigger_utils';
+import { RawValue } from '../../../../common/constants';
+import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
 
-export class FeatureProperties extends React.Component {
-  state = {
+interface Props {
+  featureId: string;
+  layerId: string;
+  mbProperties: GeoJsonProperties;
+  loadFeatureProperties: ({
+    layerId,
+    featureId,
+    mbProperties,
+  }: {
+    layerId: string;
+    featureId: string;
+    mbProperties: GeoJsonProperties;
+  }) => Promise<ITooltipProperty[]>;
+  showFilterButtons: boolean;
+  onCloseTooltip: () => void;
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  showFilterActions: (view: ReactNode) => void;
+}
+
+interface State {
+  properties: ITooltipProperty[] | null;
+  actions: Action[];
+  loadPropertiesErrorMsg: string | null;
+  prevWidth: number | null;
+  prevHeight: number | null;
+}
+
+export class FeatureProperties extends Component<Props, State> {
+  private _isMounted = false;
+  private _prevLayerId: string = '';
+  private _prevFeatureId: string = '';
+  private readonly _tableRef: RefObject<HTMLTableElement> = React.createRef();
+
+  state: State = {
     properties: null,
     actions: [],
     loadPropertiesErrorMsg: null,
@@ -29,8 +69,6 @@ export class FeatureProperties extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.prevLayerId = undefined;
-    this.prevFeatureId = undefined;
     this._loadProperties();
     this._loadActions();
   }
@@ -61,28 +99,39 @@ export class FeatureProperties extends React.Component {
     });
   };
 
-  _showFilterActions = (tooltipProperty) => {
-    this.props.showFilterActions(this._renderFilterActions(tooltipProperty));
+  _showFilterActions = (
+    tooltipProperty: ITooltipProperty,
+    getActionContext: () => ActionExecutionContext
+  ) => {
+    this.props.showFilterActions(this._renderFilterActions(tooltipProperty, getActionContext));
   };
 
-  _fetchProperties = async ({ nextLayerId, nextFeatureId, mbProperties }) => {
-    if (this.prevLayerId === nextLayerId && this.prevFeatureId === nextFeatureId) {
+  _fetchProperties = async ({
+    nextLayerId,
+    nextFeatureId,
+    mbProperties,
+  }: {
+    nextLayerId: string;
+    nextFeatureId: string;
+    mbProperties: GeoJsonProperties;
+  }) => {
+    if (this._prevLayerId === nextLayerId && this._prevFeatureId === nextFeatureId) {
       // do not reload same feature properties
       return;
     }
 
-    this.prevLayerId = nextLayerId;
-    this.prevFeatureId = nextFeatureId;
+    this._prevLayerId = nextLayerId;
+    this._prevFeatureId = nextFeatureId;
     this.setState({
-      properties: undefined,
-      loadPropertiesErrorMsg: undefined,
+      properties: null,
+      loadPropertiesErrorMsg: null,
     });
 
     // Preserve current properties width/height so they can be used while rendering loading indicator.
-    if (this.state.properties && this._node) {
+    if (this.state.properties && this._tableRef) {
       this.setState({
-        prevWidth: this._node.clientWidth,
-        prevHeight: this._node.clientHeight,
+        prevWidth: this._tableRef.clientWidth,
+        prevHeight: this._tableRef.clientHeight,
       });
     }
 
@@ -91,7 +140,7 @@ export class FeatureProperties extends React.Component {
       properties = await this.props.loadFeatureProperties({
         layerId: nextLayerId,
         featureId: nextFeatureId,
-        mbProperties: mbProperties,
+        mbProperties,
       });
     } catch (error) {
       if (this._isMounted) {
@@ -103,7 +152,7 @@ export class FeatureProperties extends React.Component {
       return;
     }
 
-    if (this.prevLayerId !== nextLayerId && this.prevFeatureId !== nextFeatureId) {
+    if (this._prevLayerId !== nextLayerId && this._prevFeatureId !== nextFeatureId) {
       // ignore results for old request
       return;
     }
@@ -113,7 +162,10 @@ export class FeatureProperties extends React.Component {
     }
   };
 
-  _renderFilterActions(tooltipProperty) {
+  _renderFilterActions(
+    tooltipProperty: ITooltipProperty,
+    getActionContext: () => ActionExecutionContext
+  ) {
     const panel = {
       id: 0,
       items: this.state.actions
@@ -124,7 +176,7 @@ export class FeatureProperties extends React.Component {
           return true;
         })
         .map((action) => {
-          const actionContext = this.props.getActionContext();
+          const actionContext = getActionContext();
           const iconType = action.getIconType(actionContext);
           const name = action.getDisplayName(actionContext);
           return {
@@ -134,14 +186,14 @@ export class FeatureProperties extends React.Component {
               this.props.onCloseTooltip();
 
               if (isUrlDrilldown(action)) {
-                this.props.onSingleValueTrigger(
+                this.props.onSingleValueTrigger!(
                   action.id,
                   tooltipProperty.getPropertyKey(),
                   tooltipProperty.getRawValue()
                 );
               } else {
                 const filters = await tooltipProperty.getESFilters();
-                this.props.addFilters(filters, action.id);
+                this.props.addFilters!(filters, action.id);
               }
             },
             ['data-test-subj']: `mapFilterActionButton__${name}`,
@@ -151,10 +203,7 @@ export class FeatureProperties extends React.Component {
 
     return (
       <div>
-        <table
-          className="eui-yScrollWithShadows mapFeatureTooltip_table"
-          ref={(node) => (this._node = node)}
-        >
+        <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
           <tbody>
             <tr>
               <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
@@ -168,7 +217,7 @@ export class FeatureProperties extends React.Component {
                  * Since these formatters produce raw HTML, this component needs to be able to render them as-is, relying
                  * on the field formatter to only produce safe HTML.
                  */
-                dangerouslySetInnerHTML={{ __html: tooltipProperty.getHtmlDisplayValue() }} //eslint-disable-line react/no-danger
+                dangerouslySetInnerHTML={{ __html: tooltipProperty.getHtmlDisplayValue() }} // eslint-disable-line react/no-danger
               />
             </tr>
           </tbody>
@@ -178,7 +227,7 @@ export class FeatureProperties extends React.Component {
     );
   }
 
-  _renderFilterCell(tooltipProperty) {
+  _renderFilterCell(tooltipProperty: ITooltipProperty) {
     if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
       return <td />;
     }
@@ -192,7 +241,7 @@ export class FeatureProperties extends React.Component {
         onClick={async () => {
           this.props.onCloseTooltip();
           const filters = await tooltipProperty.getESFilters();
-          this.props.addFilters(filters, ACTION_GLOBAL_APPLY_FILTER);
+          this.props.addFilters!(filters, ACTION_GLOBAL_APPLY_FILTER);
         }}
         aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
           defaultMessage: 'Filter on property',
@@ -203,7 +252,8 @@ export class FeatureProperties extends React.Component {
       </EuiButtonEmpty>
     );
 
-    return this.state.actions.length === 0 ||
+    return this.props.getActionContext === undefined ||
+      this.state.actions.length === 0 ||
       (this.state.actions.length === 1 &&
         this.state.actions[0].id === ACTION_GLOBAL_APPLY_FILTER) ? (
       <td>{applyFilterButton}</td>
@@ -217,7 +267,7 @@ export class FeatureProperties extends React.Component {
               defaultMessage: 'View filter actions',
             })}
             onClick={() => {
-              this._showFilterActions(tooltipProperty);
+              this._showFilterActions(tooltipProperty, this.props.getActionContext!);
             }}
             aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
               defaultMessage: 'View filter actions',
@@ -253,7 +303,7 @@ export class FeatureProperties extends React.Component {
       });
       // Use width/height of last viewed properties while displaying loading status
       // to avoid resizing component during loading phase and bouncing tooltip container around
-      const style = {};
+      const style: CSSProperties = {};
       if (this.state.prevWidth && this.state.prevHeight) {
         style.width = this.state.prevWidth;
         style.height = this.state.prevHeight;
@@ -279,7 +329,7 @@ export class FeatureProperties extends React.Component {
              * Since these formatters produce raw HTML, this component needs to be able to render them as-is, relying
              * on the field formatter to only produce safe HTML.
              */
-            dangerouslySetInnerHTML={{ __html: tooltipProperty.getHtmlDisplayValue() }} //eslint-disable-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: tooltipProperty.getHtmlDisplayValue() }} // eslint-disable-line react/no-danger
           />
           {this._renderFilterCell(tooltipProperty)}
         </tr>
@@ -287,10 +337,7 @@ export class FeatureProperties extends React.Component {
     });
 
     return (
-      <table
-        className="eui-yScrollWithShadows mapFeatureTooltip_table"
-        ref={(node) => (this._node = node)}
-      >
+      <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
         <tbody>{rows}</tbody>
       </table>
     );
