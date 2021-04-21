@@ -9,16 +9,16 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 import { SeriesFilter } from './columns/series_filter';
-import { Breakdowns } from './columns/breakdowns';
 import { DataSeries } from '../types';
 import { SeriesBuilder } from '../series_builder/series_builder';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { ChartOptions } from './columns/chart_options';
 import { SeriesActions } from './columns/series_actions';
+import { ChartEditOptions } from './chart_edit_options';
 
 export function SeriesEditor() {
   const { allSeries, firstSeriesId } = useUrlStorage();
@@ -44,7 +44,7 @@ export function SeriesEditor() {
               defaultMessage: 'Filters',
             }),
             field: 'defaultFilters',
-            width: '25%',
+            width: '15%',
             render: (defaultFilters: string[], series: DataSeries) => (
               <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
             ),
@@ -54,17 +54,10 @@ export function SeriesEditor() {
               defaultMessage: 'Breakdowns',
             }),
             field: 'breakdowns',
-            width: '15%',
+            width: '25%',
             render: (val: string[], item: DataSeries) => (
-              <Breakdowns seriesId={item.id} breakdowns={val} />
+              <ChartEditOptions seriesId={item.id} breakdowns={val} series={item} />
             ),
-          },
-          {
-            name: '',
-            align: 'center' as const,
-            width: '15%',
-            field: 'id',
-            render: (val: string, item: DataSeries) => <ChartOptions series={item} />,
           },
           {
             name: (
@@ -85,7 +78,7 @@ export function SeriesEditor() {
               defaultMessage: 'Actions',
             }),
             align: 'center' as const,
-            width: '8%',
+            width: '10%',
             field: 'id',
             render: (val: string, item: DataSeries) => <SeriesActions seriesId={item.id} />,
           },
@@ -115,22 +108,27 @@ export function SeriesEditor() {
   return (
     <>
       <EuiSpacer />
-      <EuiBasicTable
-        items={items}
-        rowHeader="firstName"
-        columns={columns}
-        rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
-        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-          defaultMessage: 'No series found, please add a series.',
-        })}
-        cellProps={{
-          style: {
-            verticalAlign: 'top',
-          },
-        }}
-      />
+      <Wrapper>
+        <EuiBasicTable
+          items={items}
+          rowHeader="firstName"
+          columns={columns}
+          rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
+          noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
+            defaultMessage: 'No series found, please add a series.',
+          })}
+          cellProps={{
+            style: {
+              verticalAlign: 'top',
+            },
+          }}
+          tableLayout="auto"
+        />
+      </Wrapper>
       <EuiSpacer />
       <SeriesBuilder />
     </>
   );
 }
+
+const Wrapper = styled.div``;

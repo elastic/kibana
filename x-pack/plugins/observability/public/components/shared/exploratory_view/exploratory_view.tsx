@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
+import styled from 'styled-components';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -49,7 +50,7 @@ export function ExploratoryView() {
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
   return (
-    <EuiPanel style={{ maxWidth: 1800, minWidth: 800, margin: '0 auto' }}>
+    <Wrapper>
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
@@ -75,6 +76,13 @@ export function ExploratoryView() {
           </h2>
         </EuiTitle>
       )}
-    </EuiPanel>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled(EuiPanel)`
+  max-width: 1800px;
+  min-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+`;
