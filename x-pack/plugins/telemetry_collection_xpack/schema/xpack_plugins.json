@@ -4877,9 +4877,6 @@
                   },
                   "timing_stats": {
                     "properties": {
-                      "average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
                       "bucket_count": {
                         "type": "long"
                       },
