@@ -40,7 +40,7 @@ export async function getFileUploadComponent(): Promise<
 export async function getIndexNameFormComponent(): Promise<
   React.ComponentType<IndexNameFormProps>
 > {
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   return fileUploadModules.IndexNameForm;
 }
 
