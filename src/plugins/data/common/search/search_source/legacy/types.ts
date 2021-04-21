@@ -27,9 +27,3 @@ export interface MsearchRequestBody {
 export interface MsearchResponse {
   body: ApiResponse<{ responses: Array<estypes.SearchResponse<any>> }>;
 }
-
-// @internal
-export type CallMsearchFn = (params: {
-  body: MsearchRequestBody;
-  signal: AbortSignal;
-}) => Promise<MsearchResponse>;
