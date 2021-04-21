@@ -1,13 +1,15 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-utility-types"
-PKG_REQUIRE_NAME = "@kbn/utility-types"
+PKG_BASE_NAME = "kbn-std"
+PKG_REQUIRE_NAME = "@kbn/std"
 
-SOURCE_FILES = glob([
-  "jest/index.ts",
-  "index.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+  ],
+  exclude = ["**/*.test.*"],
+)
 
 SRCS = SOURCE_FILES
 
@@ -17,18 +19,22 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "package.json",
-  "README.md",
+  "README.md"
 ]
 
 SRC_DEPS = [
-  "@npm//utility-types",
+  "//packages/kbn-utility-types",
+  "@npm//lodash",
+  "@npm//query-string",
+  "@npm//rxjs",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@types/lodash",
+  "@npm//@types/node",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
@@ -51,7 +57,7 @@ ts_project(
   incremental = True,
   out_dir = "target",
   source_map = True,
-  root_dir = ".",
+  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
@@ -59,7 +65,7 @@ js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = [":tsc"] + DEPS,
-  package_name = "@kbn/utility-types",
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
