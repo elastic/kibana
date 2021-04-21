@@ -10,7 +10,6 @@
     "kbn:bootstrap": "yarn build --dev"
   },
   "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/babel-preset": "link:../kbn-babel-preset"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

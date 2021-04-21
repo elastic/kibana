@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { estypes } from '@elastic/elasticsearch';
 import { useEffect, useMemo } from 'react';
 
 import {
@@ -18,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import type { estypes } from '@elastic/elasticsearch';
 import {
   IndexPattern,
   IFieldType,

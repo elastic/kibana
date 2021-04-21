@@ -40,6 +40,7 @@ describe('UXSection', () => {
         http: { basePath: { prepend: jest.fn() } },
       } as unknown) as CoreStart,
       appMountParameters: {} as AppMountParameters,
+      config: { unsafe: { alertingExperience: { enabled: true } } },
       plugins: ({
         data: {
           query: {
