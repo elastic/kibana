@@ -57,6 +57,7 @@ import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
+import { getXDomain, XyEndzones } from './x_domain';
 
 declare global {
   interface Window {
@@ -181,6 +182,13 @@ export const xyChart: ExpressionFunctionDefinition<
       options: ['LINEAR', 'CURVE_MONOTONE_X'],
       help: i18n.translate('xpack.lens.xyChart.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
+    hideEndzones: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
+        defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
   },
@@ -330,9 +338,17 @@ export function XYChart({
   renderMode,
   syncColors,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
+  const {
+    legend,
+    layers,
+    fittingFunction,
+    gridlinesVisibilitySettings,
+    valueLabels,
+    hideEndzones,
+  } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
   if (filteredLayers.length === 0) {
@@ -387,15 +403,13 @@ export function XYChart({
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval,
-      }
-    : isHistogramViz
-    ? { minInterval }
-    : undefined;
+  const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    layers,
+    data,
+    minInterval,
+    Boolean(isTimeViz),
+    Boolean(isHistogramViz)
+  );
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -601,6 +615,22 @@ export function XYChart({
           style={getYAxesStyle(axis.groupId)}
         />
       ))}
+
+      {!hideEndzones && (
+        <XyEndzones
+          baseDomain={rawXDomain}
+          extendedDomain={xDomain}
+          darkMode={darkMode}
+          histogramMode={filteredLayers.every(
+            (layer) =>
+              layer.isHistogram &&
+              (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
+              (layer.seriesType.includes('stacked') ||
+                !layer.seriesType.includes('bar') ||
+                !chartHasMoreThanOneBarSeries)
+          )}
+        />
+      )}
 
       {filteredLayers.flatMap((layer, layerIndex) =>
         layer.accessors.map((accessor, accessorIndex) => {

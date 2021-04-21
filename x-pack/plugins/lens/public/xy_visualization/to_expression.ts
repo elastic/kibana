@@ -198,6 +198,7 @@ export const buildExpression = (
             },
           ],
           valueLabels: [state?.valueLabels || 'hide'],
+          hideEndzones: [state?.hideEndzones || false],
           layers: validLayers.map((layer) => {
             const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 
