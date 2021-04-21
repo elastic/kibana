@@ -31,8 +31,8 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../vis_type_timelion/common/chain.peg';
+import PEG from 'peggy';
+import grammar from 'raw-loader!../../../vis_type_timelion/common/chain.peggy';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,

@@ -8,7 +8,7 @@
 
 module.exports = {
   kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
+    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peggy',
     dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
     options: {
       allowedStartRules: ['start', 'Literal'],
@@ -16,7 +16,7 @@ module.exports = {
     },
   },
   timelion_chain: {
-    src: 'src/plugins/vis_type_timelion/common/chain.peg',
+    src: 'src/plugins/vis_type_timelion/common/chain.peggy',
     dest: 'src/plugins/vis_type_timelion/common/_generated_/chain.js',
   },
 };

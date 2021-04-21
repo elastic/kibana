@@ -5438,11 +5438,6 @@
     "@types/node" "*"
     "@types/pdfkit" "*"
 
-"@types/pegjs@^0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@types/pegjs/-/pegjs-0.10.1.tgz#9a2f3961dc62430fdb21061eb0ddbd890f9e3b94"
-  integrity sha512-ra8IchO9odGQmYKbm+94K58UyKCEKdZh9y0vxhG4pIpOJOBlC1C+ZtBVr6jLs+/oJ4pl+1p/4t3JtBA8J10Vvw==
-
 "@types/pngjs@^3.4.0":
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.4.2.tgz#8dc49b45fbcf18a5873179e3664f049388e39ecf"
@@ -21252,10 +21247,10 @@ pdfmake@^0.1.65:
     pdfkit "^0.11.0"
     svg-to-pdfkit "^0.1.8"
 
-pegjs@0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
-  integrity sha1-z4uvrm7d/0tafvsYUmnqr0YQ3b0=
+peggy@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/peggy/-/peggy-1.0.0.tgz#df6c7816c9df0ef35e071aaf96836cb866fe7eb4"
+  integrity sha512-lH12sxAXj4Aug+vH6IGoByIQOREIlhH+x4Uzb9kce6DD8wcGeidkC0JYEOwHormKrLt5BFLTbR4PuD/tiMOirQ==
 
 pegjs@~0.9.0:
   version "0.9.0"

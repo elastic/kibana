@@ -59,10 +59,10 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
 const escapeWhitespace = (val: string) =>
   val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 
-// See the SpecialCharacter rule in kuery.peg
+// See the SpecialCharacter rule in kuery.peggy
 const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
 
-// See the Keyword rule in kuery.peg
+// See the Keyword rule in kuery.peggy
 // I do not think that we need that anymore since we are doing a full match_phrase all the time now => return `"${escapeKuery(val)}"`;
 // const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 

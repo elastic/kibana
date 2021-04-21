@@ -1,7 +1,7 @@
 /*
 * Canvas syntax parser
 *
-* You MUST use PegJS to generate a .js file to use this.
+* You MUST use Peggy to generate a .js file to use this.
 * Yes, technically you can load this and build the parser in real time, but this makes it annoying
 * to share the grammar between the front end and back, so, you know, just generate the parser.
 * You shouldn't be futzing around in the grammar very often anyway.
