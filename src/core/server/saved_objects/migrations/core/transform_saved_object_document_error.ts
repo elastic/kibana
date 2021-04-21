@@ -15,7 +15,7 @@
  * - type: doc.type,
  * - id: doc.id,
  * The new error class helps with v2 migrations.
- * For backward compatibility with v1 migrations, the error message is the same as what was previouslt thrown as a plain error
+ * For backward compatibility with v1 migrations, the error message is the same as what was previously thrown as a plain error
  */
 
 // TINA TODO: create getters for retrieving the id, type and namespace to use in migrate_raw_doc for generating the serialized SO id
@@ -36,14 +36,5 @@ export class TransformSavedObjectDocumentError extends Error {
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     // Object.setPrototypeOf(this, TransformSavedObjectDocumentError.prototype);
-  }
-  public getId() {
-    return this.id;
-  }
-  public getNamespace() {
-    return this.namespace;
-  }
-  public getType() {
-    return this.type;
   }
 }

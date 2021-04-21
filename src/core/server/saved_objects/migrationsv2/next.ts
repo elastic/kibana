@@ -32,6 +32,7 @@ import type {
   CloneTempToSource,
   SetTempWriteBlock,
   WaitForYellowSourceState,
+  TransformedDocumentsBulkIndex,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -96,7 +97,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       transformRawDocs(state.outdatedDocuments),
-    TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: any) =>
+    TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: TransformedDocumentsBulkIndex) =>
       Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, state.transformedDocs),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),

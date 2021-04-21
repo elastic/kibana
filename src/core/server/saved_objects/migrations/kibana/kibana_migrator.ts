@@ -135,7 +135,6 @@ export class KibanaMigrator {
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
-      // TINA: this.runMigrationsInternal()'s return signature is going to change
       this.migrationResult = this.runMigrationsInternal().then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
@@ -187,9 +186,8 @@ export class KibanaMigrator {
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
                 migrateRawDocsNonThrowing(
                   this.serializer,
-                  this.documentMigrator.migrateAndConvert, // TINA: used in both v1 and v2 migrations, limiting how much we can refactor this method
-                  rawDocs,
-                  new MigrationLogger(this.log)
+                  this.documentMigrator.migrateAndConvert,
+                  rawDocs
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,

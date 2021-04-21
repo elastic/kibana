@@ -603,8 +603,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // If documents couldn't be transformed or there were transformation errors we fail the migration
           const corruptDocumentIdReason =
             stateP.corruptDocumentIds.length > 0
-              ? `The following corrupt saved object documents: ${JSON.stringify(
-                  stateP.corruptDocumentIds
+              ? `The following corrupt saved object documents: ${stateP.corruptDocumentIds.join(
+                  ','
                 )}`
               : '';
           // we have both the saved object Id and the stack trace in each `transformErrors` item.

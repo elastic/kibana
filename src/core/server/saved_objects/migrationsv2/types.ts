@@ -213,7 +213,6 @@ export type OutdatedDocumentsTransform = PostInitState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
   readonly controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   readonly outdatedDocuments: SavedObjectsRawDoc[];
-  readonly errors?: Error[];
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
 };

@@ -58,7 +58,7 @@ describe('migrateRawDocs', () => {
     expect(transform).toHaveBeenNthCalledWith(1, obj1);
     expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
-  // we don't want to throw
+
   test('throws when encountering a corrupt saved object document', async () => {
     const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) => [
@@ -134,7 +134,6 @@ describe('migrateRawDocsNonThrowing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  // create an instance of a TransformSavedObjectDocumentError;
 
   test('converts raw docs to saved objects', async () => {
     let result: any;
@@ -147,8 +146,7 @@ describe('migrateRawDocsNonThrowing', () => {
       [
         { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
-      ],
-      createSavedObjectsMigrationLoggerMock()
+      ]
     );
     try {
       result = await task();
@@ -185,9 +183,9 @@ describe('migrateRawDocsNonThrowing', () => {
     expect(transform).toHaveBeenNthCalledWith(1, obj1);
     expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
+
   test('returns a `left` tag when encountering a corrupt saved object document', async () => {
     let result: any;
-    const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
@@ -197,8 +195,7 @@ describe('migrateRawDocsNonThrowing', () => {
       [
         { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
-      ],
-      logger
+      ]
     );
     try {
       result = await task();
@@ -221,8 +218,7 @@ describe('migrateRawDocsNonThrowing', () => {
     const task = migrateRawDocsNonThrowing(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
-      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
-      createSavedObjectsMigrationLoggerMock()
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }]
     );
     try {
       result = await task();
@@ -267,8 +263,7 @@ describe('migrateRawDocsNonThrowing', () => {
     const task = migrateRawDocsNonThrowing(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
-      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }], // this is the raw doc
-      createSavedObjectsMigrationLoggerMock()
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }] // this is the raw doc
     );
     try {
       result = await task();
