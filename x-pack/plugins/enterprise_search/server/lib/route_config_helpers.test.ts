@@ -20,7 +20,7 @@ const mockSchema = schema.object({});
 import { skipBodyValidation } from './route_config_helpers';
 
 describe('skipBodyValidation', () => {
-  it('adds body validation options to a route config, persisting previous properties like "path"', () => {
+  it('adds "options.body.parse" and "validate.body" properties to a route config', () => {
     expect(
       skipBodyValidation({
         path: '/example/path',
