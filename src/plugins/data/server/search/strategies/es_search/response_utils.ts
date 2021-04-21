@@ -7,7 +7,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ISearchOptions } from '../../../common';
+import { ISearchOptions } from '../../../../common';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is

@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { Observable } from 'rxjs';
@@ -10,35 +11,31 @@ import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/se
 import { catchError, first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { from } from 'rxjs';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
+  IAsyncSearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
   ISearchOptions,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-  SearchUsage,
-} from '../../../../../src/plugins/data/server';
-import {
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  searchUsageObserver,
-  shimAbortSignal,
-  shimHitsTotal,
-} from '../../../../../src/plugins/data/server';
-import type { IAsyncSearchOptions } from '../../common';
-import { pollSearch } from '../../common';
+} from '../../../../common';
+import { pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { ConfigSchema } from '../../config';
-import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
+import { SearchUsage, searchUsageObserver } from '../../collectors';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  getTotalLoaded,
+  shimAbortSignal,
+  shimHitsTotal,
+} from '../es_search';
 
 export const enhancedEsSearchStrategyProvider = (
-  config: ConfigSchema,
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
@@ -54,7 +51,7 @@ export const enhancedEsSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
   ) {
     const client = esClient.asCurrentUser.asyncSearch;
 
@@ -62,7 +59,11 @@ export const enhancedEsSearchStrategyProvider = (
       const params = id
         ? getDefaultAsyncGetParams(options)
         : {
-            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
+            ...(await getDefaultAsyncSubmitParams(
+              uiSettingsClient,
+              searchSessionsClient.getConfig(),
+              options
+            )),
             ...request.params,
           };
       const promise = id ? client.get({ ...params, id }) : client.submit(params);

@@ -9,12 +9,12 @@
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
-import type { ISearchStrategy } from '../types';
-import type { SearchUsage } from '../collectors';
+import type { ISearchStrategy } from '../../types';
+import type { SearchUsage } from '../../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
-import { searchUsageObserver } from '../collectors/usage';
-import { getKbnServerError, KbnServerError } from '../../../../kibana_utils/server';
+import { searchUsageObserver } from '../../collectors/usage';
+import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
