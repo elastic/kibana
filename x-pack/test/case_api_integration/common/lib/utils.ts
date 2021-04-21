@@ -42,6 +42,7 @@ import {
   CommentPatchRequest,
   CasesConfigurePatch,
   CasesStatusResponse,
+  CasesConfigurationsResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -571,13 +572,16 @@ export const deleteCases = async ({
   supertest,
   caseIDs,
   expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseIDs: string[];
   expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
 }) => {
   const { body } = await supertest
-    .delete(`${CASES_URL}`)
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
     // we need to json stringify here because just passing in the array of case IDs will cause a 400 with Kibana
     // not being able to parse the array correctly. The format ids=["1", "2"] seems to work, which stringify outputs.
     .query({ ids: JSON.stringify(caseIDs) })
@@ -692,15 +696,22 @@ export const updateComment = async (
   return res;
 };
 
-export const getConfiguration = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null }
-): Promise<CasesConfigureResponse> => {
+export const getConfiguration = async ({
+  supertest,
+  query = { owner: 'securitySolutionFixture' },
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesConfigurationsResponse> => {
   const { body: configuration } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
+    .query(query)
     .send()
     .expect(expectedHttpCode);
 
@@ -756,11 +767,14 @@ export const getCaseConnectors = async (
 
 export const updateConfiguration = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
+  id: string,
   req: CasesConfigurePatch,
-  expectedHttpCode: number = 200
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CasesConfigureResponse> => {
   const { body: configuration } = await supertest
-    .patch(CASE_CONFIGURE_URL)
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}/${id}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(req)
     .expect(expectedHttpCode);

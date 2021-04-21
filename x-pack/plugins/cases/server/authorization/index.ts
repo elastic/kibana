@@ -68,9 +68,17 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [WriteOperations.CreateConfiguration]: {
     type: EventType.CREATION,
-    name: WriteOperations.CreateCase,
+    name: WriteOperations.CreateConfiguration,
     action: 'create-configuration',
     verbs: createVerbs,
+    docType: 'case-configuration',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateConfiguration]: {
+    type: EventType.CHANGE,
+    name: WriteOperations.UpdateConfiguration,
+    action: 'update-configuration',
+    verbs: updateVerbs,
     docType: 'case-configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
@@ -105,5 +113,13 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindConfigurations]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.FindConfigurations,
+    action: 'find-configurations',
+    verbs: accessVerbs,
+    docType: 'case-configuration',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
 };

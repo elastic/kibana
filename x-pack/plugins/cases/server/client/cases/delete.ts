@@ -11,6 +11,8 @@ import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CaseService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+import { Operations } from '../../authorization';
+import { createAuditMsg } from '../utils';
 
 async function deleteSubCases({
   attachmentService,
@@ -54,8 +56,24 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     user,
     userActionService,
     logger,
+    authorization: auth,
+    auditLogger,
   } = clientArgs;
   try {
+    const cases = await caseService.getCases({ soClient, caseIds: ids });
+    const owners = new Set<string>();
+
+    for (const theCase of cases.saved_objects) {
+      owners.add(theCase.attributes.owner);
+    }
+
+    try {
+      await auth.ensureAuthorized([...owners.values()], Operations.deleteCase);
+    } catch (error) {
+      auditLogger?.log(createAuditMsg({ operation: Operations.deleteCase, error }));
+      throw error;
+    }
+
     await Promise.all(
       ids.map((id) =>
         caseService.deleteCase({
@@ -64,6 +82,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
         })
       )
     );
+
     const comments = await Promise.all(
       ids.map((id) =>
         caseService.getAllCaseComments({
@@ -113,6 +132,9 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'status',
             'tags',
             'title',
+            'connector',
+            'settings',
+            'owner',
             ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
           ],
         })

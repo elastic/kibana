@@ -142,10 +142,16 @@ export const buildFilter = ({
 
 export const combineAuthorizedAndOwnerFilter = (
   owner?: string[] | string,
-  authorizationFilter?: KueryNode
+  authorizationFilter?: KueryNode,
+  savedObjectType?: string
 ): KueryNode | undefined => {
   const filters = Array.isArray(owner) ? owner : owner != null ? [owner] : [];
-  const ownerFilter = buildFilter({ filters, field: 'owner', operator: 'or' });
+  const ownerFilter = buildFilter({
+    filters,
+    field: 'owner',
+    operator: 'or',
+    type: savedObjectType,
+  });
 
   return authorizationFilter != null && ownerFilter != null
     ? combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter)

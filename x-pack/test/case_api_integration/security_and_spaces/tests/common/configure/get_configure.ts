@@ -60,16 +60,35 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // TODO: Decide what to do with no configuration (no owner)
-    it.skip('should return an empty find body correctly if no configuration is loaded', async () => {
-      const configuration = await getConfiguration(supertest);
-      expect(configuration).to.eql({});
+    it('should return an empty find body correctly if no configuration is loaded', async () => {
+      const configuration = await getConfiguration({ supertest });
+      expect(configuration).to.eql([]);
     });
 
     it('should return a configuration', async () => {
       await createConfiguration(supertest);
-      const configuration = await getConfiguration(supertest);
+      const configuration = await getConfiguration({ supertest });
 
-      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
+      expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should get a single configuration', async () => {
+      await createConfiguration(supertest, getConfigurationRequest({ id: 'connector-2' }));
+      await createConfiguration(supertest);
+      const res = await getConfiguration({ supertest });
+
+      expect(res.length).to.eql(1);
+      const data = removeServerGeneratedPropertiesFromSavedObject(res[0]);
+      expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should return by descending order', async () => {
+      await createConfiguration(supertest, getConfigurationRequest({ id: 'connector-2' }));
+      await createConfiguration(supertest);
+      const res = await getConfiguration({ supertest });
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(res[0]);
       expect(data).to.eql(getConfigurationOutput());
     });
 
@@ -90,8 +109,8 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       );
 
-      const configuration = await getConfiguration(supertest);
-      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      const configuration = await getConfiguration({ supertest });
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
       expect(data).to.eql(
         getConfigurationOutput(false, {
           mappings: [
@@ -128,28 +147,136 @@ export default ({ getService }: FtrProviderContext): void => {
           space: 'space1',
         });
 
-        for (const user of [globalRead, superUser, secOnlyRead, secOnly, obsSecRead, obsSec]) {
-          const configuration = await getConfiguration(supertestWithoutAuth, 200, {
-            user,
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+          200,
+          {
+            user: obsOnly,
             space: 'space1',
+          }
+        );
+
+        for (const scenario of [
+          {
+            user: globalRead,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          {
+            user: superUser,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          { user: secOnlyRead, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
+          { user: obsOnlyRead, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
+          {
+            user: obsSecRead,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+        ]) {
+          const configuration = await getConfiguration({
+            supertest: supertestWithoutAuth,
+            query: { owner: scenario.owners },
+            expectedHttpCode: 200,
+            auth: {
+              user: scenario.user,
+              space: 'space1',
+            },
           });
 
-          ensureSavedObjectIsAuthorized([configuration], 1, ['securitySolutionFixture']);
+          ensureSavedObjectIsAuthorized(
+            configuration,
+            scenario.numberOfExpectedCases,
+            scenario.owners
+          );
         }
       });
 
-      it('should NOT read a configuration', async () => {
-        await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
-          user: secOnly,
-          space: 'space1',
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should NOT read a case`, async () => {
+          // super user creates a configuration at the appropriate space
+          await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+            user: superUser,
+            space: scenario.space,
+          });
+
+          // user should not be able to read configurations at the appropriate space
+          await getConfiguration({
+            supertest: supertestWithoutAuth,
+            expectedHttpCode: 403,
+            auth: {
+              user: scenario.user,
+              space: scenario.space,
+            },
+          });
+        });
+      }
+
+      it('should respect the owner filter when having permissions', async () => {
+        await Promise.all([
+          await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+            user: obsSec,
+            space: 'space1',
+          }),
+          await createConfiguration(
+            supertestWithoutAuth,
+            { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
+        ]);
+
+        const res = await getConfiguration({
+          supertest: supertestWithoutAuth,
+          query: { owner: 'securitySolutionFixture' },
+          auth: {
+            user: obsSec,
+            space: 'space1',
+          },
         });
 
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
-          await getConfiguration(supertestWithoutAuth, 403, {
-            user,
+        ensureSavedObjectIsAuthorized(res, 1, ['securitySolutionFixture']);
+      });
+
+      it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
+        await Promise.all([
+          await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+            user: obsSec,
             space: 'space1',
-          });
-        }
+          }),
+          await createConfiguration(
+            supertestWithoutAuth,
+            { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
+        ]);
+
+        // User with permissions only to security solution request cases from observability
+        const res = await getConfiguration({
+          supertest: supertestWithoutAuth,
+          query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
+          auth: {
+            user: secOnly,
+            space: 'space1',
+          },
+        });
+
+        // Only security solution cases are being returned
+        ensureSavedObjectIsAuthorized(res, 1, ['securitySolutionFixture']);
       });
     });
   });

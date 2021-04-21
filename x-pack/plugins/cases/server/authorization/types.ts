@@ -31,6 +31,7 @@ export enum ReadOperations {
   FindCases = 'findCases',
   GetTags = 'getTags',
   GetReporters = 'getReporters',
+  FindConfigurations = 'findConfigurations',
 }
 
 // TODO: comments
@@ -39,6 +40,7 @@ export enum WriteOperations {
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
   CreateConfiguration = 'createConfiguration',
+  UpdateConfiguration = 'updateConfiguration',
 }
 
 /**

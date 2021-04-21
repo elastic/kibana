@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 import {
   getConfigurationRequest,
@@ -15,7 +20,10 @@ import {
   getConfigurationOutput,
   deleteConfiguration,
   createConfiguration,
+  createConnector,
+  getServiceNowConnector,
   getConfiguration,
+  ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/utils';
 
 import {
@@ -25,6 +33,7 @@ import {
   noKibanaPrivileges,
   globalRead,
   obsSecRead,
+  superUser,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,10 +41,21 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('post_configure', () => {
+    const actionsRemover = new ActionsRemover(supertest);
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
+
     afterEach(async () => {
       await deleteConfiguration(es);
+      await actionsRemover.removeAll();
     });
 
     it('should create a configuration', async () => {
@@ -48,10 +68,70 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should keep only the latest configuration', async () => {
       await createConfiguration(supertest, getConfigurationRequest({ id: 'connector-2' }));
       await createConfiguration(supertest);
-      const configuration = await getConfiguration(supertest);
+      const configuration = await getConfiguration({ supertest });
 
-      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
-      expect(data).to.eql(getConfigurationOutput());
+      expect(configuration.length).to.be(1);
+    });
+
+    it('should create a configuration with mapping', async () => {
+      const connector = await createConnector(supertest, {
+        ...getServiceNowConnector(),
+        config: { apiUrl: servicenowSimulatorURL },
+      });
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: connector.id,
+          name: connector.name,
+          type: connector.connector_type_id as ConnectorTypes,
+        })
+      );
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(postRes);
+      expect(data).to.eql(
+        getConfigurationOutput(false, {
+          mappings: [
+            {
+              action_type: 'overwrite',
+              source: 'title',
+              target: 'short_description',
+            },
+            {
+              action_type: 'overwrite',
+              source: 'description',
+              target: 'description',
+            },
+            {
+              action_type: 'append',
+              source: 'comments',
+              target: 'work_notes',
+            },
+          ],
+          connector: {
+            id: connector.id,
+            name: connector.name,
+            type: connector.connector_type_id,
+            fields: null,
+          },
+        })
+      );
+    });
+
+    it('should return an error when failing to get mapping', async () => {
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'not-exists',
+          name: 'not-exists',
+          type: ConnectorTypes.jira,
+        })
+      );
+
+      expect(postRes.error).to.not.be(null);
+      expect(postRes.mappings).to.eql([]);
     });
 
     it('should not create a configuration when missing connector.id', async () => {
@@ -134,7 +214,18 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('should not create a configuration when when fields are not null', async () => {
+    it('should not create a configuration when missing connector', async () => {
+      await createConfiguration(
+        supertest,
+        // @ts-expect-error
+        {
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when fields are not null', async () => {
       await createConfiguration(
         supertest,
         {
@@ -218,6 +309,50 @@ export default ({ getService }: FtrProviderContext): void => {
             space: 'space2',
           }
         );
+      });
+
+      it('it deletes the correct configurations', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        /**
+         * This API call should not delete the previously created configuration
+         * as it belongs to a different owner
+         */
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        const configuration = await getConfiguration({
+          supertest: supertestWithoutAuth,
+          query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
+          auth: {
+            user: superUser,
+            space: 'space1',
+          },
+        });
+
+        /**
+         * This ensures that both configuration are returned as expected
+         * and neither of has been deleted
+         */
+        ensureSavedObjectIsAuthorized(configuration, 2, [
+          'securitySolutionFixture',
+          'observabilityFixture',
+        ]);
       });
     });
   });

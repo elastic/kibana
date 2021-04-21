@@ -32,6 +32,7 @@ export const SAVED_OBJECT_TYPES = [
 export const CASES_URL = '/api/cases';
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}`;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure`;
+export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration_id}`;
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
 
 export const SUB_CASES_PATCH_DEL_URL = `${CASES_URL}/sub_cases`;
