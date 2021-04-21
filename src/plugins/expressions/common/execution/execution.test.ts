@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { first, scan } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
@@ -46,7 +48,15 @@ const run = async (
   return await execution.result.pipe(first()).toPromise();
 };
 
+let testScheduler: TestScheduler;
+
 describe('Execution', () => {
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => {
+      return expect(actual).toStrictEqual(expected);
+    });
+  });
+
   test('can instantiate', () => {
     const execution = createExecution('foo bar=123');
     expect(execution.state.get().ast.chain[0].arguments.bar).toEqual([123]);
@@ -115,16 +125,102 @@ describe('Execution', () => {
     });
   });
 
-  test('casts input to correct type', async () => {
-    const execution = createExecution('add val=1');
+  describe('.input', () => {
+    test('casts input to correct type', async () => {
+      const execution = createExecution('add val=1');
 
-    // Below 1 is cast to { type: 'num', value: 1 }.
-    execution.start(1);
-    const result = await execution.result.pipe(first()).toPromise();
+      // Below 1 is cast to { type: 'num', value: 1 }.
+      execution.start(1);
+      const result = await execution.result.pipe(first()).toPromise();
 
-    expect(result).toEqual({
-      type: 'num',
-      value: 2,
+      expect(result).toEqual({
+        type: 'num',
+        value: 2,
+      });
+    });
+
+    test('supports promises on input', async () => {
+      const execution = createExecution('add val=1');
+
+      execution.start(Promise.resolve(1));
+      const result = await execution.result.pipe(first()).toPromise();
+
+      expect(result).toEqual({
+        type: 'num',
+        value: 2,
+      });
+    });
+
+    test('supports observables on input', async () => {
+      const execution = createExecution('add val=1');
+
+      execution.start(of(1));
+      const result = await execution.result.pipe(first()).toPromise();
+
+      expect(result).toEqual({
+        type: 'num',
+        value: 2,
+      });
+    });
+
+    test('handles observables on input', () => {
+      const execution = createExecution('add val=1');
+
+      testScheduler.run(({ cold, expectObservable }) => {
+        const input = cold('   -a--b-c-', { a: 1, b: 2, c: 3 });
+        const subscription = ' ---^---!';
+        const expected = '     ---ab-c-';
+
+        expectObservable(execution.start(input), subscription).toBe(expected, {
+          a: { type: 'num', value: 2 },
+          b: { type: 'num', value: 3 },
+          c: { type: 'num', value: 4 },
+        });
+      });
+    });
+
+    test('stops when input errors', () => {
+      const execution = createExecution('add val=1');
+
+      testScheduler.run(({ cold, expectObservable }) => {
+        const input = cold('-a-#-b-', { a: 1, b: 2 });
+        const expected = '  -a-#';
+
+        expectObservable(execution.start(input)).toBe(expected, {
+          a: { type: 'num', value: 2 },
+        });
+      });
+    });
+
+    test('does not complete when input completes', () => {
+      const execution = createExecution('add val=1');
+
+      testScheduler.run(({ cold, expectObservable }) => {
+        const input = cold('-a-b|', { a: 1, b: 2 });
+        const expected = '  -a-b-';
+
+        expectObservable(execution.start(input)).toBe(expected, {
+          a: { type: 'num', value: 2 },
+          b: { type: 'num', value: 3 },
+        });
+      });
+    });
+
+    test('handles partial results', () => {
+      const execution = createExecution('sum');
+
+      testScheduler.run(({ cold, expectObservable }) => {
+        const items = cold('   -a--b-c-', { a: 1, b: 2, c: 3 });
+        const subscription = ' ---^---!';
+        const expected = '     ---ab-c-';
+        const input = items.pipe(scan((result, value) => [...result, value], new Array<number>()));
+
+        expectObservable(execution.start(input), subscription).toBe(expected, {
+          a: { type: 'num', value: 1 },
+          b: { type: 'num', value: 3 },
+          c: { type: 'num', value: 6 },
+        });
+      });
     });
   });
 
@@ -275,6 +371,25 @@ describe('Execution', () => {
       await new Promise((r) => setTimeout(r, 11));
       expect(execution.state.get().result).toBe(null);
     });
+
+    test('handles functions returning observables', () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
+        const expected = '     -a-b-c-';
+        const observable: ExpressionFunctionDefinition<'observable', any, {}, any> = {
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        };
+        const executor = createUnitTestExecutor();
+        executor.registerFunction(observable);
+
+        const result = executor.run('observable', null, {});
+
+        expectObservable(result).toBe(expected, { a: 1, b: 2, c: 3 });
+      });
+    });
   });
 
   describe('when function throws', () => {
@@ -413,6 +528,138 @@ describe('Execution', () => {
       );
 
       expect(result).toBe(66);
+    });
+
+    test('supports observables in arguments', () => {
+      const observable = {
+        name: 'observable',
+        args: {},
+        help: '',
+        fn: () => of(1),
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(observable);
+
+      expect(
+        executor.run('add val={observable}', 1, {}).pipe(first()).toPromise()
+      ).resolves.toEqual({
+        type: 'num',
+        value: 2,
+      });
+    });
+
+    test('supports observables in arguments emitting multiple values', () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const arg = cold('-a-b-c-', { a: 1, b: 2, c: 3 });
+        const expected = '-a-b-c-';
+        const observable = {
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        };
+        const executor = createUnitTestExecutor();
+        executor.registerFunction(observable);
+
+        const result = executor.run('add val={observable}', 1, {});
+
+        expectObservable(result).toBe(expected, {
+          a: { type: 'num', value: 2 },
+          b: { type: 'num', value: 3 },
+          c: { type: 'num', value: 4 },
+        });
+      });
+    });
+
+    test('combines multiple observables in arguments', () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const arg1 = cold('--ab-c-', { a: 0, b: 2, c: 4 });
+        const arg2 = cold('-a--bc-', { a: 1, b: 3, c: 5 });
+        const expected = ' --abc(de)-';
+        const observable1 = {
+          name: 'observable1',
+          args: {},
+          help: '',
+          fn: () => arg1,
+        };
+        const observable2 = {
+          name: 'observable2',
+          args: {},
+          help: '',
+          fn: () => arg2,
+        };
+        const max: ExpressionFunctionDefinition<'max', any, { val1: number; val2: number }, any> = {
+          name: 'max',
+          args: {
+            val1: { help: '', types: ['number'] },
+            val2: { help: '', types: ['number'] },
+          },
+          help: '',
+          fn: (input, { val1, val2 }) => ({ type: 'num', value: Math.max(val1, val2) }),
+        };
+        const executor = createUnitTestExecutor();
+        executor.registerFunction(observable1);
+        executor.registerFunction(observable2);
+        executor.registerFunction(max);
+
+        const result = executor.run('max val1={observable1} val2={observable2}', {});
+
+        expectObservable(result).toBe(expected, {
+          a: { type: 'num', value: 1 },
+          b: { type: 'num', value: 2 },
+          c: { type: 'num', value: 3 },
+          d: { type: 'num', value: 4 },
+          e: { type: 'num', value: 5 },
+        });
+      });
+    });
+
+    test('does not complete when an argument completes', () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const arg = cold('-a|', { a: 1 });
+        const expected = '-a-';
+        const observable = {
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        };
+        const executor = createUnitTestExecutor();
+        executor.registerFunction(observable);
+
+        const result = executor.run('add val={observable}', 1, {});
+
+        expectObservable(result).toBe(expected, {
+          a: { type: 'num', value: 2 },
+        });
+      });
+    });
+
+    test('handles error in observable arguments', () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const arg = cold('-a-#', { a: 1 }, new Error('some error'));
+        const expected = '-a-b';
+        const observable = {
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        };
+        const executor = createUnitTestExecutor();
+        executor.registerFunction(observable);
+
+        const result = executor.run('add val={observable}', 1, {});
+
+        expectObservable(result).toBe(expected, {
+          a: { type: 'num', value: 2 },
+          b: {
+            error: expect.objectContaining({
+              message: '[add] > [observable] > some error',
+            }),
+            type: 'error',
+          },
+        });
+      });
     });
   });
 
