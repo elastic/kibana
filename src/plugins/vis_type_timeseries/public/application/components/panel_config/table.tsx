@@ -108,24 +108,20 @@ export class TablePanelConfig extends Component<
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem data-test-subj="groupByField">
-                  <EuiFormRow
-                    id={htmlId('field')}
+                  <FieldSelect
                     label={
                       <FormattedMessage
                         id="visTypeTimeseries.table.dataTab.groupByFieldLabel"
                         defaultMessage="Group by field"
                       />
                     }
-                  >
-                    <FieldSelect
-                      fields={this.props.fields}
-                      value={model.pivot_id}
-                      indexPattern={model.index_pattern}
-                      onChange={this.handlePivotChange}
-                      uiRestrictions={this.context.uiRestrictions}
-                      type={BUCKET_TYPES.TERMS}
-                    />
-                  </EuiFormRow>
+                    fields={this.props.fields}
+                    value={model.pivot_id}
+                    indexPattern={model.index_pattern}
+                    onChange={this.handlePivotChange}
+                    uiRestrictions={this.context.uiRestrictions}
+                    type={BUCKET_TYPES.TERMS}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow
@@ -220,6 +216,7 @@ export class TablePanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />

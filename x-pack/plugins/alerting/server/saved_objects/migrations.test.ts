@@ -252,10 +252,12 @@ describe('7.10.0 migrates with failure', () => {
     expect(migrationContext.log.error).toHaveBeenCalledWith(
       `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
       {
-        alertDocument: {
-          ...alert,
-          attributes: {
-            ...alert.attributes,
+        migrations: {
+          alertDocument: {
+            ...alert,
+            attributes: {
+              ...alert.attributes,
+            },
           },
         },
       }
@@ -696,6 +698,334 @@ describe('7.11.2', () => {
     });
 
     expect(migration7112(alert, migrationContext)).toEqual(alert);
+  });
+});
+
+describe('7.13.0', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+  test('security solution alerts get migrated and remove null values', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        author: ['Elastic'],
+        buildingBlockType: null,
+        description:
+          "This rule detects a known command and control pattern in network events. The FIN7 threat group is known to use this command and control technique, while maintaining persistence in their target's network.",
+        ruleId: '4a4e23cf-78a2-449c-bac3-701924c269d3',
+        index: ['packetbeat-*'],
+        falsePositives: [
+          "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
+        ],
+        from: 'now-6m',
+        immutable: true,
+        query:
+          'event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-zA-Z]{4,5}.(pw|us|club|info|site|top)/ AND NOT destination.domain:zoom.us',
+        language: 'lucene',
+        license: 'Elastic License',
+        outputIndex: '.siem-signals-rylandherrick_2-default',
+        savedId: null,
+        timelineId: null,
+        timelineTitle: null,
+        meta: null,
+        filters: null,
+        maxSignals: 100,
+        riskScore: 73,
+        riskScoreMapping: [],
+        ruleNameOverride: null,
+        severity: 'high',
+        severityMapping: null,
+        threat: null,
+        threatFilters: null,
+        timestampOverride: null,
+        to: 'now',
+        type: 'query',
+        references: [
+          'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
+        ],
+        note:
+          'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+        version: 1,
+        exceptionsList: null,
+        threshold: {
+          field: null,
+          value: 5,
+        },
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          author: ['Elastic'],
+          description:
+            "This rule detects a known command and control pattern in network events. The FIN7 threat group is known to use this command and control technique, while maintaining persistence in their target's network.",
+          ruleId: '4a4e23cf-78a2-449c-bac3-701924c269d3',
+          index: ['packetbeat-*'],
+          falsePositives: [
+            "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
+          ],
+          from: 'now-6m',
+          immutable: true,
+          query:
+            'event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-zA-Z]{4,5}.(pw|us|club|info|site|top)/ AND NOT destination.domain:zoom.us',
+          language: 'lucene',
+          license: 'Elastic License',
+          outputIndex: '.siem-signals-rylandherrick_2-default',
+          maxSignals: 100,
+          riskScore: 73,
+          riskScoreMapping: [],
+          severity: 'high',
+          severityMapping: [],
+          threat: [],
+          to: 'now',
+          type: 'query',
+          references: [
+            'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
+          ],
+          note:
+            'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+          version: 1,
+          exceptionsList: [],
+          threshold: {
+            field: [],
+            value: 5,
+            cardinality: [],
+          },
+        },
+      },
+    });
+  });
+
+  test('non-null values in security solution alerts are not modified', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        author: ['Elastic'],
+        buildingBlockType: 'default',
+        description:
+          "This rule detects a known command and control pattern in network events. The FIN7 threat group is known to use this command and control technique, while maintaining persistence in their target's network.",
+        ruleId: '4a4e23cf-78a2-449c-bac3-701924c269d3',
+        index: ['packetbeat-*'],
+        falsePositives: [
+          "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
+        ],
+        from: 'now-6m',
+        immutable: true,
+        query:
+          'event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-zA-Z]{4,5}.(pw|us|club|info|site|top)/ AND NOT destination.domain:zoom.us',
+        language: 'lucene',
+        license: 'Elastic License',
+        outputIndex: '.siem-signals-rylandherrick_2-default',
+        savedId: 'saved-id',
+        timelineId: 'timeline-id',
+        timelineTitle: 'timeline-title',
+        meta: {
+          field: 'value',
+        },
+        filters: ['filters'],
+        maxSignals: 100,
+        riskScore: 73,
+        riskScoreMapping: ['risk-score-mapping'],
+        ruleNameOverride: 'field.name',
+        severity: 'high',
+        severityMapping: ['severity-mapping'],
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0011',
+              name: 'Command and Control',
+              reference: 'https://attack.mitre.org/tactics/TA0011/',
+            },
+            technique: [
+              {
+                id: 'T1483',
+                name: 'Domain Generation Algorithms',
+                reference: 'https://attack.mitre.org/techniques/T1483/',
+              },
+            ],
+          },
+        ],
+        threatFilters: ['threat-filter'],
+        timestampOverride: 'event.ingested',
+        to: 'now',
+        type: 'query',
+        references: [
+          'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
+        ],
+        note:
+          'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+        version: 1,
+        exceptionsList: ['exceptions-list'],
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual(alert);
+  });
+
+  test('security solution threshold alert with string in threshold.field is migrated to array', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        threshold: {
+          field: 'host.id',
+          value: 5,
+        },
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          threshold: {
+            field: ['host.id'],
+            value: 5,
+            cardinality: [],
+          },
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
+
+  test('security solution threshold alert with empty string in threshold.field is migrated to empty array', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        threshold: {
+          field: '',
+          value: 5,
+        },
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          threshold: {
+            field: [],
+            value: 5,
+            cardinality: [],
+          },
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
+
+  test('security solution threshold alert with array in threshold.field and cardinality is left alone', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        threshold: {
+          field: ['host.id'],
+          value: 5,
+          cardinality: [
+            {
+              field: 'source.ip',
+              value: 10,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          threshold: {
+            field: ['host.id'],
+            value: 5,
+            cardinality: [
+              {
+                field: 'source.ip',
+                value: 10,
+              },
+            ],
+          },
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
+
+  test('security solution ML alert with string in machineLearningJobId is converted to an array', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        anomalyThreshold: 20,
+        machineLearningJobId: 'my_job_id',
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          anomalyThreshold: 20,
+          machineLearningJobId: ['my_job_id'],
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
+
+  test('security solution ML alert with an array in machineLearningJobId is preserved', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        anomalyThreshold: 20,
+        machineLearningJobId: ['my_job_id', 'my_other_job_id'],
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          anomalyThreshold: 20,
+          machineLearningJobId: ['my_job_id', 'my_other_job_id'],
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
   });
 });
 

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { DataSeries } from '../../types';
+import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
+export function getMonitorPingsConfig({ seriesId }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'uptime-pings',
@@ -21,16 +17,28 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'count',
-      label: 'Monitor pings',
-    },
-    hasMetricType: false,
-    defaultFilters: ['observer.geo.name'],
-    breakdowns: ['monitor.status', 'observer.geo.name', 'monitor.type'],
+    yAxisColumns: [
+      {
+        operationType: 'sum',
+        sourceField: 'summary.up',
+        label: 'Up',
+      },
+      {
+        operationType: 'sum',
+        sourceField: 'summary.down',
+        label: 'Down',
+      },
+    ],
+    yTitle: 'Pings',
+    hasOperationType: false,
+    defaultFilters: ['observer.geo.name', 'monitor.type', 'monitor.name', 'monitor.id'],
+    breakdowns: ['observer.geo.name', 'monitor.type'],
     filters: [],
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
+      {
+        field: 'monitor.name',
+      },
       {
         field: 'monitor.id',
       },

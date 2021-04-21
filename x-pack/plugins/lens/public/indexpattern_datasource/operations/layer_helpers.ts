@@ -714,7 +714,11 @@ function addBucket(
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+    columnOrder: getColumnOrder(tempLayer),
+  };
 }
 
 export function reorderByGroups(
@@ -766,7 +770,11 @@ function addMetric(
       [addedColumnId]: column,
     },
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columnOrder: getColumnOrder(tempLayer),
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+  };
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
@@ -929,9 +937,17 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
-    isColumnTransferable(column, newIndexPattern)
-  );
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) => {
+    if ('references' in column) {
+      return (
+        isColumnTransferable(column, newIndexPattern) &&
+        column.references.every((columnId) =>
+          isColumnTransferable(layer.columns[columnId], newIndexPattern)
+        )
+      );
+    }
+    return isColumnTransferable(column, newIndexPattern);
+  });
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer

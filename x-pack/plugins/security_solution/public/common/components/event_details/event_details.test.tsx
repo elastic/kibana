@@ -28,10 +28,11 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -76,13 +77,14 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
+        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
+            .containsMatchingElement(<span>{expectedCopy}</span>)
         ).toBeTruthy();
       });
     });

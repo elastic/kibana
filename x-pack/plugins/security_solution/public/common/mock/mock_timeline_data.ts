@@ -1088,6 +1088,30 @@ export const mockTimelineData: TimelineItem[] = [
       geo: { region_name: ['xx'], country_iso_code: ['xx'] },
     },
   },
+  {
+    _id: '32',
+    data: [],
+    ecs: {
+      _id: 'BuBP4W0BOpWiDweSoYSg',
+      timestamp: '2019-10-18T23:59:15.091Z',
+      threat: {
+        indicator: [
+          {
+            matched: {
+              atomic: ['192.168.1.1'],
+              field: ['source.ip'],
+              type: ['ip'],
+            },
+            event: {
+              dataset: ['threatintel.example_dataset'],
+              reference: ['https://example.com'],
+            },
+            provider: ['indicator_provider'],
+          },
+        ],
+      },
+    },
+  },
 ];
 
 export const mockFimFileCreatedEvent: Ecs = {

@@ -87,7 +87,7 @@ describe('CredentialsList', () => {
   });
 
   describe('empty state', () => {
-    it('renders an EuiEmptyState when no credentials are available', () => {
+    it('renders an EuiEmptyPrompt when no credentials are available', () => {
       setMockValues({
         ...values,
         apiTokens: [],
