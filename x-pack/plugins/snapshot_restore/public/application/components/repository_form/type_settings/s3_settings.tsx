@@ -340,7 +340,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           helpText={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeS3.bufferSizeHelpText"
-              defaultMessage="Accepts byte size units, for example: {example1}, {example2}, {example3}, {example4}. Defaults to the minimum between {defaultSize} and {defaultPercentage} of the heap size."
+              defaultMessage="Accepts byte size units, such as {example1}, {example2}, {example3}, or {example4}. Defaults to {defaultSize} or {defaultPercentage} of JVM heap, whichever is smaller."
               values={{
                 example1: <EuiCode>1g</EuiCode>,
                 example2: <EuiCode>10mb</EuiCode>,
