@@ -31,7 +31,7 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: false,
+      addLegend: !showElasticChartsOptions,
       legendPosition: Position.Right,
       nestedLegend: false,
       distinctColors: false,
