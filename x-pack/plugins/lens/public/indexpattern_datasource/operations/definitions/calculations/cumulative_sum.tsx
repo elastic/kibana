@@ -64,12 +64,17 @@ export const cumulativeSumOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined);
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
+    const ref = layer.columns[referenceIds[0]];
     let filter = previousColumn?.filter;
     if (columnParams) {
       if ('kql' in columnParams) {
@@ -78,9 +83,12 @@ export const cumulativeSumOperation: OperationDefinition<
         filter = { query: columnParams.lucene ?? '', language: 'lucene' };
       }
     }
-    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
+      label: ofName(
+        ref && 'sourceField' in ref
+          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+          : undefined
+      ),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,

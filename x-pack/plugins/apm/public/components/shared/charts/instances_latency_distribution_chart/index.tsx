@@ -9,27 +9,36 @@ import {
   Axis,
   BubbleSeries,
   Chart,
+  ElementClickListener,
+  GeometryValue,
   Position,
   ScaleType,
   Settings,
+  TooltipInfo,
+  TooltipProps,
+  TooltipType,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../../observability/public';
+import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import {
   asTransactionRate,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
+import { CustomTooltip } from './custom_tooltip';
 
-interface InstancesLatencyDistributionChartProps {
+export interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: PrimaryStatsServiceInstanceItem[];
+  items?: MainStatsServiceInstanceItem[];
   status: FETCH_STATUS;
 }
 
@@ -38,6 +47,7 @@ export function InstancesLatencyDistributionChart({
   items = [],
   status,
 }: InstancesLatencyDistributionChartProps) {
+  const history = useHistory();
   const hasData = items.length > 0;
 
   const theme = useTheme();
@@ -50,6 +60,43 @@ export function InstancesLatencyDistributionChart({
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
+
+  const tooltip: TooltipProps = {
+    type: TooltipType.Follow,
+    snap: false,
+    customTooltip: (props: TooltipInfo) => (
+      <CustomTooltip {...props} latencyFormatter={latencyFormatter} />
+    ),
+  };
+
+  /**
+   * Handle click events on the items.
+   *
+   * Due to how we handle filtering by using the kuery bar, it's difficult to
+   * modify existing queries. If you have an existing query in the bar, this will
+   * wipe it out. This is ok for now, since we probably will be replacing this
+   * interaction with something nicer in a future release.
+   *
+   * The event object has an array two items for each point, one of which has
+   * the serviceNodeName, so we flatten the list and get the items we need to
+   * form a query.
+   */
+  const handleElementClick: ElementClickListener = (event) => {
+    const serviceNodeNamesQuery = event
+      .flat()
+      .flatMap((value) => (value as GeometryValue).datum?.serviceNodeName)
+      .filter((serviceNodeName) => !!serviceNodeName)
+      .map((serviceNodeName) => `${SERVICE_NODE_NAME}:"${serviceNodeName}"`)
+      .join(' OR ');
+
+    urlHelpers.push(history, { query: { kuery: serviceNodeNamesQuery } });
+  };
+
+  // With a linear scale, if all the instances have similar throughput (or if
+  // there's just a single instance) they'll show along the origin. Make sure
+  // the x-axis domain is [0, maxThroughput].
+  const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
+  const xDomain = { min: 0, max: maxThroughput };
 
   return (
     <EuiPanel>
@@ -64,9 +111,11 @@ export function InstancesLatencyDistributionChart({
         <Chart id="instances-latency-distribution">
           <Settings
             legendPosition={Position.Bottom}
-            tooltip="none"
+            onElementClick={handleElementClick}
+            tooltip={tooltip}
             showLegend
             theme={chartTheme}
+            xDomain={xDomain}
           />
           <BubbleSeries
             color={theme.eui.euiColorVis1}

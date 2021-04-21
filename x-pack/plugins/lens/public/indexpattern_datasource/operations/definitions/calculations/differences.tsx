@@ -66,8 +66,7 @@ export const derivativeOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
@@ -83,10 +82,7 @@ export const derivativeOperation: OperationDefinition<
     }
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(
-        ref && 'sourceField' in ref ? ref.sourceField : undefined,
-        previousColumn?.timeScale
-      ),
+      label: ofName(ref?.label, previousColumn?.timeScale),
       dataType: 'number',
       operationType: OPERATION_NAME,
       isBucketed: false,

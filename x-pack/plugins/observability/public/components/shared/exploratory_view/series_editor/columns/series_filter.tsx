@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
-import { FieldLabels } from '../../configurations/constants';
+import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 
 interface Props {
   seriesId: string;
@@ -32,6 +32,7 @@ export interface Field {
   label: string;
   field: string;
   nested?: string;
+  isNegated?: boolean;
 }
 
 export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
@@ -39,11 +40,17 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
-  const options = defaultFilters.map((field) => {
+  const options: Field[] = defaultFilters.map((field) => {
     if (typeof field === 'string') {
       return { label: FieldLabels[field], field };
     }
-    return { label: FieldLabels[field.field], field: field.field, nested: field.nested };
+
+    return {
+      label: FieldLabels[field.field],
+      field: field.field,
+      nested: field.nested,
+      isNegated: field.isNegated,
+    };
   });
   const disabled = seriesId === NEW_SERIES_KEY && !isNew;
 
@@ -92,6 +99,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       field={selectedField.field}
       label={selectedField.label}
       nestedField={selectedField.nested}
+      isNegated={selectedField.isNegated}
       goBack={() => {
         setSelectedField(undefined);
       }}

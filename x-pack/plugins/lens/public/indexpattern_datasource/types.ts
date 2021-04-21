@@ -11,6 +11,7 @@ import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/pub
 import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
+  FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,
   IncompleteColumn,
@@ -86,6 +87,7 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }
 
 export interface IndexPatternRef {

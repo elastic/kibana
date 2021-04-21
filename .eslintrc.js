@@ -410,11 +410,7 @@ module.exports = {
                 errorMessage: `Common code can not import from server or public, use a common directory.`,
               },
               {
-                target: [
-                  'src/legacy/**/*',
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                ],
+                target: ['(src|x-pack)/plugins/**/(public|server)/**/*', 'examples/**/*'],
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
@@ -428,8 +424,6 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
-                  '!src/core/server/utils', // ts alias
-                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -442,7 +436,6 @@ module.exports = {
               },
               {
                 target: [
-                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
@@ -482,26 +475,13 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
+                from: ['plugins/**/*', 'src/plugins/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
-              },
-              {
-                from: ['src/legacy/ui/**/*', 'ui/**/*'],
-                target: [
-                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
-                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                ],
-                allowSameFolder: true,
-                errorMessage:
-                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
-                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
-                  'import those things once at the top level of your plugin and pass those down, just ' +
-                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },

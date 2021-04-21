@@ -1,0 +1,15 @@
+{
+  "id": "ruleRegistry",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "ruleRegistry"
+  ],
+  "requiredPlugins": [
+    "alerting",
+    "triggersActionsUi"
+  ],
+  "server": true,
+  "ui": true
+}

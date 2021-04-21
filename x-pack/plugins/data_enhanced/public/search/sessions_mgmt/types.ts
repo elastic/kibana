@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import {
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatus,
+} from '../../../../../../src/plugins/data/common';
 import { ACTION } from './components/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';

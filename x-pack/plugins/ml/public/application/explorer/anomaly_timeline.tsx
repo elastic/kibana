@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import { AddToDashboardControl } from './add_to_dashboard_control';
+import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
@@ -87,6 +87,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewByPerPage,
       swimlaneLimit,
       loading,
+      overallAnnotations,
     } = explorerState;
 
     const menuItems = useMemo(() => {
@@ -240,6 +241,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             isLoading={loading}
             noDataWarning={<NoOverallData />}
             showTimeline={false}
+            annotationsData={overallAnnotations.annotationsData}
           />
 
           <EuiSpacer size="m" />
@@ -257,6 +259,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
+              showLegend={false}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
@@ -294,7 +297,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           )}
         </EuiPanel>
         {isAddDashboardsActive && selectedJobs && (
-          <AddToDashboardControl
+          <AddSwimlaneToDashboardControl
             onClose={async (callback) => {
               setIsAddDashboardActive(false);
               if (callback) {

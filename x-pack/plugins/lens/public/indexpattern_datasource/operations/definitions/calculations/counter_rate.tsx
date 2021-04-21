@@ -66,12 +66,17 @@ export const counterRateOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined,
+      column.timeScale
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     let filter = previousColumn?.filter;
@@ -83,7 +88,12 @@ export const counterRateOperation: OperationDefinition<
       }
     }
     return {
-      label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
+      label: ofName(
+        metric && 'sourceField' in metric
+          ? indexPattern.getFieldByName(metric.sourceField)?.displayName
+          : undefined,
+        timeScale
+      ),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,

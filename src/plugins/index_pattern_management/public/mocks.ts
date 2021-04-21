@@ -69,6 +69,7 @@ const docLinks = {
   links: {
     indexPatterns: {},
     scriptedFields: {},
+    runtimeFields: {},
   } as any,
 };
 

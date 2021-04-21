@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     {
       level: 'critical',
       message:
-        'Kibana plugin funcitonal tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
+        'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
       correctiveActions: {},
       documentationUrl: 'config-secret-doc-url',
       domainId: 'corePluginDeprecations',
