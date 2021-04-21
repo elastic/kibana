@@ -42,8 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/97584
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
     });
