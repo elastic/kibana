@@ -28,6 +28,8 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
+  loadAlertData,
+  AlertData,
   loadAlertInstanceSummary,
   loadAlertTypes,
   alertingFrameworkHealth,
@@ -60,6 +62,7 @@ export interface ComponentOpts {
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
+  loadAlertData: (id: Alert['id']) => Promise<AlertData>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
 }
@@ -131,6 +134,7 @@ export function withBulkAlertOperations<T>(
         loadAlertInstanceSummary={async (alertId: Alert['id']) =>
           loadAlertInstanceSummary({ http, alertId })
         }
+        loadAlertData={async (alertId: Alert['id']) => loadAlertData({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
         getHealth={async () => alertingFrameworkHealth({ http })}
       />

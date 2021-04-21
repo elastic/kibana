@@ -9,8 +9,11 @@ import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { RegisterAlertTypesParams } from '..';
 import { createThresholdRuleType } from '../../types';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import {
+  STACK_ALERTS_FEATURE_ID,
+  ComparatorFns,
+  getHumanReadableComparator,
+} from '../../../common';
 import * as EsQuery from './alert_type';
 import {
   getSearchParams,

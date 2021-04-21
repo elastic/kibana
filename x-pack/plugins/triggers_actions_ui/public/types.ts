@@ -241,6 +241,7 @@ export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  formatter?: (opts: any) => string;
 }
 
 export interface IErrorObject {

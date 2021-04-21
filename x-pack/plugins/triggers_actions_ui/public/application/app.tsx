@@ -35,8 +35,6 @@ const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
-const AlertDataRoute = lazy(() => import('./sections/alert_details/components/alert_data_route'));
-
 export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
@@ -94,7 +92,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
       <Route
         exact
         path={routeToAlertData}
-        component={suspendedComponentWithProps(AlertDataRoute, 'xl')}
+        component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
       />
       <Route
         exact

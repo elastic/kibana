@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './config';
+export * from './render_rule_params';
+export { ComparatorFns, ComparatorFnNames, getHumanReadableComparator } from './comparator_types';
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';

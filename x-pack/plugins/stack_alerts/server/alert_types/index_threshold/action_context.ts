@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
 import { AlertInstanceContext } from '../../../../alerting/server';
+import { renderIndexThresholdParams } from '../../../common';
 
 // alert type context provided to actions
 
@@ -26,8 +27,6 @@ export interface BaseActionContext extends AlertInstanceContext {
   date: string;
   // the value that met the threshold
   value: number;
-  // threshold conditions
-  conditions: string;
 }
 
 export function addMessages(
@@ -43,21 +42,19 @@ export function addMessages(
     },
   });
 
-  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate(
     'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
     {
       defaultMessage: `alert '{name}' is active for group '{group}':
 
 - Value: {value}
-- Conditions Met: {conditions} over {window}
+- Conditions Met: {conditionsMet}
 - Timestamp: {date}`,
       values: {
         name: alertName,
         group: baseContext.group,
         value: baseContext.value,
-        conditions: baseContext.conditions,
-        window,
+        conditionsMet: renderIndexThresholdParams(params),
         date: baseContext.date,
       },
     }

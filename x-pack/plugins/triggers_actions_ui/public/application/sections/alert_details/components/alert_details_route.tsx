@@ -32,6 +32,7 @@ type AlertDetailsRouteProps = RouteComponentProps<{
 export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
     params: { ruleId },
+    path,
   },
   loadAlert,
   loadAlertTypes,
@@ -42,6 +43,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
     notifications: { toasts },
   } = useKibana().services;
 
+  const [showExperimentalAlertsAsData] = useState<boolean>(path.includes('/alerts'));
   const [alert, setAlert] = useState<Alert | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
@@ -63,6 +65,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
     <AlertDetails
       alert={alert}
       alertType={alertType}
+      showExperimentalAlertsAsData={showExperimentalAlertsAsData}
       actionTypes={actionTypes}
       requestRefresh={async () => requestRefresh(Date.now())}
     />

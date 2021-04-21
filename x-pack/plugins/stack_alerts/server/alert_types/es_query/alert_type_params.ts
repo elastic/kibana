@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames } from '../lib';
+import { ComparatorFnNames } from '../../../common';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { AlertTypeState } from '../../../../alerting/server';
 

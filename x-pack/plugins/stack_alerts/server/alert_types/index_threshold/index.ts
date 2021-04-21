@@ -9,9 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { RegisterAlertTypesParams } from '..';
 import { createThresholdRuleType } from '../../types';
 import * as IndexThreshold from './alert_type';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { STACK_ALERTS_FEATURE_ID, ComparatorFns } from '../../../common';
 import { ParamsSchema } from './alert_type_params';
-import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { TimeSeriesQuery } from '../../../../triggers_actions_ui/server';
 import { BaseActionContext, addMessages } from './action_context';
 
@@ -121,18 +120,10 @@ export function register(registerParams: RegisterAlertTypesParams) {
 
           if (!met) continue;
 
-          const agg = params.aggField
-            ? `${params.aggType}(${params.aggField})`
-            : `${params.aggType}`;
-          const humanFn = `${agg} is ${getHumanReadableComparator(
-            params.thresholdComparator
-          )} ${params.threshold.join(' and ')}`;
-
           const baseContext: BaseActionContext = {
             date,
             group: instanceId,
             value,
-            conditions: humanFn,
           };
           const actionContext = addMessages(rule.name, baseContext, params);
           writeRuleAlert({

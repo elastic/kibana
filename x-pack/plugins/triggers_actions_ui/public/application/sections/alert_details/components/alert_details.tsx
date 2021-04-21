@@ -38,9 +38,10 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { AlertDataRouteWithApi } from './experimental/alert_data_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
-import { routeToRuleDetails } from '../../../constants';
+import { routeToRuleDetails, routeToAlertData } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
@@ -48,6 +49,7 @@ import { alertReducer } from '../../alert_form/alert_reducer';
 type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
+  showExperimentalAlertsAsData: boolean;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
@@ -61,6 +63,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
   requestRefresh,
+  showExperimentalAlertsAsData,
 }) => {
   const history = useHistory();
   const {
@@ -109,7 +112,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
-    history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
+    const routeToUse = showExperimentalAlertsAsData ? routeToAlertData : routeToRuleDetails;
+    history.push(routeToUse.replace(`:ruleId`, alert.id));
   };
 
   const getAlertStatusErrorReasonText = () => {
@@ -186,6 +190,32 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
+            {showExperimentalAlertsAsData && (
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertDetails.experimentalDisclaimerTitle',
+                      {
+                        defaultMessage: 'Experimental',
+                      }
+                    )}
+                    color="warning"
+                    iconType="beaker"
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertDetails.experimentalDisclaimerText',
+                        {
+                          defaultMessage:
+                            'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts.',
+                        }
+                      )}
+                    </p>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
             <EuiFlexGroup wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
@@ -323,12 +353,21 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (
-                  <AlertInstancesRouteWithApi
-                    requestRefresh={requestRefresh}
-                    alert={alert}
-                    alertType={alertType}
-                    readOnly={!canSaveAlert}
-                  />
+                  showExperimentalAlertsAsData ? (
+                    <AlertDataRouteWithApi
+                      requestRefresh={requestRefresh}
+                      alert={alert}
+                      alertType={alertType}
+                      readOnly={!canSaveAlert}
+                    />
+                  ) : (
+                    <AlertInstancesRouteWithApi
+                      requestRefresh={requestRefresh}
+                      alert={alert}
+                      alertType={alertType}
+                      readOnly={!canSaveAlert}
+                    />
+                  )
                 ) : (
                   <Fragment>
                     <EuiSpacer />

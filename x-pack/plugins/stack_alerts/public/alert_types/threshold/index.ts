@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { renderIndexThresholdParams } from '../../../common';
 
 export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
   return {
@@ -21,6 +22,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
     documentationUrl: (docLinks) => docLinks.links.alerting.indexThreshold,
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
+    formatter: renderIndexThresholdParams,
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',
       {
