@@ -20,7 +20,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     });
 
     describe('', function () {
-      this.tags('ciGroup12');
+      this.tags('ciGroup8');
 
       loadTestFile(require.resolve('./ip'));
       loadTestFile(require.resolve('./ip_array'));

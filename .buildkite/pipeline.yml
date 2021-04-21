@@ -11,7 +11,7 @@ steps:
     label: 'Default CI Group %n'
     parallelism: 29
     agents:
-      queue: ci-group-4d
+      queue: ci-group-6d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
 
@@ -25,7 +25,7 @@ steps:
   - command: .buildkite/scripts/test/jest.sh
     label: 'Jest Tests'
     agents:
-      queue: ci-group
+      queue: bootstrap
     artifact_paths: target/junit/**/*.xml
 
   - command: .buildkite/scripts/test/jest_integration.sh

@@ -18,8 +18,9 @@ echo "--- Check File Casing"
 node scripts/check_file_casing --quiet
 
 
+# TODO this thing is loud
 echo "--- Check i18n"
-node scripts/i18n_check --ignore-missing
+node scripts/i18n_check --ignore-missing > /dev/null
 
 
 echo "--- Check Jest Configs"
