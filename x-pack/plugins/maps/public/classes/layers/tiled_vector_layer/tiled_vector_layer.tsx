@@ -103,9 +103,9 @@ export class TiledVectorLayer extends VectorLayer {
           : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
-      const urlTemplate = this._source.getMvtRefreshTokenParam()
+      const urlTemplate = newUrlTemplateAndMeta.refreshTokenParamName
         ? newUrlTemplateAndMeta.urlTemplate +
-          `&${this._source.getMvtRefreshTokenParam()}=${urlToken}`
+          `&${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`
         : newUrlTemplateAndMeta.urlTemplate;
       const urlTemplateAndMetaWithToken = {
         ...newUrlTemplateAndMeta,

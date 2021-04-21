@@ -16,9 +16,9 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
     urlTemplate: string;
     minSourceZoom: number;
     maxSourceZoom: number;
+    refreshTokenParamName?: string;
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;
   getLayerName(): string;
-  getMvtRefreshTokenParam(): string | null;
 }
