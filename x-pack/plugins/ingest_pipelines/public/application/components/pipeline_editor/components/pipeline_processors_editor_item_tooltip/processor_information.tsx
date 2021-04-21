@@ -24,7 +24,7 @@ export const ProcessorInformation: FunctionComponent<Props> = memo(({ processor 
     <EuiPanel>
       <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText size="m">
+          <EuiText>
             <strong>{label}</strong>
           </EuiText>
         </EuiFlexItem>
