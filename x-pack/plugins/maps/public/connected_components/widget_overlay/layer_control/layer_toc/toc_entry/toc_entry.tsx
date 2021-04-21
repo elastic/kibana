@@ -5,26 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
+import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
-import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
   EDIT_LAYER_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
+import { ILayer } from '../../../../../classes/layers/layer';
 
-function escapeLayerName(name) {
-  return name ? name.split(' ').join('_') : '';
+function escapeLayerName(name: string) {
+  return name.split(' ').join('_');
 }
 
-export class TOCEntry extends React.Component {
-  state = {
-    displayName: null,
+export interface ReduxStateProps {
+  isReadOnly: boolean;
+  zoom: number;
+  selectedLayer: ILayer | undefined;
+  hasDirtyStateSelector: boolean;
+  isLegendDetailsOpen: boolean;
+  isEditButtonDisabled: boolean;
+}
+
+export interface ReduxDispatchProps {
+  fitToBounds: (layerId: string) => void;
+  openLayerPanel: (layerId: string) => Promise<void>;
+  hideTOCDetails: (layerId: string) => void;
+  showTOCDetails: (layerId: string) => void;
+  toggleVisible: (layerId: string) => void;
+}
+
+export interface OwnProps {
+  layer: ILayer;
+  dragHandleProps?: DraggableProvidedDragHandleProps;
+  isDragging?: boolean;
+  isDraggingOver?: boolean;
+}
+
+type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
+
+interface State {
+  displayName: string;
+  hasLegendDetails: boolean;
+  shouldShowModal: boolean;
+  supportsFitToBounds: boolean;
+}
+
+export class TOCEntry extends Component<Props, State> {
+  private _isMounted = false;
+  state: State = {
+    displayName: '',
     hasLegendDetails: false,
     shouldShowModal: false,
     supportsFitToBounds: false,
@@ -72,13 +108,9 @@ export class TOCEntry extends React.Component {
   }
 
   async _updateDisplayName() {
-    const label = await this.props.layer.getDisplayName();
-    if (this._isMounted) {
-      if (label !== this.state.displayName) {
-        this.setState({
-          displayName: label,
-        });
-      }
+    const displayName = await this.props.layer.getDisplayName();
+    if (this._isMounted && displayName !== this.state.displayName) {
+      this.setState({ displayName });
     }
   }
 
@@ -141,6 +173,7 @@ export class TOCEntry extends React.Component {
   _renderQuickActions() {
     const quickActions = [
       <EuiButtonIcon
+        key="toggleVisiblity"
         iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
         title={getVisibilityToggleLabel(this.props.layer.isVisible())}
         aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
@@ -151,6 +184,7 @@ export class TOCEntry extends React.Component {
     if (this.state.supportsFitToBounds) {
       quickActions.push(
         <EuiButtonIcon
+          key="fitToBounds"
           iconType="expand"
           title={FIT_TO_DATA_LABEL}
           aria-label={FIT_TO_DATA_LABEL}
@@ -162,6 +196,7 @@ export class TOCEntry extends React.Component {
     if (!this.props.isReadOnly) {
       quickActions.push(
         <EuiButtonIcon
+          key="edit"
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
           aria-label={EDIT_LAYER_LABEL}
@@ -171,6 +206,7 @@ export class TOCEntry extends React.Component {
       );
       quickActions.push(
         <EuiButtonIcon
+          key="reorder"
           iconType="grab"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
