@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { ElasticsearchServiceSetup } from 'src/core/server';
-import { ReportingConfig, ReportingCore } from '../../';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { ElasticsearchClient } from 'src/core/server';
+import { ReportingCore } from '../../';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -19,31 +18,23 @@ import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
-
-  const callClusterStub = sinon.stub();
-  const mockElasticsearch = { legacy: { client: { callAsInternalUser: callClusterStub } } };
+  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
   beforeEach(async () => {
     const reportingConfig = {
       index: '.reporting-test',
       queue: { indexInterval: 'week' },
     };
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockCore = await createMockReportingCore(mockConfig);
+    mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+    mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
 
-    callClusterStub.reset();
-    callClusterStub.withArgs('indices.exists').resolves({});
-    callClusterStub.withArgs('indices.create').resolves({});
-    callClusterStub.withArgs('index').resolves({ _id: 'stub-id', _index: 'stub-index' });
-    callClusterStub.withArgs('indices.refresh').resolves({});
-    callClusterStub.withArgs('update').resolves({});
-    callClusterStub.withArgs('get').resolves({});
-
-    mockCore.getElasticsearchService = () =>
-      (mockElasticsearch as unknown) as ElasticsearchServiceSetup;
+    mockEsClient.indices.create.mockResolvedValue({} as any);
+    mockEsClient.indices.exists.mockResolvedValue({} as any);
+    mockEsClient.indices.refresh.mockResolvedValue({} as any);
+    mockEsClient.get.mockResolvedValue({} as any);
+    mockEsClient.index.mockResolvedValue({ body: { _id: 'stub-id', _index: 'stub-index' } } as any);
+    mockEsClient.update.mockResolvedValue({} as any);
   });
 
   describe('addReport', () => {
@@ -76,9 +67,7 @@ describe('ReportingStore', () => {
         index: '.reporting-test',
         queue: { indexInterval: 'centurially' },
       };
-      const mockSchema = createMockConfigSchema(reportingConfig);
-      mockConfig = createMockConfig(mockSchema);
-      mockCore = await createMockReportingCore(mockConfig);
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -88,14 +77,14 @@ describe('ReportingStore', () => {
         meta: {},
       } as any);
       expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
-        `[TypeError: this.client.callAsInternalUser is not a function]`
+        `[Error: Report object from ES has missing fields!]`
       );
     });
 
     it('handles error creating the index', async () => {
       // setup
-      callClusterStub.withArgs('indices.exists').resolves(false);
-      callClusterStub.withArgs('indices.create').rejects(new Error('horrible error'));
+      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.create.mockRejectedValue(new Error('horrible error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -117,8 +106,8 @@ describe('ReportingStore', () => {
      */
     it('ignores index creation error if the index already exists and continues adding the report', async () => {
       // setup
-      callClusterStub.withArgs('indices.exists').resolves(false);
-      callClusterStub.withArgs('indices.create').rejects(new Error('devastating error'));
+      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.create.mockRejectedValue(new Error('devastating error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -134,10 +123,9 @@ describe('ReportingStore', () => {
 
     it('skips creating the index if already exists', async () => {
       // setup
-      callClusterStub.withArgs('indices.exists').resolves(false);
-      callClusterStub
-        .withArgs('indices.create')
-        .rejects(new Error('resource_already_exists_exception')); // will be triggered but ignored
+      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      // will be triggered but ignored
+      mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -159,10 +147,9 @@ describe('ReportingStore', () => {
 
     it('allows username string to be `false`', async () => {
       // setup
-      callClusterStub.withArgs('indices.exists').resolves(false);
-      callClusterStub
-        .withArgs('indices.create')
-        .rejects(new Error('resource_already_exists_exception')); // will be triggered but ignored
+      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      // will be triggered but ignored
+      mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -192,8 +179,8 @@ describe('ReportingStore', () => {
     const mockReport: ReportDocument = {
       _id: '1234-foo-78',
       _index: '.reporting-test-17409',
-      _primary_term: 'primary_term string',
-      _seq_no: 'seq_no string',
+      _primary_term: 1234,
+      _seq_no: 5678,
       _source: {
         kibana_name: 'test',
         kibana_id: 'test123',
@@ -210,7 +197,7 @@ describe('ReportingStore', () => {
         output: null,
       },
     };
-    callClusterStub.withArgs('get').resolves(mockReport);
+    mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       ...mockReport,
@@ -221,8 +208,8 @@ describe('ReportingStore', () => {
       Report {
         "_id": "1234-foo-78",
         "_index": ".reporting-test-17409",
-        "_primary_term": "primary_term string",
-        "_seq_no": "seq_no string",
+        "_primary_term": 1234,
+        "_seq_no": 5678,
         "attempts": 0,
         "browser_type": "browser type string",
         "completed_at": undefined,
@@ -267,10 +254,9 @@ describe('ReportingStore', () => {
 
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
 
-    const updateCall = callClusterStub.getCalls().find((call) => call.args[0] === 'update');
-    expect(updateCall && updateCall.args).toMatchInlineSnapshot(`
+    const [updateCall] = mockEsClient.update.mock.calls;
+    expect(updateCall).toMatchInlineSnapshot(`
       Array [
-        "update",
         Object {
           "body": Object {
             "doc": Object {
@@ -308,10 +294,9 @@ describe('ReportingStore', () => {
 
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
-    const updateCall = callClusterStub.getCalls().find((call) => call.args[0] === 'update');
-    expect(updateCall && updateCall.args).toMatchInlineSnapshot(`
+    const [updateCall] = mockEsClient.update.mock.calls;
+    expect(updateCall).toMatchInlineSnapshot(`
       Array [
-        "update",
         Object {
           "body": Object {
             "doc": Object {
@@ -349,10 +334,9 @@ describe('ReportingStore', () => {
 
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
-    const updateCall = callClusterStub.getCalls().find((call) => call.args[0] === 'update');
-    expect(updateCall && updateCall.args).toMatchInlineSnapshot(`
+    const [updateCall] = mockEsClient.update.mock.calls;
+    expect(updateCall).toMatchInlineSnapshot(`
       Array [
-        "update",
         Object {
           "body": Object {
             "doc": Object {
@@ -395,10 +379,9 @@ describe('ReportingStore', () => {
       },
     } as any);
 
-    const updateCall = callClusterStub.getCalls().find((call) => call.args[0] === 'update');
-    expect(updateCall && updateCall.args).toMatchInlineSnapshot(`
+    const [updateCall] = mockEsClient.update.mock.calls;
+    expect(updateCall).toMatchInlineSnapshot(`
       Array [
-        "update",
         Object {
           "body": Object {
             "doc": Object {

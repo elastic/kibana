@@ -27,14 +27,7 @@ export type {
   GrantAPIKeyResult,
 } from './authentication';
 export type { CheckPrivilegesPayload } from './authorization';
-export {
-  LegacyAuditLogger,
-  AuditLogger,
-  AuditEvent,
-  EventCategory,
-  EventType,
-  EventOutcome,
-} from './audit';
+export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 

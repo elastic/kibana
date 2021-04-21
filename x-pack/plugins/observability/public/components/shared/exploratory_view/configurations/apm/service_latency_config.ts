@@ -19,11 +19,13 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'transaction.duration.us',
-      label: 'Latency',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'transaction.duration.us',
+        label: 'Latency',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [
       'user_agent.name',

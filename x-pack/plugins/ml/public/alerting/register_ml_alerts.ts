@@ -11,7 +11,10 @@ import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
-export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+  // async import validators to reduce initial bundle size
+  const { validateLookbackInterval, validateTopNBucket } = await import('./validators');
+
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
@@ -28,7 +31,9 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
           jobSelection: new Array<string>(),
           severity: new Array<string>(),
           resultType: new Array<string>(),
-        },
+          topNBuckets: new Array<string>(),
+          lookbackInterval: new Array<string>(),
+        } as Record<keyof MlAnomalyDetectionAlertParams, string[]>,
       };
 
       if (
@@ -54,6 +59,28 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
         validationResult.errors.resultType.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.resultType.errorMessage', {
             defaultMessage: 'Result type is required',
+          })
+        );
+      }
+
+      if (
+        !!alertParams.lookbackInterval &&
+        validateLookbackInterval(alertParams.lookbackInterval)
+      ) {
+        validationResult.errors.lookbackInterval.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.lookbackInterval.errorMessage', {
+            defaultMessage: 'Lookback interval is invalid',
+          })
+        );
+      }
+
+      if (
+        typeof alertParams.topNBuckets === 'number' &&
+        validateTopNBucket(alertParams.topNBuckets)
+      ) {
+        validationResult.errors.topNBuckets.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.topNBuckets.errorMessage', {
+            defaultMessage: 'Number of buckets is invalid',
           })
         );
       }

@@ -105,5 +105,6 @@ export async function getSeriesData(
         ...handleErrorResponse(panel)(err),
       };
     }
+    return meta;
   }
 }
