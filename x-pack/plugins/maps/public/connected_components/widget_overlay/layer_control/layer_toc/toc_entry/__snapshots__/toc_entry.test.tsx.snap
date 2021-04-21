@@ -13,6 +13,7 @@ exports[`TOCEntry is rendered 1`] = `
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -33,12 +34,15 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiButtonIcon
         aria-label="Hide layer"
         iconType="eyeClosed"
+        key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
+        key="edit"
         onClick={[Function]}
         title="Edit layer"
       />
@@ -46,6 +50,7 @@ exports[`TOCEntry is rendered 1`] = `
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         iconType="grab"
+        key="reorder"
         title="Reorder layer"
       />
     </div>
@@ -82,6 +87,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -102,12 +108,15 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Hide layer"
         iconType="eyeClosed"
+        key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
+        key="edit"
         onClick={[Function]}
         title="Edit layer"
       />
@@ -115,6 +124,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         iconType="grab"
+        key="reorder"
         title="Reorder layer"
       />
     </div>
@@ -151,6 +161,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -171,12 +182,15 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Hide layer"
         iconType="eyeClosed"
+        key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
+        key="edit"
         onClick={[Function]}
         title="Edit layer"
       />
@@ -184,6 +198,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         iconType="grab"
+        key="reorder"
         title="Reorder layer"
       />
     </div>
@@ -220,6 +235,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -240,6 +256,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       <EuiButtonIcon
         aria-label="Hide layer"
         iconType="eyeClosed"
+        key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
@@ -277,6 +294,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -297,12 +315,15 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiButtonIcon
         aria-label="Hide layer"
         iconType="eyeClosed"
+        key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
+        key="edit"
         onClick={[Function]}
         title="Edit layer"
       />
@@ -310,6 +331,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         iconType="grab"
+        key="reorder"
         title="Reorder layer"
       />
     </div>
