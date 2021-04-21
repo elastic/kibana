@@ -10,6 +10,7 @@ import {
   deleteColumn,
   getColumnOrder,
   reorderByGroups,
+  copyColumn,
 } from '../../operations';
 import { mergeLayer } from '../../state_helpers';
 import { isDraggedField } from '../../utils';
@@ -109,45 +110,27 @@ function onMoveCompatible(
 ) {
   const layer = state.layers[layerId];
   const sourceColumn = layer.columns[droppedItem.columnId];
-
-  const newColumns = {
-    ...layer.columns,
-    [columnId]: { ...sourceColumn },
-  };
-  if (shouldDeleteSource) {
-    delete newColumns[droppedItem.columnId];
-  }
-
-  const newColumnOrder = [...layer.columnOrder];
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
+  let modifiedLayer = layer;
 
   if (shouldDeleteSource) {
-    const sourceIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
-    const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
-
-    if (targetIndex === -1) {
-      // for newly created columns, remove the old entry and add the last one to the end
-      newColumnOrder.splice(sourceIndex, 1);
-      newColumnOrder.push(columnId);
-    } else {
-      // for drop to replace, reuse the same index
-      newColumnOrder[sourceIndex] = columnId;
-    }
-  } else {
-    // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-    // then reorder based on dimension groups if necessary
-    const insertionIndex = sourceColumn.isBucketed
-      ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
-      : newColumnOrder.length;
-    newColumnOrder.splice(insertionIndex, 0, columnId);
+    modifiedLayer = deleteColumn({
+      layer,
+      columnId: droppedItem.columnId,
+      indexPattern,
+    });
   }
 
-  const newLayer = {
-    ...layer,
-    columnOrder: newColumnOrder,
-    columns: newColumns,
-  };
+  modifiedLayer = copyColumn({
+    layer,
+    columnId,
+    sourceColumnId: droppedItem.columnId,
+    sourceColumn,
+    shouldDeleteSource,
+    indexPattern,
+  });
 
-  const updatedColumnOrder = getColumnOrder(newLayer);
+  const updatedColumnOrder = getColumnOrder(modifiedLayer);
 
   reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
@@ -158,7 +141,7 @@ function onMoveCompatible(
       layerId,
       newLayer: {
         columnOrder: updatedColumnOrder,
-        columns: newColumns,
+        columns: modifiedLayer.columns,
       },
     })
   );

@@ -16,6 +16,9 @@ import { documentField } from '../../document_field';
 import { OperationMetadata, DropType } from '../../../types';
 import { IndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
+import { generateId } from '../../../id_generator';
+
+jest.mock('../../../id_generator');
 
 const fields = [
   {
@@ -848,6 +851,68 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 col2: testState.layers.first.columns.col2,
                 newCol: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
+              },
+            },
+          },
+        });
+      });
+
+      it('when duplicating reference type column, the referenced columns get duplicated too', () => {
+        (generateId as jest.Mock).mockReturnValue(`willBeReference2`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'willBeReference'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['willBeReference'],
+                },
+                willBeReference: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+              },
+            },
+          },
+        };
+        const metricDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: metricDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'newCol',
+        });
+
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['willBeReference', 'willBeReference2', 'col1', 'newCol'],
+              columns: {
+                willBeReference: testState.layers.first.columns.willBeReference,
+                col1: testState.layers.first.columns.col1,
+                willBeReference2: { ...testState.layers.first.columns.willBeReference },
+                newCol: {
+                  ...testState.layers.first.columns.col1,
+                  references: ['willBeReference2'],
+                },
               },
             },
           },

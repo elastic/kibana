@@ -30,6 +30,81 @@ interface ColumnChange {
   shouldResetLabel?: boolean;
 }
 
+interface ColumnCopy {
+  layer: IndexPatternLayer;
+  columnId: string;
+  sourceColumn: IndexPatternColumn;
+  sourceColumnId: string;
+  shouldDeleteSource?: boolean;
+  indexPattern: IndexPattern;
+}
+
+export function copyColumn({
+  layer,
+  columnId,
+  sourceColumn,
+  sourceColumnId,
+  shouldDeleteSource,
+  indexPattern,
+}: ColumnCopy): IndexPatternLayer {
+  let newColumns = {
+    ...layer.columns,
+    [columnId]: { ...sourceColumn },
+  };
+
+  const operationDefinition = operationDefinitionMap[sourceColumn.operationType];
+  const newIds: string[] = [];
+  if (operationDefinition.input === 'fullReference' && 'references' in sourceColumn) {
+    sourceColumn?.references.forEach((ref) => {
+      const newId = generateId();
+      newIds.push(newId);
+      const refId = Object.keys(layer.columns).find((c) => c === ref);
+      if (refId) {
+        newColumns = {
+          ...newColumns,
+          [newId]: { ...layer.columns[refId] },
+          [columnId]: { ...sourceColumn, references: [newId] },
+        };
+      }
+    });
+  }
+
+  const newColumnOrder = [...layer.columnOrder];
+
+  if (shouldDeleteSource) {
+    const sourceIndex = newColumnOrder.findIndex((c) => c === sourceColumnId);
+    const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
+
+    if (targetIndex === -1) {
+      // for newly created columns, remove the old entry and add the last one to the end
+      newColumnOrder.splice(sourceIndex, 1);
+      if (newIds.length) {
+        newColumnOrder.push(...newIds);
+      }
+      newColumnOrder.push(columnId);
+    } else {
+      // for drop to replace, reuse the same index
+      newColumnOrder[sourceIndex] = columnId;
+    }
+  } else {
+    // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
+    // then reorder based on dimension groups if necessary
+    if (newIds.length) {
+      newColumnOrder.push(...newIds);
+    }
+    const insertionIndex = sourceColumn.isBucketed
+      ? newColumnOrder.findIndex((id) => !layer.columns[id].isBucketed)
+      : newColumnOrder.length;
+    newColumnOrder.splice(insertionIndex, 0, columnId);
+  }
+
+  return {
+    ...layer,
+    columnOrder: newColumnOrder,
+    columns: newColumns,
+  };
+}
+
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   if (args.layer.columns[args.columnId]) {
     return replaceColumn(args);
