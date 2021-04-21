@@ -56,5 +56,6 @@ export async function runResilientMigrator({
     logger,
     next: next(client, transformRawDocs),
     model,
+    client,
   });
 }
