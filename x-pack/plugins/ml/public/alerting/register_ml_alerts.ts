@@ -137,9 +137,9 @@ export function registerMlAlerts(
     ),
   });
 
-  // if (alerting) {
-  //   registerNavigation(alerting);
-  // }
+  if (alerting) {
+    registerNavigation(alerting);
+  }
 }
 
 export function registerNavigation(alerting: AlertingSetup) {

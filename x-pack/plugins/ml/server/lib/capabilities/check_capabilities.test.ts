@@ -103,6 +103,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateMlAlerts).toBe(false);
+      expect(capabilities.canUseMlAlerts).toBe(false);
     });
 
     test('full capabilities', async () => {
