@@ -14,7 +14,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../common/search';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';

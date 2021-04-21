@@ -11,10 +11,13 @@ import {
   getFileUploadComponent,
   importerFactory,
   hasImportPermission,
+  checkIndexExists,
+  getTimeFieldRange,
+  analyzeFile,
 } from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
+import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadSetupDependencies {}
@@ -43,6 +46,9 @@ export class FileUploadPlugin
       getMaxBytes,
       getMaxBytesFormatted,
       hasImportPermission,
+      checkIndexExists,
+      getTimeFieldRange,
+      analyzeFile,
     };
   }
 }

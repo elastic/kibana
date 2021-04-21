@@ -407,7 +407,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
-          {isAgentUpgradeable(agent, kibanaVersion) ? (
+          {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                 <EuiIcon size="m" type="alert" color="warning" />
@@ -593,7 +593,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             emptyPrompt
           )
         }
-        items={totalAgents ? agents : []}
+        items={
+          totalAgents
+            ? showUpgradeable
+              ? agents.filter(
+                  (agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion)
+                )
+              : agents
+            : []
+        }
         itemId="id"
         columns={columns}
         pagination={{
