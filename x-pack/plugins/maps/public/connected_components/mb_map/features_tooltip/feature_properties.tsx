@@ -101,9 +101,12 @@ export class FeatureProperties extends Component<Props, State> {
 
   _showFilterActions = (
     tooltipProperty: ITooltipProperty,
-    getActionContext: () => ActionExecutionContext
+    getActionContext: () => ActionExecutionContext,
+    addFilters: (filters: Filter[], actionId: string) => Promise<void>
   ) => {
-    this.props.showFilterActions(this._renderFilterActions(tooltipProperty, getActionContext));
+    this.props.showFilterActions(
+      this._renderFilterActions(tooltipProperty, getActionContext, addFilters)
+    );
   };
 
   _fetchProperties = async ({
@@ -164,7 +167,8 @@ export class FeatureProperties extends Component<Props, State> {
 
   _renderFilterActions(
     tooltipProperty: ITooltipProperty,
-    getActionContext: () => ActionExecutionContext
+    getActionContext: () => ActionExecutionContext,
+    addFilters: (filters: Filter[], actionId: string) => Promise<void>
   ) {
     const panel = {
       id: 0,
@@ -193,7 +197,7 @@ export class FeatureProperties extends Component<Props, State> {
                 );
               } else {
                 const filters = await tooltipProperty.getESFilters();
-                this.props.addFilters!(filters, action.id);
+                addFilters(filters, action.id);
               }
             },
             ['data-test-subj']: `mapFilterActionButton__${name}`,
@@ -228,7 +232,11 @@ export class FeatureProperties extends Component<Props, State> {
   }
 
   _renderFilterCell(tooltipProperty: ITooltipProperty) {
-    if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
+    if (
+      !this.props.showFilterButtons ||
+      !tooltipProperty.isFilterable() ||
+      this.props.addFilters === undefined
+    ) {
       return <td />;
     }
 
@@ -267,7 +275,11 @@ export class FeatureProperties extends Component<Props, State> {
               defaultMessage: 'View filter actions',
             })}
             onClick={() => {
-              this._showFilterActions(tooltipProperty, this.props.getActionContext!);
+              this._showFilterActions(
+                tooltipProperty,
+                this.props.getActionContext!,
+                this.props.addFilters!
+              );
             }}
             aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
               defaultMessage: 'View filter actions',
