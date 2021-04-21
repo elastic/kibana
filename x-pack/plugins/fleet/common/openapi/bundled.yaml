@@ -297,6 +297,8 @@ paths:
             schema:
               type: object
               properties:
+                revoke:
+                  type: boolean
                 force:
                   type: boolean
   '/agents/{agentId}/upgrade':
