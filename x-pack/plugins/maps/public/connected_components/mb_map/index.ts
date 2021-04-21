@@ -45,7 +45,8 @@ function mapStateToProps(state: MapStoreState) {
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
     editModeActive: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
-    featureModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FEATURES,
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
   };
 }

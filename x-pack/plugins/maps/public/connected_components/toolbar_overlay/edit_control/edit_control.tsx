@@ -24,7 +24,8 @@ import { IndexGeometrySelectPopoverForm } from '../../../components/index_geomet
 
 export interface Props {
   geoFields: GeoFieldWithIndex[];
-  activateDrawFeatureMode: () => void;
+  activateDrawPointsMode: () => void;
+  activateDrawShapesMode: () => void;
   deactivateDrawMode: () => void;
   featureModeActive: boolean;
 }
@@ -87,7 +88,13 @@ export class EditControl extends Component<Props, State> {
         <IndexGeometrySelectPopoverForm
           className="mapDrawControl__geometryFilterForm"
           geoFields={this.props.geoFields}
-          onSubmit={this.props.activateDrawFeatureMode}
+          onSubmit={({ geoFieldType }: { geoFieldType: string }) => {
+            if (geoFieldType === 'geo_point') {
+              this.props.activateDrawPointsMode();
+            } else {
+              this.props.activateDrawShapesMode();
+            }
+          }}
         />
       </EuiPopover>
     );

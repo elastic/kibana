@@ -16,13 +16,15 @@ import { getDrawMode } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    featureModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FEATURES,
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_POINTS || getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
   };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    activateDrawFeatureMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FEATURES)),
+    activateDrawPointsMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS)),
+    activateDrawShapesMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES)),
     deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }

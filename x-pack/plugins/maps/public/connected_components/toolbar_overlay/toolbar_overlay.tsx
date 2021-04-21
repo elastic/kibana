@@ -24,7 +24,8 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   addDrawLayerInProgress: boolean;
   showEditButton: boolean;
-  featureModeActive: boolean;
+  shapeDrawModeActive: boolean;
+  pointDrawModeActive: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
@@ -59,10 +60,10 @@ export function ToolbarOverlay(props: Props) {
   }
 
   function renderFeatureDrawAndEditControls() {
-    return props.featureModeActive ? (
+    return props.shapeDrawModeActive || props.pointDrawModeActive ? (
       <>
         <EuiFlexItem>
-          <FeatureDrawControl />
+          <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
         </EuiFlexItem>
         <EuiFlexItem>
           <FeatureEditControl />

@@ -18,7 +18,8 @@ function mapStateToProps(state: MapStoreState) {
     showEditButton: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
     addDrawLayerInProgress:
       getFlyoutDisplay(state) !== FLYOUT_STATE.NONE && state.map.mapState.editModeActive,
-    featureModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FEATURES,
+    shapeDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
+    pointDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
   };
 }
 
