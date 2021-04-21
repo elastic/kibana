@@ -145,6 +145,12 @@ export class EnterpriseSearchRequestHandler {
     };
   }
 
+  /**
+   * There are a number of different expected incoming bodies that we handle & pass on to Enterprise Search for ingestion:
+   * - Standard object data (should be JSON stringified)
+   * - Empty (should be passed as undefined and not as an empty obj)
+   * - Raw buffers (passed on as a string, occurs when using the `skipBodyValidation` lib helper)
+   */
   getBodyAsString(body: object | Buffer): string | undefined {
     if (Buffer.isBuffer(body)) return body.toString();
     if (this.isEmptyObj(body)) return undefined;
