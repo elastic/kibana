@@ -74,7 +74,7 @@ describe('AllCasesSelectorModal', () => {
         alertData: fullProps.alertData,
         createCaseNavigation,
         disabledStatuses: fullProps.disabledStatuses,
-        isSelector: true,
+        isSelectorView: true,
         userCanCrud: fullProps.userCanCrud,
         updateCase,
       })

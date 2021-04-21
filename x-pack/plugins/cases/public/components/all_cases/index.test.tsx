@@ -685,7 +685,7 @@ describe('AllCasesGeneric', () => {
     const { configureCasesNavigation, ...restProps } = defaultAllCasesProps;
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...restProps} isSelector={true} />
+        <AllCases {...restProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -693,10 +693,10 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('should not render table utility bar when isSelector=true', async () => {
+  it('should not render table utility bar when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={true} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -707,10 +707,10 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('case table should not be selectable when isSelector=true', async () => {
+  it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={true} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -720,7 +720,7 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('should call onRowClick with no cases and isSelector=true', async () => {
+  it('should call onRowClick with no cases and isSelectorView=true', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
@@ -735,7 +735,7 @@ describe('AllCasesGeneric', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isSelector={true}
+          isSelectorView={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -746,7 +746,7 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('should call createCaseNavigation.onClick with no cases and isSelector=false', async () => {
+  it('should call createCaseNavigation.onClick with no cases and isSelectorView=false', async () => {
     const createCaseNavigation = { href: '', onClick: jest.fn() };
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -762,7 +762,7 @@ describe('AllCasesGeneric', () => {
         <AllCases
           {...defaultAllCasesProps}
           createCaseNavigation={createCaseNavigation}
-          isSelector={false}
+          isSelectorView={false}
         />
       </TestProviders>
     );
@@ -778,7 +778,7 @@ describe('AllCasesGeneric', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isSelector={true}
+          isSelectorView={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -835,7 +835,7 @@ describe('AllCasesGeneric', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
@@ -847,7 +847,7 @@ describe('AllCasesGeneric', () => {
   it('should change the status to closed', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -862,7 +862,7 @@ describe('AllCasesGeneric', () => {
   it('should change the status to in-progress', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -877,7 +877,7 @@ describe('AllCasesGeneric', () => {
   it('should change the status to open', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -892,7 +892,7 @@ describe('AllCasesGeneric', () => {
   it('should show the correct count on stats', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} isSelector={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
