@@ -82,6 +82,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
       expect(capabilities.canDeleteAnnotation).toBe(true);
+      expect(capabilities.canUseMlAlerts).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -103,7 +104,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateMlAlerts).toBe(false);
-      expect(capabilities.canUseMlAlerts).toBe(false);
     });
 
     test('full capabilities', async () => {
