@@ -31,6 +31,7 @@ import {
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   MVT_SOURCE_LAYER_NAME,
+  MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -59,6 +60,7 @@ import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/pl
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -671,12 +673,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }> {
+  ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -719,6 +716,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 &geoFieldType=${geoField.type}`;
 
     return {
+      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),

@@ -31,6 +31,7 @@ import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -155,7 +156,7 @@ export class MVTSingleLayerVectorSource
     return this.getLayerName();
   }
 
-  async getUrlTemplateWithMeta() {
+  async getUrlTemplateWithMeta(): Promise<ITiledSingleLayerMvtParams> {
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,

@@ -27,6 +27,7 @@ import {
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   MVT_SOURCE_LAYER_NAME,
+  MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -51,6 +52,7 @@ import { ISearchSource } from '../../../../../../../src/plugins/data/common/sear
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -421,12 +423,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }> {
+  ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -454,6 +451,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 &geoFieldType=${geoField.type}`;
 
     return {
+      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
