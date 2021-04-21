@@ -133,7 +133,7 @@
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
-    "@kbn/std": "link:packages/kbn-std",
+    "@kbn/std": "link:bazel-bin/packages/kbn-std/npm_module",
     "@kbn/tinymath": "link:bazel-bin/packages/kbn-tinymath/npm_module",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "@kbn/ui-shared-deps": "link:packages/kbn-ui-shared-deps",
