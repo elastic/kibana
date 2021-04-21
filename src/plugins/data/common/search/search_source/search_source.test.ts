@@ -879,7 +879,7 @@ describe('SearchSource', () => {
         const options = {};
         await searchSource.fetch$(options).toPromise();
 
-        const [_, callOptions] = mockSearchMethod.mock.calls[0];
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
         expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
       });
 
@@ -888,7 +888,7 @@ describe('SearchSource', () => {
         const options = { strategy: 'banana' };
         await searchSource.fetch$(options).toPromise();
 
-        const [_, callOptions] = mockSearchMethod.mock.calls[0];
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
         expect(callOptions.strategy).toBe('banana');
       });
     });
