@@ -14,6 +14,7 @@ const alwaysImportedTests = [
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/reporting_functional/reporting_and_security.config.ts'),
   require.resolve('../test/reporting_functional/reporting_without_security.config.ts'),
+  require.resolve('../test/reporting_functional/reporting_and_deprecated_security.config.ts'),
   require.resolve('../test/security_functional/login_selector.config.ts'),
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
