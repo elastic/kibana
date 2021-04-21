@@ -20,8 +20,6 @@ import {
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
-import { FormattedMessage } from 'react-intl';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
