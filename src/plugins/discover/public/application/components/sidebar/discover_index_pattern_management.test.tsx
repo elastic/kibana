@@ -14,7 +14,7 @@ import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import { findTestSubject } from '@kbn/test/jest';
 
 const mockServices = ({
@@ -64,8 +64,8 @@ describe('Discover IndexPattern Management', () => {
 
   const editField = jest.fn();
 
-  test('renders correctly', () => {
-    const component = mountWithIntl(
+  const mountComponent = () => {
+    return mountWithIntl(
       <DiscoverIndexPatternManagement
         services={mockServices}
         editField={editField}
@@ -73,36 +73,27 @@ describe('Discover IndexPattern Management', () => {
         useNewFieldsApi={true}
       />
     );
+  };
+
+  test('renders correctly', () => {
+    const component = mountComponent();
     expect(component).toMatchSnapshot();
     expect(component.find(EuiPopover).length).toBe(1);
   });
 
   test('click on a button opens popover', () => {
-    const component = mountWithIntl(
-      <DiscoverIndexPatternManagement
-        services={mockServices}
-        editField={editField}
-        selectedIndexPattern={indexPattern}
-        useNewFieldsApi={true}
-      />
-    );
+    const component = mountComponent();
     expect(component.find(EuiContextMenuPanel).length).toBe(0);
 
     const button = findTestSubject(component, 'discoverIndexPatternActions');
     button.simulate('click');
 
-    expect(component.find(EuiContextMenuPanel).length).toBe(2);
+    expect(component.find(EuiContextMenuPanel).length).toBe(1);
+    expect(component.find(EuiContextMenuItem).length).toBe(2);
   });
 
   test('click on an add button executes editField callback', () => {
-    const component = mountWithIntl(
-      <DiscoverIndexPatternManagement
-        services={mockServices}
-        editField={editField}
-        selectedIndexPattern={indexPattern}
-        useNewFieldsApi={true}
-      />
-    );
+    const component = mountComponent();
     const button = findTestSubject(component, 'discoverIndexPatternActions');
     button.simulate('click');
 
@@ -112,14 +103,7 @@ describe('Discover IndexPattern Management', () => {
   });
 
   test('click on a manage button navigates away from discover', () => {
-    const component = mountWithIntl(
-      <DiscoverIndexPatternManagement
-        services={mockServices}
-        editField={editField}
-        selectedIndexPattern={indexPattern}
-        useNewFieldsApi={true}
-      />
-    );
+    const component = mountComponent();
     const button = findTestSubject(component, 'discoverIndexPatternActions');
     button.simulate('click');
 
