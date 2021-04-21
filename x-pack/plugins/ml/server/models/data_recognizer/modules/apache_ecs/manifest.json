@@ -1,6 +1,6 @@
 {
   "id": "apache_ecs",
-  "title": "Apache access logs (filebeat)",
+  "title": "Apache access logs (Filebeat)",
   "description": "Legacy jobs for finding unusual activity in HTTP access logs. The latest versions are installed with the Apache integration in Fleet.",
   "type": "Web Access Logs",
   "logoFile": "logo.json",
