@@ -7,13 +7,49 @@ steps:
     agents:
       queue: bootstrap
     key: build
-  - command: '.buildkite/scripts/xpack-cigroup.sh'
+  - command: .buildkite/scripts/xpack-cigroup.sh
     label: 'Default CI Group %n (+1)'
     parallelism: 29
     agents:
       queue: ci-group
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+
+  - command: .buildkite/scripts/xpack-firefox.sh
+    label: 'Default Firefox Smoke Tests'
+    agents:
+      queue: ci-group
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/test/jest.sh
+    label: 'Jest Tests'
+    agents:
+      queue: ci-group
+    artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/test/jest_integration.sh
+    label: 'Jest Integration Tests'
+    agents:
+      queue: jest
+    artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/test/api_integration.sh
+    label: 'API Integration Tests'
+    agents:
+      queue: jest
+    artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/lint.sh
+    label: 'Lint'
+    agents:
+      queue: jest
+
+  - command: .buildkite/scripts/checks.sh
+    label: 'Checks'
+    agents:
+      queue: jest
+
   - wait: ~
     continue_on_failure: true
   - plugins:

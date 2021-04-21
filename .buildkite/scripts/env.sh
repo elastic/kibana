@@ -68,3 +68,4 @@ if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
 fi
 
 export BUILD_TS_REFS_DISABLE=true
+export DISABLE_BOOTSTRAP_VALIDATION=true

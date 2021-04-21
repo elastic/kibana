@@ -3,9 +3,7 @@
 set -euo pipefail
 
 export DISABLE_BOOTSTRAP_VALIDATION=true
-
-export CI_GROUP=${CI_GROUP:-$(( BUILDKITE_PARALLEL_JOB + 1))}
-export JOB=kibana-default-ciGroup${CI_GROUP}
+export JOB=kibana-default-firefox
 
 .buildkite/scripts/bootstrap.sh
 
@@ -23,14 +21,13 @@ cd "$KIBANA_DIR"
 
 tar -xzf ../kibana-default-plugins.tar.gz
 
-echo "--- Running $JOB"
+echo "--- Running Firefox smoke tests"
 
 cd "$XPACK_DIR"
 
 node scripts/functional_tests \
-  --bail \
+  --debug --bail \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --include-tag "ciGroup$CI_GROUP"
-
-cd "$KIBANA_DIR"
-buildkite-agent artifact upload target/test_metadata.json || true
+  --include-tag "includeFirefox" \
+  --config test/functional/config.firefox.js \
+  --config test/functional_embedded/config.firefox.ts
