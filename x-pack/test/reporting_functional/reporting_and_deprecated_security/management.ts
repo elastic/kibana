@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'reporting', 'discover']);
+
   const testSubjects = getService('testSubjects');
   const reportingFunctional = getService('reportingFunctional');
 
@@ -21,13 +22,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await reportingFunctional.teardownEcommerce();
     });
 
-    it('does not allow user that does not have reporting privileges', async () => {
+    it('does not allow user that does not have reporting_user role', async () => {
       await reportingFunctional.loginDataAnalyst();
       await PageObjects.common.navigateToApp('reporting');
       await testSubjects.missingOrFail('reportJobListing');
     });
 
-    it('does allow user with reporting privileges', async () => {
+    it('does allow user with reporting_user role', async () => {
       await reportingFunctional.loginReportingUser();
       await PageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing');
