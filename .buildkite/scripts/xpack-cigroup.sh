@@ -36,5 +36,5 @@ node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --include-tag "ciGroup$CI_GROUP"
 
-cd "KIBANA_DIR"
+cd "$KIBANA_DIR"
 buildkite-agent artifact upload target/test_metadata.json || true
