@@ -15,7 +15,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-  UiSettingsServiceStart
+  UiSettingsServiceStart,
 } from '../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
