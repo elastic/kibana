@@ -39,7 +39,7 @@ export enum WriteOperations {
   CreateComment = 'createComment',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
-  UpdateComments = 'updateComments',
+  UpdateComment = 'updateComment',
 }
 
 /**

@@ -72,6 +72,9 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:observability/getCase",
             "cases:1.0.0-zeta1:observability/findCases",
+            "cases:1.0.0-zeta1:observability/getComment",
+            "cases:1.0.0-zeta1:observability/getAllComments",
+            "cases:1.0.0-zeta1:observability/findComments",
           ]
         `);
       });
@@ -107,9 +110,16 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getComment",
+            "cases:1.0.0-zeta1:security/getAllComments",
+            "cases:1.0.0-zeta1:security/findComments",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createComment",
+            "cases:1.0.0-zeta1:security/deleteAllComments",
+            "cases:1.0.0-zeta1:security/deleteComment",
+            "cases:1.0.0-zeta1:security/updateComment",
           ]
         `);
       });
@@ -146,11 +156,21 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getComment",
+            "cases:1.0.0-zeta1:security/getAllComments",
+            "cases:1.0.0-zeta1:security/findComments",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createComment",
+            "cases:1.0.0-zeta1:security/deleteAllComments",
+            "cases:1.0.0-zeta1:security/deleteComment",
+            "cases:1.0.0-zeta1:security/updateComment",
             "cases:1.0.0-zeta1:obs/getCase",
             "cases:1.0.0-zeta1:obs/findCases",
+            "cases:1.0.0-zeta1:obs/getComment",
+            "cases:1.0.0-zeta1:obs/getAllComments",
+            "cases:1.0.0-zeta1:obs/findComments",
           ]
         `);
       });
@@ -187,18 +207,38 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getComment",
+            "cases:1.0.0-zeta1:security/getAllComments",
+            "cases:1.0.0-zeta1:security/findComments",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createComment",
+            "cases:1.0.0-zeta1:security/deleteAllComments",
+            "cases:1.0.0-zeta1:security/deleteComment",
+            "cases:1.0.0-zeta1:security/updateComment",
             "cases:1.0.0-zeta1:other-security/getCase",
             "cases:1.0.0-zeta1:other-security/findCases",
+            "cases:1.0.0-zeta1:other-security/getComment",
+            "cases:1.0.0-zeta1:other-security/getAllComments",
+            "cases:1.0.0-zeta1:other-security/findComments",
             "cases:1.0.0-zeta1:other-security/createCase",
             "cases:1.0.0-zeta1:other-security/deleteCase",
             "cases:1.0.0-zeta1:other-security/updateCase",
+            "cases:1.0.0-zeta1:other-security/createComment",
+            "cases:1.0.0-zeta1:other-security/deleteAllComments",
+            "cases:1.0.0-zeta1:other-security/deleteComment",
+            "cases:1.0.0-zeta1:other-security/updateComment",
             "cases:1.0.0-zeta1:obs/getCase",
             "cases:1.0.0-zeta1:obs/findCases",
+            "cases:1.0.0-zeta1:obs/getComment",
+            "cases:1.0.0-zeta1:obs/getAllComments",
+            "cases:1.0.0-zeta1:obs/findComments",
             "cases:1.0.0-zeta1:other-obs/getCase",
             "cases:1.0.0-zeta1:other-obs/findCases",
+            "cases:1.0.0-zeta1:other-obs/getComment",
+            "cases:1.0.0-zeta1:other-obs/getAllComments",
+            "cases:1.0.0-zeta1:other-obs/findComments",
           ]
         `);
       });

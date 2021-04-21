@@ -147,6 +147,36 @@ export const buildFilter = ({
 };
 
 /**
+ * Combines the authorized filters with the requested owners.
+ */
+export const combineAuthorizedAndOwnerFilter = (
+  owner?: string[] | string,
+  authorizationFilter?: KueryNode,
+  savedObjectType?: string
+): KueryNode | undefined => {
+  const ownerFilter = buildFilter({
+    filters: owner,
+    field: 'owner',
+    operator: 'or',
+    type: savedObjectType,
+  });
+
+  return combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter);
+};
+
+/**
+ * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined
+ * filters and return a KueryNode with the filters and'd together.
+ */
+export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode | undefined {
+  const filters = nodes.filter((node): node is KueryNode => node !== undefined);
+  if (filters.length <= 0) {
+    return;
+  }
+  return nodeBuilder.and(filters);
+}
+
+/**
  * Constructs the filters used for finding cases and sub cases.
  * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases
  * and sub cases.
@@ -304,14 +334,6 @@ export const constructQueryOptions = ({
     }
   }
 };
-
-/**
- * Combines a string field with a kuery node to build a complete kuery node for use in the find API.
- */
-export function combineFieldWithKueryNodeFilter(filterField: FilterField, kueryNode?: KueryNode) {
-  const filter = buildFilter(filterField);
-  return combineFilterWithAuthorizationFilter(filter, kueryNode);
-}
 
 interface CompareArrays {
   addedItems: string[];

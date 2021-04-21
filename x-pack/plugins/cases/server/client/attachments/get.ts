@@ -31,12 +31,19 @@ import {
 import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
-import { ensureAuthorized, getAuthorizationFilter } from '../utils';
+import {
+  combineAuthorizedAndOwnerFilter,
+  combineFilters,
+  ensureAuthorized,
+  getAuthorizationFilter,
+} from '../utils';
 import { Operations } from '../../authorization';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
   subCaseId: rt.string,
+  owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
 type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
@@ -50,7 +57,7 @@ export interface GetAllArgs {
   caseID: string;
   includeSubCaseComments?: boolean;
   subCaseID?: string;
-  owner?: string;
+  owner?: string | string[];
 }
 
 export interface GetArgs {
@@ -63,14 +70,42 @@ export interface GetArgs {
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
-  { savedObjectsClient: soClient, caseService, logger }: CasesClientArgs
+  clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
+
   try {
     checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      auditLogger,
+      operation: Operations.findComments,
+    });
 
     const id = queryParams?.subCaseId ?? caseID;
     const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;
     const { filter, ...queryWithoutFilter } = queryParams ?? {};
+
+    // if the fields property was defined, make sure we include the 'owner' field in the response
+    const fields = includeFieldsRequiredForAuthentication(queryWithoutFilter.fields);
+
+    // combine any passed in filter property and the filter for the appropriate owner
+    const combinedFilter = combineFilters([
+      esKuery.fromKueryExpression(filter),
+      combineAuthorizedAndOwnerFilter(queryParams?.owner, authorizationFilter),
+    ]);
+
     const args = queryParams
       ? {
           caseService,
@@ -83,8 +118,9 @@ export async function find(
             page: defaultPage,
             perPage: defaultPerPage,
             sortField: 'created_at',
-            filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
+            filter: combinedFilter,
             ...queryWithoutFilter,
+            fields,
           },
           associationType,
         }
@@ -96,11 +132,22 @@ export async function find(
             page: defaultPage,
             perPage: defaultPerPage,
             sortField: 'created_at',
+            filter: combinedFilter,
           },
           associationType,
         };
 
     const theComments = await caseService.getCommentsByAssociation(args);
+
+    ensureSavedObjectsAreAuthorized(
+      theComments.saved_objects.map((comment) => ({
+        owner: comment.attributes.owner,
+        id: comment.id,
+      }))
+    );
+
+    logSuccessfulAuthorization();
+
     return CommentsResponseRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
@@ -178,22 +225,24 @@ export async function getAll(
       );
     }
 
-    // TODO: finish this call combineFieldWithKueryNodeFilter
     const {
-      filter,
+      filter: authFilter,
       ensureSavedObjectsAreAuthorized,
       logSuccessfulAuthorization,
-    } = getAuthorizationFilter({
+    } = await getAuthorizationFilter({
       authorization,
       auditLogger,
       operation: Operations.getAllComments,
     });
+
+    const filter = combineAuthorizedAndOwnerFilter(owner, authFilter);
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({
         soClient,
         id: subCaseID,
         options: {
+          filter,
           sortField: defaultSortField,
         },
       });
@@ -203,10 +252,17 @@ export async function getAll(
         id: caseID,
         includeSubCaseComments,
         options: {
+          filter,
           sortField: defaultSortField,
         },
       });
     }
+
+    ensureSavedObjectsAreAuthorized(
+      comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
+    );
+
+    logSuccessfulAuthorization();
 
     return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {

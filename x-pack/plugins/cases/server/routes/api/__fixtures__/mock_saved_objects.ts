@@ -250,6 +250,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T21:55:00.177Z',
@@ -282,6 +283,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T21:55:14.633Z',
@@ -315,6 +317,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T22:32:30.608Z',
@@ -348,6 +351,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       rule: {
@@ -385,6 +389,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       rule: {
@@ -422,6 +427,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
       pushed_at: null,
       pushed_by: null,
       rule: {

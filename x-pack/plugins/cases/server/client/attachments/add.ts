@@ -27,7 +27,6 @@ import {
   SubCaseAttributes,
   CaseResponse,
   User,
-  CommentRequestAlertType,
   AlertCommentRequestRt,
   CommentRequest,
 } from '../../../common/api';

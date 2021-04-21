@@ -420,6 +420,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
+      owner: 'securitySolution',
       type: CommentType.user as const,
     };
 

@@ -23,7 +23,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
           schema.object({
             includeSubCaseComments: schema.maybe(schema.boolean()),
             subCaseId: schema.maybe(schema.string()),
-            owner: schema.maybe(schema.string()),
+            owner: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
           })
         ),
       },

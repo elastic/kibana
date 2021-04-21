@@ -47,6 +47,7 @@ export const basicComment: Comment = {
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  owner: 'securitySolution',
   pushedAt: null,
   pushedBy: null,
   updatedAt: null,
@@ -62,6 +63,7 @@ export const alertComment: Comment = {
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  owner: 'securitySolution',
   pushedAt: null,
   pushedBy: null,
   rule: {
@@ -232,6 +234,7 @@ export const basicCommentSnake: CommentResponse = {
   id: basicCommentId,
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  owner: 'securitySolution',
   pushed_at: null,
   pushed_by: null,
   updated_at: null,

@@ -103,6 +103,7 @@ async function handleGenGroupAlerts(argv: any) {
 
     console.log('Case id: ', caseID);
     const comment: ContextTypeGeneratedAlertType = {
+      owner: 'securitySolution',
       type: CommentType.generatedAlert,
       alerts: createAlertsString(
         argv.ids.map((id: string) => ({

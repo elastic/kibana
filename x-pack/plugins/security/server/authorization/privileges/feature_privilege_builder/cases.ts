@@ -26,7 +26,7 @@ const writeOperations: string[] = [
   'createComment',
   'deleteAllComments',
   'deleteComment',
-  'updateComments',
+  'updateComment',
 ];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 

@@ -107,9 +107,9 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
-  [WriteOperations.UpdateComments]: {
+  [WriteOperations.UpdateComment]: {
     type: EventType.DELETION,
-    name: WriteOperations.UpdateComments,
+    name: WriteOperations.UpdateComment,
     action: 'update-comments',
     verbs: updateVerbs,
     docType: 'comments',

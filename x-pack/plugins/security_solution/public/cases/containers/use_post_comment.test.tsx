@@ -19,6 +19,7 @@ describe('usePostComment', () => {
   const samplePost = {
     comment: 'a comment',
     type: CommentType.user as const,
+    owner: 'securitySolution',
   };
   const updateCaseCallback = jest.fn();
   beforeEach(() => {

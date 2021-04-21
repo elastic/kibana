@@ -39,6 +39,7 @@ export const comment: CommentResponse = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  owner: 'securitySolution',
   pushed_at: null,
   pushed_by: null,
   updated_at: '2019-11-25T21:55:00.177Z',
@@ -66,6 +67,7 @@ export const commentAlert: CommentResponse = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  owner: 'securitySolution',
   pushed_at: null,
   pushed_by: null,
   updated_at: '2019-11-25T21:55:00.177Z',
@@ -83,6 +85,7 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   alertId: ['alert-id-1', 'alert-id-2'],
   index: 'alert-index-1',
   type: CommentType.alert as const,
+  owner: 'securitySolution',
 };
 
 export const commentGeneratedAlert: CommentResponseAlertsType = {
