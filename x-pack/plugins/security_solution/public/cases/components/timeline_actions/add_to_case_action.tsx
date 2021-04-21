@@ -20,13 +20,16 @@ import { Case, CaseStatuses } from '../../../../../cases/common';
 import { APP_ID } from '../../../../common/constants';
 import { Ecs } from '../../../../common/ecs';
 import { SecurityPageName } from '../../../app/types';
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import {
+  getCaseDetailsUrl,
+  getCreateCaseUrl,
+  useFormatUrl,
+} from '../../../common/components/link_to';
 import { useStateToaster } from '../../../common/components/toasters';
 import { useControl } from '../../../common/hooks/use_control';
 import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
 import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
 import { CreateCaseFlyout } from '../create/flyout';
-import { useAllCasesModal } from '../use_all_cases_modal';
 import { createUpdateSuccessToaster } from './helpers';
 import * as i18n from './translations';
 
@@ -43,7 +46,10 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
 
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    cases,
+  } = useKibana().services;
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
@@ -85,6 +91,18 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
   );
 
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
+  const goToCreateCase = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
+  const [isAllCaseModalOpen, openAllCaseModal] = useState(false);
+
   const onCaseClicked = useCallback(
     (theCase) => {
       /**
@@ -95,24 +113,10 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       if (theCase == null) {
         openCaseFlyoutOpen();
       }
+      openAllCaseModal(false);
     },
     [openCaseFlyoutOpen]
   );
-
-  const { modal: allCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
-    alertData: {
-      alertId: eventId,
-      index: eventIndex ?? '',
-      rule: {
-        id: rule?.id != null ? rule.id[0] : null,
-        name: rule?.name != null ? rule.name[0] : null,
-      },
-    },
-    disabledStatuses: [CaseStatuses.closed],
-    onRowClick: onCaseClicked,
-    updateCase: onCaseSuccess,
-  });
-
   const addNewCaseClick = useCallback(() => {
     closePopover();
     openCaseFlyoutOpen();
@@ -120,7 +124,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const addExistingCaseClick = useCallback(() => {
     closePopover();
-    openAllCaseModal();
+    openAllCaseModal(true);
   }, [openAllCaseModal, closePopover]);
 
   const items = useMemo(
@@ -181,7 +185,25 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onSuccess={onCaseSuccess} />
       )}
-      {allCasesModal}
+      {isAllCaseModalOpen &&
+        cases.getAllCasesSelectorModal({
+          alertData: {
+            alertId: eventId,
+            index: eventIndex ?? '',
+            rule: {
+              id: rule?.id != null ? rule.id[0] : null,
+              name: rule?.name != null ? rule.name[0] : null,
+            },
+          },
+          createCaseNavigation: {
+            href: formatUrl(getCreateCaseUrl()),
+            onClick: goToCreateCase,
+          },
+          disabledStatuses: [CaseStatuses.closed],
+          onRowClick: onCaseClicked,
+          updateCase: onCaseSuccess,
+          userCanCrud: userPermissions?.crud ?? false,
+        })}
     </>
   );
 };

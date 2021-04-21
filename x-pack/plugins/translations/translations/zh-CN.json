@@ -18078,7 +18078,6 @@
     "xpack.securitySolution.cases.allCases.actions": "操作",
     "xpack.securitySolution.cases.allCases.comments": "注释",
     "xpack.securitySolution.cases.allCases.noTagsAvailable": "没有可用标签",
-    "xpack.securitySolution.cases.caseModal.title": "选择案例",
     "xpack.securitySolution.cases.caseSavedObjectNoPermissionsMessage": "要查看案例，必须对 Kibana 工作区中的已保存对象管理功能有权限。有关详细信息，请联系您的 Kibana 管理员。",
     "xpack.securitySolution.cases.caseSavedObjectNoPermissionsTitle": "需要 Kibana 功能权限",
     "xpack.securitySolution.cases.caseTable.caseDetailsLinkAria": "单击以访问标题为 {detailName} 的案例",

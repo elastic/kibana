@@ -54,20 +54,32 @@ cases: CasesUiStart;
 
 ##### Methods:
 ### `getAllCases`
-Arguments: 
+Arguments:
 
 |Property|Description|
 |---|---|
 |caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
 |configureCasesNavigation|`CasesNavigation` route configuration for configure cases page
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
-|disabledStatuses?|`CaseStatuses[];` array of disabled statuses
-|isModal?|`boolean;` is All Cases table a modal
-|onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
 |userCanCrud|`boolean;` user permissions to crud
 
 UI component:
- ![All Cases Component][all-cases-img] 
+![All Cases Component][all-cases-img]
+
+### `getAllCasesSelectorModal`
+Arguments:
+
+|Property|Description|
+|---|---|
+|alertData?|`Omit<CommentRequestAlertType, 'type'>;` alert data to post to case
+|createCaseNavigation|`CasesNavigation` route configuration for create cases page
+|disabledStatuses?|`CaseStatuses[];` array of disabled statuses
+|onRowClick|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
+|updateCase?|`(theCase: Case ! SubCase) => void;` callback after case has been updated
+|userCanCrud|`boolean;` user permissions to crud
+
+UI component:
+![All Cases Selector Modal Component][all-cases-modal-img]
 
 ### `getCaseView`
 Arguments:
@@ -248,6 +260,7 @@ For IBM Resilient connectors:
 [configure-img]: images/configure.png
 [create-img]: images/create.png
 [all-cases-img]: images/all_cases.png
+[all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
 

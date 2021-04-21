@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAvatar,
   EuiBadgeGroup,
@@ -19,22 +19,24 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
-import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses, CaseType } from '../../../common';
+import { CaseStatuses, CaseType, DeleteCase, Case, SubCase } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
-import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
 import * as i18n from './translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
+import { getActions } from './actions';
+import { UpdateCase, useGetCases } from '../../containers/use_get_cases';
+import { useDeleteCases } from '../../containers/use_delete_cases';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 
 export type CasesColumns =
-  | EuiTableFieldDataColumnType<Case>
+  | EuiTableActionsColumnType<Case>
   | EuiTableComputedColumnType<Case>
-  | EuiTableActionsColumnType<Case>;
+  | EuiTableFieldDataColumnType<Case>;
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
@@ -51,35 +53,95 @@ const TagWrapper = styled(EuiBadgeGroup)`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
-interface GetCasesColumn {
-  actions: Array<DefaultItemIconButtonAction<Case>>;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
+export interface GetCasesColumn {
+  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   filterStatus: string;
-  isModal: boolean;
+  handleIsLoading: (a: boolean) => void;
+  refreshCases?: (a?: boolean) => void;
+  showActions: boolean;
 }
-export const getCasesColumns = ({
-  actions,
+export const useCasesColumns = ({
   caseDetailsNavigation,
   filterStatus,
-  isModal,
+  handleIsLoading,
+  refreshCases,
+  showActions,
 }: GetCasesColumn): CasesColumns[] => {
-  const columns = [
+  const { loading: isLoadingCases, dispatchUpdateCaseProperty } = useGetCases();
+  // Delete case
+  const {
+    dispatchResetIsDeleted,
+    handleOnDeleteConfirm,
+    handleToggleModal,
+    isDeleted,
+    isDisplayConfirmDeleteModal,
+    isLoading: isDeleting,
+  } = useDeleteCases();
+
+  const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
+    id: '',
+    title: '',
+    type: null,
+  });
+
+  const toggleDeleteModal = useCallback(
+    (deleteCase: Case) => {
+      handleToggleModal();
+      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
+    },
+    [handleToggleModal]
+  );
+
+  const handleDispatchUpdate = useCallback(
+    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
+      dispatchUpdateCaseProperty({
+        ...args,
+        refetchCasesStatus: () => {
+          if (refreshCases != null) refreshCases();
+        },
+      });
+    },
+    [dispatchUpdateCaseProperty, refreshCases]
+  );
+
+  const actions = useMemo(
+    () =>
+      getActions({
+        deleteCaseOnClick: toggleDeleteModal,
+        dispatchUpdate: handleDispatchUpdate,
+      }),
+    [toggleDeleteModal, handleDispatchUpdate]
+  );
+
+  useEffect(() => {
+    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
+  }, [handleIsLoading, isDeleting, isLoadingCases]);
+
+  useEffect(() => {
+    if (isDeleted) {
+      if (refreshCases != null) refreshCases();
+      dispatchResetIsDeleted();
+    }
+  }, [isDeleted, dispatchResetIsDeleted, refreshCases]);
+
+  return [
     {
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent = !isModal ? (
-            <CaseDetailsLink
-              caseDetailsNavigation={caseDetailsNavigation}
-              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-              title={theCase.title}
-            >
-              {theCase.title}
-            </CaseDetailsLink>
-          ) : (
-            <span>{theCase.title}</span>
-          );
+          const caseDetailsLinkComponent =
+            caseDetailsNavigation != null ? (
+              <CaseDetailsLink
+                caseDetailsNavigation={caseDetailsNavigation}
+                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+                title={theCase.title}
+              >
+                {theCase.title}
+              </CaseDetailsLink>
+            ) : (
+              <span>{theCase.title}</span>
+            );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
@@ -226,15 +288,26 @@ export const getCasesColumns = ({
         ));
       },
     },
-    {
-      name: i18n.ACTIONS,
-      actions,
-    },
+    ...(showActions
+      ? [
+          {
+            name: (
+              <>
+                {i18n.ACTIONS}
+                <ConfirmDeleteCaseModal
+                  caseTitle={deleteThisCase.title}
+                  isModalVisible={isDisplayConfirmDeleteModal}
+                  isPlural={false}
+                  onCancel={handleToggleModal}
+                  onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
+                />
+              </>
+            ),
+            actions,
+          },
+        ]
+      : []),
   ];
-  if (isModal) {
-    columns.pop(); // remove actions if in modal
-  }
-  return columns;
 };
 
 interface Props {

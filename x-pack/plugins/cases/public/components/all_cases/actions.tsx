@@ -16,13 +16,11 @@ import * as i18n from './translations';
 import { isIndividual } from './helpers';
 
 interface GetActions {
-  caseStatus: string;
   dispatchUpdate: Dispatch<Omit<UpdateCase, 'refetchCasesStatus'>>;
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
 export const getActions = ({
-  caseStatus,
   dispatchUpdate,
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {

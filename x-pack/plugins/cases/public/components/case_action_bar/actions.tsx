@@ -35,21 +35,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
-  const confirmDeleteModal = useMemo(
-    () => (
-      <ConfirmDeleteCaseModal
-        caseTitle={caseData.title}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [
-          { id: caseData.id, title: caseData.title, type: caseData.type },
-        ])}
-      />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDisplayConfirmDeleteModal, caseData]
-  );
   const propertyActions = useMemo(
     () => [
       {
@@ -78,7 +63,15 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   return (
     <>
       <PropertyActions propertyActions={propertyActions} />
-      {confirmDeleteModal}
+      <ConfirmDeleteCaseModal
+        caseTitle={caseData.title}
+        isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={false}
+        onCancel={handleToggleModal}
+        onConfirm={handleOnDeleteConfirm.bind(null, [
+          { id: caseData.id, title: caseData.title, type: caseData.type },
+        ])}
+      />
     </>
   );
 };

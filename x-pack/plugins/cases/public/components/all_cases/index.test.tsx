@@ -12,7 +12,6 @@ import { waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
-import * as i18n from './translations';
 
 import { CaseStatuses, CaseType, StatusAll } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
@@ -21,9 +20,10 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { getCasesColumns } from './columns';
-import { AllCases } from '.';
-
+import { AllCasesGeneric as AllCases } from './all_cases_generic';
+import { AllCasesProps } from '.';
+import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
+import { renderHook } from '@testing-library/react-hooks';
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
@@ -38,8 +38,8 @@ const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 jest.mock('../../common/lib/kibana');
 
-describe('AllCases', () => {
-  const defaultAllCasesProps = {
+describe('AllCasesGeneric', () => {
+  const defaultAllCasesProps: AllCasesProps = {
     configureCasesNavigation: {
       href: 'blah',
       onClick: jest.fn(),
@@ -52,6 +52,7 @@ describe('AllCases', () => {
       href: 'bleh',
       onClick: jest.fn(),
     },
+    userCanCrud: true,
   };
 
   const dispatchResetIsDeleted = jest.fn();
@@ -107,6 +108,16 @@ describe('AllCases', () => {
     isError: false,
   };
 
+  const defaultColumnArgs = {
+    filterStatus: CaseStatuses.open,
+    showActions: true,
+    handleIsLoading: jest.fn(),
+    caseDetailsNavigation: {
+      href: jest.fn(),
+      onClick: jest.fn(),
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     useUpdateCasesMock.mockReturnValue(defaultUpdateCases);
@@ -125,7 +136,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -163,7 +174,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -199,7 +210,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -240,27 +251,23 @@ describe('AllCases', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     const checkIt = (columnName: string, key: number) => {
       const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
-      if (columnName === i18n.ACTIONS) {
-        return;
-      }
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
+
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
+      useCasesColumns(defaultColumnArgs)
+    );
+
     await waitFor(() => {
-      getCasesColumns({
-        actions: [],
-        filterStatus: CaseStatuses.open,
-        isModal: false,
-        caseDetailsNavigation: {
-          href: jest.fn(),
-          onClick: jest.fn(),
-        },
-      }).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
+      result.current.map(
+        (i, key) => i.name != null && !i.hasOwnProperty('actions') && checkIt(`${i.name}`, key)
+      );
     });
   });
 
@@ -271,7 +278,7 @@ describe('AllCases', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
@@ -313,7 +320,7 @@ describe('AllCases', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -338,25 +345,22 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not render case link or actions on modal=true', async () => {
+  it('should not render case link when caseDetailsNavigation is not passed or actions on showActions=false', async () => {
+    const { caseDetailsNavigation, ...rest } = defaultAllCasesProps;
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...rest} />
       </TestProviders>
     );
-    await waitFor(() => {
-      const checkIt = (columnName: string) => {
-        expect(columnName).not.toEqual(i18n.ACTIONS);
-      };
-      getCasesColumns({
-        actions: [],
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
+      useCasesColumns({
         filterStatus: CaseStatuses.open,
-        isModal: true,
-        caseDetailsNavigation: {
-          href: jest.fn(),
-          onClick: jest.fn(),
-        },
-      }).map((i, key) => i.name != null && checkIt(`${i.name}`));
+        handleIsLoading: jest.fn(),
+        showActions: false,
+      })
+    );
+    await waitFor(() => {
+      result.current.map((i) => i.name != null && !i.hasOwnProperty('actions'));
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
   });
@@ -364,7 +368,7 @@ describe('AllCases', () => {
   it('should tableHeaderSortButton AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
@@ -381,7 +385,7 @@ describe('AllCases', () => {
   it('closes case when row action icon clicked', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
@@ -389,13 +393,14 @@ describe('AllCases', () => {
 
     await waitFor(() => {
       const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty).toBeCalledWith({
-        caseId: firstCase.id,
-        updateKey: 'status',
-        updateValue: CaseStatuses.closed,
-        refetchCasesStatus: fetchCasesStatus,
-        version: firstCase.version,
-      });
+      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          caseId: firstCase.id,
+          updateKey: 'status',
+          updateValue: CaseStatuses.closed,
+          version: firstCase.version,
+        })
+      );
     });
   });
 
@@ -416,7 +421,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -425,20 +430,21 @@ describe('AllCases', () => {
 
     await waitFor(() => {
       const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty).toBeCalledWith({
-        caseId: firstCase.id,
-        updateKey: 'status',
-        updateValue: CaseStatuses.open,
-        refetchCasesStatus: fetchCasesStatus,
-        version: firstCase.version,
-      });
+      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          caseId: firstCase.id,
+          updateKey: 'status',
+          updateValue: CaseStatuses.open,
+          version: firstCase.version,
+        })
+      );
     });
   });
 
   it('put case in progress when row action icon clicked', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -447,13 +453,14 @@ describe('AllCases', () => {
 
     await waitFor(() => {
       const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty).toBeCalledWith({
-        caseId: firstCase.id,
-        updateKey: 'status',
-        updateValue: CaseStatuses['in-progress'],
-        refetchCasesStatus: fetchCasesStatus,
-        version: firstCase.version,
-      });
+      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          caseId: firstCase.id,
+          updateKey: 'status',
+          updateValue: CaseStatuses['in-progress'],
+          version: firstCase.version,
+        })
+      );
     });
   });
 
@@ -476,7 +483,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -513,7 +520,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -531,7 +538,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('Renders correct bulk actoins for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
+  it('Renders correct bulk actions for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
@@ -556,7 +563,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -583,7 +590,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -606,7 +613,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -625,7 +632,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -646,7 +653,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -664,7 +671,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -674,10 +681,11 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not render header when modal=true', async () => {
+  it('should not render header when configureCasesNavigation are not present', async () => {
+    const { configureCasesNavigation, ...restProps } = defaultAllCasesProps;
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...restProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -685,23 +693,24 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not render table utility bar when modal=true', async () => {
+  it('should not render table utility bar when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-table-utility-bar-actions"]').exists()).toBe(
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
         false
       );
+      expect(wrapper.find('[data-test-subj="case-table-bulk-actions"]').exists()).toBe(false);
     });
   });
 
-  it('case table should not be selectable when modal=true', async () => {
+  it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -711,7 +720,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('should call onRowClick with no cases and modal=true', async () => {
+  it('should call onRowClick with no cases and isSelectorView=true', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
@@ -726,7 +735,7 @@ describe('AllCases', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isModal={true}
+          isSelectorView={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -737,7 +746,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('should call createCaseNavigation.onClick with no cases and modal=false', async () => {
+  it('should call createCaseNavigation.onClick with no cases and isSelectorView=false', async () => {
     const createCaseNavigation = { href: '', onClick: jest.fn() };
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -753,8 +762,7 @@ describe('AllCases', () => {
         <AllCases
           {...defaultAllCasesProps}
           createCaseNavigation={createCaseNavigation}
-          userCanCrud={true}
-          isModal={false}
+          isSelectorView={false}
         />
       </TestProviders>
     );
@@ -770,7 +778,7 @@ describe('AllCases', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isModal={true}
+          isSelectorView={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -827,7 +835,7 @@ describe('AllCases', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
@@ -839,7 +847,7 @@ describe('AllCases', () => {
   it('should change the status to closed', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -854,7 +862,7 @@ describe('AllCases', () => {
   it('should change the status to in-progress', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -869,7 +877,7 @@ describe('AllCases', () => {
   it('should change the status to open', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -884,7 +892,7 @@ describe('AllCases', () => {
   it('should show the correct count on stats', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -916,7 +924,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 
@@ -942,7 +950,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} />
+        <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
 

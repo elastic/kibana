@@ -17824,7 +17824,6 @@
     "xpack.securitySolution.cases.allCases.actions": "アクション",
     "xpack.securitySolution.cases.allCases.comments": "コメント",
     "xpack.securitySolution.cases.allCases.noTagsAvailable": "利用可能なタグがありません",
-    "xpack.securitySolution.cases.caseModal.title": "ケースを選択",
     "xpack.securitySolution.cases.caseSavedObjectNoPermissionsMessage": "ケースを表示するには、Kibana スペースで保存されたオブジェクト管理機能の権限が必要です。詳細については、Kibana管理者に連絡してください。",
     "xpack.securitySolution.cases.caseSavedObjectNoPermissionsTitle": "Kibana機能権限が必要です",
     "xpack.securitySolution.cases.caseTable.caseDetailsLinkAria": "クリックすると、タイトル{detailName}のケースを表示します",

@@ -5,58 +5,15 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
-jest.mock('../create/form_context', () => {
-  return {
-    FormContext: ({
-      children,
-      onSuccess,
-    }: {
-      children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => Promise<void>;
-    }) => {
-      return (
-        <>
-          <button
-            type="button"
-            data-test-subj="form-context-on-success"
-            onClick={async () => {
-              await onSuccess({ id: 'case-id' });
-            }}
-          >
-            {'Form submit'}
-          </button>
-          {children}
-        </>
-      );
-    },
-  };
-});
-
-jest.mock('../create/form', () => {
-  return {
-    CreateCaseForm: () => {
-      return <>{'form'}</>;
-    },
-  };
-});
-
-jest.mock('../create/submit_button', () => {
-  return {
-    SubmitCaseButton: () => {
-      return <>{'Submit'}</>;
-    },
-  };
-});
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onCaseCreated = jest.fn();
@@ -142,7 +99,7 @@ describe('useCreateCaseModal', () => {
     render(<TestProviders>{modal}</TestProviders>);
 
     act(() => {
-      userEvent.click(screen.getByText('Form submit'));
+      result.current.modal.props.onSuccess({ id: 'case-id' });
     });
 
     expect(result.current.isModalOpen).toBe(false);

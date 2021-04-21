@@ -9,11 +9,14 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { getCaseConnectorUi } from './components/connectors';
-import { getAllCasesLazy } from './methods/get_all_cases';
-import { getCaseViewLazy } from './methods/get_case_view';
-import { getConfigureCasesLazy } from './methods/get_configure_cases';
-import { getCreateCaseLazy } from './methods/get_create_case';
-import { getRecentCasesLazy } from './methods/get_recent_cases';
+import {
+  getAllCasesLazy,
+  getCaseViewLazy,
+  getConfigureCasesLazy,
+  getCreateCaseLazy,
+  getRecentCasesLazy,
+  getAllCasesSelectorModalLazy,
+} from './methods';
 import { ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
@@ -74,6 +77,14 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        */
       getRecentCases: (props) => {
         return getRecentCasesLazy(props);
+      },
+      /**
+       * use Modal hook for all cases selector
+       * @param props UseAllCasesSelectorModalProps
+       * @return UseAllCasesSelectorModalReturnedValues
+       */
+      getAllCasesSelectorModal: (props) => {
+        return getAllCasesSelectorModalLazy(props);
       },
     };
   }

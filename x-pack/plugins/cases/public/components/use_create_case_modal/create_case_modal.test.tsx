@@ -5,55 +5,15 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 
 import { CreateCaseModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
+import { getCreateCaseLazy as getCreateCase } from '../../methods';
 
-jest.mock('../create/form_context', () => {
-  return {
-    FormContext: ({
-      children,
-      onSuccess,
-    }: {
-      children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => Promise<void>;
-    }) => {
-      return (
-        <>
-          <button
-            type="button"
-            data-test-subj="form-context-on-success"
-            onClick={async () => {
-              await onSuccess({ id: 'case-id' });
-            }}
-          >
-            {'submit'}
-          </button>
-          {children}
-        </>
-      );
-    },
-  };
-});
-
-jest.mock('../create/form', () => {
-  return {
-    CreateCaseForm: () => {
-      return <>{'form'}</>;
-    },
-  };
-});
-
-jest.mock('../create/submit_button', () => {
-  return {
-    SubmitCaseButton: () => {
-      return <>{'Submit'}</>;
-    },
-  };
-});
-
+jest.mock('../../methods');
+const getCreateCaseMock = getCreateCase as jest.Mock;
 const onCloseCaseModal = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
@@ -65,6 +25,7 @@ const defaultProps = {
 describe('CreateCaseModal', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    getCreateCaseMock.mockReturnValue(<></>);
   });
 
   it('renders', () => {
@@ -74,7 +35,7 @@ describe('CreateCaseModal', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj='create-case-modal']`).exists()).toBeTruthy();
   });
 
   it('it does not render the modal isModalOpen=false ', () => {
@@ -84,7 +45,7 @@ describe('CreateCaseModal', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj='create-case-modal']`).exists()).toBeFalsy();
   });
 
   it('Closing modal calls onCloseCaseModal', () => {
@@ -98,29 +59,18 @@ describe('CreateCaseModal', () => {
     expect(onCloseCaseModal).toBeCalled();
   });
 
-  it('pass the correct props to FormContext component', () => {
-    const wrapper = mount(
+  it('pass the correct props to getCreateCase method', () => {
+    mount(
       <TestProviders>
         <CreateCaseModal {...defaultProps} />
       </TestProviders>
     );
 
-    const props = wrapper.find('FormContext').props();
-    expect(props).toEqual(
+    expect(getCreateCaseMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         onSuccess,
+        onCancel: onCloseCaseModal,
       })
     );
-  });
-
-  it('onSuccess called when creating a case', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseModal {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj='form-context-on-success']`).first().simulate('click');
-    expect(onSuccess).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

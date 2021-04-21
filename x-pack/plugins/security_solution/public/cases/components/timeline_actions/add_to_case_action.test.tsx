@@ -13,12 +13,20 @@ import { useKibana, useGetUserSavedObjectPermissions } from '../../../common/lib
 import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
-import { useAllCasesModal } from '../use_all_cases_modal';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { Case } from '../../../../../cases/public/containers/types';
+import { Case } from '../../../../../cases/common';
 
 jest.mock('../../../common/lib/kibana');
-
+jest.mock('../../../common/components/link_to', () => {
+  const original = jest.requireActual('../../../common/components/link_to');
+  return {
+    ...original,
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn(),
+      search: '',
+    }),
+  };
+});
 jest.mock('../../../common/components/toasters', () => {
   const actual = jest.requireActual('../../../common/components/toasters');
   return {
@@ -27,8 +35,7 @@ jest.mock('../../../common/components/toasters', () => {
   };
 });
 
-jest.mock('../use_all_cases_modal');
-
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('AddToCaseAction', () => {
   const props = {
     ecsRowData: {
@@ -41,24 +48,20 @@ describe('AddToCaseAction', () => {
   const mockDispatchToaster = jest.fn();
   const mockNavigateToApp = jest.fn();
   const mockCreateCase = jest.fn();
-  const mockUseCasesModal = useAllCasesModal as jest.Mock;
   const mockAllCasesModal = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCasesModal.mockReturnValue({
-      modal: <></>,
-      openModal: mockAllCasesModal,
-    });
+    useKibanaMock().services.application.navigateToApp = mockNavigateToApp;
+    useKibanaMock().services.cases = {
+      getAllCases: jest.fn(),
+      getCaseView: jest.fn(),
+      getConfigureCases: jest.fn(),
+      getRecentCases: jest.fn(),
+      getCreateCase: mockCreateCase,
+      getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
+    };
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        application: { navigateToApp: mockNavigateToApp },
-        cases: {
-          getCreateCase: mockCreateCase,
-        },
-      },
-    });
     (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
       crud: true,
       read: true,
@@ -109,7 +112,7 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: 'rule-name' },
@@ -131,8 +134,8 @@ describe('AddToCaseAction', () => {
     );
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+    wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
+    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: null },
@@ -140,16 +143,14 @@ describe('AddToCaseAction', () => {
   });
 
   it('onSuccess triggers toaster that links to case view', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        application: { navigateToApp: mockNavigateToApp },
-        cases: {
-          getCreateCase: ({ onSuccess }: { onSuccess: (theCase: Case) => Promise<void> }) => {
-            onSuccess(basicCase);
-          },
-        },
-      },
-    });
+    // @ts-ignore
+    useKibanaMock().services.cases.getCreateCase = ({
+      onSuccess,
+    }: {
+      onSuccess: (theCase: Case) => Promise<void>;
+    }) => {
+      onSuccess(basicCase);
+    };
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />

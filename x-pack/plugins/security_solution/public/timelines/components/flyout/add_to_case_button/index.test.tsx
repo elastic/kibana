@@ -11,9 +11,18 @@ import { mount } from 'enzyme';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
 import { AddToCaseButton } from '.';
 
+jest.mock('../../../../common/components/link_to', () => {
+  const original = jest.requireActual('../../../../common/components/link_to');
+  return {
+    ...original,
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn(),
+      search: '',
+    }),
+  };
+});
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -25,57 +34,51 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../../cases/components/use_all_cases_modal');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useAllCasesModalMock = useAllCasesModal as jest.Mock;
 
-describe('EventColumnView', () => {
+describe('AddToCaseButton', () => {
   const navigateToApp = jest.fn();
 
   beforeEach(() => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   it('navigates to the correct path without id', async () => {
-    useAllCasesModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick();
-
-      return {
-        modal: <>{'test'}</>,
-        openModal: jest.fn(),
-        isModalOpen: true,
-        closeModal: jest.fn(),
-      };
-    });
-
-    mount(
+    const here = jest.fn();
+    useKibanaMock().services.cases.getAllCasesSelectorModal = here.mockImplementation(
+      ({ onRowClick }) => {
+        onRowClick();
+        return <></>;
+      }
+    );
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    const wrapper = mount(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
+    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
   });
 
   it('navigates to the correct path with id', async () => {
-    useAllCasesModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'case-id' });
-
-      return {
-        modal: <>{'test'}</>,
-        openModal: jest.fn(),
-        isModalOpen: true,
-        closeModal: jest.fn(),
-      };
-    });
-
-    mount(
+    useKibanaMock().services.cases.getAllCasesSelectorModal = jest
+      .fn()
+      .mockImplementation(({ onRowClick }) => {
+        onRowClick({ id: 'case-id' });
+        return <></>;
+      });
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    const wrapper = mount(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
+    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/case-id' });
   });
