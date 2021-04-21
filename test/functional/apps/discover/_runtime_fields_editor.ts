@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
+      await esArchiver.unload('logstash_functional');
     });
 
     it('allows adding custom label to existing fields', async function () {
