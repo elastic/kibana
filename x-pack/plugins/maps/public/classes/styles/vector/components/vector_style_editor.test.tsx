@@ -14,6 +14,7 @@ import { IVectorSource } from '../../../sources/vector_source';
 import {
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
+  LAYER_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
@@ -39,10 +40,16 @@ function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TY
     getStyleEditorFields: async () => {
       return fields;
     },
+    getType() {
+      return LAYER_TYPE.VECTOR;
+    },
     getSource: () => {
       return ({
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
+        },
+        isESSource() {
+          return false;
         },
       } as unknown) as IVectorSource;
     },
