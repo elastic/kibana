@@ -1135,7 +1135,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y', cxtChartHeight + swlHeight + 2)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
-        const start = this.contextXScale(moment(d.timestamp)) + 1;
+        const start = Math.max(this.contextXScale(moment(d.timestamp)) + 1, contextXRangeStart);
         const end =
           typeof d.end_timestamp !== 'undefined'
             ? this.contextXScale(moment(d.end_timestamp)) - 1

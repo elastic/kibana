@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAnalysisType, isOutlierAnalysis } from './analytics';
+import { getAnalysisType, getValuesFromResponse, isOutlierAnalysis } from './analytics';
 
 describe('Data Frame Analytics: Analytics utils', () => {
   test('getAnalysisType()', () => {
@@ -34,5 +34,23 @@ describe('Data Frame Analytics: Analytics utils', () => {
 
     const unknownAnalysis = { outlier_detection: {}, regression: {} };
     expect(isOutlierAnalysis(unknownAnalysis)).toBe(false);
+  });
+
+  test('getValuesFromResponse()', () => {
+    const evalResponse: any = {
+      regression: {
+        huber: { value: 'NaN' },
+        mse: { value: 7.514953437693147 },
+        msle: { value: 'Infinity' },
+        r_squared: { value: 0.9837343227799651 },
+      },
+    };
+    const expectedResponse = {
+      mse: 7.51,
+      msle: 'Infinity',
+      huber: 'NaN',
+      r_squared: 0.984,
+    };
+    expect(getValuesFromResponse(evalResponse)).toEqual(expectedResponse);
   });
 });

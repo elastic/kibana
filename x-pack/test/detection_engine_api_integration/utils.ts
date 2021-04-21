@@ -779,6 +779,17 @@ export const countDownES = async (
 };
 
 /**
+ * Refresh an index, making changes available to search.
+ * Useful for tests where we want to ensure that a rule does NOT create alerts, e.g. testing exceptions.
+ * @param es The ElasticSearch handle
+ */
+export const refreshIndex = async (es: KibanaClient, index?: string) => {
+  await es.indices.refresh({
+    index,
+  });
+};
+
+/**
  * Does a plain countdown and checks against a boolean to determine if to wait and try again.
  * This is useful for over the wire things that can cause issues such as conflict or timeouts
  * for testing resiliency.
@@ -1107,7 +1118,7 @@ export const installPrePackagedRules = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: QueryCreateSchema,
+  rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[]
 ): Promise<FullResponseSchema> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1141,7 +1152,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: QueryCreateSchema = {
+  const ruleWithException: CreateRulesSchema = {
     ...rule,
     enabled: false,
     exceptions_list: [
@@ -1201,4 +1212,17 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+export const getOpenSignals = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  es: KibanaClient,
+  rule: FullResponseSchema
+) => {
+  await waitForRuleSuccessOrStatus(supertest, rule.id);
+  // Critically important that we wait for rule success AND refresh the write index in that order before we
+  // assert that no signals were created. Otherwise, signals could be written but not available to query yet
+  // when we search, causing tests that check that signals are NOT created to pass when they should fail.
+  await refreshIndex(es, rule.output_index);
+  return getSignalsByIds(supertest, [rule.id]);
 };
