@@ -33,7 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return colorMapping;
   }
 
-  describe('sync colors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/97403
+  describe.skip('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');
@@ -49,7 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({

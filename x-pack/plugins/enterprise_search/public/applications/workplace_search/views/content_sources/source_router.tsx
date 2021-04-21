@@ -47,12 +47,13 @@ import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
   const { sourceId } = useParams() as { sourceId: string };
-  const { initializeSource } = useActions(SourceLogic);
+  const { initializeSource, resetSourceState } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
     initializeSource(sourceId);
+    return resetSourceState;
   }, []);
 
   if (dataLoading) return <Loading />;
@@ -98,7 +99,7 @@ export const SourceRouter: React.FC = () => {
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
           <SendTelemetry action="viewed" metric="source_overview" />
-          <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.OVERVIEW]} />
+          <SetPageChrome trail={[NAV.SOURCES, name || '...']} />
           <Overview />
         </Route>
         <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
