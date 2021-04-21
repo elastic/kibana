@@ -28,6 +28,7 @@ const GEO_FIELD_TYPE_OPTIONS = [
 interface Props {
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   indexName: string;
+  indexNameError?: string;
   onFileClear: () => void;
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onGeoFieldTypeSelect: (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => void;
@@ -115,6 +116,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
         {this._renderGeoFieldTypeSelect()}
         <IndexNameForm
           indexName={this.state.updatedIndexName}
+          indexNameError={this.props.indexNameError}
           onIndexNameChange={this.props.onIndexNameChange}
         />
       </EuiForm>

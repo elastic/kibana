@@ -16,14 +16,13 @@ import {
 } from '../../util/indexing_service';
 
 export interface Props {
-  indexName: string; // Allow setting index pattern from external source
-  onIndexNameChange?: (name: string, error?: string) => void;
+  indexName?: string;
+  indexNameError?: string;
+  onIndexNameChange: (name: string, error?: string) => void;
 }
 
 interface State {
   existingIndexNames: string[];
-  indexName: string;
-  indexNameError: string | undefined;
 }
 
 export class IndexNameForm extends Component<Props, State> {
@@ -31,8 +30,6 @@ export class IndexNameForm extends Component<Props, State> {
 
   state: State = {
     existingIndexNames: [],
-    indexName: '',
-    indexNameError: '',
   };
 
   async componentDidMount() {
@@ -47,8 +44,7 @@ export class IndexNameForm extends Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     const { indexName: prevIndexName } = prevProps;
     const { indexName } = this.props;
-    if (indexName !== prevIndexName && indexName !== this.state.indexName) {
-      this.setState({ indexName });
+    if (indexName !== undefined && indexName !== prevIndexName) {
       this._onIndexNameChange(indexName);
     }
   }
@@ -81,10 +77,7 @@ export class IndexNameForm extends Component<Props, State> {
       );
     }
 
-    this.setState({ indexName, indexNameError });
-    if (this.props.onIndexNameChange) {
-      this.props.onIndexNameChange(indexName, indexNameError);
-    }
+    this.props.onIndexNameChange(indexName, indexNameError);
   };
 
   _onIndexNameChangeEvent = (event: ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +85,7 @@ export class IndexNameForm extends Component<Props, State> {
   };
 
   render() {
-    const errors = [...(this.state.indexNameError ? [this.state.indexNameError] : [])];
+    const errors = [...(this.props.indexNameError ? [this.props.indexNameError] : [])];
 
     return (
       <>
@@ -105,7 +98,7 @@ export class IndexNameForm extends Component<Props, State> {
         >
           <EuiFieldText
             data-test-subj="fileUploadIndexNameInput"
-            value={this.state.indexName}
+            value={this.props.indexName}
             onChange={this._onIndexNameChangeEvent}
             isInvalid={!!errors.length}
             aria-label={i18n.translate('xpack.fileUpload.indexNameForm.indexNameReqField', {

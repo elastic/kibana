@@ -37,6 +37,7 @@ interface State {
   importStatus: string;
   importResults?: ImportResults;
   indexName: string;
+  indexNameError?: string;
   indexPatternResp?: object;
   phase: PHASE;
 }
@@ -269,6 +270,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   _onIndexNameChange = (name: string, error?: string) => {
     this.setState({
       indexName: name,
+      indexNameError: error,
     });
 
     const isReadyToImport = !!name && error === undefined;
@@ -302,6 +304,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       <GeoJsonUploadForm
         geoFieldType={this.state.geoFieldType}
         indexName={this.state.indexName}
+        indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
