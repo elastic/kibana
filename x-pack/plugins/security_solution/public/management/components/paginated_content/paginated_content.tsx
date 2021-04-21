@@ -8,6 +8,7 @@
 import React, {
   ComponentProps,
   ComponentType,
+  FunctionComponent,
   Key,
   memo,
   ReactElement,
@@ -18,9 +19,12 @@ import React, {
 } from 'react';
 import {
   EuiEmptyPrompt,
+  EuiIcon,
   EuiProgress,
+  EuiSpacer,
   EuiTablePagination,
   EuiTablePaginationProps,
+  EuiText,
   Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
@@ -46,7 +50,7 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> {
   loading?: boolean;
   pagination?: Pagination;
   noItemsMessage?: ReactNode;
-  /** Error to be displayed in the component's body area. Will ignore `items` as well as `children` */
+  /** Error to be displayed in the component's body area. Used when `items` is empty and `children` is not used */
   error?: ReactNode;
   'data-test-subj'?: string;
   /** Classname applied to the area that holds the content items */
@@ -56,7 +60,7 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> {
    * to accommodate a use case.
    *
    * **IMPORTANT** If defined several input props will be ignored, like `items`, `noItemsMessage`
-   * and `error` above others
+   * and `error` among others
    */
   children?: ReactNode;
 }
@@ -65,7 +69,10 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> {
 // Work around below was created based on this discussion:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-568218789
 interface TypedGenericComponentMemo {
-  <T, C extends ComponentWithAnyProps>(p: PaginatedContentProps<T, C>): ReactElement;
+  <T, C extends ComponentWithAnyProps>(p: PaginatedContentProps<T, C>): ReactElement<
+    PaginatedContentProps<T, C>,
+    FunctionComponent<PaginatedContentProps<T, C>>
+  >;
 
   displayName: string;
 }
@@ -92,6 +99,18 @@ const DefaultNoItemsFound = memo(() => {
 });
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
+
+const ErrorMessage = memo<{ message: string }>(({ message }) => {
+  return (
+    <EuiText textAlign="center">
+      <EuiSpacer size="m" />
+      <EuiIcon type="minusInCircle" color="danger" /> {message}
+      <EuiSpacer size="m" />
+    </EuiText>
+  );
+});
+
+ErrorMessage.displayName = 'ErrorMessage';
 
 /**
  * A generic component to display paginated content. Provides "Items per Page" as well as pagination
@@ -139,8 +158,14 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
-        return error;
+        return 'string' === typeof error ? <ErrorMessage message={error} /> : error;
       }
+
+      // This casting here is needed in order to avoid the following a TS error (TS2322)
+      // stating that the attributes given to the `ItemComponent` are not assignable to
+      // type 'LibraryManagedAttributes<C, any>'
+      // @see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/34553
+      const Item = ItemComponent as ComponentType<ReturnType<typeof itemComponentProps>>;
 
       if (items.length) {
         return items.map((item) => {
@@ -157,7 +182,7 @@ export const PaginatedContent = memo(
             }
           }
 
-          return <ItemComponent {...itemComponentProps(item)} key={key} />;
+          return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
 
@@ -174,6 +199,8 @@ export const PaginatedContent = memo(
 
         {pagination && (
           <div>
+            <EuiSpacer size="l" />
+
             <EuiTablePagination
               activePage={pagination.pageIndex}
               itemsPerPage={pagination.pageSize}
