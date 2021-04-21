@@ -156,6 +156,7 @@ export function createExecutionHandler<
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+      // console.log(`Queuing action ${action.actionTypeId}`, { params: action.params })
       await actionsClient.executeEphemeralTask({
         taskType: `actions:${action.actionTypeId}`,
         params: {
@@ -168,6 +169,7 @@ export function createExecutionHandler<
         },
         state: {},
       });
+      // console.log('Action queued');
       // await actionsClient.enqueueExecution({
       //   id: action.id,
       //   params: action.params,

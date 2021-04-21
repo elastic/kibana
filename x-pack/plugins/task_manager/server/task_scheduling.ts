@@ -25,6 +25,7 @@ import {
   ErrResultOf,
   ClaimTaskErr,
   TaskClaimErrorType,
+  isTaskDeferredEvent,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import {
@@ -201,7 +202,7 @@ export class TaskScheduling {
               taskEvent.event,
               (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
                 // resolve if the task has run sucessfully
-                if (isTaskRunEvent(taskEvent)) {
+                if (isTaskRunEvent(taskEvent) || isTaskDeferredEvent(taskEvent)) {
                   subscription.unsubscribe();
                   resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
                 }

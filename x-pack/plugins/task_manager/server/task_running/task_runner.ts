@@ -64,6 +64,7 @@ export interface TaskRunner {
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
   stage: string;
+  isEphemeral?: boolean;
   toString: () => string;
 }
 

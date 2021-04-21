@@ -23,6 +23,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
+  asTaskPendingEvent,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
 import {
@@ -153,6 +154,10 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     return this.expiration < new Date();
   }
 
+  public get isEphemeral() {
+    return true;
+  }
+
   /**
    * Returns a log-friendly representation of this task.
    */
@@ -245,6 +250,23 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     }
 
     this.logger.debug(`The ephemral task ${this} is not cancellable.`);
+  }
+
+  /**
+   * Attemps to mark a task as pending
+   */
+  public async markTaskAsPending() {
+    const stopTaskTimer = startTaskTimer();
+    this.onTaskEvent(
+      asTaskPendingEvent(
+        this.id,
+        asOk({
+          task: { ...this.instance.task },
+          result: TaskRunResult.Success,
+        }),
+        stopTaskTimer()
+      )
+    );
   }
 
   private validateResult(

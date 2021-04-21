@@ -15,10 +15,10 @@ import { TaskManagerConfig } from './config';
 import { TaskEventType } from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
-import { TaskPool } from './task_pool';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskManagerRunner } from './task_running/ephemeral_task_runner';
+import { TaskPool } from './task_pool';
 
 export interface EphemeralTaskLifecycleOpts {
   logger: Logger;
