@@ -30,7 +30,6 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -40,6 +39,7 @@ import {
   kueryRt,
   rangeRt,
 } from './default_api_types';
+import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
