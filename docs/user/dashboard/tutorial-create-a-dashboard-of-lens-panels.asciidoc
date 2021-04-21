@@ -38,15 +38,16 @@ You don't need to save the dashboard while it's in draft mode.
 With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as
 *Lens* uses heuristics to apply the fields and create a visualization for you.
 
-. From the dashboard, click *Create panel*.
-
-. On the *New visualization* window, click *Lens*.
+. From the dashboard, click *Create visualization*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_1.png[New visualization popover]
+image::images/lens_end_to_end_1_1.png[Dashboard create visualization button]
 
 . Make sure the *kibana_sample_data_logs* index appears. You may need to select
-a different index pattern from the menu.
+a different index pattern from the menu:
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_2.png[Lens index pattern selector]
 
 [discrete]
 [[view-the-number-of-website-visitors]]
@@ -101,6 +102,8 @@ the newly added panel:
 
 .. Drag the bottom corner of the panel until the metric takes up one quarter of the screen
 width. The row for the metric will have 4 items on it later.
+
+.. The metric visualization has its own label, so you do not need to add a panel title.
 
 . Click *Save* on the dashboard menu
 
@@ -165,7 +168,7 @@ image::images/lens_end_to_end_4_3.png[Turn off axis name]
 . Arrange the panel so that it is in the same row as the *Metric* visualization. The two should
 take up half the screen width.
 
-. Add a panel title to explain the visualization.
+. Add a panel title to explain the visualization, which is necessary because you removed the axis labels.
 
 .. Click the gear icon and choose *Edit panel title*.
 
@@ -220,29 +223,16 @@ Customize the table even more:
 
 . Arrange the table panel so that it has its own row, but keep the default width of half the screen.
 
-// The proportion chart types in *Lens* display the percentage of the total,
-// grouped by a function that you choose. Combine these two ideas to see the
-// most frequent operating systems as a percentage:
-
-// *Lens* chooses a default color palette and adds a visual indicator to the dimension that controls
-// the color. To change the color:
-
-// . In the editor, click on *Top values of machine.os.keyword*, which has a color indicator. 
-
-// . From the *Color palette* dropdown, select *Compatibility*.
-
-// . Click *Close*.
-// +
-// [role="screenshot"]
-// image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
+. You do not need a panel title because the table columns are clearly labeled.
 
 [discrete]
 [[custom-ranges]]
 === Compare the percentage of a subset to the whole
 
 To compare a subset to the whole you need to create non-overlapping sets of documents that add up to 100%.
-The *filters* function is capable of doing this for all data types, but for numeric data the *intervals* function is
-is recommended instead. Use a proportion chart to display the values as a percentage.
+For numeric data the *intervals* function is the best option, while for all other data types *filters* is
+recommended. Use a proportion chart to display the values as a percentage of the sum. Lens has 5 types of proportion charts:
+pie, donut, treemap, percentage bar and percentage area.
 
 To determine if your users transfer more small files versus large files, create two non-overlapping intervals. Start
 with a bar chart and then switch to a pie chart to display as percentage:
@@ -272,14 +262,15 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 
 .. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 
-. Click *Bar vertical stacked*, then select *Pie*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_2.png[Files size distribution]
+. Click *Bar vertical stacked*, then select *Pie*. Notice how the *Suggestions* update with 
 
 . Click *Save and return*.
 
 . Arrange the panel into a small square on the first row of the dashboard, less than one quarter of the screen width.
+
+.. Click the gear icon and choose *Edit panel title*.
+
+.. Enter "Sum of bytes from large requests" as the panel title, then click *Save*.
 
 [discrete]
 [[histogram]]
@@ -309,11 +300,13 @@ image::images/lens_end_to_end_5_2.png[Create custom ranges]
 . Shrink the panel size, then drag it to the first row next to the *Median of bytes* panel. There
 should be four panels in a row.
 
+. You do not need a panel title because the axis labels are self-explanatory.
+
 [discrete]
 [[treemap]]
 === Create a multi-level chart
 
-*Lens* supports multi-level functions in the data table and proportion charts. For example,
+*Lens* lets you use multiple functions in the data table and proportion charts. For example,
 to create a chart which breaks down the traffic sources and user geography, use the *filters*
 function and *top values* function:
 
@@ -366,6 +359,10 @@ image::images/lens_end_to_end_7_3.png[Group other values as Other]
 . Click *Save and return*.
 
 . Arrange the panel so that it is in the same row as the table.
+
+.. Click the gear icon and choose *Edit panel title*.
+
+.. Enter "Page views by location and referer" as the panel title, then click *Save*.
 
 [discrete]
 === Save the dashboard
