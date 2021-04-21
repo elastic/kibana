@@ -42,6 +42,7 @@ export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup =
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    logger: createMockLevelLogger(),
     ...setupMock,
   };
 };
@@ -66,6 +67,7 @@ export const createMockPluginStart = (
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     data: startMock.data || dataPluginMock.createStartContract(),
     store,
+    logger: createMockLevelLogger(),
     ...startMock,
   };
 };
@@ -76,6 +78,7 @@ interface ReportingConfigTestType {
   queue: Partial<ReportingConfigType['queue']>;
   kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
   csv: Partial<ReportingConfigType['csv']>;
+  roles?: Partial<ReportingConfigType['roles']>;
   capture: any;
   server?: any;
 }
@@ -111,6 +114,10 @@ export const createMockConfigSchema = (
     csv: {
       ...overrides.csv,
     },
+    roles: {
+      enabled: false,
+      ...overrides.roles,
+    },
   } as any;
 };
 
@@ -127,12 +134,12 @@ export const createMockConfig = (
 };
 
 export const createMockReportingCore = async (
-  config: ReportingConfig,
+  config: ReportingConfigType,
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
   const mockReportingCore = ({
-    getConfig: () => config,
+    getConfig: () => createMockConfig(config),
     getEsClient: () => startDepsMock?.esClient,
     getDataService: () => startDepsMock?.data,
   } as unknown) as ReportingCore;
@@ -145,8 +152,10 @@ export const createMockReportingCore = async (
   }
 
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
-  const core = new ReportingCore(logger);
-  core.setConfig(config);
+  context.config = { get: () => config } as any;
+
+  const core = new ReportingCore(logger, context);
+  core.setConfig(createMockConfig(config));
 
   core.pluginSetup(setupDepsMock);
   await core.pluginSetsUp();

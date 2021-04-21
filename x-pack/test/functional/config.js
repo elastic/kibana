@@ -84,6 +84,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.maps.enableDrawingFeature=true',
+        '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
@@ -236,8 +237,8 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['all'],
-                visualize: ['all'],
+                canvas: ['minimal_all'],
+                visualize: ['minimal_all'],
               },
               spaces: ['*'],
             },
