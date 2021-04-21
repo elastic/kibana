@@ -58,18 +58,41 @@ export const WorkpadVariable = schema.object({
   type: schema.string(),
 });
 
-export const WorkpadSchema = schema.object({
-  '@created': schema.maybe(schema.string()),
-  '@timestamp': schema.maybe(schema.string()),
-  assets: schema.maybe(schema.recordOf(schema.string(), WorkpadAssetSchema)),
-  colors: schema.arrayOf(schema.string()),
-  css: schema.string(),
-  variables: schema.arrayOf(WorkpadVariable),
-  height: schema.number(),
-  id: schema.string(),
-  isWriteable: schema.maybe(schema.boolean()),
-  name: schema.string(),
-  page: schema.number(),
-  pages: schema.arrayOf(WorkpadPageSchema),
-  width: schema.number(),
-});
+export const WorkpadSchema = schema.object(
+  {
+    '@created': schema.maybe(schema.string()),
+    '@timestamp': schema.maybe(schema.string()),
+    assets: schema.maybe(schema.recordOf(schema.string(), WorkpadAssetSchema)),
+    colors: schema.arrayOf(schema.string()),
+    css: schema.string(),
+    variables: schema.arrayOf(WorkpadVariable),
+    height: schema.number(),
+    id: schema.string(),
+    isWriteable: schema.maybe(schema.boolean()),
+    name: schema.string(),
+    page: schema.number(),
+    pages: schema.arrayOf(WorkpadPageSchema),
+    width: schema.number(),
+  },
+  {
+    validate: (workpad) => {
+      // Validate unique page ids
+      const pageIdsArray = workpad.pages.map((page) => page.id);
+      const pageIdsSet = new Set(pageIdsArray);
+
+      if (pageIdsArray.length !== pageIdsSet.size) {
+        return 'Page Ids are not unique';
+      }
+
+      // Validate unique element ids
+      const elementIdsArray = workpad.pages
+        .map((page) => page.elements.map((element) => element.id))
+        .flat();
+      const elementIdsSet = new Set(elementIdsArray);
+
+      if (elementIdsArray.length !== elementIdsSet.size) {
+        return 'Element Ids are not unique';
+      }
+    },
+  }
+);
