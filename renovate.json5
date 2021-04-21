@@ -54,7 +54,7 @@
         packageNames: ['@elastic/elasticsearch'],
         reviewers: ['team:kibana-operations'],
         matchBaseBranches: ['7.x'],
-        labels: ['release_note:skip', 'v7.13.0', 'Team:Operations', 'backport:skip'],
+        labels: ['release_note:skip', 'v7.14.0', 'Team:Operations', 'backport:skip'],
         enabled: true,
       },
       {
