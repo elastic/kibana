@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { rulesRouteRepository } from './rules';
+import { fieldValuesRouteRepository } from './field_values_search';
 
 export function getGlobalObservabilityServerRouteRepository() {
-  return rulesRouteRepository;
+  return rulesRouteRepository.merge(fieldValuesRouteRepository);
 }
 
 export type ObservabilityServerRouteRepository = ReturnType<

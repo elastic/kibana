@@ -53,7 +53,7 @@ export function ExploratoryView() {
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-          {lensAttributes && seriesId && series?.reportType && series?.time ? (
+          {!lensAttributes && seriesId && series?.reportType && series?.time ? (
             <LensComponent
               id="exploratoryView"
               style={{ height: 550 }}

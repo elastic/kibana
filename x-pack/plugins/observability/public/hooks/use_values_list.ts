@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../src/plugins/data/common';
+import { IndexPattern, isCompleteResponse } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { useFetcher } from './use_fetcher';
 import { ESFilter } from '../../../../../typings/elasticsearch';
+import { buildPhraseFilter } from '../components/shared/exploratory_view/configurations/utils';
 
 export interface Props {
   sourceField: string;
@@ -57,6 +58,45 @@ export const useValuesList = ({
           : filters || [],
     });
   }, [query, sourceField, data.autocomplete, indexPattern, from, to, filters]);
+
+  const { data: values1 } = useFetcher(async () => {
+    // if (!sourceField || !indexPattern) {
+    //   return [];
+    // }
+    return new Promise((resolve) => {
+      const search$ = data.search
+        .search({
+          params: {
+            index: indexPattern.title,
+            body: {
+              query: { match_all: {} },
+              size: 0,
+              aggs: {
+                values: {
+                  terms: {
+                    field: 'monitor.name',
+                    size: 65000,
+                  },
+                },
+              },
+            },
+          },
+        })
+        .subscribe({
+          next: (response) => {
+            if (isCompleteResponse(response)) {
+              // Final result
+              resolve(response);
+              search$.unsubscribe();
+            } else {
+              resolve(response);
+            }
+          },
+        });
+    });
+  }, [query, sourceField, data.autocomplete, indexPattern, from, to, filters]);
+
+  console.log(values1);
 
   return { values: values as string[], loading };
 };
