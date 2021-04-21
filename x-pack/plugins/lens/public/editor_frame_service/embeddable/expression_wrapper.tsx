@@ -17,7 +17,7 @@ import {
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
-import { getOriginalRequestErrorMessage } from '../error_helper';
+import { getOriginalRequestErrorMessages } from '../error_helper';
 import { ErrorMessage } from '../types';
 
 export interface ExpressionWrapperProps {
@@ -130,9 +130,9 @@ export function ExpressionWrapper({
                     <EuiIcon type="alert" color="danger" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="s">
-                      {getOriginalRequestErrorMessage(error) || errorMessage}
-                    </EuiText>
+                    {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
+                      <EuiText size="s">{message}</EuiText>
+                    ))}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </div>
