@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
-import { merge } from 'lodash';
+import React, { useState, Fragment } from 'react';
 import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { rgba } from 'polished';
@@ -30,8 +29,6 @@ interface Props {
 export function FilterExpanded({ seriesId, field, label, goBack, nestedField, isNegated }: Props) {
   const { indexPattern } = useAppIndexPatternContext();
 
-  const [displayValues, setDisplayValues] = useState<string[]>([]);
-
   const [value, setValue] = useState('');
 
   const [isOpen, setIsOpen] = useState({ value: '', negate: false });
@@ -43,22 +40,14 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
     indexPattern,
     sourceField: field,
     time: series.time,
+    keepHistory: true,
   });
-
-  useEffect(() => {
-    setDisplayValues((prevState) => {
-      const newValues = merge(prevState, values);
-      const filteredValues = newValues.filter((opt) =>
-        opt.toLowerCase().includes(value.toLowerCase())
-      );
-      return [...filteredValues];
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, value, values?.length]);
 
   const filters = series?.filters ?? [];
 
   const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
+
+  const displayValues = values.filter((opt) => opt.toLowerCase().includes(value.toLowerCase()));
 
   return (
     <Wrapper>
@@ -112,11 +101,6 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
     </Wrapper>
   );
 }
-
-// const ListWrapper = styled.div`
-//   max-height: 600px;
-//   overflow-y: auto;
-// `;
 
 const ListWrapper = euiStyled.div`
   height: 400px;
