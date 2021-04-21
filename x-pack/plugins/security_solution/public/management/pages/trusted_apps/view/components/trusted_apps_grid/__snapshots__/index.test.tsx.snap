@@ -2919,7 +2919,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <button
                     aria-current="true"
                     aria-label="Page 1 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-0"
                     disabled=""
                     type="button"
@@ -2940,7 +2940,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 2 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -2960,7 +2960,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 3 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-2"
                     type="button"
                   >
@@ -2980,7 +2980,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 4 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -3000,7 +3000,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 5 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-4"
                     type="button"
                   >
@@ -3026,7 +3026,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 20 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-19"
                     type="button"
                   >
@@ -5938,7 +5938,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <button
                     aria-current="true"
                     aria-label="Page 1 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-0"
                     disabled=""
                     type="button"
@@ -5959,7 +5959,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 2 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -5979,7 +5979,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 3 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-2"
                     type="button"
                   >
@@ -5999,7 +5999,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 4 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -6019,7 +6019,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 5 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-4"
                     type="button"
                   >
@@ -6045,7 +6045,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 20 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-19"
                     type="button"
                   >
@@ -8913,7 +8913,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 1 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-0"
                     type="button"
                   >
@@ -8933,7 +8933,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 2 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -8954,7 +8954,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <button
                     aria-current="true"
                     aria-label="Page 3 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-2"
                     disabled=""
                     type="button"
@@ -8975,7 +8975,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 4 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >

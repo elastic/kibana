@@ -50,6 +50,7 @@ export interface FieldsAccordionProps {
   renderCallout: JSX.Element;
   exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
+  showExistenceFetchTimeout?: boolean;
   hideDetails?: boolean;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
@@ -73,6 +74,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   exists,
   hideDetails,
   showExistenceFetchError,
+  showExistenceFetchTimeout,
   groupIndex,
   dropOntoWorkspace,
   hasSuggestionForField,
@@ -133,25 +135,44 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   }, [label, helpTooltip]);
 
   const extraAction = useMemo(() => {
-    return showExistenceFetchError ? (
-      <EuiIconTip
-        aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
-          defaultMessage: 'Existence fetch failed',
-        })}
-        type="alert"
-        color="warning"
-        content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
-          defaultMessage: "Field information can't be loaded",
-        })}
-      />
-    ) : hasLoaded ? (
-      <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
-        {fieldsCount}
-      </EuiNotificationBadge>
-    ) : (
-      <EuiLoadingSpinner size="m" />
-    );
-  }, [showExistenceFetchError, hasLoaded, isFiltered, fieldsCount]);
+    if (showExistenceFetchError) {
+      return (
+        <EuiIconTip
+          aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
+            defaultMessage: 'Existence fetch failed',
+          })}
+          type="alert"
+          color="warning"
+          content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
+            defaultMessage: "Field information can't be loaded",
+          })}
+        />
+      );
+    }
+    if (showExistenceFetchTimeout) {
+      return (
+        <EuiIconTip
+          aria-label={i18n.translate('xpack.lens.indexPattern.existenceTimeoutAriaLabel', {
+            defaultMessage: 'Existence fetch timed out',
+          })}
+          type="clock"
+          color="warning"
+          content={i18n.translate('xpack.lens.indexPattern.existenceTimeoutLabel', {
+            defaultMessage: 'Field information took too long',
+          })}
+        />
+      );
+    }
+    if (hasLoaded) {
+      return (
+        <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
+          {fieldsCount}
+        </EuiNotificationBadge>
+      );
+    }
+
+    return <EuiLoadingSpinner size="m" />;
+  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, fieldsCount]);
 
   return (
     <EuiAccordion

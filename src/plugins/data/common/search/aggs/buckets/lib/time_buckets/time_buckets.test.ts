@@ -109,12 +109,22 @@ describe('TimeBuckets', () => {
     }
   });
 
-  test('setInterval/getInterval - intreval is a "auto"', () => {
+  test('setInterval/getInterval - interval is a "auto"', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval(autoInterval);
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('0 milliseconds');
+    expect(interval.esValue).toEqual(0);
+    expect(interval.esUnit).toEqual('ms');
+    expect(interval.expression).toEqual('0ms');
+  });
+
+  test('setInterval/getInterval - interval is a "auto" (useNormalizedEsInterval is false)', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval(autoInterval);
+    const interval = timeBuckets.getInterval(false);
+
     expect(interval.esValue).toEqual(0);
     expect(interval.esUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');

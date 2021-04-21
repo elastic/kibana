@@ -23,6 +23,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -31,6 +37,7 @@ describe('config validation', () => {
           "valueInBytes": 1048576,
         },
         "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
@@ -57,6 +64,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -74,6 +87,7 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
         "responseTimeout": "PT1M",

@@ -82,32 +82,71 @@ describe('index connector validation with minimal config', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
-    const actionParams = {
-      documents: [{ test: 1234 }],
-    };
-
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+  test('action params validation succeeds when action params are valid', () => {
+    expect(
+      actionTypeModel.validateParams({
+        documents: [{ test: 1234 }],
+      })
+    ).toEqual({
       errors: {
         documents: [],
+        indexOverride: [],
       },
     });
 
-    const emptyActionParams = {};
+    expect(
+      actionTypeModel.validateParams({
+        documents: [{ test: 1234 }],
+        indexOverride: 'kibana-alert-history-anything',
+      })
+    ).toEqual({
+      errors: {
+        documents: [],
+        indexOverride: [],
+      },
+    });
+  });
 
-    expect(actionTypeModel.validateParams(emptyActionParams)).toEqual({
+  test('action params validation fails when action params are invalid', () => {
+    expect(actionTypeModel.validateParams({})).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: [],
       },
     });
 
-    const invalidDocumentActionParams = {
-      documents: [{}],
-    };
-
-    expect(actionTypeModel.validateParams(invalidDocumentActionParams)).toEqual({
+    expect(
+      actionTypeModel.validateParams({
+        documents: [{}],
+      })
+    ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: [],
+      },
+    });
+
+    expect(
+      actionTypeModel.validateParams({
+        documents: [{}],
+        indexOverride: 'kibana-alert-history-',
+      })
+    ).toEqual({
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: ['Alert history index must contain valid suffix.'],
+      },
+    });
+
+    expect(
+      actionTypeModel.validateParams({
+        documents: [{}],
+        indexOverride: 'this.is-a_string',
+      })
+    ).toEqual({
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: ['Alert history index must begin with "kibana-alert-history-".'],
       },
     });
   });

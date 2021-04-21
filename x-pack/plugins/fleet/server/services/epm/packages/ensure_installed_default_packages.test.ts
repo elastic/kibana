@@ -77,14 +77,14 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: mockInstallation.attributes.name,
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
       ];
     });
     const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
-    expect(resp).toEqual([mockInstallation.attributes]);
+    expect(resp.installations).toEqual([mockInstallation.attributes]);
   });
   it('should throw the first Error it finds', async () => {
     class SomeCustomError extends Error {}
@@ -95,13 +95,13 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'success one',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
         {
           name: 'success two',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
@@ -111,7 +111,7 @@ describe('ensureInstalledDefaultPackages', () => {
         },
         {
           name: 'success three',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },
@@ -134,7 +134,7 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'undefined package',
-          result: { assets: [], status: 'installed' },
+          result: { assets: [], status: 'installed', installType: 'install' },
           version: '',
           statusCode: 200,
         },

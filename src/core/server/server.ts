@@ -36,7 +36,6 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as devConfig } from './dev';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
@@ -248,6 +247,7 @@ export class Server {
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
+      exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
     this.coreStart = {
@@ -272,10 +272,10 @@ export class Server {
     this.log.debug('stopping server');
 
     await this.legacy.stop();
+    await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
-    await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
@@ -303,7 +303,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      devConfig,
       kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,

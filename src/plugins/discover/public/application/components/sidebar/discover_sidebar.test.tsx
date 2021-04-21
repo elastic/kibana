@@ -48,6 +48,12 @@ const mockServices = ({
       }
     },
   },
+  indexPatternFieldEditor: {
+    openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
+  },
 } as unknown) as DiscoverServices;
 
 jest.mock('../../../kibana_services', () => ({
@@ -102,6 +108,8 @@ function getCompProps(): DiscoverSidebarProps {
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
+    onEditRuntimeField: jest.fn(),
+    editField: jest.fn(),
   };
 }
 

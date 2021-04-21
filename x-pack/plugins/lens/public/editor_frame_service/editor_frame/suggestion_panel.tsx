@@ -130,6 +130,8 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
+          hasBorder
+          hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
