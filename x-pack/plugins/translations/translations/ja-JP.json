@@ -13823,7 +13823,6 @@
     "xpack.ml.jobSelector.filterBar.invalidSearchErrorMessage": "無効な検索：{errorMessage}",
     "xpack.ml.jobSelector.flyoutTitle": "ジョブの選択",
     "xpack.ml.jobSelector.formControlLabel": "ジョブまたはグループを選択",
-    "xpack.ml.jobSelector.groupOptionsLabel": "グループ",
     "xpack.ml.jobSelector.groupsTab": "グループ",
     "xpack.ml.jobSelector.hideBarBadges": "非表示",
     "xpack.ml.jobSelector.hideFlyoutBadges": "非表示",

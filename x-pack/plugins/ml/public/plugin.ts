@@ -51,8 +51,8 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { registerMlAlerts } from './alerting/register_ml_alerts';
 import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -79,6 +79,7 @@ export interface MlSetupDependencies {
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  alerting?: AlertingSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -132,10 +133,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
     }
 
-    if (pluginsSetup.triggersActionsUi) {
-      registerMlAlerts(pluginsSetup.triggersActionsUi);
-    }
-
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -166,6 +163,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerManagementSection,
         registerMlUiActions,
         registerSearchLinks,
+        registerMlAlerts,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -181,6 +179,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
+          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
+            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+          }
         }
       }
     });
