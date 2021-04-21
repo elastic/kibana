@@ -9,7 +9,14 @@ import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
@@ -20,6 +27,7 @@ import './search_experience.scss';
 
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
+import { DOCS_PREFIX } from '../../../routes';
 import { EngineLogic } from '../../engine';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
@@ -76,6 +84,43 @@ export const SearchExperience: React.FC = () => {
   });
 
   const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
+
+  const EmptyState = () => (
+    <EuiPanel color="subdued" grow={false}>
+      <EuiEmptyPrompt
+        data-test-subj="EmptyDocumentPrompt"
+        className="emptyState__prompt"
+        iconType="documents"
+        title={
+          <h2>
+            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.emptyState.title', {
+              defaultMessage: 'No documents yet!',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.description', {
+              defaultMessage:
+                'You can index documents using the App Search Web Crawler, by uploading JSON, or by using the API.',
+            })}
+          </p>
+        }
+        actions={
+          <EuiButton
+            size="s"
+            color="primary"
+            target="_blank  "
+            href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
+          >
+            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.emptyButtonLabel', {
+              defaultMessage: 'Read the documents guide',
+            })}
+          </EuiButton>
+        }
+      />
+    </EuiPanel>
+  );
 
   return (
     <div className="documentsSearchExperience">
@@ -140,7 +185,11 @@ export const SearchExperience: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
-            <SearchExperienceContent />
+            {engine.document_count && engine.document_count > 0 ? (
+              <SearchExperienceContent />
+            ) : (
+              <EmptyState />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>
