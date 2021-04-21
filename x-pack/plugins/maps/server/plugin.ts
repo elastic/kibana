@@ -86,9 +86,19 @@ export class MapsPlugin implements Plugin {
         oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
         embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
         // @ts-ignore
-        embeddableType: 'map',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: false,
+          enhancements: {},
+          mapCenter: { lat: 45.88578, lon: -15.07605, zoom: 2.11 },
+          mapBuffer: {
+            minLon: -198.47532999999999,
+            minLat: -2.2215849999999975,
+            maxLon: 168.32322999999997,
+            maxLat: 85.70335499999999,
+          },
+          openTOCDetails: [],
+          hiddenLayers: [],
         },
       });
 
@@ -111,6 +121,16 @@ export class MapsPlugin implements Plugin {
         embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: true,
+          enhancements: {},
+          mapCenter: { lat: 38.38637, lon: -89.58746, zoom: 3.14 },
+          mapBuffer: {
+            minLon: -269.85054,
+            minLat: 13.19741,
+            maxLon: 90.67562,
+            maxLat: 61.574169999999995,
+          },
+          openTOCDetails: [],
+          hiddenLayers: [],
         },
       });
 
@@ -131,6 +151,16 @@ export class MapsPlugin implements Plugin {
         embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: false,
+          mapCenter: { lat: 42.16337, lon: -88.92107, zoom: 3.64 },
+          mapBuffer: {
+            minLon: -152.42809,
+            minLat: 21.688435,
+            maxLon: -25.41405,
+            maxLat: 61.115615,
+          },
+          openTOCDetails: [],
+          hiddenLayers: [],
+          enhancements: {},
         },
       });
 
