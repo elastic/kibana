@@ -105,7 +105,7 @@ export const DashboardListing = ({
       confirmCreateWithUnsaved(
         core.overlays,
         () => {
-          dashboardSessionStorage.clearPanels();
+          dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
         },
         () => redirectTo({ destination: 'dashboard' })
@@ -140,7 +140,7 @@ export const DashboardListing = ({
 
   const deleteItems = useCallback(
     (dashboards: Array<{ id: string }>) => {
-      dashboards.map((d) => dashboardSessionStorage.clearPanels(d.id));
+      dashboards.map((d) => dashboardSessionStorage.clearState(d.id));
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
       return savedDashboards.delete(dashboards.map((d) => d.id));
     },

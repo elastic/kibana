@@ -7,42 +7,25 @@
  */
 
 import _ from 'lodash';
-import { DashboardContainerInput } from '..';
 import { esFilters, Filter } from '../../services/data';
-import { DashboardState } from '../../types';
+import { DashboardContainerInput, DashboardState } from '../../types';
 
 export const diffDashboardContainerInput = (
   originalInput: DashboardContainerInput,
   newInput: DashboardContainerInput
 ) => {
-  const differences: Partial<DashboardContainerInput> = {};
-  if (
-    !esFilters.compareFilters(
-      originalInput.filters,
-      newInput.filters,
-      esFilters.COMPARE_ALL_OPTIONS
-    )
-  ) {
-    differences.filters = newInput.filters;
-  }
-
-  Object.keys(
-    _.omit(originalInput, ['filters', 'searchSessionId', 'lastReloadRequestTime', 'switchViewMode'])
-  ).forEach((key) => {
-    const originalValue = ((originalInput as unknown) as { [key: string]: unknown })[key];
-    const newValue = ((newInput as unknown) as { [key: string]: unknown })[key];
-    if (!_.isEqual(originalValue, newValue)) {
-      (differences as { [key: string]: unknown })[key] = newValue;
-    }
-  });
-  return _.cloneDeep(differences);
+  return commonDiff<DashboardContainerInput>(
+    (originalInput as unknown) as DashboardDiffCommon,
+    (newInput as unknown) as DashboardDiffCommon,
+    ['filters', 'searchSessionId', 'lastReloadRequestTime']
+  );
 };
 
 export const diffDashboardState = (originalState: DashboardState, newState: DashboardState) => {
-  return commonDiff(
+  return commonDiff<DashboardState>(
     (originalState as unknown) as DashboardDiffCommon,
     (newState as unknown) as DashboardDiffCommon,
-    ['viewMode', 'filters', 'query']
+    ['viewMode', 'filters']
   );
 };
 
@@ -51,12 +34,12 @@ interface DashboardDiffCommon {
   filters: Filter[];
 }
 
-const commonDiff = (
+const commonDiff = <T extends { filters: Filter[] }>(
   originalObj: DashboardDiffCommon,
   newObj: DashboardDiffCommon,
   omitKeys: string[]
 ) => {
-  const differences: Partial<DashboardContainerInput> = {};
+  const differences: Partial<T> = {};
   if (
     !esFilters.compareFilters(originalObj.filters, newObj.filters, esFilters.COMPARE_ALL_OPTIONS)
   ) {

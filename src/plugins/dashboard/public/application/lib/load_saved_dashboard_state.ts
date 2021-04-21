@@ -13,6 +13,7 @@ import { getDashboard60Warning } from '../../dashboard_strings';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
+import { ViewMode } from '../../services/embeddable';
 
 interface LoadSavedDashboardStateReturn {
   savedDashboardState: DashboardState;
@@ -99,6 +100,9 @@ export const loadSavedDashboardState = async ({
       }
     }
   }
+
+  const isViewMode = hideWriteControls || Boolean(savedDashboard.id);
+  savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
 
   return { savedDashboardState, savedDashboard };
 };

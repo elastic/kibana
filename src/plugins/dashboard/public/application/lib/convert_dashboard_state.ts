@@ -7,17 +7,21 @@
  */
 
 import _ from 'lodash';
-import { DashboardContainerInput } from '../embeddable';
 import { DashboardSavedObject } from '../../saved_dashboards';
-import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
-  DashboardAppServices,
-  DashboardPanelMap,
-  DashboardState,
-  SavedDashboardPanel,
-} from '../../types';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
+import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
+import {
+  convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
+} from '../../../common/embeddable/embeddable_saved_object_converters';
+import {
+  DashboardState,
+  RawDashboardState,
+  DashboardPanelMap,
+  SavedDashboardPanel,
+  DashboardAppServices,
+  DashboardContainerInput,
+} from '../../types';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -36,14 +40,19 @@ interface StateToDashboardContainerInputProps {
   incomingEmbeddable?: EmbeddablePackageState;
 }
 
+interface StateToRawDashboardStateProps {
+  version: string;
+  state: DashboardState;
+}
+
 export const savedObjectToDashboardState = ({
   version,
   hideWriteControls,
   savedDashboard,
   usageCollection,
   savedObjectsTagging,
-}: SavedObjectToDashboardStateProps) => {
-  return migrateAppState(
+}: SavedObjectToDashboardStateProps): DashboardState => {
+  const rawState = migrateAppState(
     {
       fullScreenMode: false,
       title: savedDashboard.title,
@@ -59,6 +68,12 @@ export const savedObjectToDashboardState = ({
     version,
     usageCollection
   );
+
+  const panels: DashboardPanelMap = {};
+  rawState.panels?.forEach((panel: SavedDashboardPanel) => {
+    panels[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+  });
+  return { ...rawState, panels };
 };
 
 export const stateToDashboardContainerInput = ({
@@ -73,11 +88,6 @@ export const stateToDashboardContainerInput = ({
     data: { query: queryService },
   } = services;
 
-  const panels: DashboardPanelMap = {};
-  dashboardState.panels?.forEach((panel: SavedDashboardPanel) => {
-    panels[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-  });
-
   return {
     refreshConfig: queryService.timefilter.timefilter.getRefreshInterval(),
     hidePanelTitles: dashboardState.options?.hidePanelTitles,
@@ -88,15 +98,25 @@ export const stateToDashboardContainerInput = ({
     description: dashboardState.description,
     viewMode: dashboardState.viewMode,
     filters: dashboardState.filters,
+    panels: dashboardState.panels,
     id: savedDashboard.id || '',
     query: dashboardState.query,
     title: dashboardState.title,
     dashboardCapabilities,
     isEmbeddedExternally,
     searchSessionId,
-    panels,
     timeRange: {
       ..._.cloneDeep(queryService.timefilter.timefilter.getTime()),
     },
   };
+};
+
+export const stateToRawDashboardState = ({
+  version,
+  state,
+}: StateToRawDashboardStateProps): RawDashboardState => {
+  const savedDashboardPanels = Object.values(state.panels).map((panel) =>
+    convertPanelStateToSavedDashboardPanel(panel, version)
+  );
+  return { ..._.omit(state, 'panels'), panels: savedDashboardPanels };
 };

@@ -133,7 +133,7 @@ export const DashboardUnsavedListing = ({
   const onDiscard = useCallback(
     (id?: string) => {
       confirmDiscardUnsavedChanges(overlays, () => {
-        dashboardSessionStorage.clearPanels(id);
+        dashboardSessionStorage.clearState(id);
         refreshUnsavedDashboards();
       });
     },
@@ -161,7 +161,7 @@ export const DashboardUnsavedListing = ({
       const newItems = dashboards.reduce((map, dashboard) => {
         if (typeof dashboard === 'string') {
           hasError = true;
-          dashboardSessionStorage.clearPanels(dashboard);
+          dashboardSessionStorage.clearState(dashboard);
           return map;
         }
         return {

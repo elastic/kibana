@@ -6,39 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
-
 import _ from 'lodash';
 import { History } from 'history';
 import { debounceTime } from 'rxjs/operators';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
 import { DashboardConstants } from '../..';
-import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../services/kibana_utils';
 import {
+  DashboardEmbedSettings,
+  DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,
-  DashboardBuildContext,
-  DashboardEmbedSettings,
   DashboardRedirect,
   DashboardState,
 } from '../../types';
 import {
+  tryDestroyDashboardContainer,
+  syncDashboardContainerInput,
+  savedObjectToDashboardState,
+  syncDashboardIndexPatterns,
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
-  syncDashboardIndexPatterns,
-  syncDashboardContainerInput,
-  tryDestroyDashboardContainer,
-  savedObjectToDashboardState,
+  loadUrlDashboardState,
   diffDashboardState,
   areTimeRangesEqual,
 } from '../lib';
+import { ViewMode } from '../../services/embeddable';
 
 interface UseDashboardStateProps {
   history: History;
@@ -53,11 +52,11 @@ export const useDashboardAppState = ({
   redirectTo,
   embedSettings,
 }: UseDashboardStateProps) => {
-  const dispatchDashboardStateChange = useDashboardDispatch();
   const services = useKibana<DashboardAppServices>().services;
+  const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
-
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
+
   const [dashboardAppState, setDashboardAppState] = useState<DashboardAppState>({
     $onDashboardStateChange: new BehaviorSubject({} as DashboardState),
     $triggerDashboardRefresh: new Subject<{ force?: boolean }>(),
@@ -65,9 +64,15 @@ export const useDashboardAppState = ({
 
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  // load saved dashboard, create container, and set up state sync every time dashboard ID changes.
+  /**
+   * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
+   * fetching the initial state from the Saved Object, Session storage, and URL, building the Dashboard Container
+   * embeddable, and setting up syncing between the Query Service, the Redux State, and the Dashboard Container.
+   */
   useEffect(() => {
-    // unpack services inside UseEffect to keep deps array small. Services should not change during runtime.
+    /**
+     * Unpack services inside UseEffect to keep deps array small. Services do not change during runtime.
+     */
     const {
       core,
       data,
@@ -75,8 +80,8 @@ export const useDashboardAppState = ({
       uiSettings,
       embeddable,
       initializerContext,
-      // dashboardSessionStorage,
       dashboardCapabilities,
+      dashboardSessionStorage,
     } = services;
 
     const { docTitle } = chrome;
@@ -85,6 +90,9 @@ export const useDashboardAppState = ({
     const timefilter = data.query.timefilter.timefilter;
     const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
+    /**
+     * Create dashboard build context package which will be used in all of the following steps.
+     */
     const dashboardBuildContext: DashboardBuildContext = {
       history,
       services,
@@ -103,43 +111,44 @@ export const useDashboardAppState = ({
       }),
     };
 
-    const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-      DashboardConstants.DASHBOARDS_ID,
-      true
-    );
-
     let canceled = false;
     let onDestroy: () => void;
 
     (async () => {
-      // Load initial state from dashboard saved object
+      /**
+       * Load and unpack state from dashboard saved object.
+       */
       const loadSavedDashboardResult = await loadSavedDashboardState(dashboardBuildContext);
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
 
-      // Load initial state from URL and from session storage
-      // const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId);
-      // TODO: fetch and combine dashboardUrlState
-
-      // Combine and dispatch initial state
-      const isViewModeOnLoad =
-        dashboardCapabilities.hideWriteControls ||
-        (Boolean(savedDashboard.id) && !incomingEmbeddable);
+      /**
+       * Combine initial state from the session storage,  sources, then dispatch it to Redux.
+       */
+      const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
+      const dashboardURLState = loadUrlDashboardState(dashboardBuildContext);
       const initialDashboardState = {
         ...savedDashboardState,
-        viewMode: isViewModeOnLoad ? ViewMode.VIEW : ViewMode.EDIT,
-        // ...dashboardSessionStorageState,
-        // ...dashboardURLState
+        ...dashboardSessionStorageState,
+        ...dashboardURLState,
       };
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
-      // set up syncing for filters
+      /**
+       * Start syncing dashboard state with the Query, Filters and Timepicker from the Query Service.
+       */
       const { applyFilters, stopSyncingDashboardFilterState } = syncDashboardFilterState({
         ...dashboardBuildContext,
         savedDashboard,
       });
 
-      // Build Dashboard Container embeddable
+      /**
+       * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
+       */
+      const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
+        DashboardConstants.DASHBOARDS_ID,
+        true
+      );
       const dashboardContainer = await buildDashboardContainer({
         ...dashboardBuildContext,
         initialDashboardState,
@@ -151,7 +160,9 @@ export const useDashboardAppState = ({
         return;
       }
 
-      // Set up syncing for index patterns
+      /**
+       * Start syncing index patterns between the Query Service and the Dashboard Container.
+       */
       const indexPatternsSubscription = syncDashboardIndexPatterns({
         dashboardContainer,
         indexPatterns: services.indexPatterns,
@@ -159,7 +170,9 @@ export const useDashboardAppState = ({
           setDashboardAppState((s) => ({ ...s, indexPatterns })),
       });
 
-      // Sync changes between dashboard container and the dashboard redux state
+      /**
+       * Set up the two way syncing between the Dashboard Container and the Redux Store.
+       */
       const stopSyncingContainerInput = syncDashboardContainerInput({
         ...dashboardBuildContext,
         dashboardContainer,
@@ -167,35 +180,43 @@ export const useDashboardAppState = ({
         applyFilters,
       });
 
-      // Compare with last saved state any time state or last saved state changes. Push differences to session storage
+      /**
+       * Any time the redux state, or the last saved state changes, compare them, set the unsaved
+       * changes state, and and push the unsaved changes to session storage.
+       */
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
         dashboardBuildContext.$checkForUnsavedChanges,
       ])
-        .pipe(debounceTime(100))
+        .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
         .subscribe((states) => {
-          const [current, lastSaved] = states;
-          const unsavedChanges = diffDashboardState(lastSaved, current);
-          if (unsavedChanges.panels) {
-            console.log('current panels', current.panels, '\n last panels', lastSaved.panels);
-            console.log('deep diff', deepDifference(current.panels, lastSaved.panels));
+          const [lastSaved, current] = states;
+          const unsavedChanges =
+            current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
+
+          if (current.viewMode === ViewMode.EDIT) {
+            const lastSavedTimeRange = {
+              from: savedDashboard?.timeFrom,
+              to: savedDashboard?.timeTo,
+            };
+            const savedTimeChanged =
+              lastSaved.timeRestore &&
+              !areTimeRangesEqual(lastSavedTimeRange, timefilter.getTime());
+            const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+            setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
           }
-          const lastSavedTimeRange = {
-            from: savedDashboard?.timeFrom,
-            to: savedDashboard?.timeTo,
-          };
-          const savedTimeChanged =
-            lastSaved.timeRestore && !areTimeRangesEqual(lastSavedTimeRange, timefilter.getTime());
-          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
-          setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
+
+          unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
+          dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
         });
 
-      // Set initial lastSavedState and initialize checkForUnsavedChanges
+      /**
+       * initialize the last saved state, and build a callback which can be used to update
+       * the last saved state on save.
+       */
       setLastSavedState(savedDashboardState);
       dashboardBuildContext.$checkForUnsavedChanges.next();
-
-      // Build callback for updating the last saved state.
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
@@ -208,7 +229,9 @@ export const useDashboardAppState = ({
         );
       };
 
-      // Apply changes
+      /**
+       * Apply changes to the dashboard app state, and set the document title
+       */
       docTitle.change(savedDashboardState.title || getNewDashboardTitle());
       setDashboardAppState((s) => ({
         ...s,
@@ -246,6 +269,30 @@ export const useDashboardAppState = ({
     services,
   ]);
 
+  // rebuild reset to last saved state callback whenever last saved state changes
+  const resetToLastSavedState = useCallback(() => {
+    if (
+      !lastSavedState ||
+      !dashboardAppState.savedDashboard ||
+      !dashboardAppState.getLatestDashboardState
+    ) {
+      return;
+    }
+
+    if (dashboardAppState.getLatestDashboardState().timeRestore) {
+      const timefilter = services.data.query.timefilter.timefilter;
+      const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
+      if (from && to) timefilter.setTime({ from, to });
+      if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
+    }
+    dispatchDashboardStateChange(setDashboardState(lastSavedState));
+  }, [
+    lastSavedState,
+    dashboardAppState,
+    dispatchDashboardStateChange,
+    services.data.query.timefilter.timefilter,
+  ]);
+
   // publish state to the state change observable when redux state changes;
   useEffect(() => {
     if (!dashboardState || Object.keys(dashboardState).length === 0) return;
@@ -258,45 +305,5 @@ export const useDashboardAppState = ({
     $onLastSavedStateChange.next(lastSavedState);
   }, [$onLastSavedStateChange, lastSavedState]);
 
-  // subscribe to check for unsaved changes every time the last savedState changes.
-
-  // useEffect(() => {
-  //   if (!lastSavedState || !isCompleteDashboardAppState(dashboardAppState)) return;
-
-  //   const usingTimeRestore = lastSavedState.timeRestore;
-  //   const timefilter = services.data.query.timefilter.timefilter;
-
-  //   console.log('S U B S C R I B I N', dashboardAppState, lastSavedState);
-  //   const hasUnsavedChangedSubscription = $checkIsDirty.pipe(debounceTime(100)).subscribe(() => {
-  //     if (!dashboardAppState.getLatestDashboardState) return;
-  //     const currentState = dashboardAppState.getLatestDashboardState();
-
-  //     if (!currentState) return;
-  //     const unsavedChanges = diffDashboardState(lastSavedState, currentState);
-  //     // console.log(lastSavedState.query, currentState.query);
-  //     const lastSavedTimeRange = {
-  //       from: dashboardAppState.savedDashboard?.timeFrom,
-  //       to: dashboardAppState.savedDashboard?.timeTo,
-  //     };
-  //     const savedTimeChanged =
-  //       usingTimeRestore && !areTimeRangesEqual(lastSavedTimeRange, timefilter.getTime());
-  //     setHasUnsavedChanges(Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
-  //   });
-
-  //   return () => hasUnsavedChangedSubscription.unsubscribe();
-  // }, [$checkIsDirty, dashboardAppState, lastSavedState, services.data.query.timefilter.timefilter]);
-
-  return dashboardAppState;
+  return { ...dashboardAppState, resetToLastSavedState };
 };
-
-function deepDifference(object: any, base: any) {
-  function changes(obj: any, b: any) {
-    return _.transform(obj, function (result: any, value, key) {
-      if (!_.isEqual(value, b[key])) {
-        result[key] =
-          _.isObject(value) && _.isObject(base[key]) ? changes(value, base[key]) : value;
-      }
-    });
-  }
-  return changes(object, base);
-}

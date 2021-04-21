@@ -8,7 +8,8 @@
 
 import _ from 'lodash';
 import { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardBuildContext, DashboardState } from '../../types';
+import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
+import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
   enableDashboardSearchSessions,
   getSearchSessionIdFromURL,
@@ -22,11 +23,6 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
-import {
-  DashboardContainer,
-  DashboardContainerInput,
-  DASHBOARD_CONTAINER_TYPE,
-} from '../embeddable';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
   savedDashboard: DashboardSavedObject;
@@ -42,8 +38,8 @@ export const buildDashboardContainer = async ({
   initialDashboardState,
   isEmbeddedExternally,
   incomingEmbeddable,
-  kbnUrlStateStorage,
   savedDashboard,
+  kibanaVersion,
   services,
   history,
 }: BuildDashboardContainerProps) => {
@@ -55,6 +51,7 @@ export const buildDashboardContainer = async ({
   // set up search session
   enableDashboardSearchSessions({
     data,
+    kibanaVersion,
     savedDashboard,
     initialDashboardState,
     getLatestDashboardState,
@@ -87,13 +84,16 @@ export const buildDashboardContainer = async ({
   // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
   if (incomingEmbeddable?.embeddableId && initialInput.panels[incomingEmbeddable.embeddableId]) {
     const originalPanelState = initialInput.panels[incomingEmbeddable.embeddableId];
-    initialInput.panels[incomingEmbeddable.embeddableId] = {
-      gridData: originalPanelState.gridData,
-      type: incomingEmbeddable.type,
-      explicitInput: {
-        ...originalPanelState.explicitInput,
-        ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
+    initialInput.panels = {
+      ...initialInput.panels,
+      [incomingEmbeddable.embeddableId]: {
+        gridData: originalPanelState.gridData,
+        type: incomingEmbeddable.type,
+        explicitInput: {
+          ...originalPanelState.explicitInput,
+          ...incomingEmbeddable.input,
+          id: incomingEmbeddable.embeddableId,
+        },
       },
     };
   }

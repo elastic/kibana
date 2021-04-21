@@ -63,14 +63,13 @@ export const syncDashboardFilterState = ({
   const stopSyncingAppFilters = connectToQueryState(
     queryService,
     {
-      set: ({ filters, query }) => {
+      set: ({ filters, query }) =>
         dispatchDashboardStateChange(
           setFiltersAndQuery({
             query: query || queryString.getDefaultQuery(),
             filters: cleanFiltersForSerialize(filters) || [],
           })
-        );
-      },
+        ),
       get: () => ({
         filters: getLatestDashboardState().filters,
         query: getLatestDashboardState().query,

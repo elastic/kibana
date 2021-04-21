@@ -19,8 +19,8 @@ import {
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Query, Filter, IndexPattern } from './services/data';
-import { ViewMode } from './services/embeddable';
+import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
+import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
@@ -60,7 +60,31 @@ export interface DashboardState {
   fullScreenMode: boolean;
   expandedPanelId?: string;
   options: DashboardOptions;
-  panels: SavedDashboardPanel[];
+  panels: DashboardPanelMap;
+}
+
+/**
+ * RawDashboardState is the dashboard state as directly loaded from the panelJSON
+ */
+export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
+
+export interface DashboardContainerInput extends ContainerInput {
+  dashboardCapabilities?: DashboardCapabilities;
+  refreshConfig?: RefreshInterval;
+  isEmbeddedExternally?: boolean;
+  isFullScreenMode: boolean;
+  expandedPanelId?: string;
+  timeRange: TimeRange;
+  description?: string;
+  useMargins: boolean;
+  syncColors?: boolean;
+  viewMode: ViewMode;
+  filters: Filter[];
+  title: string;
+  query: Query;
+  panels: {
+    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+  };
 }
 
 /**
@@ -71,6 +95,7 @@ export interface DashboardAppState {
   hasUnsavedChanges?: boolean;
   indexPatterns?: IndexPattern[];
   updateLastSavedState?: () => void;
+  resetToLastSavedState?: () => void;
   savedDashboard?: DashboardSavedObject;
   dashboardContainer?: DashboardContainer;
   getLatestDashboardState?: () => DashboardState;

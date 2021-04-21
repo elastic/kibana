@@ -11,13 +11,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
+
 import { DashboardSavedObject } from '../..';
+import { DashboardSessionStorage } from '../lib';
+import { DashboardAppServices } from '../../types';
 import { coreMock } from '../../../../../core/public/mocks';
-import { KibanaContextProvider } from '../../services/kibana_react';
 import { SavedObjectLoader } from '../../services/saved_objects';
-import { DashboardPanelStorage } from '../lib';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
-import { DashboardAppServices } from '../types';
+import { KibanaContextProvider } from '../../services/kibana_react';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
@@ -42,10 +43,10 @@ function makeDefaultServices(): DashboardAppServices {
   savedDashboards.get = jest
     .fn()
     .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
-  const dashboardPanelStorage = {} as DashboardPanelStorage;
-  dashboardPanelStorage.clearPanels = jest.fn();
+  const dashboardSessionStorage = {} as DashboardSessionStorage;
+  dashboardSessionStorage.clearState = jest.fn();
   return ({
-    dashboardPanelStorage,
+    dashboardSessionStorage,
     savedDashboards,
     core,
   } as unknown) as DashboardAppServices;
@@ -140,7 +141,7 @@ describe('Unsaved listing', () => {
     waitFor(() => {
       component.update();
       expect(services.core.overlays.openConfirm).toHaveBeenCalled();
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith(
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
     });
@@ -166,12 +167,12 @@ describe('Unsaved listing', () => {
     const { component } = mountWith({ services, props });
     waitFor(() => {
       component.update();
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase1');
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase2');
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase1');
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase2');
 
       // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
       expect(
-        services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges
+        services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
       ).toHaveBeenCalledTimes(2);
     });
   });

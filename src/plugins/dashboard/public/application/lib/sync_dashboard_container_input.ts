@@ -7,23 +7,22 @@
  */
 
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
-import { Subscription } from 'rxjs';
-import { DashboardConstants, DashboardSavedObject } from '../..';
+import { DashboardContainer } from '../embeddable';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { esFilters, Filter, Query } from '../../services/data';
-import { DashboardBuildContext, SavedDashboardPanel } from '../../types';
-import { DashboardContainer, DashboardContainerInput } from '../embeddable';
+import { DashboardConstants, DashboardSavedObject } from '../..';
+import { setFullScreenMode, setPanels, setQuery } from '../state';
+import { diffDashboardContainerInput } from './diff_dashboard_state';
+import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
+import { DashboardBuildContext, DashboardContainerInput } from '../../types';
 import {
   getSearchSessionIdFromURL,
   getSessionURLObservable,
   stateToDashboardContainerInput,
 } from '.';
-import { setExpandedPanelId, setFullScreenMode, setPanels, setQuery } from '../state';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
-import { diffDashboardContainerInput } from './diff_dashboard_state';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
@@ -60,7 +59,7 @@ export const syncDashboardContainerInput = (
   );
   subscriptions.add($onDashboardStateChange.subscribe(() => $triggerDashboardRefresh.next()));
   subscriptions.add(
-    getSessionURLObservable(history).subscribe((queryId) => {
+    getSessionURLObservable(history).subscribe(() => {
       $triggerDashboardRefresh.next({ force: true });
     })
   );
@@ -86,8 +85,6 @@ export const syncDashboardContainerInput = (
 export const applyContainerChangesToState = ({
   services,
   applyFilters,
-  $checkIsDirty,
-  kibanaVersion,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
@@ -110,73 +107,11 @@ export const applyContainerChangesToState = ({
     applyFilters(migrateLegacyQuery(latestState.query), input.filters);
   }
 
-  let dirty = false;
-
-  const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
-  const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
-
-  latestState.panels?.forEach((savedDashboardPanel) => {
-    if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
-      savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
-    } else {
-      // A panel was deleted.
-      dirty = true;
-    }
-  });
-  let expandedPanelValid = false;
-  Object.values(input.panels).forEach((panelState) => {
-    if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
-      dirty = true;
-    }
-
-    if (panelState.explicitInput.id === input.expandedPanelId) {
-      expandedPanelValid = true;
-    }
-
-    convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
-      panelState,
-      kibanaVersion
-    );
-
-    if (
-      !_.isEqual(
-        convertedPanelStateMap[panelState.explicitInput.id],
-        savedDashboardPanelMap[panelState.explicitInput.id]
-      )
-    ) {
-      // A panel was changed
-      dirty = true;
-
-      const oldVersion = savedDashboardPanelMap[panelState.explicitInput.id]?.version;
-      const newVersion = convertedPanelStateMap[panelState.explicitInput.id]?.version;
-      if (oldVersion && newVersion && oldVersion !== newVersion) {
-        // TODO: Detect Migrations
-      }
-    }
-  });
-  if (dirty) {
-    dispatchDashboardStateChange(setPanels(Object.values(convertedPanelStateMap)));
-    // TODO: show toast when migrated
-    //   if (dirtyBecauseOfInitialStateMigration) {
-    //     if (this.getIsEditMode() && !this.hasShownMigrationToast) {
-    //       this.toasts.addSuccess(getMigratedToastText());
-    //       this.hasShownMigrationToast = true;
-    //     }
-    //     this.saveState({ replace: true });
-    //   }
-    // TODO: clear unsaved state in session storage.
-    // If a panel has been changed, and the state is now equal to the state in the saved object, remove the unsaved panels
-    //   if (!this.isDirty && this.getIsEditMode()) {
-    //     this.clearUnsavedPanels();
-    //   } else {
-    //     this.setUnsavedPanels(this.getPanels());
-    //   }
+  if (!_.isEqual(input.panels, latestState.panels)) {
+    dispatchDashboardStateChange(setPanels(input.panels));
   }
-  dispatchDashboardStateChange(
-    setExpandedPanelId(expandedPanelValid ? input.expandedPanelId : undefined)
-  );
 
-  if (!_.isEqual(input.query, migrateLegacyQuery(latestState.query))) {
+  if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
   }
   dispatchDashboardStateChange(setFullScreenMode(input.isFullScreenMode));

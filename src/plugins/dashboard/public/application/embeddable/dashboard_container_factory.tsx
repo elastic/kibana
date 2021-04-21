@@ -7,6 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
+import { DashboardContainerInput } from '../..';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
@@ -14,12 +18,6 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
 } from '../../services/embeddable';
-import {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerServices,
-} from './dashboard_container';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

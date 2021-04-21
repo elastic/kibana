@@ -18,6 +18,7 @@ import {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
 } from '../../services/data';
+import { stateToRawDashboardState } from './convert_dashboard_state';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
@@ -26,6 +27,7 @@ export const getSessionURLObservable = (history: History) =>
   createQueryParamObservable<string>(history, DashboardConstants.SEARCH_SESSION_ID);
 
 export function createSessionRestorationDataProvider(deps: {
+  kibanaVersion: string;
   data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
@@ -48,8 +50,10 @@ export function enableDashboardSearchSessions({
   initialDashboardState,
   getLatestDashboardState,
   savedDashboard,
+  kibanaVersion,
   data,
 }: {
+  kibanaVersion: string;
   data: DataPublicPluginStart;
   canStoreSearchSession: boolean;
   savedDashboard: DashboardSavedObject;
@@ -65,6 +69,7 @@ export function enableDashboardSearchSessions({
   data.search.session.enableStorage(
     createSessionRestorationDataProvider({
       data,
+      kibanaVersion,
       getDashboardTitle: () => dashboardTitle,
       getDashboardId: () => savedDashboard?.id || '',
       getAppState: getLatestDashboardState,
@@ -84,15 +89,17 @@ export function enableDashboardSearchSessions({
 function getUrlGeneratorState({
   data,
   getAppState,
+  kibanaVersion,
   getDashboardId,
   shouldRestoreSearchSession,
 }: {
+  kibanaVersion: string;
   data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {
-  const appState = getAppState();
+  const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
   return {
     dashboardId: getDashboardId(),
     timeRange: shouldRestoreSearchSession

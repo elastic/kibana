@@ -43,6 +43,8 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../services/embeddable';
+import { DashboardConstants } from '../../dashboard_constants';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -53,7 +55,7 @@ export interface DashboardTopNavState {
 
 type CompleteDashboardAppState = Required<
   DashboardAppState,
-  'dashboardContainer' | 'savedDashboard' | 'indexPatterns' | 'getLatestDashboardState'
+  'indexPatterns' | 'savedDashboard' | 'dashboardContainer' | 'getLatestDashboardState'
 >;
 
 export const isCompleteDashboardAppState = (
@@ -88,17 +90,21 @@ export function DashboardTopNav({
     embeddable,
     navigation,
     uiSettings,
+    initializerContext,
     savedObjectsTagging,
     setHeaderActionMenu,
     dashboardCapabilities,
+    dashboardSessionStorage,
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
+  const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
   const toasts = core.notifications.toasts;
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
 
+  const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
 
   useEffect(() => {
@@ -161,54 +167,18 @@ export function DashboardTopNav({
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
       clearAddPanel();
-      // const isPageRefresh = newMode === dashboardState.viewMode;
-      // const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-      // const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
+      const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
-      function switchViewMode() {
+      if (!willLoseChanges) {
         dispatchDashboardStateChange(setViewMode(newMode));
-
-        if (dashboardAppState.savedDashboard?.id && allowByValueEmbeddables) {
-          const { getFullEditPath, title, id } = dashboardAppState.savedDashboard;
-          chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
-        }
+        return;
       }
 
-      // if (!willLoseChanges) {
-      switchViewMode();
-      return;
-      // }
-
-      // TODO: Discard Unsaved Changes
-      // function discardChanges() {
-      //   dashboardStateManager.resetState();
-      //   dashboardStateManager.clearUnsavedPanels();
-
-      //   // We need to do a hard reset of the timepicker. appState will not reload like
-      //   // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-      //   // reload will cause it not to sync.
-      //   if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-      //     dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-      //     dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-      //   }
-      //   dashboardStateManager.switchViewMode(ViewMode.VIEW);
-      // }
-      // confirmDiscardOrKeepUnsavedChanges(core.overlays).then((selection) => {
-      //   if (selection === 'discard') {
-      //     discardChanges();
-      //   }
-      //   if (selection !== 'cancel') {
-      //     switchViewMode();
-      //   }
-      // });
+      confirmDiscardUnsavedChanges(core.overlays, () =>
+        dashboardAppState.resetToLastSavedState?.()
+      );
     },
-    [
-      dashboardAppState.savedDashboard,
-      dispatchDashboardStateChange,
-      chrome.recentlyAccessed,
-      allowByValueEmbeddables,
-      clearAddPanel,
-    ]
+    [clearAddPanel, core.overlays, dashboardAppState, dispatchDashboardStateChange]
   );
 
   const runSaveAs = useCallback(async () => {
@@ -244,6 +214,8 @@ export function DashboardTopNav({
         redirectTo,
         saveOptions,
         savedObjectsTagging,
+        version: kibanaVersion,
+        dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, ...stateFromSaveModal },
       });
@@ -274,10 +246,12 @@ export function DashboardTopNav({
     showSaveModal(dashboardSaveModal, core.i18n.Context);
   }, [
     dispatchDashboardStateChange,
+    dashboardSessionStorage,
     savedObjectsTagging,
     dashboardAppState,
     core.i18n.Context,
     clearAddPanel,
+    kibanaVersion,
     timefilter,
     redirectTo,
     toasts,
@@ -293,13 +267,28 @@ export function DashboardTopNav({
       currentState,
       saveOptions: {},
       savedObjectsTagging,
+      version: kibanaVersion,
+      dashboardSessionStorage,
       savedDashboard: dashboardAppState.savedDashboard,
     });
     if (saveResult.id && !saveResult.redirected) {
       dashboardAppState.updateLastSavedState?.();
     }
-    setState((s) => ({ ...s, isSaveInProgress: false }));
-  }, [dashboardAppState, toasts, timefilter, redirectTo, savedObjectsTagging]);
+    // turn off save in progress after the next change check. This prevents the save button from flashing
+    setTimeout(() => {
+      if (!mounted) return;
+      setState((s) => ({ ...s, isSaveInProgress: false }));
+    }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
+  }, [
+    dashboardSessionStorage,
+    savedObjectsTagging,
+    dashboardAppState,
+    kibanaVersion,
+    timefilter,
+    redirectTo,
+    mounted,
+    toasts,
+  ]);
 
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
@@ -320,13 +309,23 @@ export function DashboardTopNav({
         redirectTo,
         saveOptions,
         savedObjectsTagging,
+        version: kibanaVersion,
+        dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, title: newTitle },
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal(onClone, currentState.title);
-  }, [dashboardAppState, redirectTo, savedObjectsTagging, timefilter, toasts]);
+  }, [
+    dashboardSessionStorage,
+    savedObjectsTagging,
+    dashboardAppState,
+    kibanaVersion,
+    redirectTo,
+    timefilter,
+    toasts,
+  ]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {
@@ -356,13 +355,14 @@ export function DashboardTopNav({
       const currentState = dashboardAppState.getLatestDashboardState();
       ShowShareModal({
         share,
+        kibanaVersion,
         anchorElement,
         dashboardCapabilities,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share]
+    [dashboardAppState, dashboardCapabilities, share, kibanaVersion]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -393,6 +393,7 @@ export function DashboardTopNav({
 
   UseUnmount(() => {
     clearAddPanel();
+    setMounted(false);
   });
 
   const getNavBarProps = () => {
@@ -419,21 +420,21 @@ export function DashboardTopNav({
       {
         hideWriteControls: dashboardCapabilities.hideWriteControls,
         isNewDashboard: !savedDashboard.id,
-        isDirty: true,
-        // isDirty: dashboardStateManager.getIsDirty(timefilter),
         isSaveInProgress: state.isSaveInProgress,
+        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       }
     );
 
-    const badges = hasUnsavedChanges
-      ? [
-          {
-            'data-test-subj': 'dashboardUnsavedChangesBadge',
-            badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-            color: 'secondary',
-          },
-        ]
-      : undefined;
+    const badges =
+      hasUnsavedChanges && dashboardState.viewMode === ViewMode.EDIT
+        ? [
+            {
+              'data-test-subj': 'dashboardUnsavedChangesBadge',
+              badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
+              color: 'secondary',
+            },
+          ]
+        : undefined;
 
     return {
       badges,

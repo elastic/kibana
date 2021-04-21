@@ -16,10 +16,12 @@ import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardCapabilities, DashboardState } from '../../types';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
 interface ShowShareModalProps {
+  kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
@@ -37,6 +39,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   share,
+  kibanaVersion,
   anchorElement,
   savedDashboard,
   dashboardCapabilities,
@@ -105,7 +108,7 @@ export function ShowShareModal({
     allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      currentDashboardState,
+      stateToRawDashboardState({ state: currentDashboardState, version: kibanaVersion }),
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),

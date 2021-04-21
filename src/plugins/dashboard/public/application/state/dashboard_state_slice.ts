@@ -10,7 +10,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { Filter, Query } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardState, SavedDashboardPanel } from '../../types';
+import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
   name: 'counter',
@@ -50,7 +50,7 @@ export const dashboardStateSlice = createSlice({
     setHidePanelTitles: (state, action: PayloadAction<boolean>) => {
       state.options.hidePanelTitles = action.payload;
     },
-    setPanels: (state, action: PayloadAction<SavedDashboardPanel[]>) => {
+    setPanels: (state, action: PayloadAction<DashboardPanelMap>) => {
       state.panels = action.payload;
     },
     setExpandedPanelId: (state, action: PayloadAction<string | undefined>) => {

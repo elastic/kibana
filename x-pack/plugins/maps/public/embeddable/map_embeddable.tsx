@@ -48,6 +48,7 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
+  getMapReady,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -427,9 +428,10 @@ export class MapEmbeddable
   }
 
   _handleStoreChanges() {
-    if (!this._isActive) {
+    if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
     }
+
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
 

@@ -7,20 +7,23 @@
  */
 
 import _ from 'lodash';
-import { DashboardAppServices, DashboardRedirect, DashboardState } from '../../types';
+
+import { convertTimeToUTCString } from '.';
+import { NotificationsStart } from '../../services/core';
 import { DashboardSavedObject } from '../../saved_dashboards';
+import { DashboardRedirect, DashboardState } from '../../types';
 import { SavedObjectSaveOpts } from '../../services/saved_objects';
+import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
-import type { SavedObjectTagDecoratorTypeGuard } from '../../services/saved_objects_tagging_oss';
-import { NotificationsStart } from '../../services/core';
-import { dashboardSaveToastStrings } from '../../dashboard_strings';
-import { convertTimeToUTCString } from '.';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { DashboardSessionStorage } from './dashboard_session_storage';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
 interface SaveDashboardProps {
+  version: string;
   redirectTo: DashboardRedirect;
   currentState: DashboardState;
   timefilter: TimefilterContract;
@@ -28,16 +31,19 @@ interface SaveDashboardProps {
   toasts: NotificationsStart['toasts'];
   savedDashboard: DashboardSavedObject;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const saveDashboard = async ({
+  toasts,
+  version,
   redirectTo,
-  currentState,
   timefilter,
   saveOptions,
-  toasts,
+  currentState,
   savedDashboard,
   savedObjectsTagging,
+  dashboardSessionStorage,
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
   const lastDashboardId = savedDashboard.id;
   const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
@@ -45,8 +51,13 @@ export const saveDashboard = async ({
   savedDashboard.title = currentState.title;
   savedDashboard.description = currentState.description;
   savedDashboard.timeRestore = currentState.timeRestore;
-  savedDashboard.panelsJSON = JSON.stringify(currentState.panels);
   savedDashboard.optionsJSON = JSON.stringify(currentState.options);
+
+  const savedDashboardPanels = Object.values(currentState.panels).map((panel) =>
+    convertPanelStateToSavedDashboardPanel(panel, version)
+  );
+
+  savedDashboard.panelsJSON = JSON.stringify(savedDashboardPanels);
 
   if (hasTaggingCapabilities(savedDashboard)) {
     savedDashboard.setTags(currentState.tags);
@@ -80,8 +91,7 @@ export const saveDashboard = async ({
         'data-test-subj': 'saveDashboardSuccess',
       });
       if (newId !== lastDashboardId) {
-        // TODO: Dashboard session storage
-        // dashboardPanelStorage.clearPanels(lastDashboardId);
+        dashboardSessionStorage.clearState(lastDashboardId);
         redirectTo({
           id: newId,
           // editMode: true,
