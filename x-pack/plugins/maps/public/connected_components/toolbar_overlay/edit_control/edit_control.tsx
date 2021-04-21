@@ -26,6 +26,7 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   activateDrawFeatureMode: () => void;
   deactivateDrawMode: () => void;
+  featureModeActive: boolean;
 }
 
 interface State {
@@ -46,6 +47,12 @@ export class EditControl extends Component<Props, State> {
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
   };
+
+  componentDidUpdate() {
+    if (this.props.featureModeActive && this.state.isPopoverOpen) {
+      this._closePopover();
+    }
+  }
 
   _renderEditButton() {
     return (
@@ -88,14 +95,16 @@ export class EditControl extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{editPopoverButton}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton size="s" fill onClick={this.props.deactivateDrawMode}>
-            <FormattedMessage
-              id="xpack.maps.tooltip.editControl.cancelDrawButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        {this.props.featureModeActive ? (
+          <EuiFlexItem>
+            <EuiButton size="s" fill onClick={this.props.deactivateDrawMode}>
+              <FormattedMessage
+                id="xpack.maps.tooltip.editControl.cancelDrawButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }

@@ -12,6 +12,13 @@ import { EditControl } from './edit_control';
 import { MapStoreState } from '../../../reducers/store';
 import { DRAW_MODE } from '../../../../common';
 import { setDrawMode } from '../../../actions';
+import { getDrawMode } from '../../../selectors/ui_selectors';
+
+function mapStateToProps(state: MapStoreState) {
+  return {
+    featureModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FEATURES,
+  };
+}
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
@@ -20,5 +27,5 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   };
 }
 
-const connectedEditControl = connect(null, mapDispatchToProps)(EditControl);
+const connectedEditControl = connect(mapStateToProps, mapDispatchToProps)(EditControl);
 export { connectedEditControl as EditControl };
