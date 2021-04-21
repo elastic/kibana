@@ -46,11 +46,7 @@ import type {
   Installation,
   Output,
 } from '../../common';
-import {
-  AgentPolicyNameExistsError,
-  AgentPolicyDeletionError,
-  IngestManagerError,
-} from '../errors';
+import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -476,7 +472,9 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot update integrations of hosted agent policy ${id}`);
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot update integrations of hosted agent policy ${id}`
+      );
     }
 
     return await this._update(
@@ -507,7 +505,9 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot remove integrations of hosted agent policy ${id}`);
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot remove integrations of hosted agent policy ${id}`
+      );
     }
 
     return await this._update(
@@ -550,7 +550,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.is_managed) {
-      throw new AgentPolicyDeletionError(`Cannot delete hosted agent policy ${id}`);
+      throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
     const {
@@ -745,7 +745,13 @@ class AgentPolicyService {
           cluster: ['monitor'],
           indices: [
             {
-              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              names: [
+                'logs-*',
+                'metrics-*',
+                'traces-*',
+                '.logs-endpoint.diagnostic.collection-*',
+                'synthetics-*',
+              ],
               privileges: ['auto_configure', 'create_doc'],
             },
           ],

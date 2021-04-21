@@ -12,6 +12,7 @@ import { ShareMenu } from '../share_menu.component';
 
 storiesOf('components/WorkpadHeader/ShareMenu', module).add('default', () => (
   <ShareMenu
+    includeReporting={true}
     onCopy={action('onCopy')}
     onExport={action('onExport')}
     getExportUrl={(type: string) => {
