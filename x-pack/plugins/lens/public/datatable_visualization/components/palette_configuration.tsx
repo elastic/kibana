@@ -87,7 +87,6 @@ function getPaletteColors(
     (activePaletteParams.rangeMin ?? DEFAULT_MIN_STOP);
 
   const stopFactor = interval / visualSteps;
-
   // If stops are already declared just return them
   if (
     activePaletteParams?.stops != null &&
@@ -196,6 +195,14 @@ export function CustomizablePalette({
     ? reversePalette(activePalette?.params?.controlStops)
     : activePalette?.params?.controlStops;
 
+  // be on the safe side here: min and max should be consistent with stops
+  // when user deletes to type it can be fast and reach a point where min > max o similar
+  // so fallback to min/max from the current stops for the time being
+  const safeColorStopsMin = isMaxMinValid ? Number(minLocalValue) : colorStops[0].stop;
+  const safeColorStopsMax = isMaxMinValid
+    ? Number(maxLocalValue)
+    : colorStops[colorStops.length - 1].stop;
+
   useDebounceWithOptions(
     () => {
       if (!isAutoRange) {
@@ -218,16 +225,24 @@ export function CustomizablePalette({
       setMinLocalValue(min);
       setMaxLocalValue(max);
 
-      if (isCustomPalette) {
+      if (isCustomPalette && controlStops) {
         // remap color stops and control stops now to be consistent on the new range
         const newInterval = Number(max) - Number(min);
-        const oldInterval = Number(maxLocalValue) - Number(minLocalValue);
+        // do not use the local min/max as they may be invalid
+        // use the control stops values which are always valid
+        const oldInterval = controlStops[controlStops.length - 1].stop - controlStops[0].stop;
+
+        // exit if the interval is not valid
+        if (newInterval < 0) {
+          return;
+        }
 
         const newControlColorStops = remapStopsByNewInterval(
           controlStops || [],
           { newInterval, oldInterval },
-          { prevMin: Number(minLocalValue), newMin: Number(min) }
+          { prevMin: controlStops[0].stop, newMin: Number(min) }
         );
+
         // return a palette object with the new stops + controlStops remapped
         return mergePaletteParams(activePalette, {
           stops:
@@ -535,7 +550,16 @@ export function CustomizablePalette({
             label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
               defaultMessage: 'Custom palette',
             })}
-            valueInputProps={rangeType === 'number' ? {} : { append: '%' }}
+            valueInputProps={
+              rangeType === 'number'
+                ? {
+                    'data-test-subj': 'lnsDatatable_dynamicColoring_progression_custom_stops_value',
+                  }
+                : {
+                    'data-test-subj': 'lnsDatatable_dynamicColoring_progression_custom_stops_value',
+                    append: '%',
+                  }
+            }
             onChange={(colorSteps) => {
               const stops =
                 // if stops are less than 2, restore the previous stops
@@ -569,8 +593,8 @@ export function CustomizablePalette({
               );
             }}
             colorStops={controlStops || colorStops || []}
-            min={Number(minLocalValue)}
-            max={Number(maxLocalValue)}
+            min={safeColorStopsMin}
+            max={safeColorStopsMax}
             stopType={progressionType}
             stepNumber={activePalette?.params?.steps}
           />

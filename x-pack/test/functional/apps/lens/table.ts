@@ -122,28 +122,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should set a specific range for the dynamic coloring', async () => {
-      await testSubjects.click('lnsDatatable_dynamicColoring_stopValue_groups_percent');
-      await testSubjects.setValue('lnsDatatable_dynamicColoring_min_range', '20', {
+      await testSubjects.click('lnsDatatable_dynamicColoring_auto_range');
+      await testSubjects.click('lnsDatatable_dynamicColoring_stopValue_groups_number');
+      await testSubjects.setValue('lnsDatatable_dynamicColoring_min_range', '15000', {
         clearWithKeyboard: true,
       });
-      await testSubjects.setValue('lnsDatatable_dynamicColoring_max_range', '30', {
+      await testSubjects.setValue('lnsDatatable_dynamicColoring_max_range', '18000', {
         clearWithKeyboard: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(187, 218, 211)');
+      expect(styleObj['background-color']).to.be('rgb(32, 146, 128)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(52, 55, 65)');
     });
 
     it('should allow the user to change a step color', async () => {
-      await PageObjects.lens.openColorStopPopup(0);
-      await PageObjects.lens.setColorStopValue(25);
+      await PageObjects.lens.openColorStopPopup(1); // The stop in the middle
+      await PageObjects.lens.setColorStopValue(16000); // move it a bit more to the left
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(34, 68, 61)');
+      expect(styleObj['background-color']).to.be('rgb(119, 182, 168)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(255, 255, 255)');
+      expect(styleObj.color).to.be('rgb(52, 55, 65)');
     });
   });
 }
