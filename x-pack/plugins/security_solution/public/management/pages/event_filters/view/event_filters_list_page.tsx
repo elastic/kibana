@@ -11,6 +11,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { PaginatedContent } from '../../../components/paginated_content';
 
+// eslint-disable-next-line react/display-name
+const TestComponent = memo<{ id: string }>(({ id }) => (
+  <div style={{ height: '5em', marginTop: '1em', backgroundColor: 'lightblue' }}>{id}</div>
+));
+
 export const EventFiltersListPage = memo(() => {
   return (
     <AdministrationListPage
@@ -25,7 +30,11 @@ export const EventFiltersListPage = memo(() => {
         defaultMessage: 'Something here about Event Filtering....',
       })}
     >
-      <PaginatedContent
+      <PaginatedContent<{ id: string }, typeof TestComponent>
+        items={[{ id: '1' }, { id: '2' }]}
+        itemId={'id'}
+        ItemComponent={TestComponent}
+        itemComponentProps={(item) => ({ id: item.id })}
         onChange={(d) => {
           // eslint-disable-next-line no-console
           console.log(d);
