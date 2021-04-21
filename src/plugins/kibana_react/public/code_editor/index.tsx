@@ -26,16 +26,13 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-<<<<<<< HEAD
 export type CodeEditorProps = Props;
 
-=======
 /**
  * Renders a Monaco code editor with EUI color theme.
  *
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
->>>>>>> origin/master
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
   return (
