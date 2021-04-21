@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../shared/loading';
@@ -25,39 +25,43 @@ import { RelevanceTuningLogic } from '.';
 
 const EmptyCallout: React.FC = () => {
   return (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
-            {
-              defaultMessage: 'Tuning requires schema fields',
-            }
-          )}
-        </h2>
-      }
-      body={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
-        {
-          defaultMessage: 'Index documents to tune relevance.',
+    <EuiPanel color="subdued">
+      <EuiEmptyPrompt
+        iconType="wrench"
+        className="emptyState__prompt"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
+              {
+                defaultMessage: 'Tuning requires schema fields',
+              }
+            )}
+          </h2>
         }
-      )}
-      actions={
-        <EuiButton
-          size="s"
-          color="primary"
-          href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
-          fill
-        >
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyButtonLabel',
-            {
-              defaultMessage: 'Read the relevance tuning guide',
-            }
-          )}
-        </EuiButton>
-      }
-    />
+        body={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
+          {
+            defaultMessage: 'Index documents to tune relevance.',
+          }
+        )}
+        actions={
+          <EuiButton
+            size="s"
+            color="primary"
+            target="_blank"
+            href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyButtonLabel',
+              {
+                defaultMessage: 'Read the relevance tuning guide',
+              }
+            )}
+          </EuiButton>
+        }
+      />
+    </EuiPanel>
   );
 };
 
