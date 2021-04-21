@@ -21,11 +21,11 @@ buildkite-agent artifact download kibana-default.tar.gz .
 buildkite-agent artifact download kibana-default-plugins.tar.gz .
 
 mkdir -p "$KIBANA_BUILD_LOCATION"
-tar -xvf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION"
+tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
 
 cd "$KIBANA_DIR"
 
-tar -xvf ../kibana-default-plugins.tar.gz
+tar -xzf ../kibana-default-plugins.tar.gz
 
 echo "--- Running $JOB"
 
