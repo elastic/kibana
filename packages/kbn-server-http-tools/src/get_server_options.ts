@@ -43,6 +43,18 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         },
       },
     },
+    mime: {
+      override: {
+        'application/x-ndjson': {
+          compressible: true,
+          charset: 'utf-8',
+        },
+        'application/ndjson': {
+          compressible: true,
+          charset: 'utf-8',
+        },
+      },
+    },
     state: {
       strictHeader: false,
       isHttpOnly: true,

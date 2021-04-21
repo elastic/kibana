@@ -13,6 +13,7 @@ import { getKibanaVersion } from './lib/saved_objects_test_utils';
 function ndjsonToObject(input: string) {
   return input.split('\n').map((str) => JSON.parse(str));
 }
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -261,6 +262,19 @@ export default function ({ getService }: FtrProviderContext) {
           const objects = ndjsonToObject(resp.text);
           expect(objects.find((o) => o.id === 'dashboard-a')).to.be.ok();
           expect(objects.find((o) => o.id === 'dashboard-b')).to.be.ok();
+        });
+
+        it('should compress the response', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .set('accept-encoding', 'gzip')
+            .send({
+              type: ['index-pattern', 'search', 'visualization', 'dashboard'],
+            })
+            .expect(200)
+            .then((resp) => {
+              expect(resp.header['content-encoding']).to.eql('gzip');
+            });
         });
       });
 

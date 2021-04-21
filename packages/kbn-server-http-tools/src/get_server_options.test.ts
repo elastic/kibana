@@ -119,4 +119,18 @@ describe('getServerOptions', () => {
       headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
     });
   });
+
+  it('properly define the ndjson mime types as compressible', () => {
+    const serverOptions = getServerOptions(createConfig({}));
+
+    const mimeOverrides = serverOptions.mime?.override!;
+    expect(mimeOverrides['application/x-ndjson']).toEqual({
+      compressible: true,
+      charset: 'utf-8',
+    });
+    expect(mimeOverrides['application/ndjson']).toEqual({
+      compressible: true,
+      charset: 'utf-8',
+    });
+  });
 });
