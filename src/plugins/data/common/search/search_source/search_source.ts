@@ -75,7 +75,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ISearchGeneric, ISearchOptions } from '../..';
+import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -272,6 +272,15 @@ export class SearchSource {
    * @param options
    */
   fetch$(options: ISearchOptions = {}) {
+    const { getConfig } = this.dependencies;
+    const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
+
+    // Use the sync search strategy if legacy search is enabled.
+    // This still uses bfetch for batching.
+    if (!options?.strategy && syncSearchByDefault) {
+      options.strategy = ES_SEARCH_STRATEGY;
+    }
+
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
