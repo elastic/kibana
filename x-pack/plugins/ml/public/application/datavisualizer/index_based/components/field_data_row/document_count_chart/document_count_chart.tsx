@@ -29,6 +29,7 @@ interface Props {
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
+  interval: number;
 }
 
 const SPEC_ID = 'document_count';
@@ -38,6 +39,7 @@ export const DocumentCountChart: FC<Props> = ({
   chartPoints,
   timeRangeEarliest,
   timeRangeLatest,
+  interval,
 }) => {
   const seriesName = i18n.translate('xpack.ml.fieldDataCard.documentCountChart.seriesLabel', {
     defaultMessage: 'document count',
@@ -54,17 +56,13 @@ export const DocumentCountChart: FC<Props> = ({
     // Display empty chart when no data in range
     if (chartPoints.length < 1) return [{ time: timeRangeEarliest, value: 0 }];
 
-    // If chart has too few data points
-    // it won't show up unless we pad it on two sides
-    if (chartPoints.length < 3) {
-      return [
-        { time: timeRangeEarliest, value: 0 },
-        ...chartPoints,
-        { time: timeRangeLatest, value: 0 },
-      ];
+    // If chart has only one bucket
+    // it won't show up correctly unless we add an extra data point
+    if (chartPoints.length === 1) {
+      return [...chartPoints, { time: Number(chartPoints[0].time) + interval, value: 0 }];
     }
     return chartPoints;
-  }, [chartPoints, timeRangeEarliest, timeRangeLatest]);
+  }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataDocumentCountChart">
