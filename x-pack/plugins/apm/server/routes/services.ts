@@ -16,7 +16,9 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
 import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
 import { getServiceInstancesDetailedStatisticsPeriods } from '../lib/services/get_service_instances/detailed_statistics';
@@ -550,7 +552,44 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceDependenciesRoute = createApmServerRoute({
+export const serviceInstancesMetadataDetails = createApmServerRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { serviceName, serviceNodeName } = resources.params.path;
+    const { transactionType, environment, kuery } = resources.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return await getServiceInstanceMetadataDetails({
+      searchAggregatedTransactions,
+      setup,
+      serviceName,
+      serviceNodeName,
+      transactionType,
+      environment,
+      kuery,
+    });
+  },
+});
+
+export const serviceDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
   params: t.type({
     path: t.type({
@@ -661,6 +700,57 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+const serviceAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/alerts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, params, apmRuleRegistry }) => {
+    const alertsClient = context.alerting.getAlertsClient();
+
+    const {
+      query: { start, end, environment, transactionType },
+      path: { serviceName },
+    } = params;
+
+    const apmRuleRegistryClient = await apmRuleRegistry.createScopedRuleRegistryClient(
+      {
+        alertsClient,
+        context,
+      }
+    );
+
+    if (!apmRuleRegistryClient) {
+      throw Boom.failedDependency(
+        'xpack.ruleRegistry.unsafe.write.enabled is set to false'
+      );
+    }
+
+    return {
+      alerts: await getServiceAlerts({
+        apmRuleRegistryClient,
+        start,
+        end,
+        serviceName,
+        environment,
+        transactionType,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(serviceMetadataDetailsRoute)
@@ -672,9 +762,11 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceAnnotationsCreateRoute)
   .add(serviceErrorGroupsMainStatisticsRoute)
   .add(serviceErrorGroupsDetailedStatisticsRoute)
+  .add(serviceInstancesMetadataDetails)
   .add(serviceThroughputRoute)
   .add(serviceInstancesMainStatisticsRoute)
   .add(serviceInstancesDetailedStatisticsRoute)
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
-  .add(serviceProfilingStatisticsRoute);
+  .add(serviceProfilingStatisticsRoute)
+  .add(serviceAlertsRoute);
