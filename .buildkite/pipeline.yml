@@ -8,17 +8,17 @@ steps:
       queue: bootstrap
     key: build
   - command: .buildkite/scripts/xpack-cigroup.sh
-    label: 'Default CI Group %n (+1)'
+    label: 'Default CI Group %n'
     parallelism: 29
     agents:
-      queue: ci-group
+      queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
 
   - command: .buildkite/scripts/xpack-firefox.sh
     label: 'Default Firefox Smoke Tests'
     agents:
-      queue: ci-group
+      queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
 

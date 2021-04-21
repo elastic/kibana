@@ -4,7 +4,7 @@ set -euo pipefail
 
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
-export CI_GROUP=${CI_GROUP:-$(( BUILDKITE_PARALLEL_JOB + 1))}
+export CI_GROUP=${CI_GROUP:-$BUILDKITE_PARALLEL_JOB}
 export JOB=kibana-default-ciGroup${CI_GROUP}
 
 .buildkite/scripts/bootstrap.sh
