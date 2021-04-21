@@ -108,7 +108,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
 
                 return (
                   <EuiTableRow key={`schema-change-document-error-${fieldName}-${errorIndex}`}>
-                    <EuiTableRowCell>
+                    <EuiTableRowCell truncateText>
                       <TruncatedContent
                         tooltipType="title"
                         content={error.external_id}
