@@ -72,7 +72,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenuPanel className="actCollapsedItemActions" hasFocus={false}>
+      <EuiContextMenuPanel
+        className="actCollapsedItemActions"
+        hasFocus={false}
+        data-test-subj="actionItemsMenuPanel"
+      >
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"

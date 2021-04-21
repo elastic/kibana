@@ -128,7 +128,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -144,7 +143,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -156,7 +154,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -172,7 +169,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -188,7 +184,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -200,7 +195,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await testSubjects.click('alert-row');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
