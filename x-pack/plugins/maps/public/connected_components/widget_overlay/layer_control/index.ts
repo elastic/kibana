@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { LayerControl } from './view';
+import { LayerControl } from './layer_control';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen } from '../../../actions';
@@ -16,8 +18,9 @@ import {
   getFlyoutDisplay,
 } from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
     isLayerTOCOpen: getIsLayerTOCOpen(state),
@@ -26,7 +29,7 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     showAddLayerWizard: async () => {
       await dispatch(setSelectedLayer(null));
@@ -41,5 +44,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
-export { connectedLayerControl as LayerControl };
+const connected = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
+export { connected as LayerControl };
