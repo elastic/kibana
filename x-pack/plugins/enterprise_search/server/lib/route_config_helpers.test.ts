@@ -35,7 +35,7 @@ describe('skipBodyValidation', () => {
     });
   });
 
-  it('will persist non-"body" properties on "options" and "validate"', () => {
+  it('persists all other properties, e.g. "path" & other non-"body" properties on "options" & "validate"', () => {
     expect(
       skipBodyValidation({
         path: '/example/path',
