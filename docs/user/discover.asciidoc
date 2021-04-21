@@ -189,7 +189,7 @@ Saving a search saves the query and the filters.
 . In the toolbar, click **Save**.
 
 . Give your search a title, and then click **Save**.
-+ 
++
 [role="screenshot"]
 image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
 
@@ -215,7 +215,7 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 
 If your documents contain geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]), you can visualize them in **Maps**.
 
-. Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range 
+. Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range
 contains data.
 
 . From the **Available fields** list, click `geoip.location`, and then click **Visualize**.
@@ -243,12 +243,10 @@ the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/management/index-patterns.asciidoc[]
-
-include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
-
-include::{kib-repo-dir}/discover/search.asciidoc[]
-
 include::{kib-repo-dir}/discover/context.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
+
+include::{kib-repo-dir}/discover/save-search.asciidoc[]
+
+include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
