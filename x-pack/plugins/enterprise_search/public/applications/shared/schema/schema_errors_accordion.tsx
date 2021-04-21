@@ -24,6 +24,8 @@ import { EuiButtonEmptyTo } from '../react_router_helpers';
 
 import { TruncatedContent } from '../truncate';
 
+import './schema_errors_accordion.scss';
+
 import {
   ERROR_TABLE_ID_HEADER,
   ERROR_TABLE_ERROR_HEADER,
