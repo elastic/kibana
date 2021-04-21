@@ -22,7 +22,7 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
   <>
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
-      defaultMessage={`We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “security” to those jobs in the {machineLearning} application to make them appear here.`}
+      defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of 'security' to those jobs in the {machineLearning} application to make them appear here."
       values={{
         machineLearning: (
           <EuiLink href={href} target="_blank">
@@ -42,7 +42,7 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
             {notRunningJobIds.length === 1 ? (
               <FormattedMessage
                 id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobSingle"
-                defaultMessage={`The selected ML job, {jobName}, is not currently running. Please set {jobName} to run via "ML job settings" before activating this rule.`}
+                defaultMessage="The selected ML job, {jobName}, is not currently running. Please set {jobName} to run via 'ML job settings' before activating this rule."
                 values={{
                   jobName: notRunningJobIds[0],
                 }}
@@ -50,7 +50,7 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobMulti"
-                defaultMessage={`The selected ML jobs, {jobNames}, are not currently running. Please set all of these jobs to run via "ML job settings" before activating this rule.`}
+                defaultMessage="The selected ML jobs, {jobNames}, are not currently running. Please set all of these jobs to run via 'ML job settings' before activating this rule."
                 values={{
                   jobNames: notRunningJobIds.reduce(
                     (acc, value, i, array) => acc + (i < array.length - 1 ? ', ' : ', and ') + value
