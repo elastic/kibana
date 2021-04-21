@@ -21,6 +21,7 @@ import {
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
@@ -37,7 +38,7 @@ export const useTimelineKpis = ({
   defaultIndex,
   isBlankTimeline,
 }: UseTimelineKpiProps): [boolean, TimelineKpiStrategyResponse | null] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -49,6 +50,8 @@ export const useTimelineKpis = ({
     timelineKpiResponse,
     setTimelineKpiResponse,
   ] = useState<TimelineKpiStrategyResponse | null>(null);
+  const { addError, addWarning } = useAppToasts();
+
   const timelineKpiSearch = useCallback(
     (request: TimelineRequestBasicOptions | null) => {
       if (request == null) {
@@ -71,13 +74,15 @@ export const useTimelineKpis = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning('An error has occurred');
+                // TODO: i18n
+                addWarning('An error has occurred');
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger('Failed to load KPIs');
+              // TODO: i18n
+              addError(msg, { title: 'Failed to load KPIs' });
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -87,7 +92,7 @@ export const useTimelineKpis = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning]
   );
 
   useEffect(() => {

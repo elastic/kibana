@@ -20,6 +20,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -37,7 +38,7 @@ export const useTimelineEventsDetails = ({
   eventId,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -46,6 +47,7 @@ export const useTimelineEventsDetails = ({
     timelineDetailsRequest,
     setTimelineDetailsRequest,
   ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const { addError, addWarning } = useAppToasts();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
     null
@@ -77,14 +79,15 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning('An error has occurred');
+                // TODO: i18n
+                addWarning('An error has occurred');
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({ title: 'Failed to run search', text: msg.message });
+              // TODO: i18n
+              addError(msg, { title: 'Failed to run search' });
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -94,7 +97,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
