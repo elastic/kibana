@@ -12,12 +12,15 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { isCompleteResponse } from '../../../../../src/plugins/data/common';
 import { useFetcher } from './use_fetcher';
 
-export const useEsSearch = <TParams extends estypes.SearchRequest>(params: TParams) => {
+export const useEsSearch = <TParams extends estypes.SearchRequest>(
+  params: TParams,
+  fnDeps: any[]
+) => {
   const {
     services: { data },
   } = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { data: response } = useFetcher(() => {
+  const { data: response = {}, loading } = useFetcher(() => {
     return new Promise((resolve) => {
       const search$ = data.search
         .search({
@@ -29,15 +32,16 @@ export const useEsSearch = <TParams extends estypes.SearchRequest>(params: TPara
               // Final result
               resolve(result);
               search$.unsubscribe();
-            } else {
-              resolve(result);
             }
           },
         });
     });
-  }, [data.search, params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...fnDeps]);
 
-  return response as { body: ESSearchResponse<unknown, TParams> };
+  const { rawResponse } = response as any;
+
+  return { data: rawResponse as ESSearchResponse<unknown, TParams>, loading };
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
