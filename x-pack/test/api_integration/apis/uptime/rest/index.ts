@@ -13,10 +13,7 @@ import {
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const server = getService('kibanaServer');
-  const es = getService('legacyEs');
-  const client = getService('es');
 
   describe('uptime REST endpoints', () => {
     beforeEach('clear settings', async () => {

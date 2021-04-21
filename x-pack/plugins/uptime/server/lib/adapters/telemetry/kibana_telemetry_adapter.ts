@@ -52,27 +52,104 @@ export class KibanaTelemetryAdapter {
             dateRangeStart: { type: 'array', items: { type: 'date' } },
             monitor_frequency: { type: 'array', items: { type: 'long' } },
             monitor_name_stats: {
-              avg_length: { type: 'float' },
-              max_length: { type: 'long' },
-              min_length: { type: 'long' },
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description: 'This field represents the average length of monitor names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description: 'This field represents the max length of monitor names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description: 'This field represents the min length of monitor names',
+                },
+              },
             },
             monitor_page: { type: 'long' },
-            no_of_unique_monitors: { type: 'long' },
-            no_of_unique_observer_locations: { type: 'long' },
+            no_of_unique_monitors: {
+              type: 'long',
+              _meta: {
+                description: 'This field represents the number of unique configured monitors',
+              },
+            },
+            no_of_unique_observer_locations: {
+              type: 'long',
+              _meta: {
+                description:
+                  'This field represents the number of unique monitor observer locations',
+              },
+            },
             observer_location_name_stats: {
-              avg_length: { type: 'float' },
-              max_length: { type: 'long' },
-              min_length: { type: 'long' },
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'This field represents the average length of monitor observer location names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the max length of monitor observer location names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the min length of monitor observer location names',
+                },
+              },
             },
             overview_page: { type: 'long' },
             settings_page: { type: 'long' },
             fleet_monitor_name_stats: {
-              avg_length: { type: 'float' },
-              max_length: { type: 'long' },
-              min_length: { type: 'long' },
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'This field represents the average length of fleet managed monitor names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the max length of fleet managed monitor names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the min length of fleet managed monitor names',
+                },
+              },
             },
-            fleet_monitor_frequency: { type: 'array', items: { type: 'long' } },
-            fleet_no_of_unique_monitors: { type: 'long' },
+            fleet_monitor_frequency: {
+              type: 'array',
+              items: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the average the monitor frequency of fleet managed monitors',
+                },
+              },
+            },
+            fleet_no_of_unique_monitors: {
+              type: 'long',
+              _meta: {
+                description:
+                  'This field represents the number of unique configured fleet managed monitors',
+              },
+            },
           },
         },
       },
