@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { keyBy, merge } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { Coordinate } from '../../../../typings/timeseries';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { joinByKey } from '../../../../common/utils/join_by_key';
@@ -23,17 +24,21 @@ export type ServiceDependencyItem = {
   name: string;
   latency: {
     value: number | null;
-    timeseries: Array<{ x: number; y: number | null }>;
+    timeseries: Coordinate[];
+    previousPeriodTimeseries?: Coordinate[];
   };
   throughput: {
     value: number | null;
-    timeseries: Array<{ x: number; y: number | null }>;
+    timeseries: Coordinate[];
+    previousPeriodTimeseries?: Coordinate[];
   };
   errorRate: {
     value: number | null;
-    timeseries: Array<{ x: number; y: number | null }>;
+    timeseries: Coordinate[];
+    previousPeriodTimeseries?: Coordinate[];
   };
   impact: number;
+  previousPeriodImpact?: number;
 } & (
   | {
       type: 'service';
@@ -58,7 +63,7 @@ function getServiceDependencies({
   numBuckets: number;
   start: number;
   end: number;
-}): Promise<ServiceDependencyItem[]> {
+}) {
   return withApmSpan('get_service_dependencies', async () => {
     const [allMetrics, destinationMap] = await Promise.all([
       getMetrics({
@@ -251,7 +256,7 @@ export async function getServiceDependenciesPeriods({
   numBuckets: number;
   comparisonStart?: number;
   comparisonEnd?: number;
-}) {
+}): Promise<{ serviceDependencies: ServiceDependencyItem[] }> {
   return withApmSpan('get_service_dependencies_periods', async () => {
     const { start, end } = setup;
 
@@ -262,28 +267,25 @@ export async function getServiceDependenciesPeriods({
       numBuckets,
     };
 
+    const previousPeriodPromise =
+      comparisonStart && comparisonEnd
+        ? getServiceDependencies({
+            ...commonProps,
+            start: comparisonStart,
+            end: comparisonEnd,
+          }).then((dependencies) => {
+            return keyBy(dependencies, 'name');
+          })
+        : undefined;
+
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceDependencies({
-        ...commonProps,
-        start,
-        end,
-      }),
-      ...(comparisonStart && comparisonEnd
-        ? [
-            getServiceDependencies({
-              ...commonProps,
-              start: comparisonStart,
-              end: comparisonEnd,
-            }),
-          ]
-        : []),
+      getServiceDependencies({ ...commonProps, start, end }),
+      previousPeriodPromise,
     ]);
 
     return {
       serviceDependencies: currentPeriod.map((currentDependency) => {
-        const previousDependency = previousPeriod?.find(
-          (item) => item.name === currentDependency.name
-        );
+        const previousDependency = previousPeriod?.[currentDependency.name];
         if (!previousDependency) {
           return currentDependency;
         }
@@ -313,6 +315,7 @@ export async function getServiceDependenciesPeriods({
                 previousDependency.errorRate?.timeseries,
             }),
           },
+          previousPeriodImpact: previousDependency.impact,
         };
       }),
     };

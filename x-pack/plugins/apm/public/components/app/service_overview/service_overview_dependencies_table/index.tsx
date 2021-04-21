@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
@@ -32,6 +33,7 @@ import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -41,8 +43,15 @@ interface Props {
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
     {
@@ -102,6 +111,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? latency.previousPeriodTimeseries : undefined
+            }
             valueLabel={asMillisecondDuration(latency.value)}
           />
         );
@@ -121,6 +133,11 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis0"
             series={throughput.timeseries}
+            comparisonSeries={
+              comparisonEnabled
+                ? throughput.previousPeriodTimeseries
+                : undefined
+            }
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -142,6 +159,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis7"
             series={errorRate.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -181,11 +201,13 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             end,
             environment,
             numBuckets: 20,
+            comparisonStart,
+            comparisonEnd,
           },
         },
       });
     },
-    [start, end, serviceName, environment]
+    [start, end, serviceName, environment, comparisonStart, comparisonEnd]
   );
 
   const serviceDependencies = data?.serviceDependencies ?? [];
