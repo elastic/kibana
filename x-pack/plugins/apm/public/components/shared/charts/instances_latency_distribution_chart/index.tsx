@@ -103,8 +103,6 @@ export function InstancesLatencyDistributionChart({
     max: Math.max(maxThroughput, maxComparisonThroughput),
   };
 
-  const commonBubbleStyle = { point: { strokeWidth: 0, radius: 4 } };
-
   return (
     <EuiPanel>
       <EuiTitle size="xs">
@@ -124,6 +122,26 @@ export function InstancesLatencyDistributionChart({
             theme={chartTheme}
             xDomain={xDomain}
           />
+          <BubbleSeries
+            color={theme.eui.euiColorVis0}
+            data={items}
+            id={i18n.translate(
+              'xpack.apm.instancesLatencyDistributionChartLegend',
+              { defaultMessage: 'Instances' }
+            )}
+            xAccessor={(item) => item.throughput}
+            xScaleType={ScaleType.Linear}
+            yAccessors={[(item) => item.latency]}
+            yScaleType={ScaleType.Linear}
+            bubbleSeriesStyle={{
+              point: {
+                strokeWidth: 0,
+                radius: 4,
+                fill: theme.eui.euiColorVis0,
+              },
+            }}
+          />
+
           {!!comparisonItems.length && (
             <BubbleSeries
               data={comparisonItems}
@@ -137,34 +155,16 @@ export function InstancesLatencyDistributionChart({
               yScaleType={ScaleType.Linear}
               color={theme.eui.euiColorMediumShade}
               bubbleSeriesStyle={{
-                ...commonBubbleStyle,
                 point: {
-                  ...commonBubbleStyle.point,
-                  fill: theme.eui.euiColorMediumShade,
+                  shape: 'square',
+                  radius: 4,
+                  fill: theme.eui.euiColorLightestShade,
+                  stroke: theme.eui.euiColorMediumShade,
+                  strokeWidth: 2,
                 },
               }}
             />
           )}
-
-          <BubbleSeries
-            color={theme.eui.euiColorVis1}
-            data={items}
-            id={i18n.translate(
-              'xpack.apm.instancesLatencyDistributionChartLegend',
-              { defaultMessage: 'Instances' }
-            )}
-            xAccessor={(item) => item.throughput}
-            xScaleType={ScaleType.Linear}
-            yAccessors={[(item) => item.latency]}
-            yScaleType={ScaleType.Linear}
-            bubbleSeriesStyle={{
-              ...commonBubbleStyle,
-              point: {
-                ...commonBubbleStyle.point,
-                fill: theme.eui.euiColorVis1,
-              },
-            }}
-          />
           <Axis
             id="x-axis"
             labelFormat={asTransactionRate}
