@@ -4279,15 +4279,7 @@
     lodash "^4.17.15"
     redent "^3.0.0"
 
-"@testing-library/react-hooks@*":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@testing-library/react-hooks/-/react-hooks-3.4.1.tgz#1f8ccd21208086ec228d9743fe40b69d0efcd7e5"
-  integrity sha512-LbzvE7oKsVzuW1cxA/aOeNgeVvmHWG2p/WSzalIGyWuqZT3jVcNDT5KPEwy36sUYWde0Qsh32xqIUFXukeywXg==
-  dependencies:
-    "@babel/runtime" "^7.5.4"
-    "@types/testing-library__react-hooks" "^3.3.0"
-
-"@testing-library/react-hooks@^5.1.1":
+"@testing-library/react-hooks@*", "@testing-library/react-hooks@^5.1.1":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/@testing-library/react-hooks/-/react-hooks-5.1.1.tgz#1fbaae8a4e8a4a7f97b176c23e1e890c41bbbfa5"
   integrity sha512-52D2XnpelFDefnWpy/V6z2qGNj8JLIvW5DjYtelMvFXdEyWiykSaI7IXHwFy4ICoqXJDmmwHAiFRiFboub/U5g==
@@ -5613,7 +5605,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-test-renderer@*", "@types/react-test-renderer@>=16.9.0", "@types/react-test-renderer@^16.9.1":
+"@types/react-test-renderer@>=16.9.0", "@types/react-test-renderer@^16.9.1":
   version "16.9.1"
   resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-16.9.1.tgz#9d432c46c515ebe50c45fa92c6fb5acdc22e39c4"
   integrity sha512-nCXQokZN1jp+QkoDNmDZwoWpKY8HDczqevIDO4Uv9/s9rbGPbSpy8Uaxa5ixHKkcm/Wt0Y9C3wCxZivh4Al+rQ==
@@ -5839,13 +5831,6 @@
   integrity sha512-ggn3ws+yRbOHog9GxnXiEZ/35Mow6YtPZpd7Z5mKDeZS/o7zx3yAle0ov/wjhVB5QT4N2Dt+GNoGCdqkBGCajQ==
   dependencies:
     "@types/jest" "*"
-
-"@types/testing-library__react-hooks@^3.3.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@types/testing-library__react-hooks/-/testing-library__react-hooks-3.4.0.tgz#be148b7fa7d19cd3349c4ef9d9534486bc582fcc"
-  integrity sha512-QYLZipqt1hpwYsBU63Ssa557v5wWbncqL36No59LI7W3nCMYKrLWTnYGn2griZ6v/3n5nKXNYkTeYpqPHY7Ukg==
-  dependencies:
-    "@types/react-test-renderer" "*"
 
 "@types/testing-library__react-hooks@^4.0.0":
   version "4.0.0"
