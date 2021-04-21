@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuidv4 from 'uuid/v4';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -47,14 +48,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows adding custom label to existing fields', async function () {
+      const uuid = uuidv4();
+      const customLabel = `megabytes${uuid}`;
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
-      await fieldEditor.setCustomLabel('megabytes');
+      await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('megabytes');
-      expect((await PageObjects.discover.getAllFieldNames()).includes('megabytes')).to.be(true);
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
+      expect((await PageObjects.discover.getAllFieldNames()).includes(customLabel)).to.be(true);
     });
 
     it('allows creation of a new field', async function () {
