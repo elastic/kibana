@@ -11,7 +11,7 @@ import { ReportingCore } from '../..';
 import {
   createMockConfigSchema,
   createMockLevelLogger,
-  createMockReportingCore
+  createMockReportingCore,
 } from '../../test_helpers';
 import { Report } from './report';
 import { ReportingStore } from './store';
