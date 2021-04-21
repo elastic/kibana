@@ -18757,7 +18757,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription": "输入要运行此规则的 Elasticsearch 索引的模式。默认情况下，将包括 Security Solution 高级设置中定义的索引模式。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText": "我们提供了一些常见作业来帮助您入门。要添加自己的定制规则，请在 {machineLearning} 应用程序中将一组“security”分配给这些作业，以使其显示在此处。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired": "Machine Learning 作业必填。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobWarningTitle": "此 ML 作业当前未运行。在激活此规则之前请通过“ML 作业设置”设置此作业以使其运行。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText": "选择作业",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError": "至少需要一个索引模式。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError": "Url 的格式无效",
