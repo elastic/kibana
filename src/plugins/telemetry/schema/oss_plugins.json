@@ -4084,7 +4084,7 @@
               }
             }
           }
-        },        
+        },
         "security_account": {
           "properties": {
             "appId": {
