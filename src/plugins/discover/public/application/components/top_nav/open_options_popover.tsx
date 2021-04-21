@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton, EuiText, EuiWrappingPopover, EuiCode } from '@elastic/eui';
 import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
+import { DOC_TABLE_LEGACY } from '../../../../common';
 
 let isOpen = false;
 
@@ -27,7 +28,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
     core: { uiSettings },
     addBasePath,
   } = getServices();
-  const isLegacy = uiSettings.get('doc_table:legacy');
+  const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
 
   const mode = isLegacy
     ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
@@ -42,8 +43,21 @@ export function OptionsPopover(props: OptionsPopoverProps) {
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>
-            <strong>Current view mode:</strong>{' '}
-            <EuiCode data-test-subj="docTableMode">{mode}</EuiCode>
+            <FormattedMessage
+              id="discover.topNav.optionsPopover.currentViewMode"
+              defaultMessage="{viewModeLabel}: {currentViewMode}"
+              values={{
+                viewModeLabel: (
+                  <strong>
+                    <FormattedMessage
+                      id="discover.topNav.optionsPopover.currentViewModeLabel"
+                      defaultMessage="Current view mode"
+                    />
+                  </strong>
+                ),
+                currentViewMode: <EuiCode data-test-subj="docTableMode">{mode}</EuiCode>,
+              }}
+            />
           </p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -57,7 +71,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         <EuiButton
           iconType="tableDensityNormal"
           fullWidth
-          href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}
+          href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
         >
           {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
             defaultMessage: 'Go to Advanced Settings',
