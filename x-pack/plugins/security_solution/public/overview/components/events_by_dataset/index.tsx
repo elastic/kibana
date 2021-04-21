@@ -52,7 +52,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showSpacer?: boolean;
   timelineId?: string;
-  toggleTopN: () => void;
+  toggleTopN?: () => void;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
