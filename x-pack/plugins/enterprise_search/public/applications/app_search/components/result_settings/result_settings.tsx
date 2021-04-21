@@ -27,6 +27,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
+import { DOCS_PREFIX } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 
 import { RESULT_SETTINGS_TITLE } from './constants';
@@ -111,9 +112,10 @@ export const ResultSettings: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiPanel hasBorder>
+        <EuiPanel color="subdued">
           <EuiEmptyPrompt
-            iconType="gear"
+            iconType="database"
+            className="emptyState__prompt"
             title={
               <h2>
                 {i18n.translate(
@@ -125,10 +127,24 @@ export const ResultSettings: React.FC = () => {
             body={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaDescription',
               {
-                defaultMessage:
-                  'You need one! A schema is created for you after you index some documents.',
+                defaultMessage: 'A schema is created for you after you index some documents.',
               }
             )}
+            actions={
+              <EuiButton
+                size="s"
+                color="primary"
+                target="_blank  "
+                href={`${DOCS_PREFIX}/result-settings-guide.html.html`}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.resultSettings.emptyButtonLabel',
+                  {
+                    defaultMessage: 'Read the result settings guide',
+                  }
+                )}
+              </EuiButton>
+            }
           />
         </EuiPanel>
       )}
