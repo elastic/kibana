@@ -17,11 +17,11 @@ import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiPageHeader, EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageHeader, EuiBasicTable } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
-import { Curations, CurationsTable } from './curations';
+import { Curations, CurationsTable, CurationsEmptyPrompt } from './curations';
 
 describe('Curations', () => {
   const { navigateToUrl } = mockKibanaValues;
@@ -86,7 +86,7 @@ describe('Curations', () => {
       setMockValues({ ...values, curations: [] });
       const wrapper = shallow(<CurationsTable />);
 
-      expect(wrapper.find(EuiBasicTable).prop('noItemsMessage').type).toEqual(EuiEmptyPrompt);
+      expect(wrapper.find(EuiBasicTable).prop('noItemsMessage').type).toEqual(CurationsEmptyPrompt);
     });
 
     it('passes loading prop based on dataLoading', () => {

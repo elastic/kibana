@@ -114,13 +114,13 @@ export const ResultSettings: React.FC = () => {
       ) : (
         <EuiPanel color="subdued">
           <EuiEmptyPrompt
-            iconType="database"
+            iconType="gear"
             className="emptyState__prompt"
             title={
               <h2>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaTitle',
-                  { defaultMessage: 'Engine does not have a schema' }
+                  { defaultMessage: 'Settings require schema fields' }
                 )}
               </h2>
             }
