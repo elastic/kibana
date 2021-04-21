@@ -217,7 +217,7 @@ const FieldEditorComponent = ({
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         {/* Name */}
         <EuiFlexItem>
           <UseField<string, Field>

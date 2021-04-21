@@ -68,7 +68,7 @@ export function DimensionContainer({
         <div
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          className="lnsDimensionContainer"
+          className="lnsDimensionContainer euiFlyout"
         >
           <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
             <EuiFlexGroup
@@ -76,6 +76,7 @@ export function DimensionContainer({
               alignItems="center"
               className="lnsDimensionContainer__headerLink"
               onClick={closeFlyout}
+              responsive={false}
             >
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
