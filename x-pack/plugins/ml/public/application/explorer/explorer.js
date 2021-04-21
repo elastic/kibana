@@ -329,7 +329,12 @@ export class ExplorerUI extends React.Component {
                     defaultMessage="Top influencers"
                   />
                   <EuiIconTip
-                    content="This list shows the relative impact of the top influencers on the anomalies in the selected time period. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.explorer.topInfluencersTooltip"
+                        defaultMessage="This list shows the relative impact of the top influencers on the anomalies in the selected time period. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                      />
+                    }
                     position="right"
                   />
                 </h2>
