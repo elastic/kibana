@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update a progress bar', async () => {
+      await testSubjects.click('responseTab');
       const progressBar = await testSubjects.find('progressBar');
       expect(await progressBar.getAttribute('value')).to.be('0');
       expect(await progressBar.getAttribute('max')).to.be('100');
