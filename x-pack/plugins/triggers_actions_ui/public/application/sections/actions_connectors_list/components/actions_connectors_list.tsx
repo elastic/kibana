@@ -42,7 +42,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-export const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     http,
     notifications: { toasts },
@@ -392,6 +392,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ActionsConnectorsList as default };
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;

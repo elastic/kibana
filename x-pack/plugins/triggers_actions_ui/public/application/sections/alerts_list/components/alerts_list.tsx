@@ -77,7 +77,7 @@ interface AlertState {
   totalItemCount: number;
 }
 
-export const AlertsList: React.FunctionComponent = () => {
+const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
@@ -781,6 +781,9 @@ export const AlertsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertsList as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt

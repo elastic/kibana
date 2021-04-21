@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -26,11 +26,16 @@ import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+
+const ActionsConnectorsList = lazy(
+  async () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+);
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
 export interface MatchParams {
   section: Section;
@@ -145,7 +150,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               component={() => (
                 <HealthContextProvider>
                   <HealthCheck waitForCheck={true}>
-                    <ActionsConnectorsList />
+                    <Suspense fallback={<CenterJustifiedSpinner size={'m'} />}>
+                      <ActionsConnectorsList />
+                    </Suspense>
                   </HealthCheck>
                 </HealthContextProvider>
               )}
@@ -157,7 +164,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             component={() => (
               <HealthContextProvider>
                 <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <AlertsList />
+                  <Suspense fallback={<CenterJustifiedSpinner size={'m'} />}>
+                    <AlertsList />
+                  </Suspense>
                 </HealthCheck>
               </HealthContextProvider>
             )}
