@@ -59,7 +59,7 @@ export async function tearDown(getService: FtrProviderContext['getService']) {
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration security and spaces enabled', function () {
     describe('', () => {
-      this.tags('ciGroup19');
+      this.tags('ciGroup30');
       loadTestFile(require.resolve('./actions'));
     });
 

@@ -48,6 +48,8 @@ JOB:
   - x-pack-ciGroup26
   - x-pack-ciGroup27
   - x-pack-ciGroup28
+  - x-pack-ciGroup29
+  - x-pack-ciGroup30
   - x-pack-accessibility
   - x-pack-visualRegression
 
