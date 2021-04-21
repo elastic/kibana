@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   UtilityBar,
