@@ -1,5 +1,5 @@
 [[index-patterns]]
-== Create an index pattern
+=== Create an index pattern
 
 {kib} requires an index pattern to access the {es} data that you want to explore.
 An index pattern selects the data to use and allows you to define properties of the fields.
@@ -126,7 +126,7 @@ pattern:
 ```
 
 You can use exclusions to exclude indices that might contain mapping errors.
-To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from 
+To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from
 all clusters having a name starting with `cluster_`, you can use `cluster_*:logstash-*,cluster*:logstash-old*`.
 To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
 
@@ -152,7 +152,7 @@ move between {kib} apps.
 image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
 
 [float]
-==== Format the display of common field types
+=== Format the display of common field types
 
 Whenever possible, {kib} uses the same field type for display as
 {es}. However, some field types that {es} supports are not available
