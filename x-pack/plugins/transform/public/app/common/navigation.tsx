@@ -12,21 +12,31 @@ import rison from 'rison-node';
 import { SECTION_SLUG } from '../constants';
 
 /**
+ * Gets url state for navigating to Discover page with optional link to a specific index pattern.
+ * @param indexPatternId Index pattern ID.
+ */
+export function getDiscoverUrlState(indexPatternId?: string): string {
+  const _g = rison.encode({});
+
+  // Add the index pattern ID to the appState part of the URL.
+  const _a = rison.encode(
+    typeof indexPatternId === 'string'
+      ? {
+          index: indexPatternId,
+        }
+      : {}
+  );
+
+  return `_g=${_g}&_a=${_a}`;
+}
+
+/**
  * Gets a url for navigating to Discover page.
  * @param indexPatternId Index pattern ID.
  * @param baseUrl Base url.
  */
 export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string {
-  const _g = rison.encode({});
-
-  // Add the index pattern ID to the appState part of the URL.
-  const _a = rison.encode({
-    index: indexPatternId,
-  });
-
-  const hash = `/discover#?_g=${_g}&_a=${_a}`;
-
-  return `${baseUrl}/app${hash}`;
+  return `${baseUrl}/app/discover?${getDiscoverUrlState(indexPatternId)}`;
 }
 
 export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;

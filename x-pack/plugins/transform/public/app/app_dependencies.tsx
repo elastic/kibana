@@ -16,6 +16,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
+  application: CoreStart['application'];
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
   docLinks: CoreStart['docLinks'];
