@@ -46,6 +46,7 @@ describe('ResultSettingsLogic', () => {
   const SELECTORS = {
     serverResultFields: {},
     reducedServerResultFields: {},
+    isEverythingDisabled: true,
     resultFieldsAtDefaultSettings: true,
     stagedUpdates: false,
     nonTextResultFields: {},
@@ -330,6 +331,20 @@ describe('ResultSettingsLogic', () => {
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(false);
+      });
+    });
+
+    describe('isEverythingDisabled', () => {
+      it('should return true if no raw or snippet fields are enabled', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false },
+            bar: {},
+            baz: { raw: false, snippet: false },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.isEverythingDisabled).toEqual(true);
       });
     });
 

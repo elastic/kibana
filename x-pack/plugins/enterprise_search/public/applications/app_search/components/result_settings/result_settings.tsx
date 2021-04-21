@@ -46,9 +46,13 @@ const UNSAVED_MESSAGE = i18n.translate(
 );
 
 export const ResultSettings: React.FC = () => {
-  const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings } = useValues(
-    ResultSettingsLogic
-  );
+  const {
+    dataLoading,
+    schema,
+    stagedUpdates,
+    resultFieldsAtDefaultSettings,
+    isEverythingDisabled,
+  } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -81,7 +85,7 @@ export const ResultSettings: React.FC = () => {
                   color="primary"
                   fill
                   onClick={saveResultSettings}
-                  disabled={!stagedUpdates}
+                  disabled={isEverythingDisabled || !stagedUpdates}
                 >
                   {SAVE_BUTTON_LABEL}
                 </EuiButton>,

@@ -24,6 +24,7 @@ import {
 
 import {
   areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   clearAllFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
@@ -73,7 +74,7 @@ interface ResultSettingsValues {
   nonTextResultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
   resultFieldsAtDefaultSettings: boolean;
-  resultFieldsEmpty: boolean;
+  isEverythingDisabled: boolean;
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
@@ -196,6 +197,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
+    ],
+    isEverythingDisabled: [
+      () => [selectors.resultFields],
+      (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
       () => [selectors.lastSavedResultFields, selectors.resultFields],
