@@ -353,6 +353,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await accordionButton.click();
     }
 
+    public async inputValueInCodeEditor(value: string) {
+      const codeEditor = await find.byCssSelector('.react-monaco-editor-container');
+      const textarea = await codeEditor.findByClassName('monaco-mouse-cursor-text');
+
+      await textarea.click();
+      await browser.pressKeys(value);
+    }
+
     public async clickReset() {
       await testSubjects.click('visualizeEditorResetButton');
       await visChart.waitForVisualization();

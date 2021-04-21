@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactElement } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 
 interface Footnote {
-  icon: ReactElement<any>;
+  icon: ReactNode;
   message?: string | null;
 }
 
 interface IconAndTooltipContent {
-  icon?: ReactElement<any> | null;
+  icon?: ReactNode;
   tooltipContent?: string | null;
   footnotes: Footnote[];
 }
