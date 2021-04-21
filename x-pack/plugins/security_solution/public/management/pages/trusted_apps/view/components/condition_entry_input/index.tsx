@@ -114,17 +114,13 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       ];
     }, [os]);
 
-    const operatorOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
-      const dropDownOptions = [
-        OperatorEntryField.included,
-        OperatorEntryField.wildcard_caseless,
-      ].map((e) => ({
-        dropdownDisplay: OPERATOR_TITLES[e],
-        inputDisplay: OPERATOR_TITLES[e],
-        value: e,
-      }));
-      return dropDownOptions;
-    }, []);
+    const operatorOptions = (Object.keys(OperatorEntryField) as [ConditionEntry['operator']]).map(
+      (value) => ({
+        dropdownDisplay: OPERATOR_TITLES[value],
+        inputDisplay: OPERATOR_TITLES[value],
+        value,
+      })
+    );
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
