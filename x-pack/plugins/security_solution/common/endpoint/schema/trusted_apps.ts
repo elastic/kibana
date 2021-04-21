@@ -30,10 +30,16 @@ export const GetTrustedAppsRequestSchema = {
 };
 
 const ConditionEntryTypeSchema = schema.literal('match');
-const ConditionEntryOperatorSchema = schema.oneOf([
-  schema.literal(OperatorEntryField.included),
-  schema.literal(OperatorEntryField.wildcard_caseless),
-]);
+// when field === PATH -> operator in ('included', 'wildcard_caseless') else operator === 'included'
+const ConditionEntryOperatorSchema = schema.conditional(
+  schema.siblingRef('field'),
+  ConditionEntryField.PATH,
+  schema.oneOf([
+    schema.literal(OperatorEntryField.included),
+    schema.literal(OperatorEntryField.wildcard_caseless),
+  ]),
+  schema.literal(OperatorEntryField.included)
+);
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
