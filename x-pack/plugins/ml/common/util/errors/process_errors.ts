@@ -14,6 +14,7 @@ import {
   isEsErrorBody,
   isMLResponseError,
 } from './types';
+import { isPopulatedObject } from '../object_utils';
 
 export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   // extract properties of the error object from within the response error
@@ -76,10 +77,10 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
       if (
         Array.isArray(error.body.attributes.body.error.root_cause) &&
         typeof error.body.attributes.body.error.root_cause[0] === 'object' &&
-        error.body.attributes.body.error.root_cause[0]?.script
+        isPopulatedObject(error.body.attributes.body.error.root_cause[0], ['script'])
       ) {
-        errObj.causedBy = error.body.attributes.body.error.root_cause[0]?.script;
-        errObj.message += `: '${error.body.attributes.body.error.root_cause[0]?.script}'`;
+        errObj.causedBy = error.body.attributes.body.error.root_cause[0].script;
+        errObj.message += `: '${error.body.attributes.body.error.root_cause[0].script}'`;
       }
       return errObj;
     } else {
