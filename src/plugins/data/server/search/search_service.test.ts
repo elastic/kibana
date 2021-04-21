@@ -29,6 +29,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../expressions/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 describe('Search service', () => {
   let plugin: SearchService;
@@ -112,7 +113,7 @@ describe('Search service', () => {
         bfetch: bfetchPluginMock.createSetupContract(),
         expressions: expressionsPluginMock.createSetupContract(),
       });
-      pluginSetup.registerSearchStrategy('ese', mockStrategy);
+      pluginSetup.registerSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY, mockStrategy);
       pluginSetup.registerSearchStrategy('nocancel', mockStrategyNoCancel);
       pluginSetup.__enhance({
         sessionService: mockSessionService,
@@ -268,7 +269,7 @@ describe('Search service', () => {
 
       it('cancels a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
-        mockMap.set('abc', 'ese');
+        mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockStrategy.cancel = jest.fn();
         mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
@@ -280,13 +281,13 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('abc');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('cancels a saved object with some strategies that dont support cancellation, dont throw an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockStrategy.cancel = jest.fn();
         mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
@@ -298,13 +299,13 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('def');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('cancels a saved object with some strategies that dont exist, dont throw an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockStrategy.cancel = jest.fn();
         mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
@@ -316,7 +317,7 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('def');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
     });
 
@@ -348,7 +349,7 @@ describe('Search service', () => {
 
       it('deletes a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
-        mockMap.set('abc', 'ese');
+        mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.cancel = jest.fn();
@@ -360,13 +361,13 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('abc');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('deletes a saved object with some strategies that dont support cancellation, dont throw an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.cancel = jest.fn();
@@ -378,13 +379,13 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('def');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('deletes a saved object with some strategies that dont exist, dont throw an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockStrategy.cancel = jest.fn();
         mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
@@ -396,7 +397,7 @@ describe('Search service', () => {
         const [searchId, options] = mockStrategy.cancel.mock.calls[0];
         expect(mockStrategy.cancel).toHaveBeenCalledTimes(1);
         expect(searchId).toBe('def');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
     });
 
@@ -428,7 +429,7 @@ describe('Search service', () => {
 
       it('extends a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
-        mockMap.set('abc', 'ese');
+        mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.extend = jest.fn();
@@ -440,13 +441,13 @@ describe('Search service', () => {
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
         expect(searchId).toBe('abc');
         expect(keepAlive).toContain('ms');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('doesnt extend the saved object with some strategies that dont support cancellation, throws an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.extend = jest.fn().mockResolvedValue({});
@@ -461,13 +462,13 @@ describe('Search service', () => {
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
         expect(searchId).toBe('def');
         expect(keepAlive).toContain('ms');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
 
       it('doesnt extend the saved object with some strategies that dont exist, throws an error', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
-        mockMap.set('def', 'ese');
+        mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
         mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
         mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.extend = jest.fn().mockResolvedValue({});
@@ -482,7 +483,7 @@ describe('Search service', () => {
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
         expect(searchId).toBe('def');
         expect(keepAlive).toContain('ms');
-        expect(options).toHaveProperty('strategy', 'ese');
+        expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
     });
   });
