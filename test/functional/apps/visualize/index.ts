@@ -86,7 +86,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup4');
+      this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_line_chart_split_series'));
       loadTestFile(require.resolve('./_line_chart_split_chart'));
