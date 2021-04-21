@@ -7,6 +7,11 @@ steps:
     agents:
       queue: bootstrap
     key: build
+  - command: .buildkite/scripts/jobs/build_oss.sh
+    label: Build OSS Kibana Distribution
+    agents:
+      queue: bootstrap
+    key: build-oss
   - command: .buildkite/scripts/xpack-cigroup.sh
     label: 'Default CI Group %n'
     parallelism: 29
@@ -14,6 +19,14 @@ steps:
       queue: ci-group-6d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+
+  - command: .buildkite/scripts/oss-cigroup.sh
+    label: 'OSS CI Group %n'
+    parallelism: 12
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
 
   - command: .buildkite/scripts/xpack-firefox.sh
     label: 'Default Firefox Smoke Tests'

@@ -3,6 +3,7 @@
 JOB:
   - kibana-intake
   - kibana-firefoxSmoke
+  - kibana-ciGroup0
   - kibana-ciGroup1
   - kibana-ciGroup2
   - kibana-ciGroup3
@@ -14,7 +15,6 @@ JOB:
   - kibana-ciGroup9
   - kibana-ciGroup10
   - kibana-ciGroup11
-  - kibana-ciGroup12
   - kibana-accessibility
   - kibana-visualRegression
 
