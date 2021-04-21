@@ -195,16 +195,15 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   Occurrences
                 </span>
                 <span
-                  aria-label="Sorted in descending order"
                   className="euiTableSortIcon"
                   data-euiicon-type="sortDown"
                   size="m"
                 />
-                <span
-                  className="euiScreenReaderOnly"
-                >
-                  Click to sort in ascending order
-                </span>
+              </span>
+              <span
+                className="euiScreenReaderOnly"
+              >
+                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -236,11 +235,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   Latest occurrence
                 </span>
-                <span
-                  className="euiScreenReaderOnly"
-                >
-                  Click to sort in ascending order
-                </span>
+              </span>
+              <span
+                className="euiScreenReaderOnly"
+              >
+                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -502,16 +501,15 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   Occurrences
                 </span>
                 <span
-                  aria-label="Sorted in descending order"
                   className="euiTableSortIcon"
                   data-euiicon-type="sortDown"
                   size="m"
                 />
-                <span
-                  className="euiScreenReaderOnly"
-                >
-                  Click to sort in ascending order
-                </span>
+              </span>
+              <span
+                className="euiScreenReaderOnly"
+              >
+                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -543,11 +541,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   Latest occurrence
                 </span>
-                <span
-                  className="euiScreenReaderOnly"
-                >
-                  Click to sort in ascending order
-                </span>
+              </span>
+              <span
+                className="euiScreenReaderOnly"
+              >
+                Click to sort in ascending order
               </span>
             </button>
           </th>

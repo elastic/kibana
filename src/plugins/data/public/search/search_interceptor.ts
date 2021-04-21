@@ -14,6 +14,7 @@ import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
+  ES_SEARCH_STRATEGY,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
@@ -189,6 +190,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: ISearchOptions = {}
   ): Observable<IKibanaSearchResponse> {
+    options = {
+      strategy: ES_SEARCH_STRATEGY,
+      ...options,
+    };
+
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
       if (options.abortSignal?.aborted) {
