@@ -247,6 +247,30 @@ describe('When invoking Trusted Apps Schema', () => {
         expect(() => body.validate(bodyMsg)).not.toThrow();
       });
 
+      it('should validate `entry.operator` does not accept `wildcard_caseless` when field is NOT PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.HASH,
+              operator: 'wildcard_caseless',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.operator` accepts `wildcard_caseless` when field is PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.PATH,
+              operator: 'wildcard_caseless',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
       it('should validate `entry.value` required', () => {
         const { value, ...entry } = createConditionEntry();
         expect(() => body.validate(createNewTrustedApp({ entries: [entry] }))).toThrow();
