@@ -24,7 +24,7 @@ import { RawValue } from '../../../../common/constants';
 import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
 
 interface Props {
-  featureId: string;
+  featureId?: string | number;
   layerId: string;
   mbProperties: GeoJsonProperties;
   loadFeatureProperties: ({
@@ -33,7 +33,7 @@ interface Props {
     mbProperties,
   }: {
     layerId: string;
-    featureId: string;
+    featureId?: string | number;
     mbProperties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   showFilterButtons: boolean;
@@ -56,7 +56,7 @@ interface State {
 export class FeatureProperties extends Component<Props, State> {
   private _isMounted = false;
   private _prevLayerId: string = '';
-  private _prevFeatureId: string = '';
+  private _prevFeatureId?: string | number = '';
   private readonly _tableRef: RefObject<HTMLTableElement> = React.createRef();
 
   state: State = {
@@ -115,7 +115,7 @@ export class FeatureProperties extends Component<Props, State> {
     mbProperties,
   }: {
     nextLayerId: string;
-    nextFeatureId: string;
+    nextFeatureId?: string | number;
     mbProperties: GeoJsonProperties;
   }) => {
     if (this._prevLayerId === nextLayerId && this._prevFeatureId === nextFeatureId) {
