@@ -109,7 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await docTable.getRowsText()).to.have.length(6);
+      await retry.waitFor('document table has a length of 6', async () => {
+        const nrOfDocs = (await docTable.getBodyRows()).length;
+        return nrOfDocs === 6;
+      });
     });
   });
 }
