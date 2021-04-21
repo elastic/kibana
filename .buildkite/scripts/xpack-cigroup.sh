@@ -32,7 +32,7 @@ echo "--- Running $JOB"
 cd "$XPACK_DIR"
 
 node scripts/functional_tests \
-  --debug --bail \
+  --bail \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --include-tag "ciGroup$CI_GROUP"
 
