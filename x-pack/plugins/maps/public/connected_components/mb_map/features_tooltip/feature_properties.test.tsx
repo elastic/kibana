@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { FeatureProperties } from './feature_properties';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
 import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
-import { Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
 class MockTooltipProperty {
   private _key: string;
@@ -45,7 +45,10 @@ const defaultProps = {
   mbProperties: {},
   onCloseTooltip: () => {},
   showFilterButtons: false,
-  addFilters: null,
+  addFilters: async () => {},
+  getActionContext: () => {
+    return ({} as unknown) as ActionExecutionContext;
+  },
   getFilterActions: async () => {
     return [({ id: ACTION_GLOBAL_APPLY_FILTER } as unknown) as Action];
   },
