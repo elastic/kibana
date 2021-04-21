@@ -6,11 +6,18 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
-import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import React, { Component } from 'react';
+import { DropResult, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
+import { ILayer } from '../../../../classes/layers/layer';
 
-export class LayerTOC extends React.Component {
+export interface Props {
+  isReadOnly: boolean;
+  layerList: ILayer[];
+  updateLayerOrder: (newOrder: number[]) => void;
+}
+
+export class LayerTOC extends Component<Props> {
   componentWillUnmount() {
     this._updateDebounced.cancel();
   }
@@ -22,14 +29,14 @@ export class LayerTOC extends React.Component {
 
   _updateDebounced = _.debounce(this.forceUpdate, 100);
 
-  _onDragEnd = ({ source, destination }) => {
+  _onDragEnd = ({ source, destination }: DropResult) => {
     // Dragging item out of EuiDroppable results in destination of null
     if (!destination) {
       return;
     }
 
     // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
-    const reverseIndex = (index) => {
+    const reverseIndex = (index: number) => {
       return this.props.layerList.length - index - 1;
     };
 
@@ -58,8 +65,8 @@ export class LayerTOC extends React.Component {
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
-          {(provided, snapshot) =>
-            reverseLayerList.map((layer, idx) => (
+          {(droppableProvided, snapshot) => {
+            const tocEntries = reverseLayerList.map((layer, idx: number) => (
               <EuiDraggable
                 spacing="none"
                 key={layer.getId()}
@@ -77,8 +84,9 @@ export class LayerTOC extends React.Component {
                   />
                 )}
               </EuiDraggable>
-            ))
-          }
+            ));
+            return <div>{tocEntries}</div>;
+          }}
         </EuiDroppable>
       </EuiDragDropContext>
     );

@@ -13,38 +13,45 @@ jest.mock('./toc_entry', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { ILayer } from '../../../../classes/layers/layer';
 
-import { LayerTOC } from './view';
+import { LayerTOC } from './layer_toc';
 
 const mockLayers = [
-  {
+  ({
     getId: () => {
       return '1';
     },
     supportsFitToBounds: () => {
       return true;
     },
-  },
-  {
+  } as unknown) as ILayer,
+  ({
     getId: () => {
       return '2';
     },
     supportsFitToBounds: () => {
       return false;
     },
-  },
+  } as unknown) as ILayer,
 ];
+
+const defaultProps = {
+  layerList: mockLayers,
+  isReadOnly: false,
+  updateLayerOrder: () => {},
+};
 
 describe('LayerTOC', () => {
   test('is rendered', () => {
-    const component = shallow(<LayerTOC layerList={mockLayers} />);
+    const component = shallow(<LayerTOC {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('isReadOnly', () => {
-      const component = shallow(<LayerTOC layerList={mockLayers} isReadOnly={true} />);
+      const component = shallow(<LayerTOC {...defaultProps} isReadOnly={true} />);
 
       expect(component).toMatchSnapshot();
     });

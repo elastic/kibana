@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallow } from 'enzyme';
+import { ILayer } from '../../../../../classes/layers/layer';
 
 jest.mock('../../../../../kibana_services', () => {
   return {
@@ -16,11 +17,11 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-import { TOCEntry } from './view';
+import { TOCEntry } from './toc_entry';
 
 const LAYER_ID = '1';
 
-const mockLayer = {
+const mockLayer = ({
   getId: () => {
     return LAYER_ID;
   },
@@ -45,22 +46,27 @@ const mockLayer = {
   hasLegendDetails: () => {
     return true;
   },
-};
+} as unknown) as ILayer;
 
 const defaultProps = {
   layer: mockLayer,
-  openLayerPanel: () => {},
+  selectedLayer: undefined,
+  openLayerPanel: async () => {},
   toggleVisible: () => {},
   fitToBounds: () => {},
   getSelectedLayerSelector: () => {},
-  hasDirtyStateSelector: () => {},
+  hasDirtyStateSelector: false,
   zoom: 0,
   isLegendDetailsOpen: false,
+  isReadOnly: false,
+  isEditButtonDisabled: false,
+  hideTOCDetails: () => {},
+  showTOCDetails: () => {},
 };
 
 describe('TOCEntry', () => {
   test('is rendered', async () => {
-    const component = shallowWithIntl(<TOCEntry {...defaultProps} />);
+    const component = shallow(<TOCEntry {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -72,7 +78,7 @@ describe('TOCEntry', () => {
 
   describe('props', () => {
     test('isReadOnly', async () => {
-      const component = shallowWithIntl(<TOCEntry {...defaultProps} isReadOnly={true} />);
+      const component = shallow(<TOCEntry {...defaultProps} isReadOnly={true} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -83,7 +89,7 @@ describe('TOCEntry', () => {
     });
 
     test('should display layer details when isLegendDetailsOpen is true', async () => {
-      const component = shallowWithIntl(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
+      const component = shallow(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -94,7 +100,7 @@ describe('TOCEntry', () => {
     });
 
     test('Should shade background when selected layer', async () => {
-      const component = shallowWithIntl(<TOCEntry {...defaultProps} selectedLayer={mockLayer} />);
+      const component = shallow(<TOCEntry {...defaultProps} selectedLayer={mockLayer} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -105,13 +111,11 @@ describe('TOCEntry', () => {
     });
 
     test('Should shade background when not selected layer', async () => {
-      const differentLayer = Object.create(mockLayer);
+      const differentLayer = (Object.create(mockLayer) as unknown) as ILayer;
       differentLayer.getId = () => {
         return 'foobar';
       };
-      const component = shallowWithIntl(
-        <TOCEntry {...defaultProps} selectedLayer={differentLayer} />
-      );
+      const component = shallow(<TOCEntry {...defaultProps} selectedLayer={differentLayer} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));

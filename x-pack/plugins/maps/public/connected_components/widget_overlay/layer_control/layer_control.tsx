@@ -17,11 +17,30 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { LayerTOC } from './layer_toc';
+import { ILayer } from '../../../classes/layers/layer';
 
-function renderExpandButton({ hasErrors, isLoading, onClick }) {
+export interface Props {
+  isReadOnly: boolean;
+  isLayerTOCOpen: boolean;
+  layerList: ILayer[];
+  isFlyoutOpen: boolean;
+  showAddLayerWizard: () => Promise<void>;
+  closeLayerTOC: () => void;
+  openLayerTOC: () => void;
+}
+
+function renderExpandButton({
+  hasErrors,
+  isLoading,
+  onClick,
+}: {
+  hasErrors: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+}) {
   const expandLabel = i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
     defaultMessage: 'Expand layers panel',
   });
@@ -59,7 +78,7 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isFlyoutOpen,
-}) {
+}: Props) {
   if (!isLayerTOCOpen) {
     const hasErrors = layerList.some((layer) => {
       return layer.hasErrors();
