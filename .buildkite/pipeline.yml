@@ -16,7 +16,7 @@ steps:
     label: 'Default CI Group %n'
     parallelism: 29
     agents:
-      queue: ci-group-6d
+      queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
 
