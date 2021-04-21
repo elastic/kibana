@@ -457,6 +457,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
       }),
+      comparisonRangeRt,
       environmentRt,
       kueryRt,
       rangeRt,
@@ -472,6 +473,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       kuery,
       transactionType,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -480,19 +483,36 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
 
     const { start, end } = setup;
 
-    const serviceInstances = await getServiceInstancesMainStatistics({
-      environment,
-      kuery,
-      latencyAggregationType,
-      serviceName,
-      setup,
-      transactionType,
-      searchAggregatedTransactions,
-      start,
-      end,
-    });
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceInstancesMainStatistics({
+        environment,
+        kuery,
+        latencyAggregationType,
+        serviceName,
+        setup,
+        transactionType,
+        searchAggregatedTransactions,
+        start,
+        end,
+      }),
+      ...(comparisonStart && comparisonEnd
+        ? [
+            getServiceInstancesMainStatistics({
+              environment,
+              kuery,
+              latencyAggregationType,
+              serviceName,
+              setup,
+              transactionType,
+              searchAggregatedTransactions,
+              start: comparisonStart,
+              end: comparisonEnd,
+            }),
+          ]
+        : []),
+    ]);
 
-    return { serviceInstances };
+    return { currentPeriod, previousPeriod };
   },
 });
 
