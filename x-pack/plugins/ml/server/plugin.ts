@@ -16,8 +16,8 @@ import {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
+  SharedGlobalConfig,
 } from 'kibana/server';
-import { Observable } from 'rxjs';
 import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
@@ -76,14 +76,14 @@ export class MlServerPlugin
   private security: SecurityPluginSetup | undefined;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
-  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private readonly kibanaIndexConfig: SharedGlobalConfig;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
 
-    this.kibanaIndexConfig = ctx.config.legacy.globalConfig$;
+    this.kibanaIndexConfig = ctx.config.legacy.get();
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -218,9 +218,7 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      this.kibanaIndexConfig.subscribe((config) => {
-        registerCollector(plugins.usageCollection!, config.kibana.index);
-      });
+      registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
     }
 
     return { ...sharedServices };
