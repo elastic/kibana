@@ -7,10 +7,10 @@
 
 import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
 
-import { StackAlertsDeps, StackAlertsStartDeps } from './types';
+import { StackAlertsDeps, StackAlertsStartDeps, StackAlertsRequestHandlerContext } from './types';
 import { registerBuiltInAlertTypes, registerLegacyBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
-
+import { getRuleAlertDataRoute } from './routes/get_rule_alert_data';
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
   private readonly logger: Logger;
@@ -48,6 +48,10 @@ export class AlertingBuiltinsPlugin
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
     });
+
+    // Routes
+    const router = core.http.createRouter<StackAlertsRequestHandlerContext>();
+    getRuleAlertDataRoute(router, stackAlertsRuleRegistry);
 
     return {
       ruleRegistry: stackAlertsRuleRegistry,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import {
@@ -20,6 +21,7 @@ export {
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { AlertingBuiltinsPlugin as StackAlertsPlugin } from './plugin';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
@@ -31,6 +33,12 @@ export interface StackAlertsDeps {
 export interface StackAlertsStartDeps {
   triggersActionsUi: TriggersActionsUiStartContract;
 }
+
+export interface StackAlertsRequestHandlerContext extends RequestHandlerContext {
+  alerting: AlertingApiRequestHandlerContext;
+}
+
+export type StackAlertsPluginRouter = IRouter<StackAlertsRequestHandlerContext>;
 
 export type StackAlertsRuleRegistry = ReturnType<StackAlertsPlugin['setup']>['ruleRegistry'];
 export const createThresholdRuleType = createThresholdRuleTypeFactory<StackAlertsRuleRegistry>();

@@ -47,7 +47,7 @@ import {
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE, routeToAlertData } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import {
@@ -306,6 +306,14 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   };
 
+  const navigateToAlert = (alert: AlertTableItem) => {
+    const routeToUse =
+      alert.alertTypeId === '.index-threshold' || alert.alertTypeId === '.es-query'
+        ? routeToAlertData
+        : routeToRuleDetails;
+    history.push(routeToUse.replace(`:ruleId`, alert.id));
+  };
+
   const alertsTableColumns = [
     {
       field: 'name',
@@ -322,7 +330,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiLink
             title={name}
             onClick={() => {
-              history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
+              navigateToAlert(alert);
             }}
           >
             {name}

@@ -12,7 +12,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import {
+  Section,
+  routeToRuleDetails,
+  legacyRouteToRuleDetails,
+  routeToAlertData,
+} from './constants';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -30,6 +35,7 @@ const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
+const AlertDataRoute = lazy(() => import('./sections/alert_details/components/alert_data_route'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
@@ -81,8 +87,14 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
       />
       <Route
+        exact
         path={routeToRuleDetails}
         component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
+      />
+      <Route
+        exact
+        path={routeToAlertData}
+        component={suspendedComponentWithProps(AlertDataRoute, 'xl')}
       />
       <Route
         exact

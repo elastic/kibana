@@ -19,6 +19,7 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToRuleDetails = `/rule/:ruleId`;
+export const routeToAlertData = `/rule/:ruleId/alerts`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 

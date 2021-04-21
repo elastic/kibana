@@ -219,6 +219,11 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
       return undefined;
     }
     const { indexAliasName, indexTarget } = this.getEsNames();
+    this.options.logger.info(
+      `createScopedRuleRegistryClient: ${JSON.stringify(indexAliasName)} ${JSON.stringify(
+        indexTarget
+      )}`
+    );
 
     const frameworkAlerts = (
       await alertsClient.find({
@@ -227,6 +232,10 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
         },
       })
     ).data;
+
+    this.options.logger.info(
+      `createScopedRuleRegistryClient frameworkAlerts: ${JSON.stringify(frameworkAlerts)}}`
+    );
 
     return createScopedRuleRegistryClient({
       ruleUuids: frameworkAlerts.map((frameworkAlert) => frameworkAlert.id),
@@ -245,6 +254,9 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
     const logger = this.options.logger.get(type.id);
 
     const { indexAliasName, indexTarget } = this.getEsNames();
+    this.options.logger.info(
+      `registerType: ${JSON.stringify(indexAliasName)} ${JSON.stringify(indexTarget)}`
+    );
 
     this.types.push(type);
 
