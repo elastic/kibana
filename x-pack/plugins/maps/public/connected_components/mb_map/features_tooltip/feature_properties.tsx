@@ -128,10 +128,10 @@ export class FeatureProperties extends Component<Props, State> {
     });
 
     // Preserve current properties width/height so they can be used while rendering loading indicator.
-    if (this.state.properties && this._tableRef) {
+    if (this.state.properties && this._tableRef.current) {
       this.setState({
-        prevWidth: this._tableRef.clientWidth,
-        prevHeight: this._tableRef.clientHeight,
+        prevWidth: this._tableRef.current.clientWidth,
+        prevHeight: this._tableRef.current.clientHeight,
       });
     }
 
@@ -181,7 +181,7 @@ export class FeatureProperties extends Component<Props, State> {
           const name = action.getDisplayName(actionContext);
           return {
             name: name ? name : action.id,
-            icon: iconType ? <EuiIcon type={iconType} /> : null,
+            icon: iconType ? <EuiIcon type={iconType} /> : undefined,
             onClick: async () => {
               this.props.onCloseTooltip();
 
