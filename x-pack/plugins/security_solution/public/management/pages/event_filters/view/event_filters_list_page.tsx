@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { PaginatedContent } from '../../../components/paginated_content';
 
 export const EventFiltersListPage = memo(() => {
   return (
@@ -24,7 +25,19 @@ export const EventFiltersListPage = memo(() => {
         defaultMessage: 'Something here about Event Filtering....',
       })}
     >
-      <div>{'page here'}</div>
+      <PaginatedContent
+        onChange={(d) => {
+          // eslint-disable-next-line no-console
+          console.log(d);
+        }}
+        pagination={{
+          totalItemCount: 100,
+          pageIndex: 0,
+          pageSize: 20,
+          pageSizeOptions: [10, 20, 50],
+        }}
+        // noItemsMessage={<>What?</>}
+      />
     </AdministrationListPage>
   );
 });
