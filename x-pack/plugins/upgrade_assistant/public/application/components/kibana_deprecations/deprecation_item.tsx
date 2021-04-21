@@ -10,7 +10,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiButtonEmpty,
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
@@ -31,10 +31,10 @@ const i18nTexts = {
     });
   },
   docLinkText: i18n.translate('xpack.upgradeAssistant.deprecationGroupItem.docLinkText', {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'View documentation',
   }),
   fixButtonLabel: i18n.translate('xpack.upgradeAssistant.deprecationGroupItem.fixButtonLabel', {
-    defaultMessage: 'Fix',
+    defaultMessage: 'Show steps to fix',
   }),
 };
 
@@ -76,30 +76,44 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
             ) : (
               <>
                 <p>{message}</p>
-                {documentationUrl && (
-                  <p>
-                    <EuiLink href={documentationUrl} external>
-                      {i18nTexts.docLinkText}
-                    </EuiLink>
-                  </p>
+
+                {(documentationUrl || correctiveActions?.manualSteps) && (
+                  <EuiFlexGroup>
+                    {correctiveActions?.manualSteps && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          onClick={() =>
+                            showModal({
+                              domainId,
+                              steps: correctiveActions.manualSteps!,
+                              documentationUrl,
+                            })
+                          }
+                        >
+                          {i18nTexts.fixButtonLabel}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+
+                    {documentationUrl && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          href={documentationUrl}
+                          iconType="help"
+                          target="_blank"
+                        >
+                          {i18nTexts.docLinkText}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 )}
               </>
             )}
           </EuiText>
         </EuiFlexItem>
-
-        {correctiveActions?.manualSteps && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={() =>
-                showModal({ domainId, steps: correctiveActions.manualSteps!, documentationUrl })
-              }
-            >
-              {i18nTexts.fixButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiAccordion>
   );
