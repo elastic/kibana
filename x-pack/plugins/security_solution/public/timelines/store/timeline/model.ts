@@ -9,7 +9,6 @@ import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/pub
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import { PinnedEvent } from '../../../graphql/types';
 import {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -23,6 +22,7 @@ import type {
   RowRendererId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
