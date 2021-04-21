@@ -11,8 +11,6 @@ export function plugin() {
   return new FileUploadPlugin();
 }
 
-export * from '../common';
-
 export * from './importer/types';
 
 export { FileUploadPluginStart } from './plugin';

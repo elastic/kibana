@@ -385,6 +385,57 @@ export function getViewBySwimlaneOptions({
   };
 }
 
+export function loadOverallAnnotations(selectedJobs, interval, bounds) {
+  const jobIds = selectedJobs.map((d) => d.id);
+  const timeRange = getSelectionTimeRange(undefined, interval, bounds);
+
+  return new Promise((resolve) => {
+    ml.annotations
+      .getAnnotations$({
+        jobIds,
+        earliestMs: timeRange.earliestMs,
+        latestMs: timeRange.latestMs,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .toPromise()
+      .then((resp) => {
+        if (resp.error !== undefined || resp.annotations === undefined) {
+          const errorMessage = extractErrorMessage(resp.error);
+          return resolve({
+            annotationsData: [],
+            error: errorMessage !== '' ? errorMessage : undefined,
+          });
+        }
+
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
+
+        return resolve({
+          annotationsData: annotationsData
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = (i + 1).toString();
+              return d;
+            }),
+        });
+      })
+      .catch((resp) => {
+        const errorMessage = extractErrorMessage(resp);
+        return resolve({
+          annotationsData: [],
+          error: errorMessage !== '' ? errorMessage : undefined,
+        });
+      });
+  });
+}
+
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
     selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL

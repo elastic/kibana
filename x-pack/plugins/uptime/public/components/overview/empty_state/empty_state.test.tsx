@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { EmptyStateComponent } from './empty_state';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
 import { HttpFetchError, IHttpFetchError } from 'src/core/public';
-import { mountWithRouter, shallowWithRouter } from '../../../lib';
+import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('EmptyState component', () => {
   let statesIndexStatus: StatesIndexStatus;
@@ -18,27 +19,31 @@ describe('EmptyState component', () => {
     statesIndexStatus = {
       indexExists: true,
       docCount: 1,
+      indices: 'heartbeat-*,synthetics-*',
     };
   });
 
   it('renders child components when count is truthy', () => {
-    const component = shallowWithRouter(
+    render(
       <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByText('Foo')).toBeInTheDocument();
+    expect(screen.getByText('Bar')).toBeInTheDocument();
+    expect(screen.getByText('Baz')).toBeInTheDocument();
   });
 
   it(`doesn't render child components when count is falsy`, () => {
-    const component = mountWithRouter(
+    render(
       <EmptyStateComponent statesIndexStatus={null} loading={false}>
-        <div>Shouldn&apos;t be rendered</div>
+        <div>Should not be rendered</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText('Should not be rendered')).toBeNull();
   });
 
   it(`renders error message when an error occurs`, () => {
@@ -47,43 +52,48 @@ describe('EmptyState component', () => {
         body: { message: 'There was an error fetching your data.' },
       }),
     ];
-    const component = mountWithRouter(
+    render(
       <EmptyStateComponent statesIndexStatus={null} errors={errors} loading={false}>
-        <div>Shouldn&apos;t appear...</div>
+        <div>Should not appear...</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText('Should not appear...')).toBeNull();
   });
 
   it('renders loading state if no errors or doc count', () => {
-    const component = mountWithRouter(
+    render(
       <EmptyStateComponent loading={true} statesIndexStatus={null}>
         <div>Should appear even while loading...</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText('Should appear even while loading...')).toBeInTheDocument();
   });
 
   it('does not render empty state with appropriate base path and no docs', () => {
     statesIndexStatus = {
       docCount: 0,
       indexExists: true,
+      indices: 'heartbeat-*,synthetics-*',
     };
-    const component = mountWithRouter(
+    const text = 'If this is in the snapshot the test should fail';
+    render(
       <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
-        <div>If this is in the snapshot the test should fail</div>
+        <div>{text}</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText(text)).toBeNull();
   });
 
   it('notifies when index does not exist', () => {
     statesIndexStatus.indexExists = false;
-    const component = mountWithRouter(
+
+    const text = 'This text should not render';
+
+    render(
       <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
-        <div>This text should not render</div>
+        <div>{text}</div>
       </EmptyStateComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText(text)).toBeNull();
   });
 });

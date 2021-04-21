@@ -44,7 +44,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
     filters,
     defaultSeriesType,
     hasOperationType,
-    yAxisColumn,
+    yAxisColumns,
   } = dataViewSeries;
 
   const onChange = (field: string, value?: string) => {
@@ -125,7 +125,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
         <EuiFlexItem style={MaxWidthStyle}>
           <OperationTypeSelect
             seriesId={NEW_SERIES_KEY}
-            defaultOperationType={yAxisColumn.operationType}
+            defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}

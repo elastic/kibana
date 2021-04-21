@@ -51,7 +51,7 @@ import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
-import { AuditLogger, EventOutcome } from '../../../security/server';
+import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -293,7 +293,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -598,7 +598,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -671,7 +671,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UPDATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -850,7 +850,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UPDATE_API_KEY,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -935,7 +935,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.ENABLE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1036,7 +1036,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.DISABLE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1112,7 +1112,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.MUTE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1173,7 +1173,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UNMUTE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1234,7 +1234,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.MUTE_INSTANCE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
     );
@@ -1300,7 +1300,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UNMUTE_INSTANCE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
     );
