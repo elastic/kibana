@@ -2,20 +2,23 @@
 === Save a query
 
 Have you ever built a query that you wanted to reuse?
-With saved queries, you can save your query text, filters, and time range for reuse anywhere a query bar is present.
+With saved queries, you can save your query text, filters, and time range for
+reuse anywhere a query bar is present.
 
-For example, suppose you're in *Discover*, and you've put a lot of thought into building
+For example, suppose you're in *Discover*, and you've put time into building
 a query that includes query input text, multiple filters, and a specific time range.
-Save this query, and you can reuse it in dashboards and visualizations, and share it in
-a link.
+Save this query, and you can embed the search results in dashboards,
+use them as a foundation for building a visualization,
+and share them in a link or CVS form.
 
 [role="screenshot"]
 image:concepts/images/saved-query.png["Example of the saved query management popover with a list of saved queries"]
 
 
-Saved queries are different than <<save-open-search,saved searches>>, which save a specific configuration in *Discover*.
-Saved searches are primarily used for adding search results to a dashboard,
-although they can also serve as the foundation for building visualizations.
+Saved queries are different than <<save-open-search,saved searches>>,
+which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
+index pattern&mdash;in addition to the query.
+Saved searches are primarily used for adding search results to a dashboard.
 
 [role="xpack"]
 ==== Read-only access
