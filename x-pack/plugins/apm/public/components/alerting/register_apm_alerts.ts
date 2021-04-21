@@ -40,7 +40,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           },
         }),
         link: format({
-          pathname: `/app/apm/services/${alert['service.name']!}`,
+          pathname: `/app/apm/services/${alert['service.name']!}/errors`,
           query: {
             ...(alert['service.environment']
               ? { environment: alert['service.environment'] }
