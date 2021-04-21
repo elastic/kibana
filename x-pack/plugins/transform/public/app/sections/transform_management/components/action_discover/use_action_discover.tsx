@@ -51,9 +51,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
 
   const action: TransformListAction = useMemo(
     () => ({
-      name: (item: TransformListRow) => (
-        <DiscoverActionName items={[item]} forceDisable={forceDisable} />
-      ),
+      name: (item: TransformListRow) => <DiscoverActionName items={[item]} />,
       enabled: (item: TransformListRow) => {
         const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
         const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);

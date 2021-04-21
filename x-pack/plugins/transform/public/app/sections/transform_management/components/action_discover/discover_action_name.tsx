@@ -43,9 +43,8 @@ export const isDiscoverActionDisabled = (
 
 export interface DiscoverActionNameProps {
   items: TransformListRow[];
-  forceDisable?: boolean;
 }
-export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items, forceDisable }) => {
+export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items }) => {
   const isBulkAction = items.length > 1;
 
   const item = items[0];
@@ -77,10 +76,14 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items, forceDi
   if (transformNeverStarted) {
     return (
       <EuiToolTip position="top" content={disabledTransformMessage}>
-        <>{discoverActionNameText}</>
+        <span data-test-subj="transformDiscoverActionNameText disabled">
+          {discoverActionNameText}
+        </span>
       </EuiToolTip>
     );
   }
 
-  return <>{discoverActionNameText}</>;
+  return (
+    <span data-test-subj="transformDiscoverActionNameText enabled">{discoverActionNameText}</span>
+  );
 };

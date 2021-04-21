@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';
@@ -41,20 +41,26 @@ describe('Transform: Transform List <ExpandedRow />', () => {
       </MlSharedContext.Provider>
     );
 
-    expect(getByText('Details')).toBeInTheDocument();
-    expect(getByText('Stats')).toBeInTheDocument();
-    expect(getByText('JSON')).toBeInTheDocument();
-    expect(getByText('Messages')).toBeInTheDocument();
-    expect(getByText('Preview')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByText('Details')).toBeInTheDocument();
+      expect(getByText('Stats')).toBeInTheDocument();
+      expect(getByText('JSON')).toBeInTheDocument();
+      expect(getByText('Messages')).toBeInTheDocument();
+      expect(getByText('Preview')).toBeInTheDocument();
 
-    const tabContent = getByTestId('transformDetailsTabContent');
-    expect(tabContent).toBeInTheDocument();
+      const tabContent = getByTestId('transformDetailsTabContent');
+      expect(tabContent).toBeInTheDocument();
 
-    expect(getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
-    expect(within(tabContent).getByText('General')).toBeInTheDocument();
+      expect(getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
+      expect(within(tabContent).getByText('General')).toBeInTheDocument();
+    });
 
     fireEvent.click(getByTestId('transformStatsTab'));
-    expect(getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
-    expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
+      const tabContent = getByTestId('transformDetailsTabContent');
+      expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
+    });
   });
 });

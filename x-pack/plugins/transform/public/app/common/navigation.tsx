@@ -36,7 +36,7 @@ export function getDiscoverUrlState(indexPatternId?: string): string {
  * @param baseUrl Base url.
  */
 export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string {
-  return `${baseUrl}/app/discover?${getDiscoverUrlState(indexPatternId)}`;
+  return `${baseUrl}/app/discover#?${getDiscoverUrlState(indexPatternId)}`;
 }
 
 export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;

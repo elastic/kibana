@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { getDiscoverUrl } from './navigation';
+import { getDiscoverUrl, getDiscoverUrlState } from './navigation';
 
-describe('navigation', () => {
+describe('navigation: getDiscoverUrl', () => {
   test('getDiscoverUrl should provide encoded url to Discover page', () => {
     expect(getDiscoverUrl('farequote-airline', 'http://example.com')).toBe(
       'http://example.com/app/discover#?_g=()&_a=(index:farequote-airline)'
     );
+  });
+});
+
+describe('navigation: getDiscoverUrlState', () => {
+  test('getDiscoverUrlState should provide encoded url state without an index for Discover page', () => {
+    expect(getDiscoverUrlState()).toBe('_g=()&_a=()');
+  });
+  test('getDiscoverUrlState should provide encoded url state with an index for Discover page', () => {
+    expect(getDiscoverUrlState('farequote-airline')).toBe('_g=()&_a=(index:farequote-airline)');
   });
 });

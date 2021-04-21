@@ -7,17 +7,23 @@
 
 import { useContext } from 'react';
 
+import type { ScopedHistory } from 'kibana/public';
+
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
+import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
+import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
 
-const appDependencies = {
+const appDependencies: AppDependencies = {
+  application: coreStart.application,
   chrome: coreStart.chrome,
   data: dataStart,
   docLinks: coreStart.docLinks,
@@ -28,11 +34,14 @@ const appDependencies = {
   storage: ({ get: jest.fn() } as unknown) as Storage,
   overlays: coreStart.overlays,
   http: coreSetup.http,
+  history: {} as ScopedHistory,
+  savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
+  ml: {} as GetMlSharedImportsReturnType,
 };
 
 export const useAppDependencies = () => {
   const ml = useContext(MlSharedContext);
-  return { ...appDependencies, ml, savedObjects: jest.fn() };
+  return { ...appDependencies, ml };
 };
 
 export const useToastNotifications = () => {
