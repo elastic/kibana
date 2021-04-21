@@ -16,12 +16,10 @@ import {
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
-} from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
-import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../data_enhanced/common';
+} from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { formatInspect, getEqlAggsData } from './helpers';
 import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';

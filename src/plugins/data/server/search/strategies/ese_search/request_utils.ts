@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IUiSettingsClient } from 'kibana/server';
@@ -11,9 +12,9 @@ import {
   AsyncSearchSubmit,
   Search,
 } from '@elastic/elasticsearch/api/requestParams';
-import { ISearchOptions, UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { getDefaultSearchParams } from '../../../../../src/plugins/data/server';
-import { ConfigSchema } from '../../config';
+import { ISearchOptions, UI_SETTINGS } from '../../../../common';
+import { getDefaultSearchParams } from '../es_search';
+import { SearchSessionsConfigSchema } from '../../../../config';
 
 /**
  * @internal
@@ -30,7 +31,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: IUiSettingsClient,
-  config: ConfigSchema,
+  searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -53,7 +54,11 @@ export async function getDefaultAsyncSubmitParams(
     ...(await getDefaultSearchParams(uiSettingsClient)),
     ...(options.sessionId
       ? {
-          keep_alive: `${config.search.sessions.defaultExpiration.asMilliseconds()}ms`,
+          // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
+          // This can be cleaned up when we completely stop separating basic and oss
+          keep_alive: searchSessionsConfig
+            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
+            : '1m',
         }
       : {}),
   };

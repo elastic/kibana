@@ -7,7 +7,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
