@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteDataFrameAnalytics: false,
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
-          canUseMlAlerts: false,
+          canUseMlAlerts: true,
           canAccessML: true,
           canGetJobs: true,
           canGetDatafeeds: true,
