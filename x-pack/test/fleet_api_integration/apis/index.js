@@ -43,5 +43,8 @@ export default function ({ loadTestFile }) {
 
     // Preconfiguration
     loadTestFile(require.resolve('./preconfiguration/index'));
+
+    // Service tokens
+    loadTestFile(require.resolve('./service_tokens'));
   });
 }
