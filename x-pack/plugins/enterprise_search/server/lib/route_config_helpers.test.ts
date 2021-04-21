@@ -58,42 +58,4 @@ describe('skipBodyValidation', () => {
       },
     });
   });
-
-  it('will keep validate to set to "false" if "false"', () => {
-    expect(
-      skipBodyValidation<'post'>({
-        path: '/example/path',
-        validate: false,
-      })
-    ).toEqual({
-      path: '/example/path',
-      validate: false,
-      options: { body: { parse: false } },
-    });
-  });
-
-  it('will throw if body validation is already applied in the config', () => {
-    expect(() =>
-      skipBodyValidation({
-        path: '/example/path',
-        validate: {
-          body: mockSchema,
-        },
-      })
-    ).toThrow('validate.body cannot be set when using "skipBodyValidation"');
-  });
-
-  it('will throw if options.body is already applied in the config', () => {
-    expect(() =>
-      skipBodyValidation({
-        path: '/example/path',
-        validate: {},
-        options: {
-          body: {
-            output: 'stream',
-          },
-        },
-      })
-    ).toThrow('options.body cannot be set when using "skipBodyValidation"');
-  });
 });

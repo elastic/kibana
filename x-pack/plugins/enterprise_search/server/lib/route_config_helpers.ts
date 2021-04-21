@@ -5,9 +5,24 @@
  * 2.0.
  */
 
-import { DestructiveRouteMethod, RouteConfig, RouteConfigOptions } from 'kibana/server';
+import {
+  DestructiveRouteMethod,
+  RouteConfig,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteValidatorFullConfig,
+} from 'kibana/server';
 
 import { schema } from '@kbn/config-schema';
+
+type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknown, unknown, Method>;
+
+// We disallow options to set 'body' because we override them.
+interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
+  extends RouteConfig<P, Q, B, Method> {
+  validate: Omit<RouteValidatorFullConfig<P, Q, B>, 'body'>;
+  options?: Omit<RouteConfigOptions<Method>, 'body'>;
+}
 
 /**
  * Kibana Enterprise Search Plugin API endpoints often times pass through the request
@@ -49,26 +64,14 @@ import { schema } from '@kbn/config-schema';
 export const skipBodyValidation = <Method extends DestructiveRouteMethod>(
   // DestructiveRouteMethod is the Kibana type for everything except 'get' and 'options'.
   // Body configuration doesn't apply to those types so we disallow it with this helper.
-  config: RouteConfig<unknown, unknown, unknown, Method>
-): RouteConfig<unknown, unknown, unknown, Method> => {
-  const options = config.options || {};
-
-  // We throw here rather than overwriting the existing settings to avoid confusion
-  if (config.validate && config.validate.body) {
-    throw new Error('validate.body cannot be set when using "skipBodyValidation"');
-  }
-  if (options.body) {
-    throw new Error('options.body cannot be set when using "skipBodyValidation"');
-  }
+  config: ConfigWithoutBodyOptions<unknown, unknown, unknown, Method>
+): Config<Method> => {
   return {
     ...config,
-    validate:
-      config.validate === false
-        ? false
-        : {
-            ...config.validate,
-            body: schema.buffer(),
-          },
+    validate: {
+      ...config.validate,
+      body: schema.buffer(),
+    },
     options: {
       ...(config.options || {}),
       body: {
