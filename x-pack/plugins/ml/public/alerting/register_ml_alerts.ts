@@ -13,14 +13,12 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_ac
 import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
 import { PLUGIN_ID } from '../../common/constants/app';
 import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
+import { validateLookbackInterval, validateTopNBucket } from './validators';
 
-export async function registerMlAlerts(
+export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   alerting?: AlertingSetup
 ) {
-  // async import validators to reduce initial bundle size
-  const { validateLookbackInterval, validateTopNBucket } = await import('./validators');
-
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
