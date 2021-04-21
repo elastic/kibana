@@ -16,25 +16,30 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToInstall: string[];
+  packagesToInstall: Array<string | { name: string; version: string }>;
   esClient: ElasticsearchClient;
+  force?: boolean;
 }
 
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToInstall,
   esClient,
+  force,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
   const installSource = 'registry';
-  const latestPackagesResults = await Promise.allSettled(
-    packagesToInstall.map((packageName) => Registry.fetchFindLatestPackage(packageName))
+  const packagesResults = await Promise.allSettled(
+    packagesToInstall.map((pkg) => {
+      if (typeof pkg === 'string') return Registry.fetchFindLatestPackage(pkg);
+      return Promise.resolve(pkg);
+    })
   );
 
   logger.debug(`kicking off bulk install of ${packagesToInstall.join(', ')} from registry`);
   const bulkInstallResults = await Promise.allSettled(
-    latestPackagesResults.map(async (result, index) => {
-      const packageName = packagesToInstall[index];
+    packagesResults.map(async (result, index) => {
+      const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
       if (result.status === 'fulfilled') {
         const latestPackage = result.value;
         const installResult = await installPackage({
@@ -43,6 +48,7 @@ export async function bulkInstallPackages({
           pkgkey: Registry.pkgToPkgKey(latestPackage),
           installSource,
           skipPostInstall: true,
+          force,
         });
         if (installResult.error) {
           return {
@@ -76,7 +82,7 @@ export async function bulkInstallPackages({
   }
 
   return bulkInstallResults.map((result, index) => {
-    const packageName = packagesToInstall[index];
+    const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
     if (result.status === 'fulfilled') {
       if (result.value && result.value.error) {
         return {
@@ -97,4 +103,13 @@ export function isBulkInstallError(
   installResponse: any
 ): installResponse is IBulkInstallPackageError {
   return 'error' in installResponse && installResponse.error instanceof Error;
+}
+
+function getNameFromPackagesToInstall(
+  packagesToInstall: BulkInstallPackagesParams['packagesToInstall'],
+  index: number
+) {
+  const entry = packagesToInstall[index];
+  if (typeof entry === 'string') return entry;
+  return entry.name;
 }

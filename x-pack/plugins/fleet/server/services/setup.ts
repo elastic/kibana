@@ -65,19 +65,13 @@ async function createSetupSideEffects(
     ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  const nonFatalErrors = [];
-
-  try {
-    await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      policies,
-      packages,
-      defaultOutput
-    );
-  } catch (e) {
-    nonFatalErrors.push(e);
-  }
+  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient,
+    policies,
+    packages,
+    defaultOutput
+  );
 
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   await ensureAgentActionPolicyChangeExists(soClient, esClient);

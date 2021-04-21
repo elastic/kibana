@@ -102,11 +102,7 @@ export async function ensureInstalledPackage(options: {
               pkgVersion: pkgKeyProps.version,
             },
           });
-    const e = {
-      installType: installResult.installType,
-      error: new Error(`${errorPrefix}: ${installResult.error.message}`),
-    };
-    throw e;
+    throw new Error(`${errorPrefix}: ${installResult.error.message}`);
   }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
