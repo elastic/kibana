@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
@@ -84,10 +84,6 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
-      legacy: {
-        callMsearch: jest.fn(),
-        loadingCount$: new BehaviorSubject(0),
-      },
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);

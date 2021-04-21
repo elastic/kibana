@@ -7,7 +7,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { LegacyFetchHandlers } from '../../../common/search/search_source';
+import { CallMsearchFn } from '../../../common/search/search_source';
 
 /**
  * Wrapper for calling the internal msearch endpoint from the client.
@@ -16,7 +16,7 @@ import { LegacyFetchHandlers } from '../../../common/search/search_source';
  *
  * @internal
  */
-export function getCallMsearch({ http }: { http: HttpStart }): LegacyFetchHandlers['callMsearch'] {
+export function getCallMsearch({ http }: { http: HttpStart }): CallMsearchFn {
   return async ({ body, signal }) => {
     return http.post('/internal/_msearch', {
       body: JSON.stringify(body),
