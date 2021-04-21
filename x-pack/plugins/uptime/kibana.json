@@ -9,7 +9,8 @@
     "data",
     "home",
     "observability",
-    "ml"
+    "ml",
+    "fleet"
   ],
   "requiredPlugins": [
     "alerting",
