@@ -9,7 +9,7 @@
 import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { Search } from '@elastic/elasticsearch/api/requestParams';
 import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../../common';
 
 export function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeout'> {
   const timeout = config.elasticsearch.shardTimeout.asMilliseconds();
