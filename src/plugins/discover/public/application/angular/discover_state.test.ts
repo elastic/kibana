@@ -79,6 +79,48 @@ describe('Test discover state', () => {
     expect(state.getPreviousAppState()).toEqual(stateA);
   });
 });
+describe('Test discover initial state sort handling', () => {
+  test('Non-empty sort in URL should not fallback to state defaults', async () => {
+    history = createBrowserHistory();
+    history.push('/#?_a=(sort:!(!(order_date,desc)))');
+
+    state = getState({
+      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      history,
+      uiSettings: uiSettingsMock,
+    });
+    await state.replaceUrlAppState({});
+    await state.startSync();
+    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "order_date",
+          "desc",
+        ],
+      ]
+    `);
+  });
+  test('Empty sort in URL should allow fallback state defaults', async () => {
+    history = createBrowserHistory();
+    history.push('/#?_a=(sort:!())');
+
+    state = getState({
+      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      history,
+      uiSettings: uiSettingsMock,
+    });
+    await state.replaceUrlAppState({});
+    await state.startSync();
+    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "fallback",
+          "desc",
+        ],
+      ]
+    `);
+  });
+});
 
 describe('Test discover state with legacy migration', () => {
   test('migration of legacy query ', async () => {

@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
-    "@kbn/logging": "link:../kbn-logging",
-    "@kbn/std": "link:../kbn-std"
+    "@kbn/logging": "link:../kbn-logging"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",

@@ -36,13 +36,13 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
             <EuiIcon type="alert" color="warning" style={{ marginRight: '4px' }} />
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.deprecation"
-              defaultMessage="Scripted fields are deprecated, {runtimeDocs}."
+              defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
               values={{
                 runtimeDocs: (
                   <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
                     <FormattedMessage
                       id="indexPatternManagement.header.runtimeLink"
-                      defaultMessage="use runtime fields instead"
+                      defaultMessage="runtime fields"
                     />
                   </EuiLink>
                 ),

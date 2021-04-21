@@ -11,8 +11,6 @@ export function plugin() {
   return new FileUploadPlugin();
 }
 
-export * from '../common';
-
 export * from './importer/types';
 
 export { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
