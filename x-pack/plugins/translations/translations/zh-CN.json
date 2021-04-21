@@ -14008,7 +14008,6 @@
     "xpack.ml.jobSelector.filterBar.jobGroupTitle": "({jobsCount, plural, other {# 个作业}})",
     "xpack.ml.jobSelector.flyoutTitle": "作业选择",
     "xpack.ml.jobSelector.formControlLabel": "选择作业或组",
-    "xpack.ml.jobSelector.groupOptionsLabel": "组",
     "xpack.ml.jobSelector.groupsTab": "组",
     "xpack.ml.jobSelector.hideBarBadges": "隐藏",
     "xpack.ml.jobSelector.hideFlyoutBadges": "隐藏",
