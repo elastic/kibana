@@ -35,6 +35,15 @@
             }
           }
         },
+        "usage-counters": {
+          "dynamic": false,
+          "properties": {
+            "domainId": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
         "dashboard": {
           "properties": {
             "description": {

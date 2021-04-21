@@ -20,12 +20,17 @@ import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_ob
 import { MlLicense } from '../../common/license';
 
 import { MlClient, getMlClient } from '../lib/ml_client';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+
+type MLRequestHandlerContext = RequestHandlerContext & {
+  alerting?: AlertingApiRequestHandlerContext;
+};
 
 type Handler = (handlerParams: {
   client: IScopedClusterClient;
   request: KibanaRequest<any, any, any, any>;
   response: KibanaResponseFactory;
-  context: RequestHandlerContext;
+  context: MLRequestHandlerContext;
   jobSavedObjectService: JobSavedObjectService;
   mlClient: MlClient;
 }) => ReturnType<RequestHandler>;
@@ -66,7 +71,7 @@ export class RouteGuard {
 
   private _guard(check: () => boolean, handler: Handler) {
     return (
-      context: RequestHandlerContext,
+      context: MLRequestHandlerContext,
       request: KibanaRequest<any, any, any, any>,
       response: KibanaResponseFactory
     ) => {

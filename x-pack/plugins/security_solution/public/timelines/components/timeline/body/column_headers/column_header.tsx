@@ -19,9 +19,9 @@ import {
   getDraggableFieldId,
 } from '../../../../../common/components/drag_and_drop/helpers';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { Direction } from '../../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../events';
-import { Direction } from '../../../../../graphql/types';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';

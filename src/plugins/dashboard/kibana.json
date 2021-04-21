@@ -11,7 +11,8 @@
     "share",
     "uiActions",
     "urlForwarding",
-    "presentationUtil"
+    "presentationUtil",
+    "visualizations"
   ],
   "optionalPlugins": [
     "home",
@@ -23,6 +24,7 @@
   "requiredBundles": [
     "home",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "presentationUtil"
   ]
 }

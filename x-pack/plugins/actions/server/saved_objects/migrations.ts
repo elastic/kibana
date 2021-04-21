@@ -6,6 +6,7 @@
  */
 
 import {
+  LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
@@ -13,6 +14,10 @@ import {
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+
+interface ActionsLogMeta extends LogMeta {
+  migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
+}
 
 type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
@@ -50,9 +55,13 @@ function executeMigrationWithErrorHandling(
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
-      context.log.error(
+      context.log.error<ActionsLogMeta>(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
-        { actionDocument: doc }
+        {
+          migrations: {
+            actionDocument: doc,
+          },
+        }
       );
     }
     return doc;

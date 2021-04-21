@@ -10,7 +10,11 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { agentPolicyService } from '../../services';
-import { AgentReassignmentError, IngestManagerError } from '../../errors';
+import {
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+  IngestManagerError,
+} from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
@@ -46,12 +50,12 @@ export async function sendUpgradeAgentAction({
 
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new IngestManagerError(
-      `Cannot upgrade agent ${agentId} in managed policy ${agentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
 
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: now,
     data,
@@ -119,17 +123,17 @@ export async function sendUpgradeAgentsActions(
   const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
   });
-  const managedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
+  const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
     acc[policy.id] = policy.is_managed;
     return acc;
   }, {});
-  const isManagedAgent = (agent: Agent) => agent.policy_id && managedPolicies[agent.policy_id];
+  const isHostedAgent = (agent: Agent) => agent.policy_id && hostedPolicies[agent.policy_id];
 
-  // results from getAgents with options.kuery '' (or even 'active:false') may include managed agents
+  // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isManagedAgent(agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(agent))
       : givenAgents;
 
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -141,8 +145,10 @@ export async function sendUpgradeAgentsActions(
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (!options.force && isManagedAgent(agent)) {
-        throw new IngestManagerError(`Cannot upgrade agent in managed policy ${agent.policy_id}`);
+      if (!options.force && isHostedAgent(agent)) {
+        throw new HostedAgentPolicyRestrictionRelatedError(
+          `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
+        );
       }
       return agent;
     })
@@ -167,7 +173,6 @@ export async function sendUpgradeAgentsActions(
   };
 
   await bulkCreateAgentActions(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,
