@@ -47,14 +47,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async docTableFieldCount(expectedCount: number) {
-      log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
-      await retry.try(async () => {
-        const docTableCells = await testSubjects.findAll('docTableField', findTimeout);
-        expect(docTableCells.length).to.be(expectedCount);
-      });
-    }
-
     async fieldSuggestions(expectedFields: string[]) {
       log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
       const fields = await filterBar.getFilterEditorFields();

@@ -87,6 +87,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 
