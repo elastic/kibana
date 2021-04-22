@@ -64,7 +64,6 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
     });
 
     describe('', () => {
-      this.tags('ciGroup18');
       loadTestFile(require.resolve('./alerting'));
     });
   });
