@@ -39,7 +39,6 @@ interface State {
   hasFile: boolean;
   isPointsOnly: boolean;
   indexNames: string[];
-  updatedIndexName: string;
 }
 
 export class GeoJsonUploadForm extends Component<Props, State> {
@@ -47,16 +46,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
     hasFile: false,
     isPointsOnly: false,
     indexNames: [],
-    updatedIndexName: '',
   };
-
-  componentDidUpdate(prevProps: Props) {
-    const { indexName: prevIndexName } = prevProps;
-    const { indexName } = this.props;
-    if (indexName !== prevIndexName && indexName !== this.state.updatedIndexName) {
-      this.setState({ updatedIndexName: this.props.indexName });
-    }
-  }
 
   _onFileSelect = (onFileSelectParameters: OnFileSelectParameters) => {
     this.setState({
@@ -66,7 +56,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
 
     this.props.onFileSelect(onFileSelectParameters);
 
-    this.setState({ updatedIndexName: onFileSelectParameters.indexName });
+    this.props.onIndexNameChange(onFileSelectParameters.indexName);
 
     const geoFieldType =
       onFileSelectParameters.hasPoints && !onFileSelectParameters.hasShapes
@@ -83,7 +73,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
 
     this.props.onFileClear();
 
-    this.setState({ updatedIndexName: '' });
+    this.props.onIndexNameChange('');
   };
 
   _onGeoFieldTypeSelect = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -115,7 +105,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
         <GeoJsonFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
         <IndexNameForm
-          indexName={this.state.updatedIndexName}
+          indexName={this.props.indexName}
           indexNameError={this.props.indexNameError}
           onIndexNameChange={this.props.onIndexNameChange}
         />
