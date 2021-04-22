@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
+  const dataGrid = getService('dataGrid');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -37,7 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
 
       await kibanaServer.uiSettings.replace({
@@ -109,6 +111,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.share.exportAsSavedObject();
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.be(expectedUrl);
+        });
+
+        it('should load snapshot URL with empty sort param correctly', async function () {
+          const expectedUrl =
+            baseUrl +
+            '/app/discover?_t=1453775307251#' +
+            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
+            ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
+            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
+            "*',interval:auto,query:(language:kuery,query:'')" +
+            ',sort:!())';
+          await browser.navigateTo(expectedUrl);
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await retry.waitFor('url to contain default sorting', async () => {
+            // url fallback default sort should have been pushed to URL
+            const url = await browser.getCurrentUrl();
+            return url.includes('sort:!(!(%27@timestamp%27,desc))');
+          });
+
+          const row = await dataGrid.getRow({ rowIndex: 0 });
+          const firstRowText = await Promise.all(
+            row.map(async (cell) => await cell.getVisibleText())
+          );
+
+          // sorting requested by ES should be correct
+          expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
         });
       });
     });

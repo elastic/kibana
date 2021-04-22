@@ -53,7 +53,7 @@ export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<FieldBasedIndexPatternColumn>;
+  yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
@@ -64,6 +64,7 @@ export interface DataSeries {
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
+  yTitle?: string;
 }
 
 export interface SeriesUrl {
