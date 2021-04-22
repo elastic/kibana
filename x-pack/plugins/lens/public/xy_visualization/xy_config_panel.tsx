@@ -295,7 +295,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
-            endzonesVisible={!state.hideEndzones}
+            endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
           />
           <TooltipWrapper
