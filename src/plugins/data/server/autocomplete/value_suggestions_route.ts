@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, map, capitalize } from 'lodash';
+import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
@@ -79,7 +79,7 @@ async function getBody(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
-  rawQuery: string,
+  query: string,
   filters: estypes.QueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
@@ -87,20 +87,6 @@ async function getBody(
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
-
-  const query = getEscapedQuery(rawQuery);
-
-  let includeClause = '';
-
-  if (query) {
-    if (query[0].toLowerCase() === query[0]) {
-      // if first letter is lowercase we also add the capitalize option
-      includeClause = `(${query}|${capitalize(query)}).*`;
-    } else {
-      // otherwise we add lowercase option prefix
-      includeClause = `(${query}|${query.toLowerCase()}).*`;
-    }
-  }
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map' as const;
@@ -121,7 +107,7 @@ async function getBody(
       suggestions: {
         terms: {
           field: isFieldObject(field) ? field.name : field,
-          ...(query ? { include: includeClause } : {}),
+          include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
           shard_size: shardSize,
         },
