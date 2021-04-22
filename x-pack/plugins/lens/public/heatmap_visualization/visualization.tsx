@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { OperationMetadata, Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
-import { suggestions } from './suggestions';
+import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
   CHART_SHAPES,
@@ -79,8 +79,19 @@ export const getHeatmapVisualization = ({
   },
 
   clearLayer(state) {
+    const newState = { ...state };
+    delete newState.valueAccessor;
+    delete newState.xAccessor;
+    delete newState.yAccessor;
     return {
       ...state,
+    };
+  },
+
+  switchVisualizationType: (visualizationTypeId, state) => {
+    return {
+      ...state,
+      shape: visualizationTypeId as typeof CHART_SHAPES.HEATMAP,
     };
   },
 
@@ -89,9 +100,8 @@ export const getHeatmapVisualization = ({
   },
 
   initialize(frame, state, mainPalette) {
-    return {
-      // default state
-      ...{
+    return (
+      state || {
         layerId: frame.addNewLayer(),
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
@@ -99,7 +109,6 @@ export const getHeatmapVisualization = ({
           isVisible: true,
           position: Position.Top,
           type: LEGEND_FUNCTION,
-          ...(state?.legend ?? {}),
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
@@ -107,12 +116,11 @@ export const getHeatmapVisualization = ({
           isYAxisLabelVisible: true,
           isXAxisLabelVisible: true,
         },
-      },
-      ...state,
-    };
+      }
+    );
   },
 
-  getSuggestions: suggestions,
+  getSuggestions,
 
   getConfiguration({ state, frame, layerId }) {
     const datasourceLayer = frame.datasourceLayers[layerId];
@@ -132,7 +140,7 @@ export const getHeatmapVisualization = ({
           groupLabel: getAxisName(GROUP_ID.X),
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
           filterOperations: filterOperationsXAxis,
-          supportsMoreColumns: true,
+          supportsMoreColumns: !state.xAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_xDimensionPanel',
         },
@@ -142,10 +150,9 @@ export const getHeatmapVisualization = ({
           groupLabel: getAxisName(GROUP_ID.Y),
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: true,
+          supportsMoreColumns: !state.yAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
-          // enableDimensionEditor: true,
         },
         {
           layerId: state.layerId,
@@ -155,10 +162,9 @@ export const getHeatmapVisualization = ({
           }),
           accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
           filterOperations: isNumericMetric,
-          supportsMoreColumns: true,
+          supportsMoreColumns: !state.valueAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_cellPanel',
-          // enableDimensionEditor: true,
         },
       ],
     };

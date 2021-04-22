@@ -16,9 +16,13 @@ const groupLabel = i18n.translate('xpack.lens.heatmap.groupLabel', {
   defaultMessage: 'Heatmap',
 });
 
+export const CHART_SHAPES = {
+  HEATMAP: 'heatmap',
+} as const;
+
 export const CHART_NAMES = {
   heatmap: {
-    shapeType: 'heatmap',
+    shapeType: CHART_SHAPES.HEATMAP,
     icon: LensIconChartHeatmap,
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
       defaultMessage: 'Heatmap',
@@ -31,10 +35,6 @@ export const GROUP_ID = {
   X: 'x',
   Y: 'y',
   CELL: 'cell',
-} as const;
-
-export const CHART_SHAPES = {
-  HEATMAP: 'heatmap',
 } as const;
 
 export const FUNCTION_NAME = 'lens_heatmap';
