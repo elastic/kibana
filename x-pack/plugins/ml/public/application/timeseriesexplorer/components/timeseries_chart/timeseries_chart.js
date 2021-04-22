@@ -988,8 +988,8 @@ class TimeseriesChartIntl extends Component {
 
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
     each(combinedData, (item) => {
-      const lowerBound = item.lower ?? Number.MIN_VALUE;
-      const upperBound = item.upper ?? Number.MAX_VALUE;
+      const lowerBound = item.lower ?? Number.MAX_VALUE;
+      const upperBound = item.upper ?? Number.MIN_VALUE;
       valuesRange.min = Math.min(item.value, lowerBound, valuesRange.min);
       valuesRange.max = Math.max(item.value, upperBound, valuesRange.max);
     });
