@@ -6,17 +6,11 @@
  */
 import { kea, MakeLogicType } from 'kea';
 
-import { Meta } from '../../../../../common/types';
-
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
-
-interface EnginesAPIResponse {
-  results: EngineDetails[];
-  meta: Meta;
-}
+import { EnginesAPIResponse } from '../engines/types';
 
 interface SourceEnginesLogicValues {
   dataLoading: boolean;
