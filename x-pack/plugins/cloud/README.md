@@ -1,7 +1,7 @@
 # `cloud` plugin
 
 The `cloud` plugin adds cloud specific features to Kibana.
-The plugin configures following values: 
+The client-side plugin configures following values: 
 - `isCloudEnabled = true` for both ESS and ECE deployments
 - `cloudId` is the ID of the Cloud deployment Kibana is running on  
 - `baseUrl` is the URL of the Cloud interface, for Elastic Cloud production environment the value is `https://cloud.elastic.co`
