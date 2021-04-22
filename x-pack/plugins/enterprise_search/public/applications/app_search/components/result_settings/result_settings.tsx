@@ -9,15 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -27,9 +19,9 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
-import { DOCS_PREFIX } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 
+import { EmptyState } from './components';
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -112,42 +104,7 @@ export const ResultSettings: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiPanel color="subdued">
-          <EuiEmptyPrompt
-            iconType="gear"
-            title={
-              <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaTitle',
-                  { defaultMessage: 'Add documents to adjust settings' }
-                )}
-              </h2>
-            }
-            body={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaDescription',
-              {
-                defaultMessage:
-                  'A schema will be automatically created for you after you index some documents.',
-              }
-            )}
-            actions={
-              <EuiButton
-                iconType="popout"
-                size="s"
-                color="primary"
-                target="_blank"
-                href={`${DOCS_PREFIX}/result-settings-guide.html.html`}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.resultSettings.emptyButtonLabel',
-                  {
-                    defaultMessage: 'Read the result settings guide',
-                  }
-                )}
-              </EuiButton>
-            }
-          />
-        </EuiPanel>
+        <EmptyState />
       )}
     </>
   );
