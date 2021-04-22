@@ -45,8 +45,6 @@ import {
 } from './constants';
 import { EnginesLogic } from './engines_logic';
 
-import './engines_overview.scss';
-
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const {
@@ -83,11 +81,11 @@ export const EnginesOverview: React.FC = () => {
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
-      <EuiPageContent hasBorder panelPaddingSize="s" className="enginesOverview">
+      <EuiPageContent hasBorder>
         <FlashMessages />
-        <EuiPageContentHeader responsive={false}>
+        <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EngineIcon />
               </EuiFlexItem>
@@ -113,7 +111,7 @@ export const EnginesOverview: React.FC = () => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           <EnginesTable
             items={engines}
             loading={enginesLoading}
@@ -127,10 +125,10 @@ export const EnginesOverview: React.FC = () => {
 
         {hasPlatinumLicense && (
           <>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="xxl" />
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <MetaEngineIcon />
                   </EuiFlexItem>
@@ -156,6 +154,7 @@ export const EnginesOverview: React.FC = () => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
+              <EuiSpacer size="m" />
               <MetaEnginesTable
                 items={metaEngines}
                 loading={metaEnginesLoading}
