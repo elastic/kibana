@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ContainerType } from '../../../../../common/service_metadata';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -17,6 +18,7 @@ import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
+import { AlertDetails } from './alert_details';
 
 interface Props {
   serviceName: string;
@@ -28,13 +30,13 @@ const cloudIcons: Record<string, string> = {
   azure: 'logoAzure',
 };
 
-function getCloudIcon(provider?: string) {
+export function getCloudIcon(provider?: string) {
   if (provider) {
     return cloudIcons[provider];
   }
 }
 
-function getContainerIcon(container?: ContainerType) {
+export function getContainerIcon(container?: ContainerType) {
   if (!container) {
     return;
   }
@@ -46,10 +48,15 @@ function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons = 'service' | 'container' | 'cloud';
+type Icons = 'service' | 'container' | 'cloud' | 'alerts';
+
 interface PopoverItem {
   key: Icons;
-  icon?: string;
+  icon: {
+    type?: string;
+    color?: string;
+    size?: 's' | 'm' | 'l';
+  };
   isVisible: boolean;
   title: string;
   component: ReactChild;
@@ -65,6 +72,8 @@ export function ServiceIcons({ serviceName }: Props) {
   ] = useState<Icons | null>();
 
   const theme = useTheme();
+
+  const { alerts } = useApmServiceContext();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
@@ -106,7 +115,9 @@ export function ServiceIcons({ serviceName }: Props) {
   const popoverItems: PopoverItem[] = [
     {
       key: 'service',
-      icon: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+      icon: {
+        type: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+      },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
         defaultMessage: 'Service',
@@ -115,7 +126,9 @@ export function ServiceIcons({ serviceName }: Props) {
     },
     {
       key: 'container',
-      icon: getContainerIcon(icons?.containerType),
+      icon: {
+        type: getContainerIcon(icons?.containerType),
+      },
       isVisible: !!icons?.containerType,
       title: i18n.translate('xpack.apm.serviceIcons.container', {
         defaultMessage: 'Container',
@@ -124,12 +137,27 @@ export function ServiceIcons({ serviceName }: Props) {
     },
     {
       key: 'cloud',
-      icon: getCloudIcon(icons?.cloudProvider),
+      icon: {
+        type: getCloudIcon(icons?.cloudProvider),
+      },
       isVisible: !!icons?.cloudProvider,
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
         defaultMessage: 'Cloud',
       }),
       component: <CloudDetails cloud={details?.cloud} />,
+    },
+    {
+      key: 'alerts',
+      icon: {
+        type: 'bell',
+        color: theme.eui.euiColorDanger,
+        size: 'm',
+      },
+      isVisible: alerts.length > 0,
+      title: i18n.translate('xpack.apm.serviceIcons.alerts', {
+        defaultMessage: 'Alerts',
+      }),
+      component: <AlertDetails alerts={alerts} />,
     },
   ];
 
