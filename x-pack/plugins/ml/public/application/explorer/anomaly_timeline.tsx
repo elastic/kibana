@@ -15,8 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiSelect,
   EuiTitle,
+  EuiToolTip,
   EuiSpacer,
   EuiContextMenuItem,
   EuiButtonEmpty,
@@ -223,6 +225,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.ml.explorer.tooltip.swimlaneExplanation', {
+                  defaultMessage:
+                    'The overall swim lane contains the anomaly scores for each bucket in the selected time period. Each score is a value from 0 to 100, which is a statistically aggregated and normalized view of the combined anomalousness of all the anomaly record results within the bucket. The buckets with high scores are shown in red and low scores are indicated in blue.',
+                })}
+              >
+                <EuiIcon type="help" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
