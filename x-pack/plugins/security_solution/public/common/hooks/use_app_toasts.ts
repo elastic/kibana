@@ -10,7 +10,7 @@ import { IEsError, isEsError } from '../../../../../../src/plugins/data/public';
 
 import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/core/public';
 import { useToasts } from '../lib/kibana';
-import { isAppError } from '../utils/api';
+import { AppError, isAppError, isKibanaError, isSecurityAppError } from '../utils/api';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;
@@ -32,23 +32,31 @@ export const useAppToasts = (): UseAppToasts => {
 
   const _addError = useCallback(
     (error: unknown, options: ErrorToastOptions) => {
-      if (error != null && isEsError(error)) {
-        const err = esErrorToRequestError(error);
-        return addError(err, options);
-      } else if (isAppError(error)) {
-        return addError(error, options);
-      } else if (error instanceof Error) {
-        return addError(error, options);
-      } else {
-        // Best guess that this is a stringable error.
-        const err = new Error(String(error));
-        return addError(err, options);
-      }
+      const adaptedError = errorToErrorStackAdapter(error);
+      return addError(adaptedError, options);
     },
     [addError]
   );
-
   return { api: toasts, addError: _addError, addSuccess, addWarning };
+};
+
+/**
+ * Given an error of one type vs. another type this tries to adapt
+ * the best it can to the existing error toaster which parses the .stack
+ * as its error when you click the button to show the full error message.
+ * @param error The error to adapt to.
+ * @returns The adapted toaster error message.
+ */
+export const errorToErrorStackAdapter = (error: unknown): Error => {
+  if (error != null && isEsError(error)) {
+    return esErrorToErrorStack(error);
+  } else if (isAppError(error)) {
+    return appErrorToErrorStack(error);
+  } else if (error instanceof Error) {
+    return errorToErrorStack(error);
+  } else {
+    return unknownToErrorStack(error);
+  }
 };
 
 /**
@@ -72,13 +80,74 @@ type MaybeESError = IEsError & { err?: Record<string, unknown> };
  *
  * Where this same technique of overriding and changing the stack is occurring.
  */
-export const esErrorToRequestError = (error: IEsError & MaybeESError): Error => {
+export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
   const maybeUnWrapped = error.err != null ? error.err : error;
   const statusCode = error.err?.statusCode != null ? `(${error.err.statusCode})` : '';
   const stringifiedError = JSON.stringify(maybeUnWrapped, null, 2);
-  return {
-    message: `${error.attributes?.reason ?? error.message} ${statusCode}`,
-    name: error.attributes?.reason ?? error.message,
-    stack: stringifiedError,
-  };
+  const adaptedError = new Error(`${error.attributes?.reason ?? error.message} ${statusCode}`);
+  adaptedError.name = error.attributes?.reason ?? error.message;
+  adaptedError.stack = stringifiedError;
+};
+
+/**
+ * This attempts its best to map between a Kibana application error which can come from backend
+ * REST API's that are typically of a particular format and form.
+ *
+ * The existing error_toaster code tries to consolidate network and software stack traces but really
+ * here and our toasters we are using them for network response errors so we can troubleshoot things
+ * as quick as possible.
+ *
+ * We override and use error.stack to be able to give _full_ network responses regardless of if they
+ * are from Kibana or if they are from elasticSearch since sometimes Kibana errors might wrap the errors.
+ *
+ * Sometimes the errors are wrapped from io-ts, Kibana Schema or something else and we want to show
+ * as full error messages as we can.
+ */
+export const appErrorToErrorStack = (error: AppError): Error => {
+  const statusCode = isKibanaError(error)
+    ? `(${error.body.statusCode})`
+    : isSecurityAppError(error)
+    ? `(${error.body.status_code})`
+    : '';
+  const stringifiedError = JSON.stringify(error, null, 2);
+  const adaptedError = new Error(
+    `${String(error.body.message).trim() !== '' ? error.body.message : error.message} ${statusCode}`
+  );
+  adaptedError.name = error.name;
+  adaptedError.stack = stringifiedError;
+  return adaptedError;
+};
+
+/**
+ * Takes an error and tries to stringify it and use that as the stack for the error
+ * toaster. A lot of Error's will not stringify and this could become {}.
+ * @param error The error to convert into a message
+ * @returns The exception error to return back
+ */
+export const errorToErrorStack = (error: Error): Error => {
+  const stringifiedError = JSON.stringify(error, null, 2);
+  const adaptedError = new Error(error.message);
+  adaptedError.name = error.name;
+  adaptedError.stack = stringifiedError;
+  return adaptedError;
+};
+
+/**
+ * Last ditch effort to take something unknown which could be a string, number,
+ * anything. This usually should not be called but just in case we do try our
+ * best to stringify it and give a message, name, and replace the stack of it.
+ * @param error The unknown error to convert into a message
+ * @returns The exception error to return back
+ */
+export const unknownToErrorStack = (error: unknown): Error => {
+  let stringifiedError = '';
+  try {
+    stringifiedError = JSON.stringify(error, null, 2);
+  } catch (err) {
+    stringifiedError = '';
+  }
+  const adaptedError = new Error(String(error));
+  adaptedError.name = String(error);
+  adaptedError.stack = stringifiedError;
+  return adaptedError;
 };
