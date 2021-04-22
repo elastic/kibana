@@ -74,8 +74,8 @@ Arguments:
 |alertData?|`Omit<CommentRequestAlertType, 'type'>;` alert data to post to case
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |disabledStatuses?|`CaseStatuses[];` array of disabled statuses
-|onRowClick|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
-|updateCase?|`(theCase: Case ! SubCase) => void;` callback after case has been updated
+|onRowClick|<code>(theCase?: Case &vert; SubCase) => void;</code> callback for row click, passing case in row
+|updateCase?|<code>(theCase: Case &vert; SubCase) => void;</code> callback after case has been updated
 |userCanCrud|`boolean;` user permissions to crud
 
 UI component:
@@ -93,7 +93,7 @@ Arguments:
 |getCaseDetailHrefWithCommentId|`(commentId: string) => string;` callback to generate the case details url with a comment id reference from the case id and comment id
 |onComponentInitialized?|`() => void;` callback when component has initialized
 |onCaseDataSuccess?| `(data: Case) => void;` optional callback to handle case data in consuming application
-|ruleDetailsNavigation| `CasesNavigation<string \| null \| undefined, 'configurable'>`
+|ruleDetailsNavigation| <code>CasesNavigation<string &vert; null &vert; undefined, 'configurable'></code>
 |showAlertDetails| `(alertId: string, index: string) => void;` callback to show alert details
 |subCaseId?| `string;` subcase id
 |timelineIntegration?.editor_plugins| Plugins needed for integrating timeline into markdown editor.
@@ -143,7 +143,7 @@ Arguments:
 |---|---|
 |allCasesNavigation|`CasesNavigation` route configuration for configure cases page
 |caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
-|createCaseNavigation|`CasesNavigation`
+|createCaseNavigation|`CasesNavigation` route configuration for create case page
 |maxCasesToShow|`number;` number of cases to show in widget
   
 UI component:
