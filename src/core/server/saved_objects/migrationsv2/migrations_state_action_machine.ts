@@ -10,12 +10,13 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
 import type { ElasticsearchClient } from '../../elasticsearch';
-import * as Actions from './actions';
 import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
+import { cleanup } from './migrations_state_machine_cleanup';
 import { State } from './types';
 
-type ExecutionLog = Array<
+/** @internal */
+export type ExecutionLog = Array<
   | {
       type: 'transition';
       prevControlState: State['controlState'];
@@ -203,21 +204,6 @@ export async function migrationStateActionMachine({
       // restore error stack to point to a source of the problem.
       newError.stack = `[${e.stack}]`;
       throw newError;
-    }
-  }
-}
-
-async function cleanup(client: ElasticsearchClient, executionLog: ExecutionLog, state?: State) {
-  if (!state) return;
-  if ('sourceIndexPitId' in state) {
-    try {
-      await Actions.closePit(client, state.sourceIndexPitId)();
-    } catch (e) {
-      executionLog.push({
-        type: 'cleanup',
-        state,
-        message: e.message,
-      });
     }
   }
 }
