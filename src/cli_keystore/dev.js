@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../setup_node_env/no_transpilation');
+require('../setup_node_env');
 require('./cli_keystore');

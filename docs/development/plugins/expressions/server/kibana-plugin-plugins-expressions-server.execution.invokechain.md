@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
+invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
 ```
 
 ## Parameters
@@ -19,5 +19,5 @@ invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
 
 <b>Returns:</b>
 
-`Promise<any>`
+`Observable<any>`
 

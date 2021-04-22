@@ -22,7 +22,7 @@ import { CancellationToken } from '../../../common';
 import { CSV_BOM_CHARS } from '../../../common/constants';
 import { LevelLogger } from '../../lib';
 import { setFieldFormats } from '../../services';
-import { createMockReportingCore } from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadDeprecatedCSV } from './types';
 
@@ -75,7 +75,7 @@ describe('CSV Execute Job', function () {
     configGetStub.withArgs('csv', 'scroll').returns({});
     mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
 
-    mockReportingCore = await createMockReportingCore(mockReportingConfig);
+    mockReportingCore = await createMockReportingCore(createMockConfigSchema());
     mockReportingCore.getUiSettingsServiceFactory = () =>
       Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
     mockReportingCore.setConfig(mockReportingConfig);

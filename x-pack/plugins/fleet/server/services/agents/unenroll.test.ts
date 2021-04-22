@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
-import { AgentUnenrollmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { unenrollAgent, unenrollAgents } from './unenroll';
 
@@ -49,7 +49,7 @@ describe('unenrollAgent (singular)', () => {
   it('cannot unenroll from hosted agent policy by default', async () => {
     const { soClient, esClient } = createClientMock();
     await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
-      AgentUnenrollmentError
+      HostedAgentPolicyRestrictionRelatedError
     );
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
@@ -59,7 +59,7 @@ describe('unenrollAgent (singular)', () => {
     const { soClient, esClient } = createClientMock();
     await expect(
       unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
-    ).rejects.toThrowError(AgentUnenrollmentError);
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });
