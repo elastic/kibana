@@ -4,10 +4,6 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Build kbn_sample_panel_action'
-cd "$KIBANA_DIR/test/plugin_functional/plugins/kbn_sample_panel_action"
-yarn build
-
 echo '--- Downloading Distribution and Plugin artifacts'
 
 cd "$WORKSPACE"
@@ -21,6 +17,12 @@ tar -xzf kibana-oss.tar.gz -C "$KIBANA_OSS_BUILD_LOCATION" --strip=1
 cd "$KIBANA_DIR"
 
 tar -xzf ../kibana-oss-plugins.tar.gz
+
+echo '--- Build kbn_sample_panel_action'
+cd "$KIBANA_DIR/test/plugin_functional/plugins/kbn_sample_panel_action"
+yarn build
+
+cd "$KIBANA_DIR"
 
 echo '--- Plugin functional tests'
 node scripts/functional_tests \
