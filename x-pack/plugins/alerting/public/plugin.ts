@@ -30,14 +30,17 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
     const registerNavigation = async (
       consumer: string,
-      alertType: string,
+      alertTypeId: string,
       handler: AlertNavigationHandler
-    ) =>
-      this.alertNavigationRegistry!.register(
-        consumer,
-        await loadAlertType({ http: core.http, id: alertType }),
-        handler
-      );
+    ) => {
+      const alertType = await loadAlertType({ http: core.http, id: alertTypeId });
+      if (!alertType) {
+        // eslint-disable-next-line no-console
+        console.log(`Alert type "${alertTypeId}" is not registered.`);
+        return;
+      }
+      this.alertNavigationRegistry!.register(consumer, alertType, handler);
+    };
 
     const registerDefaultNavigation = async (consumer: string, handler: AlertNavigationHandler) =>
       this.alertNavigationRegistry!.registerDefault(consumer, handler);
@@ -53,6 +56,12 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       getNavigation: async (alertId: Alert['id']) => {
         const alert = await loadAlert({ http: core.http, alertId });
         const alertType = await loadAlertType({ http: core.http, id: alert.alertTypeId });
+
+        if (!alertType) {
+          // eslint-disable-next-line no-console
+          console.log(`Alert type "${alert.alertTypeId}" is not registered.`);
+          return;
+        }
 
         if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
