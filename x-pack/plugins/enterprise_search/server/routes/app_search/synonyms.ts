@@ -7,9 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
 import { RouteDependencies } from '../../plugin';
-
-const synonymsSchema = schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 2 });
 
 export function registerSynonymsRoutes({
   router,
@@ -34,35 +33,29 @@ export function registerSynonymsRoutes({
   );
 
   router.post(
-    {
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/synonyms',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          synonyms: synonymsSchema,
-        }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/synonyms/collection',
     })
   );
 
   router.put(
-    {
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           synonymId: schema.string(),
         }),
-        body: schema.object({
-          synonyms: synonymsSchema,
-        }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/synonyms/:synonymId',
     })
