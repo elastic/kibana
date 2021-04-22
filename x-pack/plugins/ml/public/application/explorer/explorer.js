@@ -482,7 +482,7 @@ export class ExplorerUI extends React.Component {
                         <EuiToolTip
                           content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
                             defaultMessage:
-                              'Show all anomalies or only the highest severity anomaly for each hour or day.',
+                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
                           })}
                         >
                           <span>
