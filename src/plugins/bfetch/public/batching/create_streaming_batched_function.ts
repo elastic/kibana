@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { inflateSync } from 'zlib';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
   createBatchedFunction,
-  BatchResponseItem,
   ErrorLike,
-  BatchItemWrapper,
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
 import { BatchedFunc, BatchItem } from './types';
+import { getInflatedResponse } from './get_inflated_response';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -129,22 +127,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        const getResponse = (response: string): BatchResponseItem<Result, ErrorLike> => {
-          const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
-
-          try {
-            const inputBuf = Buffer.from(payload, 'base64');
-            const inflatedRes = compressed ? inflateSync(inputBuf).toString() : payload;
-            return JSON.parse(inflatedRes);
-          } catch (e) {
-            return JSON.parse(payload);
-          }
-        };
-
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
             try {
-              const response = getResponse(json);
+              const response = getInflatedResponse<Result>(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

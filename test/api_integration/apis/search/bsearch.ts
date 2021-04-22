@@ -8,25 +8,18 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
-import { inflateSync } from 'zlib';
+import { getInflatedResponse } from '../../../../src/plugins/bfetch/public/batching/get_inflated_response';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
 
-const inflate = (resp: any) => {
-  if (resp.compressed) {
-    const inputBuf = Buffer.from(resp.payload, 'base64');
-    return JSON.parse(inflateSync(inputBuf).toString());
-  } else {
-    return JSON.parse(resp.payload);
-  }
-};
-
-function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
+function parseBfetchResponse(resp: request.Response) {
   return resp.text
     .trim()
     .split('\n')
-    .map((item) => inflate(JSON.parse(item)));
+    .map((item) => {
+      return getInflatedResponse<any>(item);
+    });
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -41,28 +34,28 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
-                      bool: {
-                        must: [{ match: { name: 'John' } }],
-                      },
+                      match_all: {},
                     },
                   },
                 },
+              },
+              options: {
+                strategy: 'es',
               },
             },
           ],
         });
 
-        const response = JSON.parse(resp.text);
-        expect(response.compressed).to.be(false);
-        const jsonBody = inflate(response);
+        const jsonBody = parseBfetchResponse(resp);
 
         expect(resp.status).to.be(200);
-        expect(jsonBody.id).to.be(0);
-        expect(jsonBody.result.isPartial).to.be(false);
-        expect(jsonBody.result.isRunning).to.be(false);
-        expect(jsonBody.result).to.have.property('rawResponse');
+        expect(jsonBody[0].id).to.be(0);
+        expect(jsonBody[0].result.isPartial).to.be(false);
+        expect(jsonBody[0].result.isRunning).to.be(false);
+        expect(jsonBody[0].result).to.have.property('rawResponse');
       });
 
       it('should return a batch of successful resposes', async () => {
@@ -71,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -82,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -109,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -135,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           batch: [
             {
               request: {
+                index: '.kibana',
                 indexType: 'baad',
                 params: {
                   body: {
