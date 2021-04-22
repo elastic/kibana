@@ -5,8 +5,59 @@
  * 2.0.
  */
 
-import { getNumOverlapped, getNumAgentsInGrouping, processAggregations } from './helpers';
-import { Overlap, SelectedGroups } from './types';
+import uuid from 'uuid';
+import { generateGroupOption } from './agent_grouper';
+import {
+  getNumOverlapped,
+  getNumAgentsInGrouping,
+  processAggregations,
+  generateAgentSelection,
+} from './helpers';
+import { AGENT_GROUP_KEY, GroupOption, Overlap, SelectedGroups } from './types';
+
+describe('generateAgentSelection', () => {
+  it('should handle empty input', () => {
+    const options: GroupOption[] = [];
+    const { newAgentSelection, selectedGroups, selectedAgents } = generateAgentSelection(options);
+    expect(newAgentSelection).toEqual({
+      agents: [],
+      allAgentsSelected: false,
+      platformsSelected: [],
+      policiesSelected: [],
+    });
+    expect(selectedAgents).toEqual([]);
+    expect(selectedGroups).toEqual({
+      policy: {},
+      platform: {},
+    });
+  });
+
+  it('should properly pull out group ids', () => {
+    const options: GroupOption[] = [];
+    const policyOptions = generateGroupOption('policy', AGENT_GROUP_KEY.Policy, [
+      { name: 'policy 1', id: 'policy 1', size: 5 },
+      { name: 'policy 2', id: uuid.v4(), size: 5 },
+    ]).options;
+    options.push(...policyOptions);
+
+    const platformOptions = generateGroupOption('platform', AGENT_GROUP_KEY.Platform, [
+      { name: 'platform 1', id: 'platform 1', size: 5 },
+      { name: 'platform 2', id: uuid.v4(), size: 5 },
+    ]).options;
+    options.push(...platformOptions);
+
+    const { newAgentSelection, selectedGroups, selectedAgents } = generateAgentSelection(options);
+    expect(newAgentSelection).toEqual({
+      agents: [],
+      allAgentsSelected: false,
+      platformsSelected: platformOptions.map(({ value: { id } }) => id),
+      policiesSelected: policyOptions.map(({ value: { id } }) => id),
+    });
+    expect(selectedAgents).toEqual([]);
+    expect(Object.keys(selectedGroups.platform).length).toEqual(2);
+    expect(Object.keys(selectedGroups.policy).length).toEqual(2);
+  });
+});
 
 describe('processAggregations', () => {
   it('should handle empty inputs properly', () => {
