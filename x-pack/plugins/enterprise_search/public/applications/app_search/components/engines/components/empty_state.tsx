@@ -31,7 +31,7 @@ export const EmptyState: React.FC = () => {
   return (
     <>
       <EnginesOverviewHeader />
-      <EuiPageContent color="subdued" className="emptyState">
+      <EuiPageContent color="subdued">
         {canManageEngines ? (
           <EuiEmptyPrompt
             data-test-subj="AdminEmptyEnginesPrompt"
