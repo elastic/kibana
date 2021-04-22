@@ -27,10 +27,9 @@ describe('calculateDomainForSeries', () => {
     expect(domainBounds?.domainEnd).toBe(3);
   });
 
-  it('should return undefined for both domainStart and domainEnd when series is empty', () => {
+  it('should return undefined when series is empty', () => {
     const domainBounds = calculateDomainForSeries([]);
 
-    expect(domainBounds?.domainStart).toBeUndefined();
-    expect(domainBounds?.domainEnd).toBeUndefined();
+    expect(domainBounds).toBeUndefined();
   });
 });
