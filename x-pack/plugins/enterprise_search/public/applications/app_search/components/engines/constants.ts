@@ -49,7 +49,7 @@ export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
 export const META_ENGINE_EMPTY_PROMPT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPrompTitle',
   {
-    defaultMessage: 'No meta engines yet',
+    defaultMessage: 'Create your first meta engine',
   }
 );
 
