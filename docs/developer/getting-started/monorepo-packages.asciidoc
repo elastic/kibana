@@ -65,6 +65,7 @@ yarn kbn watch-bazel
 - @kbn/apm-utils
 - @kbn/babel-preset
 - @kbn/config-schema
+- @kbn/std
 - @kbn/tinymath
 - @kbn/utility-types
 
