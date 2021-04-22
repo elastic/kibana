@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomCheerioStatic } from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import {
+  CustomCheerio,
+  CustomCheerioStatic,
+} from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -16,7 +19,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  function getRowItemData(row: CheerioElement, $: CustomCheerioStatic) {
+  function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
       name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
       tagsText: $(row)
@@ -79,7 +82,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -97,7 +100,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           return getRowItemData(row, $);
         });
     },
@@ -106,7 +109,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,

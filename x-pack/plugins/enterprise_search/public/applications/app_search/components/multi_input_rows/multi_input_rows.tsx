@@ -44,7 +44,7 @@ export const MultiInputRows: React.FC<Props> = ({
   inputPlaceholder = INPUT_ROW_PLACEHOLDER,
 }) => {
   const logic = MultiInputRowsLogic({ id, values: initialValues });
-  const { values, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
+  const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
 
   useEffect(() => {
@@ -55,17 +55,22 @@ export const MultiInputRows: React.FC<Props> = ({
 
   return (
     <>
-      {values.map((value: string, index: number) => (
-        <InputRow
-          key={`inputRow${index}`}
-          value={value}
-          placeholder={inputPlaceholder}
-          onChange={(newValue) => editValue(index, newValue)}
-          onDelete={() => deleteValue(index)}
-          disableDelete={hasOnlyOneValue}
-          deleteLabel={deleteRowLabel}
-        />
-      ))}
+      {values.map((value: string, index: number) => {
+        const firstRow = index === 0;
+        const lastRow = index === values.length - 1;
+        return (
+          <InputRow
+            key={`inputRow-${id}-${index}`}
+            value={value}
+            placeholder={inputPlaceholder}
+            autoFocus={addedNewRow ? lastRow : firstRow}
+            onChange={(newValue) => editValue(index, newValue)}
+            onDelete={() => deleteValue(index)}
+            disableDelete={hasOnlyOneValue}
+            deleteLabel={deleteRowLabel}
+          />
+        );
+      })}
       <EuiButtonEmpty
         size="s"
         iconType="plusInCircle"
