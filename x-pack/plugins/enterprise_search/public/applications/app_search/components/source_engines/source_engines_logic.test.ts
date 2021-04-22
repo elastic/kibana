@@ -6,10 +6,7 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'test-engine' } },
-}));
+import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -73,7 +70,7 @@ describe('SourceEnginesLogic', () => {
       SourceEnginesLogic.actions.fetchSourceEngines();
       await nextTick();
 
-      expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/test-engine/source_engines', {
+      expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/source_engines', {
         query: {
           'page[current]': 1,
           'page[size]': 25,
