@@ -151,59 +151,57 @@ export function register(registerParams: RegisterAlertTypesParams) {
           },
         });
 
-        if (numMatches > 0) {
-          logger.debug(
-            `alert ${EsQuery.ID}:${rule.uuid} "${rule.name}" query has ${numMatches} matches`
+        logger.debug(
+          `alert ${EsQuery.ID}:${rule.uuid} "${rule.name}" query has ${numMatches} matches`
+        );
+
+        // apply the alert condition
+        const conditionMet = compareFn(numMatches, params.threshold);
+        if (conditionMet) {
+          const humanFn = i18n.translate(
+            'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
+            {
+              defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
+              values: {
+                thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
+                threshold: params.threshold.join(' and '),
+              },
+            }
           );
 
-          // apply the alert condition
-          const conditionMet = compareFn(numMatches, params.threshold);
-          if (conditionMet) {
-            const humanFn = i18n.translate(
-              'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
-              {
-                defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
-                values: {
-                  thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
-                  threshold: params.threshold.join(' and '),
-                },
-              }
-            );
+          const baseContext: EsQueryAlertActionContext = {
+            date: new Date().toISOString(),
+            value: numMatches,
+            conditions: humanFn,
+            hits: searchResult.hits.hits,
+          };
 
-            const baseContext: EsQueryAlertActionContext = {
-              date: new Date().toISOString(),
-              value: numMatches,
-              conditions: humanFn,
-              hits: searchResult.hits.hits,
-            };
+          const actionContext = addMessages(rule.name, baseContext, params);
+          writeRuleAlert({
+            id: EsQuery.ConditionMetAlertInstanceId,
+            fields: {
+              'kibana.rac.alert.value': numMatches,
+              'kibana.rac.alert.threshold': params.threshold[0],
+            },
+          })
+            // store the params we would need to recreate the query that led to this alert instance
+            .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
+            .scheduleActions(EsQuery.RuleTypeActionGroupId, actionContext);
 
-            const actionContext = addMessages(rule.name, baseContext, params);
-            writeRuleAlert({
-              id: EsQuery.ConditionMetAlertInstanceId,
-              fields: {
-                'kibana.rac.alert.value': numMatches,
-                'kibana.rac.alert.threshold': params.threshold[0],
-              },
-            })
-              // store the params we would need to recreate the query that led to this alert instance
-              .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
-              .scheduleActions(EsQuery.RuleTypeActionGroupId, actionContext);
+          // This will show up in the alerts-as-data index as event.kind: "event"
+          // and contain a copy of the source document, with basic alerts-as-data fields appended
+          // writeRuleEvents({
+          //   events: searchResult.hits.hits,
+          //   id: EsQuery.ConditionMetAlertInstanceId,
+          //   fields: {},
+          // });
 
-            // This will show up in the alerts-as-data index as event.kind: "event"
-            // and contain a copy of the source document, with basic alerts-as-data fields appended
-            // writeRuleEvents({
-            //   events: searchResult.hits.hits,
-            //   id: EsQuery.ConditionMetAlertInstanceId,
-            //   fields: {},
-            // });
-
-            // update the timestamp based on the current search results
-            const firstValidTimefieldSort = getValidTimefieldSort(
-              searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
-            );
-            if (firstValidTimefieldSort) {
-              timestamp = firstValidTimefieldSort;
-            }
+          // update the timestamp based on the current search results
+          const firstValidTimefieldSort = getValidTimefieldSort(
+            searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+          );
+          if (firstValidTimefieldSort) {
+            timestamp = firstValidTimefieldSort;
           }
         }
 
