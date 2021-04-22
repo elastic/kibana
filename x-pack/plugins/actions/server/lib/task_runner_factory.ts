@@ -73,22 +73,20 @@ export class TaskRunnerFactory {
 
     return {
       async run() {
-        const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
-        const namespace = spaceIdToNamespace(spaceId);
-        const taskParams = taskInstance.params.taskParams;
+        const { spaceId, actionTaskParamsId, taskParams, ...rest } = taskInstance.params as Record<
+          string,
+          string | Record<string, string>
+        >;
+        const namespace = spaceIdToNamespace(spaceId as string);
 
-        let params = null;
-        let actionId = null;
-        let apiKey = null;
+        let params = rest;
+        let actionId = taskParams ? (taskParams as Record<string, string>).actionId : undefined;
+        let apiKey = taskParams ? (taskParams as Record<string, string>).apiKey : undefined;
         let references: SavedObjectReference[] = [];
-        if (taskParams) {
-          params = taskParams.params;
-          actionId = taskParams.actionId;
-          apiKey = taskParams.apiKey;
-        } else {
+        if (!actionId) {
           const taskParamsSO = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
             ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-            actionTaskParamsId,
+            actionTaskParamsId as string,
             { namespace }
           );
           params = taskParamsSO.attributes.params;
@@ -102,7 +100,7 @@ export class TaskRunnerFactory {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
-        const path = addSpaceIdToPath('/', spaceId);
+        const path = addSpaceIdToPath('/', spaceId as string);
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
@@ -149,7 +147,7 @@ export class TaskRunnerFactory {
         }
 
         // Cleanup action_task_params object now that we're done with it
-        if (!taskParams) {
+        if (!actionId) {
           try {
             // If the request has reached this far we can assume the user is allowed to run clean up
             // We would idealy secure every operation but in order to support clean up of legacy alerts
@@ -157,7 +155,7 @@ export class TaskRunnerFactory {
             // Once support for legacy alert RBAC is dropped, this can be secured
             await getUnsecuredSavedObjectsClient(fakeRequest).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskParamsId
+              actionTaskParamsId as string
             );
           } catch (e) {
             // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)

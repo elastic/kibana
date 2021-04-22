@@ -164,8 +164,12 @@ export function createExecutionHandler<
           taskParams: {
             actionId: action.id,
             apiKey,
-            params: action.params,
           },
+          // taskParams: {
+          //   actionId: action.id,
+          //   apiKey,
+          //   params: action.params,
+          // },
         },
         state: {},
       });
