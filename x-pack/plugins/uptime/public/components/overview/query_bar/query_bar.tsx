@@ -36,7 +36,7 @@ export const QueryBar = () => {
 
   const { query, setQuery } = useQueryBar();
 
-  const { index_pattern: indexPattern } = useIndexPattern(query.language ?? SyntaxType.text);
+  const { index_pattern: indexPattern } = useIndexPattern();
 
   const [inputVal, setInputVal] = useState<string>(query.query);
 

@@ -44,7 +44,7 @@ export const useQueryBar = () => {
         }
   );
 
-  const { index_pattern: indexPattern } = useIndexPattern(query.language);
+  const { index_pattern: indexPattern } = useIndexPattern();
 
   const updateUrlParams = useUrlParams()[1];
 
