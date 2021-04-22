@@ -1,13 +1,15 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-config-schema"
-PKG_REQUIRE_NAME = "@kbn/config-schema"
+PKG_BASE_NAME = "kbn-utils"
+PKG_REQUIRE_NAME = "@kbn/utils"
 
-SOURCE_FILES = glob([
-  "src/**/*.ts",
-  "types/joi.d.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+  ],
+  exclude = ["**/*.test.*"],
+)
 
 SRCS = SOURCE_FILES
 
@@ -18,23 +20,18 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
+  "README.md"
 ]
 
 SRC_DEPS = [
-  "@npm//joi",
-  "@npm//lodash",
-  "@npm//moment",
-  "@npm//tsd",
-  "@npm//type-detect",
+  "//packages/kbn-config-schema",
+  "@npm//load-json-file",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
-  "@npm//@types/joi",
-  "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/type-detect",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
