@@ -267,12 +267,7 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout
-          ownFocus
-          size="m"
-          onClose={() => deselect()}
-          data-test-subj="mlAnalyticsJobMapFlyout"
-        >
+        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
