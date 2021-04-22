@@ -30,7 +30,6 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -40,6 +39,7 @@ import {
   kueryRt,
   rangeRt,
 } from './default_api_types';
+import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -457,6 +457,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
       }),
+      comparisonRangeRt,
       environmentRt,
       kueryRt,
       rangeRt,
@@ -472,6 +473,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       kuery,
       transactionType,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -480,19 +483,36 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
 
     const { start, end } = setup;
 
-    const serviceInstances = await getServiceInstancesMainStatistics({
-      environment,
-      kuery,
-      latencyAggregationType,
-      serviceName,
-      setup,
-      transactionType,
-      searchAggregatedTransactions,
-      start,
-      end,
-    });
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceInstancesMainStatistics({
+        environment,
+        kuery,
+        latencyAggregationType,
+        serviceName,
+        setup,
+        transactionType,
+        searchAggregatedTransactions,
+        start,
+        end,
+      }),
+      ...(comparisonStart && comparisonEnd
+        ? [
+            getServiceInstancesMainStatistics({
+              environment,
+              kuery,
+              latencyAggregationType,
+              serviceName,
+              setup,
+              transactionType,
+              searchAggregatedTransactions,
+              start: comparisonStart,
+              end: comparisonEnd,
+            }),
+          ]
+        : []),
+    ]);
 
-    return { serviceInstances };
+    return { currentPeriod, previousPeriod };
   },
 });
 

@@ -35,7 +35,6 @@ import {
   phraseFilterFunction,
   esRawResponse,
 } from '../../common/search';
-import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
@@ -157,10 +156,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, notifications, uiSettings }: CoreStart,
+    { http, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search = ((request, options) => {
+    const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
@@ -171,10 +170,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: handleResponse,
-      legacy: {
-        callMsearch: getCallMsearch({ http }),
-        loadingCount$,
-      },
     };
 
     return {
