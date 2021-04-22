@@ -174,29 +174,25 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             />
           </ConditionEntryCell>
         </EuiFlexItem>
-        {entry.field === ConditionEntryField.PATH ? (
-          <EuiFlexItem style={{ gridArea: 'operator' }}>
-            <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+        <EuiFlexItem style={{ gridArea: 'operator' }}>
+          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+            {entry.field === ConditionEntryField.PATH ? (
               <EuiSuperSelect
                 options={operatorOptions}
                 onChange={handleOperatorUpdate}
                 valueOfSelected={entry.operator}
                 data-test-subj={getTestId('operator')}
               />
-            </ConditionEntryCell>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem style={{ gridArea: 'operator' }}>
-            <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+            ) : (
               <EuiFieldText
                 name="operator"
                 value={OPERATOR_TITLES.included}
                 data-test-subj={getTestId('operator')}
                 readOnly
               />
-            </ConditionEntryCell>
-          </EuiFlexItem>
-        )}
+            )}
+          </ConditionEntryCell>
+        </EuiFlexItem>
         <EuiFlexItem style={{ gridArea: 'value' }}>
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText
