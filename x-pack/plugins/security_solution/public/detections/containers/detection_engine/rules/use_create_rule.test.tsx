@@ -10,10 +10,21 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useCreateRule, ReturnCreateRule } from './use_create_rule';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useCreateRule', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
   test('init', async () => {
     const { result } = renderHook<unknown, ReturnCreateRule>(() => useCreateRule());
 

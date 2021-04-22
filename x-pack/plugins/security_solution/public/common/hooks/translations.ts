@@ -46,3 +46,10 @@ export const EQL_PREVIEW_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'EQL Preview Error',
   }
 );
+
+export const EQL_TIME_INTERVAL_NOT_DEFINED = i18n.translate(
+  'xpack.securitySolution.components.hooks.errors.timeIntervalsNotDefined',
+  {
+    defaultMessage: 'Time intervals are not defined.',
+  }
+);
