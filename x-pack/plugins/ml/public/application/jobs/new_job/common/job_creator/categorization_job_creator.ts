@@ -155,10 +155,10 @@ export class CategorizationJobCreator extends JobCreator {
     checks: FieldExampleCheck[]
   ) {
     return (
-      this.indexPatternTitle.includes(':') &&
       examples.length === 0 &&
       status === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID &&
-      checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES
+      checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES &&
+      this.indexPatternTitle.includes(':')
     );
   }
 
