@@ -139,14 +139,15 @@ export function MachineLearningAlertingProvider(
       await this.assertTopNBuckets(numberOfBuckets);
     },
 
+    async isAdvancedSectionOpened() {
+      return await find.existsByDisplayedByCssSelector('#mlAnomalyAlertAdvancedSettings');
+    },
+
     async ensureAdvancedSectionOpen() {
       await retry.tryForTime(5000, async () => {
-        const isVisible = await find.existsByDisplayedByCssSelector(
-          '#mlAnomalyAlertAdvancedSettings'
-        );
-        if (!isVisible) {
+        if (!(await this.isAdvancedSectionOpened())) {
           await testSubjects.click('mlAnomalyAlertAdvancedSettingsTrigger');
-          await this.ensureAdvancedSectionOpen();
+          expect(await this.isAdvancedSectionOpened()).to.eql(true);
         }
       });
     },
