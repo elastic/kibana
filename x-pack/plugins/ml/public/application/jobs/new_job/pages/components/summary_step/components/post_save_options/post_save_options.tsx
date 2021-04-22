@@ -87,7 +87,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.createAlert"
-            defaultMessage="Create alert"
+            defaultMessage="Create alert rule"
           />
         </EuiButton>
       </EuiFlexItem>
