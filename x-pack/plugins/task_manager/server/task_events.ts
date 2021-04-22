@@ -101,7 +101,7 @@ export function asTaskRunEvent(
   };
 }
 
-export function asTaskPendingEvent(
+export function asTaskDeferredEvent(
   id: string,
   event: Result<RanTask, ErroredTask>,
   timing?: TaskTiming

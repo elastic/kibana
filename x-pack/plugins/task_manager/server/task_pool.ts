@@ -161,8 +161,8 @@ export class TaskPool {
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
-    if (taskRunner.isEphemeral && (taskRunner as EphemeralTaskManagerRunner).markTaskAsPending) {
-      (taskRunner as EphemeralTaskManagerRunner).markTaskAsPending();
+    if (taskRunner.isEphemeral && (taskRunner as EphemeralTaskManagerRunner).markTaskAsDeferred) {
+      (taskRunner as EphemeralTaskManagerRunner).markTaskAsDeferred();
       setTimeout(() => this.runTaskRunner(taskRunner));
     } else {
       this.runTaskRunner(taskRunner);

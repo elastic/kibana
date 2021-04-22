@@ -23,7 +23,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
-  asTaskPendingEvent,
+  asTaskDeferredEvent,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
 import {
@@ -255,10 +255,10 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   /**
    * Attemps to mark a task as pending
    */
-  public async markTaskAsPending() {
+  public async markTaskAsDeferred() {
     const stopTaskTimer = startTaskTimer();
     this.onTaskEvent(
-      asTaskPendingEvent(
+      asTaskDeferredEvent(
         this.id,
         asOk({
           task: { ...this.instance.task },
