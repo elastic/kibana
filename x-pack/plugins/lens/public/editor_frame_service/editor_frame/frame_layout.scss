@@ -9,6 +9,9 @@
   bottom: 0;
   overflow: hidden;
   flex-direction: column;
+  @include euiBreakpoint('xs', 's', 'm') {
+    position: static;
+  }
 }
 
 .lnsFrameLayout__pageContent {
