@@ -64,9 +64,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       .sort(sortByOrder);
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_${
-      IS_DARK_THEME ? 'dark' : 'light'
-    }_2x.png`;
+    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_2x.png`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
@@ -199,7 +197,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         <EuiFlexItem className="kbnOverviewMore__item" key={id}>
                           <RedirectAppLinks application={application}>
                             <EuiCard
-                              className="kbnOverviewSolution"
+                              className={`kbnOverviewSolution ${id}`}
                               description={description ? description : ''}
                               href={addBasePath(path)}
                               icon={
