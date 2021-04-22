@@ -15,8 +15,9 @@ export function getInflatedResponse<Result extends object>(
   const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
 
   try {
-    const inputBuf = Buffer.from(payload, 'base64');
-    const inflatedRes = compressed ? inflateSync(inputBuf).toString() : payload;
+    const inflatedRes = compressed
+      ? inflateSync(Buffer.from(payload, 'base64')).toString()
+      : payload;
     return JSON.parse(inflatedRes);
   } catch (e) {
     return JSON.parse(payload);

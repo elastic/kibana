@@ -12,6 +12,17 @@ import { AbortError, defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
 import { deflateSync } from 'zlib';
 
+const formatResponse = (resp: any, compressed: boolean = false) => {
+  return (
+    JSON.stringify({
+      compressed,
+      payload: compressed
+        ? deflateSync(JSON.stringify(resp)).toString('base64')
+        : JSON.stringify(resp),
+    }) + '\n'
+  );
+};
+
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
     new Promise<any>((resolve) =>
@@ -259,13 +270,10 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await isPending(promise3)).toBe(true);
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 1,
-            result: { foo: 'bar' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 1,
+          result: { foo: 'bar' },
+        })
       );
 
       expect(await isPending(promise1)).toBe(true);
@@ -273,13 +281,10 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await isPending(promise3)).toBe(true);
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 0,
-            result: { foo: 'bar 2' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 0,
+          result: { foo: 'bar 2' },
+        })
       );
 
       expect(await isPending(promise1)).toBe(false);
@@ -302,22 +307,16 @@ describe('createStreamingBatchedFunction()', () => {
       await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 1,
-            result: { foo: 'bar' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 1,
+          result: { foo: 'bar' },
+        })
       );
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 2,
-            result: { foo: 'bar 2' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 2,
+          result: { foo: 'bar 2' },
+        })
       );
 
       expect(await isPending(promise1)).toBe(true);
@@ -341,27 +340,23 @@ describe('createStreamingBatchedFunction()', () => {
       const promise3 = fn({ c: '3' });
       await new Promise((r) => setTimeout(r, 6));
 
-      const compress = (resp: object) => {
-        return deflateSync(JSON.stringify(resp)).toString('base64');
-      };
-
       stream.next(
-        JSON.stringify({
-          compressed: true,
-          payload: compress({
+        formatResponse(
+          {
             id: 1,
             result: { foo: 'bar' },
-          }),
-        }) + '\n'
+          },
+          true
+        )
       );
       stream.next(
-        JSON.stringify({
-          compressed: true,
-          payload: compress({
+        formatResponse(
+          {
             id: 2,
             result: { foo: 'bar 2' },
-          }),
-        }) + '\n'
+          },
+          true
+        )
       );
 
       expect(await isPending(promise1)).toBe(true);
@@ -386,31 +381,22 @@ describe('createStreamingBatchedFunction()', () => {
       await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 0,
-            result: false,
-          },
-        }) + '\n'
+        formatResponse({
+          id: 0,
+          result: false,
+        })
       );
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 1,
-            result: 0,
-          },
-        }) + '\n'
+        formatResponse({
+          id: 1,
+          result: 0,
+        })
       );
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 2,
-            result: '',
-          },
-        }) + '\n'
+        formatResponse({
+          id: 2,
+          result: '',
+        })
       );
 
       expect(await isPending(promise1)).toBe(false);
@@ -436,13 +422,10 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await isPending(promise)).toBe(true);
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 0,
-            error: { message: 'oops' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 0,
+          error: { message: 'oops' },
+        })
       );
 
       expect(await isPending(promise)).toBe(false);
@@ -468,37 +451,28 @@ describe('createStreamingBatchedFunction()', () => {
       await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 2,
-            result: { b: '3' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 2,
+          result: { b: '3' },
+        })
       );
 
       await new Promise((r) => setTimeout(r, 1));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 1,
-            error: { b: '2' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 1,
+          error: { b: '2' },
+        })
       );
 
       await new Promise((r) => setTimeout(r, 1));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 0,
-            result: { b: '1' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 0,
+          result: { b: '1' },
+        })
       );
 
       await new Promise((r) => setTimeout(r, 1));
@@ -566,13 +540,10 @@ describe('createStreamingBatchedFunction()', () => {
         expect(error).toBeInstanceOf(AbortError);
 
         stream.next(
-          JSON.stringify({
-            compressed: false,
-            payload: {
-              id: 1,
-              result: { b: '2' },
-            },
-          }) + '\n'
+          formatResponse({
+            id: 1,
+            result: { b: '2' },
+          })
         );
 
         await new Promise((r) => setTimeout(r, 1));
@@ -628,13 +599,10 @@ describe('createStreamingBatchedFunction()', () => {
         await new Promise((r) => setTimeout(r, 6));
 
         stream.next(
-          JSON.stringify({
-            compressed: false,
-            payload: {
-              id: 1,
-              result: { b: '1' },
-            },
-          }) + '\n'
+          formatResponse({
+            id: 1,
+            result: { b: '1' },
+          })
         );
         stream.complete();
 
@@ -700,13 +668,10 @@ describe('createStreamingBatchedFunction()', () => {
         await new Promise((r) => setTimeout(r, 6));
 
         stream.next(
-          JSON.stringify({
-            compressed: false,
-            payload: {
-              id: 1,
-              result: { b: '1' },
-            },
-          }) + '\n'
+          formatResponse({
+            id: 1,
+            result: { b: '1' },
+          })
         );
         stream.error('oops');
 
@@ -739,13 +704,10 @@ describe('createStreamingBatchedFunction()', () => {
       await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
-        JSON.stringify({
-          compressed: false,
-          payload: {
-            id: 1,
-            result: { b: '1' },
-          },
-        }) + '\n'
+        formatResponse({
+          id: 1,
+          result: { b: '1' },
+        })
       );
 
       stream.next('Not a JSON\n');
