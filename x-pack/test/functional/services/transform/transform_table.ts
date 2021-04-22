@@ -238,6 +238,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
       await testSubjects.existOrFail('transformActionClone');
       await testSubjects.existOrFail('transformActionDelete');
+      await testSubjects.existOrFail('transformActionDiscover');
       await testSubjects.existOrFail('transformActionEdit');
 
       if (isTransformRunning) {
@@ -274,7 +275,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async clickTransformRowActionWithRetry(
       transformId: string,
-      action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit'
+      action: 'Clone' | 'Delete' | 'Edit' | 'Start' | 'Stop' | 'Discover'
     ) {
       await retry.tryForTime(30 * 1000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
