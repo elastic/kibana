@@ -6,6 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
+import { SearchRequest, SortResults } from '@elastic/elasticsearch/api/types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -23,7 +24,7 @@ import {
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationContainer>;
-  searchAfterSortId: string | undefined;
+  searchAfterSortIds: SortResults | undefined;
   index: string[];
   from: string;
   to: string;
@@ -34,13 +35,12 @@ interface SingleSearchAfterParams {
   filter?: estypes.QueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   aggregations,
-  searchAfterSortId,
+  searchAfterSortIds,
   index,
   from,
   to,
@@ -51,7 +51,6 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -66,15 +65,16 @@ export const singleSearchAfter = async ({
       filter,
       size: pageSize,
       sortOrder,
-      searchAfterSortId,
+      searchAfterSortIds,
       timestampOverride,
-      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();
     const {
       body: nextSearchAfterResult,
-    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(searchAfterQuery);
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+      searchAfterQuery as SearchRequest
+    );
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

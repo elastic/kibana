@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const dataGrid = getService('dataGrid');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -173,8 +174,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        await testSubjects.click('docTableCellFilter');
-
+        const documentCell = await dataGrid.getCellElement(1, 3);
+        await documentCell.click();
+        const expandCellContentButton = await documentCell.findByClassName(
+          'euiDataGridRowCell__expandButtonIcon'
+        );
+        await expandCellContentButton.click();
+        await testSubjects.click('filterForButton');
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
       });

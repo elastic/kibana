@@ -134,7 +134,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.online ? 'success' : 'danger'}>
+      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
         <span className={contentClassName}>
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>

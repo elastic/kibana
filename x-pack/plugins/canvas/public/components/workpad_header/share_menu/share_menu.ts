@@ -46,6 +46,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
   withServices,
   withProps(
     ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
+      includeReporting: services.reporting.includeReporting(),
       getExportUrl: (type, layout) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(
