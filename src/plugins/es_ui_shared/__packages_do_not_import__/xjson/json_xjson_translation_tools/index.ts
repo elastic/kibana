@@ -31,6 +31,13 @@ const MAX_EXPANDABLE_JSON_SIZE = 5 * 1024 * 1024;
  * }"
  */
 export function expandLiteralStrings(data: string) {
+  // Guard against non-JSON strings
+  try {
+    JSON.parse(data);
+  } catch (e) {
+    throw new Error('Provided string is not valid JSON');
+  }
+
   // Assuming 1 byte per char
   if (data.length > MAX_EXPANDABLE_JSON_SIZE) {
     return data;
