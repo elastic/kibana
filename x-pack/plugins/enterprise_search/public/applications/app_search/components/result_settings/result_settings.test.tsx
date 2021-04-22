@@ -15,6 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader, EuiEmptyPrompt } from '@elastic/eui';
 
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -84,6 +86,17 @@ describe('ResultSettings', () => {
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
+  it('renders the "save" button as disabled if everything is disabled', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+      resultFieldsEmpty: true,
+    });
+    const buttons = findButtons(subject());
+    const saveButton = shallow(buttons[0]);
+    expect(saveButton.prop('disabled')).toBe(true);
+  });
+
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
     const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);
@@ -108,6 +121,14 @@ describe('ResultSettings', () => {
     const clearButton = shallow(buttons[2]);
     clearButton.simulate('click');
     expect(actions.clearAllFields).toHaveBeenCalled();
+  });
+
+  it('will prevent user from leaving the page if there are unsaved changes', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+    });
+    expect(subject().find(UnsavedChangesPrompt).prop('hasUnsavedChanges')).toBe(true);
   });
 
   describe('when there is no schema yet', () => {

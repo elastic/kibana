@@ -13,25 +13,25 @@ exports[`Overview render 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           ],
         ],
         "results": Array [
@@ -41,7 +41,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           },
           Object {
             "type": "return",
@@ -49,7 +49,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           },
           Object {
             "type": "return",
@@ -57,7 +57,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           },
           Object {
             "type": "return",
@@ -65,7 +65,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           },
         ],
       }
@@ -191,7 +191,7 @@ exports[`Overview render 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution kibana"
                   description=""
                   href="kibana_landing_page"
                   icon={
@@ -203,7 +203,7 @@ exports[`Overview render 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_kibana_2x.png"
                   onClick={[Function]}
                   title="Kibana"
                   titleElement="h3"
@@ -217,7 +217,7 @@ exports[`Overview render 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-2"
                   description="Description of solution two"
                   href="path-to-solution-two"
                   icon={
@@ -229,7 +229,7 @@ exports[`Overview render 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_2_2x.png"
                   onClick={[Function]}
                   title="Solution two"
                   titleElement="h3"
@@ -243,7 +243,7 @@ exports[`Overview render 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-3"
                   description="Description of solution three"
                   href="path-to-solution-three"
                   icon={
@@ -255,7 +255,7 @@ exports[`Overview render 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_3_2x.png"
                   onClick={[Function]}
                   title="Solution three"
                   titleElement="h3"
@@ -269,7 +269,7 @@ exports[`Overview render 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-4"
                   description="Description of solution four"
                   href="path-to-solution-four"
                   icon={
@@ -281,7 +281,7 @@ exports[`Overview render 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_4_2x.png"
                   onClick={[Function]}
                   title="Solution four"
                   titleElement="h3"
@@ -305,25 +305,25 @@ exports[`Overview render 1`] = `
               "kibana_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             ],
           ],
           "results": Array [
@@ -333,7 +333,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             },
             Object {
               "type": "return",
@@ -341,7 +341,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             },
             Object {
               "type": "return",
@@ -349,7 +349,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             },
             Object {
               "type": "return",
@@ -357,7 +357,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             },
           ],
         }
@@ -383,49 +383,49 @@ exports[`Overview without features 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           ],
           Array [
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           ],
         ],
         "results": Array [
@@ -435,7 +435,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           },
           Object {
             "type": "return",
@@ -443,7 +443,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           },
           Object {
             "type": "return",
@@ -451,7 +451,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           },
           Object {
             "type": "return",
@@ -459,7 +459,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           },
           Object {
             "type": "return",
@@ -467,7 +467,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           },
           Object {
             "type": "return",
@@ -475,7 +475,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           },
           Object {
             "type": "return",
@@ -483,7 +483,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           },
           Object {
             "type": "return",
@@ -491,7 +491,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           },
         ],
       }
@@ -617,7 +617,7 @@ exports[`Overview without features 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution kibana"
                   description=""
                   href="kibana_landing_page"
                   icon={
@@ -629,7 +629,7 @@ exports[`Overview without features 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_kibana_2x.png"
                   onClick={[Function]}
                   title="Kibana"
                   titleElement="h3"
@@ -643,7 +643,7 @@ exports[`Overview without features 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-2"
                   description="Description of solution two"
                   href="path-to-solution-two"
                   icon={
@@ -655,7 +655,7 @@ exports[`Overview without features 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_2_2x.png"
                   onClick={[Function]}
                   title="Solution two"
                   titleElement="h3"
@@ -669,7 +669,7 @@ exports[`Overview without features 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-3"
                   description="Description of solution three"
                   href="path-to-solution-three"
                   icon={
@@ -681,7 +681,7 @@ exports[`Overview without features 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_3_2x.png"
                   onClick={[Function]}
                   title="Solution three"
                   titleElement="h3"
@@ -695,7 +695,7 @@ exports[`Overview without features 1`] = `
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="kbnOverviewSolution solution-4"
                   description="Description of solution four"
                   href="path-to-solution-four"
                   icon={
@@ -707,7 +707,7 @@ exports[`Overview without features 1`] = `
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  image="/plugins/kibanaOverview/assets/solutions_solution_4_2x.png"
                   onClick={[Function]}
                   title="Solution four"
                   titleElement="h3"
@@ -731,49 +731,49 @@ exports[`Overview without features 1`] = `
               "kibana_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             ],
             Array [
               "kibana_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             ],
           ],
           "results": Array [
@@ -783,7 +783,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             },
             Object {
               "type": "return",
@@ -791,7 +791,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             },
             Object {
               "type": "return",
@@ -799,7 +799,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             },
             Object {
               "type": "return",
@@ -807,7 +807,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             },
             Object {
               "type": "return",
@@ -815,7 +815,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             },
             Object {
               "type": "return",
@@ -823,7 +823,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             },
             Object {
               "type": "return",
@@ -831,7 +831,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             },
             Object {
               "type": "return",
@@ -839,7 +839,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             },
           ],
         }
@@ -865,25 +865,25 @@ exports[`Overview without solutions 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           ],
         ],
         "results": Array [
@@ -893,7 +893,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
           },
           Object {
             "type": "return",
@@ -901,7 +901,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
           },
           Object {
             "type": "return",
@@ -909,7 +909,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
           },
           Object {
             "type": "return",
@@ -917,7 +917,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
           },
         ],
       }
@@ -1026,25 +1026,25 @@ exports[`Overview without solutions 1`] = `
                       "kibana_landing_page",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
                     ],
                     Array [
                       "path-to-solution-two",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
                     ],
                     Array [
                       "path-to-solution-three",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
                     ],
                     Array [
                       "path-to-solution-four",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
                     ],
                   ],
                   "results": Array [
@@ -1054,7 +1054,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1062,7 +1062,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1070,7 +1070,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1078,7 +1078,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
                     },
                   ],
                 }
@@ -1095,25 +1095,25 @@ exports[`Overview without solutions 1`] = `
                       "kibana_landing_page",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
                     ],
                     Array [
                       "path-to-solution-two",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
                     ],
                     Array [
                       "path-to-solution-three",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
                     ],
                     Array [
                       "path-to-solution-four",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
                     ],
                   ],
                   "results": Array [
@@ -1123,7 +1123,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1131,7 +1131,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1139,7 +1139,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1147,7 +1147,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
                     },
                   ],
                 }
@@ -1170,25 +1170,25 @@ exports[`Overview without solutions 1`] = `
               "kibana_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             ],
           ],
           "results": Array [
@@ -1198,7 +1198,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
             },
             Object {
               "type": "return",
@@ -1206,7 +1206,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
             },
             Object {
               "type": "return",
@@ -1214,7 +1214,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
             },
             Object {
               "type": "return",
@@ -1222,7 +1222,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
             },
           ],
         }

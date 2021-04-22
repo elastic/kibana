@@ -75,7 +75,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ISearchGeneric, ISearchOptions } from '../..';
+import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -95,7 +95,6 @@ import {
   IKibanaSearchResponse,
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -274,6 +273,13 @@ export class SearchSource {
    */
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
+    const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
+
+    // Use the sync search strategy if legacy search is enabled.
+    // This still uses bfetch for batching.
+    if (!options?.strategy && syncSearchByDefault) {
+      options.strategy = ES_SEARCH_STRATEGY;
+    }
 
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
@@ -283,9 +289,7 @@ export class SearchSource {
           options.indexPattern = searchRequest.index;
         }
 
-        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
-          ? from(this.legacyFetch(searchRequest, options))
-          : this.fetchSearch$(searchRequest, options);
+        return this.fetchSearch$(searchRequest, options);
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
@@ -478,27 +482,6 @@ export class SearchSource {
   }
 
   /**
-   * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
-   */
-  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { getConfig, legacy, onResponse } = this.dependencies;
-
-    return await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        getConfig,
-        onResponse,
-        legacy,
-      }
-    );
-  }
-
-  /**
    *  Called by requests of this search source when they are started
    *  @param options
    *  @return {Promise<undefined>}
@@ -635,18 +618,15 @@ export class SearchSource {
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
     }
-    const metaFields = this.dependencies.getConfig(UI_SETTINGS.META_FIELDS);
     const sourceFiltersValues = sourceFilters.excludes;
     const wildcardField = bodyFields.find(
       (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
     );
-    const filterSourceFields = (fieldName: string) => {
-      return (
-        fieldName &&
-        !sourceFiltersValues.some((sourceFilter) => fieldName.match(sourceFilter)) &&
-        !metaFields.includes(fieldName)
-      );
-    };
+    const filter = fieldWildcardFilter(
+      sourceFiltersValues,
+      this.dependencies.getConfig(UI_SETTINGS.META_FIELDS)
+    );
+    const filterSourceFields = (fieldName: string) => fieldName && filter(fieldName);
     if (!wildcardField) {
       // we already have an explicit list of fields, so we just remove source filters from that list
       return bodyFields.filter((fld: SearchFieldValue) =>

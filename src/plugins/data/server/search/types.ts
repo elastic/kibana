@@ -21,14 +21,14 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchClient,
+  IEsSearchResponse,
+  IEsSearchRequest,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
-  defaultStrategy: string;
   sessionService: ISearchSessionService;
 }
 

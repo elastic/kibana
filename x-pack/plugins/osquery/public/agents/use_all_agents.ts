@@ -31,14 +31,22 @@ export const useAllAgents = (
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
-      if (searchValue) {
-        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elastic.agent.id:/${searchValue}/)`;
+      const kueryFragments: string[] = [];
+      if (osqueryPolicies.length) {
+        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
       }
+
+      if (searchValue) {
+        kueryFragments.push(
+          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
+        );
+      }
+
       return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery,
+          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
           perPage,
+          showInactive: true,
         },
       });
     },

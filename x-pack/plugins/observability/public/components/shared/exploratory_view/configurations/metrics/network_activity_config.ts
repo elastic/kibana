@@ -21,10 +21,12 @@ export function getNetworkActivityLensConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'system.memory.used.pct',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'system.memory.used.pct',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],

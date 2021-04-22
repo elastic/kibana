@@ -9,10 +9,21 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { usePrivilegeUser, ReturnPrivilegeUser } from './use_privilege_user';
 import * as api from './api';
 import { Privilege } from './types';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('usePrivilegeUser', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnPrivilegeUser>(() =>
