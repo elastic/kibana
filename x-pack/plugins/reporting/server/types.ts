@@ -36,8 +36,11 @@ export interface ReportingStartDeps {
   data: DataPluginStart;
 }
 
-export type ReportingStart = object;
-export type ReportingSetup = object;
+export interface ReportingSetup {
+  usesUiCapabilities: () => boolean;
+}
+
+export type ReportingStart = ReportingSetup;
 
 /*
  * Internal Types
@@ -97,8 +100,9 @@ export interface ExportTypeDefinition<
 /**
  * @internal
  */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
 }
 
 /**

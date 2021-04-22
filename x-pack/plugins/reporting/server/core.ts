@@ -12,10 +12,12 @@ import {
   BasePath,
   IClusterClient,
   KibanaRequest,
+  PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from '../../../../src/core/server';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -23,12 +25,12 @@ import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
-import { ReportingPluginRouter } from './types';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { ReportingPluginRouter, ReportingStart } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -37,6 +39,7 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  logger: LevelLogger;
 }
 
 export interface ReportingInternalStart {
@@ -47,6 +50,7 @@ export interface ReportingInternalStart {
   esClient: IClusterClient;
   data: DataPluginStart;
   esqueue: ESQueueInstance;
+  logger: LevelLogger;
 }
 
 export class ReportingCore {
@@ -54,10 +58,22 @@ export class ReportingCore {
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
+  private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private exportTypesRegistry = getExportTypesRegistry();
   private config?: ReportingConfig;
 
-  constructor(private logger: LevelLogger) {}
+  public getStartContract: () => ReportingStart;
+
+  constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    const syncConfig = context.config.get<ReportingConfigType>();
+    this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
+
+    this.getStartContract = (): ReportingStart => {
+      return {
+        usesUiCapabilities: () => syncConfig.roles.enabled === false,
+      };
+    };
+  }
 
   /*
    * Register setupDeps
@@ -109,23 +125,38 @@ export class ReportingCore {
   }
 
   /**
-   * Registers reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles.
+   * If xpack.reporting.roles.enabled === true, register Reporting as a feature
+   * that is controlled by user role names
    */
   public registerFeature() {
-    const config = this.getConfig();
-    const allowedRoles = ['superuser', ...(config.get('roles')?.allow ?? [])];
-    this.getPluginSetupDeps().features.registerElasticsearchFeature({
-      id: 'reporting',
-      catalogue: ['reporting'],
-      management: {
-        insightsAndAlerting: ['reporting'],
-      },
-      privileges: allowedRoles.map((role) => ({
+    const { features } = this.getPluginSetupDeps();
+    const deprecatedRoles = this.getDeprecatedAllowedRoles();
+
+    if (deprecatedRoles !== false) {
+      // refer to roles.allow configuration (deprecated path)
+      const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
+      const privileges = allowedRoles.map((role) => ({
         requiredClusterPrivileges: [],
         requiredRoles: [role],
         ui: [],
-      })),
-    });
+      }));
+
+      // self-register as an elasticsearch feature (deprecated)
+      features.registerElasticsearchFeature({
+        id: 'reporting',
+        catalogue: ['reporting'],
+        management: {
+          insightsAndAlerting: ['reporting'],
+        },
+        privileges,
+      });
+    } else {
+      this.logger.debug(
+        `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
+      );
+      // trigger application to register Reporting as a subfeature
+      features.enableReportingUiCapabilities();
+    }
   }
 
   /*
@@ -136,6 +167,15 @@ export class ReportingCore {
       throw new Error('Config is not yet initialized');
     }
     return this.config;
+  }
+
+  /*
+   * If deprecated feature has not been disabled,
+   * this returns an array of allowed role names
+   * that have access to Reporting.
+   */
+  public getDeprecatedAllowedRoles(): string[] | false {
+    return this.deprecatedAllowedRoles;
   }
 
   /*

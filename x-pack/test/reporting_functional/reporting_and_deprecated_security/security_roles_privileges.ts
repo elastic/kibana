@@ -25,47 +25,41 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Dashboard: Download CSV file', () => {
-      it('does not allow user that does not have reporting privileges', async () => {
+      it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvNotAvailable('Ecommerce Data');
+        await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
       });
 
-      it('does allow user with reporting privileges', async () => {
-        await reportingFunctional.loginReportingUser();
+      it('does allow user with reporting_user role', async () => {
+        await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
         await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
       });
     });
 
     describe('Dashboard: Generate Screenshot', () => {
-      it('does not allow user that does not have reporting privileges', async () => {
+      it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryReportsNotAvailable();
+        await reportingFunctional.tryGeneratePdfFail();
       });
 
-      it('does allow PDF generation user with reporting privileges', async () => {
+      it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
         await reportingFunctional.tryGeneratePdfSuccess();
       });
-
-      it('does allow PNG generation user with reporting privileges', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryGeneratePngSuccess();
-      });
     });
 
     describe('Discover: Generate CSV', () => {
-      it('does not allow user that does not have reporting privileges', async () => {
+      it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
-        await reportingFunctional.tryDiscoverCsvNotAvailable();
+        await reportingFunctional.tryDiscoverCsvFail();
       });
 
-      it('does allow user with reporting privileges', async () => {
+      it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
         await reportingFunctional.tryDiscoverCsvSuccess();
@@ -85,13 +79,13 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.initEcommerce();
       });
 
-      it('does not allow user that does not have reporting privileges', async () => {
+      it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfNotAvailable();
+        await reportingFunctional.tryGeneratePdfFail();
       });
 
-      it('does allow user with reporting privileges', async () => {
+      it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
         await reportingFunctional.tryGeneratePdfSuccess();
@@ -99,22 +93,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Visualize Editor: Generate Screenshot', () => {
-      it('does not allow user that does not have reporting privileges', async () => {
+      it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedVisualization(VIS_TITLE);
-        await reportingFunctional.tryReportsNotAvailable();
+        await reportingFunctional.tryGeneratePdfFail();
       });
 
-      it('does allow PDF generation user with reporting privileges', async () => {
+      it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedVisualization(VIS_TITLE);
         await reportingFunctional.tryGeneratePdfSuccess();
-      });
-
-      it('does allow PNG generation user with reporting privileges', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openSavedVisualization(VIS_TITLE);
-        await reportingFunctional.tryGeneratePngSuccess();
       });
     });
   });

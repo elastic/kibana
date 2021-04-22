@@ -20,6 +20,7 @@ const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
+  const security = getService('security');
   const browser = getService('browser');
   const log = getService('log');
   const config = getService('config');
@@ -29,10 +30,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
-      log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('reporting/ecommerce');
       await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
       await browser.setWindowSize(1600, 850);
+
+      await security.role.create('test_reporting_user', {
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            {
+              names: ['ecommerce'],
+              privileges: ['read'],
+              field_security: { grant: ['*'], except: [] },
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { dashboard: ['minimal_all', 'generate_report'] },
+          },
+        ],
+      });
+
+      await security.testUser.setRoles(['test_reporting_user']);
     });
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
@@ -42,6 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         refresh: true,
         body: { query: { match_all: {} } },
       });
+      await security.testUser.restoreDefaults();
     });
 
     describe('Print PDF button', () => {

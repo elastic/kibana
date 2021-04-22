@@ -6,12 +6,11 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import * as sinon from 'sinon';
 import { ElasticsearchClient } from 'kibana/server';
+import * as sinon from 'sinon';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { ReportingConfig, ReportingCore } from '../../server';
+import { ReportingCore } from '../../server';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -38,14 +37,11 @@ const getMockExportTypesRegistry = (
 
 describe('Create Worker', () => {
   let mockReporting: ReportingCore;
-  let mockConfig: ReportingConfig;
   let queue: Esqueue;
   let client: DeeplyMockedKeys<ElasticsearchClient>;
 
   beforeEach(async () => {
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
 
     ({ asInternalUser: client } = elasticsearchServiceMock.createClusterClient());
