@@ -86,12 +86,30 @@ export function PieChartProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getPieSliceStyle(name: string) {
       log.debug(`VisualizePage.getPieSliceStyle(${name})`);
+      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+        const slices =
+          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+            ?.partitions ?? [];
+        const selectedSlice = slices.filter((slice) => {
+          return slice.name.toString() === name.replace(',', '');
+        });
+        return [selectedSlice[0].color];
+      }
       const pieSlice = await this.getPieSlice(name);
       return await pieSlice.getAttribute('style');
     }
 
     async getAllPieSliceStyles(name: string) {
       log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
+      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+        const slices =
+          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+            ?.partitions ?? [];
+        const selectedSlice = slices.filter((slice) => {
+          return slice.name.toString() === name.replace(',', '');
+        });
+        return selectedSlice.map((slice) => slice.color);
+      }
       const pieSlices = await this.getAllPieSlices(name);
       return await Promise.all(
         pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))

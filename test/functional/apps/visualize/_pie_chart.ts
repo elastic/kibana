@@ -403,7 +403,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await inspector.close();
       });
 
-      it('should correctly filter on legend', async () => {
+      it('should correctly filter on legend miaou', async () => {
         const expectedTableData = [
           '0',
           'CN',
@@ -426,7 +426,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '360,000',
           'CN',
         ].sort();
-        if (PageObjects.visChart.isNewLibraryChart('visTypePieChart')) {
+        if (await PageObjects.visChart.isNewLibraryChart('visTypePieChart')) {
           await PageObjects.visEditor.clickOptionsTab();
           await PageObjects.visEditor.togglePieNestedLegend();
           await PageObjects.visEditor.clickDataTab();

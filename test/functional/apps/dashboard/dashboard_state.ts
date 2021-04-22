@@ -272,7 +272,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach((style) => {
-              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+              if (style.indexOf('rgb(255, 255, 255)') > -1) {
                 whitePieSliceCounts++;
               }
             });
@@ -297,7 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
             // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(-1);
           });
         });
 
