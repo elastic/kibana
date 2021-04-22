@@ -58,8 +58,8 @@ export const config: PluginConfigDescriptor = {
         })
       ),
     }),
-    packages: schema.maybe(PreconfiguredPackagesSchema),
-    agentPolicies: schema.maybe(PreconfiguredAgentPoliciesSchema),
+    packages: PreconfiguredPackagesSchema,
+    agentPolicies: PreconfiguredAgentPoliciesSchema,
   }),
 };
 
