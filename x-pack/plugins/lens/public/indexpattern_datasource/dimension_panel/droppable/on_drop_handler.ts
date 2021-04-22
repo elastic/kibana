@@ -122,7 +122,7 @@ function onMoveCompatible(
   }
 
   modifiedLayer = copyColumn({
-    layer,
+    layer: modifiedLayer,
     columnId,
     sourceColumnId: droppedItem.columnId,
     sourceColumn,

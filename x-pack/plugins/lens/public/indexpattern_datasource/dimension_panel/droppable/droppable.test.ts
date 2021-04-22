@@ -1075,6 +1075,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'count',
               sourceField: 'Records',
+              customLabel: true,
             },
           },
         };
