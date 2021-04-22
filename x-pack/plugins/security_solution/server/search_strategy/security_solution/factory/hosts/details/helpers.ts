@@ -7,6 +7,10 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
+import {
+  ILegacyScopedClusterClient,
+  SavedObjectsClientContract,
+} from '../../../../../../../../../src/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
@@ -17,9 +21,9 @@ import {
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { getHostData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
-import { FrameworkRequest } from '../../../../../lib/framework';
 
 export const HOST_FIELDS = [
   '_id',
@@ -158,10 +162,14 @@ const getFirstItem = (data: HostBuckets): string | null => {
 };
 
 export const getHostEndpoint = async (
-  request: FrameworkRequest,
   id: string | null,
-  endpointContext: EndpointAppContext
+  deps: {
+    esLegacyClient: ILegacyScopedClusterClient;
+    savedObjectsClient: SavedObjectsClientContract;
+    endpointContext: EndpointAppContext;
+  }
 ): Promise<EndpointFields | null> => {
+  const { esLegacyClient, endpointContext, savedObjectsClient } = deps;
   const logger = endpointContext.logFactory.get('metadata');
   try {
     const agentService = endpointContext.service.getAgentService();
@@ -169,9 +177,10 @@ export const getHostEndpoint = async (
       throw new Error('agentService not available');
     }
     const metadataRequestContext = {
+      esLegacyClient,
       endpointAppContextService: endpointContext.service,
       logger,
-      requestHandlerContext: request.context,
+      savedObjectsClient,
     };
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null

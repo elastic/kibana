@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { Logger, RequestHandler } from 'kibana/server';
+import type {
+  ILegacyScopedClusterClient,
+  Logger,
+  RequestHandler,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
@@ -27,9 +32,11 @@ import { findAgentIDsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export interface MetadataRequestContext {
+  esLegacyClient?: ILegacyScopedClusterClient;
   endpointAppContextService: EndpointAppContextService;
   logger: Logger;
-  requestHandlerContext: SecuritySolutionRequestHandlerContext;
+  requestHandlerContext?: SecuritySolutionRequestHandlerContext;
+  savedObjectClient?: SavedObjectsClientContract;
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
@@ -169,19 +176,20 @@ export async function getHostData(
   id: string,
   queryStrategyVersion?: MetadataQueryStrategyVersions
 ): Promise<HostInfo | undefined> {
+  if (!metadataRequestContext.savedObjectClient) {
+    return undefined;
+  }
   const queryStrategy = await metadataRequestContext.endpointAppContextService
     ?.getMetadataService()
-    ?.queryStrategy(
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      queryStrategyVersion
-    );
+    ?.queryStrategy(metadataRequestContext.savedObjectClient, queryStrategyVersion);
 
   const query = getESQueryHostMetadataByID(id, queryStrategy!);
+
+  if (!metadataRequestContext.esLegacyClient) {
+    return undefined;
+  }
   const hostResult = queryStrategy!.queryResponseToHostResult(
-    await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
-      'search',
-      query
-    )
+    await metadataRequestContext.esLegacyClient.callAsCurrentUser('search', query)
   );
   const hostMetadata = hostResult.result;
   if (!hostMetadata) {
@@ -207,6 +215,10 @@ async function findAgent(
   hostMetadata: HostMetadata
 ): Promise<Agent | undefined> {
   try {
+    if (metadataRequestContext.requestHandlerContext == null) {
+      throw new Error(`requestHandlerContext not found`);
+    }
+
     return await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
@@ -277,6 +289,10 @@ export async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
+    if (metadataRequestContext.requestHandlerContext == null) {
+      throw new Error(`requestHandlerContext not found`);
+    }
+
     const status = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgentStatusById(
@@ -295,6 +311,9 @@ export async function enrichHostMetadata(
 
   let policyInfo: HostInfo['policy_info'];
   try {
+    if (metadataRequestContext.requestHandlerContext == null) {
+      throw new Error(`requestHandlerContext not found`);
+    }
     const agent = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
