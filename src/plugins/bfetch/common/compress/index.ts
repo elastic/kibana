@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
-export * from './batch';
-export * from './compress';
+export { deflateResponse } from './deflate_response';
+export { inflateResponse } from './inflate_response';

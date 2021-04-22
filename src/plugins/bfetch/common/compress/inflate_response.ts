@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { inflateSync } from 'zlib';
+import { unzlibSync, strFromU8 } from 'fflate';
 import { BatchResponseItem, ErrorLike, BatchItemWrapper } from '../../common';
 
-export function getInflatedResponse<Result extends object>(
+export function inflateResponse<Result extends object>(
   response: string
 ): BatchResponseItem<Result, ErrorLike> {
   const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
 
   try {
     const inflatedRes = compressed
-      ? inflateSync(Buffer.from(payload, 'base64')).toString()
+      ? strFromU8(unzlibSync(Buffer.from(payload, 'base64')))
       : payload;
     return JSON.parse(inflatedRes);
   } catch (e) {

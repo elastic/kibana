@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
-import { getInflatedResponse } from '../../../../src/plugins/bfetch/public/batching/get_inflated_response';
+import { inflateResponse } from '../../../../src/plugins/bfetch/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
@@ -18,7 +18,7 @@ function parseBfetchResponse(resp: request.Response) {
     .trim()
     .split('\n')
     .map((item) => {
-      return getInflatedResponse<any>(item);
+      return inflateResponse<any>(item);
     });
 }
 

@@ -12,11 +12,11 @@ import {
   TimedItemBufferParams,
   createBatchedFunction,
   ErrorLike,
+  normalizeError,
+  inflateResponse,
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
-import { normalizeError } from '../../common';
 import { BatchedFunc, BatchItem } from './types';
-import { getInflatedResponse } from './get_inflated_response';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -130,7 +130,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
             try {
-              const response = getInflatedResponse<Result>(json);
+              const response = inflateResponse<Result>(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

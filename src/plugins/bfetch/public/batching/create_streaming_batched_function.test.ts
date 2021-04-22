@@ -10,17 +10,10 @@ import { createStreamingBatchedFunction } from './create_streaming_batched_funct
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
 import { AbortError, defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
-import { deflateSync } from 'zlib';
+import { deflateResponse } from '../../common';
 
 const formatResponse = (resp: any, compressed: boolean = false) => {
-  return (
-    JSON.stringify({
-      compressed,
-      payload: compressed
-        ? deflateSync(JSON.stringify(resp)).toString('base64')
-        : JSON.stringify(resp),
-    }) + '\n'
-  );
+  return deflateResponse(resp, compressed) + '\n';
 };
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>

@@ -9,10 +9,9 @@
 import { Observable } from 'rxjs';
 import { Logger } from 'src/core/server';
 import { Stream, PassThrough } from 'stream';
-import { deflateSync } from 'zlib';
+import { deflateResponse } from '../../common';
 
 const delimiter = '\n';
-const ENCODE_THRESHOLD = 1400;
 
 export const createNDJSONStream = <Response>(
   results: Observable<Response>,
@@ -23,13 +22,7 @@ export const createNDJSONStream = <Response>(
   results.subscribe({
     next: (message: Response) => {
       try {
-        const strMessage = JSON.stringify(message);
-        const compressed = strMessage.length > ENCODE_THRESHOLD;
-        const payload = compressed ? deflateSync(strMessage).toString('base64') : strMessage;
-        const line = JSON.stringify({
-          compressed,
-          payload,
-        });
+        const line = deflateResponse(message);
         stream.write(`${line}${delimiter}`);
       } catch (error) {
         logger.error('Could not serialize or stream a message.');
