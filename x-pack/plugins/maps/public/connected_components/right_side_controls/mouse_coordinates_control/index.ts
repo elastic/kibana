@@ -17,5 +17,5 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-const connected = connect(mapStateToProps, null)(MouseCoordinatesControl);
+const connected = connect(mapStateToProps, {})(MouseCoordinatesControl);
 export { connected as MouseCoordinatesControl };

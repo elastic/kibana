@@ -18,5 +18,5 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-const connected = connect(mapStateToProps, null)(AttributionControl);
+const connected = connect(mapStateToProps, {})(AttributionControl);
 export { connected as AttributionControl };

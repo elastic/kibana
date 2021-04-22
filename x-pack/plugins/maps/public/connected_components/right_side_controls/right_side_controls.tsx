@@ -10,8 +10,13 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LayerControl } from './layer_control';
 import { MouseCoordinatesControl } from './mouse_coordinates_control';
 import { AttributionControl } from './attribution_control';
+import { MapSettings } from '../../reducers/map';
 
-export function WidgetOverlay({ settings }) {
+export interface Props {
+  settings: MapSettings;
+}
+
+export function RightSideControls({ settings }: Props) {
   return (
     <EuiFlexGroup
       className="mapWidgetOverlay"
