@@ -41,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({
         packages: [],
         policies: [],
+        nonFatalErrors: [],
       });
     });
   });
