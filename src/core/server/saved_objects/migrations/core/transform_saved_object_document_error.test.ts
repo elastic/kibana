@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
-// TINA TODO:
-// Clean up the test input
-// Add more test cases
+
 describe('TransformSavedObjectDocumentError', () => {
   it('is a special error', () => {
     const originalError = new Error('Dang diggity!');

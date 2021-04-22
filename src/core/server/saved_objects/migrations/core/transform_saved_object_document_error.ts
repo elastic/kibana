@@ -18,7 +18,6 @@
  * For backward compatibility with v1 migrations, the error message is the same as what was previously thrown as a plain error
  */
 
-// TINA TODO: create getters for retrieving the id, type and namespace to use in migrate_raw_doc for generating the serialized SO id
 export class TransformSavedObjectDocumentError extends Error {
   constructor(
     public readonly id: string,
