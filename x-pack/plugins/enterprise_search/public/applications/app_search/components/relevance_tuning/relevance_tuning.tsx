@@ -34,7 +34,7 @@ const EmptyCallout: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
               {
-                defaultMessage: 'Tuning requires schema fields',
+                defaultMessage: 'Add documents to tune relevance',
               }
             )}
           </h2>
@@ -42,7 +42,8 @@ const EmptyCallout: React.FC = () => {
         body={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
           {
-            defaultMessage: 'Index documents to tune relevance.',
+            defaultMessage:
+              'A schema will be automatically created for you after you index some documents.',
           }
         )}
         actions={
