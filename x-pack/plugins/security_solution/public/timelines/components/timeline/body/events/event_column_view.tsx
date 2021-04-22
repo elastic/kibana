@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { CellValueElementProps } from '../../cell_rendering';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -95,6 +96,8 @@ export const EventColumnView = React.memo<Props>(
     const timelineType = useShallowEqualSelector(
       (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
     );
+
+    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
 
     // Each action button shall announce itself to screen readers via an `aria-label`
     // in the following format:
@@ -183,7 +186,7 @@ export const EventColumnView = React.memo<Props>(
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal'}
+          disabled={eventType !== 'signal' && (!isEventFilteringEnabled || eventType !== 'raw')}
           refetch={refetch}
           onRuleChange={onRuleChange}
         />,
@@ -205,6 +208,7 @@ export const EventColumnView = React.memo<Props>(
         timelineId,
         timelineType,
         toggleShowNotes,
+        isEventFilteringEnabled,
       ]
     );
 

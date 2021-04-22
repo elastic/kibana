@@ -49,18 +49,29 @@ import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
-import exceptionableFields from './exceptionable_fields.json';
+import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
+import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
   type: ExceptionListType
 ): IIndexPattern => {
-  return type === 'endpoint'
-    ? {
+  switch (type) {
+    case 'endpoint':
+      return {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
-      }
-    : patterns;
+        fields: patterns.fields.filter(({ name }) => exceptionableEndpointFields.includes(name)),
+      };
+    case 'endpoint_events':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) =>
+          exceptionableEndpointEventFields.includes(name)
+        ),
+      };
+    default:
+      return patterns;
+  }
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
