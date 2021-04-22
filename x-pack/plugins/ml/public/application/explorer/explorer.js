@@ -21,6 +21,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiIconTip,
   EuiPage,
   EuiPageBody,
@@ -28,6 +29,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   EuiLoadingContent,
   EuiPanel,
   EuiAccordion,
@@ -476,9 +478,21 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ width: '170px' }}>
                     <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.intervalLabel', {
-                        defaultMessage: 'Interval',
-                      })}
+                      label={
+                        <EuiToolTip
+                          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
+                            defaultMessage:
+                              'Show all anomalies or only the highest severity anomaly for each hour or day.',
+                          })}
+                        >
+                          <span>
+                            {i18n.translate('xpack.ml.explorer.intervalLabel', {
+                              defaultMessage: 'Interval',
+                            })}
+                            <EuiIcon type="questionInCircle" color="subdued" />
+                          </span>
+                        </EuiToolTip>
+                      }
                     >
                       <SelectInterval />
                     </EuiFormRow>
