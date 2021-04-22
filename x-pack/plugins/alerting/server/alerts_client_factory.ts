@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import {
   KibanaRequest,
   Logger,
@@ -116,13 +117,19 @@ export class AlertsClientFactory {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
-        // Create an API key using the new grant API - in this case the Kibana system user is creating the
-        // API key for the user, instead of having the user create it themselves, which requires api_key
-        // privileges
-        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
-          request,
-          { name, role_descriptors: {} }
-        );
+        let createAPIKeyResult = null;
+        try {
+          // Create an API key using the new grant API - in this case the Kibana system user is creating the
+          // API key for the user, instead of having the user create it themselves, which requires api_key
+          // privileges
+          createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
+            request,
+            { name, role_descriptors: {} }
+          );
+        } catch (error) {
+          throw Boom.badRequest(`Error creating API key - ${error.message}`);
+        }
+
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
