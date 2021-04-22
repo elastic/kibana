@@ -36,10 +36,14 @@ export class DiscoverEnhancedPlugin
     if (!!usageCollection) {
       const collector = usageCollection.makeUsageCollector<{
         exploreDataInChartActionEnabled: boolean;
+        exploreDataInContextMenuEnabled: boolean;
       }>({
         type: 'discoverEnhanced',
         schema: {
           exploreDataInChartActionEnabled: {
+            type: 'boolean',
+          },
+          exploreDataInContextMenuEnabled: {
             type: 'boolean',
           },
         },
@@ -48,6 +52,7 @@ export class DiscoverEnhancedPlugin
           const config = await this.config$.pipe(take(1)).toPromise();
           return {
             exploreDataInChartActionEnabled: config.actions.exploreDataInChart.enabled,
+            exploreDataInContextMenuEnabled: config.actions.exploreDataInContextMenu.enabled,
           };
         },
       });
