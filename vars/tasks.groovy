@@ -40,8 +40,12 @@ def test() {
 }
 
 def ossCiGroups() {
-  def ciGroups = 1..12
-  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+//  def ciGroups = 1..12
+//  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+  tasks([
+    kibanaPipeline.ossCiGroupProcess(it)
+  ])
+
 }
 
 def xpackCiGroups() {
@@ -60,34 +64,34 @@ def functionalOss(Map params = [:]) {
   ]
 
   task {
-    kibanaPipeline.buildOss(6)
+    kibanaPipeline.buildOss(20)
+    task(kibanaPipeline.ossCiGroupProcess(7))
 
-    if (config.ciGroups) {
-      ossCiGroups()
-    }
+//    if (config.ciGroups) {
+//      ossCiGroups()
+//    }
 
-    if (config.firefox) {
-      task(kibanaPipeline.functionalTestProcess('oss-firefox', './test/scripts/jenkins_firefox_smoke.sh'))
-    }
+    // if (config.firefox) {
+    //   task(kibanaPipeline.functionalTestProcess('oss-firefox', './test/scripts/jenkins_firefox_smoke.sh'))
+    // }
 
-    if (config.accessibility) {
-      task(kibanaPipeline.functionalTestProcess('oss-accessibility', './test/scripts/jenkins_accessibility.sh'))
-    }
+    // if (config.accessibility) {
+    //   task(kibanaPipeline.functionalTestProcess('oss-accessibility', './test/scripts/jenkins_accessibility.sh'))
+    // }
 
-    if (config.pluginFunctional) {
-      task(kibanaPipeline.functionalTestProcess('oss-pluginFunctional', './test/scripts/jenkins_plugin_functional.sh'))
-    }
+    // if (config.pluginFunctional) {
+    //   task(kibanaPipeline.functionalTestProcess('oss-pluginFunctional', './test/scripts/jenkins_plugin_functional.sh'))
+    // }
 
-    if (config.visualRegression) {
-      task(kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh'))
-    }
+    // if (config.visualRegression) {
+    //   task(kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh'))
+    // }
 
-    if (config.serverIntegration) {
-      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
-    }
+    // if (config.serverIntegration) {
+    //   task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
+    // }
   }
 }
-
 def functionalXpack(Map params = [:]) {
   def config = params ?: [
     ciGroups: true,
