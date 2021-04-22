@@ -11,6 +11,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import {
   ConditionEntryField,
   OperatingSystem,
+  OperatorEntryField,
   TrustedApp,
 } from '../../../../common/endpoint/types';
 import { createConditionEntry, createEntryMatch } from './mapping';
@@ -37,8 +38,12 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   created_by: 'admin',
   description: 'Linux trusted app 1',
   entries: [
-    createEntryMatch('process.executable.caseless', '/bin/malware'),
-    createEntryMatch('process.hash.md5', '1234234659af249ddf3e40864e9fb241'),
+    createEntryMatch('process.executable.caseless', OperatorEntryField.included, '/bin/malware'),
+    createEntryMatch(
+      'process.hash.md5',
+      OperatorEntryField.included,
+      '1234234659af249ddf3e40864e9fb241'
+    ),
   ],
   item_id: '123',
   list_id: 'endpoint_trusted_apps',
@@ -65,8 +70,12 @@ const TRUSTED_APP: TrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
+    createConditionEntry(
+      ConditionEntryField.HASH,
+      OperatorEntryField.included,
+      '1234234659af249ddf3e40864e9fb241'
+    ),
+    createConditionEntry(ConditionEntryField.PATH, OperatorEntryField.included, '/bin/malware'),
   ],
 };
 
@@ -109,8 +118,43 @@ describe('service', () => {
         effectScope: { type: 'global' },
         os: OperatingSystem.LINUX,
         entries: [
-          createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
-          createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
+          createConditionEntry(
+            ConditionEntryField.PATH,
+            OperatorEntryField.included,
+            '/bin/malware'
+          ),
+          createConditionEntry(
+            ConditionEntryField.HASH,
+            OperatorEntryField.included,
+            '1234234659af249ddf3e40864e9fb241'
+          ),
+        ],
+      });
+
+      expect(result).toEqual({ data: TRUSTED_APP });
+
+      expect(exceptionsListClient.createTrustedAppsList).toHaveBeenCalled();
+    });
+
+    it('should create trusted app with correct wildcard_caseless operator', async () => {
+      exceptionsListClient.createExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+
+      const result = await createTrustedApp(exceptionsListClient, {
+        name: 'linux trusted app 1',
+        description: 'Linux trusted app 1',
+        effectScope: { type: 'global' },
+        os: OperatingSystem.LINUX,
+        entries: [
+          createConditionEntry(
+            ConditionEntryField.PATH,
+            OperatorEntryField.wildcard_caseless,
+            '/bin/malware'
+          ),
+          createConditionEntry(
+            ConditionEntryField.HASH,
+            OperatorEntryField.wildcard_caseless,
+            '1234234659af249ddf3e40864e9fb241'
+          ),
         ],
       });
 
