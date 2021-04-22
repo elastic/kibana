@@ -5,44 +5,68 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, VisualizationSuggestion } from '../types';
-import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { partition } from 'lodash';
+import { Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
+import { CHART_SHAPES } from './constants';
 
-export function suggestions({
+export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
   state,
   keptLayerIds,
   mainPalette,
   subVisualizationId,
-}: SuggestionRequest<HeatmapVisualizationState>): Array<
-  VisualizationSuggestion<HeatmapVisualizationState>
-> {
+}) => {
+  const isUnchanged = state && table.changeType === 'unchanged';
+
   if (
+    isUnchanged ||
     keptLayerIds.length > 1 ||
-    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-    (state && table.changeType === 'unchanged')
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0])
   ) {
     return [];
   }
+  const title = 'TODO';
 
-  const title = i18n.translate('xpack.lens.heatmap.suggestionLabel', {
-    defaultMessage: 'TODO suggestion',
-  });
+  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+
+  // heatmap chart requires exact 2 groups and single metric
+  if (groups.length !== 2 || metrics.length !== 1) {
+    return [];
+  }
+
+  const newState = ({
+    title,
+    shape: CHART_SHAPES.HEATMAP,
+    layerId: table.layerId,
+  } as unknown) as HeatmapVisualizationState;
+
+  if (metrics.length === 1 && metrics[0].operation.dataType === 'number') {
+    newState.valueAccessor = metrics[0].columnId;
+  }
+
+  const [ordinal, dateHistogram] = partition(groups, (g) => g.operation.dataType === 'date');
+
+  if (dateHistogram.length > 1) {
+    // support single date histogram only
+    return [];
+  }
+
+  if (dateHistogram.length === 1) {
+    newState.xAccessor = dateHistogram[0].columnId;
+    newState.yAccessor = ordinal[0].columnId;
+  } else {
+    newState.xAccessor = ordinal[0].columnId;
+    newState.yAccessor = ordinal[1].columnId;
+  }
 
   return [
     {
-      title,
-      // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
-      score: (Math.min(table.columns.length, 10) / 10) * 0.4,
-      state: {
-        ...(state || {}),
-        layerId: table.layerId,
-      },
-      previewIcon: LensIconChartDatatable,
-      // tables are hidden from suggestion bar, but used for drag & drop and chart switching
-      hide: true,
+      state: newState,
+      title: 'test',
+      hide: false,
+      previewIcon: '',
+      score: 0.5,
     },
   ];
-}
+};
