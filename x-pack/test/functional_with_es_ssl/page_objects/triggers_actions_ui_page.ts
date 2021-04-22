@@ -186,19 +186,12 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       shouldBeCheckedAsString: string
     ) {
       await retry.try(async () => {
-        if (await testSubjects.find('actionItemsMenuPanel')) {
-          // close opened menu
-          await testSubjects.click('collapsedItemActions');
-        }
         await this.searchAlerts(ruleName);
-
-        // re-open
         await testSubjects.click('collapsedItemActions');
+
         const switchControl = await testSubjects.find(switchName);
         const isChecked = await switchControl.getAttribute('aria-checked');
         expect(isChecked).to.eql(shouldBeCheckedAsString);
-        // close
-        await testSubjects.click('collapsedItemActions');
       });
     },
   };
