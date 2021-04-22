@@ -129,15 +129,15 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        const getResponse = (response: string) => {
+        const getResponse = (response: string): BatchResponseItem<Result, ErrorLike> => {
           const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
 
           try {
             const inputBuf = Buffer.from(payload, 'base64');
             const inflatedRes = compressed ? inflateSync(inputBuf).toString() : payload;
-            return JSON.parse(inflatedRes) as BatchResponseItem<Result, ErrorLike>;
+            return JSON.parse(inflatedRes);
           } catch (e) {
-            return payload;
+            return JSON.parse(payload);
           }
         };
 
