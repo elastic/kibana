@@ -173,7 +173,7 @@ image:images/document-table-expanded.png[Table view with document expanded]
 hover of its name for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
-<<discover-document-context, View surrounding documents>>.
+<<discover-view-surrounding-documents, View surrounding documents>>.
 
 . For direct access to a particular document, click **<<discover-view-single-document,View single document>>**.
 +
@@ -249,8 +249,6 @@ include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 
 include::{kib-repo-dir}/discover/search.asciidoc[]
 
-include::{kib-repo-dir}/discover/context.asciidoc[]
-
-include::{kib-repo-dir}/discover/view-single-document.asciidoc[]
+include::{kib-repo-dir}/discover/view-document.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]

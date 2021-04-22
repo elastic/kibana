@@ -1,25 +1,45 @@
-[[discover-document-context]]
-== View surrounding documents
+[[discover-view-document]]
+== View a document
 
-Once you've narrowed your search to a specific event in *Discover*,
-you can inspect the documents that occurred
-immediately before and after the event.
+Once you've found a document of interest in Discover there are 2 more ways to view it.
+
+[float]
+[[discover-view-single-document]]
+=== View single document
+
+. In the document table, click the expand icon (>).
+. Click **View single document**
++
+This allows you to view the document in two ways. **Table** displays the document's fields row by row.
+**JSON** (JavaScript Object Notation) allows you to take a look at how the document is returned from Elasticsearch.
++
+[role="screenshot"]
+image::images/discover-view-single-document.png[Discover single document view]
+
+The link is valid for the time the document is available in Elasticsearch. If you need another way to view single
+documents, you can extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
+
+[float]
+[[discover-view-surrounding-documents]]
+=== View surrounding documents
+
 To view the surrounding documents, your index pattern must contain time-based events.
 
 . In the document table, click the expand icon (>).
-. Click *View surrounding documents.*
-+
-In the context view, documents are sorted by the time field specified in the index pattern
+. Click **View surrounding documents**
+
+Now you can inspect the documents that occurred immediately before and after the event.
+
+Documents are sorted by the time field specified in the index pattern
 and displayed using the same set of columns as the *Discover* view from which
 the context was opened. The anchor document is highlighted in blue.
-+
+
 [role="screenshot"]
 image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
-+
+
 The filters you applied in *Discover* are carried over to the context view. Pinned 
 filters remain active, while normal filters are copied in a disabled state.
 
-+
 [role="screenshot"]
 image::images/discover-context-filters-inactive.png[Filter in context view]
 
@@ -34,7 +54,7 @@ image::images/discover-context-load-newer-documents.png[Load button and the numb
 
 [float]
 [[configure-context-ContextView]]
-=== Configure the context view
+==== Configure the context view
 
 Configure the appearance and behavior in *Advanced Settings*.
 
