@@ -103,6 +103,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async assertLookbackInterval(expectedValue: string) {
+      await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute(
         'mlAnomalyAlertLookbackInterval',
         'value'
@@ -114,6 +115,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async assertTopNBuckets(expectedNumberOfBuckets: number) {
+      await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
       expect(actualValue).to.eql(
         expectedNumberOfBuckets,
@@ -140,6 +142,7 @@ export function MachineLearningAlertingProvider(
         );
         if (!isVisible) {
           await testSubjects.click('mlAnomalyAlertAdvancedSettingsTrigger');
+          await this.ensureAdvancedSectionOpen();
         }
       });
     },
