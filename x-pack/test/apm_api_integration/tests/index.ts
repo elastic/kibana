@@ -24,6 +24,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./alerts/chart_preview'));
     });
 
+    describe('alerts/rule_registry', function () {
+      loadTestFile(require.resolve('./alerts/rule_registry'));
+    });
+
     describe('correlations/latency_slow_transactions', function () {
       loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
     });
@@ -61,12 +65,16 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./service_overview/dependencies'));
     });
 
-    describe('service_overview/instances_primary_statistics', function () {
-      loadTestFile(require.resolve('./service_overview/instances_primary_statistics'));
+    describe('service_overview/instances_main_statistics', function () {
+      loadTestFile(require.resolve('./service_overview/instances_main_statistics'));
     });
 
-    describe('service_overview/instances_comparison_statistics', function () {
-      loadTestFile(require.resolve('./service_overview/instances_comparison_statistics'));
+    describe('service_overview/instances_detailed_statistics', function () {
+      loadTestFile(require.resolve('./service_overview/instances_detailed_statistics'));
+    });
+
+    describe('service_overview/instance_details', function () {
+      loadTestFile(require.resolve('./service_overview/instance_details'));
     });
 
     // Services
@@ -98,12 +106,12 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 
-    describe('services/error_groups_primary_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_primary_statistics'));
+    describe('services/error_groups_main_statistics', function () {
+      loadTestFile(require.resolve('./services/error_groups_main_statistics'));
     });
 
-    describe('services/error_groups_comparison_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_comparison_statistics'));
+    describe('services/error_groups_detailed_statistics', function () {
+      loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
     });
 
     // Settinges
@@ -161,12 +169,12 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./transactions/top_transaction_groups'));
     });
 
-    describe('transactions/transactions_groups_primary_statistics', function () {
-      loadTestFile(require.resolve('./transactions/transactions_groups_primary_statistics'));
+    describe('transactions/transactions_groups_main_statistics', function () {
+      loadTestFile(require.resolve('./transactions/transactions_groups_main_statistics'));
     });
 
-    describe('transactions/transactions_groups_comparison_statistics', function () {
-      loadTestFile(require.resolve('./transactions/transactions_groups_comparison_statistics'));
+    describe('transactions/transactions_groups_detailed_statistics', function () {
+      loadTestFile(require.resolve('./transactions/transactions_groups_detailed_statistics'));
     });
 
     // feature control

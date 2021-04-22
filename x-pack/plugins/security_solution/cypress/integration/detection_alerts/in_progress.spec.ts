@@ -38,7 +38,7 @@ describe('Marking alerts as in-progress', () => {
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(newRule);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
   });
 
   it('Mark one alert in progress when more than one open alerts are selected', () => {

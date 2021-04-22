@@ -7,21 +7,25 @@
 
 import React from 'react';
 import { FeatureCollection } from 'geojson';
-import { IndexPattern } from 'src/plugins/data/public';
 import { HttpStart } from 'src/core/public';
-import { IImporter, ImportFactoryOptions, ImportResults } from '../importer';
+import { IImporter, ImportFactoryOptions } from '../importer';
 import { getHttp } from '../kibana_services';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+
+export interface FileUploadGeoResults {
+  indexPatternId: string;
+  geoFieldName: string;
+  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
+  docCount: number;
+}
 
 export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
-  onFileUpload: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
-  onFileRemove: () => void;
+  onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
+  onFileClear: () => void;
   onIndexReady: (indexReady: boolean) => void;
-  onIndexingComplete: (results: {
-    indexDataResp: ImportResults;
-    indexPattern: IndexPattern;
-  }) => void;
-  onIndexingError: () => void;
+  onUploadComplete: (results: FileUploadGeoResults) => void;
+  onUploadError: () => void;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
@@ -32,7 +36,7 @@ interface LazyLoadedFileUploadModules {
   getHttp: () => HttpStart;
 }
 
-export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
+export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
   if (typeof loadModulesPromise !== 'undefined') {
     return loadModulesPromise;
   }

@@ -29,6 +29,7 @@ export const initAlertPreviewRoute = ({
   framework,
   sources,
   getLogQueryFields,
+  configuration,
 }: InfraBackendLibs) => {
   framework.registerRoute(
     {
@@ -55,6 +56,8 @@ export const initAlertPreviewRoute = ({
         requestContext.core.savedObjects.client,
         sourceId || 'default'
       );
+
+      const compositeSize = configuration.inventory.compositeSize;
 
       try {
         switch (alertType) {
@@ -83,7 +86,8 @@ export const initAlertPreviewRoute = ({
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
             const logQueryFields = await getLogQueryFields(
               sourceId || 'default',
-              requestContext.core.savedObjects.client
+              requestContext.core.savedObjects.client,
+              requestContext.core.elasticsearch.client.asCurrentUser
             );
             const {
               nodeType,
@@ -96,6 +100,7 @@ export const initAlertPreviewRoute = ({
               lookback,
               source,
               logQueryFields,
+              compositeSize,
               alertInterval,
               alertThrottle,
               alertNotifyWhen,

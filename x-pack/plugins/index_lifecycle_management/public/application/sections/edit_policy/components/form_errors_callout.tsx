@@ -25,9 +25,10 @@ const i18nTexts = {
 export const FormErrorsCallout: FunctionComponent = () => {
   const {
     errors: { hasErrors },
+    isFormSubmitted,
   } = useFormErrorsContext();
 
-  if (!hasErrors) {
+  if (!isFormSubmitted || !hasErrors) {
     return null;
   }
 

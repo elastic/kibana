@@ -262,7 +262,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -537,7 +537,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -806,7 +806,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {

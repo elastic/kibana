@@ -15,12 +15,14 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
   EuiCode,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
 import {
   Form,
   useForm,
+  useFormData,
   FormHook,
   UseField,
   TextField,
@@ -137,6 +139,11 @@ const geti18nTexts = (): {
   },
 });
 
+const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
+  defaultMessage:
+    'Changing name or type can break searches and visualizations that rely on this field.',
+});
+
 const formDeserializer = (field: Field): FieldFormInternal => {
   let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
   if (!field.type) {
@@ -184,6 +191,9 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
+  const { clear: clearSyntaxError } = syntaxError;
+
+  const [{ type }] = useFormData<FieldFormInternal>({ form });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
@@ -193,6 +203,17 @@ const FieldEditorComponent = ({
       onChange({ isValid: isFormValid, isSubmitted, submit });
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
+
+  useEffect(() => {
+    // Whenever the field "type" changes we clear any possible painless syntax
+    // error as it is possibly stale.
+    clearSyntaxError();
+  }, [type, clearSyntaxError]);
+
+  const [{ name: updatedName, type: updatedType }] = useFormData({ form });
+  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
+  const typeHasChanged =
+    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
@@ -221,6 +242,18 @@ const FieldEditorComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {(nameHasChanged || typeHasChanged) && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut
+            color="warning"
+            title={changeWarning}
+            iconType="alert"
+            size="s"
+            data-test-subj="changeWarning"
+          />
+        </>
+      )}
       <EuiSpacer size="xl" />
 
       {/* Set custom label */}

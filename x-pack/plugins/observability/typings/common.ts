@@ -9,10 +9,13 @@ export type ObservabilityApp =
   | 'infra_metrics'
   | 'infra_logs'
   | 'apm'
+  // we will remove uptime in future to replace to be replace by synthetics
   | 'uptime'
+  | 'synthetics'
   | 'observability-overview'
   | 'stack_monitoring'
-  | 'ux';
+  | 'ux'
+  | 'fleet';
 
 export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
   ? Value

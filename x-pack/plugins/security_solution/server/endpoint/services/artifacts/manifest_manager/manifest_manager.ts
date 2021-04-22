@@ -22,6 +22,7 @@ import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
+  getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
   isCompressed,
@@ -34,6 +35,7 @@ import {
 } from '../../../schemas/artifacts';
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -81,6 +83,7 @@ export interface ManifestManagerContext {
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -99,11 +102,9 @@ export class ManifestManager {
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
+  protected experimentalFeatures: ExperimentalFeatures;
 
-  constructor(
-    context: ManifestManagerContext,
-    private readonly isFleetServerEnabled: boolean = false
-  ) {
+  constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -111,6 +112,7 @@ export class ManifestManager {
     this.logger = context.logger;
     this.cache = context.cache;
     this.schemaVersion = 'v1';
+    this.experimentalFeatures = context.experimentalFeatures;
   }
 
   /**
@@ -199,6 +201,41 @@ export class ManifestManager {
   }
 
   /**
+   * Builds an array of endpoint event filters (one per supported OS) based on the current state of the
+   * Event Filters list
+   * @protected
+   */
+  protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildEventFiltersForOs(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
+    );
+  }
+
+  /**
    * Writes new artifact SO.
    *
    * @param artifact An InternalArtifactCompleteSchema representing the artifact.
@@ -280,14 +317,11 @@ export class ManifestManager {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest(
-        {
-          schemaVersion: this.schemaVersion,
-          semanticVersion: manifestSo.attributes.semanticVersion,
-          soVersion: manifestSo.version,
-        },
-        this.isFleetServerEnabled
-      );
+      const manifest = new Manifest({
+        schemaVersion: this.schemaVersion,
+        semanticVersion: manifestSo.attributes.semanticVersion,
+        soVersion: manifestSo.version,
+      });
 
       for (const entry of manifestSo.attributes.artifacts) {
         const artifact = await this.artifactClient.getArtifact(entry.artifactId);
@@ -311,11 +345,8 @@ export class ManifestManager {
   /**
    * creates a new default Manifest
    */
-  public static createDefaultManifest(
-    schemaVersion?: ManifestSchemaVersion,
-    isFleetServerEnabled?: boolean
-  ): Manifest {
-    return Manifest.getDefault(schemaVersion, isFleetServerEnabled);
+  public static createDefaultManifest(schemaVersion?: ManifestSchemaVersion): Manifest {
+    return Manifest.getDefault(schemaVersion);
   }
 
   /**
@@ -325,24 +356,22 @@ export class ManifestManager {
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
   public async buildNewManifest(
-    baselineManifest: Manifest = ManifestManager.createDefaultManifest(
-      this.schemaVersion,
-      this.isFleetServerEnabled
-    )
+    baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
   ): Promise<Manifest> {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
+      // If Endpoint Event Filtering feature is ON, then add in the exceptions for them
+      ...(this.experimentalFeatures.eventFilteringEnabled
+        ? [this.buildEventFiltersArtifacts()]
+        : []),
     ]);
 
-    const manifest = new Manifest(
-      {
-        schemaVersion: this.schemaVersion,
-        semanticVersion: baselineManifest.getSemanticVersion(),
-        soVersion: baselineManifest.getSavedObjectVersion(),
-      },
-      this.isFleetServerEnabled
-    );
+    const manifest = new Manifest({
+      schemaVersion: this.schemaVersion,
+      semanticVersion: baselineManifest.getSemanticVersion(),
+      soVersion: baselineManifest.getSavedObjectVersion(),
+    });
 
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
