@@ -186,5 +186,45 @@ describe('Kibana deprecations', () => {
         'Could not retrieve Kibana deprecations.'
       );
     });
+
+    test('handles deprecation service error', async () => {
+      const domainId = 'test';
+      const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
+        {
+          domainId,
+          message: `Failed to get deprecations info for plugin "${domainId}".`,
+          level: 'fetch_error',
+          correctiveActions: {
+            manualSteps: ['Check Kibana server logs for error message.'],
+          },
+        },
+      ];
+
+      await act(async () => {
+        const deprecationService = deprecationsServiceMock.createStartContract();
+        deprecationService.getAllDeprecations = jest
+          .fn()
+          .mockReturnValue(kibanaDeprecationsMockResponse);
+
+        testBed = await setupKibanaPage({
+          deprecations: deprecationService,
+        });
+      });
+
+      const { component, exists, find, actions } = testBed;
+      component.update();
+
+      // Verify top-level callout renders
+      expect(exists('kibanaPluginError')).toBe(true);
+      expect(find('kibanaPluginError').text()).toContain(
+        'Not all Kibana deprecations were retrieved successfully.'
+      );
+
+      // Open all deprecations
+      actions.clickExpandAll();
+
+      // Verify callout also displays for deprecation with error
+      expect(exists(`${domainId}Error`)).toBe(true);
+    });
   });
 });

@@ -44,7 +44,7 @@ const i18nTexts = {
     defaultMessage: 'Loading deprecations…',
   }),
   successMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.successMessage', {
-    defaultMessage: 'Kibana deprecation resolved',
+    defaultMessage: 'Deprecation resolved',
   }),
   errorMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.errorMessage', {
     defaultMessage: 'Error resolving deprecation',
