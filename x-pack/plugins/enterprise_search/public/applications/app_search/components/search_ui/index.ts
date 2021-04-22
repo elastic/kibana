@@ -6,3 +6,4 @@
  */
 
 export { SEARCH_UI_TITLE } from './constants';
+export { SearchUI } from './search_ui';
