@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { IEsError } from 'src/plugins/data/public';
 
 import { useToasts } from '../lib/kibana';
 import { useAppToasts } from './use_app_toasts';
@@ -49,5 +50,24 @@ describe('useAppToasts', () => {
     });
   });
 
-  // TODO: Add the other tests here
+  it('works normally with a bsearch type error', async () => {
+    const error = ({
+      message: 'some message',
+      attributes: {},
+      err: {
+        statusCode: 400,
+        innerMessages: { somethingElse: 'message' },
+      },
+    } as unknown) as IEsError;
+    const { result } = renderHook(() => useAppToasts());
+
+    result.current.addError(error, { title: 'title' });
+    const errorObj = addErrorMock.mock.calls[0][0];
+    expect(errorObj).toEqual({
+      message: 'some message (400)',
+      name: 'some message',
+      stack:
+        '{\n  "statusCode": 400,\n  "innerMessages": {\n    "somethingElse": "message"\n  }\n}',
+    });
+  });
 });

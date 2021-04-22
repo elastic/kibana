@@ -55,8 +55,7 @@ export const useEqlPreview = (): [
   const searchEql = useCallback(
     ({ from, to, query, index, interval }: EqlPreviewRequest) => {
       if (parseScheduleDates(to) == null || parseScheduleDates(from) == null) {
-        // TODO: Use i18n here and not english text
-        addWarning('Time intervals are not defined.');
+        addWarning(i18n.EQL_TIME_INTERVAL_NOT_DEFINED);
         return;
       }
 

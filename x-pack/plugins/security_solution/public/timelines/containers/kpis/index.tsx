@@ -22,6 +22,7 @@ import {
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
 
 export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
@@ -74,15 +75,13 @@ export const useTimelineKpis = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: i18n
-                addWarning('An error has occurred');
+                addWarning(i18n.FAIL_TIMELINE_KPI_DETAILS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              // TODO: i18n
-              addError(msg, { title: 'Failed to load KPIs' });
+              addError(msg, { title: i18n.FAIL_TIMELINE_KPI_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
           });

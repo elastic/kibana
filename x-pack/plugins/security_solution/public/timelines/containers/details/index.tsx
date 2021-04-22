@@ -21,6 +21,8 @@ import {
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -79,15 +81,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: i18n
-                addWarning('An error has occurred');
+                addWarning(i18n.FAIL_TIMELINE_DETAILS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              // TODO: i18n
-              addError(msg, { title: 'Failed to run search' });
+              addError(msg, { title: i18n.FAIL_TIMELINE_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
           });
