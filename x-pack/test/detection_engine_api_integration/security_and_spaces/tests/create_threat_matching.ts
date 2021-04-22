@@ -116,6 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('auditbeat/hosts');
       });
 
+      // TODO: flesh top level fields out / find by source unique key
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
         const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
