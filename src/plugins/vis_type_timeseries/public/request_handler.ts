@@ -8,7 +8,8 @@
 
 import { KibanaContext } from '../../data/public';
 
-import { getTimezone, validateInterval } from './application';
+import { getTimezone } from './application/lib/get_timezone';
+import { validateInterval } from './application/lib/validate_interval';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
 import { TimeseriesVisParams } from './types';
