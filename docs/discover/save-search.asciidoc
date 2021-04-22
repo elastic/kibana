@@ -22,14 +22,13 @@ can serve as a foundation for building visualizations.
 [[discover-read-only-access]]
 [float]
 === Read-only access
-If you have insufficient privileges to save searches, the following indicator is
-displayed and the *Save* button is not visible. For more information on granting access to
-Kibana, refer to <<xpack-security-authorization>>.
+If you don't have sufficient privileges to save searches, the following indicator is
+displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
 
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 [float]
-=== Save and reuse a Elasticsearch
+=== Save a search
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
