@@ -20,12 +20,10 @@ module.exports = () => {
         },
       ],
       require('./common_preset'),
-    ],
-    plugins: [
       [
-        require.resolve('babel-plugin-styled-components'),
+        require.resolve('@emotion/babel-preset-css-prop'),
         {
-          fileName: false,
+          labelFormat: '[local]',
         },
       ],
     ],
@@ -42,5 +40,15 @@ module.exports = () => {
         ],
       },
     },
+    overrides: [
+      {
+        include: [
+          /src[\/\\]plugins[\/\\](data|kibana_react)[\/\\]/,
+          /x-pack[\/\\]plugins[\/\\](apm|beats_management|fleet|infra|lists|observability|osquery|security_solution|uptime)[\/\\]/,
+          /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
+        ],
+        plugins: [[require.resolve('babel-plugin-styled-components')]],
+      },
+    ],
   };
 };
