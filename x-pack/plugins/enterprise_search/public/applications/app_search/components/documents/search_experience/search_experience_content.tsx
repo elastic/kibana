@@ -91,7 +91,7 @@ export const SearchExperienceContent: React.FC = () => {
       title={
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocumentsTitle', {
-            defaultMessage: 'No documents yet!',
+            defaultMessage: 'Add your first documents!',
           })}
         </h2>
       }

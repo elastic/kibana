@@ -120,14 +120,15 @@ export const ResultSettings: React.FC = () => {
               <h2>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaTitle',
-                  { defaultMessage: 'Settings require schema fields' }
+                  { defaultMessage: 'Add documents to adjust settings' }
                 )}
               </h2>
             }
             body={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaDescription',
               {
-                defaultMessage: 'A schema is created for you after you index some documents.',
+                defaultMessage:
+                  'A schema will be automatically created for you after you index some documents.',
               }
             )}
             actions={
