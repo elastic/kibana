@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -34,6 +35,7 @@ export interface LensEmbeddableStartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
+  usageCollection?: UsageCollectionSetup;
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
@@ -87,6 +89,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       attributeService,
       indexPatternService,
       capabilities,
+      usageCollection,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../../async_services');
@@ -105,6 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
           canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
+        usageCollection,
       },
       input,
       parent
