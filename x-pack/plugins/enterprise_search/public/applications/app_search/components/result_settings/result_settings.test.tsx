@@ -90,7 +90,7 @@ describe('ResultSettings', () => {
     setMockValues({
       ...values,
       stagedUpdates: true,
-      isEverythingDisabled: true,
+      resultFieldsEmpty: true,
     });
     const buttons = findButtons(subject());
     const saveButton = shallow(buttons[0]);

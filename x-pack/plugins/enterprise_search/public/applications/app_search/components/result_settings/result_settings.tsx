@@ -51,7 +51,7 @@ export const ResultSettings: React.FC = () => {
     schema,
     stagedUpdates,
     resultFieldsAtDefaultSettings,
-    isEverythingDisabled,
+    resultFieldsEmpty,
   } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
@@ -85,7 +85,7 @@ export const ResultSettings: React.FC = () => {
                   color="primary"
                   fill
                   onClick={saveResultSettings}
-                  disabled={isEverythingDisabled || !stagedUpdates}
+                  disabled={resultFieldsEmpty || !stagedUpdates}
                 >
                   {SAVE_BUTTON_LABEL}
                 </EuiButton>,

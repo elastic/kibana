@@ -74,7 +74,7 @@ interface ResultSettingsValues {
   nonTextResultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
   resultFieldsAtDefaultSettings: boolean;
-  isEverythingDisabled: boolean;
+  resultFieldsEmpty: boolean;
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
@@ -198,7 +198,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
     ],
-    isEverythingDisabled: [
+    resultFieldsEmpty: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsEmpty(resultFields),
     ],
