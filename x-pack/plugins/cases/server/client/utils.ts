@@ -15,6 +15,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   CaseConnector,
   ESCasesConfigureAttributes,
@@ -174,6 +175,17 @@ export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode |
     return;
   }
   return nodeBuilder.and(filters);
+}
+
+/**
+ * Creates a KueryNode from a string expression. Returns undefined if the expression is undefined.
+ */
+export function stringToKueryNode(expression: string | undefined): KueryNode | undefined {
+  if (!expression) {
+    return;
+  }
+
+  return esKuery.fromKueryExpression(expression);
 }
 
 /**

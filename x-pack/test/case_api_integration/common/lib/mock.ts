@@ -74,7 +74,7 @@ export const userActionPostResp: CasesClientPostRequest = {
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
   type: CommentType.user,
-  owner: 'securitySolution',
+  owner: 'securitySolutionFixture',
 };
 
 export const postCommentAlertReq: CommentRequestAlertType = {
@@ -82,7 +82,7 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
-  owner: 'securitySolution',
+  owner: 'securitySolutionFixture',
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
@@ -91,7 +91,7 @@ export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
     { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
   ]),
   type: CommentType.generatedAlert,
-  owner: 'securitySolution',
+  owner: 'securitySolutionFixture',
 };
 
 export const postCaseResp = (

@@ -648,7 +648,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should NOT allow to pass a filter query parameter', async () => {
         await supertest
           .get(
-            `${CASES_URL}/_find?sortOrder=asc&filter=cases.attributes.owner=observabilityFixture`
+            `${CASES_URL}/_find?sortOrder=asc&filter=cases.attributes.owner:"observabilityFixture"`
           )
           .set('kbn-xsrf', 'true')
           .send()

@@ -143,6 +143,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
+      // TODO: create test that checks that you can't create a comment with a different owner than the case
+
       it('400s when type is missing', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await createComment({

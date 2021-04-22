@@ -452,9 +452,9 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
     deleteCasesByESQuery(es),
     deleteSubCases(es),
     deleteCasesUserActions(es),
-    deleteComments(es),
     deleteConfiguration(es),
     deleteMappings(es),
+    deleteComments(es),
   ]);
 };
 
@@ -466,6 +466,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -477,6 +478,7 @@ export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -492,6 +494,7 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -503,6 +506,7 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -514,6 +518,7 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -525,6 +530,7 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -534,14 +540,14 @@ export const getSpaceUrlPrefix = (spaceId?: string) => {
 
 export const createCaseAsUser = async ({
   supertestWithoutAuth,
-  user,
+  user = superUser,
   space,
   owner,
   expectedHttpCode = 200,
 }: {
   supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
-  user: User;
-  space: string;
+  user?: User;
+  space?: string;
   owner?: string;
   expectedHttpCode?: number;
 }): Promise<CaseResponse> => {

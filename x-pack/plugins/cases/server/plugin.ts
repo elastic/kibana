@@ -68,7 +68,7 @@ export class CasePlugin {
   private securityPluginSetup?: SecurityPluginSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get('plugins', 'cases');
+    this.log = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.log);
   }
 

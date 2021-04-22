@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
 
@@ -115,6 +116,13 @@ export const CommentsResponseRt = rt.type({
 
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
+export const FindQueryParamsRt = rt.partial({
+  ...SavedObjectFindOptionsRt.props,
+  subCaseId: rt.string,
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
+export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;

@@ -5,11 +5,9 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import * as rt from 'io-ts';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import {
   AllCommentsResponse,
   AllCommentsResponseRt,
@@ -19,7 +17,7 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  SavedObjectFindOptionsRt,
+  FindQueryParams,
 } from '../../../common/api';
 import {
   checkEnabledCaseConnectorOrThrow,
@@ -36,17 +34,10 @@ import {
   combineFilters,
   ensureAuthorized,
   getAuthorizationFilter,
+  stringToKueryNode,
 } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-
-const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
-  subCaseId: rt.string,
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
-
-type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 
 export interface FindArgs {
   caseID: string;
@@ -102,8 +93,12 @@ export async function find(
 
     // combine any passed in filter property and the filter for the appropriate owner
     const combinedFilter = combineFilters([
-      esKuery.fromKueryExpression(filter),
-      combineAuthorizedAndOwnerFilter(queryParams?.owner, authorizationFilter),
+      stringToKueryNode(filter),
+      combineAuthorizedAndOwnerFilter(
+        queryParams?.owner,
+        authorizationFilter,
+        CASE_COMMENT_SAVED_OBJECT
+      ),
     ]);
 
     const args = queryParams

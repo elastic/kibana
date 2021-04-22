@@ -199,6 +199,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(alertComment.updated_by).to.eql(defaultUser);
     });
 
+    // TODO: create test that checks that you can't modify the owner of a comment
+
     it('unhappy path - 404s when comment is not there', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await updateComment(
