@@ -10,7 +10,7 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { PublicMethodsOf, RecursiveReadonly } from '@kbn/utility-types';
 import type {
   CoreSetup,
   CoreStart,
@@ -48,7 +48,11 @@ import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
-import type { Session } from './session_management';
+import type {
+  Session,
+  SessionUserDataStorage,
+  SessionUserDataStorageScope,
+} from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
@@ -80,6 +84,9 @@ export interface SecurityPluginSetup {
   >;
   license: SecurityLicense;
   audit: AuditServiceSetup;
+  readonly session: {
+    readonly userData: { registerScope: (scopePrefix: string) => SessionUserDataStorageScope };
+  };
 }
 
 /**
@@ -91,6 +98,12 @@ export interface SecurityPluginStart {
     AuthorizationServiceSetup,
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
+  readonly session: {
+    readonly hasActiveSession: (request: KibanaRequest) => Promise<boolean>;
+    readonly userData: {
+      getStorage: (scope: SessionUserDataStorageScope) => PublicMethodsOf<SessionUserDataStorage>;
+    };
+  };
 }
 
 export interface PluginSetupDependencies {
@@ -245,7 +258,11 @@ export class SecurityPlugin
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
-    this.sessionManagementService.setup({ config, http: core.http, taskManager });
+    const { userData } = this.sessionManagementService.setup({
+      config,
+      http: core.http,
+      taskManager,
+    });
     this.authenticationService.setup({ http: core.http, license });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
@@ -323,6 +340,8 @@ export class SecurityPlugin
         mode: this.authorizationSetup.mode,
       },
 
+      session: { userData },
+
       license,
     });
   }
@@ -339,7 +358,7 @@ export class SecurityPlugin
 
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
-    const { session } = this.sessionManagementService.start({
+    const { session, hasActiveSession, userData } = this.sessionManagementService.start({
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),
@@ -380,6 +399,7 @@ export class SecurityPlugin
           .checkPrivilegesDynamicallyWithRequest,
         mode: this.authorizationSetup!.mode,
       },
+      session: { hasActiveSession, userData },
     });
   }
 

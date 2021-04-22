@@ -43,7 +43,7 @@ describe('SessionManagementService', () => {
           }),
           taskManager: mockTaskManager,
         })
-      ).toBeUndefined();
+      ).toEqual({ userData: { registerScope: expect.any(Function) } });
 
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -97,7 +97,11 @@ describe('SessionManagementService', () => {
           online$: mockStatusSubject.asObservable(),
           taskManager: mockTaskManager,
         })
-      ).toEqual({ session: expect.any(Session) });
+      ).toEqual({
+        session: expect.any(Session),
+        hasActiveSession: expect.any(Function),
+        userData: { getStorage: expect.any(Function) },
+      });
     });
 
     it('registers proper session index cleanup task runner', () => {

@@ -57,6 +57,11 @@ export interface SessionValue {
   state: unknown;
 
   /**
+   * Optional map of the session user data.
+   */
+  userData?: Map<string, unknown>;
+
+  /**
    * Indicates whether user acknowledged access agreement or not.
    */
   accessAgreementAcknowledged?: boolean;
@@ -77,6 +82,7 @@ export interface SessionOptions {
 export interface SessionValueContentToEncrypt {
   username?: string;
   state: unknown;
+  userData?: Array<[string, unknown]>;
 }
 
 /**
@@ -198,7 +204,7 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, state, ...publicSessionValue } = sessionValue;
+    const { username, state, userData, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -207,7 +213,14 @@ export class Session {
       ...sessionExpirationInfo,
       sid,
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
+      content: await this.crypto.encrypt(
+        JSON.stringify({
+          username,
+          state,
+          userData: userData && userData.size > 0 ? [...userData.entries()] : undefined,
+        }),
+        aad
+      ),
     });
 
     await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
@@ -234,7 +247,7 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, state, metadata, ...publicSessionInfo } = sessionValue;
+    const { username, state, userData, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -244,7 +257,11 @@ export class Session {
       ...sessionExpirationInfo,
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
-        JSON.stringify({ username, state }),
+        JSON.stringify({
+          username,
+          state,
+          userData: userData && userData.size > 0 ? [...userData.entries()] : undefined,
+        }),
         sessionCookieValue.aad
       ),
     });
@@ -446,11 +463,17 @@ export class Session {
    */
   private static sessionIndexValueToSessionValue(
     sessionIndexValue: Readonly<SessionIndexValue>,
-    { username, state }: SessionValueContentToEncrypt
+    { username, state, userData }: SessionValueContentToEncrypt
   ): Readonly<SessionValue> {
     // Extract values that are specific to session index value.
     const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
-    return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
+    return {
+      ...publicSessionValue,
+      username,
+      state,
+      userData: userData && userData.length > 0 ? new Map(userData) : undefined,
+      metadata: { index: sessionIndexValue },
+    };
   }
 
   /**

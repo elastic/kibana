@@ -10,3 +10,5 @@ export {
   SessionManagementServiceStart,
   SessionManagementService,
 } from './session_management_service';
+export type { SessionUserDataStorageScope } from './session_user_data_storage_service';
+export type { SessionUserDataStorage } from './session_user_data_storage';

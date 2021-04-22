@@ -7,7 +7,8 @@
 
 import type { Observable, Subscription } from 'rxjs';
 
-import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ElasticsearchClient, HttpServiceSetup, KibanaRequest, Logger } from 'src/core/server';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import type {
@@ -19,6 +20,9 @@ import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
+import type { SessionUserDataStorage } from './session_user_data_storage';
+import { SessionUserDataStorageService } from './session_user_data_storage_service';
+import type { SessionUserDataStorageScope } from './session_user_data_storage_service';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
@@ -33,8 +37,18 @@ export interface SessionManagementServiceStartParams {
   readonly taskManager: TaskManagerStartContract;
 }
 
+export interface SessionManagementServiceSetup {
+  readonly userData: {
+    registerScope: (scopePrefix: string) => SessionUserDataStorageScope;
+  };
+}
+
 export interface SessionManagementServiceStart {
   readonly session: Session;
+  readonly hasActiveSession: (request: KibanaRequest) => Promise<boolean>;
+  readonly userData: {
+    getStorage: (scope: SessionUserDataStorageScope) => PublicMethodsOf<SessionUserDataStorage>;
+  };
 }
 
 /**
@@ -50,11 +64,16 @@ export class SessionManagementService {
   private sessionIndex!: SessionIndex;
   private sessionCookie!: SessionCookie;
   private config!: ConfigType;
+  private readonly sessionUserDataStorageService = new SessionUserDataStorageService(this.logger);
   private isCleanupTaskScheduled = false;
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, taskManager }: SessionManagementServiceSetupParams) {
+  setup({
+    config,
+    http,
+    taskManager,
+  }: SessionManagementServiceSetupParams): SessionManagementServiceSetup {
     this.config = config;
 
     this.sessionCookie = new SessionCookie({
@@ -71,6 +90,14 @@ export class SessionManagementService {
         createTaskRunner: () => ({ run: () => this.sessionIndex.cleanUp() }),
       },
     });
+
+    return {
+      userData: {
+        registerScope: this.sessionUserDataStorageService.registerScope.bind(
+          this.sessionUserDataStorageService
+        ),
+      },
+    };
   }
 
   start({
@@ -94,13 +121,23 @@ export class SessionManagementService {
       }
     });
 
+    const session = new Session({
+      logger: this.logger,
+      sessionCookie: this.sessionCookie,
+      sessionIndex: this.sessionIndex,
+      config: this.config,
+    });
+
     return {
-      session: new Session({
-        logger: this.logger,
-        sessionCookie: this.sessionCookie,
-        sessionIndex: this.sessionIndex,
-        config: this.config,
-      }),
+      session,
+      hasActiveSession: (request: KibanaRequest) =>
+        session.get(request).then((value) => value != null),
+      userData: {
+        getStorage: this.sessionUserDataStorageService.getStorage.bind(
+          this.sessionUserDataStorageService,
+          session
+        ),
+      },
     };
   }
 

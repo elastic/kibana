@@ -13,6 +13,7 @@ import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
 import { auditServiceMock } from './audit/index.mock';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { sessionUserDataStorageMock } from './session_management/session_user_data_storage.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -27,6 +28,7 @@ function createSetupMock() {
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
+    session: { userData: { registerScope: jest.fn() } },
   };
 }
 
@@ -43,6 +45,10 @@ function createStartMock() {
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       mode: mockAuthz.mode,
+    },
+    session: {
+      hasActiveSession: jest.fn(),
+      userData: { getStorage: jest.fn().mockReturnValue(sessionUserDataStorageMock.create()) },
     },
   };
 }

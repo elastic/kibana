@@ -119,6 +119,11 @@ describe('Security Plugin', () => {
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
           },
+          "session": Object {
+            "userData": Object {
+              "registerScope": [Function],
+            },
+          },
         }
       `);
     });
@@ -167,6 +172,12 @@ describe('Security Plugin', () => {
             "checkPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
+            },
+          },
+          "session": Object {
+            "hasActiveSession": [Function],
+            "userData": Object {
+              "getStorage": [Function],
             },
           },
         }

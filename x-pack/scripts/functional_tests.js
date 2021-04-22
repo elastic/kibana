@@ -46,6 +46,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/session_idle.config.ts'),
   require.resolve('../test/security_api_integration/session_invalidate.config.ts'),
   require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
+  require.resolve('../test/security_api_integration/session_user_data.config.ts'),
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
   require.resolve('../test/security_api_integration/kerberos.config.ts'),

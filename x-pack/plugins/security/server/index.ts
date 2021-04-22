@@ -30,6 +30,7 @@ export type { CheckPrivilegesPayload } from './authorization';
 export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
+export type { SessionUserDataStorage, SessionUserDataStorageScope } from './session_management';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
