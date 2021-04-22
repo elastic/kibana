@@ -1,0 +1,7 @@
+@import 'number_content';
+
+.dataVisualizerExpandedRow {
+  @include euiBreakpoint('xs', 's', 'm') {
+    flex-direction: column;
+  }
+}

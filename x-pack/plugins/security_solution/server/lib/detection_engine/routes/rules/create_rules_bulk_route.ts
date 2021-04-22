@@ -23,8 +23,6 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -101,12 +99,9 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              /**
-               * TODO: Remove this use of `as` by utilizing the proper type
-               */
-              const createdRule = (await alertsClient.create({
+              const createdRule = await alertsClient.create({
                 data: internalRule,
-              })) as Alert<RuleTypeParams>;
+              });
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,

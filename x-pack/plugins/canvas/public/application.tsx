@@ -24,7 +24,6 @@ import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
@@ -127,6 +126,8 @@ export const initializeCanvas = async (
         }
   );
 
+  // Setup documentation links
+  const { docLinks } = coreStart;
   // Set help extensions
   coreStart.chrome.setHelpExtension({
     appName: i18n.translate('xpack.canvas.helpMenu.appName', {
@@ -135,7 +136,7 @@ export const initializeCanvas = async (
     links: [
       {
         linkType: 'documentation',
-        href: getDocumentationLinks().canvas,
+        href: docLinks.links.canvas.guide,
       },
     ],
     content: (domNode) => {

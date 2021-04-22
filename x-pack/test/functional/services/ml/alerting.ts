@@ -16,6 +16,7 @@ export function MachineLearningAlertingProvider(
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async selectAnomalyDetectionAlertType() {
@@ -98,6 +99,48 @@ export function MachineLearningAlertingProvider(
     async assertPreviewCalloutVisible() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`mlAnomalyAlertPreviewCallout`);
+      });
+    },
+
+    async assertLookbackInterval(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'mlAnomalyAlertLookbackInterval',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected lookback interval to equal ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async assertTopNBuckets(expectedNumberOfBuckets: number) {
+      const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
+      expect(actualValue).to.eql(
+        expectedNumberOfBuckets,
+        `Expected number of buckets to equal ${expectedNumberOfBuckets}, got ${actualValue}`
+      );
+    },
+
+    async setLookbackInterval(interval: string) {
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.setValue('mlAnomalyAlertLookbackInterval', interval);
+      await this.assertLookbackInterval(interval);
+    },
+
+    async setTopNBuckets(numberOfBuckets: number) {
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.setValue('mlAnomalyAlertTopNBuckets', numberOfBuckets.toString());
+      await this.assertTopNBuckets(numberOfBuckets);
+    },
+
+    async ensureAdvancedSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        const isVisible = await find.existsByDisplayedByCssSelector(
+          '#mlAnomalyAlertAdvancedSettings'
+        );
+        if (!isVisible) {
+          await testSubjects.click('mlAnomalyAlertAdvancedSettingsTrigger');
+        }
       });
     },
   };

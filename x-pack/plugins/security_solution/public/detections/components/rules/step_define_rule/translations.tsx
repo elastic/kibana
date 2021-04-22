@@ -64,14 +64,6 @@ export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
   }
 );
 
-export const ENABLE_ML_JOB_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobWarningTitle',
-  {
-    defaultMessage:
-      'This ML job is not currently running. Please set this job to run via "ML job settings" before activating this rule.',
-  }
-);
-
 export const QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
   {

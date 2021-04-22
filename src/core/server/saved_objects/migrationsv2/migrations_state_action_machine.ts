@@ -8,11 +8,16 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
 import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
+
+interface StateLogMeta extends LogMeta {
+  kibana: {
+    migrationState: State;
+  };
+}
 
 type ExecutionLog = Array<
   | {
@@ -32,15 +37,24 @@ const logStateTransition = (
   logger: Logger,
   logMessagePrefix: string,
   oldState: State,
-  newState: State
+  newState: State,
+  tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs
-      .slice(oldState.logs.length)
-      .forEach((log) => logger[log.level](logMessagePrefix + log.message));
+    newState.logs.slice(oldState.logs.length).forEach((log) => {
+      const getLogger = (level: keyof Logger) => {
+        if (level === 'error') {
+          return logger[level] as Logger['error'];
+        }
+        return logger[level] as Logger['info'];
+      };
+      getLogger(log.level)(logMessagePrefix + log.message);
+    });
   }
 
-  logger.info(logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}`);
+  logger.info(
+    logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}. took: ${tookMs}ms.`
+  );
 };
 
 const logActionResponse = (
@@ -56,7 +70,14 @@ const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog
   logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {
     if (log.type === 'transition') {
-      logger.info(logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`, log.state);
+      logger.info<StateLogMeta>(
+        logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
+        {
+          kibana: {
+            migrationState: log.state,
+          },
+        }
+      );
     }
     if (log.type === 'response') {
       logger.info(logMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
@@ -85,11 +106,12 @@ export async function migrationStateActionMachine({
   model: Model<State>;
 }) {
   const executionLog: ExecutionLog = [];
-  const starteTime = performance.now();
+  const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
+  let prevTimestamp = startTime;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -116,12 +138,20 @@ export async function migrationStateActionMachine({
           controlState: newState.controlState,
           prevControlState: state.controlState,
         });
-        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State);
+        const now = Date.now();
+        logStateTransition(
+          logger,
+          logMessagePrefix,
+          state,
+          redactedNewState as State,
+          now - prevTimestamp
+        );
+        prevTimestamp = now;
         return newState;
       }
     );
 
-    const elapsedMs = performance.now() - starteTime;
+    const elapsedMs = Date.now() - startTime;
     if (finalState.controlState === 'DONE') {
       logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
       if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {

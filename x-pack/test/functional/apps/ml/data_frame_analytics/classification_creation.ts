@@ -62,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             { color: '#D3DAE6', percentage: 8 },
             { color: '#F5F7FA', percentage: 15 },
           ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_y": {', '    "type": "keyword",'],
           row: {
             type: 'classification',
             status: 'stopped',
@@ -113,9 +114,9 @@ export default function ({ getService }: FtrProviderContext) {
             JSON.stringify(testData.runtimeFields)
           );
           await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
-          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent([
-            '{"uppercase_y":{"type":"keyword","script":"emit(params._source.y.toUpperCase())"}}',
-          ]);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();

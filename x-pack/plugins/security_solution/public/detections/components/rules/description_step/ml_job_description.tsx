@@ -104,7 +104,15 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
 
 export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
-export const buildMlJobDescription = (jobId: string, label: string): ListItems => ({
+const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => (
+  <>
+    {jobIds.map((jobId) => (
+      <MlJobDescription key={jobId} jobId={jobId} />
+    ))}
+  </>
+);
+
+export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({
   title: label,
-  description: <MlJobDescription jobId={jobId} />,
+  description: <MlJobsDescription jobIds={jobIds} />,
 });

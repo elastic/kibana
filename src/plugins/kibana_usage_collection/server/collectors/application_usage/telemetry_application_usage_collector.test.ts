@@ -10,7 +10,7 @@ import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../co
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import {

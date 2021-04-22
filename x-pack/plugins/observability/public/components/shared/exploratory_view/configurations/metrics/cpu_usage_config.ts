@@ -21,11 +21,13 @@ export function getCPUUsageLensConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'system.cpu.user.pct',
-      label: 'CPU Usage %',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'system.cpu.user.pct',
+        label: 'CPU Usage %',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],

@@ -8,14 +8,16 @@
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../../../../reducers/store';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
-import { TOCEntryButton, StateProps, OwnProps } from './toc_entry_button';
+import { TOCEntryButton, ReduxStateProps, OwnProps } from './toc_entry_button';
 
-function mapStateToProps(state: MapStoreState, ownProps: OwnProps): StateProps {
+function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   return {
     isUsingSearch: isUsingSearch(state),
     zoom: getMapZoom(state),
   };
 }
 
-const connected = connect<StateProps, {}, OwnProps, MapStoreState>(mapStateToProps)(TOCEntryButton);
+const connected = connect<ReduxStateProps, {}, OwnProps, MapStoreState>(mapStateToProps)(
+  TOCEntryButton
+);
 export { connected as TOCEntryButton };
