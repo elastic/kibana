@@ -22,8 +22,6 @@ import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample
 
 import { EnginesOverviewHeader } from './header';
 
-import './empty_state.scss';
-
 export const EmptyState: React.FC = () => {
   const {
     myRole: { canManageEngines },
