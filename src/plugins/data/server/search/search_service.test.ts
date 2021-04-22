@@ -261,7 +261,7 @@ describe('Search service', () => {
 
       it('does not include kibana request in search deps when search strategy not registered to include it', async () => {
         const searchRequest = { params: {} };
-        const options = { strategy: 'es' };
+        const options = { strategy: ENHANCED_ES_SEARCH_STRATEGY };
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
