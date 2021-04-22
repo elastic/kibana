@@ -45,7 +45,7 @@ export const CurationsEmptyPrompt: React.FC = () => (
       <h2>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.table.empty.noCurationsTitle',
-          { defaultMessage: 'No curations yet' }
+          { defaultMessage: 'Create your first curation' }
         )}
       </h2>
     }
@@ -82,12 +82,6 @@ export const Curations: React.FC = () => {
 
   if (dataLoading && !curations.length) return <Loading />;
 
-  const EmptyState = () => (
-    <EuiPanel color="subdued">
-      <CurationsEmptyPrompt />
-    </EuiPanel>
-  );
-
   return (
     <>
       <EuiPageHeader
@@ -98,13 +92,9 @@ export const Curations: React.FC = () => {
           </EuiButtonTo>,
         ]}
       />
-      <EuiPageContent
-        hasBorder={curations.length > 0}
-        hasShadow={false}
-        paddingSize={curations.length > 0 ? 'm' : 'none'}
-      >
+      <EuiPageContent hasBorder>
         <FlashMessages />
-        {curations.length > 0 ? <CurationsTable /> : <EmptyState />}
+        <CurationsTable />
       </EuiPageContent>
     </>
   );
