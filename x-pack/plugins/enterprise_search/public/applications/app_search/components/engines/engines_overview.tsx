@@ -10,6 +10,8 @@ import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -83,11 +85,16 @@ export const EnginesOverview: React.FC = () => {
         <FlashMessages />
         <EuiPageContentHeader responsive={false}>
           <EuiPageContentHeaderSection>
-            <EuiTitle size="s">
-              <h2>
-                <EngineIcon /> {ENGINES_TITLE}
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EngineIcon />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2>{ENGINES_TITLE}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             {canManageEngines && (
@@ -121,11 +128,16 @@ export const EnginesOverview: React.FC = () => {
             <EuiSpacer size="xl" />
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle size="s">
-                  <h2>
-                    <MetaEngineIcon /> {META_ENGINES_TITLE}
-                  </h2>
-                </EuiTitle>
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <MetaEngineIcon />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2>{META_ENGINES_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 {canManageEngines && (

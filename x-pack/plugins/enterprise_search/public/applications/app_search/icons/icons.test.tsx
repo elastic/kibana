@@ -26,6 +26,6 @@ describe('shared App Search icons', () => {
 
   it('renders a meta engine icon', () => {
     const wrapper = shallow(<MetaEngineIcon />);
-    expect(wrapper.hasClass('engineIcon')).toBe(true);
+    expect(wrapper.hasClass('euiIcon')).toBe(true);
   });
 });
