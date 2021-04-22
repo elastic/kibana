@@ -15,6 +15,7 @@ export const requiredPackages = {
   System: 'system',
   Endpoint: 'endpoint',
   ElasticAgent: 'elastic_agent',
+  FleetServer: FLEET_SERVER_PACKAGE,
   SecurityDetectionEngine: 'security_detection_engine',
 } as const;
 

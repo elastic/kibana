@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './async_resource_state';
+export * from '../../../state/async_resource_state';
 export * from './trusted_apps_list_page_state';
