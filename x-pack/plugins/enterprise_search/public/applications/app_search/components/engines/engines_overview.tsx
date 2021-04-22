@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent,
@@ -28,7 +29,7 @@ import { convertMetaToPagination, handlePageChange } from '../../../shared/table
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
-import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
+import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH, DOCS_PREFIX } from '../../routes';
 
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
@@ -167,13 +168,14 @@ export const EnginesOverview: React.FC = () => {
                     body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
                     actions={
                       canManageEngines && (
-                        <EuiButtonTo
+                        <EuiButton
+                          iconType="popout"
+                          target="_blank"
                           data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
-                          fill
-                          to={META_ENGINE_CREATION_PATH}
+                          href={`${DOCS_PREFIX}/meta-engines-guide.html`}
                         >
                           {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                        </EuiButtonTo>
+                        </EuiButton>
                       )
                     }
                   />

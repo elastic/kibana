@@ -14,6 +14,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+import { DOCS_PREFIX } from '../../routes';
+
 import { LoadingState, EmptyState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
@@ -158,8 +160,8 @@ describe('EnginesOverview', () => {
             expect(
               emptyPrompt
                 .find('[data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"]')
-                .prop('to')
-            ).toEqual('/meta_engine_creation');
+                .prop('href')
+            ).toEqual(`${DOCS_PREFIX}/meta-engines-guide.html`);
           });
         });
       });
