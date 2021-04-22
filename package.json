@@ -138,7 +138,7 @@
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "@kbn/ui-shared-deps": "link:packages/kbn-ui-shared-deps",
     "@kbn/utility-types": "link:bazel-bin/packages/kbn-utility-types/npm_module",
-    "@kbn/utils": "link:packages/kbn-utils",
+    "@kbn/utils": "link:bazel-bin/packages/kbn-utils/npm_module",
     "@loaders.gl/core": "^2.3.1",
     "@loaders.gl/json": "^2.3.1",
     "@mapbox/geojson-rewind": "^0.5.0",
