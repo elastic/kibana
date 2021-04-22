@@ -9,10 +9,21 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useUpdateRule, ReturnUpdateRule } from './use_update_rule';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useUpdateRule', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
   test('init', async () => {
     const { result } = renderHook<unknown, ReturnUpdateRule>(() => useUpdateRule());
 
