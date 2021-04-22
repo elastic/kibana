@@ -269,9 +269,7 @@ export class MapEmbeddable
         timeFilters: this.input.timeRange,
         forceRefresh,
         searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
-          ? this.input.mapBuffer
-          : undefined,
+        searchSessionMapBuffer: this.input.mapBuffer,
       })
     );
   }
