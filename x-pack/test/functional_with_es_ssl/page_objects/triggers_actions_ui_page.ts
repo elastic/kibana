@@ -188,14 +188,12 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       switchName: string,
       shouldBeCheckedAsString: string
     ) {
-      await retry.try(async () => {
-        await this.searchAlerts(ruleName);
-        await testSubjects.click('collapsedItemActions');
+      await this.searchAlerts(ruleName);
+      await testSubjects.click('collapsedItemActions');
 
-        const switchControl = await testSubjects.find(switchName);
-        const isChecked = await switchControl.getAttribute('aria-checked');
-        expect(isChecked).to.eql(shouldBeCheckedAsString);
-      });
+      const switchControl = await testSubjects.find(switchName);
+      const isChecked = await switchControl.getAttribute('aria-checked');
+      expect(isChecked).to.eql(shouldBeCheckedAsString);
     },
   };
 }
