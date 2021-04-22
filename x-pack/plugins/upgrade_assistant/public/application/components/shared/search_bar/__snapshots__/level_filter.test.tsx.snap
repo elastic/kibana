@@ -11,18 +11,8 @@ exports[`DeprecationLevelFilter renders 1`] = `
       key="critical"
       numFilters={1}
       onClick={[Function]}
-      withNext={true}
     >
       critical
-    </EuiFilterButton>
-    <EuiFilterButton
-      data-test-subj="warningLevelFilter"
-      hasActiveFilters={false}
-      key="warning"
-      numFilters={4}
-      onClick={[Function]}
-    >
-      warning
     </EuiFilterButton>
   </EuiFilterGroup>
 </EuiFlexItem>

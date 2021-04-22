@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { DomainDeprecationDetails } from 'kibana/public';
 import { DeprecationHealth } from '../shared';
 import { LEVEL_MAP } from '../constants';
-import { ModalContent } from './steps_modal';
+import { StepsModalContent } from './steps_modal';
 
 const i18nTexts = {
   getDeprecationTitle: (domainId: string) => {
@@ -33,23 +33,34 @@ const i18nTexts = {
   docLinkText: i18n.translate('xpack.upgradeAssistant.deprecationGroupItem.docLinkText', {
     defaultMessage: 'View documentation',
   }),
-  fixButtonLabel: i18n.translate('xpack.upgradeAssistant.deprecationGroupItem.fixButtonLabel', {
-    defaultMessage: 'Show steps to fix',
-  }),
+  manualFixButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.deprecationGroupItem.fixButtonLabel',
+    {
+      defaultMessage: 'Show steps to fix',
+    }
+  ),
+  resolveButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.deprecationGroupItem.resolveButtonLabel',
+    {
+      defaultMessage: 'Quick resolve',
+    }
+  ),
 };
 
 export interface Props {
   deprecation: DomainDeprecationDetails;
   index: number;
   forceExpand: boolean;
-  showModal: (modalContent: ModalContent) => void;
+  showStepsModal: (modalContent: StepsModalContent) => void;
+  showResolveModal: (deprecation: DomainDeprecationDetails) => void;
 }
 
 export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
   deprecation,
   forceExpand,
   index,
-  showModal,
+  showStepsModal,
+  showResolveModal,
 }) => {
   const { domainId, level, message, documentationUrl, correctiveActions } = deprecation;
 
@@ -79,19 +90,33 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
 
                 {(documentationUrl || correctiveActions?.manualSteps) && (
                   <EuiFlexGroup>
+                    {correctiveActions?.api && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          fill
+                          size="s"
+                          data-test-subj="resolveButton"
+                          onClick={() => showResolveModal(deprecation)}
+                        >
+                          {i18nTexts.resolveButtonLabel}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+
                     {correctiveActions?.manualSteps && (
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           size="s"
+                          data-test-subj="stepsButton"
                           onClick={() =>
-                            showModal({
+                            showStepsModal({
                               domainId,
                               steps: correctiveActions.manualSteps!,
                               documentationUrl,
                             })
                           }
                         >
-                          {i18nTexts.fixButtonLabel}
+                          {i18nTexts.manualFixButtonLabel}
                         </EuiButton>
                       </EuiFlexItem>
                     )}

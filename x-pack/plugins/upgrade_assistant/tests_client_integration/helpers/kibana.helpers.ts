@@ -55,4 +55,5 @@ export type KibanaTestSubjects =
   | 'kibanaPluginError'
   | 'kibanaDeprecationsContent'
   | 'kibanaDeprecationItem'
-  | 'kibanaRequestError';
+  | 'kibanaRequestError'
+  | string;

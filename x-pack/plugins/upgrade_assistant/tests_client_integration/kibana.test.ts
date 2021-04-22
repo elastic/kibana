@@ -22,11 +22,16 @@ describe('Kibana deprecations', () => {
   describe('With deprecations', () => {
     const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
       {
-        correctiveActions: {},
-        domainId: 'xpack.spaces',
+        correctiveActions: {
+          manualSteps: ['Step 1', 'Step 2', 'Step 3'],
+          api: {
+            method: 'POST',
+            path: '/test',
+          },
+        },
+        domainId: 'test_domain',
         level: 'critical',
-        message:
-          'Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
+        message: 'Test deprecation message',
       },
     ];
 
@@ -41,12 +46,103 @@ describe('Kibana deprecations', () => {
           deprecations: deprecationService,
         });
       });
+
+      testBed.component.update();
     });
 
     test('renders deprecations', () => {
       const { exists, find } = testBed;
       expect(exists('kibanaDeprecationsContent')).toBe(true);
       expect(find('kibanaDeprecationItem').length).toEqual(1);
+    });
+
+    describe('manual steps modal', () => {
+      test('renders modal with a list of steps to fix a deprecation', async () => {
+        const { component, actions, exists, find } = testBed;
+        const deprecation = kibanaDeprecationsMockResponse[0];
+
+        expect(exists('kibanaDeprecationsContent')).toBe(true);
+
+        // Open all deprecations
+        actions.clickExpandAll();
+
+        const accordionTestSubj = `${deprecation.domainId}Deprecation`;
+
+        await act(async () => {
+          find(`${accordionTestSubj}.stepsButton`).simulate('click');
+        });
+
+        component.update();
+
+        // We need to read the document "body" as the modal is added there and not inside
+        // the component DOM tree.
+        let modal = document.body.querySelector('[data-test-subj="stepsModal"]');
+
+        expect(modal).not.toBe(null);
+        expect(modal!.textContent).toContain(`Fix '${deprecation.domainId}'`);
+
+        const steps: NodeListOf<Element> | null = modal!.querySelectorAll(
+          '[data-test-subj="fixDeprecationSteps"] .euiStep'
+        );
+
+        expect(steps).not.toBe(null);
+        expect(steps.length).toEqual(deprecation!.correctiveActions!.manualSteps!.length);
+
+        await act(async () => {
+          const closeButton: HTMLButtonElement | null = modal!.querySelector(
+            '[data-test-subj="closeButton"]'
+          );
+
+          closeButton!.click();
+        });
+
+        component.update();
+
+        // Confirm modal closed and no longer appears in the DOM
+        modal = document.body.querySelector('[data-test-subj="stepsModal"]');
+        expect(modal).toBe(null);
+      });
+    });
+
+    describe('resolve modal', () => {
+      test('renders confirmation modal to resolve a deprecation', async () => {
+        const { component, actions, exists, find } = testBed;
+        const deprecation = kibanaDeprecationsMockResponse[0];
+
+        expect(exists('kibanaDeprecationsContent')).toBe(true);
+
+        // Open all deprecations
+        actions.clickExpandAll();
+
+        const accordionTestSubj = `${deprecation.domainId}Deprecation`;
+
+        await act(async () => {
+          find(`${accordionTestSubj}.resolveButton`).simulate('click');
+        });
+
+        component.update();
+
+        // We need to read the document "body" as the modal is added there and not inside
+        // the component DOM tree.
+        let modal = document.body.querySelector('[data-test-subj="resolveModal"]');
+
+        expect(modal).not.toBe(null);
+        expect(modal!.textContent).toContain(`Resolve '${deprecation.domainId}'`);
+
+        const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+          '[data-test-subj="confirmModalConfirmButton"]'
+        );
+
+        await act(async () => {
+          confirmButton!.click();
+        });
+
+        component.update();
+
+        // Confirm modal should close and no longer appears in the DOM
+        modal = document.body.querySelector('[data-test-subj="resolveModal"]');
+        expect(modal).toBe(null);
+      });
     });
   });
 

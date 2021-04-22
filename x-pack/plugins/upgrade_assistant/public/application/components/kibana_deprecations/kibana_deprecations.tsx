@@ -23,8 +23,9 @@ import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
 import { KibanaDeprecationList } from './deprecation_list';
-import { StepsModal, ModalContent } from './steps_modal';
+import { StepsModal, StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
+import { ResolveDeprecationModal } from './resolve_deprecation_modal';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
@@ -42,6 +43,12 @@ const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.loadingText', {
     defaultMessage: 'Loading deprecations…',
   }),
+  successMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.successMessage', {
+    defaultMessage: 'Kibana deprecation resolved',
+  }),
+  errorMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.errorMessage', {
+    defaultMessage: 'Error resolving deprecation',
+  }),
 };
 
 export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
@@ -50,9 +57,15 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [modalContent, setModalContent] = useState<ModalContent | undefined>(undefined);
+  const [stepsModalContent, setStepsModalContent] = useState<StepsModalContent | undefined>(
+    undefined
+  );
+  const [resolveModalContent, setResolveModalContent] = useState<
+    undefined | DomainDeprecationDetails
+  >(undefined);
+  const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, docLinks, api } = useAppContext();
+  const { deprecations, breadcrumbs, docLinks, api, notifications } = useAppContext();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
@@ -67,12 +80,42 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     setIsLoading(false);
   }, [deprecations]);
 
-  const toggleModal = (newModalContent?: ModalContent) => {
-    if (typeof newModalContent === 'undefined') {
-      setModalContent(undefined);
+  const toggleStepsModal = (newStepsModalContent?: StepsModalContent) => {
+    if (typeof newStepsModalContent === 'undefined') {
+      setStepsModalContent(undefined);
     }
 
-    setModalContent(newModalContent);
+    setStepsModalContent(newStepsModalContent);
+  };
+
+  const toggleResolveModal = (newResolveModalContent?: DomainDeprecationDetails) => {
+    if (typeof newResolveModalContent === 'undefined') {
+      setResolveModalContent(undefined);
+    }
+
+    setResolveModalContent(newResolveModalContent);
+  };
+
+  const resolveDeprecation = async (deprecationDetails: DomainDeprecationDetails) => {
+    setIsResolvingDeprecation(true);
+
+    const response = await deprecations.resolveDeprecation(deprecationDetails);
+
+    setIsResolvingDeprecation(false);
+    toggleResolveModal();
+
+    // Handle error case
+    if (response.status === 'fail') {
+      notifications.toasts.addError(new Error(response.reason), {
+        title: i18nTexts.errorMessage,
+      });
+
+      return;
+    }
+
+    notifications.toasts.addSuccess(i18nTexts.successMessage);
+    // Refetch deprecations
+    await getAllDeprecations();
   };
 
   useEffect(() => {
@@ -111,7 +154,8 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
       content = (
         <KibanaDeprecationList
           deprecations={kibanaDeprecations}
-          showModal={toggleModal}
+          showStepsModal={toggleStepsModal}
+          showResolveModal={toggleResolveModal}
           reloadDeprecations={getAllDeprecations}
           isLoading={isLoading}
         />
@@ -119,6 +163,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     } else if (error) {
       content = <KibanaDeprecationErrors errorType="requestError" />;
     }
+
     return (
       <div data-test-subj="kibanaDeprecationsContent">
         <EuiSpacer />
@@ -147,8 +192,18 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
         <EuiPageContentBody>
           {getPageContent()}
-          {modalContent && (
-            <StepsModal closeModal={() => toggleModal()} modalContent={modalContent} />
+
+          {stepsModalContent && (
+            <StepsModal closeModal={() => toggleStepsModal()} modalContent={stepsModalContent} />
+          )}
+
+          {resolveModalContent && (
+            <ResolveDeprecationModal
+              closeModal={() => toggleResolveModal()}
+              resolveDeprecation={resolveDeprecation}
+              isResolvingDeprecation={isResolvingDeprecation}
+              deprecation={resolveModalContent}
+            />
           )}
         </EuiPageContentBody>
       </EuiPageContent>

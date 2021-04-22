@@ -24,7 +24,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-export interface ModalContent {
+export interface StepsModalContent {
   domainId: string;
   steps: string[];
   documentationUrl?: string;
@@ -32,7 +32,7 @@ export interface ModalContent {
 
 interface Props {
   closeModal: () => void;
-  modalContent: ModalContent;
+  modalContent: StepsModalContent;
 }
 
 const i18nTexts = {
@@ -74,7 +74,7 @@ export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent 
   const { domainId, steps, documentationUrl } = modalContent;
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} data-test-subj="stepsModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <EuiTitle size="m">
@@ -93,6 +93,7 @@ export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent 
 
           <EuiSteps
             titleSize="xs"
+            data-test-subj="fixDeprecationSteps"
             steps={steps.map((step, index) => {
               return {
                 title: i18nTexts.getStepTitle(index + 1),
@@ -118,7 +119,7 @@ export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent 
           )}
 
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={closeModal} fill>
+            <EuiButton onClick={closeModal} fill data-test-subj="closeButton">
               {i18nTexts.closeButtonLabel}
             </EuiButton>
           </EuiFlexItem>

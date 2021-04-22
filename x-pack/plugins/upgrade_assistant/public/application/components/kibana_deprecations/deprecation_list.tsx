@@ -15,12 +15,13 @@ import { LevelFilterOption } from '../types';
 import { SearchBar, DeprecationListBar, DeprecationPagination } from '../shared';
 import { LEVEL_MAP, DEPRECATIONS_PER_PAGE } from '../constants';
 import { KibanaDeprecationAccordion } from './deprecation_item';
-import { ModalContent } from './steps_modal';
+import { StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 
 interface Props {
   deprecations: DomainDeprecationDetails[];
-  showModal: (newModalContent: ModalContent) => void;
+  showStepsModal: (newStepsModalContent: StepsModalContent) => void;
+  showResolveModal: (deprecation: DomainDeprecationDetails) => void;
   reloadDeprecations: () => Promise<void>;
   isLoading: boolean;
 }
@@ -54,7 +55,8 @@ const sortByLevelDesc = (a: DomainDeprecationDetails, b: DomainDeprecationDetail
 
 export const KibanaDeprecationList: FunctionComponent<Props> = ({
   deprecations,
-  showModal,
+  showStepsModal,
+  showResolveModal,
   reloadDeprecations,
   isLoading,
 }) => {
@@ -126,7 +128,8 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
                   index,
                   deprecation,
                   forceExpand: expandState.forceExpand,
-                  showModal,
+                  showStepsModal,
+                  showResolveModal,
                 }}
               />
               <EuiHorizontalRule margin="s" />
