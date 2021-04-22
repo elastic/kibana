@@ -43,6 +43,11 @@ const mockUseKibana = {
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
 }));
 
 describe('useTimelineLastEventTime', () => {

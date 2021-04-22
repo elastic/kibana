@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { getUserPrivilege } from './api';
 import * as i18n from './translations';
 
@@ -44,7 +44,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -84,7 +84,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             hasIndexUpdateDelete: false,
             hasIndexMaintenance: false,
           });
-          errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.PRIVILEGE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -97,7 +97,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [dispatchToaster]);
+  }, [addError]);
 
   return { loading, ...privilegeUser };
 };
