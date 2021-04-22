@@ -93,6 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.alerting.cleanAnomalyDetectionRules();
     });
 
     describe('overview page alert flyout controls', () => {
