@@ -56,6 +56,8 @@ export class ConsoleMenu extends Component<Props, State> {
 
   /**
    * Use the document.execCommand('copy') API to interact with the system clipboard.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand
    */
   legacyCopyText(text: string) {
     const textField = document.createElement('textarea');
