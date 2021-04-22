@@ -45,6 +45,15 @@ import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
 
 import './chart.scss';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
@@ -278,6 +287,7 @@ const PieComponent = (props: PieComponentProps) => {
             splitDimension={splitChartDimension}
           />
           <Settings
+            debugState={window._echDebugStateFlag ?? false}
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
