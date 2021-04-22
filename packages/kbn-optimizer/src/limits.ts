@@ -11,7 +11,7 @@ import Path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
-import { createFailError, ToolingLog, CiStatsMetrics } from '@kbn/dev-utils';
+import { createFailError, ToolingLog, CiStatsMetric } from '@kbn/dev-utils';
 
 import { OptimizerConfig, Limits } from './optimizer';
 
@@ -86,7 +86,7 @@ export function updateBundleLimits({
   limitsPath,
 }: UpdateBundleLimitsOptions) {
   const limits = readLimits(limitsPath);
-  const metrics: CiStatsMetrics = config.bundles
+  const metrics: CiStatsMetric[] = config.bundles
     .map((bundle) =>
       JSON.parse(Fs.readFileSync(Path.resolve(bundle.outputDir, 'metrics.json'), 'utf-8'))
     )

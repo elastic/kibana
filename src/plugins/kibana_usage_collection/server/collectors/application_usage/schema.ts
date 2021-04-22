@@ -7,7 +7,7 @@
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_collector';
+import { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
@@ -148,6 +148,7 @@ export const applicationUsageSchema = {
   ml: commonSchema,
   monitoring: commonSchema,
   'observability-overview': commonSchema,
+  osquery: commonSchema,
   security_account: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it

@@ -18,7 +18,7 @@ import {
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
-import { AlertExecutionStatusValues } from '../../../../alerts/common';
+import { AlertExecutionStatusValues } from '../../../../alerting/common';
 import { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({

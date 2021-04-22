@@ -59,6 +59,7 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
+  buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
 import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
@@ -107,6 +108,7 @@ import * as statusI18n from '../../../../components/rules/rule_status/translatio
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -207,6 +209,7 @@ const RuleDetailsPageComponent = () => {
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
+  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
@@ -285,10 +288,11 @@ const RuleDetailsPageComponent = () => {
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
+      ...buildAlertsRuleIdFilter(ruleId),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, showBuildingBlockAlerts]
+    [ruleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -328,7 +332,10 @@ const RuleDetailsPageComponent = () => {
       </EuiFlexItem>
     ) : (
       <>
-        <RuleStatus status={currentStatus?.status} statusDate={currentStatus?.status_date}>
+        <RuleStatus
+          status={getRuleStatusText(currentStatus?.status)}
+          statusDate={currentStatus?.status_date}
+        >
           <EuiButtonIcon
             data-test-subj="refreshButton"
             color="primary"
@@ -440,6 +447,13 @@ const RuleDetailsPageComponent = () => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
     },
     [setShowBuildingBlockAlerts]
+  );
+
+  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
+    (newShowOnlyThreatIndicatorAlerts: boolean) => {
+      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
+    },
+    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -562,17 +576,19 @@ const RuleDetailsPageComponent = () => {
                       position="top"
                       content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
-                      <RuleSwitch
-                        id={rule?.id ?? '-1'}
-                        isDisabled={
-                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                          userHasNoPermissions(canUserCRUD) ||
-                          (!hasMlPermissions && !rule?.enabled)
-                        }
-                        enabled={rule?.enabled ?? false}
-                        optionLabel={i18n.ACTIVATE_RULE}
-                        onChange={handleOnChangeEnabledRule}
-                      />
+                      <EuiFlexGroup>
+                        <RuleSwitch
+                          id={rule?.id ?? '-1'}
+                          isDisabled={
+                            !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                            userHasNoPermissions(canUserCRUD) ||
+                            (!hasMlPermissions && !rule?.enabled)
+                          }
+                          enabled={rule?.enabled ?? false}
+                          onChange={handleOnChangeEnabledRule}
+                        />
+                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
 
@@ -664,7 +680,9 @@ const RuleDetailsPageComponent = () => {
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
+                    showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                    onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
                     onRuleChange={refreshRule}
                     to={to}
                   />

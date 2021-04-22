@@ -30,29 +30,29 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TextField, useForm, useFormData } from '../../../shared_imports';
-
+import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 import { createDocLink } from '../../services/documentation';
-
 import { UseField } from './form';
-
 import { savePolicy } from './save_policy';
-
 import {
   ColdPhase,
   DeletePhase,
   HotPhase,
+  FrozenPhase,
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
   FormErrorsCallout,
 } from './components';
-
-import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
-
+import {
+  createPolicyNameValidations,
+  createSerializer,
+  createDeserializer,
+  Form,
+  getSchema,
+} from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-
 import { FormInternal } from './types';
 
 export interface Props {
@@ -72,21 +72,41 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policy: currentPolicy,
     existingPolicies,
     policyName,
+    license,
   } = useEditPolicyContext();
+
+  const {
+    services: { cloud },
+  } = useKibana();
+
+  const [saveAsNew, setSaveAsNew] = useState(false);
+  const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const isAllowedByLicense = license.canUseSearchableSnapshot();
+  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
   }, [isNewPolicy, currentPolicy]);
 
-  const [saveAsNew, setSaveAsNew] = useState(false);
-  const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const deserializer = useMemo(() => {
+    return createDeserializer(isCloudEnabled);
+  }, [isCloudEnabled]);
+
+  const defaultValue = useMemo(
+    () => ({
+      ...currentPolicy,
+      name: originalPolicyName,
+    }),
+    [currentPolicy, originalPolicyName]
+  );
+
+  const schema = useMemo(() => {
+    return getSchema(isCloudEnabled);
+  }, [isCloudEnabled]);
 
   const { form } = useForm({
     schema,
-    defaultValue: {
-      ...currentPolicy,
-      name: originalPolicyName,
-    },
+    defaultValue,
     deserializer,
     serializer,
   });
@@ -243,13 +263,21 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               <HotPhase />
 
               <EuiSpacer />
-
               <WarmPhase />
 
               <EuiSpacer />
-
               <ColdPhase />
 
+              {isAllowedByLicense && (
+                <>
+                  <EuiSpacer />
+                  <FrozenPhase />
+                </>
+              )}
+
+              {/* We can't add the <EuiSpacer /> here as it breaks the layout
+              and makes the connecting line go further that it needs to.
+              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
               <DeletePhase />
             </div>
 

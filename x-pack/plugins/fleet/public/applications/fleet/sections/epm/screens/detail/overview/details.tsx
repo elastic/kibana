@@ -14,15 +14,15 @@ import {
   EuiDescriptionList,
   EuiNotificationBadge,
 } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
-import {
+import type {
   PackageInfo,
   PackageSpecCategory,
   AssetTypeToParts,
   KibanaAssetType,
-  entries,
 } from '../../../../../types';
+import { entries } from '../../../../../types';
 import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 

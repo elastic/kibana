@@ -185,7 +185,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,synthetics-*",
       }
     `);
   });
@@ -287,7 +287,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,synthetics-*",
       }
     `);
   });
@@ -474,7 +474,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,synthetics-*",
       }
     `);
   });
@@ -581,7 +581,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,synthetics-*",
       }
     `);
   });
@@ -694,7 +694,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,synthetics-*",
       }
     `);
     expect(result.length).toBe(3);

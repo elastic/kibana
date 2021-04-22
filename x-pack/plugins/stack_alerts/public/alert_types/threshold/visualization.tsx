@@ -10,7 +10,7 @@ import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { interval } from 'rxjs';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
@@ -39,7 +39,7 @@ import {
 } from './index_threshold_api';
 import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -303,7 +303,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 <LineAnnotation
                   key={specId}
                   id={specId}
-                  domainType={AnnotationDomainTypes.YDomain}
+                  domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: threshold[thresholdIndex], details: specId }]}
                 />
               );

@@ -63,7 +63,7 @@ export const dateHistogramOperation: OperationDefinition<
   getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      type === 'date' &&
+      (type === 'date' || type === 'date_range') &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {
@@ -355,7 +355,11 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
             defaultMessage: 'How it works',
           })}

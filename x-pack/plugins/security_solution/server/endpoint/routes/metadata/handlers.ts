@@ -19,6 +19,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
+import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -32,9 +33,15 @@ export interface MetadataRequestContext {
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
-  ['online', HostStatus.ONLINE],
+  ['online', HostStatus.HEALTHY],
   ['offline', HostStatus.OFFLINE],
-  ['unenrolling', HostStatus.UNENROLLING],
+  ['inactive', HostStatus.INACTIVE],
+  ['unenrolling', HostStatus.UPDATING],
+  ['enrolling', HostStatus.UPDATING],
+  ['updating', HostStatus.UPDATING],
+  ['warning', HostStatus.UNHEALTHY],
+  ['error', HostStatus.UNHEALTHY],
+  ['degraded', HostStatus.UNHEALTHY],
 ]);
 
 /**
@@ -202,16 +209,11 @@ async function findAgent(
     return await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         hostMetadata.elastic.agent.id
       );
   } catch (e) {
-    if (
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
-        e
-      )
-    ) {
+    if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -261,7 +263,7 @@ export async function enrichHostMetadata(
   metadataRequestContext: MetadataRequestContext,
   metadataQueryStrategyVersion: MetadataQueryStrategyVersions
 ): Promise<HostInfo> {
-  let hostStatus = HostStatus.ERROR;
+  let hostStatus = HostStatus.UNHEALTHY;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
   const log = metadataRequestContext.logger;
   try {
@@ -277,17 +279,12 @@ export async function enrichHostMetadata(
     const status = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgentStatusById(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
-    hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
+    hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.UNHEALTHY;
   } catch (e) {
-    if (
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
-        e
-      )
-    ) {
+    if (e instanceof AgentNotFoundError) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);
@@ -300,7 +297,6 @@ export async function enrichHostMetadata(
     const agent = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );

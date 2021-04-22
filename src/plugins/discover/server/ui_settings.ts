@@ -14,7 +14,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -25,6 +24,7 @@ import {
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
+  MAX_DOC_FIELDS_DISPLAYED,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -39,6 +39,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
+  [MAX_DOC_FIELDS_DISPLAYED]: {
+    name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
+      defaultMessage: 'Maximum document fields displayed',
+    }),
+    value: 200,
+    description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
+      defaultMessage: 'Maximum number of fields rendered in the document column',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
       defaultMessage: 'Number of rows',
@@ -46,20 +57,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
       defaultMessage: 'The number of rows to show in the table',
-    }),
-    category: ['discover'],
-    schema: schema.number(),
-  },
-  [AGGS_TERMS_SIZE_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.aggsTermsSizeTitle', {
-      defaultMessage: 'Number of terms',
-    }),
-    value: 20,
-    type: 'number',
-    description: i18n.translate('discover.advancedSettings.aggsTermsSizeText', {
-      defaultMessage:
-        'Determines how many terms will be visualized when clicking the "visualize" ' +
-        'button, in the field drop downs, in the discover sidebar.',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -160,7 +157,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
       defaultMessage: 'Use legacy table',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
         'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -15,8 +15,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
-import { ActionVariable } from '../../types';
 import { templateActionVariable } from '../lib';
+import { ActionVariable } from '../../../../alerting/common';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -37,6 +37,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         key={variable.name}
         data-test-subj={`variableMenuButton-${variable.name}`}
         icon="empty"
+        disabled={variable.deprecated}
         onClick={() => {
           onSelectEventHandler(variable);
           setIsVariablesPopoverOpen(false);
@@ -54,11 +55,15 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     ));
 
   const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.addMessageVariables.addVariableTitle',
+    'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
     {
-      defaultMessage: 'Add alert variable',
+      defaultMessage: 'Add rule variable',
     }
   );
+
+  if ((messageVariables?.length ?? 0) === 0) {
+    return <Fragment />;
+  }
 
   return (
     <EuiPopover
@@ -66,7 +71,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         <EuiButtonIcon
           id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
-          isDisabled={(messageVariables?.length ?? 0) === 0}
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"

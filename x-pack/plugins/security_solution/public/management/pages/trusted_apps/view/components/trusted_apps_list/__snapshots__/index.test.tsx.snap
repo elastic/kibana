@@ -635,6 +635,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -718,7 +719,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -746,7 +747,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Collapse"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -771,7 +772,8 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  data-test-subj="trustedAppCard"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -993,6 +995,27 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             >
                               <div>
                                 <button
+                                  class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                                  data-test-subj="trustedAppEditButton"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Edit
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <div>
+                                <button
                                   class="euiButton euiButton--danger euiButton--small eui-fullWidth "
                                   data-test-subj="trustedAppDeleteButton"
                                   type="button"
@@ -1023,6 +1046,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1106,7 +1130,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1134,7 +1158,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1152,6 +1176,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1235,7 +1260,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1263,7 +1288,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1281,6 +1306,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1364,7 +1390,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1392,7 +1418,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1410,6 +1436,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1493,7 +1520,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1521,7 +1548,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1539,6 +1566,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1622,7 +1650,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1650,7 +1678,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1668,6 +1696,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1751,7 +1780,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1779,7 +1808,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1797,6 +1826,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1880,7 +1910,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -1908,7 +1938,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -1926,6 +1956,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2009,7 +2040,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2037,7 +2068,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2055,6 +2086,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2138,7 +2170,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2166,7 +2198,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2184,6 +2216,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2267,7 +2300,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2295,7 +2328,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2313,6 +2346,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2396,7 +2430,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2424,7 +2458,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2442,6 +2476,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2525,7 +2560,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2553,7 +2588,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2571,6 +2606,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2654,7 +2690,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2682,7 +2718,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2700,6 +2736,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2783,7 +2820,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2811,7 +2848,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2829,6 +2866,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2912,7 +2950,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -2940,7 +2978,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -2958,6 +2996,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3041,7 +3080,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -3069,7 +3108,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -3087,6 +3126,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3170,7 +3210,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -3198,7 +3238,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -3216,6 +3256,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3299,7 +3340,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -3327,7 +3368,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -3345,6 +3386,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3428,7 +3470,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -3456,7 +3498,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -3520,7 +3562,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -3541,7 +3583,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -3563,7 +3605,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -3585,7 +3627,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -3607,7 +3649,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -3629,7 +3671,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -3657,7 +3699,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -3677,7 +3719,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
             <a
               aria-controls="mockId"
               aria-label="Next page, 2"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-next"
               href="#mockId"
               rel="noreferrer"
@@ -3834,6 +3876,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3917,7 +3960,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -3945,7 +3988,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -3963,6 +4006,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4046,7 +4090,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4074,7 +4118,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4092,6 +4136,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4175,7 +4220,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4203,7 +4248,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4221,6 +4266,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4304,7 +4350,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4332,7 +4378,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4350,6 +4396,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4433,7 +4480,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4461,7 +4508,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4479,6 +4526,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4562,7 +4610,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4590,7 +4638,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4608,6 +4656,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4691,7 +4740,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4719,7 +4768,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4737,6 +4786,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4820,7 +4870,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4848,7 +4898,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4866,6 +4916,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4949,7 +5000,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -4977,7 +5028,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -4995,6 +5046,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5078,7 +5130,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5106,7 +5158,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5124,6 +5176,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5207,7 +5260,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5235,7 +5288,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5253,6 +5306,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5336,7 +5390,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5364,7 +5418,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5382,6 +5436,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5465,7 +5520,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5493,7 +5548,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5511,6 +5566,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5594,7 +5650,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5622,7 +5678,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5640,6 +5696,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5723,7 +5780,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5751,7 +5808,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5769,6 +5826,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5852,7 +5910,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -5880,7 +5938,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -5898,6 +5956,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5981,7 +6040,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -6009,7 +6068,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -6027,6 +6086,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6110,7 +6170,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -6138,7 +6198,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -6156,6 +6216,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6239,7 +6300,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -6267,7 +6328,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -6285,6 +6346,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6368,7 +6430,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -6396,7 +6458,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -6460,7 +6522,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -6481,7 +6543,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -6503,7 +6565,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -6525,7 +6587,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -6547,7 +6609,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -6569,7 +6631,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -6597,7 +6659,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -6617,7 +6679,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
             <a
               aria-controls="mockId"
               aria-label="Next page, 2"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-next"
               href="#mockId"
               rel="noreferrer"
@@ -6932,6 +6994,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7015,7 +7078,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7043,7 +7106,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7061,6 +7124,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7144,7 +7208,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7172,7 +7236,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7190,6 +7254,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7273,7 +7338,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7301,7 +7366,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7319,6 +7384,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7402,7 +7468,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7430,7 +7496,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7448,6 +7514,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7531,7 +7598,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7559,7 +7626,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7577,6 +7644,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7660,7 +7728,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7688,7 +7756,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7706,6 +7774,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7789,7 +7858,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7817,7 +7886,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7835,6 +7904,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7918,7 +7988,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -7946,7 +8016,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -7964,6 +8034,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8047,7 +8118,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8075,7 +8146,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8093,6 +8164,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8176,7 +8248,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8204,7 +8276,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8222,6 +8294,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8305,7 +8378,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8333,7 +8406,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8351,6 +8424,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8434,7 +8508,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8462,7 +8536,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8480,6 +8554,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8563,7 +8638,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8591,7 +8666,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8609,6 +8684,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8692,7 +8768,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8720,7 +8796,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8738,6 +8814,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8821,7 +8898,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8849,7 +8926,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8867,6 +8944,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8950,7 +9028,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -8978,7 +9056,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -8996,6 +9074,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9079,7 +9158,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -9107,7 +9186,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -9125,6 +9204,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9208,7 +9288,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -9236,7 +9316,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -9254,6 +9334,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9337,7 +9418,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -9365,7 +9446,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -9383,6 +9464,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9466,7 +9548,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -9494,7 +9576,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -9558,7 +9640,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -9579,7 +9661,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -9601,7 +9683,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -9623,7 +9705,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -9645,7 +9727,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -9667,7 +9749,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -9695,7 +9777,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -9715,7 +9797,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
             <a
               aria-controls="mockId"
               aria-label="Next page, 2"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-next"
               href="#mockId"
               rel="noreferrer"
@@ -9872,6 +9954,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9955,7 +10038,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -9983,7 +10066,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10001,6 +10084,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10084,7 +10168,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10112,7 +10196,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10130,6 +10214,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10213,7 +10298,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10241,7 +10326,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10259,6 +10344,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10342,7 +10428,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10370,7 +10456,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10388,6 +10474,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10471,7 +10558,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10499,7 +10586,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10517,6 +10604,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10600,7 +10688,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10628,7 +10716,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10646,6 +10734,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10729,7 +10818,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10757,7 +10846,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10775,6 +10864,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10858,7 +10948,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -10886,7 +10976,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -10904,6 +10994,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10987,7 +11078,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11015,7 +11106,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11033,6 +11124,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11116,7 +11208,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11144,7 +11236,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11162,6 +11254,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11245,7 +11338,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11273,7 +11366,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11291,6 +11384,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11374,7 +11468,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11402,7 +11496,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11420,6 +11514,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11503,7 +11598,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11531,7 +11626,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11549,6 +11644,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11632,7 +11728,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11660,7 +11756,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11678,6 +11774,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11761,7 +11858,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11789,7 +11886,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11807,6 +11904,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11890,7 +11988,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -11918,7 +12016,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -11936,6 +12034,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12019,7 +12118,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -12047,7 +12146,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -12065,6 +12164,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12148,7 +12248,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -12176,7 +12276,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -12194,6 +12294,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12277,7 +12378,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -12305,7 +12406,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -12323,6 +12424,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12406,7 +12508,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-labelledby="mockId"
-                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
@@ -12434,7 +12536,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <button
                   aria-label="Expand"
-                  class="euiButtonIcon euiButtonIcon--primary"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
@@ -12499,7 +12601,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
             <a
               aria-controls="mockId"
               aria-label="Previous page, 2"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-previous"
               href="#mockId"
               rel="noreferrer"
@@ -12519,7 +12621,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 1 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   href="#mockId"
                   rel="noreferrer"
@@ -12541,7 +12643,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -12564,7 +12666,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 3 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   disabled=""
                   type="button"
@@ -12586,7 +12688,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -12606,7 +12708,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
             <a
               aria-controls="mockId"
               aria-label="Next page, 4"
-              class="euiButtonIcon euiButtonIcon--text"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="pagination-button-next"
               href="#mockId"
               rel="noreferrer"

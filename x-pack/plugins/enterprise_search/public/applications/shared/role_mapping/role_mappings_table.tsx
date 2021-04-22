@@ -25,8 +25,11 @@ import { i18n } from '@kbn/i18n';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { MANAGE_BUTTON_LABEL } from '../constants';
 import { EuiLinkTo } from '../react_router_helpers';
 import { RoleRules } from '../types';
+
+import './role_mappings_table.scss';
 
 import {
   ANY_AUTH_PROVIDER,
@@ -37,7 +40,6 @@ import {
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
-  MANAGE_ROLE_MAPPING_BUTTON,
 } from './constants';
 
 interface AccessItem {
@@ -83,8 +85,10 @@ export const RoleMappingsTable: React.FC<Props> = ({
   });
 
   const filterResults = (result: SharedRoleMapping) => {
+    // Filter out non-alphanumeric characters, except for underscores, hyphens, and spaces
+    const sanitizedValue = filterValue.replace(/[^\w\s-]/g, '');
     const values = Object.values(result);
-    const regexp = new RegExp(filterValue, 'i');
+    const regexp = new RegExp(sanitizedValue, 'i');
     return values.filter((x) => regexp.test(x)).length > 0;
   };
 
@@ -106,7 +110,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer />
       {filteredResults.length > 0 ? (
-        <EuiTable>
+        <EuiTable className="roleMappingsTable">
           <EuiTableHeader>
             <EuiTableHeaderCell>{EXTERNAL_ATTRIBUTE_LABEL}</EuiTableHeaderCell>
             <EuiTableHeaderCell>{ATTRIBUTE_VALUE_LABEL}</EuiTableHeaderCell>
@@ -150,12 +154,8 @@ export const RoleMappingsTable: React.FC<Props> = ({
                       {authProvider.map(getAuthProviderDisplayValue).join(', ')}
                     </EuiTableRowCell>
                   )}
-                  <EuiTableRowCell>
-                    {id && (
-                      <EuiLinkTo to={getRoleMappingPath(id)}>
-                        {MANAGE_ROLE_MAPPING_BUTTON}
-                      </EuiLinkTo>
-                    )}
+                  <EuiTableRowCell align="right">
+                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>{MANAGE_BUTTON_LABEL}</EuiLinkTo>}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>

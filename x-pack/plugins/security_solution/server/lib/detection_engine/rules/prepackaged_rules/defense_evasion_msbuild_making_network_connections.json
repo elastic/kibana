@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "MsBuild Making Network Connections",
   "query": "sequence by process.entity_id\n  [process where process.name : \"MSBuild.exe\" and event.type == \"start\"]\n  [network where process.name : \"MSBuild.exe\" and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
   "risk_score": 47,
@@ -21,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Defense Evasion"
   ],
   "threat": [
     {

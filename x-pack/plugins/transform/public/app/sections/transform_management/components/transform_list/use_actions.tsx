@@ -20,16 +20,18 @@ import { useStopAction } from '../action_stop';
 
 export const useActions = ({
   forceDisable,
+  transformNodes,
 }: {
   forceDisable: boolean;
+  transformNodes: number;
 }): {
   actions: EuiTableActionsColumnType<TransformListRow>['actions'];
   modals: JSX.Element;
 } => {
-  const cloneAction = useCloneAction(forceDisable);
+  const cloneAction = useCloneAction(forceDisable, transformNodes);
   const deleteAction = useDeleteAction(forceDisable);
-  const editAction = useEditAction(forceDisable);
-  const startAction = useStartAction(forceDisable);
+  const editAction = useEditAction(forceDisable, transformNodes);
+  const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
 
   return {

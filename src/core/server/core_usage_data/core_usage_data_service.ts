@@ -118,10 +118,14 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              docsCount: stats['docs.count'],
-              docsDeleted: stats['docs.deleted'],
-              storeSizeBytes: stats['store.size'],
-              primaryStoreSizeBytes: stats['pri.store.size'],
+              // @ts-expect-error @elastic/elasticsearch declares it 'docs.count' as optional
+              docsCount: parseInt(stats['docs.count'], 10),
+              // @ts-expect-error @elastic/elasticsearch declares it 'docs.deleted' as optional
+              docsDeleted: parseInt(stats['docs.deleted'], 10),
+              // @ts-expect-error @elastic/elasticsearch declares it 'store.size' as string | number
+              storeSizeBytes: parseInt(stats['store.size'], 10),
+              // @ts-expect-error @elastic/elasticsearch declares it 'pri.store.size' as string | number
+              primaryStoreSizeBytes: parseInt(stats['pri.store.size'], 10),
             };
           });
       })
@@ -221,6 +225,16 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             keystoreConfigured: isConfigured.record(http.ssl.keystore),
             truststoreConfigured: isConfigured.record(http.ssl.truststore),
           },
+          securityResponseHeaders: {
+            // ES does not index `null` and it cannot be searched, so we coalesce these to string values instead
+            strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity ?? 'NULL',
+            xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions ?? 'NULL',
+            referrerPolicy: http.securityResponseHeaders.referrerPolicy ?? 'NULL',
+            permissionsPolicyConfigured: isConfigured.string(
+              http.securityResponseHeaders.permissionsPolicy ?? undefined
+            ),
+            disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+          },
         },
 
         logging: {
@@ -235,7 +249,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         savedObjects: {
           customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
-          maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
+          maxImportExportSize: this.soConfig.maxImportExportSize,
         },
       },
       environment: {

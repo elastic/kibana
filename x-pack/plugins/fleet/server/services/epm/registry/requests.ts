@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import fetch, { FetchError, Response } from 'node-fetch';
-import type { RequestInit } from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
+import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';
@@ -28,7 +28,7 @@ async function registryFetch(url: string) {
     const message = `'${status} ${statusText}' error response from package registry at ${
       resUrl || url
     }`;
-    const responseError = new RegistryResponseError(message);
+    const responseError = new RegistryResponseError(message, status);
 
     throw new pRetry.AbortError(responseError);
   }

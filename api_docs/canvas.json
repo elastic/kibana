@@ -19,8 +19,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/canvas/public/index.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/index.ts#L16"
+              "lineNumber": 16
             },
             "signature": [
               "{ services: ",
@@ -32,29 +31,16 @@
                 "text": "CoreStart"
               },
               " & ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasStartDeps",
-                "text": "CanvasStartDeps"
-              },
+              "CanvasStartDeps",
               " & { canvas: ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasServices",
-                "text": "CanvasServices"
-              },
+              "CanvasServices",
               "; }; }"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/canvas/public/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/index.ts#L15"
+          "lineNumber": 15
         },
         "initialIsOpen": false
       }
@@ -74,8 +60,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 63,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/plugin.tsx#L63"
+        "lineNumber": 65
       },
       "signature": [
         "CanvasApi"
@@ -91,8 +76,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 64,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/plugin.tsx#L64"
+        "lineNumber": 66
       },
       "signature": [
         "void"

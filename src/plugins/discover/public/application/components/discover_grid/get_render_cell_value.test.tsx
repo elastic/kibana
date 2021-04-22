@@ -7,11 +7,27 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
-const rowsSource = [
+jest.mock('../../../../../kibana_react/public', () => ({
+  useUiSetting: () => true,
+  withKibana: (comp: ReactWrapper) => {
+    return comp;
+  },
+}));
+
+jest.mock('../../../kibana_services', () => ({
+  getServices: () => ({
+    uiSettings: {
+      get: jest.fn(),
+    },
+  }),
+}));
+
+const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -19,12 +35,12 @@ const rowsSource = [
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
 
-const rowsFields = [
+const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -33,12 +49,12 @@ const rowsFields = [
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
 
-const rowsFieldsWithTopLevelObject = [
+const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -47,7 +63,7 @@ const rowsFieldsWithTopLevelObject = [
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
@@ -58,7 +74,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -78,7 +95,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -127,7 +145,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -139,20 +158,27 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`
-      "<span>{
-        &quot;_id&quot;: &quot;1&quot;,
-        &quot;_index&quot;: &quot;test&quot;,
-        &quot;_type&quot;: &quot;test&quot;,
-        &quot;_score&quot;: 1,
-        &quot;_source&quot;: {
-          &quot;bytes&quot;: 100,
-          &quot;extension&quot;: &quot;.gz&quot;
-        },
-        &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+    expect(component).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Object {
+            "_id": "1",
+            "_index": "test",
+            "_score": 1,
+            "_source": Object {
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "_type": "test",
+            "highlight": Object {
+              "extension": Array [
+                "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+              ],
+            },
+          }
         }
-      }</span>"
+        width={370}
+      />
     `);
   });
 
@@ -161,7 +187,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -209,12 +236,55 @@ describe('Discover grid cell rendering', function () {
     `);
   });
 
+  it('limits amount of rendered items', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFields,
+      rowsFields.map((row) => indexPatternMock.flattenHit(row)),
+      true,
+      // this is the number of rendered items
+      1
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="dscDiscoverGrid__descriptionList"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle>
+          extension
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": Array [
+                ".gz",
+              ],
+            }
+          }
+        />
+      </EuiDescriptionList>
+    `);
+  });
+
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -226,24 +296,32 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`
-      "<span>{
-        &quot;_id&quot;: &quot;1&quot;,
-        &quot;_index&quot;: &quot;test&quot;,
-        &quot;_type&quot;: &quot;test&quot;,
-        &quot;_score&quot;: 1,
-        &quot;fields&quot;: {
-          &quot;bytes&quot;: [
-            100
-          ],
-          &quot;extension&quot;: [
-            &quot;.gz&quot;
-          ]
-        },
-        &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+    expect(component).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Object {
+            "_id": "1",
+            "_index": "test",
+            "_score": 1,
+            "_source": undefined,
+            "_type": "test",
+            "fields": Object {
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "highlight": Object {
+              "extension": Array [
+                "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+              ],
+            },
+          }
         }
-      }</span>"
+        width={370}
+      />
     `);
   });
 
@@ -252,7 +330,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -291,7 +370,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -329,7 +409,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -358,7 +439,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -386,7 +468,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -406,7 +489,8 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue

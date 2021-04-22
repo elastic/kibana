@@ -9,12 +9,13 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { Direction } from '../../../../graphql/types';
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
+import { defaultRowRenderers } from '../body/renderers';
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
@@ -23,6 +24,7 @@ import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { Direction } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -106,6 +108,8 @@ describe('Timeline', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
       showExpandedDetails: false,
       sort,

@@ -19,7 +19,6 @@ import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
 import {
   ADD_SOURCE_PATH,
-  SOURCE_ADDED_PATH,
   SOURCE_DETAILS_PATH,
   PERSONAL_SOURCES_PATH,
   SOURCES_PATH,
@@ -27,7 +26,6 @@ import {
 } from '../../routes';
 
 import { AddSource, AddSourceList } from './components/add_source';
-import { SourceAdded } from './components/source_added';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
 import { staticSourceData } from './source_data';
@@ -84,7 +82,7 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         ))}
         {staticSourceData.map(({ addPath, name }, i) => (
-          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}>
+          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
             <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
             <AddSource reAuthenticate sourceIndex={i} />
           </Route>
@@ -114,10 +112,6 @@ export const SourcesRouter: React.FC = () => {
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
           <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
           <AddSourceList />
-        </Route>
-        <Route path={getSourcesPath(SOURCE_ADDED_PATH, isOrganization)} exact>
-          <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
-          <SourceAdded />
         </Route>
         <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
           <SourceRouter />

@@ -408,7 +408,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
-        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        const arbitraryColor = (await this.isVisTypeXYChart()) ? '#d36086' : '#EF843C';
+        const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
         if (!isOpen) {
           throw new Error('legend color selector not open');
         }
@@ -418,12 +419,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     public async filterOnTableCell(columnIndex: number, rowIndex: number) {
       await retry.try(async () => {
         const cell = await dataGrid.getCellElement(rowIndex, columnIndex);
-        await cell.focus();
+        await cell.click();
         const filterBtn = await testSubjects.findDescendant(
           'tbvChartCell__filterForCellValue',
           cell
         );
-        await filterBtn.click();
+        await common.sleep(2000);
+        filterBtn.click();
       });
     }
 

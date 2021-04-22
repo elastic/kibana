@@ -45,6 +45,7 @@ const fieldsWithData = [
   'machine.os',
   'machine.os.raw',
   'machine.ram',
+  'machine.ram_range',
   'memory',
   'phpmemory',
   'referer',
@@ -159,7 +160,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('existing_fields apis', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/97387
+  describe.skip('existing_fields apis', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('visualize/default');

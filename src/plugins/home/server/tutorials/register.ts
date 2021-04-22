@@ -42,8 +42,8 @@ import { etcdMetricsSpecProvider } from './etcd_metrics';
 import { f5LogsSpecProvider } from './f5_logs';
 import { fortinetLogsSpecProvider } from './fortinet_logs';
 import { golangMetricsSpecProvider } from './golang_metrics';
-import { googlecloudLogsSpecProvider } from './googlecloud_logs';
-import { googlecloudMetricsSpecProvider } from './googlecloud_metrics';
+import { gcpLogsSpecProvider } from './gcp_logs';
+import { gcpMetricsSpecProvider } from './gcp_metrics';
 import { gsuiteLogsSpecProvider } from './gsuite_logs';
 import { haproxyLogsSpecProvider } from './haproxy_logs';
 import { haproxyMetricsSpecProvider } from './haproxy_metrics';
@@ -192,7 +192,7 @@ export const builtInTutorials = [
   oracleMetricsSpecProvider,
   iisMetricsSpecProvider,
   azureLogsSpecProvider,
-  googlecloudMetricsSpecProvider,
+  gcpMetricsSpecProvider,
   auditdLogsSpecProvider,
   barracudaLogsSpecProvider,
   bluecoatLogsSpecProvider,
@@ -202,7 +202,7 @@ export const builtInTutorials = [
   cylanceLogsSpecProvider,
   f5LogsSpecProvider,
   fortinetLogsSpecProvider,
-  googlecloudLogsSpecProvider,
+  gcpLogsSpecProvider,
   gsuiteLogsSpecProvider,
   haproxyLogsSpecProvider,
   icingaLogsSpecProvider,

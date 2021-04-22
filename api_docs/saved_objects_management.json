@@ -17,8 +17,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L18"
+              "lineNumber": 18
             },
             "signature": [
               "() => React.ReactNode"
@@ -32,8 +31,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L19"
+              "lineNumber": 19
             }
           },
           {
@@ -44,40 +42,39 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "{ name: string; description: string; icon: string; type: string; available?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => boolean) | undefined; enabled?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => boolean) | undefined; onClick?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => void) | undefined; render?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => any) | undefined; }"
@@ -91,8 +88,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L30"
+              "lineNumber": 30
             },
             "signature": [
               "(() => boolean) | undefined"
@@ -106,8 +102,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L34"
+              "lineNumber": 34
             },
             "signature": [
               "ActionContext | null"
@@ -121,15 +116,14 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L35"
+              "lineNumber": 35
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               " | null"
@@ -145,6 +139,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.setActionContext.$1",
                 "type": "Object",
                 "label": "actionContext",
                 "isRequired": true,
@@ -154,8 +149,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L37"
+                  "lineNumber": 37
                 }
               }
             ],
@@ -163,8 +157,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L37"
+              "lineNumber": 37
             }
           },
           {
@@ -177,6 +170,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.registerOnFinishCallback.$1",
                 "type": "Object",
                 "label": "callback",
                 "isRequired": true,
@@ -186,8 +180,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L41"
+                  "lineNumber": 41
                 }
               }
             ],
@@ -195,8 +188,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L41"
+              "lineNumber": 41
             }
           },
           {
@@ -206,10 +198,10 @@
             "signature": [
               "(record: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => void"
@@ -217,23 +209,23 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.start.$1",
                 "type": "Object",
                 "label": "record",
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-common.SavedObjectsManagementRecord",
+                    "pluginId": "savedObjectsManagement",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsManagementPluginApi",
+                    "section": "def-public.SavedObjectsManagementRecord",
                     "text": "SavedObjectsManagementRecord"
                   }
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L45"
+                  "lineNumber": 45
                 }
               }
             ],
@@ -241,8 +233,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L45"
+              "lineNumber": 45
             }
           },
           {
@@ -258,15 +249,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L49"
+              "lineNumber": 49
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L17"
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
@@ -286,11 +275,18 @@
             "text": "SavedObjectsImportResponse"
           },
           ") => ",
-          "ProcessedImportResponse"
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.ProcessedImportResponse",
+            "text": "ProcessedImportResponse"
+          }
         ],
         "description": [],
         "children": [
           {
+            "id": "def-public.processImportResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": true,
@@ -306,8 +302,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L52"
+              "lineNumber": 52
             }
           }
         ],
@@ -315,558 +310,12 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-          "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L51"
+          "lineNumber": 51
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.SavedObjectsManagementActionServiceSetup",
-        "type": "Interface",
-        "label": "SavedObjectsManagementActionServiceSetup",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementActionServiceSetup.register",
-            "type": "Function",
-            "label": "register",
-            "description": [
-              "\nregister given action in the registry."
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L15"
-            },
-            "signature": [
-              "(action: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementAction",
-                "text": "SavedObjectsManagementAction"
-              },
-              ") => void"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementActionServiceStart",
-        "type": "Interface",
-        "label": "SavedObjectsManagementActionServiceStart",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementActionServiceStart.has",
-            "type": "Function",
-            "label": "has",
-            "description": [
-              "\nreturn true if the registry contains given action, false otherwise."
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L22"
-            },
-            "signature": [
-              "(actionId: string) => boolean"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementActionServiceStart.getAll",
-            "type": "Function",
-            "label": "getAll",
-            "description": [
-              "\nreturn all {@link SavedObjectsManagementAction | actions} currently registered."
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L26"
-            },
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementAction",
-                "text": "SavedObjectsManagementAction"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L18"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementColumnServiceSetup",
-        "type": "Interface",
-        "label": "SavedObjectsManagementColumnServiceSetup",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementColumnServiceSetup.register",
-            "type": "Function",
-            "label": "register",
-            "description": [
-              "\nregister given column in the registry."
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L15"
-            },
-            "signature": [
-              "(column: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementColumn",
-                "text": "SavedObjectsManagementColumn"
-              },
-              "<unknown>) => void"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementColumnServiceStart",
-        "type": "Interface",
-        "label": "SavedObjectsManagementColumnServiceStart",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementColumnServiceStart.getAll",
-            "type": "Function",
-            "label": "getAll",
-            "description": [
-              "\nreturn all {@link SavedObjectsManagementColumn | columns} currently registered."
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L22"
-            },
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementColumn",
-                "text": "SavedObjectsManagementColumn"
-              },
-              "<unknown>[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L18"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementColumn",
-        "type": "Interface",
-        "label": "SavedObjectsManagementColumn",
-        "signature": [
-          "SavedObjectsManagementColumn",
-          "<T>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementColumn.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementColumn.euiColumn",
-            "type": "Object",
-            "label": "euiColumn",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L14"
-            },
-            "signature": [
-              "Pick<",
-              "EuiTableFieldDataColumnType",
-              "<",
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
-                "text": "SavedObjectsManagementRecord"
-              },
-              ">, \"children\" | \"headers\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"description\" | \"title\" | \"name\" | \"field\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"width\" | \"render\" | \"align\" | \"abbr\" | \"footer\" | \"colSpan\" | \"rowSpan\" | \"scope\" | \"valign\" | \"dataType\" | \"isExpander\" | \"textOnly\" | \"truncateText\" | \"isMobileHeader\" | \"mobileOptions\" | \"hideForMobile\">"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L12"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementRecord",
-        "type": "Interface",
-        "label": "SavedObjectsManagementRecord",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementRecord.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L12"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementRecord.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementRecord.meta",
-            "type": "Object",
-            "label": "meta",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L14"
-            },
-            "signature": [
-              "{ icon: string; title: string; namespaceType: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
-                "text": "SavedObjectsNamespaceType"
-              },
-              "; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementRecord.references",
-            "type": "Array",
-            "label": "references",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L19"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementRecord.namespaces",
-            "type": "Array",
-            "label": "namespaces",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L20"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedObjectsManagementServiceRegistryEntry",
-        "type": "Interface",
-        "label": "SavedObjectsManagementServiceRegistryEntry",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.service",
-            "type": "Object",
-            "label": "service",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L14"
-            },
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectLoader",
-                "text": "SavedObjectLoader"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.title",
-            "type": "string",
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L15"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L12"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ProcessedImportResponse",
-        "type": "Interface",
-        "label": "ProcessedImportResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.failedImports",
-            "type": "Array",
-            "label": "failedImports",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L38"
-            },
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.FailedImport",
-                "text": "FailedImport"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.successfulImports",
-            "type": "Array",
-            "label": "successfulImports",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L39"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportSuccess",
-                "text": "SavedObjectsImportSuccess"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.unmatchedReferences",
-            "type": "Array",
-            "label": "unmatchedReferences",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L40"
-            },
-            "signature": [
-              "UnmatchedReference[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.status",
-            "type": "CompoundType",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L41"
-            },
-            "signature": [
-              "\"success\" | \"idle\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.importCount",
-            "type": "number",
-            "label": "importCount",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L42"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.conflictedSavedObjectsLinkedToSavedSearches",
-            "type": "Uncategorized",
-            "label": "conflictedSavedObjectsLinkedToSavedSearches",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L43"
-            },
-            "signature": [
-              "undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.conflictedSearchDocs",
-            "type": "Uncategorized",
-            "label": "conflictedSearchDocs",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L44"
-            },
-            "signature": [
-              "undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ProcessedImportResponse.importWarnings",
-            "type": "Array",
-            "label": "importWarnings",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L45"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportWarning",
-                "text": "SavedObjectsImportWarning"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-          "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L37"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.FailedImport",
         "type": "Interface",
@@ -882,8 +331,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L22"
+              "lineNumber": 22
             },
             "signature": [
               "Pick<",
@@ -894,7 +342,7 @@
                 "section": "def-server.SavedObjectsImportFailure",
                 "text": "SavedObjectsImportFailure"
               },
-              ", \"type\" | \"id\" | \"title\" | \"meta\" | \"overwrite\">"
+              ", \"type\" | \"title\" | \"id\" | \"meta\" | \"overwrite\">"
             ]
           },
           {
@@ -905,8 +353,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L23"
+              "lineNumber": 23
             },
             "signature": [
               {
@@ -953,91 +400,151 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L21"
+          "lineNumber": 21
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedObjectRelation",
+        "id": "def-public.ProcessedImportResponse",
         "type": "Interface",
-        "label": "SavedObjectRelation",
-        "description": [
-          "\nRepresents a relation between two {@link SavedObject | saved object}"
-        ],
+        "label": "ProcessedImportResponse",
+        "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.SavedObjectRelation.id",
-            "type": "string",
-            "label": "id",
+            "id": "def-public.ProcessedImportResponse.failedImports",
+            "type": "Array",
+            "label": "failedImports",
             "description": [],
             "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L37"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectRelation.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L38"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectRelation.relationship",
-            "type": "CompoundType",
-            "label": "relationship",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L39"
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 38
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectRelationKind",
-                "text": "SavedObjectRelationKind"
-              }
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.FailedImport",
+                "text": "FailedImport"
+              },
+              "[]"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedObjectRelation.meta",
-            "type": "Object",
-            "label": "meta",
+            "id": "def-public.ProcessedImportResponse.successfulImports",
+            "type": "Array",
+            "label": "successfulImports",
             "description": [],
             "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L40"
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 39
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectMetadata",
-                "text": "SavedObjectMetadata"
-              }
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsImportSuccess",
+                "text": "SavedObjectsImportSuccess"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.unmatchedReferences",
+            "type": "Array",
+            "label": "unmatchedReferences",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "UnmatchedReference[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.status",
+            "type": "CompoundType",
+            "label": "status",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 41
+            },
+            "signature": [
+              "\"success\" | \"idle\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.importCount",
+            "type": "number",
+            "label": "importCount",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 42
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.conflictedSavedObjectsLinkedToSavedSearches",
+            "type": "Uncategorized",
+            "label": "conflictedSavedObjectsLinkedToSavedSearches",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 43
+            },
+            "signature": [
+              "undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.conflictedSearchDocs",
+            "type": "Uncategorized",
+            "label": "conflictedSearchDocs",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ProcessedImportResponse.importWarnings",
+            "type": "Array",
+            "label": "importWarnings",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsImportWarning",
+                "text": "SavedObjectsImportWarning"
+              },
+              "[]"
             ]
           }
         ],
         "source": {
-          "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L36"
+          "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+          "lineNumber": 37
         },
         "initialIsOpen": false
       },
@@ -1058,8 +565,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L17"
+              "lineNumber": 17
             },
             "signature": [
               "string | undefined"
@@ -1073,8 +579,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L18"
+              "lineNumber": 18
             },
             "signature": [
               "string | undefined"
@@ -1088,8 +593,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -1103,8 +607,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
@@ -1118,8 +621,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
@@ -1128,8 +630,455 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L16"
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectRelation",
+        "type": "Interface",
+        "label": "SavedObjectRelation",
+        "description": [
+          "\nRepresents a relation between two {@link SavedObject | saved object}"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectRelation.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 37
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectRelation.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 38
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectRelation.relationship",
+            "type": "CompoundType",
+            "label": "relationship",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 39
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectRelationKind",
+                "text": "SavedObjectRelationKind"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectRelation.meta",
+            "type": "Object",
+            "label": "meta",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 36
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementActionServiceSetup",
+        "type": "Interface",
+        "label": "SavedObjectsManagementActionServiceSetup",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementActionServiceSetup.register",
+            "type": "Function",
+            "label": "register",
+            "description": [
+              "\nregister given action in the registry."
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              "(action: ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementAction",
+                "text": "SavedObjectsManagementAction"
+              },
+              ") => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementActionServiceStart",
+        "type": "Interface",
+        "label": "SavedObjectsManagementActionServiceStart",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementActionServiceStart.has",
+            "type": "Function",
+            "label": "has",
+            "description": [
+              "\nreturn true if the registry contains given action, false otherwise."
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "(actionId: string) => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementActionServiceStart.getAll",
+            "type": "Function",
+            "label": "getAll",
+            "description": [
+              "\nreturn all {@link SavedObjectsManagementAction | actions} currently registered."
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementAction",
+                "text": "SavedObjectsManagementAction"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+          "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementColumn",
+        "type": "Interface",
+        "label": "SavedObjectsManagementColumn",
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.SavedObjectsManagementColumn",
+            "text": "SavedObjectsManagementColumn"
+          },
+          "<T>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementColumn.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementColumn.euiColumn",
+            "type": "Object",
+            "label": "euiColumn",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              "Pick<",
+              "EuiTableFieldDataColumnType",
+              "<",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
+                "text": "SavedObjectsManagementRecord"
+              },
+              ">, \"children\" | \"headers\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"description\" | \"title\" | \"id\" | \"name\" | \"field\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"width\" | \"render\" | \"align\" | \"abbr\" | \"footer\" | \"colSpan\" | \"rowSpan\" | \"scope\" | \"valign\" | \"dataType\" | \"isExpander\" | \"textOnly\" | \"truncateText\" | \"isMobileHeader\" | \"mobileOptions\" | \"hideForMobile\">"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementColumnServiceSetup",
+        "type": "Interface",
+        "label": "SavedObjectsManagementColumnServiceSetup",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementColumnServiceSetup.register",
+            "type": "Function",
+            "label": "register",
+            "description": [
+              "\nregister given column in the registry."
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementColumn",
+                "text": "SavedObjectsManagementColumn"
+              },
+              "<unknown>) => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementColumnServiceStart",
+        "type": "Interface",
+        "label": "SavedObjectsManagementColumnServiceStart",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementColumnServiceStart.getAll",
+            "type": "Function",
+            "label": "getAll",
+            "description": [
+              "\nreturn all {@link SavedObjectsManagementColumn | columns} currently registered."
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementColumn",
+                "text": "SavedObjectsManagementColumn"
+              },
+              "<unknown>[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+          "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementRecord",
+        "type": "Interface",
+        "label": "SavedObjectsManagementRecord",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementRecord.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 12
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementRecord.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementRecord.meta",
+            "type": "Object",
+            "label": "meta",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              "{ icon: string; title: string; namespaceType: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsNamespaceType",
+                "text": "SavedObjectsNamespaceType"
+              },
+              "; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementRecord.references",
+            "type": "Array",
+            "label": "references",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementRecord.namespaces",
+            "type": "Array",
+            "label": "namespaces",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 20
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectsManagementServiceRegistryEntry",
+        "type": "Interface",
+        "label": "SavedObjectsManagementServiceRegistryEntry",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.service",
+            "type": "Object",
+            "label": "service",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectLoader",
+                "text": "SavedObjectLoader"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectsManagementServiceRegistryEntry.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -1144,8 +1093,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L18"
+          "lineNumber": 18
         },
         "signature": [
           "{ get: (id: string) => SavedObjectsManagementServiceRegistryEntry | undefined; register: (entry: SavedObjectsManagementServiceRegistryEntry) => void; all: () => SavedObjectsManagementServiceRegistryEntry[]; }"
@@ -1162,8 +1110,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L27"
+          "lineNumber": 27
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
@@ -1187,15 +1134,14 @@
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
-            "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L32"
+            "lineNumber": 32
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementActionServiceSetup",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementActionServiceSetup",
               "text": "SavedObjectsManagementActionServiceSetup"
             }
           ]
@@ -1208,15 +1154,14 @@
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
-            "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L33"
+            "lineNumber": 33
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementColumnServiceSetup",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementColumnServiceSetup",
               "text": "SavedObjectsManagementColumnServiceSetup"
             }
           ]
@@ -1229,26 +1174,18 @@
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
-            "lineNumber": 34,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L34"
+            "lineNumber": 34
           },
           "signature": [
             "Pick<",
-            {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementServiceRegistry",
-              "text": "SavedObjectsManagementServiceRegistry"
-            },
+            "SavedObjectsManagementServiceRegistry",
             ", \"get\" | \"register\" | \"all\">"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/saved_objects_management/public/plugin.ts",
-        "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L31"
+        "lineNumber": 31
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1268,15 +1205,14 @@
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
-            "lineNumber": 38,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L38"
+            "lineNumber": 38
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementActionServiceStart",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementActionServiceStart",
               "text": "SavedObjectsManagementActionServiceStart"
             }
           ]
@@ -1289,15 +1225,14 @@
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
-            "lineNumber": 39,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L39"
+            "lineNumber": 39
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementColumnServiceStart",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementColumnServiceStart",
               "text": "SavedObjectsManagementColumnServiceStart"
             }
           ]
@@ -1305,8 +1240,7 @@
       ],
       "source": {
         "path": "src/plugins/saved_objects_management/public/plugin.ts",
-        "lineNumber": 37,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L37"
+        "lineNumber": 37
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1325,6 +1259,129 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-common.SavedObjectGetRelationshipsResponse",
+        "type": "Interface",
+        "label": "SavedObjectGetRelationshipsResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectGetRelationshipsResponse.relations",
+            "type": "Array",
+            "label": "relations",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectRelation",
+                "text": "SavedObjectRelation"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectGetRelationshipsResponse.invalidRelations",
+            "type": "Array",
+            "label": "invalidRelations",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 52
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectInvalidRelation",
+                "text": "SavedObjectInvalidRelation"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 50
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SavedObjectInvalidRelation",
+        "type": "Interface",
+        "label": "SavedObjectInvalidRelation",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectInvalidRelation.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 44
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectInvalidRelation.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 45
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectInvalidRelation.relationship",
+            "type": "CompoundType",
+            "label": "relationship",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectRelationKind",
+                "text": "SavedObjectRelationKind"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectInvalidRelation.error",
+            "type": "string",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 47
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 43
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.SavedObjectMetadata",
         "type": "Interface",
         "label": "SavedObjectMetadata",
@@ -1341,8 +1398,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L17"
+              "lineNumber": 17
             },
             "signature": [
               "string | undefined"
@@ -1356,8 +1412,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L18"
+              "lineNumber": 18
             },
             "signature": [
               "string | undefined"
@@ -1371,8 +1426,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -1386,8 +1440,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
@@ -1401,8 +1454,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
@@ -1411,8 +1463,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L16"
+          "lineNumber": 16
         },
         "initialIsOpen": false
       },
@@ -1433,8 +1484,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L37"
+              "lineNumber": 37
             }
           },
           {
@@ -1445,8 +1495,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L38"
+              "lineNumber": 38
             }
           },
           {
@@ -1457,14 +1506,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L39"
+              "lineNumber": 39
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectRelationKind",
                 "text": "SavedObjectRelationKind"
               }
@@ -1478,14 +1526,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L40"
+              "lineNumber": 40
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
@@ -1494,145 +1541,28 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L36"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SavedObjectInvalidRelation",
-        "type": "Interface",
-        "label": "SavedObjectInvalidRelation",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectInvalidRelation.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L44"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectInvalidRelation.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L45"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectInvalidRelation.relationship",
-            "type": "CompoundType",
-            "label": "relationship",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L46"
-            },
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectRelationKind",
-                "text": "SavedObjectRelationKind"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectInvalidRelation.error",
-            "type": "string",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L47"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L43"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SavedObjectGetRelationshipsResponse",
-        "type": "Interface",
-        "label": "SavedObjectGetRelationshipsResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectGetRelationshipsResponse.relations",
-            "type": "Array",
-            "label": "relations",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L51"
-            },
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectRelation",
-                "text": "SavedObjectRelation"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SavedObjectGetRelationshipsResponse.invalidRelations",
-            "type": "Array",
-            "label": "invalidRelations",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L52"
-            },
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectInvalidRelation",
-                "text": "SavedObjectInvalidRelation"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L50"
+          "lineNumber": 36
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-common.SavedObjectRelationKind",
+        "type": "Type",
+        "label": "SavedObjectRelationKind",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 31
+        },
+        "signature": [
+          "\"parent\" | \"child\""
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-common.SavedObjectWithMetadata",
         "type": "Type",
@@ -1643,27 +1573,10 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L27"
+          "lineNumber": 27
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SavedObjectRelationKind",
-        "type": "Type",
-        "label": "SavedObjectRelationKind",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L31"
-        },
-        "signature": [
-          "\"parent\" | \"child\""
         ],
         "initialIsOpen": false
       }

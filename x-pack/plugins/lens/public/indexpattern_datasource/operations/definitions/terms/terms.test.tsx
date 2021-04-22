@@ -8,12 +8,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
@@ -101,46 +101,6 @@ describe('terms', () => {
           arguments: expect.objectContaining({
             otherBucket: [false],
             missingBucket: [false],
-          }),
-        })
-      );
-    });
-
-    it('should include esaggs suffix from other columns in orderby argument', () => {
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: {
-            ...termsColumn.params,
-            otherBucket: true,
-            orderBy: { type: 'column', columnId: 'abcde' },
-          },
-        },
-        'col1',
-        {} as IndexPattern,
-        {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            abcde: {
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'percentile',
-              sourceField: 'abc',
-              label: '',
-              params: {
-                percentile: 12,
-              },
-            },
-          },
-        },
-        uiSettingsMock
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            orderBy: ['abcde.12'],
           }),
         })
       );
@@ -398,7 +358,7 @@ describe('terms', () => {
         },
       });
       expect(termsColumn.params).toEqual(
-        expect.objectContaining({ orderBy: { type: 'alphabetical' } })
+        expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
       );
     });
 
@@ -509,7 +469,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -556,7 +516,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -588,7 +548,7 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -632,7 +592,81 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
+        })
+      );
+    });
+
+    it('should set order to ascending if falling back to alphabetical', () => {
+      const termsColumn = termsOperation.onOtherColumnChanged!(
+        {
+          columns: {
+            col2: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'column', columnId: 'col1' },
+                size: 3,
+                orderDirection: 'desc',
+              },
+              sourceField: 'category',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        'col2',
+        'col1'
+      );
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderDirection: 'asc',
+        })
+      );
+    });
+
+    it('should switch back to descending metric sorting if alphabetical sorting was applied as fallback', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+        },
+        'col2',
+        'col1'
+      );
+
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'column', columnId: 'col1' },
+          orderDirection: 'desc',
         })
       );
     });
@@ -814,6 +848,7 @@ describe('terms', () => {
                 type: 'column',
                 columnId: 'col2',
               },
+              orderDirection: 'desc',
             },
           },
         },
@@ -888,7 +923,7 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual('3');
+      expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
     });
 
     it('should update state with the size value', () => {
@@ -904,7 +939,7 @@ describe('terms', () => {
       );
 
       act(() => {
-        instance.find(ValuesRangeInput).prop('onChange')!(7);
+        instance.find(ValuesInput).prop('onChange')!(7);
       });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({

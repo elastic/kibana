@@ -138,6 +138,18 @@ export const setup = async (arg?: {
 
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
+  const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxPrimaryShardSize.select').simulate('change', {
+          target: { value: units },
+        });
+      }
+    });
+    component.update();
+  };
+
   const setMaxSize = async (value: string, units?: string) => {
     await act(async () => {
       find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
@@ -208,8 +220,8 @@ export const setup = async (arg?: {
     };
   };
 
-  const setFreeze = createFormToggleAction('freezeSwitch');
-  const freezeExists = () => exists('freezeSwitch');
+  const createSetFreeze = (phase: Phases) => createFormToggleAction(`${phase}-freezeSwitch`);
+  const createFreezeExists = (phase: Phases) => () => exists(`${phase}-freezeSwitch`);
 
   const createReadonlyActions = (phase: Phases) => {
     const toggleSelector = `${phase}-readonlySwitch`;
@@ -247,25 +259,12 @@ export const setup = async (arg?: {
     };
   };
 
-  const createToggleDeletePhaseActions = () => {
-    const enablePhase = async () => {
-      await act(async () => {
-        find('enableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    const disablePhase = async () => {
-      await act(async () => {
-        find('disableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    return {
-      enablePhase,
-      disablePhase,
-    };
+  const enableDeletePhase = async (isEnabled: boolean) => {
+    const buttonSelector = isEnabled ? 'enableDeletePhaseButton' : 'disableDeletePhaseButton';
+    await act(async () => {
+      find(buttonSelector).simulate('click');
+    });
+    component.update();
   };
 
   const hasRolloverSettingRequiredCallout = (): boolean => exists('rolloverSettingsRequired');
@@ -275,21 +274,21 @@ export const setup = async (arg?: {
     const dataTierSelector = `${controlsSelector}.dataTierSelect`;
     const nodeAttrsSelector = `${phase}-selectedNodeAttrs`;
 
+    const openNodeAttributesSection = async () => {
+      await act(async () => {
+        find(dataTierSelector).simulate('click');
+      });
+      component.update();
+    };
+
     return {
       hasDataTierAllocationControls: () => exists(controlsSelector),
-      openNodeAttributesSection: async () => {
-        await act(async () => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
-      },
+      openNodeAttributesSection,
       hasNodeAttributesSelect: (): boolean => exists(nodeAttrsSelector),
       getNodeAttributesSelectOptions: () => find(nodeAttrsSelector).find('option'),
       setDataAllocation: async (value: DataTierAllocationType) => {
-        act(() => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
+        await openNodeAttributesSection();
+
         await act(async () => {
           switch (value) {
             case 'node_roles':
@@ -333,10 +332,8 @@ export const setup = async (arg?: {
   };
 
   /*
-   * For new we rely on a setTimeout to ensure that error messages have time to populate
-   * the form object before we look at the form object. See:
-   * x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/form_errors_context.tsx
-   * for where this logic lives.
+   * We rely on a setTimeout (dedounce) to display error messages under the form fields.
+   * This handler runs all the timers so we can assert for errors in our tests.
    */
   const runTimers = () => {
     act(() => {
@@ -359,12 +356,14 @@ export const setup = async (arg?: {
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasFrozenPhase: () => exists('ilmTimelineFrozenPhase'),
         hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
       },
       hot: {
         setMaxSize,
         setMaxDocs,
         setMaxAge,
+        setMaxPrimaryShardSize,
         toggleRollover,
         toggleDefaultRollover,
         hasRolloverSettingRequiredCallout,
@@ -390,16 +389,23 @@ export const setup = async (arg?: {
         enable: enable('cold'),
         ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
-        setFreeze,
-        freezeExists,
+        setFreeze: createSetFreeze('cold'),
+        freezeExists: createFreezeExists('cold'),
+        ...createReadonlyActions('cold'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
         ...createNodeAllocationActions('cold'),
       },
+      frozen: {
+        enable: enable('frozen'),
+        ...createMinAgeActions('frozen'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-frozen'),
+        ...createSearchableSnapshotActions('frozen'),
+      },
       delete: {
         isShown: () => exists('delete-phaseContent'),
-        ...createToggleDeletePhaseActions(),
+        enable: enableDeletePhase,
         ...createMinAgeActions('delete'),
       },
     },

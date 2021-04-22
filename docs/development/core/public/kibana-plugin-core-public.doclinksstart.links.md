@@ -8,6 +8,9 @@
 
 ```typescript
 readonly links: {
+        readonly canvas: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -87,7 +90,10 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly overview: string;
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -99,11 +105,13 @@ readonly links: {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly upgradeAssistant: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
@@ -111,9 +119,10 @@ readonly links: {
         };
         readonly query: {
             readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuerySyntax: string;
+            readonly percolate: string;
+            readonly queryDsl: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -124,6 +133,7 @@ readonly links: {
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -140,7 +150,9 @@ readonly links: {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
+            simulatePipeline: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -163,5 +175,6 @@ readonly links: {
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 ```

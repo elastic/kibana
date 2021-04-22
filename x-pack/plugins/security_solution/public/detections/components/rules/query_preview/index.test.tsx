@@ -17,6 +17,7 @@ import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_resp
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { FilterMeta } from 'src/plugins/data/common';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -129,6 +130,49 @@ describe('PreviewQuery', () => {
     expect(
       wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
     ).toBeTruthy();
+  });
+
+  test('it renders preview button enabled if query exists', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:"foo"', language: 'kql' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
+  test('it renders preview button enabled if no query exists but filters do exist', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{
+            query: { query: '', language: 'kuery' },
+            filters: [{ meta: {} as FilterMeta, query: {} }],
+          }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
   });
 
   test('it renders query histogram when rule type is query and preview button clicked', () => {
@@ -284,11 +328,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: 'agent.hostname',
-            value: 200,
+            field: ['agent.hostname'],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -331,11 +375,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: 'agent.hostname',
-            value: 200,
+            field: ['agent.hostname'],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -365,7 +409,7 @@ describe('PreviewQuery', () => {
     expect(wrapper.find('[data-test-subj="previewQueryWarning"]').exists()).toBeTruthy();
   });
 
-  test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is not defined', () => {
+  test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is empty array', () => {
     const wrapper = mount(
       <TestProviders>
         <PreviewQuery
@@ -375,11 +419,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: undefined,
-            value: 200,
+            field: [],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -407,11 +451,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: '   ',
-            value: 200,
+            field: ['   '],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}

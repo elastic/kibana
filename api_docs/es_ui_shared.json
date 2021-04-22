@@ -39,6 +39,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -48,8 +49,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 65,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L65"
+                  "lineNumber": 65
                 }
               }
             ],
@@ -57,8 +57,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L65"
+              "lineNumber": 65
             }
           },
           {
@@ -71,6 +70,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.Unnamed.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -80,8 +80,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 70,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L70"
+                  "lineNumber": 70
                 }
               }
             ],
@@ -89,8 +88,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L70"
+              "lineNumber": 70
             }
           },
           {
@@ -98,6 +96,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFrequency.$1",
                 "type": "CompoundType",
                 "label": "frequency",
                 "isRequired": true,
@@ -113,8 +112,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L80"
+                  "lineNumber": 80
                 }
               }
             ],
@@ -133,8 +131,7 @@
             "label": "onChangeFrequency",
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L80"
+              "lineNumber": 80
             },
             "tags": [],
             "returnComment": []
@@ -144,43 +141,30 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFields.$1",
                 "type": "Object",
                 "label": "fields",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "esUiShared",
-                    "scope": "public",
-                    "docId": "kibEsUiSharedPluginApi",
-                    "section": "def-public.FieldToValueMap",
-                    "text": "FieldToValueMap"
-                  }
+                  "FieldToValueMap"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L104"
+                  "lineNumber": 104
                 }
               }
             ],
             "signature": [
               "(fields: ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.FieldToValueMap",
-                "text": "FieldToValueMap"
-              },
+              "FieldToValueMap",
               ") => void"
             ],
             "description": [],
             "label": "onChangeFields",
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L104"
+              "lineNumber": 104
             },
             "tags": [],
             "returnComment": []
@@ -198,8 +182,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L140"
+              "lineNumber": 140
             }
           },
           {
@@ -215,20 +198,116 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-              "lineNumber": 215,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L215"
+              "lineNumber": 215
             }
           }
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L64"
+          "lineNumber": 64
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-public.attemptToURIDecode",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.attemptToURIDecode.$1",
+            "type": "string",
+            "label": "value",
+            "isRequired": false,
+            "signature": [
+              "string | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "signature": [
+          "(value?: string | undefined) => string | undefined"
+        ],
+        "description": [],
+        "label": "attemptToURIDecode",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+          "lineNumber": 15
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.AuthorizationProvider",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.AuthorizationProvider.$1",
+            "type": "Object",
+            "label": "{ privilegesEndpoint, httpClient, children }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+              "lineNumber": 49
+            }
+          }
+        ],
+        "signature": [
+          "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
+        ],
+        "description": [],
+        "label": "AuthorizationProvider",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 49
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.extractQueryParams",
+        "type": "Function",
+        "label": "extractQueryParams",
+        "signature": [
+          "(queryString: string) => ",
+          "ParsedQuery",
+          "<string>"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.extractQueryParams.$1",
+            "type": "string",
+            "label": "queryString",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+              "lineNumber": 11
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
       {
         "tags": [],
         "id": "def-public.JsonEditor",
@@ -237,8 +316,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
-          "lineNumber": 102,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx#L102"
+          "lineNumber": 102
         },
         "signature": [
           "typeof JsonEditorComp"
@@ -246,10 +324,75 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.NotAuthorizedSection",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.NotAuthorizedSection.$1",
+            "type": "Object",
+            "label": "{ title, message }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+              "lineNumber": 17
+            }
+          }
+        ],
+        "signature": [
+          "({ title, message }: Props) => JSX.Element"
+        ],
+        "description": [],
+        "label": "NotAuthorizedSection",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+          "lineNumber": 17
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionError",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SectionError.$1",
+            "type": "CompoundType",
+            "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
+            "isRequired": true,
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 24
+            }
+          }
+        ],
+        "signature": [
+          "({ title, error, actions, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "description": [],
+        "label": "SectionError",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+          "lineNumber": 24
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.SectionLoading",
         "type": "Function",
         "children": [
           {
+            "id": "def-public.SectionLoading.$1",
             "type": "CompoundType",
             "label": "{ inline, children, ...rest }",
             "isRequired": true,
@@ -259,8 +402,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx#L26"
+              "lineNumber": 26
             }
           }
         ],
@@ -271,8 +413,7 @@
         "label": "SectionLoading",
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
-          "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx#L26"
+          "lineNumber": 26
         },
         "tags": [],
         "returnComment": [],
@@ -283,6 +424,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.sendRequest.$1",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -298,11 +440,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L29"
+              "lineNumber": 29
             }
           },
           {
+            "id": "def-public.sendRequest.$2",
             "type": "Object",
             "label": "{ path, method, body, query, asSystemRequest }",
             "isRequired": true,
@@ -318,8 +460,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L30"
+              "lineNumber": 30
             }
           }
         ],
@@ -354,8 +495,24 @@
         "label": "sendRequest",
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L28"
+          "lineNumber": 28
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useAuthorizationContext",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => Authorization"
+        ],
+        "description": [],
+        "label": "useAuthorizationContext",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 35
         },
         "tags": [],
         "returnComment": [],
@@ -366,6 +523,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useRequest.$1",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -381,11 +539,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L29"
+              "lineNumber": 29
             }
           },
           {
+            "id": "def-public.useRequest.$2",
             "type": "Object",
             "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
             "isRequired": true,
@@ -401,8 +559,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L30"
+              "lineNumber": 30
             }
           }
         ],
@@ -437,74 +594,7 @@
         "label": "useRequest",
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L28"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AuthorizationProvider",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ privilegesEndpoint, httpClient, children }",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L49"
-            }
-          }
-        ],
-        "signature": [
-          "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
-        ],
-        "description": [],
-        "label": "AuthorizationProvider",
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 49,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L49"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.NotAuthorizedSection",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ title, message }",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx#L17"
-            }
-          }
-        ],
-        "signature": [
-          "({ title, message }: Props) => JSX.Element"
-        ],
-        "description": [],
-        "label": "NotAuthorizedSection",
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx#L17"
+          "lineNumber": 28
         },
         "tags": [],
         "returnComment": [],
@@ -515,6 +605,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.WithPrivileges.$1",
             "type": "Object",
             "label": "{ privileges: requiredPrivileges, children }",
             "isRequired": true,
@@ -524,8 +615,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx#L32"
+              "lineNumber": 32
             }
           }
         ],
@@ -536,127 +626,7 @@
         "label": "WithPrivileges",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx#L32"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionError",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
-            "isRequired": true,
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L24"
-            }
-          }
-        ],
-        "signature": [
-          "({ title, error, actions, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
-        ],
-        "description": [],
-        "label": "SectionError",
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L24"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.useAuthorizationContext",
-        "type": "Function",
-        "children": [],
-        "signature": [
-          "() => Authorization"
-        ],
-        "description": [],
-        "label": "useAuthorizationContext",
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L35"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.extractQueryParams",
-        "type": "Function",
-        "label": "extractQueryParams",
-        "signature": [
-          "(queryString: string) => ",
-          "ParsedQuery",
-          "<string>"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "string",
-            "label": "queryString",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/url/extract_query_params.ts#L11"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/url/extract_query_params.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.attemptToURIDecode",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "value",
-            "isRequired": false,
-            "signature": [
-              "string | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts#L15"
-            }
-          }
-        ],
-        "signature": [
-          "(value?: string | undefined) => string | undefined"
-        ],
-        "description": [],
-        "label": "attemptToURIDecode",
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts#L15"
+          "lineNumber": 32
         },
         "tags": [],
         "returnComment": [],
@@ -664,6 +634,59 @@
       }
     ],
     "interfaces": [
+      {
+        "id": "def-public.Error",
+        "type": "Interface",
+        "label": "Error",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Error.error",
+            "type": "string",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Error.cause",
+            "type": "Array",
+            "label": "cause",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 14
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Error.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 15
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.JsonEditorState",
         "type": "Interface",
@@ -689,8 +712,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/use_json.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "{ raw: string; format(): T; }"
@@ -709,8 +731,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/use_json.ts#L19"
+              "lineNumber": 19
             }
           },
           {
@@ -721,8 +742,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/use_json.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "boolean | undefined"
@@ -731,8 +751,80 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/use_json.ts#L14"
+          "lineNumber": 14
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.MissingPrivileges",
+        "type": "Interface",
+        "label": "MissingPrivileges",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.MissingPrivileges.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 10
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Privileges",
+        "type": "Interface",
+        "label": "Privileges",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Privileges.hasAllPrivileges",
+            "type": "boolean",
+            "label": "hasAllPrivileges",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Privileges.missingPrivileges",
+            "type": "Object",
+            "label": "missingPrivileges",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "common",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-common.MissingPrivileges",
+                "text": "MissingPrivileges"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
@@ -751,8 +843,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L12"
+              "lineNumber": 12
             }
           },
           {
@@ -763,8 +854,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L13"
+              "lineNumber": 13
             },
             "signature": [
               "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
@@ -778,8 +868,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L14"
+              "lineNumber": 14
             },
             "signature": [
               {
@@ -800,8 +889,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "any"
@@ -817,8 +905,7 @@
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "boolean | undefined"
@@ -827,8 +914,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L11"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       },
@@ -857,8 +943,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L24"
+              "lineNumber": 24
             },
             "signature": [
               "D | null"
@@ -872,8 +957,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "E | null"
@@ -882,8 +966,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L23"
+          "lineNumber": 23
         },
         "initialIsOpen": false
       },
@@ -919,8 +1002,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "number | undefined"
@@ -934,8 +1016,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L16"
+              "lineNumber": 16
             },
             "signature": [
               "any"
@@ -949,8 +1030,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L17"
+              "lineNumber": 17
             },
             "signature": [
               "((data: any) => any) | undefined"
@@ -959,8 +1039,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L14"
+          "lineNumber": 14
         },
         "initialIsOpen": false
       },
@@ -989,8 +1068,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L21"
+              "lineNumber": 21
             }
           },
           {
@@ -1001,8 +1079,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L22"
+              "lineNumber": 22
             }
           },
           {
@@ -1013,8 +1090,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L23"
+              "lineNumber": 23
             },
             "signature": [
               "E | null"
@@ -1028,8 +1104,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L24"
+              "lineNumber": 24
             },
             "signature": [
               "D | null | undefined"
@@ -1043,8 +1118,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "() => void"
@@ -1053,149 +1127,28 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L20"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Privileges",
-        "type": "Interface",
-        "label": "Privileges",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Privileges.hasAllPrivileges",
-            "type": "boolean",
-            "label": "hasAllPrivileges",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L14"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Privileges.missingPrivileges",
-            "type": "Object",
-            "label": "missingPrivileges",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L15"
-            },
-            "signature": [
-              {
-                "pluginId": "esUiShared",
-                "scope": "common",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-common.MissingPrivileges",
-                "text": "MissingPrivileges"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.MissingPrivileges",
-        "type": "Interface",
-        "label": "MissingPrivileges",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-public.MissingPrivileges.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L10"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L9"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Error",
-        "type": "Interface",
-        "label": "Error",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Error.error",
-            "type": "string",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Error.cause",
-            "type": "Array",
-            "label": "cause",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L14"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Error.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L15"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L12"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-public.Frequency",
+        "type": "Type",
+        "label": "Frequency",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.OnJsonEditorUpdateHandler",
         "type": "Type",
@@ -1204,8 +1157,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/json_editor/use_json.ts#L23"
+          "lineNumber": 23
         },
         "signature": [
           "(arg: ",
@@ -1219,25 +1171,24 @@
           "<T>) => void"
         ],
         "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Frequency",
-        "type": "Type",
-        "label": "Frequency",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/types.ts#L9"
-        },
-        "signature": [
-          "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "tags": [],
+        "id": "def-public.AuthorizationContext",
+        "type": "Object",
+        "label": "AuthorizationContext",
+        "description": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 33
+        },
+        "signature": [
+          "React.Context<Authorization>"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.indices",
         "type": "Object",
@@ -1251,8 +1202,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/indices/index.ts#L18"
+              "lineNumber": 18
             },
             "signature": [
               "string[]"
@@ -1266,18 +1216,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/indices/index.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameBeginsWithPeriod",
-                "text": "indexNameBeginsWithPeriod"
-              }
+              "indexNameBeginsWithPeriod"
             ]
           },
           {
@@ -1288,18 +1231,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/indices/index.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.findIllegalCharactersInIndexName",
-                "text": "findIllegalCharactersInIndexName"
-              }
+              "findIllegalCharactersInIndexName"
             ]
           },
           {
@@ -1310,18 +1246,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/indices/index.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameContainsSpaces",
-                "text": "indexNameContainsSpaces"
-              }
+              "indexNameContainsSpaces"
             ]
           }
         ],
@@ -1329,25 +1258,8 @@
         "label": "indices",
         "source": {
           "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/indices/index.ts#L17"
+          "lineNumber": 17
         },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.AuthorizationContext",
-        "type": "Object",
-        "label": "AuthorizationContext",
-        "description": [],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L33"
-        },
-        "signature": [
-          "React.Context<Authorization>"
-        ],
         "initialIsOpen": false
       }
     ]
@@ -1356,43 +1268,11 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-server.isEsError",
-        "type": "Function",
-        "label": "isEsError",
-        "signature": [
-          "(err: RequestError) => boolean"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "RequestError"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts#L21"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts#L21"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.handleEsError",
         "type": "Function",
         "children": [
           {
+            "id": "def-server.handleEsError.$1",
             "type": "Object",
             "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
             "isRequired": true,
@@ -1402,8 +1282,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L23"
+              "lineNumber": 23
             }
           }
         ],
@@ -1422,11 +1301,42 @@
         "label": "handleEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L23"
+          "lineNumber": 23
         },
         "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.isEsError",
+        "type": "Function",
+        "label": "isEsError",
+        "signature": [
+          "(err: RequestError) => boolean"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.isEsError.$1",
+            "type": "Object",
+            "label": "err",
+            "isRequired": true,
+            "signature": [
+              "RequestError"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+              "lineNumber": 21
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1434,6 +1344,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.parseEsError.$1",
             "type": "string",
             "label": "err",
             "isRequired": true,
@@ -1443,8 +1354,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts#L27"
+              "lineNumber": 27
             }
           }
         ],
@@ -1455,8 +1365,7 @@
         "label": "parseEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts#L27"
+          "lineNumber": 27
         },
         "tags": [],
         "returnComment": [],
@@ -1473,54 +1382,6 @@
     "functions": [],
     "interfaces": [
       {
-        "id": "def-common.Privileges",
-        "type": "Interface",
-        "label": "Privileges",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Privileges.hasAllPrivileges",
-            "type": "boolean",
-            "label": "hasAllPrivileges",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L14"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Privileges.missingPrivileges",
-            "type": "Object",
-            "label": "missingPrivileges",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L15"
-            },
-            "signature": [
-              {
-                "pluginId": "esUiShared",
-                "scope": "common",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-common.MissingPrivileges",
-                "text": "MissingPrivileges"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.MissingPrivileges",
         "type": "Interface",
         "label": "MissingPrivileges",
@@ -1535,8 +1396,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L10"
+              "lineNumber": 10
             },
             "signature": [
               "any"
@@ -1545,8 +1405,52 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts#L9"
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Privileges",
+        "type": "Interface",
+        "label": "Privileges",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Privileges.hasAllPrivileges",
+            "type": "boolean",
+            "label": "hasAllPrivileges",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.Privileges.missingPrivileges",
+            "type": "Object",
+            "label": "missingPrivileges",
+            "description": [],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "common",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-common.MissingPrivileges",
+                "text": "MissingPrivileges"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
         },
         "initialIsOpen": false
       }

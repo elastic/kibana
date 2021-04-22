@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { Note } from '../../lib/note';
 
 export type ErrorState = ErrorModel;
@@ -24,4 +25,5 @@ export type ErrorModel = Error[];
 export interface AppModel {
   notesById: NotesById;
   errors: ErrorState;
+  enableExperimental?: ExperimentalFeatures;
 }

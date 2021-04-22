@@ -519,7 +519,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  * A handler that will be executed before leaving the application, either when
  * going to another application or when closing the browser tab or manually changing
  * the url.
- * Should return `confirm` to to prompt a message to the user before leaving the page, or `default`
+ * Should return `confirm` to prompt a message to the user before leaving the page, or `default`
  * to keep the default behavior (doing nothing).
  *
  * See {@link AppMountParameters} for detailed usage examples.
@@ -685,6 +685,11 @@ export interface NavigateToAppOptions {
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    */
   replace?: boolean;
+
+  /**
+   * if true, will open the app in new tab, will share session information via window.open if base
+   */
+  openInNewTab?: boolean;
 }
 
 /** @public */

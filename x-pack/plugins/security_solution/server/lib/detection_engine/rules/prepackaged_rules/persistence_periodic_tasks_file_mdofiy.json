@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Persistence via Periodic Tasks",
   "query": "event.category:\"file\" and not event.type:\"deletion\" and file.path:(/private/etc/periodic/* or /private/etc/defaults/periodic.conf or /private/etc/periodic.conf)",
   "references": [

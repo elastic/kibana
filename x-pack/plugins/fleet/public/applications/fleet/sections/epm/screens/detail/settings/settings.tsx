@@ -12,7 +12,8 @@ import semverLt from 'semver/functions/lt';
 
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { InstallStatus, PackageInfo } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 import { useGetPackagePolicies } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { useGetPackageInstallStatus } from '../../../hooks';

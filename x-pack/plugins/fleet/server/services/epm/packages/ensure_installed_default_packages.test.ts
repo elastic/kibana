@@ -77,15 +77,14 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: mockInstallation.attributes.name,
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed', installType: 'install' },
+          version: '',
           statusCode: 200,
         },
       ];
     });
     const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
-    expect(resp).toEqual([mockInstallation.attributes]);
+    expect(resp.installations).toEqual([mockInstallation.attributes]);
   });
   it('should throw the first Error it finds', async () => {
     class SomeCustomError extends Error {}
@@ -96,16 +95,14 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'success one',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed', installType: 'install' },
+          version: '',
           statusCode: 200,
         },
         {
           name: 'success two',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed', installType: 'install' },
+          version: '',
           statusCode: 200,
         },
         {
@@ -114,9 +111,8 @@ describe('ensureInstalledDefaultPackages', () => {
         },
         {
           name: 'success three',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed', installType: 'install' },
+          version: '',
           statusCode: 200,
         },
         {
@@ -138,9 +134,8 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'undefined package',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed', installType: 'install' },
+          version: '',
           statusCode: 200,
         },
       ];

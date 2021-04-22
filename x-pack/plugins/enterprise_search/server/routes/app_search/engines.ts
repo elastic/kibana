@@ -69,6 +69,19 @@ export function registerEnginesRoutes({
       path: '/as/engines/:name/details',
     })
   );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name',
+    })
+  );
   router.get(
     {
       path: '/api/app_search/engines/{name}/overview',
@@ -80,6 +93,23 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/overview_metrics',
+    })
+  );
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/source_engines',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/source_engines',
     })
   );
 }

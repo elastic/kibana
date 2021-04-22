@@ -10,10 +10,15 @@ import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
+import {
+  createServer,
+  getListenerOptions,
+  getServerOptions,
+  getRequestId,
+} from '@kbn/server-http-tools';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions, getRequestId } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -30,11 +35,11 @@ import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
-import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
+import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { HttpServiceSetup, HttpServerInfo } from './types';
+import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -54,10 +59,7 @@ export interface HttpServerSetup {
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   getAuthHeaders: GetAuthHeaders;
-  auth: {
-    get: GetAuthState;
-    isAuthenticated: IsAuthenticated;
-  };
+  auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
 }
 
@@ -228,14 +230,16 @@ export class HttpServer {
 
   private getAuthOption(
     authRequired: RouteConfigOptions<any>['authRequired'] = true
-  ): undefined | false | { mode: 'required' | 'optional' } {
+  ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
     if (authRequired === true) {
       return { mode: 'required' };
     }
     if (authRequired === 'optional') {
-      return { mode: 'optional' };
+      // we want to use HAPI `try` mode and not `optional` to not throw unauthorized errors when the user
+      // has invalid or expired credentials
+      return { mode: 'try' };
     }
     if (authRequired === false) {
       return false;

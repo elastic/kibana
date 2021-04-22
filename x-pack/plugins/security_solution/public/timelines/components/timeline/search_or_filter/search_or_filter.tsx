@@ -60,7 +60,7 @@ interface Props {
 }
 
 const SearchOrFilterContainer = styled.div`
-  margin: 5px 0 10px 0;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
   user-select: none;
   .globalQueryBar {
     padding: 0px;

@@ -7,8 +7,10 @@
  */
 
 import _ from 'lodash';
-import RowParser from '../../../lib/row_parser';
+
 import { XJson } from '../../../../../es_ui_shared/public';
+
+import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
@@ -16,22 +18,20 @@ import * as es from '../../../lib/es/es';
 
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
-
-import Autocomplete from '../../../lib/autocomplete/autocomplete';
+import createAutocompleter from '../../../lib/autocomplete/autocomplete';
 
 const { collapseLiteralStrings } = XJson;
 
 export class SenseEditor {
-  currentReqRange: (Range & { markerRef: any }) | null;
-  parser: any;
+  currentReqRange: (Range & { markerRef: unknown }) | null;
+  parser: RowParser;
 
-  // @ts-ignore
-  private readonly autocomplete: any;
+  private readonly autocomplete: ReturnType<typeof createAutocompleter>;
 
   constructor(private readonly coreEditor: CoreEditor) {
     this.currentReqRange = null;
     this.parser = new RowParser(this.coreEditor);
-    this.autocomplete = new (Autocomplete as any)({
+    this.autocomplete = createAutocompleter({
       coreEditor,
       parser: this.parser,
     });
@@ -114,7 +114,10 @@ export class SenseEditor {
     return this.coreEditor.setValue(data, reTokenizeAll);
   };
 
-  replaceRequestRange = (newRequest: any, requestRange: Range) => {
+  replaceRequestRange = (
+    newRequest: { method: string; url: string; data: string | string[] },
+    requestRange: Range
+  ) => {
     const text = utils.textFromRequest(newRequest);
     if (requestRange) {
       this.coreEditor.replaceRange(requestRange, text);
@@ -207,12 +210,12 @@ export class SenseEditor {
     const request: {
       method: string;
       data: string[];
-      url: string | null;
+      url: string;
       range: Range;
     } = {
       method: '',
       data: [],
-      url: null,
+      url: '',
       range,
     };
 
@@ -284,7 +287,7 @@ export class SenseEditor {
       return [];
     }
 
-    const requests: any = [];
+    const requests: unknown[] = [];
 
     let rangeStartCursor = expandedRange.start.lineNumber;
     const endLineNumber = expandedRange.end.lineNumber;

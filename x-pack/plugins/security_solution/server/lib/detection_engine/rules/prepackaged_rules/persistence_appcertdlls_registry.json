@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Registry Persistence via AppCert DLL",
   "query": "registry where\n/* uncomment once stable length(bytes_written_string) > 0 and */\n  registry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Control\\\\Session Manager\\\\AppCertDLLs\\\\*\"\n",
   "risk_score": 47,

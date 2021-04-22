@@ -7,13 +7,13 @@
 
 export * from './models';
 export * from './rest_spec';
+import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
-    fleetServerEnabled: boolean;
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
@@ -26,9 +26,14 @@ export interface FleetConfigType {
       host?: string;
       ca_sha256?: string;
     };
+    fleet_server?: {
+      hosts?: string[];
+    };
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
+  agentPolicies?: PreconfiguredAgentPolicy[];
+  packages?: PreconfiguredPackage[];
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

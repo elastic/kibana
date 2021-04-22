@@ -106,7 +106,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       },
     } = useKibana();
 
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable>(null);
 
     const [defaultAutoRefreshSetting] = useUiSetting$<{
       on: boolean;
@@ -219,7 +219,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
         totalItemCount: pagination.total,
-        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300, 400, 500],
+        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
       }),
       [pagination]
     );

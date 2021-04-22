@@ -10,23 +10,20 @@ import { Route, Switch } from 'react-router-dom';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { NotFound } from '../../../shared/not_found';
 import {
   ENGINE_CURATIONS_PATH,
   ENGINE_CURATIONS_NEW_PATH,
   ENGINE_CURATION_PATH,
-  ENGINE_CURATION_ADD_RESULT_PATH,
 } from '../../routes';
+import { getEngineBreadcrumbs } from '../engine';
 
 import { CURATIONS_TITLE, CREATE_NEW_CURATION_TITLE } from './constants';
+import { Curation } from './curation';
 import { Curations, CurationCreation } from './views';
 
-interface Props {
-  engineBreadcrumb: BreadcrumbTrail;
-}
-export const CurationsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const CURATIONS_BREADCRUMB = [...engineBreadcrumb, CURATIONS_TITLE];
+export const CurationsRouter: React.FC = () => {
+  const CURATIONS_BREADCRUMB = getEngineBreadcrumbs([CURATIONS_TITLE]);
 
   return (
     <Switch>
@@ -38,15 +35,8 @@ export const CurationsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
         <SetPageChrome trail={[...CURATIONS_BREADCRUMB, CREATE_NEW_CURATION_TITLE]} />
         <CurationCreation />
       </Route>
-      <Route exact path={ENGINE_CURATION_PATH}>
-        <SetPageChrome trail={[...CURATIONS_BREADCRUMB, 'curation queries']} />
-        TODO: Curation view (+ show a NotFound view if ID is invalid)
-      </Route>
-      <Route exact path={ENGINE_CURATION_ADD_RESULT_PATH}>
-        <SetPageChrome
-          trail={[...CURATIONS_BREADCRUMB, 'curation queries', 'add result manually']}
-        />
-        TODO: Curation Add Result view
+      <Route path={ENGINE_CURATION_PATH}>
+        <Curation curationsBreadcrumb={CURATIONS_BREADCRUMB} />
       </Route>
       <Route>
         <NotFound breadcrumbs={CURATIONS_BREADCRUMB} product={APP_SEARCH_PLUGIN} />

@@ -6,20 +6,16 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiTextColor } from '@elastic/eui';
-
-import { useConfigurationIssues } from '../../../form';
-
-import { LearnMoreLink, ToggleFieldWithDescribedFormRow } from '../../';
-
+import { useConfiguration } from '../../../form';
 import {
   DataTierAllocationField,
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
+  FreezeField,
+  ReadonlyField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
@@ -34,42 +30,17 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
       <ReplicasField phase="cold" />
 
       {/* Freeze section */}
-      {!isUsingSearchableSnapshotInHotPhase && (
-        <ToggleFieldWithDescribedFormRow
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                defaultMessage="Freeze"
-              />
-            </h3>
-          }
-          description={
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                defaultMessage="Make the index read-only and minimize its memory footprint."
-              />{' '}
-              <LearnMoreLink docPath="ilm-freeze.html" />
-            </EuiTextColor>
-          }
-          fullWidth
-          titleSize="xs"
-          switchProps={{
-            'data-test-subj': 'freezeSwitch',
-            path: '_meta.cold.freezeEnabled',
-          }}
-        >
-          <div />
-        </ToggleFieldWithDescribedFormRow>
-      )}
+      {!isUsingSearchableSnapshotInHotPhase && <FreezeField phase="cold" />}
+
+      {/* Readonly section */}
+      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="cold" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField

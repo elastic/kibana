@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from '../../../alerts/common';
+import { ActionGroup } from '../../../alerting/common';
 import { MINIMUM_FULL_LICENSE } from '../license';
 import { PLUGIN_ID } from './app';
 
@@ -47,3 +47,5 @@ export const ML_ALERT_TYPES_CONFIG: Record<
 };
 
 export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
+
+export const TOP_N_BUCKETS_COUNT = 1;

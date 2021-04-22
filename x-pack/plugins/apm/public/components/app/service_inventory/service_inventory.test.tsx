@@ -24,7 +24,7 @@ import { clearCache } from '../../../services/rest/callApi';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import * as hook from './use_anomaly_detection_jobs_fetcher';
+import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { TimeRangeComparisonType } from '../../shared/time_comparison/get_time_range_comparison';
 
 const KibanaReactContext = createKibanaReactContext({
@@ -78,9 +78,10 @@ describe('ServiceInventory', () => {
     global.sessionStorage = new SessionStorageMock();
     clearCache();
 
-    jest.spyOn(hook, 'useAnomalyDetectionJobsFetcher').mockReturnValue({
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+    jest.spyOn(hook, 'useAnomalyDetectionJobsContext').mockReturnValue({
       anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
+      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+      anomalyDetectionJobsRefetch: () => {},
     });
 
     jest

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash/fp';
 
-import { User } from '../../../../case/common/api';
+import { User } from '../../../../cases/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getReporters } from './api';
 import * as i18n from './translations';

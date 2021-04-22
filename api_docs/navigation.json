@@ -53,6 +53,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -69,8 +70,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 21,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L21"
+                  "lineNumber": 21
                 }
               }
             ],
@@ -78,8 +78,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L21"
+              "lineNumber": 21
             }
           },
           {
@@ -107,6 +106,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -123,8 +123,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 23,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L23"
+                  "lineNumber": 23
                 }
               }
             ],
@@ -132,8 +131,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L23"
+              "lineNumber": 23
             }
           },
           {
@@ -150,13 +148,7 @@
                 "text": "CoreStart"
               },
               ", { data }: ",
-              {
-                "pluginId": "navigation",
-                "scope": "public",
-                "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPluginStartDependencies",
-                "text": "NavigationPluginStartDependencies"
-              },
+              "NavigationPluginStartDependencies",
               ") => ",
               {
                 "pluginId": "navigation",
@@ -169,6 +161,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "{ i18n }",
                 "isRequired": true,
@@ -184,28 +177,21 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L32"
+                  "lineNumber": 32
                 }
               },
               {
+                "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "label": "{ data }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "navigation",
-                    "scope": "public",
-                    "docId": "kibNavigationPluginApi",
-                    "section": "def-public.NavigationPluginStartDependencies",
-                    "text": "NavigationPluginStartDependencies"
-                  }
+                  "NavigationPluginStartDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L33"
+                  "lineNumber": 33
                 }
               }
             ],
@@ -213,8 +199,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L31"
+              "lineNumber": 31
             }
           },
           {
@@ -230,15 +215,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L44"
+              "lineNumber": 44
             }
           }
         ],
         "source": {
           "path": "src/plugins/navigation/public/plugin.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L17"
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
@@ -262,6 +245,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.TopNavMenu.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -277,8 +261,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
+              "lineNumber": 64
             }
           }
         ],
@@ -286,8 +269,7 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
+          "lineNumber": 64
         },
         "initialIsOpen": false
       }
@@ -308,8 +290,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L14"
+              "lineNumber": 14
             },
             "signature": [
               "string | undefined"
@@ -323,8 +304,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L15"
+              "lineNumber": 15
             }
           },
           {
@@ -335,17 +315,10 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L16"
+              "lineNumber": 16
             },
             "signature": [
-              {
-                "pluginId": "navigation",
-                "scope": "public",
-                "docId": "kibNavigationPluginApi",
-                "section": "def-public.TopNavMenuAction",
-                "text": "TopNavMenuAction"
-              }
+              "TopNavMenuAction"
             ]
           },
           {
@@ -356,8 +329,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L17"
+              "lineNumber": 17
             },
             "signature": [
               "string | undefined"
@@ -371,8 +343,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L18"
+              "lineNumber": 18
             },
             "signature": [
               "string | undefined"
@@ -386,8 +357,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L19"
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -401,8 +371,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L20"
+              "lineNumber": 20
             },
             "signature": [
               "boolean | (() => boolean) | undefined"
@@ -416,8 +385,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L21"
+              "lineNumber": 21
             },
             "signature": [
               "string | (() => string | undefined) | undefined"
@@ -431,8 +399,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L22"
+              "lineNumber": 22
             },
             "signature": [
               "boolean | undefined"
@@ -446,8 +413,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L23"
+              "lineNumber": 23
             },
             "signature": [
               "boolean | undefined"
@@ -461,8 +427,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L24"
+              "lineNumber": 24
             },
             "signature": [
               "string | undefined"
@@ -476,8 +441,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L25"
+              "lineNumber": 25
             },
             "signature": [
               "\"left\" | \"right\" | undefined"
@@ -486,8 +450,7 @@
         ],
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L13"
+          "lineNumber": 13
         },
         "initialIsOpen": false
       }
@@ -502,8 +465,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L23"
+          "lineNumber": 23
         },
         "signature": [
           "SearchBarOwnProps",
@@ -535,26 +497,18 @@
           "description": [],
           "source": {
             "path": "src/plugins/navigation/public/types.ts",
-            "lineNumber": 13,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L13"
+            "lineNumber": 13
           },
           "signature": [
             "(menuItem: ",
-            {
-              "pluginId": "navigation",
-              "scope": "public",
-              "docId": "kibNavigationPluginApi",
-              "section": "def-public.RegisteredTopNavMenuData",
-              "text": "RegisteredTopNavMenuData"
-            },
+            "RegisteredTopNavMenuData",
             ") => void"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/navigation/public/types.ts",
-        "lineNumber": 12,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L12"
+        "lineNumber": 12
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -574,8 +528,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/navigation/public/types.ts",
-            "lineNumber": 17,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L17"
+            "lineNumber": 17
           },
           "signature": [
             "{ TopNavMenu: React.ComponentType<",
@@ -592,8 +545,7 @@
       ],
       "source": {
         "path": "src/plugins/navigation/public/types.ts",
-        "lineNumber": 16,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L16"
+        "lineNumber": 16
       },
       "lifecycle": "start",
       "initialIsOpen": true

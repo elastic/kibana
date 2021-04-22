@@ -30,10 +30,12 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
@@ -46,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
       }
     });
     after(async () => {
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should open the context view with the selected document as anchor', async () => {
@@ -125,7 +127,9 @@ export default function ({ getService, getPageObjects }) {
       const alert = await browser.getAlert();
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/doc');
-      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+      retry.waitFor('doc view being rendered', async () => {
+        return await PageObjects.discover.isShowingDocViewer();
+      });
     });
   });
 }

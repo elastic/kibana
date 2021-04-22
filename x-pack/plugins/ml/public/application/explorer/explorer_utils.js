@@ -26,7 +26,6 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from '../services/results_service';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
@@ -65,6 +64,7 @@ export function getDefaultSwimlaneData() {
 }
 
 export async function loadFilteredTopInfluencers(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
@@ -125,6 +125,7 @@ export async function loadFilteredTopInfluencers(
   });
 
   return await loadTopInfluencers(
+    mlResultsService,
     jobIds,
     earliestMs,
     latestMs,
@@ -535,61 +536,8 @@ export async function loadAnomaliesTableData(
   });
 }
 
-// track the request to be able to ignore out of date requests
-// and avoid race conditions ending up with the wrong charts.
-let requestCount = 0;
-export async function loadDataForCharts(
-  jobIds,
-  earliestMs,
-  latestMs,
-  influencers = [],
-  selectedCells,
-  influencersFilterQuery
-) {
-  return new Promise((resolve) => {
-    // Just skip doing the request when this function
-    // is called without the minimum required data.
-    if (
-      selectedCells === undefined &&
-      influencers.length === 0 &&
-      influencersFilterQuery === undefined
-    ) {
-      resolve([]);
-    }
-
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
-
-    // Load the top anomalies (by record_score) which will be displayed in the charts.
-    mlResultsService
-      .getRecordsForInfluencer(
-        jobIds,
-        influencers,
-        0,
-        earliestMs,
-        latestMs,
-        500,
-        influencersFilterQuery
-      )
-      .then((resp) => {
-        // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
-          resolve([]);
-        }
-
-        if (
-          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-          influencersFilterQuery !== undefined
-        ) {
-          resolve(resp.records);
-        }
-
-        resolve([]);
-      });
-  });
-}
-
 export async function loadTopInfluencers(
+  mlResultsService,
   selectedJobIds,
   earliestMs,
   latestMs,

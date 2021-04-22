@@ -16,16 +16,18 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-type ErrorGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
-type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
+type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
-  errorGroupComparisonStatistics,
+  errorGroupDetailedStatistics,
+  comparisonEnabled,
 }: {
   serviceName: string;
-  errorGroupComparisonStatistics: ErrorGroupComparisonStatistics;
-}): Array<EuiBasicTableColumn<ErrorGroupPrimaryStatistics['error_groups'][0]>> {
+  errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
+  comparisonEnabled?: boolean;
+}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
   return [
     {
       field: 'name',
@@ -71,12 +73,17 @@ export function getColumns({
       ),
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries =
-          errorGroupComparisonStatistics?.[errorGroupId]?.timeseries;
+        const currentPeriodTimeseries =
+          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
+            ?.timeseries;
+        const previousPeriodTimeseries =
+          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
+            ?.timeseries;
+
         return (
           <SparkPlot
             color="euiColorVis7"
-            series={timeseries}
+            series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
@@ -86,6 +93,9 @@ export function getColumns({
                 },
               }
             )}
+            comparisonSeries={
+              comparisonEnabled ? previousPeriodTimeseries : undefined
+            }
           />
         );
       },

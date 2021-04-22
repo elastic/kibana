@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { setup, OverviewTestBed } from './overview.helpers';
+export { setup as setupOverviewPage, OverviewTestBed } from './overview.helpers';
+export { setup as setupIndicesPage, IndicesTestBed } from './indices.helpers';
+
+export { setupEnvironment } from './setup_environment';

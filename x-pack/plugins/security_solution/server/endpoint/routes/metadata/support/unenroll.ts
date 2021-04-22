@@ -20,8 +20,10 @@ export async function findAllUnenrolledAgentIds(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery:
-        '(fleet-agents.active : false) OR (NOT fleet-agents.packages : "endpoint" AND fleet-agents.active : true)',
+      // FIXME: remove temporary work-around after https://github.com/elastic/beats/pull/25070 is implemented
+      //        makes it into a snapshot build.
+      // kuery: '(active : false) OR (NOT packages : "endpoint" AND active : true)',
+      kuery: '(active : false)',
     };
   };
 
@@ -31,11 +33,7 @@ export async function findAllUnenrolledAgentIds(
   let hasMore = true;
 
   while (hasMore) {
-    const unenrolledAgents = await agentService.listAgents(
-      soClient,
-      esClient,
-      searchOptions(page++)
-    );
+    const unenrolledAgents = await agentService.listAgents(esClient, searchOptions(page++));
     result.push(...unenrolledAgents.agents.map((agent: Agent) => agent.id));
     hasMore = unenrolledAgents.agents.length > 0;
   }

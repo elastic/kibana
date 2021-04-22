@@ -8,11 +8,13 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { fieldFormats } from 'src/plugins/data/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -23,6 +25,7 @@ import {
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
+import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
@@ -34,28 +37,38 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
-    elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
     basePath: { set: jest.fn() },
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    taskManager: { registerTaskDefinitions: jest.fn() } as any,
     ...setupMock,
   };
 };
 
 const logger = createMockLevelLogger();
 
-const createMockPluginStart = (
-  mockReportingCore: ReportingCore,
+const createMockReportingStore = () => ({} as ReportingStore);
+
+export const createMockPluginStart = (
+  mockReportingCore: ReportingCore | undefined,
   startMock?: any
 ): ReportingInternalStart => {
-  const store = new ReportingStore(mockReportingCore, logger);
+  const store = mockReportingCore
+    ? new ReportingStore(mockReportingCore, logger)
+    : createMockReportingStore();
+
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
+    esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    data: startMock.data || dataPluginMock.createStartContract(),
     store,
+    taskManager: {
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+    } as any,
     ...startMock,
   };
 };
@@ -121,14 +134,21 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  config = config || {};
+  const mockReportingCore = ({
+    getConfig: () => config,
+    getEsClient: () => startDepsMock?.esClient,
+    getDataService: () => startDepsMock?.data,
+  } as unknown) as ReportingCore;
 
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
   }
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(mockReportingCore, {});
+  }
 
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
-  const core = new ReportingCore(logger);
+  const core = new ReportingCore(logger, context);
   core.setConfig(config);
 
   core.pluginSetup(setupDepsMock);
@@ -139,6 +159,13 @@ export const createMockReportingCore = async (
   }
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
+
+  setFieldFormats({
+    fieldFormatServiceFactory() {
+      const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+      return Promise.resolve(fieldFormatsRegistry);
+    },
+  });
 
   return core;
 };

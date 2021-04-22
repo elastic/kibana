@@ -31,7 +31,7 @@ export interface UseInstalledSecurityJobsReturn {
  * necessary (running jobs, etc).
  *
  * NOTE: If you need to include jobs that are not currently installed, try the
- * {@link useInstalledSecurityJobs} hook.
+ * {@link useSecurityJobs} hook.
  *
  */
 export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {

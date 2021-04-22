@@ -16,43 +16,31 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.initServerWithKibana.$1",
             "type": "Object",
             "label": "server",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCoreSetup",
-                "text": "UptimeCoreSetup"
-              }
+              "UptimeCoreSetup"
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "lineNumber": 28
             }
           },
           {
+            "id": "def-server.initServerWithKibana.$2",
             "type": "Object",
             "label": "plugins",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCorePlugins",
-                "text": "UptimeCorePlugins"
-              }
+              "UptimeCorePlugins"
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "lineNumber": 28
             }
           }
         ],
@@ -67,8 +55,7 @@
         "label": "initServerWithKibana",
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+          "lineNumber": 28
         },
         "tags": [],
         "returnComment": [],
@@ -102,26 +89,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "(options: ",
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.KibanaRouteOptions",
-                "text": "KibanaRouteOptions"
-              },
+              "KibanaRouteOptions",
               ") => void"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L24"
+          "lineNumber": 24
         },
         "initialIsOpen": false
       }

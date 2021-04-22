@@ -39,6 +39,7 @@ import { LocalizedDateTooltip } from '../../../../../common/components/localized
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
@@ -79,9 +80,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0], history);
+      }
     },
   },
   {
@@ -201,7 +208,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -398,7 +405,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );

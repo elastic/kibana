@@ -6,10 +6,10 @@
  */
 
 import React, { memo, useContext, useMemo } from 'react';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
 import { useLocation } from 'react-router-dom';
 
-import { AnyIntraAppRouteState } from '../types';
+import type { AnyIntraAppRouteState } from '../types';
 
 interface IntraAppState<S extends AnyIntraAppRouteState = AnyIntraAppRouteState> {
   forRoute: string;

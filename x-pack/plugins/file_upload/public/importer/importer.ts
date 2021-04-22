@@ -21,7 +21,7 @@ import {
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
-const MAX_CHUNK_CHAR_COUNT = 1000000;
+export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
@@ -85,7 +85,7 @@ export abstract class Importer implements IImporter {
   public async import(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
     if (!id || !index) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerts/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
@@ -19,7 +19,7 @@ import { SecurityPluginStart } from '../../../../../../../plugins/security/serve
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerts: AlertingPluginSetup;
+  alerting: AlertingPluginSetup;
 }
 
 export interface FixtureStartDeps {
@@ -29,7 +29,16 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get('fixtures', 'plugins', 'alerts');
+  }
+
+  public setup(
+    core: CoreSetup<FixtureStartDeps>,
+    { features, actions, alerting }: FixtureSetupDeps
+  ) {
     features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
@@ -105,8 +114,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
 
     defineActionTypes(core, { actions });
-    defineAlertTypes(core, { alerts });
-    defineRoutes(core);
+    defineAlertTypes(core, { alerting });
+    defineRoutes(core, { logger: this.logger });
   }
 
   public start() {}

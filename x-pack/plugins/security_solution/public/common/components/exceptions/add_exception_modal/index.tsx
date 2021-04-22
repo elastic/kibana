@@ -23,20 +23,23 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+  ExceptionBuilder,
+} from '../../../../../public/shared_imports';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -50,6 +53,8 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
+  retrieveAlertOsTypes,
+  filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
@@ -115,7 +120,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   onRuleChange,
   alertStatus,
 }: AddExceptionModalProps) {
-  const { http } = useKibana().services;
+  const { http, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -135,10 +140,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     memoSignalIndexName
   );
 
-  const memoMlJobIds = useMemo(
-    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
-    [maybeRule]
-  );
+  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {
@@ -291,18 +293,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
-    const osDefaults: OsTypeArray = ['windows', 'macos'];
-    if (alertData != null) {
-      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
-      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
-        return osTypes;
-      }
-      return osDefaults;
-    }
-    return osDefaults;
-  }, [alertData]);
-
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
   > => {
@@ -312,11 +302,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = retrieveAlertOsTypes();
+      const osTypes = retrieveAlertOsTypes(alertData);
       enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
@@ -405,11 +395,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
+              <ExceptionBuilder.ExceptionBuilderComponent
+                allowLargeValueLists={
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
+                }
+                httpService={http}
+                autocompleteService={data.autocomplete}
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
                 listId={ruleExceptionList.list_id}
                 listNamespaceType={ruleExceptionList.namespace_type}
+                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
                 ruleName={ruleName}
                 indexPatterns={indexPatterns}
                 isOrDisabled={false}
@@ -418,7 +414,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}
-                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />

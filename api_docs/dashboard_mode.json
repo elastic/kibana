@@ -45,6 +45,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.DashboardModeServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -61,8 +62,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-                  "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+                  "lineNumber": 30
                 }
               }
             ],
@@ -70,8 +70,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+              "lineNumber": 30
             }
           },
           {
@@ -92,6 +91,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.DashboardModeServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -108,11 +108,11 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                  "lineNumber": 34
                 }
               },
               {
+                "id": "def-server.DashboardModeServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ security }",
                 "isRequired": true,
@@ -122,8 +122,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                  "lineNumber": 34
                 }
               }
             ],
@@ -131,8 +130,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+              "lineNumber": 34
             }
           },
           {
@@ -153,6 +151,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.DashboardModeServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -168,8 +167,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-                  "lineNumber": 60,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+                  "lineNumber": 60
                 }
               }
             ],
@@ -177,8 +175,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+              "lineNumber": 60
             }
           },
           {
@@ -194,15 +191,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L62"
+              "lineNumber": 62
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
-          "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L26"
+          "lineNumber": 26
         },
         "initialIsOpen": false
       }
@@ -233,8 +228,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/common/constants.ts#L9"
+              "lineNumber": 9
             }
           }
         ],
@@ -242,8 +236,7 @@
         "label": "UI_SETTINGS",
         "source": {
           "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/common/constants.ts#L8"
+          "lineNumber": 8
         },
         "initialIsOpen": false
       }

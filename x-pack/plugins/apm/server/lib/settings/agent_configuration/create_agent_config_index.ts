@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
-  MappingsDefinition,
+  Mappings,
 } from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
@@ -31,7 +31,7 @@ export async function createApmAgentConfigurationIndex({
   });
 }
 
-const mappings: MappingsDefinition = {
+const mappings: Mappings = {
   dynamic: 'strict',
   dynamic_templates: [
     {

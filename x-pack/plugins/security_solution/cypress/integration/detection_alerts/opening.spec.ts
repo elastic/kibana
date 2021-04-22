@@ -39,7 +39,7 @@ describe('Opening alerts', () => {
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(newRule);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
     selectNumberOfAlerts(5);
 
     cy.get(SELECTED_ALERTS).should('have.text', `Selected 5 alerts`);

@@ -84,7 +84,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, '123', undefined);
       expect(updateCase).toBeCalledWith(basicCase);
       expect(onSuccess).toHaveBeenCalled();
     });
@@ -104,7 +104,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, basicSubCaseId);
+      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, '123', basicSubCaseId);
       expect(updateCase).toBeCalledWith(basicCase);
       expect(onSuccess).toHaveBeenCalled();
     });

@@ -6,11 +6,11 @@
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerts/server';
+import { AlertInstance } from '../../../../../alerting/server';
+import { RuleParams } from '../schemas/rule_schemas';
 import { SignalSource } from '../signals/types';
-import { RuleTypeParams } from '../types';
 
-export type NotificationRuleTypeParams = RuleTypeParams & {
+export type NotificationRuleTypeParams = RuleParams & {
   name: string;
   id: string;
 };

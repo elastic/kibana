@@ -822,6 +822,59 @@ describe('xy_expression', () => {
       });
     });
 
+    test('returns correct original data for ordinal x axis with special formatter', () => {
+      const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'a',
+        splitAccessors: {},
+        seriesKeys: ['a'],
+      };
+
+      const { args, data } = sampleArgs();
+
+      convertSpy.mockImplementation((x) => (typeof x === 'string' ? x.toUpperCase() : x));
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 3,
+            row: 1,
+            table: data.tables.first,
+            value: 'Bar',
+          },
+        ],
+      });
+    });
+
     test('onElementClick is not triggering event on noInteractivity mode', () => {
       const { args, data } = sampleArgs();
 
@@ -1894,10 +1947,14 @@ describe('xy_expression', () => {
       xyProps.args.layers[0].xScaleType = 'time';
     });
     it('should use first valid layer and determine interval', async () => {
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5 * 60 * 1000);
     });
 
@@ -1915,34 +1972,38 @@ describe('xy_expression', () => {
           },
         },
       };
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5);
     });
 
     it('should return undefined if data table is empty', async () => {
       xyProps.data.tables.first.rows = [];
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if interval can not be checked', async () => {
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if date column is not found', async () => {
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if x axis is not a date', async () => {
       xyProps.args.layers[0].xScaleType = 'ordinal';
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
   });

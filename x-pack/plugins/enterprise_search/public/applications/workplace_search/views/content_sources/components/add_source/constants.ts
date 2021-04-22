@@ -176,7 +176,7 @@ export const CONFIG_CUSTOM_BUTTON = i18n.translate(
 export const CONFIG_OAUTH_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.label',
   {
-    defaultMessage: 'Complete connection',
+    defaultMessage: 'Select GitHub organizations to sync',
   }
 );
 

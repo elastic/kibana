@@ -49,26 +49,15 @@
                 "text": "CoreSetup"
               },
               "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
-              {
-                "pluginId": "devTools",
-                "scope": "public",
-                "docId": "kibDevToolsPluginApi",
-                "section": "def-public.CreateDevToolArgs",
-                "text": "CreateDevToolArgs"
-              },
+              "CreateDevToolArgs",
               ") => ",
-              {
-                "pluginId": "devTools",
-                "scope": "public",
-                "docId": "kibDevToolsPluginApi",
-                "section": "def-public.DevToolApp",
-                "text": "DevToolApp"
-              },
+              "DevToolApp",
               "; }"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.DevToolsPlugin.setup.$1",
                 "type": "Object",
                 "label": "coreSetup",
                 "isRequired": true,
@@ -85,12 +74,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/dev_tools/public/plugin.ts",
-                  "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                  "lineNumber": 43
                 }
               },
               {
-                "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }",
+                "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
                 "type": "Object",
                 "label": "{ urlForwarding }",
                 "tags": [],
@@ -98,14 +86,13 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.urlForwarding",
+                    "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding.urlForwarding",
                     "type": "Object",
                     "label": "urlForwarding",
                     "description": [],
                     "source": {
                       "path": "src/plugins/dev_tools/public/plugin.ts",
-                      "lineNumber": 43,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                      "lineNumber": 43
                     },
                     "signature": [
                       "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
@@ -114,8 +101,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dev_tools/public/plugin.ts",
-                  "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                  "lineNumber": 43
                 }
               }
             ],
@@ -123,8 +109,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+              "lineNumber": 43
             }
           },
           {
@@ -140,8 +125,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L84"
+              "lineNumber": 84
             }
           },
           {
@@ -157,15 +141,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
-              "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L90"
+              "lineNumber": 90
             }
           }
         ],
         "source": {
           "path": "src/plugins/dev_tools/public/plugin.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L35"
+          "lineNumber": 35
         },
         "initialIsOpen": false
       }
@@ -192,33 +174,19 @@
           ],
           "source": {
             "path": "src/plugins/dev_tools/public/plugin.ts",
-            "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L32"
+            "lineNumber": 32
           },
           "signature": [
             "(devTool: ",
-            {
-              "pluginId": "devTools",
-              "scope": "public",
-              "docId": "kibDevToolsPluginApi",
-              "section": "def-public.CreateDevToolArgs",
-              "text": "CreateDevToolArgs"
-            },
+            "CreateDevToolArgs",
             ") => ",
-            {
-              "pluginId": "devTools",
-              "scope": "public",
-              "docId": "kibDevToolsPluginApi",
-              "section": "def-public.DevToolApp",
-              "text": "DevToolApp"
-            }
+            "DevToolApp"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/dev_tools/public/plugin.ts",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L21"
+        "lineNumber": 21
       },
       "lifecycle": "setup",
       "initialIsOpen": true

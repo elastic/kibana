@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
@@ -236,6 +236,48 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) 
           delete agg.params.customBucket.params.customInterval;
         }
       });
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// Migrate schemas inside aggregation (replace 'schema' object to name of the schema)
+const migrateSchema: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    function replaceSchema(agg: any) {
+      forOwn(agg, (value: any, key: string) => {
+        if (typeof value === 'object') {
+          if (key === 'schema') {
+            agg[key] = value.name;
+          } else {
+            replaceSchema(value);
+          }
+        }
+      });
+    }
+
+    if (visState && visState.aggs) {
+      for (const agg of visState.aggs) {
+        if (typeof agg === 'object') {
+          replaceSchema(agg);
+        }
+      }
       return {
         ...doc,
         attributes: {
@@ -748,6 +790,35 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const addSupportOfDualIndexSelectionModeInTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const { params } = visState;
+
+      if (typeof params?.index_pattern === 'string') {
+        params.use_kibana_indexes = false;
+      }
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [Data table visualization] Enable toolbar by default
 const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
   let visState;
@@ -817,6 +888,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
       const isHorizontalBar = visState.type === 'horizontal_bar';
       const isLineOrArea =
         visState?.params?.type === CHART_TYPE_AREA || visState?.params?.type === CHART_TYPE_LINE;
+      const hasPalette = visState?.params?.palette;
       return {
         ...doc,
         attributes: {
@@ -825,10 +897,12 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
-              palette: {
-                type: 'palette',
-                name: 'kibana_palette',
-              },
+              ...(!hasPalette && {
+                palette: {
+                  type: 'palette',
+                  name: 'kibana_palette',
+                },
+              }),
               categoryAxes:
                 visState.params.categoryAxes &&
                 decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
@@ -842,6 +916,64 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               }),
             },
           }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+/**
+ * [TSVB] Hide Last value indicator by default for all TSVB types except timeseries
+ */
+const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+
+    if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries')
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              hide_last_value_indicator: true,
+            },
+          }),
+        },
+      };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  return doc;
+};
+
+const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
+  doc
+) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const { params } = visState;
+
+      delete params.default_index_pattern;
+      delete params.default_timefield;
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
         },
       };
     }
@@ -883,5 +1015,10 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibAreaLineBarTypes),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
+  '7.13.0': flow(
+    addSupportOfDualIndexSelectionModeInTSVB,
+    hideTSVBLastValueIndicator,
+    removeDefaultIndexPatternAndTimeFieldFromTSVBModel
+  ),
 };

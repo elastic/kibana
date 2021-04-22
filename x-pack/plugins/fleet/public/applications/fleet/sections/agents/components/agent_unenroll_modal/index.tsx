@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Agent } from '../../../../types';
+import type { Agent } from '../../../../types';
 import {
   sendPostAgentUnenroll,
   sendPostBulkAgentUnenroll,
@@ -40,11 +40,11 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(true);
       const { error } = isSingleAgent
         ? await sendPostAgentUnenroll((agents[0] as Agent).id, {
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           })
         : await sendPostBulkAgentUnenroll({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           });
       if (error) {
         throw error;

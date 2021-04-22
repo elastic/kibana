@@ -59,16 +59,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_column > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_column > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
+    });
+
+    it('should allow to transpose columns', async () => {
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_rows > lns-dimensionTrigger',
+        'lnsDatatable_columns > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
+      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
+        '169.228.188.120 › Average of bytes'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal(
+        '78.83.247.30 › Average of bytes'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(3)).to.equal(
+        '226.82.228.233 › Average of bytes'
+      );
+    });
+
+    it('should allow to sort by transposed columns', async () => {
+      await PageObjects.lens.changeTableSortingBy(2, 'ascending');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
     });
   });
 }

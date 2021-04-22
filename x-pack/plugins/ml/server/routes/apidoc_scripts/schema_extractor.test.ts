@@ -133,7 +133,7 @@ describe('schema_extractor', () => {
           {
             name: 'expand_wildcards',
             documentation: '',
-            type: 'string[]',
+            type: '"all" | "open" | "closed" | "hidden" | "none"[]',
           },
           {
             name: 'ignore_unavailable',

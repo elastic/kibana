@@ -9,9 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
+import {
+  getEmsTileLayerId,
+  getUiSettings,
+  getToasts,
+  getServiceSettings,
+} from '../kibana_services';
 import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
-import { getServiceSettings } from '../get_service_settings';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
@@ -189,13 +193,12 @@ export function BaseMapsVisualizationProvider() {
         isDesaturated,
         isDarkMode
       );
-      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { ...options, showZoomMessage, ...meta },
+        options: { ...options, ...meta },
       });
     }
 

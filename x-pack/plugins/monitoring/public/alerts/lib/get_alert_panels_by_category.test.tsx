@@ -20,7 +20,7 @@ import {
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
 import { AlertsByName } from '../types';
-import { AlertExecutionStatusValues } from '../../../../alerts/common';
+import { AlertExecutionStatusValues } from '../../../../alerting/common';
 import { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({

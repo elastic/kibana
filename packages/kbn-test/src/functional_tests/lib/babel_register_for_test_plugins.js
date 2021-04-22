@@ -21,6 +21,7 @@ require('@babel/register')({
     Path.resolve(REPO_ROOT, 'x-pack/examples'),
     // TODO: should should probably remove this link back to the source
     Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
+    Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
   ],
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],

@@ -39,15 +39,17 @@ const oneDayInMilliseconds = moment.duration(1, 'day').asMilliseconds();
 const oneWeekInMilliseconds = moment.duration(1, 'week').asMilliseconds();
 
 export function getTimeRangeComparison({
+  comparisonEnabled,
   comparisonType,
   start,
   end,
 }: {
-  comparisonType: TimeRangeComparisonType;
+  comparisonEnabled?: boolean;
+  comparisonType?: TimeRangeComparisonType;
   start?: string;
   end?: string;
 }) {
-  if (!start || !end) {
+  if (!comparisonEnabled || !comparisonType || !start || !end) {
     return {};
   }
 

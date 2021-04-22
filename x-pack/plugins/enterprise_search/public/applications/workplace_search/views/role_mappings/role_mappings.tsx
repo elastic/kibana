@@ -9,21 +9,21 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import {
+  EMPTY_ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPINGS_DESCRIPTION,
+} from '../../../shared/role_mapping/constants';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
 
-import {
-  EMPTY_ROLE_MAPPINGS_TITLE,
-  EMPTY_ROLE_MAPPINGS_BODY,
-  ROLE_MAPPINGS_TABLE_HEADER,
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from './constants';
+import { EMPTY_ROLE_MAPPINGS_BODY, ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
@@ -40,12 +40,14 @@ export const RoleMappings: React.FC = () => {
 
   const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
   const emptyPrompt = (
-    <EuiEmptyPrompt
-      iconType="usersRolesApp"
-      title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
-      body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
-      actions={addMappingButton}
-    />
+    <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
+      <EuiEmptyPrompt
+        iconType="usersRolesApp"
+        title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
+        body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
+        actions={addMappingButton}
+      />
+    </EuiPanel>
   );
   const roleMappingsTable = (
     <RoleMappingsTable
@@ -60,6 +62,7 @@ export const RoleMappings: React.FC = () => {
 
   return (
     <>
+      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
       <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
       <div>
         <FlashMessages />

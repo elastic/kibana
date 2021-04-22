@@ -16,8 +16,8 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-} from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+} from '../../../../../alerting/common';
+import { AlertExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
 import { MlPluginSetup } from '../../../../../ml/server';

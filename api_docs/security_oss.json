@@ -22,24 +22,16 @@
           "description": [],
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L26"
+            "lineNumber": 26
           },
           "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceSetup",
-              "text": "InsecureClusterServiceSetup"
-            }
+            "InsecureClusterServiceSetup"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
-        "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L25"
+        "lineNumber": 25
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -59,17 +51,10 @@
           "description": [],
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 30,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L30"
+            "lineNumber": 30
           },
           "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceStart",
-              "text": "InsecureClusterServiceStart"
-            }
+            "InsecureClusterServiceStart"
           ]
         },
         {
@@ -80,26 +65,18 @@
           "description": [],
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L31"
+            "lineNumber": 31
           },
           "signature": [
             "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
-            {
-              "pluginId": "core",
-              "scope": "common",
-              "docId": "kibCorePluginApi",
-              "section": "def-common.Capabilities",
-              "text": "Capabilities"
-            },
+            "Capabilities",
             ">; }"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
-        "lineNumber": 29,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L29"
+        "lineNumber": 29
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -129,8 +106,7 @@
           ],
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
-            "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L29"
+            "lineNumber": 29
           },
           "signature": [
             "BehaviorSubject",
@@ -147,26 +123,18 @@
           ],
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
-            "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L35"
+            "lineNumber": 35
           },
           "signature": [
             "(provider: () => ",
-            {
-              "pluginId": "securityOss",
-              "scope": "server",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-server.AnonymousAccessService",
-              "text": "AnonymousAccessService"
-            },
+            "AnonymousAccessService",
             ") => void"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/security_oss/server/plugin.ts",
-        "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L25"
+        "lineNumber": 25
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -193,8 +161,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L13"
+              "lineNumber": 13
             },
             "signature": [
               "{ displayAlert: boolean; }"
@@ -208,8 +175,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L14"
+              "lineNumber": 14
             },
             "signature": [
               "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
@@ -218,8 +184,7 @@
         ],
         "source": {
           "path": "src/plugins/security_oss/common/app_state.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L12"
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }

@@ -11,7 +11,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
-import { AttributeSelector, AttributeName } from './attribute_selector';
+import { AttributeName } from '../types';
+
+import { AttributeSelector } from './attribute_selector';
 import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 
 const handleAttributeSelectorChange = jest.fn();
@@ -37,14 +39,6 @@ describe('AttributeSelector', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
 
     expect(wrapper.find('[data-test-subj="AttributeSelector"]').exists()).toBe(true);
-  });
-
-  it('renders disabled panel with className', () => {
-    const wrapper = shallow(<AttributeSelector {...baseProps} disabled />);
-
-    expect(wrapper.find('[data-test-subj="AttributeSelector"]').prop('className')).toEqual(
-      'euiPanel--disabled'
-    );
   });
 
   describe('Auth Providers', () => {

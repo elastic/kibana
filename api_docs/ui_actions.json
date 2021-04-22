@@ -3,747 +3,6 @@
   "client": {
     "classes": [
       {
-        "id": "def-public.UiActionsService",
-        "type": "Class",
-        "tags": [],
-        "label": "UiActionsService",
-        "description": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UiActionsService.executionService",
-            "type": "Object",
-            "label": "executionService",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L27"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsExecutionService",
-                "text": "UiActionsExecutionService"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UiActionsService.triggers",
-            "type": "Object",
-            "label": "triggers",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L28"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerRegistry",
-                "text": "TriggerRegistry"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UiActionsService.actions",
-            "type": "Object",
-            "label": "actions",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L29"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionRegistry",
-                "text": "ActionRegistry"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UiActionsService.triggerToActions",
-            "type": "Object",
-            "label": "triggerToActions",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L30"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerToActionsRegistry",
-                "text": "TriggerToActionsRegistry"
-              }
-            ]
-          },
-          {
-            "id": "def-public.UiActionsService.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "{\n    triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.UiActionsServiceParams",
-                    "text": "UiActionsServiceParams"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L32"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L32"
-            }
-          },
-          {
-            "id": "def-public.UiActionsService.registerTrigger",
-            "type": "Function",
-            "children": [
-              {
-                "type": "Object",
-                "label": "trigger",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Trigger",
-                    "text": "Trigger"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L42"
-                }
-              }
-            ],
-            "signature": [
-              "(trigger: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
-              },
-              ") => void"
-            ],
-            "description": [],
-            "label": "registerTrigger",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L42"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.getTrigger",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L53"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerContract",
-                "text": "TriggerContract"
-              },
-              "<object>"
-            ],
-            "description": [],
-            "label": "getTrigger",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L53"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.registerAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "Uncategorized",
-                "label": "definition",
-                "isRequired": true,
-                "signature": [
-                  "A"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 64,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L64"
-                }
-              }
-            ],
-            "signature": [
-              "<A extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(definition: A) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionContext",
-                "text": "ActionContext"
-              },
-              "<A>>"
-            ],
-            "description": [],
-            "label": "registerAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L63"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.unregisterAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 77,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L77"
-                }
-              }
-            ],
-            "signature": [
-              "(actionId: string) => void"
-            ],
-            "description": [],
-            "label": "unregisterAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L77"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.hasAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 85,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L85"
-                }
-              }
-            ],
-            "signature": [
-              "(actionId: string) => boolean"
-            ],
-            "description": [],
-            "label": "hasAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 85,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L85"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.attachAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 89,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
-                }
-              },
-              {
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 89,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string, actionId: string) => void"
-            ],
-            "description": [],
-            "label": "attachAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.detachAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
-                }
-              },
-              {
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string, actionId: string) => void"
-            ],
-            "description": [],
-            "label": "detachAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.addTriggerAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 127,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L127"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "action",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<object>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 128,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L128"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>) => void"
-            ],
-            "description": [
-              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
-            ],
-            "label": "addTriggerAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L126"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.getAction",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "id",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 135,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L135"
-                }
-              }
-            ],
-            "signature": [
-              "<T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionContext",
-                "text": "ActionContext"
-              },
-              "<T>>"
-            ],
-            "description": [],
-            "label": "getAction",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L134"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.getTriggerActions",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 144,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L144"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>[]"
-            ],
-            "description": [],
-            "label": "getTriggerActions",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 144,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L144"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.getTriggerCompatibleActions",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 158,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L158"
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  "object"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 159,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L159"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string, context: object) => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>[]>"
-            ],
-            "description": [],
-            "label": "getTriggerCompatibleActions",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L157"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.executeTriggerActions",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "triggerId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 181,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  "object"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 181,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
-                }
-              }
-            ],
-            "signature": [
-              "(triggerId: string, context: object) => Promise<void>"
-            ],
-            "description": [],
-            "label": "executeTriggerActions",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 181,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
-            },
-            "tags": [
-              "deprecated"
-            ],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.clear",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
-            "description": [
-              "\nRemoves all registered triggers and actions."
-            ],
-            "label": "clear",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 189,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L189"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.UiActionsService.fork",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              }
-            ],
-            "description": [
-              "\n\"Fork\" a separate instance of `UiActionsService` that inherits all existing\ntriggers and actions, but going forward all new triggers and actions added\nto this instance of `UiActionsService` are only available within this instance."
-            ],
-            "label": "fork",
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 200,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L200"
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-          "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L26"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.IncompatibleActionError",
         "type": "Class",
         "tags": [],
@@ -768,8 +27,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/incompatible_action_error.ts#L12"
+              "lineNumber": 12
             }
           },
           {
@@ -785,20 +43,735 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/incompatible_action_error.ts#L14"
+              "lineNumber": 14
             }
           }
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/incompatible_action_error.ts#L11"
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UiActionsService",
+        "type": "Class",
+        "tags": [],
+        "label": "UiActionsService",
+        "description": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.UiActionsService.executionService",
+            "type": "Object",
+            "label": "executionService",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "UiActionsExecutionService"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UiActionsService.triggers",
+            "type": "Object",
+            "label": "triggers",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 28
+            },
+            "signature": [
+              "TriggerRegistry"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UiActionsService.actions",
+            "type": "Object",
+            "label": "actions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "ActionRegistry"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UiActionsService.triggerToActions",
+            "type": "Object",
+            "label": "triggerToActions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "TriggerToActionsRegistry"
+            ]
+          },
+          {
+            "id": "def-public.UiActionsService.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.UiActionsService.Unnamed.$1",
+                "type": "Object",
+                "label": "{\n    triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.UiActionsServiceParams",
+                    "text": "UiActionsServiceParams"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 32
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 32
+            }
+          },
+          {
+            "id": "def-public.UiActionsService.registerTrigger",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.registerTrigger.$1",
+                "type": "Object",
+                "label": "trigger",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Trigger",
+                    "text": "Trigger"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 42
+                }
+              }
+            ],
+            "signature": [
+              "(trigger: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "label": "registerTrigger",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 42
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.getTrigger",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.getTrigger.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 53
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string) => ",
+              "TriggerContract",
+              "<object>"
+            ],
+            "description": [],
+            "label": "getTrigger",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 53
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.registerAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.registerAction.$1",
+                "type": "Uncategorized",
+                "label": "definition",
+                "isRequired": true,
+                "signature": [
+                  "A"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 64
+                }
+              }
+            ],
+            "signature": [
+              "<A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>"
+            ],
+            "description": [],
+            "label": "registerAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 63
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.unregisterAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.unregisterAction.$1",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 77
+                }
+              }
+            ],
+            "signature": [
+              "(actionId: string) => void"
+            ],
+            "description": [],
+            "label": "unregisterAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 77
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.hasAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.hasAction.$1",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 85
+                }
+              }
+            ],
+            "signature": [
+              "(actionId: string) => boolean"
+            ],
+            "description": [],
+            "label": "hasAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 85
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.attachAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.attachAction.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 89
+                }
+              },
+              {
+                "id": "def-public.UiActionsService.attachAction.$2",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 89
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string, actionId: string) => void"
+            ],
+            "description": [],
+            "label": "attachAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 89
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.detachAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.detachAction.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 105
+                }
+              },
+              {
+                "id": "def-public.UiActionsService.detachAction.$2",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 105
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string, actionId: string) => void"
+            ],
+            "description": [],
+            "label": "detachAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 105
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.addTriggerAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.addTriggerAction.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 127
+                }
+              },
+              {
+                "id": "def-public.UiActionsService.addTriggerAction.$2",
+                "type": "Object",
+                "label": "action",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<object>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 128
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>) => void"
+            ],
+            "description": [
+              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
+            ],
+            "label": "addTriggerAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 126
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.getAction",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.getAction.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 135
+                }
+              }
+            ],
+            "signature": [
+              "<T extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(id: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<T>>"
+            ],
+            "description": [],
+            "label": "getAction",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 134
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.getTriggerActions",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.getTriggerActions.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 144
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]"
+            ],
+            "description": [],
+            "label": "getTriggerActions",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 144
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.getTriggerCompatibleActions",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 158
+                }
+              },
+              {
+                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$2",
+                "type": "Uncategorized",
+                "label": "context",
+                "isRequired": true,
+                "signature": [
+                  "object"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 159
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>"
+            ],
+            "description": [],
+            "label": "getTriggerCompatibleActions",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 157
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.executeTriggerActions",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.UiActionsService.executeTriggerActions.$1",
+                "type": "string",
+                "label": "triggerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 181
+                }
+              },
+              {
+                "id": "def-public.UiActionsService.executeTriggerActions.$2",
+                "type": "Uncategorized",
+                "label": "context",
+                "isRequired": true,
+                "signature": [
+                  "object"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 181
+                }
+              }
+            ],
+            "signature": [
+              "(triggerId: string, context: object) => Promise<void>"
+            ],
+            "description": [],
+            "label": "executeTriggerActions",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 181
+            },
+            "tags": [
+              "deprecated"
+            ],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.clear",
+            "type": "Function",
+            "children": [],
+            "signature": [
+              "() => void"
+            ],
+            "description": [
+              "\nRemoves all registered triggers and actions."
+            ],
+            "label": "clear",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 189
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.UiActionsService.fork",
+            "type": "Function",
+            "children": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              }
+            ],
+            "description": [
+              "\n\"Fork\" a separate instance of `UiActionsService` that inherits all existing\ntriggers and actions, but going forward all new triggers and actions added\nto this instance of `UiActionsService` are only available within this instance."
+            ],
+            "label": "fork",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 200
+            },
+            "tags": [],
+            "returnComment": []
+          }
+        ],
+        "source": {
+          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+          "lineNumber": 26
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-public.buildContextMenuForActions",
+        "type": "Function",
+        "label": "buildContextMenuForActions",
+        "signature": [
+          "({\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}: ",
+          "BuildContextMenuParams",
+          ") => Promise<",
+          "EuiContextMenuPanelDescriptor",
+          "[]>"
+        ],
+        "description": [
+          "\nTransforms an array of Actions to the shape EuiContextMenuPanel expects."
+        ],
+        "children": [
+          {
+            "id": "def-public.buildContextMenuForActions.$1",
+            "type": "Object",
+            "label": "{\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
+            "isRequired": true,
+            "signature": [
+              "BuildContextMenuParams"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+              "lineNumber": 120
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+          "lineNumber": 120
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.createAction",
         "type": "Function",
@@ -825,6 +798,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createAction.$1",
             "type": "Object",
             "label": "action",
             "isRequired": true,
@@ -841,8 +815,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/create_action.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/create_action.ts#L12"
+              "lineNumber": 12
             }
           }
         ],
@@ -850,141 +823,12 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/ui_actions/public/actions/create_action.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/create_action.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.buildContextMenuForActions",
-        "type": "Function",
-        "label": "buildContextMenuForActions",
-        "signature": [
-          "({\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}: ",
-          "BuildContextMenuParams",
-          ") => Promise<",
-          "EuiContextMenuPanelDescriptor",
-          "[]>"
-        ],
-        "description": [
-          "\nTransforms an array of Actions to the shape EuiContextMenuPanel expects."
-        ],
-        "children": [
-          {
-            "type": "Object",
-            "label": "{\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.BuildContextMenuParams",
-                "text": "BuildContextMenuParams"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-              "lineNumber": 120,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx#L120"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-          "lineNumber": 120,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx#L120"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.UiActionsServiceParams",
-        "type": "Interface",
-        "label": "UiActionsServiceParams",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UiActionsServiceParams.triggers",
-            "type": "Object",
-            "label": "triggers",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L17"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerRegistry",
-                "text": "TriggerRegistry"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UiActionsServiceParams.actions",
-            "type": "Object",
-            "label": "actions",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L18"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionRegistry",
-                "text": "ActionRegistry"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UiActionsServiceParams.triggerToActions",
-            "type": "Object",
-            "label": "triggerToActions",
-            "description": [
-              "\nA 1-to-N mapping from `Trigger` to zero or more `Action`."
-            ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L23"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerToActionsRegistry",
-                "text": "TriggerToActionsRegistry"
-              },
-              " | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L16"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.Action",
         "type": "Interface",
@@ -1028,8 +872,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L44"
+              "lineNumber": 44
             },
             "signature": [
               "number | undefined"
@@ -1045,8 +888,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L49"
+              "lineNumber": 49
             }
           },
           {
@@ -1059,8 +901,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L54"
+              "lineNumber": 54
             }
           },
           {
@@ -1083,6 +924,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.getIconType.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1099,8 +941,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L59"
+                  "lineNumber": 59
                 }
               }
             ],
@@ -1108,8 +949,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L59"
+              "lineNumber": 59
             }
           },
           {
@@ -1132,6 +972,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.getDisplayName.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1148,8 +989,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 65,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L65"
+                  "lineNumber": 65
                 }
               }
             ],
@@ -1157,8 +997,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L65"
+              "lineNumber": 65
             }
           },
           {
@@ -1171,8 +1010,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L71"
+              "lineNumber": 71
             },
             "signature": [
               {
@@ -1213,6 +1051,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.isCompatible.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1229,8 +1068,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 77,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L77"
+                  "lineNumber": 77
                 }
               }
             ],
@@ -1238,8 +1076,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L77"
+              "lineNumber": 77
             }
           },
           {
@@ -1262,6 +1099,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.execute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1278,8 +1116,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 82,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L82"
+                  "lineNumber": 82
                 }
               }
             ],
@@ -1287,8 +1124,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L82"
+              "lineNumber": 82
             }
           },
           {
@@ -1311,6 +1147,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.getHref.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1327,8 +1164,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 89,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L89"
+                  "lineNumber": 89
                 }
               }
             ],
@@ -1336,8 +1172,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L89"
+              "lineNumber": 89
             }
           },
           {
@@ -1360,6 +1195,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Action.shouldAutoExecute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1376,8 +1212,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 96,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L96"
+                  "lineNumber": 96
                 }
               }
             ],
@@ -1385,15 +1220,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L96"
+              "lineNumber": 96
             }
           }
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L38"
+          "lineNumber": 38
         },
         "initialIsOpen": false
       },
@@ -1436,8 +1269,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L107"
+              "lineNumber": 107
             }
           },
           {
@@ -1450,8 +1282,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L112"
+              "lineNumber": 112
             },
             "signature": [
               "string | undefined"
@@ -1463,13 +1294,7 @@
             "label": "isCompatible",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "description": [
@@ -1477,24 +1302,18 @@
             ],
             "children": [
               {
+                "id": "def-public.ActionDefinition.isCompatible.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 118,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L118"
+                  "lineNumber": 118
                 }
               }
             ],
@@ -1502,8 +1321,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 118,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L118"
+              "lineNumber": 118
             }
           },
           {
@@ -1512,13 +1330,7 @@
             "label": "execute",
             "signature": [
               "(context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<void>"
             ],
             "description": [
@@ -1526,24 +1338,18 @@
             ],
             "children": [
               {
+                "id": "def-public.ActionDefinition.execute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 123,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L123"
+                  "lineNumber": 123
                 }
               }
             ],
@@ -1551,8 +1357,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 123,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L123"
+              "lineNumber": 123
             }
           },
           {
@@ -1561,13 +1366,7 @@
             "label": "shouldAutoExecute",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "description": [
@@ -1575,24 +1374,18 @@
             ],
             "children": [
               {
+                "id": "def-public.ActionDefinition.shouldAutoExecute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 130,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L130"
+                  "lineNumber": 130
                 }
               }
             ],
@@ -1600,8 +1393,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 130,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L130"
+              "lineNumber": 130
             }
           },
           {
@@ -1610,13 +1402,7 @@
             "label": "getHref",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
             "description": [
@@ -1624,24 +1410,18 @@
             ],
             "children": [
               {
+                "id": "def-public.ActionDefinition.getHref.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 137,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L137"
+                  "lineNumber": 137
                 }
               }
             ],
@@ -1649,15 +1429,51 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 137,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L137"
+              "lineNumber": 137
             }
           }
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 102,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L102"
+          "lineNumber": 102
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ActionExecutionMeta",
+        "type": "Interface",
+        "label": "ActionExecutionMeta",
+        "description": [
+          "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ActionExecutionMeta.trigger",
+            "type": "Object",
+            "label": "trigger",
+            "description": [
+              "\nTrigger that executed the action"
+            ],
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/action.ts",
+          "lineNumber": 17
         },
         "initialIsOpen": false
       },
@@ -1690,8 +1506,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L18"
+              "lineNumber": 18
             }
           },
           {
@@ -1704,8 +1519,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -1718,8 +1532,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L30"
+              "lineNumber": 30
             },
             "signature": [
               {
@@ -1744,6 +1557,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Presentable.getIconType.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1753,8 +1567,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L35"
+                  "lineNumber": 35
                 }
               }
             ],
@@ -1762,8 +1575,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L35"
+              "lineNumber": 35
             }
           },
           {
@@ -1778,6 +1590,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Presentable.getDisplayName.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1787,8 +1600,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L40"
+                  "lineNumber": 40
                 }
               }
             ],
@@ -1796,8 +1608,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L40"
+              "lineNumber": 40
             }
           },
           {
@@ -1812,6 +1623,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Presentable.getDisplayNameTooltip.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1821,8 +1633,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L46"
+                  "lineNumber": 46
                 }
               }
             ],
@@ -1830,8 +1641,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L46"
+              "lineNumber": 46
             }
           },
           {
@@ -1846,6 +1656,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Presentable.getHref.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1855,8 +1666,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L53"
+                  "lineNumber": 53
                 }
               }
             ],
@@ -1864,8 +1674,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L53"
+              "lineNumber": 53
             }
           },
           {
@@ -1880,6 +1689,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Presentable.isCompatible.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1889,8 +1699,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L59"
+                  "lineNumber": 59
                 }
               }
             ],
@@ -1898,8 +1707,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L59"
+              "lineNumber": 59
             }
           },
           {
@@ -1912,8 +1720,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L66"
+              "lineNumber": 66
             },
             "signature": [
               {
@@ -1929,8 +1736,57 @@
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/util/presentable.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L14"
+          "lineNumber": 14
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.RowClickContext",
+        "type": "Interface",
+        "label": "RowClickContext",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.RowClickContext.embeddable",
+            "type": "Unknown",
+            "label": "embeddable",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 28
+            },
+            "signature": [
+              "unknown"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.RowClickContext.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "{ rowIndex: number; table: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; columns?: string[] | undefined; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -1953,8 +1809,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/trigger.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -1967,8 +1822,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/trigger.ts#L29"
+              "lineNumber": 29
             },
             "signature": [
               "string | undefined"
@@ -1984,8 +1838,7 @@
             ],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/trigger.ts#L34"
+              "lineNumber": 34
             },
             "signature": [
               "string | undefined"
@@ -1994,61 +1847,68 @@
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/trigger.ts#L20"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.RowClickContext",
+        "id": "def-public.UiActionsServiceParams",
         "type": "Interface",
-        "label": "RowClickContext",
+        "label": "UiActionsServiceParams",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.RowClickContext.embeddable",
-            "type": "Unknown",
-            "label": "embeddable",
+            "id": "def-public.UiActionsServiceParams.triggers",
+            "type": "Object",
+            "label": "triggers",
             "description": [],
             "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L28"
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 17
             },
             "signature": [
-              "unknown"
+              "TriggerRegistry",
+              " | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.RowClickContext.data",
+            "id": "def-public.UiActionsServiceParams.actions",
             "type": "Object",
-            "label": "data",
+            "label": "actions",
             "description": [],
             "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L29"
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 18
             },
             "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
+              "ActionRegistry",
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UiActionsServiceParams.triggerToActions",
+            "type": "Object",
+            "label": "triggerToActions",
+            "description": [
+              "\nA 1-to-N mapping from `Trigger` to zero or more `Action`."
+            ],
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "TriggerToActionsRegistry",
+              " | undefined"
             ]
           }
         ],
         "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L25"
+          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+          "lineNumber": 16
         },
         "initialIsOpen": false
       },
@@ -2067,8 +1927,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -2079,8 +1938,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L18"
+              "lineNumber": 18
             }
           },
           {
@@ -2091,8 +1949,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               "string[] | undefined"
@@ -2101,118 +1958,13 @@
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ActionExecutionMeta",
-        "type": "Interface",
-        "label": "ActionExecutionMeta",
-        "description": [
-          "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ActionExecutionMeta.trigger",
-            "type": "Object",
-            "label": "trigger",
-            "description": [
-              "\nTrigger that executed the action"
-            ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L21"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L17"
+          "lineNumber": 16
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
-      {
-        "id": "def-public.PresentableGrouping",
-        "type": "Type",
-        "label": "PresentableGrouping",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/util/presentable.ts",
-          "lineNumber": 76,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/util/presentable.ts#L76"
-        },
-        "signature": [
-          "PresentableGroup<Context>[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.VISUALIZE_FIELD_TRIGGER",
-        "type": "string",
-        "label": "VISUALIZE_FIELD_TRIGGER",
-        "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L11"
-        },
-        "signature": [
-          "\"VISUALIZE_FIELD_TRIGGER\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.VISUALIZE_GEO_FIELD_TRIGGER",
-        "type": "string",
-        "label": "VISUALIZE_GEO_FIELD_TRIGGER",
-        "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L11"
-        },
-        "signature": [
-          "\"VISUALIZE_GEO_FIELD_TRIGGER\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.ROW_CLICK_TRIGGER",
-        "type": "string",
-        "label": "ROW_CLICK_TRIGGER",
-        "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L13"
-        },
-        "signature": [
-          "\"ROW_CLICK_TRIGGER\""
-        ],
-        "initialIsOpen": false
-      },
       {
         "tags": [],
         "id": "def-public.ACTION_VISUALIZE_FIELD",
@@ -2221,8 +1973,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L22"
+          "lineNumber": 22
         },
         "signature": [
           "\"ACTION_VISUALIZE_FIELD\""
@@ -2237,8 +1988,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L23"
+          "lineNumber": 23
         },
         "signature": [
           "\"ACTION_VISUALIZE_GEO_FIELD\""
@@ -2253,8 +2003,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/types.ts#L24"
+          "lineNumber": 24
         },
         "signature": [
           "\"ACTION_VISUALIZE_LENS_FIELD\""
@@ -2271,16 +2020,122 @@
         ],
         "source": {
           "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/actions/action.ts#L27"
+          "lineNumber": 27
         },
         "signature": [
           "Context & ActionExecutionMeta"
         ],
         "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PresentableGrouping",
+        "type": "Type",
+        "label": "PresentableGrouping",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/ui_actions/public/util/presentable.ts",
+          "lineNumber": 76
+        },
+        "signature": [
+          "PresentableGroup<Context>[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.ROW_CLICK_TRIGGER",
+        "type": "string",
+        "label": "ROW_CLICK_TRIGGER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "\"ROW_CLICK_TRIGGER\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.VISUALIZE_FIELD_TRIGGER",
+        "type": "string",
+        "label": "VISUALIZE_FIELD_TRIGGER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"VISUALIZE_FIELD_TRIGGER\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.VISUALIZE_GEO_FIELD_TRIGGER",
+        "type": "string",
+        "label": "VISUALIZE_GEO_FIELD_TRIGGER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"VISUALIZE_GEO_FIELD_TRIGGER\""
+        ],
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "id": "def-public.rowClickTrigger",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.rowClickTrigger.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.rowClickTrigger.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 17
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.rowClickTrigger.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 20
+            }
+          }
+        ],
+        "description": [],
+        "label": "rowClickTrigger",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 15
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.visualizeFieldTrigger",
         "type": "Object",
@@ -2294,8 +2149,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L13"
+              "lineNumber": 13
             }
           },
           {
@@ -2306,8 +2160,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L14"
+              "lineNumber": 14
             }
           },
           {
@@ -2318,8 +2171,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L15"
+              "lineNumber": 15
             }
           }
         ],
@@ -2327,8 +2179,7 @@
         "label": "visualizeFieldTrigger",
         "source": {
           "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L12"
+          "lineNumber": 12
         },
         "initialIsOpen": false
       },
@@ -2345,8 +2196,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L13"
+              "lineNumber": 13
             }
           },
           {
@@ -2357,8 +2207,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L14"
+              "lineNumber": 14
             }
           },
           {
@@ -2369,8 +2218,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L15"
+              "lineNumber": 15
             }
           }
         ],
@@ -2378,59 +2226,7 @@
         "label": "visualizeGeoFieldTrigger",
         "source": {
           "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L12"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.rowClickTrigger",
-        "type": "Object",
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.rowClickTrigger.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L16"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.rowClickTrigger.title",
-            "type": "string",
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L17"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.rowClickTrigger.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L20"
-            }
-          }
-        ],
-        "description": [],
-        "label": "rowClickTrigger",
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/triggers/row_click_trigger.ts#L15"
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -2443,8 +2239,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/ui_actions/public/plugin.ts",
-        "lineNumber": 14,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/plugin.ts#L14"
+        "lineNumber": 14
       },
       "signature": [
         "{ readonly addTriggerAction: (triggerId: string, action: ",
@@ -2480,8 +2275,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/ui_actions/public/plugin.ts",
-        "lineNumber": 24,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/plugin.ts#L24"
+        "lineNumber": 24
       },
       "signature": [
         "{ readonly clear: () => void; readonly fork: () => UiActionsService; readonly addTriggerAction: (triggerId: string, action: ",

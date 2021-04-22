@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Local Service Commands",
   "query": "event.category:process and event.type:(start or process_started) and process.name:sc.exe and process.args:(config or create or failure or start)",
   "risk_score": 21,
@@ -21,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Lateral Movement"
   ],
   "threat": [
     {

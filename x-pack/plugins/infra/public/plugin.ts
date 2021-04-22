@@ -10,7 +10,6 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { createMetricAnomalyAlertType } from './alerting/metric_anomaly';
 import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
 import { registerFeatures } from './register_feature';
 import {
@@ -36,7 +35,6 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType());
 
     if (pluginsSetup.observability) {
       pluginsSetup.observability.dashboard.register({
@@ -65,6 +63,39 @@ export class Plugin implements InfraClientPluginClass {
       euiIconType: 'logoObservability',
       order: 8100,
       appRoute: '/app/logs',
+      meta: {
+        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
+        searchDeepLinks: [
+          {
+            id: 'stream',
+            title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
+              defaultMessage: 'Stream',
+            }),
+            path: '/stream',
+          },
+          {
+            id: 'anomalies',
+            title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: '/anomalies',
+          },
+          {
+            id: 'log-categories',
+            title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+              defaultMessage: 'Categories',
+            }),
+            path: '/log-categories',
+          },
+          {
+            id: 'settings',
+            title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+              defaultMessage: 'Settings',
+            }),
+            path: '/settings',
+          },
+        ],
+      },
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
@@ -84,6 +115,32 @@ export class Plugin implements InfraClientPluginClass {
       order: 8200,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
+        searchDeepLinks: [
+          {
+            id: 'inventory',
+            title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+              defaultMessage: 'Inventory',
+            }),
+            path: '/inventory',
+          },
+          {
+            id: 'metrics-explorer',
+            title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+              defaultMessage: 'Metrics Explorer',
+            }),
+            path: '/explorer',
+          },
+          {
+            id: 'settings',
+            title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+              defaultMessage: 'Settings',
+            }),
+            path: '/settings',
+          },
+        ],
+      },
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart] = await core.getStartServices();

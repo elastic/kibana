@@ -11,7 +11,8 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service';
-import { getDeleteProvider } from './components/delete_field_provider';
+import { getDeleteFieldProvider } from './components/delete_field_provider';
+import { getFieldDeleteModalOpener } from './open_delete_modal';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -31,6 +32,11 @@ export class IndexPatternFieldEditorPlugin
       application: { capabilities },
     } = core;
     const { data, usageCollection } = plugins;
+    const openDeleteModal = getFieldDeleteModalOpener({
+      core,
+      indexPatternService: data.indexPatterns,
+      usageCollection,
+    });
     return {
       fieldFormatEditors,
       openEditor: getFieldEditorOpener({
@@ -41,16 +47,13 @@ export class IndexPatternFieldEditorPlugin
         search: data.search,
         usageCollection,
       }),
+      openDeleteModal,
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;
         },
       },
-      DeleteRuntimeFieldProvider: getDeleteProvider(
-        data.indexPatterns,
-        usageCollection,
-        core.notifications
-      ),
+      DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };
   }
 

@@ -95,6 +95,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./bwc_import'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
       loadTestFile(require.resolve('./copy_panel_to'));

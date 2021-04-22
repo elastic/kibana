@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 
+import { estypes } from '@elastic/elasticsearch';
+
 import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
@@ -29,6 +31,7 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import type {
+  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -43,7 +46,6 @@ import type { GetTransformsStatsResponseSchema } from '../../../common/api_schem
 import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 import { EsIndex } from '../../../common/types/es_index';
-import type { SearchResponse7 } from '../../../common/shared_imports';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -66,6 +68,13 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
+      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/_nodes`);
+        } catch (e) {
+          return e;
+        }
+      },
       async getTransform(
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | HttpFetchError> {
@@ -179,7 +188,7 @@ export const useApi = () => {
           return e;
         }
       },
-      async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+      async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
         } catch (e) {

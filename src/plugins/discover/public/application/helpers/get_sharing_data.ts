@@ -6,57 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { getSortForSearchSource } from '../angular/doc_table';
+import type { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { ISearchSource } from '../../../../data/common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import type { SavedSearch, SortOrder } from '../../saved_searches/types';
 import { AppState } from '../angular/discover_state';
-import { SortOrder } from '../../saved_searches/types';
-
-const getSharingDataFields = async (
-  getFieldCounts: () => Promise<Record<string, number>>,
-  selectedFields: string[],
-  timeFieldName: string,
-  hideTimeColumn: boolean
-) => {
-  if (
-    selectedFields.length === 0 ||
-    (selectedFields.length === 1 && selectedFields[0] === '_source')
-  ) {
-    const fieldCounts = await getFieldCounts();
-    return {
-      searchFields: undefined,
-      selectFields: Object.keys(fieldCounts).sort(),
-    };
-  }
-
-  const fields =
-    timeFieldName && !hideTimeColumn ? [timeFieldName, ...selectedFields] : selectedFields;
-  return {
-    searchFields: fields,
-    selectFields: fields,
-  };
-};
+import { getSortForSearchSource } from '../angular/doc_table';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
  */
 export async function getSharingData(
   currentSearchSource: ISearchSource,
-  state: AppState,
-  config: IUiSettingsClient,
-  getFieldCounts: () => Promise<Record<string, number>>
+  state: AppState | SavedSearch,
+  config: IUiSettingsClient
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 
-  const { searchFields, selectFields } = await getSharingDataFields(
-    getFieldCounts,
-    state.columns || [],
-    index.timeFieldName || '',
-    config.get(DOC_HIDE_TIME_COLUMN_SETTING)
-  );
-  searchSource.setField('fieldsFromSource', searchFields);
   searchSource.setField(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
@@ -66,17 +33,24 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  const body = await searchSource.getSearchRequestBody();
+  // Columns that the user has selected in the saved search
+  let columns = state.columns || [];
+
+  if (columns && columns.length > 0) {
+    // conditionally add the time field column:
+    let timeFieldName: string | undefined;
+    const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    if (!hideTimeColumn && index && index.timeFieldName) {
+      timeFieldName = index.timeFieldName;
+    }
+    if (timeFieldName && !columns.includes(timeFieldName)) {
+      columns = [timeFieldName, ...columns];
+    }
+  }
 
   return {
-    searchRequest: {
-      index: index.title,
-      body,
-    },
-    fields: selectFields,
-    metaFields: index.metaFields,
-    conflictedTypesFields: index.fields.filter((f) => f.type === 'conflict').map((f) => f.name),
-    indexPatternId: index.id,
+    searchSource: searchSource.getSerializedFields(true),
+    columns,
   };
 }
 

@@ -9,7 +9,7 @@ import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React from 'react';
 
 import { Loading } from '../../../../components';
-import { CategorySummaryItem, CategorySummaryList } from '../../../../types';
+import type { CategorySummaryItem, CategorySummaryList } from '../../../../types';
 
 export function CategoryFacets({
   isLoading,

@@ -17,8 +17,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L138"
+              "lineNumber": 138
             },
             "signature": [
               {
@@ -41,6 +40,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.KibanaFeature.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -53,13 +53,12 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
+                  "lineNumber": 140
                 }
               }
             ],
@@ -67,8 +66,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
+              "lineNumber": 140
             }
           },
           {
@@ -79,8 +77,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L146"
+              "lineNumber": 146
             }
           },
           {
@@ -91,8 +88,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L150"
+              "lineNumber": 150
             }
           },
           {
@@ -103,8 +99,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L154"
+              "lineNumber": 154
             },
             "signature": [
               "number | undefined"
@@ -118,8 +113,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L158"
+              "lineNumber": 158
             },
             "signature": [
               "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
@@ -133,8 +127,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L162"
+              "lineNumber": 162
             },
             "signature": [
               "readonly string[]"
@@ -148,8 +141,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L166"
+              "lineNumber": 166
             },
             "signature": [
               "readonly string[] | undefined"
@@ -163,8 +155,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L170"
+              "lineNumber": 170
             },
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
@@ -178,8 +169,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L174"
+              "lineNumber": 174
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -193,8 +183,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L178"
+              "lineNumber": 178
             },
             "signature": [
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
@@ -208,8 +197,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L182"
+              "lineNumber": 182
             },
             "signature": [
               "readonly string[] | undefined"
@@ -223,8 +211,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L186"
+              "lineNumber": 186
             }
           },
           {
@@ -235,8 +222,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L190"
+              "lineNumber": 190
             },
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
@@ -262,21 +248,165 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L194"
+              "lineNumber": 194
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L137"
+          "lineNumber": 137
         },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
+      {
+        "id": "def-public.FeatureKibanaPrivileges",
+        "type": "Interface",
+        "label": "FeatureKibanaPrivileges",
+        "description": [
+          "\nFeature privilege definition"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.excludeFromBasePrivileges",
+            "type": "CompoundType",
+            "label": "excludeFromBasePrivileges",
+            "description": [
+              "\nWhether or not this specific privilege should be excluded from the base privileges."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.management",
+            "type": "Object",
+            "label": "management",
+            "description": [
+              "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "{ [sectionId: string]: readonly string[]; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.catalogue",
+            "type": "Object",
+            "label": "catalogue",
+            "description": [
+              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.api",
+            "type": "Object",
+            "label": "api",
+            "description": [
+              "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 64
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.app",
+            "type": "Object",
+            "label": "app",
+            "description": [
+              "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 77
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.alerting",
+            "type": "Object",
+            "label": "alerting",
+            "description": [
+              "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 84
+            },
+            "signature": [
+              "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FeatureKibanaPrivileges.savedObject",
+            "type": "Object",
+            "label": "savedObject",
+            "description": [
+              "\nIf your feature requires access to specific saved objects, then specify your access needs here."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 110
+            },
+            "signature": [
+              "{ all: readonly string[]; read: readonly string[]; }"
+            ]
+          },
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-public.FeatureKibanaPrivileges.ui",
+            "type": "Object",
+            "label": "ui",
+            "description": [
+              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 153
+            },
+            "signature": [
+              "readonly string[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.KibanaFeatureConfig",
         "type": "Interface",
@@ -298,8 +428,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L27"
+              "lineNumber": 27
             }
           },
           {
@@ -312,8 +441,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L33"
+              "lineNumber": 33
             }
           },
           {
@@ -326,17 +454,10 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L40"
+              "lineNumber": 40
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ]
           },
           {
@@ -349,8 +470,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               "number | undefined"
@@ -366,8 +486,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L54"
+              "lineNumber": 54
             },
             "signature": [
               "boolean | undefined"
@@ -383,8 +502,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L62"
+              "lineNumber": 62
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -400,17 +518,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L68"
+              "lineNumber": 68
             },
             "signature": [
               "readonly string[]"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -419,8 +534,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L84"
+              "lineNumber": 84
             },
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
@@ -436,8 +550,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L92"
+              "lineNumber": 92
             },
             "signature": [
               "readonly string[] | undefined"
@@ -453,8 +566,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L99"
+              "lineNumber": 99
             },
             "signature": [
               "readonly string[] | undefined"
@@ -462,7 +574,6 @@
           },
           {
             "tags": [
-              "example",
               "see"
             ],
             "id": "def-public.KibanaFeatureConfig.privileges",
@@ -473,8 +584,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L113"
+              "lineNumber": 113
             },
             "signature": [
               "{ all: ",
@@ -506,8 +616,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L121"
+              "lineNumber": 121
             },
             "signature": [
               "readonly ",
@@ -531,8 +640,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L126"
+              "lineNumber": 126
             },
             "signature": [
               "string | undefined"
@@ -548,188 +656,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L131"
+              "lineNumber": 131
             },
             "signature": [
               "{ description: string; privileges: readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ReservedKibanaPrivilege",
-                "text": "ReservedKibanaPrivilege"
-              },
+              "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L20"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.FeatureKibanaPrivileges",
-        "type": "Interface",
-        "label": "FeatureKibanaPrivileges",
-        "description": [
-          "\nFeature privilege definition"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.FeatureKibanaPrivileges.excludeFromBasePrivileges",
-            "type": "CompoundType",
-            "label": "excludeFromBasePrivileges",
-            "description": [
-              "\nWhether or not this specific privilege should be excluded from the base privileges."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L15"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-public.FeatureKibanaPrivileges.management",
-            "type": "Object",
-            "label": "management",
-            "description": [
-              "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L29"
-            },
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FeatureKibanaPrivileges.catalogue",
-            "type": "Object",
-            "label": "catalogue",
-            "description": [
-              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L36"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-public.FeatureKibanaPrivileges.api",
-            "type": "Object",
-            "label": "api",
-            "description": [
-              "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L64"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-public.FeatureKibanaPrivileges.app",
-            "type": "Object",
-            "label": "app",
-            "description": [
-              "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L77"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FeatureKibanaPrivileges.alerting",
-            "type": "Object",
-            "label": "alerting",
-            "description": [
-              "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L84"
-            },
-            "signature": [
-              "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FeatureKibanaPrivileges.savedObject",
-            "type": "Object",
-            "label": "savedObject",
-            "description": [
-              "\nIf your feature requires access to specific saved objects, then specify your access needs here."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L110"
-            },
-            "signature": [
-              "{ all: readonly string[]; read: readonly string[]; }"
-            ]
-          },
-          {
-            "tags": [
-              "example",
-              "see"
-            ],
-            "id": "def-public.FeatureKibanaPrivileges.ui",
-            "type": "Object",
-            "label": "ui",
-            "description": [
-              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L153"
-            },
-            "signature": [
-              "readonly string[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L11"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
@@ -752,8 +690,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -766,8 +703,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "readonly ",
@@ -784,8 +720,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L15"
+          "lineNumber": 15
         },
         "initialIsOpen": false
       },
@@ -809,7 +744,7 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          ", \"management\" | \"catalogue\" | \"ui\" | \"alerting\" | \"app\" | \"api\" | \"savedObject\">"
+          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"api\" | \"savedObject\">"
         ],
         "description": [
           "\nConfiguration for a sub-feature privilege."
@@ -826,8 +761,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L61"
+              "lineNumber": 61
             }
           },
           {
@@ -840,8 +774,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L66"
+              "lineNumber": 66
             }
           },
           {
@@ -854,8 +787,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L72"
+              "lineNumber": 72
             },
             "signature": [
               "\"read\" | \"all\" | \"none\""
@@ -871,8 +803,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L79"
+              "lineNumber": 79
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -881,8 +812,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 56,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L56"
+          "lineNumber": 56
         },
         "initialIsOpen": false
       }
@@ -898,8 +828,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/features/public/plugin.ts",
-        "lineNumber": 27,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/public/plugin.ts#L27"
+        "lineNumber": 27
       },
       "signature": [
         "void"
@@ -915,8 +844,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/features/public/plugin.ts",
-        "lineNumber": 28,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/public/plugin.ts#L28"
+        "lineNumber": 28
       },
       "signature": [
         "{ getFeatures: () => Promise<",
@@ -936,278 +864,6 @@
   "server": {
     "classes": [
       {
-        "id": "def-server.KibanaFeature",
-        "type": "Class",
-        "tags": [],
-        "label": "KibanaFeature",
-        "description": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.KibanaFeature.subFeatures",
-            "type": "Array",
-            "label": "subFeatures",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L138"
-            },
-            "signature": [
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.SubFeature",
-                "text": "SubFeature"
-              },
-              "[]"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "config",
-                "isRequired": true,
-                "signature": [
-                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.SubFeaturePrivilegeGroupType",
-                    "text": "SubFeaturePrivilegeGroupType"
-                  },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
-            }
-          },
-          {
-            "id": "def-server.KibanaFeature.id",
-            "type": "string",
-            "label": "id",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L146"
-            }
-          },
-          {
-            "id": "def-server.KibanaFeature.name",
-            "type": "string",
-            "label": "name",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L150"
-            }
-          },
-          {
-            "id": "def-server.KibanaFeature.order",
-            "type": "number",
-            "label": "order",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L154"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.category",
-            "type": "Object",
-            "label": "category",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L158"
-            },
-            "signature": [
-              "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.app",
-            "type": "Object",
-            "label": "app",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L162"
-            },
-            "signature": [
-              "readonly string[]"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.catalogue",
-            "type": "Object",
-            "label": "catalogue",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L166"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.management",
-            "type": "Object",
-            "label": "management",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L170"
-            },
-            "signature": [
-              "Readonly<{ [x: string]: readonly string[]; }> | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.minimumLicense",
-            "type": "CompoundType",
-            "label": "minimumLicense",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L174"
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.privileges",
-            "type": "CompoundType",
-            "label": "privileges",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L178"
-            },
-            "signature": [
-              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.alerting",
-            "type": "Object",
-            "label": "alerting",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L182"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.excludeFromBasePrivileges",
-            "type": "boolean",
-            "label": "excludeFromBasePrivileges",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L186"
-            }
-          },
-          {
-            "id": "def-server.KibanaFeature.reserved",
-            "type": "Object",
-            "label": "reserved",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L190"
-            },
-            "signature": [
-              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaFeature.toRaw",
-            "type": "Function",
-            "label": "toRaw",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureConfig",
-                "text": "KibanaFeatureConfig"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L194"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L137"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.ElasticsearchFeature",
         "type": "Class",
         "tags": [],
@@ -1224,6 +880,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ElasticsearchFeature.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -1247,8 +904,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-                  "lineNumber": 65,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L65"
+                  "lineNumber": 65
                 }
               }
             ],
@@ -1256,8 +912,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L65"
+              "lineNumber": 65
             }
           },
           {
@@ -1268,8 +923,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L67"
+              "lineNumber": 67
             }
           },
           {
@@ -1280,8 +934,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L71"
+              "lineNumber": 71
             },
             "signature": [
               "RecursiveReadonlyArray",
@@ -1296,8 +949,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L75"
+              "lineNumber": 75
             },
             "signature": [
               "Readonly<{ [x: string]: ",
@@ -1313,8 +965,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L79"
+              "lineNumber": 79
             },
             "signature": [
               "RecursiveReadonlyArray",
@@ -1349,21 +1000,593 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L83"
+              "lineNumber": 83
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L64"
+          "lineNumber": 64
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.KibanaFeature",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaFeature",
+        "description": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.KibanaFeature.subFeatures",
+            "type": "Array",
+            "label": "subFeatures",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 138
+            },
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.SubFeature",
+                "text": "SubFeature"
+              },
+              "[]"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-server.KibanaFeature.Unnamed.$1",
+                "type": "Object",
+                "label": "config",
+                "isRequired": true,
+                "signature": [
+                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.SubFeaturePrivilegeGroupType",
+                    "text": "SubFeaturePrivilegeGroupType"
+                  },
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/features/common/kibana_feature.ts",
+                  "lineNumber": 140
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 140
+            }
+          },
+          {
+            "id": "def-server.KibanaFeature.id",
+            "type": "string",
+            "label": "id",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 146
+            }
+          },
+          {
+            "id": "def-server.KibanaFeature.name",
+            "type": "string",
+            "label": "name",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 150
+            }
+          },
+          {
+            "id": "def-server.KibanaFeature.order",
+            "type": "number",
+            "label": "order",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 154
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.category",
+            "type": "Object",
+            "label": "category",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 158
+            },
+            "signature": [
+              "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.app",
+            "type": "Object",
+            "label": "app",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 162
+            },
+            "signature": [
+              "readonly string[]"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.catalogue",
+            "type": "Object",
+            "label": "catalogue",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 166
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.management",
+            "type": "Object",
+            "label": "management",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 170
+            },
+            "signature": [
+              "Readonly<{ [x: string]: readonly string[]; }> | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.minimumLicense",
+            "type": "CompoundType",
+            "label": "minimumLicense",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 174
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.privileges",
+            "type": "CompoundType",
+            "label": "privileges",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 178
+            },
+            "signature": [
+              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.alerting",
+            "type": "Object",
+            "label": "alerting",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 182
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.excludeFromBasePrivileges",
+            "type": "boolean",
+            "label": "excludeFromBasePrivileges",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 186
+            }
+          },
+          {
+            "id": "def-server.KibanaFeature.reserved",
+            "type": "Object",
+            "label": "reserved",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 190
+            },
+            "signature": [
+              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaFeature.toRaw",
+            "type": "Function",
+            "label": "toRaw",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeatureConfig",
+                "text": "KibanaFeatureConfig"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/features/common/kibana_feature.ts",
+              "lineNumber": 194
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/kibana_feature.ts",
+          "lineNumber": 137
         },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
+      {
+        "id": "def-server.ElasticsearchFeatureConfig",
+        "type": "Interface",
+        "label": "ElasticsearchFeatureConfig",
+        "description": [
+          "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-server.ElasticsearchFeatureConfig.id",
+            "type": "string",
+            "label": "id",
+            "description": [
+              "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 23
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchFeatureConfig.management",
+            "type": "Object",
+            "label": "management",
+            "description": [
+              "\nManagement sections associated with this feature.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "{ [sectionId: string]: string[]; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchFeatureConfig.catalogue",
+            "type": "Array",
+            "label": "catalogue",
+            "description": [
+              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-server.ElasticsearchFeatureConfig.privileges",
+            "type": "Array",
+            "label": "privileges",
+            "description": [
+              "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 61
+            },
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.FeatureElasticsearchPrivileges",
+                "text": "FeatureElasticsearchPrivileges"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.FeatureElasticsearchPrivileges",
+        "type": "Interface",
+        "label": "FeatureElasticsearchPrivileges",
+        "description": [
+          "\nElasticsearch Feature privilege definition"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.FeatureElasticsearchPrivileges.requiredClusterPrivileges",
+            "type": "Array",
+            "label": "requiredClusterPrivileges",
+            "description": [
+              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+              "lineNumber": 17
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureElasticsearchPrivileges.requiredIndexPrivileges",
+            "type": "Object",
+            "label": "requiredIndexPrivileges",
+            "description": [
+              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+              "lineNumber": 38
+            },
+            "signature": [
+              "{ [indexName: string]: string[]; } | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "deprecated"
+            ],
+            "id": "def-server.FeatureElasticsearchPrivileges.requiredRoles",
+            "type": "Array",
+            "label": "requiredRoles",
+            "description": [
+              "\nA set of Elasticsearch roles which are required for this feature to be enabled.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+              "lineNumber": 50
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-server.FeatureElasticsearchPrivileges.ui",
+            "type": "Array",
+            "label": "ui",
+            "description": [
+              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+              "lineNumber": 72
+            },
+            "signature": [
+              "string[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.FeatureKibanaPrivileges",
+        "type": "Interface",
+        "label": "FeatureKibanaPrivileges",
+        "description": [
+          "\nFeature privilege definition"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.excludeFromBasePrivileges",
+            "type": "CompoundType",
+            "label": "excludeFromBasePrivileges",
+            "description": [
+              "\nWhether or not this specific privilege should be excluded from the base privileges."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.management",
+            "type": "Object",
+            "label": "management",
+            "description": [
+              "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "{ [sectionId: string]: readonly string[]; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.catalogue",
+            "type": "Object",
+            "label": "catalogue",
+            "description": [
+              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.api",
+            "type": "Object",
+            "label": "api",
+            "description": [
+              "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 64
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.app",
+            "type": "Object",
+            "label": "app",
+            "description": [
+              "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 77
+            },
+            "signature": [
+              "readonly string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.alerting",
+            "type": "Object",
+            "label": "alerting",
+            "description": [
+              "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 84
+            },
+            "signature": [
+              "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.FeatureKibanaPrivileges.savedObject",
+            "type": "Object",
+            "label": "savedObject",
+            "description": [
+              "\nIf your feature requires access to specific saved objects, then specify your access needs here."
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 110
+            },
+            "signature": [
+              "{ all: readonly string[]; read: readonly string[]; }"
+            ]
+          },
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-server.FeatureKibanaPrivileges.ui",
+            "type": "Object",
+            "label": "ui",
+            "description": [
+              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+              "lineNumber": 153
+            },
+            "signature": [
+              "readonly string[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.KibanaFeatureConfig",
         "type": "Interface",
@@ -1385,8 +1608,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L27"
+              "lineNumber": 27
             }
           },
           {
@@ -1399,8 +1621,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L33"
+              "lineNumber": 33
             }
           },
           {
@@ -1413,17 +1634,10 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L40"
+              "lineNumber": 40
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ]
           },
           {
@@ -1436,8 +1650,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               "number | undefined"
@@ -1453,8 +1666,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L54"
+              "lineNumber": 54
             },
             "signature": [
               "boolean | undefined"
@@ -1470,8 +1682,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L62"
+              "lineNumber": 62
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -1487,17 +1698,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L68"
+              "lineNumber": 68
             },
             "signature": [
               "readonly string[]"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -1506,8 +1714,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L84"
+              "lineNumber": 84
             },
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
@@ -1523,8 +1730,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L92"
+              "lineNumber": 92
             },
             "signature": [
               "readonly string[] | undefined"
@@ -1540,8 +1746,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L99"
+              "lineNumber": 99
             },
             "signature": [
               "readonly string[] | undefined"
@@ -1549,7 +1754,6 @@
           },
           {
             "tags": [
-              "example",
               "see"
             ],
             "id": "def-server.KibanaFeatureConfig.privileges",
@@ -1560,8 +1764,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L113"
+              "lineNumber": 113
             },
             "signature": [
               "{ all: ",
@@ -1593,8 +1796,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L121"
+              "lineNumber": 121
             },
             "signature": [
               "readonly ",
@@ -1618,8 +1820,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L126"
+              "lineNumber": 126
             },
             "signature": [
               "string | undefined"
@@ -1635,376 +1836,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L131"
+              "lineNumber": 131
             },
             "signature": [
               "{ description: string; privileges: readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ReservedKibanaPrivilege",
-                "text": "ReservedKibanaPrivilege"
-              },
+              "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L20"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.FeatureKibanaPrivileges",
-        "type": "Interface",
-        "label": "FeatureKibanaPrivileges",
-        "description": [
-          "\nFeature privilege definition"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.FeatureKibanaPrivileges.excludeFromBasePrivileges",
-            "type": "CompoundType",
-            "label": "excludeFromBasePrivileges",
-            "description": [
-              "\nWhether or not this specific privilege should be excluded from the base privileges."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L15"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-server.FeatureKibanaPrivileges.management",
-            "type": "Object",
-            "label": "management",
-            "description": [
-              "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L29"
-            },
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.FeatureKibanaPrivileges.catalogue",
-            "type": "Object",
-            "label": "catalogue",
-            "description": [
-              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L36"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-server.FeatureKibanaPrivileges.api",
-            "type": "Object",
-            "label": "api",
-            "description": [
-              "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L64"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-server.FeatureKibanaPrivileges.app",
-            "type": "Object",
-            "label": "app",
-            "description": [
-              "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L77"
-            },
-            "signature": [
-              "readonly string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.FeatureKibanaPrivileges.alerting",
-            "type": "Object",
-            "label": "alerting",
-            "description": [
-              "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L84"
-            },
-            "signature": [
-              "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.FeatureKibanaPrivileges.savedObject",
-            "type": "Object",
-            "label": "savedObject",
-            "description": [
-              "\nIf your feature requires access to specific saved objects, then specify your access needs here."
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L110"
-            },
-            "signature": [
-              "{ all: readonly string[]; read: readonly string[]; }"
-            ]
-          },
-          {
-            "tags": [
-              "example",
-              "see"
-            ],
-            "id": "def-server.FeatureKibanaPrivileges.ui",
-            "type": "Object",
-            "label": "ui",
-            "description": [
-              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L153"
-            },
-            "signature": [
-              "readonly string[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ElasticsearchFeatureConfig",
-        "type": "Interface",
-        "label": "ElasticsearchFeatureConfig",
-        "description": [
-          "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [
-              "see"
-            ],
-            "id": "def-server.ElasticsearchFeatureConfig.id",
-            "type": "string",
-            "label": "id",
-            "description": [
-              "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L23"
-            }
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-server.ElasticsearchFeatureConfig.management",
-            "type": "Object",
-            "label": "management",
-            "description": [
-              "\nManagement sections associated with this feature.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L36"
-            },
-            "signature": [
-              "{ [sectionId: string]: string[]; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchFeatureConfig.catalogue",
-            "type": "Array",
-            "label": "catalogue",
-            "description": [
-              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L44"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example",
-              "see"
-            ],
-            "id": "def-server.ElasticsearchFeatureConfig.privileges",
-            "type": "Array",
-            "label": "privileges",
-            "description": [
-              "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L61"
-            },
-            "signature": [
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.FeatureElasticsearchPrivileges",
-                "text": "FeatureElasticsearchPrivileges"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.FeatureElasticsearchPrivileges",
-        "type": "Interface",
-        "label": "FeatureElasticsearchPrivileges",
-        "description": [
-          "\nElasticsearch Feature privilege definition"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.FeatureElasticsearchPrivileges.requiredClusterPrivileges",
-            "type": "Array",
-            "label": "requiredClusterPrivileges",
-            "description": [
-              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L17"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-server.FeatureElasticsearchPrivileges.requiredIndexPrivileges",
-            "type": "Object",
-            "label": "requiredIndexPrivileges",
-            "description": [
-              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L38"
-            },
-            "signature": [
-              "{ [indexName: string]: string[]; } | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "deprecated"
-            ],
-            "id": "def-server.FeatureElasticsearchPrivileges.requiredRoles",
-            "type": "Array",
-            "label": "requiredRoles",
-            "description": [
-              "\nA set of Elasticsearch roles which are required for this feature to be enabled.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L50"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example",
-              "see"
-            ],
-            "id": "def-server.FeatureElasticsearchPrivileges.ui",
-            "type": "Array",
-            "label": "ui",
-            "description": [
-              "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L72"
-            },
-            "signature": [
-              "string[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L11"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
@@ -2035,6 +1878,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerKibanaFeature.$1",
                 "type": "Object",
                 "label": "feature",
                 "isRequired": true,
@@ -2050,8 +1894,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L34"
+                  "lineNumber": 34
                 }
               }
             ],
@@ -2059,8 +1902,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L34"
+              "lineNumber": 34
             }
           },
           {
@@ -2081,6 +1923,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerElasticsearchFeature.$1",
                 "type": "Object",
                 "label": "feature",
                 "isRequired": true,
@@ -2096,8 +1939,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L35"
+                  "lineNumber": 35
                 }
               }
             ],
@@ -2105,8 +1947,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L35"
+              "lineNumber": 35
             }
           },
           {
@@ -2130,8 +1971,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L41"
+              "lineNumber": 41
             }
           },
           {
@@ -2155,8 +1995,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L47"
+              "lineNumber": 47
             }
           },
           {
@@ -2165,13 +2004,7 @@
             "label": "getFeaturesUICapabilities",
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "description": [],
             "children": [],
@@ -2179,15 +2012,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L48"
+              "lineNumber": 48
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L33"
+          "lineNumber": 33
         },
         "initialIsOpen": false
       },
@@ -2219,8 +2050,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L52"
+              "lineNumber": 52
             }
           },
           {
@@ -2244,15 +2074,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L53"
+              "lineNumber": 53
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/plugin.ts#L51"
+          "lineNumber": 51
         },
         "initialIsOpen": false
       }
@@ -2268,8 +2096,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/features/server/feature_schema.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/server/feature_schema.ts#L23"
+          "lineNumber": 23
         },
         "signature": [
           "RegExp"
@@ -2297,6 +2124,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ElasticsearchFeature.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2320,8 +2148,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-                  "lineNumber": 65,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L65"
+                  "lineNumber": 65
                 }
               }
             ],
@@ -2329,8 +2156,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L65"
+              "lineNumber": 65
             }
           },
           {
@@ -2341,8 +2167,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L67"
+              "lineNumber": 67
             }
           },
           {
@@ -2353,8 +2178,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L71"
+              "lineNumber": 71
             },
             "signature": [
               "RecursiveReadonlyArray",
@@ -2369,8 +2193,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L75"
+              "lineNumber": 75
             },
             "signature": [
               "Readonly<{ [x: string]: ",
@@ -2386,8 +2209,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L79"
+              "lineNumber": 79
             },
             "signature": [
               "RecursiveReadonlyArray",
@@ -2422,15 +2244,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L83"
+              "lineNumber": 83
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L64"
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -2449,8 +2269,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L138"
+              "lineNumber": 138
             },
             "signature": [
               {
@@ -2473,6 +2292,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.KibanaFeature.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2485,13 +2305,12 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
+                  "lineNumber": 140
                 }
               }
             ],
@@ -2499,8 +2318,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L140"
+              "lineNumber": 140
             }
           },
           {
@@ -2511,8 +2329,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L146"
+              "lineNumber": 146
             }
           },
           {
@@ -2523,8 +2340,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L150"
+              "lineNumber": 150
             }
           },
           {
@@ -2535,8 +2351,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L154"
+              "lineNumber": 154
             },
             "signature": [
               "number | undefined"
@@ -2550,8 +2365,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L158"
+              "lineNumber": 158
             },
             "signature": [
               "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
@@ -2565,8 +2379,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L162"
+              "lineNumber": 162
             },
             "signature": [
               "readonly string[]"
@@ -2580,8 +2393,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L166"
+              "lineNumber": 166
             },
             "signature": [
               "readonly string[] | undefined"
@@ -2595,8 +2407,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L170"
+              "lineNumber": 170
             },
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
@@ -2610,8 +2421,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L174"
+              "lineNumber": 174
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -2625,8 +2435,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L178"
+              "lineNumber": 178
             },
             "signature": [
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
@@ -2640,8 +2449,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L182"
+              "lineNumber": 182
             },
             "signature": [
               "readonly string[] | undefined"
@@ -2655,8 +2463,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L186"
+              "lineNumber": 186
             }
           },
           {
@@ -2667,8 +2474,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L190"
+              "lineNumber": 190
             },
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
@@ -2694,15 +2500,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L194"
+              "lineNumber": 194
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L137"
+          "lineNumber": 137
         },
         "initialIsOpen": false
       },
@@ -2723,6 +2527,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.SubFeature.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2735,13 +2540,12 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/features/common/sub_feature.ts",
-                  "lineNumber": 83,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L83"
+                  "lineNumber": 83
                 }
               }
             ],
@@ -2749,8 +2553,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L83"
+              "lineNumber": 83
             }
           },
           {
@@ -2761,8 +2564,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 85,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L85"
+              "lineNumber": 85
             }
           },
           {
@@ -2773,8 +2575,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L89"
+              "lineNumber": 89
             },
             "signature": [
               "readonly Readonly<{ groupType: ",
@@ -2785,7 +2586,7 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
             ]
           },
           {
@@ -2801,7 +2602,7 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; ui: readonly string[]; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"read\" | \"all\" | \"none\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }"
             ],
             "description": [],
             "children": [],
@@ -2809,21 +2610,107 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L93"
+              "lineNumber": 93
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 82,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L82"
+          "lineNumber": 82
         },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
+      {
+        "id": "def-common.ElasticsearchFeatureConfig",
+        "type": "Interface",
+        "label": "ElasticsearchFeatureConfig",
+        "description": [
+          "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-common.ElasticsearchFeatureConfig.id",
+            "type": "string",
+            "label": "id",
+            "description": [
+              "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 23
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ElasticsearchFeatureConfig.management",
+            "type": "Object",
+            "label": "management",
+            "description": [
+              "\nManagement sections associated with this feature.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "{ [sectionId: string]: string[]; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ElasticsearchFeatureConfig.catalogue",
+            "type": "Array",
+            "label": "catalogue",
+            "description": [
+              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "see"
+            ],
+            "id": "def-common.ElasticsearchFeatureConfig.privileges",
+            "type": "Array",
+            "label": "privileges",
+            "description": [
+              "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+              "lineNumber": 61
+            },
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.FeatureElasticsearchPrivileges",
+                "text": "FeatureElasticsearchPrivileges"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-common.FeatureElasticsearchPrivileges",
         "type": "Interface",
@@ -2843,17 +2730,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L17"
+              "lineNumber": 17
             },
             "signature": [
               "string[]"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-common.FeatureElasticsearchPrivileges.requiredIndexPrivileges",
             "type": "Object",
             "label": "requiredIndexPrivileges",
@@ -2862,8 +2746,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L38"
+              "lineNumber": 38
             },
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
@@ -2881,8 +2764,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L50"
+              "lineNumber": 50
             },
             "signature": [
               "string[] | undefined"
@@ -2890,7 +2772,6 @@
           },
           {
             "tags": [
-              "example",
               "see"
             ],
             "id": "def-common.FeatureElasticsearchPrivileges.ui",
@@ -2901,8 +2782,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L72"
+              "lineNumber": 72
             },
             "signature": [
               "string[]"
@@ -2911,8 +2791,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_elasticsearch_privileges.ts#L11"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       },
@@ -2935,17 +2814,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "boolean | undefined"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.management",
             "type": "Object",
             "label": "management",
@@ -2954,8 +2830,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L29"
+              "lineNumber": 29
             },
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
@@ -2971,17 +2846,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L36"
+              "lineNumber": 36
             },
             "signature": [
               "readonly string[] | undefined"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.api",
             "type": "Object",
             "label": "api",
@@ -2990,17 +2862,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L64"
+              "lineNumber": 64
             },
             "signature": [
               "readonly string[] | undefined"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.app",
             "type": "Object",
             "label": "app",
@@ -3009,8 +2878,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L77"
+              "lineNumber": 77
             },
             "signature": [
               "readonly string[] | undefined"
@@ -3026,8 +2894,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L84"
+              "lineNumber": 84
             },
             "signature": [
               "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
@@ -3043,8 +2910,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L110"
+              "lineNumber": 110
             },
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
@@ -3052,7 +2918,6 @@
           },
           {
             "tags": [
-              "example",
               "see"
             ],
             "id": "def-common.FeatureKibanaPrivileges.ui",
@@ -3063,8 +2928,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L153"
+              "lineNumber": 153
             },
             "signature": [
               "readonly string[]"
@@ -3073,104 +2937,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/feature_kibana_privileges.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.ElasticsearchFeatureConfig",
-        "type": "Interface",
-        "label": "ElasticsearchFeatureConfig",
-        "description": [
-          "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [
-              "see"
-            ],
-            "id": "def-common.ElasticsearchFeatureConfig.id",
-            "type": "string",
-            "label": "id",
-            "description": [
-              "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L23"
-            }
-          },
-          {
-            "tags": [
-              "example"
-            ],
-            "id": "def-common.ElasticsearchFeatureConfig.management",
-            "type": "Object",
-            "label": "management",
-            "description": [
-              "\nManagement sections associated with this feature.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L36"
-            },
-            "signature": [
-              "{ [sectionId: string]: string[]; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.ElasticsearchFeatureConfig.catalogue",
-            "type": "Array",
-            "label": "catalogue",
-            "description": [
-              "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L44"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "example",
-              "see"
-            ],
-            "id": "def-common.ElasticsearchFeatureConfig.privileges",
-            "type": "Array",
-            "label": "privileges",
-            "description": [
-              "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
-            ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L61"
-            },
-            "signature": [
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.FeatureElasticsearchPrivileges",
-                "text": "FeatureElasticsearchPrivileges"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/elasticsearch_feature.ts#L16"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       },
@@ -3195,8 +2962,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L27"
+              "lineNumber": 27
             }
           },
           {
@@ -3209,8 +2975,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L33"
+              "lineNumber": 33
             }
           },
           {
@@ -3223,17 +2988,10 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L40"
+              "lineNumber": 40
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ]
           },
           {
@@ -3246,8 +3004,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               "number | undefined"
@@ -3263,8 +3020,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L54"
+              "lineNumber": 54
             },
             "signature": [
               "boolean | undefined"
@@ -3280,8 +3036,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L62"
+              "lineNumber": 62
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -3297,17 +3052,14 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L68"
+              "lineNumber": 68
             },
             "signature": [
               "readonly string[]"
             ]
           },
           {
-            "tags": [
-              "example"
-            ],
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -3316,8 +3068,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L84"
+              "lineNumber": 84
             },
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
@@ -3333,8 +3084,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L92"
+              "lineNumber": 92
             },
             "signature": [
               "readonly string[] | undefined"
@@ -3350,8 +3100,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L99"
+              "lineNumber": 99
             },
             "signature": [
               "readonly string[] | undefined"
@@ -3359,7 +3108,6 @@
           },
           {
             "tags": [
-              "example",
               "see"
             ],
             "id": "def-common.KibanaFeatureConfig.privileges",
@@ -3370,8 +3118,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L113"
+              "lineNumber": 113
             },
             "signature": [
               "{ all: ",
@@ -3403,8 +3150,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L121"
+              "lineNumber": 121
             },
             "signature": [
               "readonly ",
@@ -3428,8 +3174,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L126"
+              "lineNumber": 126
             },
             "signature": [
               "string | undefined"
@@ -3445,26 +3190,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L131"
+              "lineNumber": 131
             },
             "signature": [
               "{ description: string; privileges: readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ReservedKibanaPrivilege",
-                "text": "ReservedKibanaPrivilege"
-              },
+              "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/kibana_feature.ts#L20"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
@@ -3487,8 +3224,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -3501,8 +3237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "readonly ",
@@ -3519,8 +3254,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L15"
+          "lineNumber": 15
         },
         "initialIsOpen": false
       },
@@ -3544,7 +3278,7 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          ", \"management\" | \"catalogue\" | \"ui\" | \"alerting\" | \"app\" | \"api\" | \"savedObject\">"
+          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"api\" | \"savedObject\">"
         ],
         "description": [
           "\nConfiguration for a sub-feature privilege."
@@ -3561,8 +3295,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L61"
+              "lineNumber": 61
             }
           },
           {
@@ -3575,8 +3308,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L66"
+              "lineNumber": 66
             }
           },
           {
@@ -3589,8 +3321,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L72"
+              "lineNumber": 72
             },
             "signature": [
               "\"read\" | \"all\" | \"none\""
@@ -3606,8 +3337,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L79"
+              "lineNumber": 79
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -3616,8 +3346,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 56,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L56"
+          "lineNumber": 56
         },
         "initialIsOpen": false
       },
@@ -3640,8 +3369,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               {
@@ -3663,8 +3391,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L50"
+              "lineNumber": 50
             },
             "signature": [
               "readonly ",
@@ -3681,8 +3408,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L36"
+          "lineNumber": 36
         },
         "initialIsOpen": false
       }
@@ -3699,8 +3425,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/features/common/sub_feature.ts#L31"
+          "lineNumber": 31
         },
         "signature": [
           "\"mutually_exclusive\" | \"independent\""

@@ -19,6 +19,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
@@ -160,9 +162,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find<T>(options: SavedObjectsFindOptions) {
+  public async find<T, A>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.find<T>(options),
+      await this.options.baseClient.find<T, A>(options),
       undefined
     );
   }
@@ -261,6 +263,17 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
     return await this.options.baseClient.closePointInTime(id, options);
+  }
+
+  public createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    return this.options.baseClient.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
+    });
   }
 
   /**

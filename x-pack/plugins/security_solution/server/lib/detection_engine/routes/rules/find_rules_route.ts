@@ -13,11 +13,11 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { transformValidateFindAlerts } from './validate';
 import { transformError, buildSiemResponse } from '../utils';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { transformFindAlerts } from './utils';
 
 export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
@@ -96,12 +96,11 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
             return results;
           })
         );
-
-        const [validated, errors] = transformValidateFindAlerts(rules, ruleActions, ruleStatuses);
-        if (errors != null) {
-          return siemResponse.error({ statusCode: 500, body: errors });
+        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        if (transformed == null) {
+          return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {
-          return response.ok({ body: validated ?? {} });
+          return response.ok({ body: transformed ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

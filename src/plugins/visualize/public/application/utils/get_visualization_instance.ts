@@ -18,7 +18,16 @@ import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
+
+function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
+  const originalError = error.original || error;
+  return (
+    originalError instanceof SavedFieldNotFound ||
+    originalError instanceof SavedFieldTypeInvalidForAgg
+  );
+}
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
@@ -37,7 +46,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {
-    if (output.error) {
+    if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
         ((output.error as unknown) as ExpressionValueError['error']).original || output.error
       );
@@ -68,6 +77,10 @@ export const getVisualizationInstanceFromInput = async (
    * state of the visualization, into a new saved object.
    */
   const savedVis: VisSavedObject = await savedVisualizations.get();
+  if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
+    savedVis.uiStateJSON = JSON.stringify(visState.uiState);
+  }
+
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {

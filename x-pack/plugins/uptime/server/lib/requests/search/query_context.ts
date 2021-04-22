@@ -10,7 +10,7 @@ import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export class QueryContext {
   callES: UptimeESClient;
@@ -144,7 +144,8 @@ export class QueryContext {
       this.pagination,
       this.filterClause,
       this.size,
-      this.statusFilter
+      this.statusFilter,
+      this.query
     );
   }
 

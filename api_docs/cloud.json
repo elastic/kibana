@@ -19,8 +19,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L17"
+              "lineNumber": 18
             },
             "signature": [
               "string | undefined"
@@ -28,14 +27,13 @@
           },
           {
             "tags": [],
-            "id": "def-public.CloudConfigType.resetPasswordUrl",
+            "id": "def-public.CloudConfigType.cname",
             "type": "string",
-            "label": "resetPasswordUrl",
+            "label": "cname",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L18"
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -43,14 +41,13 @@
           },
           {
             "tags": [],
-            "id": "def-public.CloudConfigType.deploymentUrl",
+            "id": "def-public.CloudConfigType.base_url",
             "type": "string",
-            "label": "deploymentUrl",
+            "label": "base_url",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L19"
+              "lineNumber": 20
             },
             "signature": [
               "string | undefined"
@@ -58,14 +55,41 @@
           },
           {
             "tags": [],
-            "id": "def-public.CloudConfigType.accountUrl",
+            "id": "def-public.CloudConfigType.profile_url",
             "type": "string",
-            "label": "accountUrl",
+            "label": "profile_url",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L20"
+              "lineNumber": 21
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.deployment_url",
+            "type": "string",
+            "label": "deployment_url",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.organization_url",
+            "type": "string",
+            "label": "organization_url",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 23
             },
             "signature": [
               "string | undefined"
@@ -74,8 +98,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cloud/public/plugin.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L16"
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
@@ -98,8 +121,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L32"
+            "lineNumber": 35
           },
           "signature": [
             "string | undefined"
@@ -107,14 +129,69 @@
         },
         {
           "tags": [],
-          "id": "def-public.CloudSetup.cloudDeploymentUrl",
+          "id": "def-public.CloudSetup.cname",
           "type": "string",
-          "label": "cloudDeploymentUrl",
+          "label": "cname",
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L33"
+            "lineNumber": 36
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.baseUrl",
+          "type": "string",
+          "label": "baseUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 37
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.deploymentUrl",
+          "type": "string",
+          "label": "deploymentUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 38
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.profileUrl",
+          "type": "string",
+          "label": "profileUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 39
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.organizationUrl",
+          "type": "string",
+          "label": "organizationUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 40
           },
           "signature": [
             "string | undefined"
@@ -128,45 +205,13 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 34,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L34"
+            "lineNumber": 41
           }
-        },
-        {
-          "tags": [],
-          "id": "def-public.CloudSetup.resetPasswordUrl",
-          "type": "string",
-          "label": "resetPasswordUrl",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L35"
-          },
-          "signature": [
-            "string | undefined"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-public.CloudSetup.accountUrl",
-          "type": "string",
-          "label": "accountUrl",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 36,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L36"
-          },
-          "signature": [
-            "string | undefined"
-          ]
         }
       ],
       "source": {
         "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L31"
+        "lineNumber": 34
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -194,8 +239,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 19,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L19"
+            "lineNumber": 19
           },
           "signature": [
             "string | undefined"
@@ -209,8 +253,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 20,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L20"
+            "lineNumber": 20
           }
         },
         {
@@ -221,8 +264,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 21,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L21"
+            "lineNumber": 21
           },
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
@@ -231,8 +273,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 18,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L18"
+        "lineNumber": 18
       },
       "lifecycle": "setup",
       "initialIsOpen": true

@@ -6,24 +6,19 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-
-import { resetContext } from 'kea';
+import { LogicMounter } from '../__mocks__';
 
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {
-  const mount = (props = {}) => {
-    AppLogic({ ...DEFAULT_INITIAL_APP_DATA, ...props });
-    AppLogic.mount();
-  };
+  const { mount } = new LogicMounter(AppLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
   });
 
   it('sets values from props', () => {
-    mount();
+    mount({}, DEFAULT_INITIAL_APP_DATA);
 
     expect(AppLogic.values).toEqual({
       ilmEnabled: true,
@@ -53,7 +48,7 @@ describe('AppLogic', () => {
   describe('actions', () => {
     describe('setOnboardingComplete()', () => {
       it('sets true', () => {
-        mount({ appSearch: { onboardingComplete: false } });
+        mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: { onboardingComplete: false } });
 
         AppLogic.actions.setOnboardingComplete();
         expect(AppLogic.values.account.onboardingComplete).toEqual(true);
@@ -64,7 +59,7 @@ describe('AppLogic', () => {
   describe('selectors', () => {
     describe('myRole', () => {
       it('falls back to an empty object if role is missing', () => {
-        mount({ appSearch: {} });
+        mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: {} });
 
         expect(AppLogic.values.myRole).toEqual({});
       });

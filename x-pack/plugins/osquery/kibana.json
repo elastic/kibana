@@ -17,10 +17,14 @@
     "kibanaReact"
   ],
   "requiredPlugins": [
+    "actions",
     "data",
     "dataEnhanced",
+    "discover",
+    "features",
     "fleet",
-    "navigation"
+    "navigation",
+    "triggersActionsUi"
   ],
   "server": true,
   "ui": true,

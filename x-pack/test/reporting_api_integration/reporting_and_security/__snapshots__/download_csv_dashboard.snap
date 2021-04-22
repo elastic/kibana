@@ -1,0 +1,250 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting APIs CSV Generation from SearchSource Exports CSV with all fields when using defaults 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
+3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,,Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"{
+  \\"\\"coordinates\\"\\": [
+    54.4,
+    24.5
+  ],
+  \\"\\"type\\"\\": \\"\\"Point\\"\\"
+}\\",\\"Abu Dhabi\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Jul 12, 2019 @ 00:00:00.000\\",716724,\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0, 0, 0\\",\\"0, 0, 0, 0\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"42.375, 33, 10.344, 6.109\\",\\"80, 60, 21.984, 11.992\\",\\"23,975, 6,338, 14,116, 15,290\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"1, 1, 1, 1\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",\\"0, 0, 0, 0\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"0, 0, 0, 0\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",174,174,4,4,order,sultan
+9gMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",EUR,Pia,Pia,\\"Pia Richards\\",\\"Pia Richards\\",FEMALE,45,Richards,Richards,,Saturday,5,\\"pia@richards-family.zzz\\",Cannes,Europe,FR,\\"{
+  \\"\\"coordinates\\"\\": [
+    7,
+    43.6
+  ],
+  \\"\\"type\\"\\": \\"\\"Point\\"\\"
+}\\",\\"Alpes-Maritimes\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591503,\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"10.703, 9.867\\",\\"20.984, 20.984\\",\\"14,761, 11,632\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"1, 1\\",\\"ZO0006400064, ZO0150601506\\",\\"0, 0\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"0, 0\\",\\"ZO0006400064, ZO0150601506\\",\\"41.969\\",\\"41.969\\",2,2,order,pia
+BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing\\",\\"Women's Clothing\\",EUR,Brigitte,Brigitte,\\"Brigitte Meyer\\",\\"Brigitte Meyer\\",FEMALE,12,Meyer,Meyer,,Saturday,5,\\"brigitte@meyer-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
+  \\"\\"coordinates\\"\\": [
+    -74,
+    40.8
+  ],
+  \\"\\"type\\"\\": \\"\\"Point\\"\\"
+}\\",\\"New York\\",\\"Spherecords, Tigress Enterprises\\",\\"Spherecords, Tigress Enterprises\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591709,\\"sold_product_591709_20734, sold_product_591709_7539\\",\\"sold_product_591709_20734, sold_product_591709_7539\\",\\"7.988, 33\\",\\"7.988, 33\\",\\"Women's Clothing, Women's Clothing\\",\\"Women's Clothing, Women's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Spherecords, Tigress Enterprises\\",\\"Spherecords, Tigress Enterprises\\",\\"3.6, 17.484\\",\\"7.988, 33\\",\\"20,734, 7,539\\",\\"Basic T-shirt - dark blue, Summer dress - scarab\\",\\"Basic T-shirt - dark blue, Summer dress - scarab\\",\\"1, 1\\",\\"ZO0638206382, ZO0038800388\\",\\"0, 0\\",\\"7.988, 33\\",\\"7.988, 33\\",\\"0, 0\\",\\"ZO0638206382, ZO0038800388\\",\\"40.969\\",\\"40.969\\",2,2,order,brigitte
+KQMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Men's Clothing\\",\\"Men's Clothing\\",EUR,Abd,Abd,\\"Abd Mccarthy\\",\\"Abd Mccarthy\\",MALE,52,Mccarthy,Mccarthy,,Saturday,5,\\"abd@mccarthy-family.zzz\\",Cairo,Africa,EG,\\"{
+  \\"\\"coordinates\\"\\": [
+    31.3,
+    30.1
+  ],
+  \\"\\"type\\"\\": \\"\\"Point\\"\\"
+}\\",\\"Cairo Governorate\\",\\"Oceanavigations, Elitelligence\\",\\"Oceanavigations, Elitelligence\\",\\"Jul 12, 2019 @ 00:00:00.000\\",590937,\\"sold_product_590937_14438, sold_product_590937_23607\\",\\"sold_product_590937_14438, sold_product_590937_23607\\",\\"28.984, 12.992\\",\\"28.984, 12.992\\",\\"Men's Clothing, Men's Clothing\\",\\"Men's Clothing, Men's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Oceanavigations, Elitelligence\\",\\"Oceanavigations, Elitelligence\\",\\"13.344, 6.109\\",\\"28.984, 12.992\\",\\"14,438, 23,607\\",\\"Jumper - dark grey multicolor, Print T-shirt - black\\",\\"Jumper - dark grey multicolor, Print T-shirt - black\\",\\"1, 1\\",\\"ZO0297602976, ZO0565605656\\",\\"0, 0\\",\\"28.984, 12.992\\",\\"28.984, 12.992\\",\\"0, 0\\",\\"ZO0297602976, ZO0565605656\\",\\"41.969\\",\\"41.969\\",2,2,order,abd
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource Exports CSV with almost all fields when using fieldsFromSource 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,currency,\\"customer_first_name\\",\\"customer_full_name\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,geoip,manufacturer,\\"order_date\\",\\"order_id\\",products,\\"products.created_on\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
+3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al Boone\\",MALE,19,Boone,\\"-\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"{\\"\\"city_name\\"\\":\\"\\"Abu Dhabi\\"\\",\\"\\"continent_name\\"\\":\\"\\"Asia\\"\\",\\"\\"country_iso_code\\"\\":\\"\\"AE\\"\\",\\"\\"location\\"\\":{\\"\\"lat\\"\\":24.5,\\"\\"lon\\"\\":54.4},\\"\\"region_name\\"\\":\\"\\"Abu Dhabi\\"\\"}\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Jul 12, 2019 @ 00:00:00.000\\",716724,\\"{\\"\\"_id\\"\\":\\"\\"sold_product_716724_23975\\"\\",\\"\\"base_price\\"\\":79.99,\\"\\"base_unit_price\\"\\":79.99,\\"\\"category\\"\\":\\"\\"Men's Shoes\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Angeldale\\"\\",\\"\\"min_price\\"\\":42.39,\\"\\"price\\"\\":79.99,\\"\\"product_id\\"\\":23975,\\"\\"product_name\\"\\":\\"\\"Winter boots - cognac\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0687606876\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":79.99,\\"\\"taxless_price\\"\\":79.99,\\"\\"unit_discount_amount\\"\\":0}, {\\"\\"_id\\"\\":\\"\\"sold_product_716724_6338\\"\\",\\"\\"base_price\\"\\":59.99,\\"\\"base_unit_price\\"\\":59.99,\\"\\"category\\"\\":\\"\\"Men's Clothing\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Oceanavigations\\"\\",\\"\\"min_price\\"\\":32.99,\\"\\"price\\"\\":59.99,\\"\\"product_id\\"\\":6338,\\"\\"product_name\\"\\":\\"\\"Trenchcoat - black\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0290502905\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":59.99,\\"\\"taxless_price\\"\\":59.99,\\"\\"unit_discount_amount\\"\\":0}, {\\"\\"_id\\"\\":\\"\\"sold_product_716724_14116\\"\\",\\"\\"base_price\\"\\":21.99,\\"\\"base_unit_price\\"\\":21.99,\\"\\"category\\"\\":\\"\\"Women's Accessories\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Microlutions\\"\\",\\"\\"min_price\\"\\":10.34,\\"\\"price\\"\\":21.99,\\"\\"product_id\\"\\":14116,\\"\\"product_name\\"\\":\\"\\"Watch - black\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0126701267\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":21.99,\\"\\"taxless_price\\"\\":21.99,\\"\\"unit_discount_amount\\"\\":0}, {\\"\\"_id\\"\\":\\"\\"sold_product_716724_15290\\"\\",\\"\\"base_price\\"\\":11.99,\\"\\"base_unit_price\\"\\":11.99,\\"\\"category\\"\\":\\"\\"Men's Accessories\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Oceanavigations\\"\\",\\"\\"min_price\\"\\":6.11,\\"\\"price\\"\\":11.99,\\"\\"product_id\\"\\":15290,\\"\\"product_name\\"\\":\\"\\"Hat - light grey multicolor\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0308503085\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":11.99,\\"\\"taxless_price\\"\\":11.99,\\"\\"unit_discount_amount\\"\\":0}\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",173.96,173.96,4,4,order,sultan
+9gMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Shoes, Women's Clothing\\",EUR,Pia,\\"Pia Richards\\",FEMALE,45,Richards,\\"-\\",Saturday,5,\\"pia@richards-family.zzz\\",\\"{\\"\\"city_name\\"\\":\\"\\"Cannes\\"\\",\\"\\"continent_name\\"\\":\\"\\"Europe\\"\\",\\"\\"country_iso_code\\"\\":\\"\\"FR\\"\\",\\"\\"location\\"\\":{\\"\\"lat\\"\\":43.6,\\"\\"lon\\"\\":7},\\"\\"region_name\\"\\":\\"\\"Alpes-Maritimes\\"\\"}\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591503,\\"{\\"\\"_id\\"\\":\\"\\"sold_product_591503_14761\\"\\",\\"\\"base_price\\"\\":20.99,\\"\\"base_unit_price\\"\\":20.99,\\"\\"category\\"\\":\\"\\"Women's Shoes\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Tigress Enterprises\\"\\",\\"\\"min_price\\"\\":10.7,\\"\\"price\\"\\":20.99,\\"\\"product_id\\"\\":14761,\\"\\"product_name\\"\\":\\"\\"Classic heels - blue\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0006400064\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":20.99,\\"\\"taxless_price\\"\\":20.99,\\"\\"unit_discount_amount\\"\\":0}, {\\"\\"_id\\"\\":\\"\\"sold_product_591503_11632\\"\\",\\"\\"base_price\\"\\":20.99,\\"\\"base_unit_price\\"\\":20.99,\\"\\"category\\"\\":\\"\\"Women's Clothing\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Pyramidustries\\"\\",\\"\\"min_price\\"\\":9.87,\\"\\"price\\"\\":20.99,\\"\\"product_id\\"\\":11632,\\"\\"product_name\\"\\":\\"\\"Summer dress - coral/pink\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0150601506\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":20.99,\\"\\"taxless_price\\"\\":20.99,\\"\\"unit_discount_amount\\"\\":0}\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0006400064, ZO0150601506\\",41.98,41.98,2,2,order,pia
+BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing\\",EUR,Brigitte,\\"Brigitte Meyer\\",FEMALE,12,Meyer,\\"-\\",Saturday,5,\\"brigitte@meyer-family.zzz\\",\\"{\\"\\"city_name\\"\\":\\"\\"New York\\"\\",\\"\\"continent_name\\"\\":\\"\\"North America\\"\\",\\"\\"country_iso_code\\"\\":\\"\\"US\\"\\",\\"\\"location\\"\\":{\\"\\"lat\\"\\":40.8,\\"\\"lon\\"\\":-74},\\"\\"region_name\\"\\":\\"\\"New York\\"\\"}\\",\\"Spherecords, Tigress Enterprises\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591709,\\"{\\"\\"_id\\"\\":\\"\\"sold_product_591709_20734\\"\\",\\"\\"base_price\\"\\":7.99,\\"\\"base_unit_price\\"\\":7.99,\\"\\"category\\"\\":\\"\\"Women's Clothing\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Spherecords\\"\\",\\"\\"min_price\\"\\":3.6,\\"\\"price\\"\\":7.99,\\"\\"product_id\\"\\":20734,\\"\\"product_name\\"\\":\\"\\"Basic T-shirt - dark blue\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0638206382\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":7.99,\\"\\"taxless_price\\"\\":7.99,\\"\\"unit_discount_amount\\"\\":0}, {\\"\\"_id\\"\\":\\"\\"sold_product_591709_7539\\"\\",\\"\\"base_price\\"\\":32.99,\\"\\"base_unit_price\\"\\":32.99,\\"\\"category\\"\\":\\"\\"Women's Clothing\\"\\",\\"\\"created_on\\"\\":\\"\\"2016-12-31T00:00:00+00:00\\"\\",\\"\\"discount_amount\\"\\":0,\\"\\"discount_percentage\\"\\":0,\\"\\"manufacturer\\"\\":\\"\\"Tigress Enterprises\\"\\",\\"\\"min_price\\"\\":17.48,\\"\\"price\\"\\":32.99,\\"\\"product_id\\"\\":7539,\\"\\"product_name\\"\\":\\"\\"Summer dress - scarab\\"\\",\\"\\"quantity\\"\\":1,\\"\\"sku\\"\\":\\"\\"ZO0038800388\\"\\",\\"\\"tax_amount\\"\\":0,\\"\\"taxful_price\\"\\":32.99,\\"\\"taxless_price\\"\\":32.99,\\"\\"unit_discount_amount\\"\\":0}\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0638206382, ZO0038800388\\",40.98,40.98,2,2,order,brigitte
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource Logs the error explanation if the search query returns an error 1`] = `"{\\"statusCode\\":500,\\"error\\":\\"Internal Server Error\\",\\"message\\":\\"An internal server error occurred.\\"}"`;
+
+exports[`Reporting APIs CSV Generation from SearchSource date formatting Formatted date_nanos data, UTC timezone 1`] = `
+"date,message
+\\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\"
+\\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\"
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource date formatting Formatted date_nanos data, custom timezone (New York) 1`] = `
+"date,message
+\\"Jan 1, 2015 @ 07:10:30.123456789\\",\\"Hello 2\\"
+\\"Jan 1, 2015 @ 07:10:30.000000000\\",\\"Hello 1\\"
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, default to UTC 1`] = `
+"\\"@timestamp\\",clientip,extension
+\\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg
+\\"Sep 20, 2015 @ 10:26:48.540\\",\\"146.86.123.109\\",jpg
+\\"Sep 20, 2015 @ 10:26:48.353\\",\\"233.126.159.144\\",jpg
+\\"Sep 20, 2015 @ 10:26:45.468\\",\\"153.139.156.196\\",png
+\\"Sep 20, 2015 @ 10:26:34.063\\",\\"25.140.171.133\\",css
+\\"Sep 20, 2015 @ 10:26:11.181\\",\\"239.249.202.59\\",jpg
+\\"Sep 20, 2015 @ 10:26:00.639\\",\\"95.59.225.31\\",css
+\\"Sep 20, 2015 @ 10:26:00.094\\",\\"247.174.57.245\\",jpg
+\\"Sep 20, 2015 @ 10:25:55.744\\",\\"116.126.47.226\\",css
+\\"Sep 20, 2015 @ 10:25:54.701\\",\\"169.228.188.120\\",jpg
+\\"Sep 20, 2015 @ 10:25:52.360\\",\\"74.224.77.232\\",css
+\\"Sep 20, 2015 @ 10:25:49.913\\",\\"97.83.96.39\\",css
+\\"Sep 20, 2015 @ 10:25:44.979\\",\\"175.188.44.145\\",css
+\\"Sep 20, 2015 @ 10:25:40.968\\",\\"89.143.125.181\\",jpg
+\\"Sep 20, 2015 @ 10:25:36.331\\",\\"231.169.195.137\\",css
+\\"Sep 20, 2015 @ 10:25:34.064\\",\\"137.205.146.206\\",jpg
+\\"Sep 20, 2015 @ 10:25:32.312\\",\\"53.0.188.251\\",jpg
+\\"Sep 20, 2015 @ 10:25:27.254\\",\\"111.214.104.239\\",jpg
+\\"Sep 20, 2015 @ 10:25:22.561\\",\\"111.46.85.146\\",jpg
+\\"Sep 20, 2015 @ 10:25:06.674\\",\\"55.100.60.111\\",jpg
+\\"Sep 20, 2015 @ 10:25:05.114\\",\\"34.197.178.155\\",jpg
+\\"Sep 20, 2015 @ 10:24:55.114\\",\\"163.123.136.118\\",jpg
+\\"Sep 20, 2015 @ 10:24:54.818\\",\\"11.195.163.57\\",jpg
+\\"Sep 20, 2015 @ 10:24:53.742\\",\\"96.222.137.213\\",png
+\\"Sep 20, 2015 @ 10:24:48.798\\",\\"227.228.214.218\\",jpg
+\\"Sep 20, 2015 @ 10:24:20.223\\",\\"228.53.110.116\\",jpg
+\\"Sep 20, 2015 @ 10:24:01.794\\",\\"196.131.253.111\\",png
+\\"Sep 20, 2015 @ 10:23:49.521\\",\\"125.163.133.47\\",jpg
+\\"Sep 20, 2015 @ 10:23:45.816\\",\\"148.47.216.255\\",jpg
+\\"Sep 20, 2015 @ 10:23:36.052\\",\\"51.105.100.214\\",jpg
+\\"Sep 20, 2015 @ 10:23:34.323\\",\\"41.210.252.157\\",gif
+\\"Sep 20, 2015 @ 10:23:27.213\\",\\"248.163.75.193\\",png
+\\"Sep 20, 2015 @ 10:23:14.866\\",\\"48.43.210.167\\",png
+\\"Sep 20, 2015 @ 10:23:10.578\\",\\"33.95.78.209\\",css
+\\"Sep 20, 2015 @ 10:23:07.001\\",\\"96.40.73.208\\",css
+\\"Sep 20, 2015 @ 10:23:02.876\\",\\"174.32.230.63\\",jpg
+\\"Sep 20, 2015 @ 10:23:00.019\\",\\"140.233.207.177\\",jpg
+\\"Sep 20, 2015 @ 10:22:47.447\\",\\"37.127.124.65\\",jpg
+\\"Sep 20, 2015 @ 10:22:45.803\\",\\"130.171.208.139\\",png
+\\"Sep 20, 2015 @ 10:22:45.590\\",\\"39.250.210.253\\",jpg
+\\"Sep 20, 2015 @ 10:22:43.997\\",\\"248.239.221.43\\",css
+\\"Sep 20, 2015 @ 10:22:36.107\\",\\"232.64.207.109\\",gif
+\\"Sep 20, 2015 @ 10:22:30.527\\",\\"24.186.122.118\\",jpg
+\\"Sep 20, 2015 @ 10:22:25.697\\",\\"23.3.174.206\\",jpg
+\\"Sep 20, 2015 @ 10:22:08.272\\",\\"185.170.80.142\\",php
+\\"Sep 20, 2015 @ 10:21:40.822\\",\\"202.22.74.232\\",png
+\\"Sep 20, 2015 @ 10:21:36.210\\",\\"39.227.27.167\\",jpg
+\\"Sep 20, 2015 @ 10:21:19.154\\",\\"140.233.207.177\\",jpg
+\\"Sep 20, 2015 @ 10:21:09.852\\",\\"22.151.97.227\\",jpg
+\\"Sep 20, 2015 @ 10:21:06.079\\",\\"157.39.25.197\\",css
+\\"Sep 20, 2015 @ 10:21:01.357\\",\\"37.127.124.65\\",jpg
+\\"Sep 20, 2015 @ 10:20:56.519\\",\\"23.184.94.58\\",jpg
+\\"Sep 20, 2015 @ 10:20:40.189\\",\\"80.83.92.252\\",jpg
+\\"Sep 20, 2015 @ 10:20:27.012\\",\\"66.194.157.171\\",png
+\\"Sep 20, 2015 @ 10:20:24.450\\",\\"15.191.218.38\\",jpg
+\\"Sep 20, 2015 @ 10:19:45.764\\",\\"199.113.69.162\\",jpg
+\\"Sep 20, 2015 @ 10:19:43.754\\",\\"171.243.18.67\\",gif
+\\"Sep 20, 2015 @ 10:19:41.208\\",\\"126.87.234.213\\",jpg
+\\"Sep 20, 2015 @ 10:19:40.307\\",\\"78.216.173.242\\",css
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, non-default timezone 1`] = `
+"\\"@timestamp\\",clientip,extension
+\\"Sep 20, 2015 @ 03:26:48.725\\",\\"74.214.76.90\\",jpg
+\\"Sep 20, 2015 @ 03:26:48.540\\",\\"146.86.123.109\\",jpg
+\\"Sep 20, 2015 @ 03:26:48.353\\",\\"233.126.159.144\\",jpg
+\\"Sep 20, 2015 @ 03:26:45.468\\",\\"153.139.156.196\\",png
+\\"Sep 20, 2015 @ 03:26:34.063\\",\\"25.140.171.133\\",css
+\\"Sep 20, 2015 @ 03:26:11.181\\",\\"239.249.202.59\\",jpg
+\\"Sep 20, 2015 @ 03:26:00.639\\",\\"95.59.225.31\\",css
+\\"Sep 20, 2015 @ 03:26:00.094\\",\\"247.174.57.245\\",jpg
+\\"Sep 20, 2015 @ 03:25:55.744\\",\\"116.126.47.226\\",css
+\\"Sep 20, 2015 @ 03:25:54.701\\",\\"169.228.188.120\\",jpg
+\\"Sep 20, 2015 @ 03:25:52.360\\",\\"74.224.77.232\\",css
+\\"Sep 20, 2015 @ 03:25:49.913\\",\\"97.83.96.39\\",css
+\\"Sep 20, 2015 @ 03:25:44.979\\",\\"175.188.44.145\\",css
+\\"Sep 20, 2015 @ 03:25:40.968\\",\\"89.143.125.181\\",jpg
+\\"Sep 20, 2015 @ 03:25:36.331\\",\\"231.169.195.137\\",css
+\\"Sep 20, 2015 @ 03:25:34.064\\",\\"137.205.146.206\\",jpg
+\\"Sep 20, 2015 @ 03:25:32.312\\",\\"53.0.188.251\\",jpg
+\\"Sep 20, 2015 @ 03:25:27.254\\",\\"111.214.104.239\\",jpg
+\\"Sep 20, 2015 @ 03:25:22.561\\",\\"111.46.85.146\\",jpg
+\\"Sep 20, 2015 @ 03:25:06.674\\",\\"55.100.60.111\\",jpg
+\\"Sep 20, 2015 @ 03:25:05.114\\",\\"34.197.178.155\\",jpg
+\\"Sep 20, 2015 @ 03:24:55.114\\",\\"163.123.136.118\\",jpg
+\\"Sep 20, 2015 @ 03:24:54.818\\",\\"11.195.163.57\\",jpg
+\\"Sep 20, 2015 @ 03:24:53.742\\",\\"96.222.137.213\\",png
+\\"Sep 20, 2015 @ 03:24:48.798\\",\\"227.228.214.218\\",jpg
+\\"Sep 20, 2015 @ 03:24:20.223\\",\\"228.53.110.116\\",jpg
+\\"Sep 20, 2015 @ 03:24:01.794\\",\\"196.131.253.111\\",png
+\\"Sep 20, 2015 @ 03:23:49.521\\",\\"125.163.133.47\\",jpg
+\\"Sep 20, 2015 @ 03:23:45.816\\",\\"148.47.216.255\\",jpg
+\\"Sep 20, 2015 @ 03:23:36.052\\",\\"51.105.100.214\\",jpg
+\\"Sep 20, 2015 @ 03:23:34.323\\",\\"41.210.252.157\\",gif
+\\"Sep 20, 2015 @ 03:23:27.213\\",\\"248.163.75.193\\",png
+\\"Sep 20, 2015 @ 03:23:14.866\\",\\"48.43.210.167\\",png
+\\"Sep 20, 2015 @ 03:23:10.578\\",\\"33.95.78.209\\",css
+\\"Sep 20, 2015 @ 03:23:07.001\\",\\"96.40.73.208\\",css
+\\"Sep 20, 2015 @ 03:23:02.876\\",\\"174.32.230.63\\",jpg
+\\"Sep 20, 2015 @ 03:23:00.019\\",\\"140.233.207.177\\",jpg
+\\"Sep 20, 2015 @ 03:22:47.447\\",\\"37.127.124.65\\",jpg
+\\"Sep 20, 2015 @ 03:22:45.803\\",\\"130.171.208.139\\",png
+\\"Sep 20, 2015 @ 03:22:45.590\\",\\"39.250.210.253\\",jpg
+\\"Sep 20, 2015 @ 03:22:43.997\\",\\"248.239.221.43\\",css
+\\"Sep 20, 2015 @ 03:22:36.107\\",\\"232.64.207.109\\",gif
+\\"Sep 20, 2015 @ 03:22:30.527\\",\\"24.186.122.118\\",jpg
+\\"Sep 20, 2015 @ 03:22:25.697\\",\\"23.3.174.206\\",jpg
+\\"Sep 20, 2015 @ 03:22:08.272\\",\\"185.170.80.142\\",php
+\\"Sep 20, 2015 @ 03:21:40.822\\",\\"202.22.74.232\\",png
+\\"Sep 20, 2015 @ 03:21:36.210\\",\\"39.227.27.167\\",jpg
+\\"Sep 20, 2015 @ 03:21:19.154\\",\\"140.233.207.177\\",jpg
+\\"Sep 20, 2015 @ 03:21:09.852\\",\\"22.151.97.227\\",jpg
+\\"Sep 20, 2015 @ 03:21:06.079\\",\\"157.39.25.197\\",css
+\\"Sep 20, 2015 @ 03:21:01.357\\",\\"37.127.124.65\\",jpg
+\\"Sep 20, 2015 @ 03:20:56.519\\",\\"23.184.94.58\\",jpg
+\\"Sep 20, 2015 @ 03:20:40.189\\",\\"80.83.92.252\\",jpg
+\\"Sep 20, 2015 @ 03:20:27.012\\",\\"66.194.157.171\\",png
+\\"Sep 20, 2015 @ 03:20:24.450\\",\\"15.191.218.38\\",jpg
+\\"Sep 20, 2015 @ 03:19:45.764\\",\\"199.113.69.162\\",jpg
+\\"Sep 20, 2015 @ 03:19:43.754\\",\\"171.243.18.67\\",gif
+\\"Sep 20, 2015 @ 03:19:41.208\\",\\"126.87.234.213\\",jpg
+\\"Sep 20, 2015 @ 03:19:40.307\\",\\"78.216.173.242\\",css
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource non-timebased Handle _id and _index columns 1`] = `
+"date,message,\\"_id\\",\\"_index\\"
+\\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\",2,nanos
+\\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\",1,nanos
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource non-timebased With filters and non-timebased data 1`] = `
+"name,power
+\\"Jonelle-Jane Marth\\",1
+\\"Suzie-May Rishel\\",1
+\\"Suzie-May Rishel\\",2
+\\"Rosana Casto\\",2
+\\"Stephen Cortez\\",4
+\\"Jonelle-Jane Marth\\",6
+\\"Jonelle-Jane Marth\\",7
+\\"Florinda Alejandro\\",10
+\\"Jonelle-Jane Marth\\",14
+\\"Suzie-May Rishel\\",19
+\\"Suzie-May Rishel\\",20
+\\"Florinda Alejandro\\",22
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource validation Searches large amount of data, stops at Max Size Reached 1`] = `
+"\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"products.created_on\\",sku
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,19,716724,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",EUR,45,591503,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0006400064, ZO0150601506\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",EUR,12,591709,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0638206382, ZO0038800388\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,52,590937,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0297602976, ZO0565605656\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,29,590976,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0561405614, ZO0281602816\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",EUR,41,591636,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0385003850, ZO0408604086\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes\\",EUR,30,591539,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0505605056, ZO0513605136\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,41,591598,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0276702767, ZO0291702917\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",EUR,44,590927,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0046600466, ZO0050800508\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing, Men's Shoes\\",EUR,48,590970,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0455604556, ZO0680806808\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",EUR,46,591299,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0229002290, ZO0674406744\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,36,591133,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0529905299, ZO0617006170\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,13,591175,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0299402994, ZO0433504335\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",EUR,21,591297,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0257502575, ZO0451704517\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,14,591149,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0584905849, ZO0578405784\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",EUR,27,591754,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0335803358, ZO0325903259\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",EUR,42,591803,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0645906459, ZO0324303243\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",EUR,46,592082,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0034400344, ZO0492904929\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Accessories\\",EUR,27,591283,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0239302393, ZO0198501985\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing, Men's Shoes\\",EUR,4,591148,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0290302903, ZO0513705137\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Accessories, Men's Clothing\\",EUR,51,591417,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0464504645, ZO0621006210\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing, Men's Shoes\\",EUR,14,591562,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0544305443, ZO0108001080\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",EUR,5,590996,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0638106381, ZO0096900969\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes\\",EUR,27,591317,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0366203662, ZO0139501395\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,38,591362,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0541805418, ZO0594105941\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",EUR,30,591411,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0693506935, ZO0532405324\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing, Men's Shoes\\",EUR,38,722629,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0424204242, ZO0403504035, ZO0506705067, ZO0395603956\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,16,591041,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0418704187, ZO0557105571\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",EUR,6,591074,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0268602686, ZO0484704847\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,7,591349,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0474804748, ZO0560705607\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",EUR,44,591374,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0206002060, ZO0268302683\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",EUR,12,591230,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0226902269, ZO0660106601\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",EUR,17,591717,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0248002480, ZO0646706467\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes\\",EUR,42,591768,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0005800058, ZO0133901339\\"
+\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",EUR,21,591810,5,\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0587405874, ZO0590305903\\"
+"
+`;

@@ -6,8 +6,8 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
@@ -16,6 +16,7 @@ describe('Epic Timeline', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         columns: [
           {
             columnHeaderType: 'not-filtered',

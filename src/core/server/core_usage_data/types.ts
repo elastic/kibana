@@ -212,6 +212,13 @@ export interface CoreConfigUsageData {
       supportedProtocols: string[];
       clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+    };
   };
 
   logging: {
@@ -229,7 +236,7 @@ export interface CoreConfigUsageData {
   savedObjects: {
     customIndex: boolean;
     maxImportPayloadBytes: number;
-    maxImportExportSizeBytes: number;
+    maxImportExportSize: number;
   };
 
   // uiSettings: {
