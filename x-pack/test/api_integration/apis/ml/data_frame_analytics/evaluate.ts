@@ -147,6 +147,41 @@ export default ({ getService }: FtrProviderContext) => {
             expect(regression).to.have.property('r_squared');
           }
         });
+
+        it(`should evaluate ${testConfig.jobType} job for the user with only view permission`, async () => {
+          const { body } = await supertest
+            .post(`/api/ml/data_frame/_evaluate`)
+            .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+            .set(COMMON_REQUEST_HEADERS)
+            .send(testConfig.eval)
+            .expect(200);
+
+          if (testConfig.jobType === 'classification') {
+            const { classification } = body;
+            expect(body).to.have.property('classification');
+            expect(classification).to.have.property('recall');
+            expect(classification).to.have.property('accuracy');
+            expect(classification).to.have.property('multiclass_confusion_matrix');
+          } else {
+            const { regression } = body;
+            expect(body).to.have.property('regression');
+            expect(regression).to.have.property('mse');
+            expect(regression).to.have.property('msle');
+            expect(regression).to.have.property('r_squared');
+          }
+        });
+
+        it(`should not allow unauthorized user to evaluate ${testConfig.jobType} job`, async () => {
+          const { body } = await supertest
+            .post(`/api/ml/data_frame/_evaluate`)
+            .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+            .set(COMMON_REQUEST_HEADERS)
+            .send(testConfig.eval)
+            .expect(403);
+
+          expect(body.error).to.eql('Forbidden');
+          expect(body.message).to.eql('Forbidden');
+        });
       });
     });
   });
