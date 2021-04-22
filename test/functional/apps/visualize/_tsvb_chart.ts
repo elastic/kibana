@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'visualize',
     'visualBuilder',
@@ -28,11 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
-      await security.testUser.setRoles([
-        'kibana_admin',
-        'test_logstash_reader',
-        'kibana_sample_admin',
-      ]);
+      await security.testUser.setRoles(
+        ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
+        false
+      );
+      await initTests();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -142,6 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await security.testUser.restoreDefaults();
         await esArchiver.unload('index_pattern_without_timefield');
+        await esArchiver.load('empty_kibana');
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
@@ -249,4 +251,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
+
+  async function initTests() {
+    await kibanaServer.savedObjects.clean({ types: ['visualization'] });
+    await kibanaServer.importExport.load('visualize');
+
+    await kibanaServer.uiSettings.replace({
+      defaultIndex: 'logstash-*',
+    });
+  }
 }

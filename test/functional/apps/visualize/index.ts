@@ -15,19 +15,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const deployment = getService('deployment');
+
   let isOss = true;
 
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
+      await esArchiver.load('empty_kibana');
+
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
-      await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      });
+
       isOss = await deployment.isOss();
     });
 
@@ -36,6 +35,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup7');
 
       before(async () => {
+        await initTests();
+
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': false,
         });
@@ -50,7 +51,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       });
 
       // Test replaced vislib chart types
-      loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_line_chart_split_series'));
       loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
@@ -60,6 +60,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     describe('', function () {
       this.tags('ciGroup9');
+
+      before(async () => {
+        await initTests();
+      });
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_area_chart'));
@@ -76,6 +80,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('', function () {
       this.tags('ciGroup10');
 
+      before(async () => {
+        await initTests();
+      });
+
       loadTestFile(require.resolve('./_inspector'));
       loadTestFile(require.resolve('./_experimental_vis'));
       loadTestFile(require.resolve('./_gauge_chart'));
@@ -88,8 +96,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('', function () {
       this.tags('ciGroup4');
 
-      loadTestFile(require.resolve('./_line_chart_split_series'));
-      loadTestFile(require.resolve('./_line_chart_split_chart'));
+      before(async () => {
+        await initTests();
+      });
+
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
@@ -108,6 +118,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('', function () {
       this.tags('ciGroup12');
 
+      before(async () => {
+        await initTests();
+      });
+
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
@@ -118,4 +132,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vega_chart'));
     });
   });
+
+  async function initTests() {
+    await kibanaServer.savedObjects.clean({ types: ['visualization'] });
+    await kibanaServer.importExport.load('visualize');
+
+    await kibanaServer.uiSettings.replace({
+      defaultIndex: 'logstash-*',
+      [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+    });
+  }
 }
