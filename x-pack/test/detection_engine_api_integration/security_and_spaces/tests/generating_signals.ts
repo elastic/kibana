@@ -20,6 +20,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getSignalsByRuleIds,
@@ -39,9 +40,9 @@ export const ID = 'BhbXBmkBR346wHgn4PeZ';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/97584
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
     });
@@ -728,9 +729,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -753,9 +753,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -778,9 +777,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const signal = signalsOpen.hits.hits[0];
           expect(signal._source.signal.threshold_result).eql({
@@ -814,9 +812,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 22,
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -833,9 +830,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 21,
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const signal = signalsOpen.hits.hits[0];
           expect(signal._source.signal.threshold_result).eql({
