@@ -65,6 +65,7 @@ Every publicly exposed function, class, interface, type, parameter and property 
 - Use `@returns` tags for return types.
 - Use `@throws` when appropriate.
 - Use `@beta` or `@deprecated` when appropriate.
+- Use `@removeBy {version}` on `@deprecated` APIs. The version should be the last version the API will work in. For example, `@removeBy 7.15` means the API will be removed in 7.16. This lets us avoid mid-release cycle coordination. The API can be removed as soon as the 7.15 branch is cut.
 - Use `@internal` to indicate this API item is intended for internal use only, which will also remove it from the docs.
 
 #### Interfaces vs inlined types
