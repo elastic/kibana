@@ -9,14 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiPageContent,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPageContent, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -26,50 +19,15 @@ import { Loading } from '../../../../shared/loading';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
-import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH, DOCS_PREFIX } from '../../../routes';
+import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes';
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
 import { generateEnginePath } from '../../engine';
 
+import { EmptyState } from '../components';
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
 import { convertToDate } from '../utils';
-
-export const CurationsEmptyPrompt: React.FC = () => (
-  <EuiEmptyPrompt
-    data-test-subj="EmptyCurationsPrompt"
-    iconType="pin"
-    title={
-      <h2>
-        {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.curations.table.empty.noCurationsTitle',
-          { defaultMessage: 'Create your first curation' }
-        )}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.description', {
-          defaultMessage:
-            'Use curations to promote and hide documents. Help people discover what you would most like them to discover.',
-        })}
-      </p>
-    }
-    actions={
-      <EuiButton
-        iconType="popout"
-        size="s"
-        color="primary"
-        target="_blank"
-        href={`${DOCS_PREFIX}/curations-guide.html`}
-      >
-        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.emptyButtonLabel', {
-          defaultMessage: 'Read the curations guide',
-        })}
-      </EuiButton>
-    }
-  />
-);
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -181,7 +139,7 @@ export const CurationsTable: React.FC = () => {
       responsive
       hasActions
       loading={dataLoading}
-      noItemsMessage={<CurationsEmptyPrompt />}
+      noItemsMessage={<EmptyState />}
       pagination={{
         ...convertMetaToPagination(meta),
         hidePerPageOptions: true,
