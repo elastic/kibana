@@ -14,12 +14,13 @@ import {
   HostDetailsStrategyResponse,
   HostsQueries,
   HostDetailsRequestOptions,
+  EndpointFields,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
-import { formatHostItem } from './helpers';
+import { formatHostItem, getHostEndpoint } from './helpers';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
   buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
@@ -31,7 +32,14 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     const inspect = {
       dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
     };
-    const formattedHostItem = formatHostItem(aggregations);
-    return { ...response, inspect, hostDetails: formattedHostItem };
+    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const ident = // endpoint-generated ID, NOT elastic-agent-id
+      formattedHostItem.agent && formattedHostItem.agent.id
+        ? Array.isArray(formattedHostItem.agent.id)
+          ? formattedHostItem.agent.id[0]
+          : formattedHostItem.agent.id
+        : null;
+    const endpoint: EndpointFields | null = await getHostEndpoint(request, ident, endpointContext);
+    return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
   },
 };
