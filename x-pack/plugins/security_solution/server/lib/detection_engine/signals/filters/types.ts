@@ -44,6 +44,6 @@ export interface CreateFieldAndSetTuplesOptions<T> {
 
 export interface FieldSet {
   field: string;
-  operator: 'excluded' | 'included';
+  operator: 'excluded' | 'included' | 'wildcard_caseless';
   matchedSet: Set<unknown>;
 }
