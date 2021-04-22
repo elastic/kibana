@@ -38,7 +38,7 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
-  onRuntimeError: () => {};
+  onRuntimeError: () => void;
 }
 
 interface VisualizationErrorProps {
