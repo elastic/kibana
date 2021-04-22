@@ -6,21 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import type { LogstashPluginRouter } from '../../types';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { PipelineListItem } from '../../models/pipeline_list_item';
 import { checkLicense } from '../../lib/check_license';
 
-async function fetchPipelines(callWithRequest: LegacyAPICaller) {
-  const params = {
-    path: '/_logstash/pipeline',
-    method: 'GET',
-    ignore: [404],
-  };
-
-  return await callWithRequest('transport.request', params);
+async function fetchPipelines(client: ElasticsearchClient) {
+  const { body } = await client.transport.request(
+    {
+      method: 'GET',
+      path: '/_logstash/pipeline',
+    },
+    { ignore: [404] }
+  );
+  return body;
 }
 
 export function registerPipelinesListRoute(router: LogstashPluginRouter) {
@@ -34,7 +35,7 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         try {
           const client = context.logstash!.esClient;
-          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<
+          const pipelinesRecord = (await fetchPipelines(client.asCurrentUser)) as Record<
             string,
             any
           >;

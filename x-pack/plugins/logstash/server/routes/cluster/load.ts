@@ -19,7 +19,7 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {
       try {
         const client = context.logstash!.esClient;
-        const info = await client.callAsCurrentUser('info');
+        const { body: info } = await client.asCurrentUser.info();
         return response.ok({
           body: {
             cluster: Cluster.fromUpstreamJSON(info).downstreamJSON,
