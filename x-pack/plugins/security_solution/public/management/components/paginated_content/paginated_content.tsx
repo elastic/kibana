@@ -82,6 +82,10 @@ const RootContainer = styled.div`
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
+
+    &-content {
+      position: relative;
+    }
   }
 `;
 
@@ -197,11 +201,13 @@ export const PaginatedContent = memo(
 
         <div className="body" data-test-subj={getTestId('body')}>
           <EuiSpacer size="l" />
-          <div className={contentClassName}>{children ? children : generatedBodyItemContent}</div>
+          <div className={`body-content ${contentClassName}`}>
+            {children ? children : generatedBodyItemContent}
+          </div>
         </div>
 
         {pagination && (
-          <div>
+          <div data-test-subj={getTestId('footer')}>
             <EuiSpacer size="l" />
 
             <EuiTablePagination
@@ -212,7 +218,6 @@ export const PaginatedContent = memo(
               hidePerPageOptions={pagination.hidePerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
-              data-test-subj={getTestId('pagination')}
             />
           </div>
         )}
