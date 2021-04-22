@@ -260,9 +260,9 @@ describe('Pipeline Editor', () => {
       await actions.addProcessor('processors', 'test', { if: '1 == 1' });
 
       const processorDescriptions = {
-        script: 'my script',
-        set: 'Sets value of "test" to "test"',
-        test: 'No description',
+        userProvided: 'my script',
+        default: 'Sets value of "test" to "test"',
+        none: 'No description',
       };
 
       const createAssertForProcessor = (processorIndex: string) => ({
@@ -286,16 +286,16 @@ describe('Pipeline Editor', () => {
       const assertTestProcessor = createAssertForProcessor('3');
 
       assertScriptProcessor({
-        description: processorDescriptions.script,
+        description: processorDescriptions.userProvided,
         descriptionVisible: true,
       });
 
       assertSetProcessor({
-        description: processorDescriptions.set,
+        description: processorDescriptions.default,
         descriptionVisible: true,
       });
 
-      assertTestProcessor({ description: processorDescriptions.test, descriptionVisible: true });
+      assertTestProcessor({ description: processorDescriptions.none, descriptionVisible: true });
 
       // Enter "move" mode
       find('processors>0.moveItemButton').simulate('click');
@@ -303,16 +303,16 @@ describe('Pipeline Editor', () => {
       // We expect that descriptions remain exactly the same, but the processor with "No description" has
       // its description hidden
       assertScriptProcessor({
-        description: processorDescriptions.script,
+        description: processorDescriptions.userProvided,
         descriptionVisible: true,
       });
 
       assertSetProcessor({
-        description: processorDescriptions.set,
+        description: processorDescriptions.default,
         descriptionVisible: true,
       });
 
-      assertTestProcessor({ description: processorDescriptions.test, descriptionVisible: false });
+      assertTestProcessor({ description: processorDescriptions.none, descriptionVisible: false });
     });
   });
 });
