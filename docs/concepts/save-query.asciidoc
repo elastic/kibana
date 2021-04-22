@@ -1,39 +1,45 @@
 [[save-load-delete-query]]
-== Save a query
-A saved query is a collection of query text and filters that you can
-reuse in any app with a query bar, like <<discover, *Discover*>> and <<dashboard, *Dashboard*>>. Save a query when you want to:
+=== Save a query
 
-* Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
-* View the results of the same query in multiple apps
-* Share your query
+Have you ever built a query that you wanted to reuse?
+With saved queries, you can save your query text, filters, and time range for
+reuse anywhere a query bar is present.
 
-Saved queries don't include information specific to *Discover*,
-such as the currently selected columns in the document table, the sort order, and the index pattern.
-To save your current view of *Discover* for later retrieval and reuse,
-create a <<save-open-search, saved search>> instead.
+For example, suppose you're in *Discover*, and you've put time into building
+a query that includes query input text, multiple filters, and a specific time range.
+Save this query, and you can embed the search results in dashboards,
+use them as a foundation for building a visualization,
+and share them in a link or CVS form.
 
-NOTE::
+[role="screenshot"]
+image:concepts/images/saved-query.png["Example of the saved query management popover with a list of saved queries"]
 
-If you have insufficient privileges to save queries, the *Save current query*
-button isn't visible in the saved query management popover.
+
+Saved queries are different than <<save-open-search,saved searches>>,
+which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
+index pattern&mdash;in addition to the query.
+Saved searches are primarily used for adding search results to a dashboard.
+
+[role="xpack"]
+==== Read-only access
+If you have insufficient privileges to save queries,
+the *Save* button isn't visible in the saved query management popover.
 For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
-. Click *#* in the query bar.
+==== Save a query
+
+. Once you’ve built a query worth saving, click the save query icon image:concepts/images/save-icon.png["save query icon"].
 . In the popover, click *Save current query*.
-+
-[role="screenshot"]
-image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
-+
-. Enter a name, a description, and then select the filter options.
+. Enter a unique name to identify the query and an optional description that will appear in a tooltip in the saved query popover.
+. Choose whether to include or exclude filters and a time range.
 By default, filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
-image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
+image:concepts/images/saved-query-popup.png["Example of the saved query management popover with a list of saved queries"]
+
 . Click *Save*.
-. To load a saved query into *Discover* or *Dashboard*, open the *Saved search* popover, and select the query.
-. To manage your saved queries, use these actions in the popover:
+. To load a saved query, select it in the *Saved query* popover.
 +
-* Save as new:  Save changes to the current query.
-* Clear.  Clear a query that is currently loaded in an app.
-* Delete.  You can’t recover a deleted query.
-. To import and export saved queries, go to <<managing-saved-objects, Saved Objects in Management>>.
+The query text, filters, and time range are updated and your data refreshed.
+If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
+. To clear, modify, and delete saved queries, use the *Saved query* popover.

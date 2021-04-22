@@ -29,6 +29,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkTopCountriesQuery';
 
@@ -68,7 +69,7 @@ export const useNetworkTopCountries = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopCountriesSelector(state, type, flowTarget)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -95,6 +96,7 @@ export const useNetworkTopCountries = ({
     },
     [limit]
   );
+  const { addError, addWarning } = useAppToasts();
 
   const [
     networkTopCountriesResponse,
@@ -147,16 +149,14 @@ export const useNetworkTopCountries = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
+                addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_TOP_COUNTRIES,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -167,7 +167,7 @@ export const useNetworkTopCountries = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addWarning, addError, skip]
   );
 
   useEffect(() => {

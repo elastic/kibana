@@ -8,13 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
+import { PLUGIN_ID } from '../../common/constants/app';
+import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
+import { validateLookbackInterval, validateTopNBucket } from './validators';
 
-export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
-  // async import validators to reduce initial bundle size
-  const { validateLookbackInterval, validateTopNBucket } = await import('./validators');
-
+export function registerMlAlerts(
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
+  alerting?: AlertingSetup
+) {
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
@@ -43,6 +47,20 @@ export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPu
         validationResult.errors.jobSelection.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
             defaultMessage: 'Job selection is required',
+          })
+        );
+      }
+
+      // Since 7.13 we support single job selection only
+      if (
+        (Array.isArray(alertParams.jobSelection?.groupIds) &&
+          alertParams.jobSelection?.groupIds.length > 0) ||
+        (Array.isArray(alertParams.jobSelection?.jobIds) &&
+          alertParams.jobSelection?.jobIds.length > 1)
+      ) {
+        validationResult.errors.jobSelection.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.singleJobSelection.errorMessage', {
+            defaultMessage: 'Only one job per rule is allowed',
           })
         );
       }
@@ -96,7 +114,7 @@ export async function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPu
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
 
-Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.
+\\{\\{context.message\\}\\}
 
 \\{\\{#context.topInfluencers.length\\}\\}
   Top influencers:
@@ -117,5 +135,23 @@ Alerts are raised based on real-time scores. Remember that scores may be adjuste
 `,
       }
     ),
+  });
+
+  if (alerting) {
+    registerNavigation(alerting);
+  }
+}
+
+export function registerNavigation(alerting: AlertingSetup) {
+  alerting.registerNavigation(PLUGIN_ID, ML_ALERT_TYPES.ANOMALY_DETECTION, (alert) => {
+    const alertParams = alert.params as MlAnomalyDetectionAlertParams;
+    const jobIds = [
+      ...new Set([
+        ...(alertParams.jobSelection.jobIds ?? []),
+        ...(alertParams.jobSelection.groupIds ?? []),
+      ]),
+    ];
+
+    return createExplorerUrl('', { jobIds });
   });
 }
