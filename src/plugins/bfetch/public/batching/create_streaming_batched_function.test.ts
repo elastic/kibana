@@ -10,6 +10,7 @@ import { createStreamingBatchedFunction } from './create_streaming_batched_funct
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
 import { AbortError, defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
+import { deflateSync } from 'zlib';
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
@@ -259,8 +260,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 1,
-          result: { foo: 'bar' },
+          compressed: false,
+          payload: {
+            id: 1,
+            result: { foo: 'bar' },
+          },
         }) + '\n'
       );
 
@@ -270,8 +274,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 0,
-          result: { foo: 'bar 2' },
+          compressed: false,
+          payload: {
+            id: 0,
+            result: { foo: 'bar 2' },
+          },
         }) + '\n'
       );
 
@@ -296,14 +303,64 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 1,
-          result: { foo: 'bar' },
+          compressed: false,
+          payload: {
+            id: 1,
+            result: { foo: 'bar' },
+          },
         }) + '\n'
       );
       stream.next(
         JSON.stringify({
-          id: 2,
-          result: { foo: 'bar 2' },
+          compressed: false,
+          payload: {
+            id: 2,
+            result: { foo: 'bar 2' },
+          },
+        }) + '\n'
+      );
+
+      expect(await isPending(promise1)).toBe(true);
+      expect(await isPending(promise2)).toBe(false);
+      expect(await isPending(promise3)).toBe(false);
+      expect(await promise2).toEqual({ foo: 'bar' });
+      expect(await promise3).toEqual({ foo: 'bar 2' });
+    });
+
+    test('handles compressed chunks', async () => {
+      const { fetchStreaming, stream } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+      });
+
+      const promise1 = fn({ a: '1' });
+      const promise2 = fn({ b: '2' });
+      const promise3 = fn({ c: '3' });
+      await new Promise((r) => setTimeout(r, 6));
+
+      const compress = (resp: object) => {
+        return deflateSync(JSON.stringify(resp)).toString('base64');
+      };
+
+      stream.next(
+        JSON.stringify({
+          compressed: true,
+          payload: compress({
+            id: 1,
+            result: { foo: 'bar' },
+          }),
+        }) + '\n'
+      );
+      stream.next(
+        JSON.stringify({
+          compressed: true,
+          payload: compress({
+            id: 2,
+            result: { foo: 'bar 2' },
+          }),
         }) + '\n'
       );
 
@@ -330,20 +387,29 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 0,
-          result: false,
+          compressed: false,
+          payload: {
+            id: 0,
+            result: false,
+          },
         }) + '\n'
       );
       stream.next(
         JSON.stringify({
-          id: 1,
-          result: 0,
+          compressed: false,
+          payload: {
+            id: 1,
+            result: 0,
+          },
         }) + '\n'
       );
       stream.next(
         JSON.stringify({
-          id: 2,
-          result: '',
+          compressed: false,
+          payload: {
+            id: 2,
+            result: '',
+          },
         }) + '\n'
       );
 
@@ -371,8 +437,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 0,
-          error: { message: 'oops' },
+          compressed: false,
+          payload: {
+            id: 0,
+            error: { message: 'oops' },
+          },
         }) + '\n'
       );
 
@@ -400,8 +469,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 2,
-          result: { b: '3' },
+          compressed: false,
+          payload: {
+            id: 2,
+            result: { b: '3' },
+          },
         }) + '\n'
       );
 
@@ -409,8 +481,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 1,
-          error: { b: '2' },
+          compressed: false,
+          payload: {
+            id: 1,
+            error: { b: '2' },
+          },
         }) + '\n'
       );
 
@@ -418,8 +493,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 0,
-          result: { b: '1' },
+          compressed: false,
+          payload: {
+            id: 0,
+            result: { b: '1' },
+          },
         }) + '\n'
       );
 
@@ -489,8 +567,11 @@ describe('createStreamingBatchedFunction()', () => {
 
         stream.next(
           JSON.stringify({
-            id: 1,
-            result: { b: '2' },
+            compressed: false,
+            payload: {
+              id: 1,
+              result: { b: '2' },
+            },
           }) + '\n'
         );
 
@@ -548,8 +629,11 @@ describe('createStreamingBatchedFunction()', () => {
 
         stream.next(
           JSON.stringify({
-            id: 1,
-            result: { b: '1' },
+            compressed: false,
+            payload: {
+              id: 1,
+              result: { b: '1' },
+            },
           }) + '\n'
         );
         stream.complete();
@@ -617,8 +701,11 @@ describe('createStreamingBatchedFunction()', () => {
 
         stream.next(
           JSON.stringify({
-            id: 1,
-            result: { b: '1' },
+            compressed: false,
+            payload: {
+              id: 1,
+              result: { b: '1' },
+            },
           }) + '\n'
         );
         stream.error('oops');
@@ -653,8 +740,11 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next(
         JSON.stringify({
-          id: 1,
-          result: { b: '1' },
+          compressed: false,
+          payload: {
+            id: 1,
+            result: { b: '1' },
+          },
         }) + '\n'
       );
 

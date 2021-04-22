@@ -8,15 +8,25 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
+import { inflateSync } from 'zlib';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
+
+const inflate = (resp: any) => {
+  if (resp.compressed) {
+    const inputBuf = Buffer.from(resp.payload, 'base64');
+    return JSON.parse(inflateSync(inputBuf).toString());
+  } else {
+    return JSON.parse(resp.payload);
+  }
+};
 
 function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
   return resp.text
     .trim()
     .split('\n')
-    .map((item) => JSON.parse(item));
+    .map((item) => inflate(JSON.parse(item)));
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -33,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
                 params: {
                   body: {
                     query: {
-                      match_all: {},
+                      bool: {
+                        must: [{ match: { name: 'John' } }],
+                      },
                     },
                   },
                 },
@@ -42,7 +54,9 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         });
 
-        const jsonBody = JSON.parse(resp.text);
+        const response = JSON.parse(resp.text);
+        expect(response.compressed).to.be(false);
+        const jsonBody = inflate(response);
 
         expect(resp.status).to.be(200);
         expect(jsonBody.id).to.be(0);

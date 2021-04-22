@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { inflate } from 'pako';
+import { inflateSync } from 'zlib';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
@@ -14,6 +14,7 @@ import {
   createBatchedFunction,
   BatchResponseItem,
   ErrorLike,
+  BatchItemWrapper,
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
@@ -129,10 +130,15 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
         };
 
         const getResponse = (response: string) => {
-          const { compressed, payload } = JSON.parse(response);
-          const inputBuf = Buffer.from(payload, 'base64');
-          const inflatedRes = compressed ? inflate(inputBuf, { to: 'string' }) : payload;
-          return JSON.parse(inflatedRes) as BatchResponseItem<Result, ErrorLike>;
+          const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
+
+          try {
+            const inputBuf = Buffer.from(payload, 'base64');
+            const inflatedRes = compressed ? inflateSync(inputBuf).toString() : payload;
+            return JSON.parse(inflatedRes) as BatchResponseItem<Result, ErrorLike>;
+          } catch (e) {
+            return payload;
+          }
         };
 
         stream.pipe(split('\n')).subscribe({

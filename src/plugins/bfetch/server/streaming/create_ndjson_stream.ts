@@ -12,7 +12,7 @@ import { Stream, PassThrough } from 'stream';
 import { deflateSync } from 'zlib';
 
 const delimiter = '\n';
-const ENCODE_THRESHOLD = 1000;
+const ENCODE_THRESHOLD = 1400;
 
 export const createNDJSONStream = <Response>(
   results: Observable<Response>,
