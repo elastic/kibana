@@ -54,13 +54,30 @@ export class ConsoleMenu extends Component<Props, State> {
     }
   }
 
-  copyText(text: string) {
+  /**
+   * Use the document.execCommand('copy') API to interact with the system clipboard.
+   */
+  legacyCopyText(text: string) {
     const textField = document.createElement('textarea');
     textField.innerText = text;
     document.body.appendChild(textField);
     textField.select();
     document.execCommand('copy');
     textField.remove();
+  }
+
+  /**
+   * Best effort functionality to write provided text to the system clipboard
+   */
+  copyText(text: string) {
+    // We prefer using the Clipboard API to interact with the system clipboard. It has widespread support among
+    // browsers: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Interact_with_the_clipboard.
+    if (window.navigator?.clipboard) {
+      window.navigator.clipboard.writeText(text);
+    } else {
+      // If, for some reason, the system clipboard is not accessible we try the legacy document.execCommand.
+      this.legacyCopyText(text);
+    }
   }
 
   onButtonClick = () => {
