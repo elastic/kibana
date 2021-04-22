@@ -84,6 +84,17 @@ describe('ResultSettings', () => {
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
+  it('renders the "save" button as disabled if everything is disabled', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+      resultFieldsEmpty: true,
+    });
+    const buttons = findButtons(subject());
+    const saveButton = shallow(buttons[0]);
+    expect(saveButton.prop('disabled')).toBe(true);
+  });
+
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
     const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);

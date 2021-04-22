@@ -40,9 +40,13 @@ const CLEAR_BUTTON_LABEL = i18n.translate(
 );
 
 export const ResultSettings: React.FC = () => {
-  const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings } = useValues(
-    ResultSettingsLogic
-  );
+  const {
+    dataLoading,
+    schema,
+    stagedUpdates,
+    resultFieldsAtDefaultSettings,
+    resultFieldsEmpty,
+  } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -74,7 +78,7 @@ export const ResultSettings: React.FC = () => {
                   color="primary"
                   fill
                   onClick={saveResultSettings}
-                  disabled={!stagedUpdates}
+                  disabled={resultFieldsEmpty || !stagedUpdates}
                 >
                   {SAVE_BUTTON_LABEL}
                 </EuiButton>,
