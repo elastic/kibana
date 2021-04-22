@@ -12,7 +12,7 @@ import { useAppToasts } from './use_app_toasts';
 
 jest.mock('../lib/kibana');
 
-describe('useDeleteList', () => {
+describe('useAppToasts', () => {
   let addErrorMock: jest.Mock;
   let addSuccessMock: jest.Mock;
   let addWarningMock: jest.Mock;
@@ -37,22 +37,6 @@ describe('useDeleteList', () => {
     expect(addErrorMock).toHaveBeenCalledWith(error, { title: 'title' });
   });
 
-  it("uses a AppError's body.message as the toastMessage", async () => {
-    const kibanaApiError = {
-      message: 'Not Found',
-      body: { status_code: 404, message: 'Detailed Message' },
-    };
-
-    const { result } = renderHook(() => useAppToasts());
-
-    result.current.addError(kibanaApiError, { title: 'title' });
-
-    expect(addErrorMock).toHaveBeenCalledWith(kibanaApiError, {
-      title: 'title',
-      toastMessage: 'Detailed Message',
-    });
-  });
-
   it('converts an unknown error to an Error', () => {
     const unknownError = undefined;
 
@@ -64,4 +48,6 @@ describe('useDeleteList', () => {
       title: 'title',
     });
   });
+
+  // TODO: Add the other tests here
 });

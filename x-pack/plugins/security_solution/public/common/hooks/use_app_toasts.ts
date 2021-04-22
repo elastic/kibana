@@ -32,7 +32,7 @@ export const useAppToasts = (): UseAppToasts => {
 
   const _addError = useCallback(
     (error: unknown, options: ErrorToastOptions) => {
-      if (isEsError(error)) {
+      if (error != null && isEsError(error)) {
         const err = esErrorToRequestError(error);
         return addError(err, options);
       } else if (isAppError(error)) {
