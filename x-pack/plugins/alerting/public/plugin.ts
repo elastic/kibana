@@ -36,7 +36,9 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       const alertType = await loadAlertType({ http: core.http, id: alertTypeId });
       if (!alertType) {
         // eslint-disable-next-line no-console
-        console.log(`Alert type "${alertTypeId}" is not registered.`);
+        console.log(
+          `Unable to register navigation for alert type "${alertTypeId}" because it is not registered on the server side.`
+        );
         return;
       }
       this.alertNavigationRegistry!.register(consumer, alertType, handler);
@@ -59,7 +61,9 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
         if (!alertType) {
           // eslint-disable-next-line no-console
-          console.log(`Alert type "${alert.alertTypeId}" is not registered.`);
+          console.log(
+            `Unable to get navigation for alert type "${alert.alertTypeId}" because it is not registered on the server side.`
+          );
           return;
         }
 
