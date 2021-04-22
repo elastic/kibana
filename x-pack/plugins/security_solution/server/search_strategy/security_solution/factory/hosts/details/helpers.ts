@@ -159,8 +159,8 @@ const getFirstItem = (data: HostBuckets): string | null => {
 
 export const getHostEndpoint = async (
   request: FrameworkRequest,
-  id: string | null
-  endpointContext: EndpointAppContext,
+  id: string | null,
+  endpointContext: EndpointAppContext
 ): Promise<EndpointFields | null> => {
   const logger = endpointContext.logFactory.get('metadata');
   try {
