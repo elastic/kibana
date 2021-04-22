@@ -18,6 +18,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  CommonProps,
   EuiEmptyPrompt,
   EuiIcon,
   EuiProgress,
@@ -35,7 +36,7 @@ import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
-export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> {
+export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
   items: T[];
   onChange: (changes: { pageIndex: number; pageSize: number }) => void;
   /**
@@ -52,7 +53,6 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> {
   noItemsMessage?: ReactNode;
   /** Error to be displayed in the component's body area. Used when `items` is empty and `children` is not used */
   error?: ReactNode;
-  'data-test-subj'?: string;
   /** Classname applied to the area that holds the content items */
   contentClassName?: string;
   /**
@@ -131,6 +131,8 @@ export const PaginatedContent = memo(
     error,
     contentClassName,
     'data-test-subj': dataTestSubj,
+    'aria-label': ariaLabel,
+    className,
     children,
   }: PaginatedContentProps<T, C>) => {
     const [itemKeys] = useState<WeakMap<T, string>>(new WeakMap());
@@ -190,10 +192,11 @@ export const PaginatedContent = memo(
     }, [ItemComponent, error, itemComponentProps, itemId, itemKeys, items, noItemsMessage]);
 
     return (
-      <RootContainer data-test-subj={dataTestSubj}>
+      <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
         {loading && <EuiProgress size="xs" color="primary" />}
 
         <div className="body" data-test-subj={getTestId('body')}>
+          <EuiSpacer size="l" />
           <div className={contentClassName}>{children ? children : generatedBodyItemContent}</div>
         </div>
 
@@ -209,6 +212,7 @@ export const PaginatedContent = memo(
               hidePerPageOptions={pagination.hidePerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
+              data-test-subj={getTestId('pagination')}
             />
           </div>
         )}
