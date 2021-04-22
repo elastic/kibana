@@ -107,9 +107,10 @@ export const SearchExperience: React.FC = () => {
         }
         actions={
           <EuiButton
+            iconType="popout"
             size="s"
             color="primary"
-            target="_blank  "
+            target="_blank"
             href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
           >
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.emptyButtonLabel', {

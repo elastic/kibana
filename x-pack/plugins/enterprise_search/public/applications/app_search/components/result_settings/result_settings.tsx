@@ -132,9 +132,10 @@ export const ResultSettings: React.FC = () => {
             )}
             actions={
               <EuiButton
+                iconType="popout"
                 size="s"
                 color="primary"
-                target="_blank  "
+                target="_blank"
                 href={`${DOCS_PREFIX}/result-settings-guide.html.html`}
               >
                 {i18n.translate(

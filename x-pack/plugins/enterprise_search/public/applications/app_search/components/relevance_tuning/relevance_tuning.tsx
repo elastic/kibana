@@ -47,6 +47,7 @@ const EmptyCallout: React.FC = () => {
         )}
         actions={
           <EuiButton
+            iconType="popout"
             size="s"
             color="primary"
             target="_blank"

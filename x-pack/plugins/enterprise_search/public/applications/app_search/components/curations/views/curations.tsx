@@ -57,9 +57,10 @@ export const CurationsEmptyPrompt: React.FC = () => (
     }
     actions={
       <EuiButton
+        iconType="popout"
         size="s"
         color="primary"
-        target="_blank  "
+        target="_blank"
         href={`${DOCS_PREFIX}/curations-guide.html`}
       >
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.emptyButtonLabel', {
