@@ -120,7 +120,7 @@ export async function waitForSnapshotCompletion(
       }
     );
 
-    return inProgressSnapshots;
+    return inProgressSnapshots ?? [];
   };
 
   const { body: repositoryMap } = await client.snapshot.getRepository({} as any);
