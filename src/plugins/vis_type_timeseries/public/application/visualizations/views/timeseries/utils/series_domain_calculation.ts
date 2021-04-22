@@ -8,12 +8,7 @@
 
 import { PanelData } from '../../../../../../common/types';
 
-interface DomainBounds {
-  domainStart: number;
-  domainEnd: number;
-}
-
-export const calculateDomainForSeries = (series: PanelData[]): DomainBounds => {
+export const calculateDomainForSeries = (series: PanelData[]) => {
   const seriesData = series[0]?.data || [];
 
   return seriesData?.length
@@ -21,5 +16,5 @@ export const calculateDomainForSeries = (series: PanelData[]): DomainBounds => {
         domainStart: seriesData[0][0],
         domainEnd: seriesData[Math.max(seriesData.length - 1, 0)][0],
       }
-    : ({} as DomainBounds);
+    : undefined;
 };

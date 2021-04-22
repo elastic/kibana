@@ -21,16 +21,16 @@ describe('calculateDomainForSeries', () => {
         ],
       },
     ] as PanelData[];
-    const { domainStart, domainEnd } = calculateDomainForSeries(series);
+    const domainBounds = calculateDomainForSeries(series);
 
-    expect(domainStart).toBe(0);
-    expect(domainEnd).toBe(3);
+    expect(domainBounds?.domainStart).toBe(0);
+    expect(domainBounds?.domainEnd).toBe(3);
   });
 
   it('should return undefined for both domainStart and domainEnd when series is empty', () => {
-    const { domainStart, domainEnd } = calculateDomainForSeries([]);
+    const domainBounds = calculateDomainForSeries([]);
 
-    expect(domainStart).toBeUndefined();
-    expect(domainEnd).toBeUndefined();
+    expect(domainBounds?.domainStart).toBeUndefined();
+    expect(domainBounds?.domainEnd).toBeUndefined();
   });
 });

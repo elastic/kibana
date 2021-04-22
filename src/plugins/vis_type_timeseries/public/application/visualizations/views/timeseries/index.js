@@ -86,8 +86,13 @@ export const TimeSeries = ({
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
-    const { domainStart, domainEnd } = calculateDomainForSeries(series);
-    tooltipFormatter = renderEndzoneTooltip(interval, domainStart, domainEnd, tooltipFormatter);
+    const domainBounds = calculateDomainForSeries(series);
+    tooltipFormatter = renderEndzoneTooltip(
+      interval,
+      domainBounds?.domainStart,
+      domainBounds?.domainEnd,
+      tooltipFormatter
+    );
   }
 
   const uiSettings = getUISettings();
