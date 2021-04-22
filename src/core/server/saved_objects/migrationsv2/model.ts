@@ -610,9 +610,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // we have both the saved object Id and the stack trace in each `transformErrors` item.
           const transformErrorsReason =
             stateP.transformErrors.length > 0
-              ? `the following saved object documents could not be transformed: ${JSON.stringify(
-                  stateP.transformErrors
-                )}`
+              ? 'the following saved object documents could not be transformed:/n' +
+                stateP.transformErrors
+                  .map((errObj) => `${errObj.rawId}: ${errObj.err.message}`)
+                  .join('/n')
               : '';
           return {
             ...stateP,

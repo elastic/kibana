@@ -22,7 +22,7 @@ export class TransformSavedObjectDocumentError extends Error {
   constructor(
     public readonly id: string,
     public readonly type: string,
-    public readonly namespace: string,
+    public readonly namespace: string | undefined,
     public readonly failedTransform: string, // created by document_migrator wrapWithTry as `${type.name}:${version}`;
     public readonly failedDoc: string,
     public readonly originalError: Error // public readonly namespace?: string--> part of the stringified failedDoc

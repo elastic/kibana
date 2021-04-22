@@ -40,4 +40,21 @@ describe('TransformSavedObjectDocumentError', () => {
     `
     );
   });
+  it('handles undefined namespace', () => {
+    const originalError = new Error('Dang diggity!');
+    const err = new TransformSavedObjectDocumentError(
+      'id',
+      'type',
+      undefined,
+      'failedTransform',
+      'failedDoc',
+      originalError
+    );
+    expect(err.message).toMatchInlineSnapshot(
+      `
+      "Failed to transform document id. Transform: failedTransform
+      Doc: failedDoc"
+    `
+    );
+  });
 });

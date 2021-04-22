@@ -685,7 +685,7 @@ function wrapWithTry(
       throw new TransformSavedObjectDocumentError(
         doc.id,
         doc.type,
-        doc.namespace ?? 'N/A',
+        doc.namespace ?? undefined,
         failedTransform,
         failedDoc,
         error
