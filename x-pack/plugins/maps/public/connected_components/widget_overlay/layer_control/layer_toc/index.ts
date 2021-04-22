@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { LayerTOC } from './view';
+import { LayerTOC } from './layer_toc';
 import { updateLayerOrder } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../selectors/ui_selectors';
+import { MapStoreState } from '../../../../reducers/store';
 
-const mapDispatchToProps = {
-  updateLayerOrder: (newOrder) => updateLayerOrder(newOrder),
-};
-
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
     layerList: getLayerList(state),
   };
 }
 
-const connectedLayerTOC = connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(
-  LayerTOC
-);
-export { connectedLayerTOC as LayerTOC };
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
+  return {
+    updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
+  };
+}
+
+const connected = connect(mapStateToProps, mapDispatchToProps)(LayerTOC);
+export { connected as LayerTOC };

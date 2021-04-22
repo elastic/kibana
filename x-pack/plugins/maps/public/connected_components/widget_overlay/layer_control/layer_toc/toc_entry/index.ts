@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TOCEntry } from './view';
+import { TOCEntry, OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
+import { MapStoreState } from '../../../../../reducers/store';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
 import {
   getMapZoom,
@@ -27,7 +30,7 @@ import {
   toggleLayerVisible,
 } from '../../../../../actions';
 
-function mapStateToProps(state = {}, ownProps) {
+function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);
   return {
     isReadOnly: getIsReadOnly(state),
@@ -40,26 +43,29 @@ function mapStateToProps(state = {}, ownProps) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    fitToBounds: (layerId) => {
+    fitToBounds: (layerId: string) => {
       dispatch(fitToLayerExtent(layerId));
     },
-    openLayerPanel: async (layerId) => {
+    openLayerPanel: async (layerId: string) => {
       await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    hideTOCDetails: (layerId) => {
+    hideTOCDetails: (layerId: string) => {
       dispatch(hideTOCDetails(layerId));
     },
-    showTOCDetails: (layerId) => {
+    showTOCDetails: (layerId: string) => {
       dispatch(showTOCDetails(layerId));
     },
-    toggleVisible: (layerId) => {
+    toggleVisible: (layerId: string) => {
       dispatch(toggleLayerVisible(layerId));
     },
   };
 }
 
-const connectedTOCEntry = connect(mapStateToProps, mapDispatchToProps)(TOCEntry);
-export { connectedTOCEntry as TOCEntry };
+const connected = connect<ReduxStateProps, ReduxDispatchProps, OwnProps, MapStoreState>(
+  mapStateToProps,
+  mapDispatchToProps
+)(TOCEntry);
+export { connected as TOCEntry };
