@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
+import { ML_ALERT_TYPES } from '../../../../plugins/ml/common/constants/alerts';
+import { Alert } from '../../../../plugins/alerting/common';
+import { MlAnomalyDetectionAlertParams } from '../../../../plugins/ml/common/types/alerts';
 
 export function MachineLearningAlertingProvider(
   { getService }: FtrProviderContext,
@@ -17,6 +20,7 @@ export function MachineLearningAlertingProvider(
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const supertest = getService('supertest');
 
   return {
     async selectAnomalyDetectionAlertType() {
@@ -145,6 +149,20 @@ export function MachineLearningAlertingProvider(
           await this.ensureAdvancedSectionOpen();
         }
       });
+    },
+
+    async cleanAnomalyDetectionRules() {
+      const { body: anomalyDetectionRules } = await supertest
+        .get(`/api/alerting/rules/_find`)
+        .query({ filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}` })
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      for (const rule of anomalyDetectionRules.data as Array<
+        Alert<MlAnomalyDetectionAlertParams>
+      >) {
+        await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo').expect(204);
+      }
     },
   };
 }
