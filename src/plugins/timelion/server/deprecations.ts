@@ -62,6 +62,10 @@ export async function getDeprecations({
           'In the toolbar, click Save.',
           'On the Save visualization window, enter the visualization Title, then click Save and return.',
         ],
+        api: {
+          method: 'POST',
+          path: '/api/upgrade_assistant/test',
+        },
       },
     });
   }

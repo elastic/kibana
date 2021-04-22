@@ -31,6 +31,7 @@ import { registerReindexIndicesRoutes, createReindexWorker } from './routes/rein
 import { registerTelemetryRoutes } from './routes/telemetry';
 import { registerUpdateSettingsRoute } from './routes/update_index_settings';
 import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+import { registerTestRoutes } from './routes/test';
 
 import { RouteDependencies } from './types';
 
@@ -113,6 +114,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(dependencies);
     registerUpdateSettingsRoute(dependencies);
+    registerTestRoutes(dependencies);
 
     if (usageCollection) {
       getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
