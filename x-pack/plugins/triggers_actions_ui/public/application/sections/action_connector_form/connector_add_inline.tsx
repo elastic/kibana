@@ -258,3 +258,6 @@ export const AddConnectorInline = ({
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AddConnectorInline as default };

@@ -77,7 +77,7 @@ interface AlertState {
   totalItemCount: number;
 }
 
-const AlertsList: React.FunctionComponent = () => {
+export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,

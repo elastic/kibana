@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -30,10 +30,9 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 
 const ActionsConnectorsList = lazy(
-  async () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
@@ -142,36 +141,24 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <EuiSpacer size="s" />
 
-        <Switch>
-          {canShowActions && (
-            <Route
-              exact
-              path={routeToConnectors}
-              component={() => (
-                <HealthContextProvider>
-                  <HealthCheck waitForCheck={true}>
-                    <Suspense fallback={<CenterJustifiedSpinner size={'m'} />}>
-                      <ActionsConnectorsList />
-                    </Suspense>
-                  </HealthCheck>
-                </HealthContextProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Switch>
+              {canShowActions && (
+                <Route
+                  exact
+                  path={routeToConnectors}
+                  component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
+                />
               )}
-            />
-          )}
-          <Route
-            exact
-            path={routeToRules}
-            component={() => (
-              <HealthContextProvider>
-                <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <Suspense fallback={<CenterJustifiedSpinner size={'m'} />}>
-                    <AlertsList />
-                  </Suspense>
-                </HealthCheck>
-              </HealthContextProvider>
-            )}
-          />
-        </Switch>
+              <Route
+                exact
+                path={routeToRules}
+                component={suspendedComponentWithProps(AlertsList, 'xl')}
+              />
+            </Switch>
+          </HealthCheck>
+        </HealthContextProvider>
       </EuiPageContent>
     </EuiPageBody>
   );

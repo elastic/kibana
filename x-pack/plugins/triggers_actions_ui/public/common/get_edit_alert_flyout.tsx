@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import type { AlertEditProps } from '../application/sections/alert_form/alert_edit';
+import { AlertEdit } from '../application/sections/alert_form';
 
 export const getEditAlertFlyoutLazy = (props: AlertEditProps) => {
-  const AlertEditFlyoutLazy = lazy(() => import('../application/sections/alert_form/alert_edit'));
-  return (
-    <Suspense fallback={null}>
-      <AlertEditFlyoutLazy {...props} />
-    </Suspense>
-  );
+  return <AlertEdit {...props} />;
 };
