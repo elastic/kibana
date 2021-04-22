@@ -42,6 +42,13 @@ export const DELETE_ENGINE_MESSAGE = (engineName: string) =>
 export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createAMetaEngineButton.ButtonLabel',
   {
+    defaultMessage: 'Create a meta engine',
+  }
+);
+
+export const EMPTY_META_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.emptyMetaEngineButton.ButtonLabel',
+  {
     defaultMessage: 'Learn more about meta engines',
   }
 );

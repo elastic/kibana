@@ -37,6 +37,7 @@ import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
+  EMPTY_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
   META_ENGINE_EMPTY_PROMPT_DESCRIPTION,
   META_ENGINE_EMPTY_PROMPT_TITLE,
@@ -174,7 +175,7 @@ export const EnginesOverview: React.FC = () => {
                           data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
                           href={`${DOCS_PREFIX}/meta-engines-guide.html`}
                         >
-                          {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                          {EMPTY_META_ENGINE_BUTTON_LABEL}
                         </EuiButton>
                       )
                     }
