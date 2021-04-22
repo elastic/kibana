@@ -593,7 +593,11 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.eql({
-          agent1: { success: false, error: 'Cannot upgrade agent in hosted agent policy policy1' },
+          agent1: {
+            success: false,
+            error:
+              'Cannot upgrade agent in hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
           agent2: { success: true },
         });
 
