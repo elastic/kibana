@@ -188,7 +188,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
   };
 
   // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
-  const onChangeEndzoneVisiblity = state.layers.every(
+  const onChangeEndzoneVisiblity = state?.layers.every(
     (layer) =>
       layer.xAccessor &&
       getScaleType(

@@ -51,6 +51,7 @@ describe('#toExpression', () => {
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          hideEndzones: true,
           layers: [
             {
               layerId: 'first',

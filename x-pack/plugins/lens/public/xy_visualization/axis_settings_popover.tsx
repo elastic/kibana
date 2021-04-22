@@ -227,7 +227,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           <EuiSpacer size="m" />
           <EuiSwitch
             compressed
-            data-test-subj={`lnsshow${axis}AxisGridlines`}
+            data-test-subj={`lnsshowEndzones`}
             label={i18n.translate('xpack.lens.xyChart.showEnzones', {
               defaultMessage: 'Show partial data markers',
             })}

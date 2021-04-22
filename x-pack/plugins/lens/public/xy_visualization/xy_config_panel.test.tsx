@@ -138,6 +138,29 @@ describe('XY Config panels', () => {
 
       expect(component.find(AxisSettingsPopover).length).toEqual(3);
     });
+
+    it('should pass in endzone visibility setter and current sate for time chart', () => {
+      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        dataType: 'date',
+      });
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            hideEndzones: true,
+            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+          }}
+        />
+      );
+
+      expect(component.find(AxisSettingsPopover).at(0).prop('setEndzoneVisibility')).toBeFalsy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
+      expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+    });
   });
 
   describe('Dimension Editor', () => {
