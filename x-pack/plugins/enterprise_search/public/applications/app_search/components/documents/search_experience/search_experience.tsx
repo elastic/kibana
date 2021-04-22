@@ -9,14 +9,7 @@ import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
@@ -27,8 +20,8 @@ import './search_experience.scss';
 
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
-import { DOCS_PREFIX } from '../../../routes';
 import { EngineLogic } from '../../engine';
+import { EmptyState } from '../components';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { buildSortOptions } from './build_sort_options';
@@ -84,43 +77,6 @@ export const SearchExperience: React.FC = () => {
   });
 
   const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
-
-  const EmptyState = () => (
-    <EuiPanel color="subdued" grow={false}>
-      <EuiEmptyPrompt
-        data-test-subj="EmptyDocumentPrompt"
-        iconType="documents"
-        title={
-          <h2>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.emptyState.title', {
-              defaultMessage: 'Add your first documents',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.description', {
-              defaultMessage:
-                'You can index documents using the App Search Web Crawler, by uploading JSON, or by using the API.',
-            })}
-          </p>
-        }
-        actions={
-          <EuiButton
-            iconType="popout"
-            size="s"
-            color="primary"
-            target="_blank"
-            href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
-          >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.emptyButtonLabel', {
-              defaultMessage: 'Read the documents guide',
-            })}
-          </EuiButton>
-        }
-      />
-    </EuiPanel>
-  );
 
   return (
     <div className="documentsSearchExperience">
