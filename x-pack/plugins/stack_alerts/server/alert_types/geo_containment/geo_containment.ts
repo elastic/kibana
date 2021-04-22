@@ -176,8 +176,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     }
 
     const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
-      // @ts-expect-error body doesn't exist on currentIntervalResults
-      currentIntervalResults?.body,
+      currentIntervalResults,
       params.dateField,
       params.geoField
     );
