@@ -11,10 +11,6 @@ import { PanelNotFoundError } from '../../../services/embeddable';
 import { GridData } from '../../../../common';
 import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 
-type Mutable<T> = {
-  -readonly [P in keyof T]: T[P];
-};
-
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs
 ) => PanelPlacementMethodReturn;
@@ -180,7 +176,7 @@ export function placePanelBeside({
    * 2. place the cloned panel to the bottom
    * 3. reposition the panels after the cloned panel in the grid
    */
-  const otherPanels = { ...currentPanels } as Mutable<{ [key: string]: DashboardPanelState }>;
+  const otherPanels = { ...currentPanels };
   const grid = otherPanelGridData.sort(comparePanels);
 
   let position = 0;

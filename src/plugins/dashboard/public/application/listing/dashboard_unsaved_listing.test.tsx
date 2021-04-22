@@ -13,13 +13,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { DashboardSavedObject } from '../..';
-import { DashboardSessionStorage } from '../lib';
 import { DashboardAppServices } from '../../types';
-import { coreMock } from '../../../../../core/public/mocks';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { makeDefaultServices } from '../test_helpers';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {
@@ -36,20 +35,16 @@ const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   } as DashboardSavedObject,
 };
 
-function makeDefaultServices(): DashboardAppServices {
-  const core = coreMock.createStart();
-  core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
+function makeServices(): DashboardAppServices {
+  const services = makeDefaultServices();
   const savedDashboards = {} as SavedObjectLoader;
   savedDashboards.get = jest
     .fn()
     .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
-  const dashboardSessionStorage = {} as DashboardSessionStorage;
-  dashboardSessionStorage.clearState = jest.fn();
-  return ({
-    dashboardSessionStorage,
+  return {
+    ...services,
     savedDashboards,
-    core,
-  } as unknown) as DashboardAppServices;
+  };
 }
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
@@ -65,7 +60,7 @@ function mountWith({
   services?: DashboardAppServices;
   props?: DashboardUnsavedListingProps;
 }) {
-  const services = incomingServices ?? makeDefaultServices();
+  const services = incomingServices ?? makeServices();
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
@@ -148,7 +143,7 @@ describe('Unsaved listing', () => {
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
-    const services = makeDefaultServices();
+    const services = makeServices();
     const props = makeDefaultProps();
     services.savedDashboards.get = jest.fn().mockImplementation((id: string) => {
       if (id === 'failCase1' || id === 'failCase2') {

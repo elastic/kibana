@@ -6,30 +6,29 @@
  * Side Public License, v 1.
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0 and the Server Side Public License, v 1; you may not use this file except
-//  * in compliance with, at your election, the Elastic License 2.0 or the Server
-//  * Side Public License, v 1.
-//  */
+// import React from 'react';
+// import { getSavedDashboardMock } from '../test_helpers';
+// import { InputTimeRange, TimefilterContract, TimeRange } from '../../services/data';
+// import { DashboardContainer } from '..';
+// import { DashboardContainerInput } from '../..';
+// import { ViewMode } from '../../services/embeddable';
+// import { DashboardContainerServices } from '../embeddable/dashboard_container';
+// import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+// import { DashboardAppServices, DashboardCapabilities } from '../../types';
+// import { dataPluginMock } from '../../../../data/public/mocks';
+// import { renderHook, act } from '@testing-library/react-hooks';
+// import { KibanaContextProvider } from '../../../../kibana_react/public';
 
+// import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public';
 // import { createBrowserHistory } from 'history';
-// import { getSavedDashboardMock } from './test_helpers';
-// import { DashboardContainer, DashboardContainerInput, DashboardPanelState } from '.';
-// import { DashboardStateManager } from './dashboard_state_manager';
-// import { DashboardContainerServices } from './embeddable/dashboard_container';
 
-// import { EmbeddableInput, ViewMode } from '../services/embeddable';
-// import { createKbnUrlStateStorage } from '../services/kibana_utils';
-// import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
+// import { EmbeddableFactory } from '../../../../embeddable/public';
+// import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
+// import { coreMock } from '../../../../../core/public/mocks';
 
-// import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-// import { coreMock } from '../../../../core/public/mocks';
-
-// describe('DashboardState', function () {
-//   let dashboardState: DashboardStateManager;
-//   const savedDashboard = getSavedDashboardMock();
+describe('DashboardAppState', function () {
+  test('STUB - TODO', () => {});
+});
 
 //   let mockTime: TimeRange = { to: 'now', from: 'now-15m' };
 //   const mockTimefilter = {
@@ -46,19 +45,27 @@
 //     return false;
 //   }
 
-//   function initDashboardState() {
-//     dashboardState = new DashboardStateManager({
-//       savedDashboard,
-//       hideWriteControls: false,
-//       allowByValueEmbeddables: false,
-//       hasPendingEmbeddable: () => false,
-//       kibanaVersion: '7.0.0',
-//       kbnUrlStateStorage: createKbnUrlStateStorage(),
-//       history: createBrowserHistory(),
-//       toasts: coreMock.createStart().notifications.toasts,
-//       hasTaggingCapabilities: mockHasTaggingCapabilities,
-//     });
-//   }
+//   const setupEmbeddableFactory = (services: DashboardAppServices) => {
+//     const embeddable = new HelloWorldEmbeddable({ id: 'id' });
+//     const deferEmbeddableCreate = defer();
+//     services.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
+//       () =>
+//         (({
+//           create: () => deferEmbeddableCreate.promise,
+//         } as unknown) as EmbeddableFactory)
+//     );
+//     const destroySpy = jest.spyOn(embeddable, 'destroy');
+
+//     return {
+//       destroySpy,
+//       embeddable,
+//       createEmbeddable: () => {
+//         act(() => {
+//           deferEmbeddableCreate.resolve(embeddable);
+//         });
+//       },
+//     };
+//   };
 
 //   function initDashboardContainer(initialInput?: Partial<DashboardContainerInput>) {
 //     const { doStart } = embeddablePluginMock.createInstance();
@@ -76,9 +83,8 @@
 //     };
 //     const input = { ...defaultInput, ...(initialInput ?? {}) };
 //     return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerServices);
-//   }
 
-//   describe('syncTimefilterWithDashboard', function () {
+// describe('syncTimefilterWithDashboard', function () {
 //     test('syncs quick time', function () {
 //       savedDashboard.timeRestore = true;
 //       savedDashboard.timeFrom = 'now/w';
@@ -279,92 +285,12 @@
 //   });
 // });
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-// import { useDashboardContainer } from './use_dashboard_container';
-// import { renderHook, act } from '@testing-library/react-hooks';
-// import { KibanaContextProvider } from '../../../../kibana_react/public';
-// import React from 'react';
-// import { DashboardStateManager } from '../dashboard_state_manager';
-// import { getSavedDashboardMock } from '../test_helpers';
-// import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public';
-// import { createBrowserHistory } from 'history';
-// import { dataPluginMock } from '../../../../data/public/mocks';
-// import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-// import { DashboardCapabilities } from '../types';
-// import { EmbeddableFactory } from '../../../../embeddable/public';
-// import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
-// import { DashboardContainer } from '../embeddable';
-// import { coreMock } from 'src/core/public/mocks';
-
 // const savedDashboard = getSavedDashboardMock();
 
 // // TS is *very* picky with type guards / predicates. can't just use jest.fn()
 // function mockHasTaggingCapabilities(obj: any): obj is any {
 //   return false;
 // }
-
-// const history = createBrowserHistory();
-// const createDashboardState = () =>
-//   new DashboardStateManager({
-//     savedDashboard,
-//     kibanaVersion: '7.0.0',
-//     hideWriteControls: false,
-//     allowByValueEmbeddables: false,
-//     history: createBrowserHistory(),
-//     hasPendingEmbeddable: () => false,
-//     kbnUrlStateStorage: createKbnUrlStateStorage(),
-//     hasTaggingCapabilities: mockHasTaggingCapabilities,
-//     toasts: coreMock.createStart().notifications.toasts,
-//   });
-
-// const defaultCapabilities: DashboardCapabilities = {
-//   show: false,
-//   createNew: false,
-//   saveQuery: false,
-//   createShortUrl: false,
-//   hideWriteControls: true,
-//   mapsCapabilities: { save: false },
-//   visualizeCapabilities: { save: false },
-//   storeSearchSession: true,
-// };
-
-// const getIncomingEmbeddable = () => undefined;
-
-// const services = {
-//   dashboardCapabilities: defaultCapabilities,
-//   data: dataPluginMock.createStartContract(),
-//   embeddable: embeddablePluginMock.createStartContract(),
-//   scopedHistory: history,
-// };
-
-// const setupEmbeddableFactory = () => {
-//   const embeddable = new HelloWorldEmbeddable({ id: 'id' });
-//   const deferEmbeddableCreate = defer();
-//   services.embeddable.getEmbeddableFactory.mockImplementation(
-//     () =>
-//       (({
-//         create: () => deferEmbeddableCreate.promise,
-//       } as unknown) as EmbeddableFactory)
-//   );
-//   const destroySpy = jest.spyOn(embeddable, 'destroy');
-
-//   return {
-//     destroySpy,
-//     embeddable,
-//     createEmbeddable: () => {
-//       act(() => {
-//         deferEmbeddableCreate.resolve(embeddable);
-//       });
-//     },
-//   };
-// };
 
 // test('container is destroyed on unmount', async () => {
 //   const { createEmbeddable, destroySpy, embeddable } = setupEmbeddableFactory();
