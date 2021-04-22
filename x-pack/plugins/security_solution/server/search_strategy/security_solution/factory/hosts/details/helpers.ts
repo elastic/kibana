@@ -8,15 +8,18 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
   AggregationRequest,
+  EndpointFields,
   HostAggEsItem,
   HostBuckets,
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { getHostData } from '../../../../../endpoint/routes/metadata/handlers';
+import { EndpointAppContext } from '../../../../../endpoint/types';
+import { FrameworkRequest } from '../../../../../lib/framework';
 
 export const HOST_FIELDS = [
   '_id',
@@ -99,18 +102,11 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
   };
 };
 
-export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
-  HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+export const formatHostItem = (fields: readonly string[], bucket: HostAggEsItem): HostItem =>
+  fields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
-      if (fieldName === '_id') {
-        return set('_id', fieldValue, flattenedFields);
-      }
-      return set(
-        fieldName,
-        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-        flattenedFields
-      );
+      return set(fieldName, fieldValue, flattenedFields);
     }
     return flattenedFields;
   }, {});
@@ -159,4 +155,37 @@ const getFirstItem = (data: HostBuckets): string | null => {
     return null;
   }
   return firstItem.key;
+};
+
+export const getHostEndpoint = async (
+  request: FrameworkRequest,
+  id: string | null
+  endpointContext: EndpointAppContext,
+): Promise<EndpointFields | null> => {
+  const logger = endpointContext.logFactory.get('metadata');
+  try {
+    const agentService = endpointContext.service.getAgentService();
+    if (agentService === undefined) {
+      throw new Error('agentService not available');
+    }
+    const metadataRequestContext = {
+      endpointAppContextService: endpointContext.service,
+      logger,
+      requestHandlerContext: request.context,
+    };
+    const endpointData =
+      id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
+        ? await getHostData(metadataRequestContext, id)
+        : null;
+    return endpointData != null && endpointData.metadata
+      ? {
+          endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
+          policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
+          sensorVersion: endpointData.metadata.agent.version,
+        }
+      : null;
+  } catch (err) {
+    logger.warn(JSON.stringify(err, null, 2));
+    return null;
+  }
 };

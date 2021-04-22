@@ -27,11 +27,21 @@ export interface EndpointFields {
   policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
+interface AgentFields {
+  id?: Maybe<string>;
+}
+
+interface Inspect {
+  dsl: string[];
+  response: string[];
+}
 export interface HostItem {
   _id?: Maybe<string>;
+  agent?: Maybe<AgentFields>;
   cloud?: Maybe<CloudEcs>;
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
+  inspect?: Maybe<Inspect>;
   lastSeen?: Maybe<string[]>;
 }
 
