@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
@@ -45,8 +45,8 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
 };
 
-export function SeriesBuilder() {
-  const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
+export function SeriesBuilder({ seriesId }: { seriesId: string }) {
+  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
 
   const {
     dataType,
@@ -59,21 +59,15 @@ export function SeriesBuilder() {
     time,
   } = series;
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
-
   const { indexPattern, loading, hasData } = useAppIndexPatternContext();
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
+      seriesId,
       indexPattern,
       reportType: reportType!,
-      seriesId: NEW_SERIES_KEY,
     });
   };
-
-  useEffect(() => {
-    setIsFlyoutVisible(!!series.dataType);
-  }, [series.dataType]);
 
   const columns = [
     {
@@ -152,80 +146,24 @@ export function SeriesBuilder() {
 
       setSeries(newSeriesId, newSeriesN).then(() => {
         removeSeries(NEW_SERIES_KEY);
-        setIsFlyoutVisible(false);
       });
     }
   };
 
-  const items = [{ id: NEW_SERIES_KEY }];
+  const items = [{ id: seriesId }];
 
-  let flyout;
-
-  if (isFlyoutVisible) {
-    flyout = (
-      <>
-        <EuiBasicTable
-          items={items as any}
-          columns={columns}
-          cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
-        />
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plus"
-              color="primary"
-              onClick={addSeries}
-              size="s"
-              isDisabled={!series?.reportType}
-            >
-              {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
-                defaultMessage: 'Add',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="cross"
-              color="text"
-              onClick={() => {
-                removeSeries(NEW_SERIES_KEY);
-                setIsFlyoutVisible(false);
-              }}
-            >
-              {i18n.translate('xpack.observability.expView.seriesBuilder.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-
-  return (
-    <div>
-      {!isFlyoutVisible && (
-        <>
-          <EuiButton
-            iconType={isFlyoutVisible ? 'arrowDown' : 'arrowRight'}
-            color="primary"
-            iconSide="right"
-            onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
-            disabled={allSeriesIds.length > 0}
-          >
-            {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
-              defaultMessage: 'Add series',
-            })}
-          </EuiButton>
-          <EuiSpacer />
-        </>
-      )}
-      {flyout}
-    </div>
+  const flyout = (
+    <>
+      <EuiBasicTable
+        items={items as any}
+        columns={columns}
+        cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
+      />
+      <EuiSpacer size="xs" />
+    </>
   );
+
+  return <div>{flyout}</div>;
 }
 
 export const INITIATING_VIEW = i18n.translate(

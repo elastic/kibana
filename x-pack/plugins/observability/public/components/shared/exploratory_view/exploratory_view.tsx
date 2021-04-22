@@ -11,13 +11,13 @@ import styled from 'styled-components';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
-import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { ReportToDataTypeMap } from './configurations/constants';
+import { SeriesBuilder } from './series_builder/series_builder';
 
 export function ExploratoryView() {
   const {
@@ -64,7 +64,7 @@ export function ExploratoryView() {
           ) : (
             <EmptyView loading={loading} />
           )}
-          <SeriesEditor />
+          <SeriesBuilder seriesId={seriesId} />
         </>
       ) : (
         <EuiTitle>

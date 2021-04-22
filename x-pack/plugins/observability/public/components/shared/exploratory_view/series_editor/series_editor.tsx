@@ -9,10 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import styled from 'styled-components';
 import { SeriesFilter } from './columns/series_filter';
 import { DataSeries } from '../types';
-import { SeriesBuilder } from '../series_builder/series_builder';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
@@ -108,27 +106,22 @@ export function SeriesEditor() {
   return (
     <>
       <EuiSpacer />
-      <Wrapper>
-        <EuiBasicTable
-          items={items}
-          rowHeader="firstName"
-          columns={columns}
-          rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
-          noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-            defaultMessage: 'No series found, please add a series.',
-          })}
-          cellProps={{
-            style: {
-              verticalAlign: 'top',
-            },
-          }}
-          tableLayout="auto"
-        />
-      </Wrapper>
+      <EuiBasicTable
+        items={items}
+        rowHeader="firstName"
+        columns={columns}
+        rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
+        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
+          defaultMessage: 'No series found, please add a series.',
+        })}
+        cellProps={{
+          style: {
+            verticalAlign: 'top',
+          },
+        }}
+        tableLayout="auto"
+      />
       <EuiSpacer />
-      <SeriesBuilder />
     </>
   );
 }
-
-const Wrapper = styled.div``;
