@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
-const COMMON_REQUEST_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
-  const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75724
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
@@ -53,45 +46,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
-      });
-
-      it('records telemetry for hosts', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
-
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_hosts
-        ).to.be.greaterThan(0);
-      });
-
-      it('records telemetry for docker', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.goToDocker();
-
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_docker
-        ).to.be.greaterThan(0);
       });
     });
   });
