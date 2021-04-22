@@ -8,26 +8,24 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiHealth,
-  EuiIconTip,
-  EuiSpacer,
-  EuiSwitch,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiIconTip, EuiSpacer, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
 import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../../alerting/common';
-import { Alert, AlertInstanceStatus, AlertType, Pagination } from '../../../../../types';
+import {
+  Alert,
+  AlertInstanceStatus,
+  AlertType,
+  AlertTypeModel,
+  Pagination,
+} from '../../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../../constants';
-import { AlertData } from '../../../../lib/alert_api';
+import { AlertData, AlertDataItem } from '../../../../lib/alert_api';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 interface AlertTableData extends AlertData {
@@ -39,7 +37,7 @@ type AlertDataTableProps = {
   alert: Alert;
   alertType: AlertType;
   readOnly: boolean;
-  alertData: AlertData[];
+  alertData: AlertData;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
@@ -50,7 +48,7 @@ function durationAsString(duration: Duration): string {
     .join(':');
 }
 
-const columns = (alert, alertTypeModel) => [
+const columns = (alert: Alert, alertTypeModel: AlertTypeModel) => [
   {
     field: 'active',
     name: i18n.translate(
@@ -180,7 +178,6 @@ export function AlertDataTable({
   requestRefresh,
   durationEpoch = Date.now(),
 }: AlertDataTableProps) {
-  console.log(alertData);
   const [pagination, setPagination] = useState<Pagination>({
     index: 0,
     size: DEFAULT_SEARCH_PAGE_SIZE,
@@ -190,9 +187,9 @@ export function AlertDataTable({
   const { alertTypeRegistry } = useKibana().services;
   const alertTypeModel = alertTypeRegistry.get(alert.alertTypeId);
   useEffect(() => {
-    if (alertData && alertData.length > 0) {
+    if (alertData && alertData.alerts && alertData.alerts.length > 0) {
       setAlertTableData(
-        alertData.map((data: AlertData) => {
+        alertData.alerts.map((data: AlertDataItem) => {
           // const ruleType = observabilityRuleRegistry.getTypeByRuleId(alert['rule.id']);
           // const formatted = {
           //   reason: alert['rule.name'],

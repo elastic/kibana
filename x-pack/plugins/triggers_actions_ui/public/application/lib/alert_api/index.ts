@@ -14,7 +14,7 @@ export { disableAlert, disableAlerts } from './disable';
 export { enableAlert, enableAlerts } from './enable';
 export { loadAlert } from './get_rule';
 export { loadAlertInstanceSummary } from './alert_summary';
-export { AlertData, loadAlertData } from './alert_data';
+export { AlertData, AlertDataItem, loadAlertData } from './alert_data';
 export { muteAlertInstance } from './mute_alert';
 export { muteAlert, muteAlerts } from './mute';
 export { loadAlertTypes } from './rule_types';

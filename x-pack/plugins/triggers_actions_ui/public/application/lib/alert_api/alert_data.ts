@@ -6,7 +6,7 @@
  */
 import { HttpSetup } from 'kibana/public';
 
-export interface AlertData {
+export interface AlertDataItem {
   'rule.id': string;
   'kibana.rac.alert.value': number;
   'rule.name': string;
@@ -25,12 +25,17 @@ export interface AlertData {
   'rule.category': string;
 }
 
+export interface AlertData {
+  alerts?: AlertDataItem[];
+  metrics?: AlertDataItem[];
+}
+
 export async function loadAlertData({
   http,
   alertId,
 }: {
   http: HttpSetup;
   alertId: string;
-}): Promise<AlertData[]> {
+}): Promise<AlertData> {
   return await http.get(`/internal/stack_alerts/rule/${alertId}/_alert_data`);
 }

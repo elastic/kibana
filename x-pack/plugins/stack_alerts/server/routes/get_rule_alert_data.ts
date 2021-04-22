@@ -51,29 +51,52 @@ export const getRuleAlertDataRoute = (
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let events: any[] = [];
+      let events: { alerts?: any[]; metrics?: any[] } = {};
       if (alertingRuleRegistryClient) {
-        const data = await alertingRuleRegistryClient.search({
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  /* ...rangeQuery(start, end),*/ { term: { 'event.kind': 'alert' } },
-                  { term: { 'rule.uuid': id } },
-                ],
+        const [alertDataResponse, metricDataResponse] = await Promise.all([
+          alertingRuleRegistryClient.search({
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    /* ...rangeQuery(start, end),*/ { term: { 'event.kind': 'alert' } },
+                    { term: { 'rule.uuid': id } },
+                  ],
+                },
+              },
+              size: 100,
+              fields: ['*'],
+              collapse: {
+                field: 'kibana.rac.alert.uuid',
+              },
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            size: 100,
-            fields: ['*'],
-            collapse: {
-              field: 'kibana.rac.alert.uuid',
+          }),
+          alertingRuleRegistryClient.search({
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    /* ...rangeQuery(start, end),*/ { term: { 'event.kind': 'metric' } },
+                    { term: { 'rule.uuid': id } },
+                  ],
+                },
+              },
+              size: 1000,
+              fields: ['*'],
+              sort: {
+                '@timestamp': 'desc',
+              },
             },
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        });
-        events = data.events;
+          }),
+        ]);
+
+        events = {
+          alerts: alertDataResponse.events,
+          metrics: metricDataResponse.events,
+        };
       }
 
       return res.ok({ body: events });

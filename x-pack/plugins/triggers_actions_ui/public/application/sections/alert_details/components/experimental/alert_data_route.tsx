@@ -14,6 +14,7 @@ import {
   withBulkAlertOperations,
 } from '../../../common/components/with_bulk_alert_api_operations';
 import { AlertDataTableWithApi } from './alert_data';
+import { AlertDataHistogramWithApi } from './alert_data_histogram';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../../components/center_justified_spinner';
 import { AlertData } from '../../../../lib/alert_api';
@@ -36,7 +37,7 @@ export const AlertDataRoute: React.FunctionComponent<WithAlertDataProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const [alertData, setAlertData] = useState<AlertData | null>(null);
+  const [alertData, setAlertData] = useState<AlertData>({});
 
   useEffect(() => {
     getAlertData(alert.id, loadAlertData, setAlertData, toasts);
@@ -44,13 +45,16 @@ export const AlertDataRoute: React.FunctionComponent<WithAlertDataProps> = ({
   }, [alert]);
 
   return alertData ? (
-    <AlertDataTableWithApi
-      requestRefresh={requestRefresh}
-      alert={alert}
-      alertType={alertType}
-      readOnly={readOnly}
-      alertData={alertData}
-    />
+    <>
+      <AlertDataHistogramWithApi alertData={alertData} />
+      <AlertDataTableWithApi
+        requestRefresh={requestRefresh}
+        alert={alert}
+        alertType={alertType}
+        readOnly={readOnly}
+        alertData={alertData}
+      />
+    </>
   ) : (
     <CenterJustifiedSpinner />
   );
@@ -59,7 +63,7 @@ export const AlertDataRoute: React.FunctionComponent<WithAlertDataProps> = ({
 export async function getAlertData(
   alertId: string,
   loadAlertData: AlertApis['loadAlertData'],
-  setAlertData: React.Dispatch<React.SetStateAction<AlertData | null>>,
+  setAlertData: React.Dispatch<React.SetStateAction<AlertData>>,
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
