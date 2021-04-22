@@ -1,21 +1,21 @@
 [[save-open-search]]
-== Save a search
+== Save a search for reuse
 
 A saved search is a convenient way to reuse a search
 that you've created in *Discover*.
-Saved searches are good for adding search results to a dashboard, 
-and can also serve as the basis for building visualizations.
-
-Saved searches include information about the query and the current *Discover*
-view&mdash;the columns selected in the document table, the sort order,
-and the index pattern.
+Saved searches are good for adding search results to a dashboard.
 
 [role="screenshot"]
 image::discover/images/saved-search.png[Example of Discover's save search option]
 
-A saved search is different than a <<save-load-delete-query,saved query>>, which stores
-the query text, filters, and time range. Saved queries
-are available in any app that has a query bar.
+
+A saved search stores the query text, filters, time range, and
+current view of *Discover*&mdash;the columns selected in the document table,
+the sort order, and the index pattern.
+
+Saved searches are different from <<save-load-delete-query,saved queries>>, which store
+only the query and are available in any app that has a query bar. Saved queries
+can serve as a foundation for building visualizations.
 
 
 [role="xpack"]
@@ -23,18 +23,21 @@ are available in any app that has a query bar.
 [float]
 === Read-only access
 If you have insufficient privileges to save searches, the following indicator is
-displayed and the *Save* button won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
+displayed and the *Save* button is not visible. For more information on granting access to
+Kibana, refer to <<xpack-security-authorization>>.
 
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 [float]
-=== Save a search
+=== Save and reuse a Elasticsearch
 
-. In the toolbar, click *Save*.
+. Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
-. To reload a saved search into *Discover*, click *Open* in the toolbar and select the search.
+. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search is also automatically selected.
+. To add your search results to a dashboard:
+.. On the dashboard, click *Add from library*.
+.. Find your saved search, and select it.
