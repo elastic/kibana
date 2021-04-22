@@ -37,7 +37,6 @@ export const EmptyState: React.FC = () => {
         {canManageEngines ? (
           <EuiEmptyPrompt
             data-test-subj="AdminEmptyEnginesPrompt"
-            className="emptyState__prompt"
             iconType={EngineIcon}
             title={
               <h2>
@@ -81,7 +80,6 @@ export const EmptyState: React.FC = () => {
         ) : (
           <EuiEmptyPrompt
             data-test-subj="NonAdminEmptyEnginesPrompt"
-            className="emptyState__prompt"
             iconType={EngineIcon}
             title={
               <h2>

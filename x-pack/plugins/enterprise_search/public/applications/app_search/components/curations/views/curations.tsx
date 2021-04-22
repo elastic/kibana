@@ -38,7 +38,6 @@ import { convertToDate } from '../utils';
 export const CurationsEmptyPrompt: React.FC = () => (
   <EuiEmptyPrompt
     data-test-subj="EmptyCurationsPrompt"
-    className="emptyState__prompt"
     iconType="pin"
     title={
       <h2>

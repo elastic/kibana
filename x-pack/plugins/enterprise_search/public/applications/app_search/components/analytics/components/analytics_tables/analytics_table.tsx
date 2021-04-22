@@ -64,7 +64,6 @@ export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks, isSmall }) =
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="visLine"
-          className="emptyState__prompt"
           title={
             <h4>
               {i18n.translate(

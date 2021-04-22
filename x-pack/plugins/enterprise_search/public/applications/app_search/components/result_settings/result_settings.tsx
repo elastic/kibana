@@ -115,7 +115,6 @@ export const ResultSettings: React.FC = () => {
         <EuiPanel color="subdued">
           <EuiEmptyPrompt
             iconType="gear"
-            className="emptyState__prompt"
             title={
               <h2>
                 {i18n.translate(

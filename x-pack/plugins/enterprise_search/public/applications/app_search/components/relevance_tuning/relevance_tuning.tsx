@@ -28,7 +28,6 @@ const EmptyCallout: React.FC = () => {
     <EuiPanel color="subdued">
       <EuiEmptyPrompt
         iconType="wrench"
-        className="emptyState__prompt"
         title={
           <h2>
             {i18n.translate(

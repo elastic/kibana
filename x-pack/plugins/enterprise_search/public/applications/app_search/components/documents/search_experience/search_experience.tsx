@@ -89,7 +89,6 @@ export const SearchExperience: React.FC = () => {
     <EuiPanel color="subdued" grow={false}>
       <EuiEmptyPrompt
         data-test-subj="EmptyDocumentPrompt"
-        className="emptyState__prompt"
         iconType="documents"
         title={
           <h2>
