@@ -6,9 +6,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-
-import { Location } from 'history';
 
 import { useActions, useValues } from 'kea';
 
@@ -37,7 +34,6 @@ import { SaveCustom } from './save_custom';
 import './add_source.scss';
 
 export const AddSource: React.FC<AddSourceProps> = (props) => {
-  const { search } = useLocation() as Location;
   const {
     initializeAddSource,
     setAddSourceStep,
@@ -98,7 +94,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
   const goToFormSourceCreated = () => {
-    KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}${search}`);
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
     setSuccessMessage(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
   };
 
