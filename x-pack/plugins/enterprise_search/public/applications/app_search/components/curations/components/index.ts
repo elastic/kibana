@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-/**
- * Empty/Error UI states
- */
-.emptyState {
-  min-height: $euiSizeXXL * 11.25;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  &__prompt > .euiIcon {
-    margin-bottom: $euiSizeS;
-  }
-}
+export { EmptyState } from './empty_state';
