@@ -107,6 +107,9 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('openAnomalyFlyoutButton');
       await testSubjects.exists('loadMLFlyout');
     },
+    async closeFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
+    },
     async goToAnomaliesTab() {
       await testSubjects.click('anomalyFlyoutAnomaliesTab');
     },
@@ -124,13 +127,13 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     async findAnomalies() {
       return testSubjects.findAll('anomalyRow');
     },
-    async setAnomaliesDate() {
+    async setAnomaliesDate(date: string) {
       await testSubjects.click('superDatePickerShowDatesButton');
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();
-      await datePickerInput.type(['Apr 21, 2021 @ 00:00:00.000']);
+      await datePickerInput.type([date]);
     },
   };
 }

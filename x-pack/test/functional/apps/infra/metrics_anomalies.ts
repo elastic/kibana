@@ -33,6 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoAnomaliesMsg();
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();
         await pageObjects.infraHome.getNoAnomaliesMsg();
+        await pageObjects.infraHome.closeFlyout();
       });
     });
 
@@ -59,9 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.unload('infra/metrics_anomalies');
       });
       it('renders the anomaly table with anomalies', async () => {
+        await pageObjects.infraHome.openAnomalyFlyout();
         await pageObjects.infraHome.goToAnomaliesTab();
         await pageObjects.infraHome.clickHostsAnomaliesDropdown();
-        await pageObjects.infraHome.setAnomaliesDate();
+        await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
         const hostAnomalies = await pageObjects.infraHome.findAnomalies();
         // expect 2 anomalies with default Anomaly Severity Threshold setting (50)
         expect(hostAnomalies.length).to.be(2);
@@ -69,6 +71,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
         // expect 3 anomalies with default Anomaly Severity Threshold setting (50)
         expect(k8sAnomalies.length).to.be(3);
+        await pageObjects.infraHome.closeFlyout();
+      });
+      it('renders the anomaly table after a date change with no anomalies', async () => {
+        await pageObjects.infraHome.openAnomalyFlyout();
+        await pageObjects.infraHome.goToAnomaliesTab();
+        await pageObjects.infraHome.clickHostsAnomaliesDropdown();
+        await pageObjects.infraHome.setAnomaliesDate('Apr 23, 2021 @ 11:00:00.000');
+        await pageObjects.infraHome.getNoAnomaliesMsg();
       });
     });
   });
