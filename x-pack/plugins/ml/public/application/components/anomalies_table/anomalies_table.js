@@ -148,11 +148,12 @@ export class AnomaliesTableInternal extends Component {
   };
 
   onTableChange = ({ page, sort }) => {
+    const pageCopy = { ...page };
     const { tableState, updateTableState } = this.props;
     const result = {
-      pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
-      pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
-      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      pageIndex: page && page.index !== undefined ? pageCopy.index : tableState.pageIndex,
+      pageSize: page && page.size !== undefined ? pageCopy.size : tableState.pageSize,
+      sortField: sort && sort.field !== undefined ? pageCopy.field : tableState.sortField,
       sortDirection:
         sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
     };
