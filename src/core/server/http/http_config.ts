@@ -27,7 +27,7 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
-const RESPONSE_HEADER_DENY_LIST = ['location'];
+const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
 const configSchema = schema.object(
   {

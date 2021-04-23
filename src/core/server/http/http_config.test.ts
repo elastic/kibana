@@ -294,6 +294,20 @@ test('forbids the "location" custom response header', () => {
   );
 });
 
+test('forbids the "refresh" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      refresh: 'string',
+      Refresh: 'string',
+      rEfReSh: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: refresh, Refresh, rEfReSh"`
+  );
+});
+
 describe('with TLS', () => {
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;
