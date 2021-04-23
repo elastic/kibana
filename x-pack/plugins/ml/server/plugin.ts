@@ -180,7 +180,6 @@ export class MlServerPlugin
     jobAuditMessagesRoutes(routeInit);
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
-    notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
