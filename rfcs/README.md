@@ -89,7 +89,7 @@ feature and its progress. The *owner* could be the *champion* or somebody else.
 
 ## Process
 
-In short, to get a major feature added to Kibana codebase, one usually
+To get a major feature added to Kibana codebase, one usually
 first gets the RFC merged into the RFC tree as a markdown file. At that point
 the RFC is 'active' and may be implemented with the goal of eventual inclusion
 into Kibana.
