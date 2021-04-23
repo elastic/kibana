@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { DefaultPackagesInstallationError } from '../models/epm';
-
 export interface PostIngestSetupResponse {
   isInitialized: boolean;
-  preconfigurationError?: { name: string; message: string };
-  nonFatalPackageUpgradeErrors?: DefaultPackagesInstallationError[];
+  nonFatalErrors?: Array<{ error: Error }>;
 }
