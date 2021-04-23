@@ -280,6 +280,20 @@ test('accepts any type of objects for custom headers', () => {
   expect(() => httpSchema.validate(obj)).not.toThrow();
 });
 
+test('forbids the "location" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      location: 'string',
+      Location: 'string',
+      lOcAtIoN: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: location, Location, lOcAtIoN"`
+  );
+});
+
 describe('with TLS', () => {
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;

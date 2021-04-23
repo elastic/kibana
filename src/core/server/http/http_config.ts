@@ -70,6 +70,18 @@ const configSchema = schema.object(
     securityResponseHeaders: securityResponseHeadersSchema,
     customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
       defaultValue: {},
+      validate(value) {
+        const RESPONSE_HEADER_DENY_LIST = ['location'];
+
+        const forbiddenKeys = Object.keys(value).filter((headerName) =>
+          RESPONSE_HEADER_DENY_LIST.includes(headerName.toLowerCase())
+        );
+        if (forbiddenKeys.length > 0) {
+          return `The following custom response headers are not allowed to be set: ${forbiddenKeys.join(
+            ', '
+          )}`;
+        }
+      },
     }),
     host: schema.string({
       defaultValue: 'localhost',
