@@ -21,6 +21,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
           <dd
+            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
             dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
           />{' '}
         </Fragment>
