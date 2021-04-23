@@ -9,8 +9,8 @@ import React from 'react';
 
 import { EuiToken } from '@elastic/eui';
 
-import { BOOST_TYPE_TO_ICON_MAP } from './constants';
-import { BoostType } from './types';
+import { BOOST_TYPE_TO_ICON_MAP } from '../constants';
+import { BoostType } from '../types';
 
 interface Props {
   type: BoostType;
