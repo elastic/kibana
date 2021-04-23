@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useRef } from 'react';
+import { isString } from 'lodash/fp';
 import { IEsError, isEsError } from '../../../../../../src/plugins/data/public';
 
 import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/core/public';
@@ -65,7 +66,7 @@ export const errorToErrorStackAdapter = (error: unknown): Error => {
  * our status code from it if possible within the error in our function.
  * src/plugins/data/public/search/errors/es_error.tsx
  */
-type MaybeESError = IEsError & { err?: Record<string, unknown> };
+export type MaybeESError = IEsError & { err?: Record<string, unknown> };
 
 /**
  * This attempts its best to map between an IEsError which comes from bsearch to a error_toaster
@@ -82,11 +83,19 @@ type MaybeESError = IEsError & { err?: Record<string, unknown> };
  */
 export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
   const maybeUnWrapped = error.err != null ? error.err : error;
-  const statusCode = error.err?.statusCode != null ? `(${error.err.statusCode})` : '';
-  const stringifiedError = JSON.stringify(maybeUnWrapped, null, 2);
+  const statusCode =
+    error.err?.statusCode != null
+      ? `(${error.err.statusCode})`
+      : error.statusCode != null
+      ? `(${error.statusCode})`
+      : '';
+  const stringifiedError = getStringifiedStack(maybeUnWrapped);
   const adaptedError = new Error(`${error.attributes?.reason ?? error.message} ${statusCode}`);
   adaptedError.name = error.attributes?.reason ?? error.message;
-  adaptedError.stack = stringifiedError;
+  if (stringifiedError != null) {
+    adaptedError.stack = stringifiedError;
+  }
+  return adaptedError;
 };
 
 /**
@@ -109,26 +118,31 @@ export const appErrorToErrorStack = (error: AppError): Error => {
     : isSecurityAppError(error)
     ? `(${error.body.status_code})`
     : '';
-  const stringifiedError = JSON.stringify(error, null, 2);
+  const stringifiedError = getStringifiedStack(error);
   const adaptedError = new Error(
     `${String(error.body.message).trim() !== '' ? error.body.message : error.message} ${statusCode}`
   );
-  adaptedError.name = error.name;
-  adaptedError.stack = stringifiedError;
+  // Note although all the Typescript typings say that error.name is a string and exists, we still can encounter an undefined so we
+  // do an extra guard here and default to empty string if it is undefined
+  adaptedError.name = error.name != null ? error.name : '';
+  if (stringifiedError != null) {
+    adaptedError.stack = stringifiedError;
+  }
   return adaptedError;
 };
 
 /**
- * Takes an error and tries to stringify it and use that as the stack for the error
- * toaster. A lot of Error's will not stringify and this could become {}.
+ * Takes an error and tries to stringify it and use that as the stack for the error toaster
  * @param error The error to convert into a message
  * @returns The exception error to return back
  */
 export const errorToErrorStack = (error: Error): Error => {
-  const stringifiedError = JSON.stringify(error, null, 2);
+  const stringifiedError = getStringifiedStack(error);
   const adaptedError = new Error(error.message);
   adaptedError.name = error.name;
-  adaptedError.stack = stringifiedError;
+  if (stringifiedError != null) {
+    adaptedError.stack = stringifiedError;
+  }
   return adaptedError;
 };
 
@@ -140,14 +154,79 @@ export const errorToErrorStack = (error: Error): Error => {
  * @returns The exception error to return back
  */
 export const unknownToErrorStack = (error: unknown): Error => {
-  let stringifiedError = '';
-  try {
-    stringifiedError = JSON.stringify(error, null, 2);
-  } catch (err) {
-    stringifiedError = '';
+  const stringifiedError = getStringifiedStack(error);
+  const message = isString(error)
+    ? error
+    : error instanceof Object && stringifiedError != null
+    ? stringifiedError
+    : String(error);
+  const adaptedError = new Error(message);
+  adaptedError.name = message;
+  if (stringifiedError != null) {
+    adaptedError.stack = stringifiedError;
   }
-  const adaptedError = new Error(String(error));
-  adaptedError.name = String(error);
-  adaptedError.stack = stringifiedError;
   return adaptedError;
+};
+
+/**
+ * Stringifies the error. However, since Errors can string into empty objects this will
+ * use a replacer to push those as enumerable properties so we can stringify them.
+ * @param error The error to get a string representation of
+ * @returns The string representation of the error
+ */
+export const getStringifiedStack = (error: unknown): string | undefined => {
+  try {
+    return JSON.stringify(
+      error,
+      (_, value) => {
+        const enumerable = convertErrorToEnumerable(value);
+        if (isEmptyObjectWhenStringified(enumerable)) {
+          return undefined;
+        } else {
+          return enumerable;
+        }
+      },
+      2
+    );
+  } catch (err) {
+    return undefined;
+  }
+};
+
+/**
+ * Converts an error if this is an error to have enumerable so it can stringified
+ * @param error The error which might not have enumerable properties.
+ * @returns Enumerable error
+ */
+export const convertErrorToEnumerable = (error: unknown): unknown => {
+  if (error instanceof Error) {
+    return {
+      ...error,
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  } else {
+    return error;
+  }
+};
+
+/**
+ * If the object strings into an empty object we shouldn't show it as it doesn't
+ * add value and sometimes different people/frameworks attach req,res,request,response
+ * objects which don't stringify into anything or can have circular references.
+ * @param item  The item to see if we are empty or have a circular reference error with.
+ * @returns True if this is a good object to stringify, otherwise false
+ */
+export const isEmptyObjectWhenStringified = (item: unknown): boolean => {
+  if (item instanceof Object) {
+    try {
+      return JSON.stringify(item) === '{}';
+    } catch (_) {
+      // Do nothing, return false if we have a circular reference or other oddness.
+      return false;
+    }
+  } else {
+    return false;
+  }
 };

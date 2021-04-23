@@ -23,12 +23,18 @@ import styled from 'styled-components';
 import { AppToast } from '.';
 import * as i18n from './translations';
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 interface FullErrorProps {
   isShowing: boolean;
   toast: AppToast;
   toggle: (toast: AppToast) => void;
 }
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, toggle }) => {
   const handleClose = useCallback(() => toggle(toast), [toggle, toast]);
 
@@ -43,7 +49,7 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
       <EuiModalBody>
         <EuiCallOut title={toast.title} color="danger" size="s" iconType="alert" />
         <EuiSpacer size="s" />
-        {toast.errors != null &&
+        {Array.isArray(toast.errors) && // FunFact: This can be a non-array in some rare cases
           toast.errors.map((error, index) => (
             <EuiAccordion
               key={`${toast.id}-${index}`}
@@ -66,10 +72,19 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
   );
 };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export const ModalAllErrors = React.memo(ModalAllErrorsComponent);
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const MyEuiCodeBlock = styled(EuiCodeBlock)`
   margin-top: 4px;
 `;
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 MyEuiCodeBlock.displayName = 'MyEuiCodeBlock';
