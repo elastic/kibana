@@ -462,6 +462,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                       selectedOptions={selectedOStoOptions}
                       onChange={handleOSSelectionChange}
                       isClearable={false}
+                      data-test-subj="os-selection-dropdown"
                     />
                   </EuiFormRow>
                   <EuiSpacer size="m" />
@@ -481,9 +482,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 listTypeSpecificIndexPatternFilter={filterIndexPatterns}
                 ruleName={ruleName}
                 indexPatterns={indexPatterns}
-                isOrDisabled={false}
-                isAndDisabled={false}
-                isNestedDisabled={false}
+                isOrDisabled={isExceptionBuilderFormDisabled}
+                isAndDisabled={isExceptionBuilderFormDisabled}
+                isNestedDisabled={isExceptionBuilderFormDisabled}
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}

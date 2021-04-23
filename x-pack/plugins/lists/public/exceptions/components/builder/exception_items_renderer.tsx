@@ -426,9 +426,9 @@ export const ExceptionBuilderComponent = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
-              isOrDisabled={isDisabled || (isOrDisabled ? isOrDisabled : disableOr)}
-              isAndDisabled={isDisabled || disableAnd}
-              isNestedDisabled={isDisabled || disableNested}
+              isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
+              isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
+              isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}
