@@ -5727,9 +5727,9 @@ content-type@~1.0.4:
   integrity sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
 
 content@4.x.x:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/content/-/content-4.0.5.tgz#bc547deabc889ab69bce17faf3585c29f4c41bf2"
-  integrity sha512-wDP6CTWDpwCf791fNxlCCkZGRkrNzSEU/8ju9Hnr3Uc5mF/gFR5W+fcoGm6zUSlVPdSXYn5pCbySADKj7YM4Cg==
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/content/-/content-4.0.6.tgz#76ffd96c5cbccf64fe3923cbb9c48b8bc04b273e"
+  integrity sha512-lR9ND3dXiMdmsE84K6l02rMdgiBVmtYWu1Vr/gfSGHcIcznBj2QxmSdUgDuNFOA+G9yrb1IIWkZ7aKtB6hDGyA==
   dependencies:
     boom "7.x.x"
 
