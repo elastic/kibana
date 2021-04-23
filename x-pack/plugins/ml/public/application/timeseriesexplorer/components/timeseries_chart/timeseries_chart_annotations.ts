@@ -196,7 +196,19 @@ export function renderAnnotations(
     .attr('width', ANNOTATION_TEXT_RECT_WIDTH)
     .attr('height', ANNOTATION_TEXT_RECT_HEIGHT)
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
-    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS);
+    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
+    .on('mouseover', function (this: object, d: Annotation) {
+      showFocusChartTooltip(d, this);
+    })
+    .on('mouseout', () => hideFocusChartTooltip())
+    .on('click', (d: Annotation) => {
+      // clear a possible existing annotation set up for editing before setting the new one.
+      // this needs to be done explicitly here because a new annotation created using the brush tool
+      // could still be present in the chart.
+      annotationUpdatesService.setValue(null);
+      // set the actual annotation and trigger the flyout
+      annotationUpdatesService.setValue(d);
+    });
 
   texts.enter().append('text').classed('mlAnnotationText', true);
 
