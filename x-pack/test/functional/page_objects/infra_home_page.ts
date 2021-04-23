@@ -102,5 +102,35 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     async waitForLoading() {
       await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
     },
+
+    async openAnomalyFlyout() {
+      await testSubjects.click('openAnomalyFlyoutButton');
+      await testSubjects.exists('loadMLFlyout');
+    },
+    async goToAnomaliesTab() {
+      await testSubjects.click('anomalyFlyoutAnomaliesTab');
+    },
+    async getNoAnomaliesMsg() {
+      await testSubjects.find('noAnomaliesFoundMsg');
+    },
+    async clickHostsAnomaliesDropdown() {
+      await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.click('anomaliesHostComboBoxItem');
+    },
+    async clickK8sAnomaliesDropdown() {
+      await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.click('anomaliesK8sComboBoxItem');
+    },
+    async findAnomalies() {
+      return testSubjects.findAll('anomalyRow');
+    },
+    async setAnomaliesDate() {
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
+      await datePickerInput.clearValueWithKeyboard();
+      await datePickerInput.type(['Apr 21, 2021 @ 00:00:00.000']);
+    },
   };
 }
