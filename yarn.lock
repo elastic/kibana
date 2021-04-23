@@ -827,6 +827,19 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
+"@hapi/good-squeeze@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@hapi/good-squeeze/-/good-squeeze-6.0.0.tgz#bb72d6869cd7398b615a6b7270f630dc4f76aebf"
+  integrity sha512-UgHAF9Lm8fJPzgf2HymtowOwNc1+IL+p08YTVR+XA4d8nmyE1t9x3RLA4riqldnOKHkVqGakJ1jGqUG7jk77Cg==
+  dependencies:
+    "@hapi/hoek" "9.x.x"
+    fast-safe-stringify "2.x.x"
+
+"@hapi/hoek@9.x.x":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.0.tgz#f3933a44e365864f4dad5db94158106d511e8131"
+  integrity sha512-sqKVVVOe5ivCaXDWivIJYVSaEgdQK9ul7a4Kity5Iw7u9+wBAPbX1RMSnLLmp7O4Vzj0WOWwMAJsTL00xwaNug==
+
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
@@ -8524,7 +8537,7 @@ fast-levenshtein@~2.0.4:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-safe-stringify@2.0.x, fast-safe-stringify@^2.0.4:
+fast-safe-stringify@2.x.x, fast-safe-stringify@^2.0.4:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.7.tgz#124aa885899261f68aedb42a7c080de9da608743"
   integrity sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
@@ -9854,14 +9867,6 @@ good-listener@^1.2.2:
   dependencies:
     delegate "^3.1.2"
 
-good-squeeze@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/good-squeeze/-/good-squeeze-5.1.0.tgz#265f3e8be6081aa44c55d484d1af375e166752b9"
-  integrity sha1-Jl8+i+YIGqRMVdSE0a83XhZnUrk=
-  dependencies:
-    fast-safe-stringify "2.0.x"
-    hoek "4.2.x"
-
 got@5.6.0:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/got/-/got-5.6.0.tgz#bb1d7ee163b78082bbc8eb836f3f395004ea6fbf"
@@ -10707,7 +10712,7 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hoek@4.2.1, hoek@4.2.x:
+hoek@4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-4.2.1.tgz#9634502aa12c445dd5a7c5734b572bb8738aacbb"
   integrity sha512-QLg82fGkfnJ/4iy1xZ81/9SIJiq1NGFUMGs6ParyjBZr6jW2Ufj/snDqTHixNlHdPNwN2RLVD0Pi3igeK9+JfA==
