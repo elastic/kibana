@@ -19,7 +19,7 @@ interface SourceEnginesLogicValues {
 
 interface SourceEnginesLogicActions {
   fetchSourceEngines: () => void;
-  setSourceEngines: (
+  onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
 }
@@ -30,19 +30,19 @@ export const SourceEnginesLogic = kea<
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
     fetchSourceEngines: true,
-    setSourceEngines: (sourceEngines) => ({ sourceEngines }),
+    onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
   }),
   reducers: () => ({
     dataLoading: [
       true,
       {
-        setSourceEngines: () => false,
+        onSourceEnginesFetch: () => false,
       },
     ],
     sourceEngines: [
       [],
       {
-        setSourceEngines: (_, { sourceEngines }) => sourceEngines,
+        onSourceEnginesFetch: (_, { sourceEngines }) => sourceEngines,
       },
     ],
   }),
@@ -70,7 +70,7 @@ export const SourceEnginesLogic = kea<
           enginesAccumulator = [...enginesAccumulator, ...results];
 
           if (page >= meta.page.total_pages) {
-            actions.setSourceEngines(enginesAccumulator);
+            actions.onSourceEnginesFetch(enginesAccumulator);
           } else {
             recursiveFetchSourceEngines(page + 1);
           }

@@ -35,7 +35,7 @@ describe('SourceEnginesLogic', () => {
 
   describe('setSourceEngines', () => {
     beforeEach(() => {
-      SourceEnginesLogic.actions.setSourceEngines([
+      SourceEnginesLogic.actions.onSourceEnginesFetch([
         { name: 'source-engine-1' },
         { name: 'source-engine-2' },
       ] as EngineDetails[]);
@@ -65,7 +65,7 @@ describe('SourceEnginesLogic', () => {
           results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
         })
       );
-      jest.spyOn(SourceEnginesLogic.actions, 'setSourceEngines');
+      jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesFetch');
 
       SourceEnginesLogic.actions.fetchSourceEngines();
       await nextTick();
@@ -76,7 +76,7 @@ describe('SourceEnginesLogic', () => {
           'page[size]': 25,
         },
       });
-      expect(SourceEnginesLogic.actions.setSourceEngines).toHaveBeenCalledWith([
+      expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
         { name: 'source-engine-1' },
         { name: 'source-engine-2' },
       ]);
@@ -94,7 +94,7 @@ describe('SourceEnginesLogic', () => {
 
     it('recursively fetches a number of pages', async () => {
       mount();
-      jest.spyOn(SourceEnginesLogic.actions, 'setSourceEngines');
+      jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesFetch');
 
       // First page
       http.get.mockReturnValueOnce(
@@ -123,7 +123,7 @@ describe('SourceEnginesLogic', () => {
       SourceEnginesLogic.actions.fetchSourceEngines();
       await nextTick();
 
-      expect(SourceEnginesLogic.actions.setSourceEngines).toHaveBeenCalledWith([
+      expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
         // First page
         { name: 'source-engine-1' },
         // Second and final page
