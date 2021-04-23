@@ -15,6 +15,7 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { DocumentMigrator } from '../core/document_migrator';
+
 jest.mock('../core/document_migrator', () => {
   return {
     // Create a mock for spying on the constructor
@@ -362,7 +363,11 @@ const mockV2MigrationOptions = () => {
     )
   );
   options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      acknowledged: true,
+      shards_acknowledged: true,
+      indices: [],
+    })
   );
   options.client.reindex.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({

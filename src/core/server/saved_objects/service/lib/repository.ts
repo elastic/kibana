@@ -665,7 +665,6 @@ export class SavedObjectsRepository {
     }
 
     const deleteDocNotFound = body.result === 'not_found';
-    // @ts-expect-error 'error' does not exist on type 'DeleteResponse'
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
@@ -1386,7 +1385,6 @@ export class SavedObjectsRepository {
       }
 
       const deleteDocNotFound = body.result === 'not_found';
-      // @ts-expect-error
       const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
       if (deleteDocNotFound || deleteIndexNotFound) {
         // see "404s from missing index" above
@@ -1920,13 +1918,9 @@ export class SavedObjectsRepository {
     const {
       body,
       statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
-      // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
-      esOptions,
-      {
-        ignore: [404],
-      }
-    );
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(esOptions, {
+      ignore: [404],
+    });
     if (statusCode === 404) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }

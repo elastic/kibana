@@ -40,7 +40,7 @@ describe('ElasticIndex', () => {
         return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
-            mappings: { dynamic: 'strict', properties: { a: 'b' } },
+            mappings: { dynamic: 'strict', properties: { a: { type: 'flattened' } } },
             settings: {},
           },
         } as estypes.GetIndexResponse);
@@ -49,7 +49,7 @@ describe('ElasticIndex', () => {
       const info = await Index.fetchInfo(client, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
-        mappings: { dynamic: 'strict', properties: { a: 'b' } },
+        mappings: { dynamic: 'strict', properties: { a: { type: 'flattened' } } },
         exists: true,
         indexName: '.baz',
         settings: {},
