@@ -32,7 +32,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
-. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
+. To reload your search in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
