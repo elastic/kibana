@@ -53,13 +53,24 @@ describe('selectors', () => {
       };
       expect(getFormHasError(state)).toBeTruthy();
     });
-    it('returns true when entry with item error and name error', () => {
+    it('returns true when entry with os error', () => {
+      const state = {
+        ...initialState,
+        form: {
+          ...initialState.form,
+          hasOSError: true,
+        },
+      };
+      expect(getFormHasError(state)).toBeTruthy();
+    });
+    it('returns true when entry with item error, name error and os error', () => {
       const state = {
         ...initialState,
         form: {
           ...initialState.form,
           hasItemsError: true,
           hasNameError: true,
+          hasOSError: true,
         },
       };
       expect(getFormHasError(state)).toBeTruthy();
@@ -72,6 +83,7 @@ describe('selectors', () => {
           ...initialState.form,
           hasItemsError: false,
           hasNameError: false,
+          hasOSError: false,
         },
       };
       expect(getFormHasError(state)).toBeFalsy();

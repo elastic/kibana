@@ -13,6 +13,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     entry: undefined,
     hasNameError: false,
     hasItemsError: false,
+    hasOSError: false,
     submissionResourceState: { type: 'UninitialisedResourceState' },
   },
 });

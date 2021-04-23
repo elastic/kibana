@@ -13,6 +13,7 @@ import {
   EventFiltersInitForm,
   EventFiltersChangeForm,
   EventFiltersFormStateChanged,
+  EventFiltersCreateSuccess,
 } from './action';
 
 import { EventFiltersListPageState } from '../state';
@@ -31,6 +32,7 @@ const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) 
       ...state.form,
       entry: action.payload.entry,
       hasNameError: !action.payload.entry.name,
+      hasOSError: !action.payload.entry.os_types?.length,
       submissionResourceState: {
         type: 'UninitialisedResourceState',
       },
@@ -52,6 +54,8 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
         action.payload.hasNameError !== undefined
           ? action.payload.hasNameError
           : state.form.hasNameError,
+      hasOSError:
+        action.payload.hasOSError !== undefined ? action.payload.hasOSError : state.form.hasOSError,
     },
   };
 };
@@ -66,6 +70,13 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
   };
 };
 
+const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state, action) => {
+  return {
+    ...state,
+    entries: [action.payload.exception, ...state.entries],
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -77,6 +88,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersChangeForm(state, action);
     case 'eventFiltersFormStateChanged':
       return eventFiltersFormStateChanged(state, action);
+    case 'eventFiltersCreateSuccess':
+      return eventFiltersCreateSuccess(state, action);
   }
 
   return state;

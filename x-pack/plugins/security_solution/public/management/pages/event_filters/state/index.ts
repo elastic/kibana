@@ -13,6 +13,7 @@ export interface EventFiltersListPageState {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
     hasNameError: boolean;
     hasItemsError: boolean;
+    hasOSError: boolean;
     submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

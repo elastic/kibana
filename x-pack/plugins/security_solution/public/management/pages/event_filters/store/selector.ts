@@ -21,7 +21,7 @@ export const getFormEntry = (
 };
 
 export const getFormHasError = (state: EventFiltersListPageState): boolean => {
-  return state.form.hasItemsError || state.form.hasNameError;
+  return state.form.hasItemsError || state.form.hasNameError || state.form.hasOSError;
 };
 
 export const isCreationInProgress = (state: EventFiltersListPageState): boolean => {

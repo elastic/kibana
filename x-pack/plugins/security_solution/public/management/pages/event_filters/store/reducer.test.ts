@@ -78,5 +78,35 @@ describe('reducer', () => {
         },
       });
     });
+
+    it('create is success when there is no entry on entries list', () => {
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersCreateSuccess',
+        payload: {
+          exception: createdEventFilterEntryMock(),
+        },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        entries: [createdEventFilterEntryMock()],
+      });
+    });
+
+    it('create is success when there there are entries on entries list', () => {
+      const customizedInitialState = {
+        ...initialState,
+        entries: [createdEventFilterEntryMock(), createdEventFilterEntryMock()],
+      };
+      const result = eventFiltersPageReducer(customizedInitialState, {
+        type: 'eventFiltersCreateSuccess',
+        payload: {
+          exception: { ...createdEventFilterEntryMock(), meta: {} },
+        },
+      });
+
+      expect(result.entries).toHaveLength(3);
+      expect(result.entries[0]!.meta).not.toBeUndefined();
+    });
   });
 });
