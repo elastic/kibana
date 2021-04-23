@@ -123,7 +123,6 @@ export class AlertsClientFactory {
           request,
           { name, role_descriptors: {} }
         );
-
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }

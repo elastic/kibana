@@ -6,6 +6,8 @@
 
 Update the attributes for an existing rule.
 
+WARNING: This API only supports <<token-api-authentication>> and does not support <<key-authentication>>.
+
 [[update-rule-api-request]]
 ==== Request
 

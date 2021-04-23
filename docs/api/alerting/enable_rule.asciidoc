@@ -6,6 +6,8 @@
 
 Enable a rule.
 
+WARNING: This API only supports <<token-api-authentication>> and does not support <<key-authentication>>.
+
 [[enable-rule-api-request]]
 ==== Request
 
