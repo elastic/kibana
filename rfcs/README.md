@@ -97,10 +97,10 @@ into Kibana.
 - Copy `rfcs/0000_template.md` to `rfcs/text/0001_my_feature.md` (where
   `my_feature` is descriptive. Assign a number. Check that an RFC with this
   number doesn't already exist in `master` or an open PR).
-- Fill in the RFC. Put care into the details: **RFCs that do not
+- Fill in the RFC. Put care into the details: RFCs that do not
   present convincing motivation, demonstrate understanding of the
   impact of the design, or are disingenuous about the drawbacks or
-  alternatives tend to be poorly-received**.
+  alternatives tend to be poorly-received.
 - Submit a pull request. As a pull request the RFC will receive design
   feedback from the larger community and Elastic staff. The author should
   be prepared to revise it in response.
