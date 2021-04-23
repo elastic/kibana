@@ -10428,10 +10428,10 @@ gulplog@^1.0.0:
   dependencies:
     glogg "^1.0.0"
 
-h2o2@^8.1.2:
-  version "8.1.2"
-  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.1.2.tgz#25e6f69f453175c9ca1e3618741c5ebe1b5000c1"
-  integrity sha1-Jeb2n0UxdcnKHjYYdBxevhtQAME=
+h2o2@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.2.0.tgz#ead6a855f40cf8fbe67986751b5e2ff8a87aa643"
+  integrity sha512-TwWWSk1tMg03VkSKQTrTSXWKogmpYts5Uj5W6GN9CedFJY5EtL5vz2nndd9s5qxxSMP6Wj8jyGrj/6qV9d4KDg==
   dependencies:
     boom "7.x.x"
     hoek "5.x.x"
