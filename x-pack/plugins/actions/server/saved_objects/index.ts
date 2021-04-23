@@ -24,6 +24,36 @@ export function setupSavedObjects(
     namespaceType: 'single',
     mappings: mappings.action,
     migrations: getMigrations(encryptedSavedObjects),
+    management: {
+      defaultSearchField: 'name',
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Connector: [${obj.attributes.name}]`;
+      },
+      onExport(ctx, objs) {
+        return objs.map((obj) => {
+          return {
+            ...obj,
+            attributes: {
+              ...obj.attributes,
+              enabled: false,
+              secrets: null,
+            },
+          };
+        });
+      },
+      onImport(objs) {
+        return {
+          warnings: [
+            {
+              type: 'action_required',
+              message: `${objs.length} Connectors have been imported but need to be enabled`,
+              actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
+            },
+          ],
+        };
+      },
+    },
   });
 
   // Encrypted attributes

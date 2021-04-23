@@ -12,6 +12,9 @@
       "actionTypeId": {
         "type": "keyword"
       },
+      "enabledAfterImport": {
+        "type": "boolean"
+      },
       "config": {
         "enabled": false,
         "type": "object"
