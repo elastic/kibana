@@ -14,8 +14,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
-import { modifyUrl, URLMeaningfulParts } from '@kbn/std';
-import _ from 'lodash';
+import { parse as parseUrl } from 'url';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer';
@@ -28,15 +27,6 @@ import {
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
-
-function unescapeTemplateVars(url: string) {
-  const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
-  return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
-}
-
-function extendUrl(url: string, props: URLMeaningfulParts) {
-  return unescapeTemplateVars(modifyUrl(url, (parsed) => _.merge(parsed, props)));
-}
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -117,11 +107,9 @@ export class TiledVectorLayer extends VectorLayer {
 
       let urlTemplate;
       if (newUrlTemplateAndMeta.refreshTokenParamName) {
-        urlTemplate = extendUrl(newUrlTemplateAndMeta.urlTemplate, {
-          query: {
-            [newUrlTemplateAndMeta.refreshTokenParamName]: urlToken as string,
-          },
-        });
+        const parsedUrl = parseUrl(newUrlTemplateAndMeta.urlTemplate, true);
+        const separator = !parsedUrl.query || Object.keys(parsedUrl.query).length === 0 ? '?' : '&';
+        urlTemplate = `${newUrlTemplateAndMeta.urlTemplate}${separator}${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`;
       } else {
         urlTemplate = newUrlTemplateAndMeta.urlTemplate;
       }
