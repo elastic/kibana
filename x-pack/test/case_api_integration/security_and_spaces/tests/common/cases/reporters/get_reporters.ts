@@ -41,6 +41,14 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(reporters).to.eql([defaultUser]);
     });
 
+    it('should return unique reporters', async () => {
+      await createCase(supertest, getPostCaseRequest());
+      await createCase(supertest, getPostCaseRequest());
+      const reporters = await getReporters({ supertest: supertestWithoutAuth });
+
+      expect(reporters).to.eql([defaultUser]);
+    });
+
     describe('rbac', () => {
       it('User: security solution only - should read the correct reporters', async () => {
         await createCase(

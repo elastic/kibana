@@ -155,7 +155,7 @@ export const combineAuthorizedAndOwnerFilter = (
 
   return authorizationFilter != null && ownerFilter != null
     ? combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter)
-    : ownerFilter ?? undefined;
+    : authorizationFilter ?? ownerFilter ?? undefined;
 };
 
 /**

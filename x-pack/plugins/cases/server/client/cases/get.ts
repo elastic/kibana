@@ -140,7 +140,11 @@ export async function getTags(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter } = await getAuthorizationFilter({
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
       authorization: auth,
       operation: Operations.findCases,
       auditLogger,
@@ -148,11 +152,30 @@ export async function getTags(
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    // TODO: ensureSavedObjectsAreAuthorized + logSuccessfulAuthorization if possible
-    return await caseService.getTags({
+    const cases = await caseService.getTags({
       soClient,
       filter,
     });
+
+    const tags = new Set<string>();
+    const mappedCases: Array<{
+      owner: string;
+      id: string;
+    }> = [];
+
+    // Gather all necessary information in one pass
+    cases.saved_objects.forEach((theCase) => {
+      theCase.attributes.tags.forEach((tag) => tags.add(tag));
+      mappedCases.push({
+        id: theCase.id,
+        owner: theCase.attributes.owner,
+      });
+    });
+
+    ensureSavedObjectsAreAuthorized(mappedCases);
+    logSuccessfulAuthorization();
+
+    return [...tags.values()];
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -179,7 +202,11 @@ export async function getReporters(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter } = await getAuthorizationFilter({
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
       authorization: auth,
       operation: Operations.getReporters,
       auditLogger,
@@ -187,13 +214,34 @@ export async function getReporters(
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    // TODO: ensureSavedObjectsAreAuthorized + logSuccessfulAuthorization if possible
-    const reporters = await caseService.getReporters({
+    const cases = await caseService.getReporters({
       soClient,
       filter,
     });
 
-    return UsersRt.encode(reporters);
+    const reporters = new Map<string, User>();
+    const mappedCases: Array<{
+      owner: string;
+      id: string;
+    }> = [];
+
+    // Gather all necessary information in one pass
+    cases.saved_objects.forEach((theCase) => {
+      const user = theCase.attributes.created_by;
+      if (user.username != null) {
+        reporters.set(user.username, user);
+      }
+
+      mappedCases.push({
+        id: theCase.id,
+        owner: theCase.attributes.owner,
+      });
+    });
+
+    ensureSavedObjectsAreAuthorized(mappedCases);
+    logSuccessfulAuthorization();
+
+    return UsersRt.encode([...reporters.values()]);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }

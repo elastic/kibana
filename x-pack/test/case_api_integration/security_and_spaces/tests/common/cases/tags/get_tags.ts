@@ -41,8 +41,16 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(tags).to.eql(['defacement', 'unique']);
     });
 
+    it('should return unique tags', async () => {
+      await createCase(supertest, getPostCaseRequest());
+      await createCase(supertest, getPostCaseRequest());
+
+      const tags = await getTags({ supertest });
+      expect(tags).to.eql(['defacement']);
+    });
+
     describe('rbac', () => {
-      it('User: security solution only - should read the correct tags', async () => {
+      it('should read the correct tags', async () => {
         await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
