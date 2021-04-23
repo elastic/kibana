@@ -65,7 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
-    it('should fail if untrusted certificate is used', async () => {
+    it('should fail and redirect if untrusted certificate is used', async () => {
+      // Unlike the call to '/internal/security/me' above, this route can be redirected (see pre-response in `AuthenticationService`).
       const unauthenticatedResponse = await supertest
         .get('/security/account')
         .ca(CA_CERT)

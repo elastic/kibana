@@ -162,14 +162,13 @@ export class AuthorizationService {
 
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
+        const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToStaticMarkup(
           <ResetSessionPage
             buildNumber={buildNumber}
             basePath={http.basePath}
             logoutUrl={http.basePath.prepend(
-              `/api/security/logout?${querystring.stringify({
-                next: `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`,
-              })}`
+              `/api/security/logout?${querystring.stringify({ next })}`
             )}
           />
         );

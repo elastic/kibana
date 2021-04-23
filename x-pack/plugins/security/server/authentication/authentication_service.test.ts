@@ -6,6 +6,7 @@
  */
 
 jest.mock('./authenticator');
+jest.mock('./can_redirect_request');
 jest.mock('./unauthenticated_page');
 
 import Boom from '@hapi/boom';
@@ -19,7 +20,6 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-  OnPreResponseHandler,
   OnPreResponseToolkit,
 } from 'src/core/server';
 import {
@@ -40,7 +40,7 @@ import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
+import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { AuthenticationResult } from './authentication_result';
@@ -65,6 +65,7 @@ describe('AuthenticationService', () => {
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
   };
+  let mockCanRedirectRequest: jest.Mock;
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
@@ -81,6 +82,8 @@ describe('AuthenticationService', () => {
       license: licenseMock.create(),
       buildNumber: 100500,
     };
+    mockCanRedirectRequest = jest.requireMock('./can_redirect_request').canRedirectRequest;
+    mockCanRedirectRequest.mockReturnValue(false);
 
     const coreStart = coreMock.createStart();
     mockStartAuthenticationParams = {
@@ -347,20 +350,26 @@ describe('AuthenticationService', () => {
   });
 
   describe('onPreResponse handler', () => {
-    let onPreResponseHandler: OnPreResponseHandler;
-    beforeEach(() => {
+    function getService({ runStart = true }: { runStart?: boolean } = {}) {
       service.setup(mockSetupAuthenticationParams);
-      service.start(mockStartAuthenticationParams);
 
-      onPreResponseHandler =
+      if (runStart) {
+        service.start(mockStartAuthenticationParams);
+      }
+
+      const onPreResponseHandler =
         mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[0][0];
-    });
+      const [authenticator] = jest.requireMock('./authenticator').Authenticator.mock.instances;
+
+      return { authenticator, onPreResponseHandler };
+    }
 
     it('ignores responses with non-401 status code', async () => {
       const mockReturnedValue = { type: 'next' as any };
       const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
       mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
 
+      const { onPreResponseHandler } = getService();
       for (const statusCode of [200, 400, 403, 404]) {
         await expect(
           onPreResponseHandler(
@@ -376,32 +385,51 @@ describe('AuthenticationService', () => {
       const mockReturnedValue = { type: 'next' as any };
       const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
       mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+      mockCanRedirectRequest.mockReturnValue(false);
 
-      for (const request of [
-        httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'something' } }),
-        httpServerMock.createKibanaRequest({ path: '/api/security/some' }),
-        httpServerMock.createKibanaRequest({ path: '/internal/security/some' }),
-        httpServerMock.createKibanaRequest({ routeTags: ['api'] }),
-      ]) {
-        await expect(
-          onPreResponseHandler(request, { statusCode: 401 }, mockOnPreResponseToolkit)
-        ).resolves.toBe(mockReturnedValue);
-      }
+      const { onPreResponseHandler } = getService();
+      await expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).resolves.toBe(mockReturnedValue);
     });
 
-    describe('when login page is available', () => {
+    it('ignores responses if authenticator is not initialized', async () => {
+      // Run `setup`, but not `start` to simulate non-initialized `Authenticator`.
+      const { onPreResponseHandler } = getService({ runStart: false });
+
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+      mockCanRedirectRequest.mockReturnValue(true);
+
+      await expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).resolves.toBe(mockReturnedValue);
+    });
+
+    describe('when login form is available', () => {
       let mockReturnedValue: { type: any; body: string };
       let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
         mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
-
-        const [authenticator] = jest.requireMock('./authenticator').Authenticator.mock.instances;
-        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
       });
 
       it('redirects to the login page when user does not have an active session', async () => {
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
@@ -423,6 +451,10 @@ describe('AuthenticationService', () => {
       it('performs logout if user has an active session', async () => {
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
@@ -442,12 +474,16 @@ describe('AuthenticationService', () => {
       });
 
       it('does not preserve path for the authentication flow paths', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({
               path: '/api/security/saml/callback',
               query: { param: 'one two' },
-              routeTags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
             }),
             { statusCode: 401 },
             mockOnPreResponseToolkit
@@ -465,7 +501,105 @@ describe('AuthenticationService', () => {
       });
     });
 
-    describe('when login page is not available', () => {
+    describe('when login selector is available', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                saml: { saml1: { order: 0, realm: 'saml1' } },
+                basic: { basic1: { order: 1 } },
+              },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+      });
+
+      it('redirects to the login page when user does not have an active session', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('performs logout if user has an active session', async () => {
+        mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('does not preserve path for the authentication flow paths', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/saml/callback',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2F',
+          },
+        });
+      });
+    });
+
+    describe('when neither login selector nor login form is available', () => {
       let mockReturnedValue: { type: any; body: string };
       let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
@@ -480,22 +614,16 @@ describe('AuthenticationService', () => {
           loggingSystemMock.create().get(),
           { isTLSEnabled: false }
         );
-
-        service = new AuthenticationService(logger);
-        service.setup(mockSetupAuthenticationParams);
-        service.start(mockStartAuthenticationParams);
-
-        const [, authenticator] = jest.requireMock('./authenticator').Authenticator.mock.instances;
-        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
-
-        onPreResponseHandler =
-          mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[1][0];
       });
 
       it('renders unauthenticated page if user does not have an active session', async () => {
         const mockRenderUnauthorizedPage = jest
           .requireMock('./unauthenticated_page')
           .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
 
         await expect(
           onPreResponseHandler(
@@ -525,6 +653,10 @@ describe('AuthenticationService', () => {
           .renderUnauthenticatedPage.mockReturnValue('rendered-view');
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
@@ -552,12 +684,16 @@ describe('AuthenticationService', () => {
           .requireMock('./unauthenticated_page')
           .renderUnauthenticatedPage.mockReturnValue('rendered-view');
 
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({
               path: '/api/security/saml/callback',
               query: { param: 'one two' },
-              routeTags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
             }),
             { statusCode: 401 },
             mockOnPreResponseToolkit
