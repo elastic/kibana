@@ -25,14 +25,6 @@ export class IndexNameForm extends Component<Props, State> {
     existingIndexNames: [],
   };
 
-  componentDidUpdate(prevProps: Props) {
-    const { indexName: prevIndexName } = prevProps;
-    const { indexName } = this.props;
-    if (indexName !== undefined && indexName !== prevIndexName) {
-      this._onIndexNameChange(indexName);
-    }
-  }
-
   _onIndexNameChange = async (indexName: string) => {
     const indexNameError = await validateIndexName(indexName);
     this.props.onIndexNameChange(indexName, indexNameError);
