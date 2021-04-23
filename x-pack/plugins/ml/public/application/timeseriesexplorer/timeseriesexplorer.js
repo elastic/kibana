@@ -1272,8 +1272,8 @@ export class TimeSeriesExplorer extends React.Component {
                             {i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
                               defaultMessage: 'Interval',
                             })}
+                            <EuiIcon type="questionInCircle" color="subdued" />
                           </span>
-                          <EuiIcon type="questionInCircle" color="subdued" />
                         </EuiToolTip>
                       }
                     >
