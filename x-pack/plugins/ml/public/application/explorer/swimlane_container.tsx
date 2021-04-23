@@ -396,6 +396,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             style={{
               width: '100%',
               overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >
