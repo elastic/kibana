@@ -5,4 +5,31 @@
  * 2.0.
  */
 
-// next up
+import React from 'react';
+import { configure, getByTestId, render } from '@testing-library/react';
+import RecentCases from '.';
+
+configure({ testIdAttribute: 'data-test-subj' });
+const defaultProps = {
+  allCasesNavigation: {
+    href: 'all-cases-href',
+    onClick: jest.fn(),
+  },
+  caseDetailsNavigation: {
+    href: () => 'case-details-href',
+    onClick: jest.fn(),
+  },
+  createCaseNavigation: {
+    href: 'create-details-href',
+    onClick: jest.fn(),
+  },
+  maxCasesToShow: 10,
+};
+
+describe('RecentCases', () => {
+  it('renders', () => {
+    render(<RecentCases {...defaultProps} />);
+    const thisItem = getByTestId('wowzeroni');
+    console.log('getByTestId', thisItem);
+  });
+});
