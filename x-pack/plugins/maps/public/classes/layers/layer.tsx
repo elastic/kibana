@@ -98,6 +98,7 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  getDescriptor(): LayerDescriptor;
 }
 
 export type CustomIconAndTooltipContent = {
@@ -153,6 +154,10 @@ export class AbstractLayer implements ILayer {
     // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
+  }
+
+  getDescriptor(): LayerDescriptor {
+    return this._descriptor;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
@@ -258,10 +263,16 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (!this.hasErrors()) {
-      return await this.getSource().getAttributions();
+    if (this.hasErrors()) {
+      return [];
     }
-    return [];
+
+    const attributionProvider = this.getSource().getAttributionProvider();
+    if (attributionProvider) {
+      return attributionProvider();
+    }
+
+    return this._descriptor.attribution !== undefined ? this._descriptor.attribution : [];
   }
 
   getStyleForEditing(): IStyle {
