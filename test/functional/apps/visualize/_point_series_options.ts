@@ -283,7 +283,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '2015-09-19 12:00',
             '2015-09-20 12:00',
             '2015-09-21 12:00',
-            '2015-09-21 12:00',
             '2015-09-22 12:00',
             '2015-09-23 12:00',
           ]
