@@ -63,6 +63,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
         },
         breakdown: 'observer.geo.name',
         operationType: 'average',
+        dataType: 'synthetics',
       },
     },
     basePath

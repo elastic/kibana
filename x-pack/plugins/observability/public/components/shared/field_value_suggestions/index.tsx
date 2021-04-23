@@ -17,7 +17,7 @@ export function FieldValueSuggestions({
   sourceField,
   label,
   indexPattern,
-  value,
+  selectedValue,
   filters,
   button,
   time,
@@ -49,7 +49,7 @@ export function FieldValueSuggestions({
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
-      value={value}
+      selectedValue={selectedValue}
       button={button}
       forceOpen={forceOpen}
       anchorPosition={anchorPosition}

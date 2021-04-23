@@ -26,7 +26,7 @@ export function UrlStorageContextProvider({
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
   return {
     operationType: op,
     reportType: rt!,
@@ -35,6 +35,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     filters: ft!,
     time: time!,
     reportDefinitions: rdf,
+    dataType: dt!,
     ...restSeries,
   };
 }
@@ -42,6 +43,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
 interface ShortUrlSeries {
   [URL_KEYS.OPERATION_TYPE]?: OperationType;
   [URL_KEYS.REPORT_TYPE]?: ReportViewTypeId;
+  [URL_KEYS.DATA_TYPE]?: AppDataType;
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
@@ -50,7 +52,6 @@ interface ShortUrlSeries {
     to: string;
     from: string;
   };
-  dataType?: AppDataType;
 }
 
 export type AllShortSeries = Record<string, ShortUrlSeries>;

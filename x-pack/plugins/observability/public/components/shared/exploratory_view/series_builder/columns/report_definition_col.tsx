@@ -9,16 +9,16 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { DataSeries } from '../../types';
+import { DataSeries, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
 
-function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, string>) {
+function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
   const { reportDefinitions } = dataView;
   const customColumn = reportDefinitions.find((item) => item.custom);
   if (customColumn?.field && selectedDefinition[customColumn?.field]) {
@@ -31,10 +31,16 @@ function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, 
 
 const MaxWidthStyle = { maxWidth: 250 };
 
-export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
+export function ReportDefinitionCol({
+  dataViewSeries,
+  seriesId,
+}: {
+  dataViewSeries: DataSeries;
+  seriesId: string;
+}) {
   const { indexPattern } = useAppIndexPatternContext();
 
-  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
+  const { series, setSeries } = useUrlStorage(seriesId);
 
   const { reportDefinitions: rtd = {} } = series;
 
@@ -47,15 +53,15 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
     yAxisColumns,
   } = dataViewSeries;
 
-  const onChange = (field: string, value?: string) => {
-    if (!value) {
+  const onChange = (field: string, value?: string[]) => {
+    if (!value?.[0]) {
       delete rtd[field];
-      setSeries(NEW_SERIES_KEY, {
+      setSeries(seriesId, {
         ...series,
         reportDefinitions: { ...rtd },
       });
     } else {
-      setSeries(NEW_SERIES_KEY, {
+      setSeries(seriesId, {
         ...series,
         reportDefinitions: { ...rtd, [field]: value },
       });
@@ -64,7 +70,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
 
   const onRemove = (field: string) => {
     delete rtd[field];
-    setSeries(NEW_SERIES_KEY, {
+    setSeries(seriesId, {
       ...series,
       reportDefinitions: rtd,
     });
@@ -75,7 +81,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
   return (
     <FlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <DatePickerCol seriesId={NEW_SERIES_KEY} />
+        <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
       {indexPattern &&
         reportDefinitions.map(({ field, custom, options, defaultValue }) => (
@@ -87,8 +93,8 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                     label={labels[field]}
                     sourceField={field}
                     indexPattern={indexPattern}
-                    value={rtd?.[field]}
-                    onChange={(val?: string) => onChange(field, val)}
+                    selectedValue={rtd?.[field]}
+                    onChange={(val?: string[]) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
                     fullWidth={true}
@@ -101,12 +107,12 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                       iconSide="right"
                       iconType="cross"
                       color="hollow"
-                      onClick={() => onRemove(field)}
+                      onClick={() => {}}
                       iconOnClick={() => onRemove(field)}
                       iconOnClickAriaLabel={'Click to remove'}
                       onClickAriaLabel={'Click to remove'}
                     >
-                      {rtd?.[field]}
+                      {labels[field]}: {(rtd?.[field] ?? []).join(', ')}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
@@ -116,7 +122,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                 field={field}
                 options={options}
                 defaultValue={defaultValue}
-                seriesId={NEW_SERIES_KEY}
+                seriesId={seriesId}
               />
             )}
           </EuiFlexItem>
@@ -124,13 +130,13 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
       {(hasOperationType || columnType === 'operation') && (
         <EuiFlexItem style={MaxWidthStyle}>
           <OperationTypeSelect
-            seriesId={NEW_SERIES_KEY}
+            seriesId={seriesId}
             defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}
       <EuiFlexItem style={MaxWidthStyle}>
-        <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
+        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} />
       </EuiFlexItem>
     </FlexGroup>
   );

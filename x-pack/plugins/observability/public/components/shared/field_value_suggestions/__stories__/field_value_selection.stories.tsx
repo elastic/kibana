@@ -31,7 +31,7 @@ export default {
               label="Service name"
               values={['elastic co frontend', 'apm server', 'opbean python']}
               onChange={() => {}}
-              value={''}
+              selectedValue={[]}
               loading={false}
               setQuery={() => {}}
             />
@@ -48,7 +48,7 @@ export function ValuesLoaded() {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -61,7 +61,7 @@ export function LoadingState() {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={true}
       setQuery={() => {}}
     />
@@ -74,7 +74,7 @@ export function EmptyState() {
       label="Service name"
       values={[]}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -94,7 +94,7 @@ export function SearchState(args: FieldValueSelectionProps) {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={setQuery}
     />

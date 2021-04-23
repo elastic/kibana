@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -24,6 +24,11 @@ export function ExploratoryView() {
     services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
+  const seriesBuilderRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const [height, setHeight] = useState<string>('100vh');
+
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
   );
@@ -38,6 +43,14 @@ export function ExploratoryView() {
     seriesId,
   });
 
+  const setHeightOffset = () => {
+    if (seriesBuilderRef?.current && wrapperRef.current) {
+      const headerOffset = wrapperRef.current.getBoundingClientRect().top;
+      const seriesOffset = seriesBuilderRef.current.getBoundingClientRect().height;
+      setHeight(`calc(100vh - ${seriesOffset + headerOffset + 32}px)`);
+    }
+  };
+
   useEffect(() => {
     if (series?.reportType || series?.dataType) {
       loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
@@ -49,22 +62,27 @@ export function ExploratoryView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
+  useEffect(() => {
+    setHeightOffset();
+  });
+
   return (
     <Wrapper>
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-          {lensAttributes && seriesId && series?.reportType && series?.time ? (
-            <LensComponent
-              id="exploratoryView"
-              style={{ height: 550 }}
-              timeRange={series?.time}
-              attributes={lensAttributes}
-            />
-          ) : (
-            <EmptyView loading={loading} />
-          )}
-          <SeriesBuilder seriesId={seriesId} />
+          <LensWrapper ref={wrapperRef} height={height}>
+            {lensAttributes && seriesId && series?.reportType && series?.time ? (
+              <LensComponent
+                id="exploratoryView"
+                timeRange={series?.time}
+                attributes={lensAttributes}
+              />
+            ) : (
+              <EmptyView loading={loading} height={height} />
+            )}
+          </LensWrapper>
+          <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />
         </>
       ) : (
         <EuiTitle>
@@ -79,7 +97,14 @@ export function ExploratoryView() {
     </Wrapper>
   );
 }
+const LensWrapper = styled.div<{ height: string }>`
+  min-height: 400px;
+  height: ${(props) => props.height};
 
+  &&& > div {
+    height: 100%;
+  }
+`;
 const Wrapper = styled(EuiPanel)`
   max-width: 1800px;
   min-width: 800px;

@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { Breakdowns } from '../../series_editor/columns/breakdowns';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { DataSeries } from '../../types';
 
-export function ReportBreakdowns({ dataViewSeries }: { dataViewSeries: DataSeries }) {
-  return <Breakdowns breakdowns={dataViewSeries.breakdowns ?? []} seriesId={NEW_SERIES_KEY} />;
+export function ReportBreakdowns({
+  seriesId,
+  dataViewSeries,
+}: {
+  dataViewSeries: DataSeries;
+  seriesId: string;
+}) {
+  return <Breakdowns breakdowns={dataViewSeries.breakdowns ?? []} seriesId={seriesId} />;
 }

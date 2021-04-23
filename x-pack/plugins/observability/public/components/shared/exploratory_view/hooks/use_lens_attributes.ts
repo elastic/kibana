@@ -25,7 +25,7 @@ export const getFiltersFromDefs = (
   const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
     return {
       field,
-      values: [value],
+      values: value,
     };
   }) as UrlFilter[];
 

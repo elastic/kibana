@@ -19,6 +19,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     breakdown,
     filters,
     reportDefinitions,
+    dataType,
     ...restSeries
   } = series;
 
@@ -29,6 +30,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.BREAK_DOWN]: breakdown,
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
+    [URL_KEYS.DATA_TYPE]: dataType,
     ...restSeries,
   };
 }

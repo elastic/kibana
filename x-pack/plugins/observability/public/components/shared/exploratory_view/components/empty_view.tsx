@@ -6,18 +6,13 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { INITIATING_VIEW } from '../series_builder/series_builder';
+import { LOADING_VIEW } from '../series_builder/series_builder';
 
-export function EmptyView({ loading }: { loading: boolean }) {
-  const {
-    services: { http },
-  } = useKibana();
-
+export function EmptyView({ loading, height }: { loading: boolean; height: string }) {
   return (
-    <Wrapper>
+    <Wrapper height={height}>
       {loading && (
         <EuiProgress
           size="xs"
@@ -29,21 +24,21 @@ export function EmptyView({ loading }: { loading: boolean }) {
         />
       )}
       <EuiSpacer />
-      <ImageWrap
-        alt="Visulization"
-        url={http!.basePath.prepend(`/plugins/observability/assets/kibana_dashboard_light.svg`)}
-      />
-      <EuiText>{INITIATING_VIEW}</EuiText>
+      <FlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem>
+          <EuiText>{LOADING_VIEW}</EuiText>
+        </EuiFlexItem>
+      </FlexGroup>
     </Wrapper>
   );
 }
 
-const ImageWrap = styled(EuiImage)`
-  opacity: 0.4;
+const Wrapper = styled.div<{ height: string }>`
+  text-align: center;
+  height: ${(props) => props.height};
+  position: relative;
 `;
 
-const Wrapper = styled.div`
-  text-align: center;
-  height: 550px;
-  position: relative;
+const FlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
 `;

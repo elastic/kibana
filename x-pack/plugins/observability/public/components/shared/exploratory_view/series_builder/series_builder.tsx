@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { RefObject } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
@@ -45,7 +45,13 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
 };
 
-export function SeriesBuilder({ seriesId }: { seriesId: string }) {
+export function SeriesBuilder({
+  seriesBuilderRef,
+  seriesId,
+}: {
+  seriesId: string;
+  seriesBuilderRef: RefObject<HTMLDivElement>;
+}) {
   const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
 
   const {
@@ -75,7 +81,7 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
         defaultMessage: 'Data Type',
       }),
       width: '15%',
-      render: (val: string) => <DataTypesCol />,
+      render: (val: string) => <DataTypesCol seriesId={seriesId} />,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.report', {
@@ -83,7 +89,7 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
       }),
       width: '15%',
       render: (val: string) => (
-        <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
+        <ReportTypesCol seriesId={seriesId} reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
     },
     {
@@ -94,9 +100,9 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
       render: (val: string) => {
         if (dataType && hasData) {
           return loading ? (
-            INITIATING_VIEW
+            LOADING_VIEW
           ) : reportType ? (
-            <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
+            <ReportDefinitionCol seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
           ) : (
             SELECT_REPORT_TYPE
           );
@@ -111,7 +117,9 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
       }),
       width: '20%',
       render: (val: string) =>
-        reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
+        reportType && indexPattern ? (
+          <ReportFilters seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
+        ) : null,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdown', {
@@ -121,11 +129,13 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
       field: 'id',
       render: (val: string) =>
         reportType && indexPattern ? (
-          <ReportBreakdowns dataViewSeries={getDataViewSeries()} />
+          <ReportBreakdowns seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
         ) : null,
     },
   ];
 
+  // TODO: Remove this if remain unused during multiple series view
+  // @ts-expect-error
   const addSeries = () => {
     if (reportType) {
       const newSeriesId = `${
@@ -135,6 +145,7 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
       }`;
 
       const newSeriesN: SeriesUrl = {
+        dataType,
         time,
         filters,
         breakdown,
@@ -152,24 +163,21 @@ export function SeriesBuilder({ seriesId }: { seriesId: string }) {
 
   const items = [{ id: seriesId }];
 
-  const flyout = (
-    <>
+  return (
+    <div ref={seriesBuilderRef}>
       <EuiBasicTable
         items={items as any}
         columns={columns}
-        cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
+        cellProps={{ style: { borderRight: '1px solid #d3dae6', verticalAlign: 'initial' } }}
       />
-      <EuiSpacer size="xs" />
-    </>
+    </div>
   );
-
-  return <div>{flyout}</div>;
 }
 
-export const INITIATING_VIEW = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.initView',
+export const LOADING_VIEW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.loadingView',
   {
-    defaultMessage: 'Initiating view ...',
+    defaultMessage: 'Loading view ...',
   }
 );
 

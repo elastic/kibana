@@ -31,7 +31,7 @@ import {
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
-import { DataSeries, UrlFilter } from '../types';
+import { DataSeries, UrlFilter, URLReportDefinition } from '../types';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
@@ -49,7 +49,7 @@ function buildNumberColumn(sourceField: string) {
 export const parseCustomFieldName = (
   sourceField: string,
   reportViewConfig: DataSeries,
-  selectedDefinitions: Record<string, string>
+  selectedDefinitions: URLReportDefinition
 ) => {
   let fieldName = sourceField;
   let columnType;
@@ -60,7 +60,7 @@ export const parseCustomFieldName = (
 
   if (customField) {
     if (selectedDefinitions[fieldName]) {
-      fieldName = selectedDefinitions[fieldName];
+      fieldName = selectedDefinitions[fieldName][0];
       if (customField?.options)
         columnType = customField?.options?.find(({ field }) => field === fieldName)?.columnType;
     } else if (customField.defaultValue) {
@@ -81,7 +81,7 @@ export class LensAttributes {
   filters: UrlFilter[];
   seriesType: SeriesType;
   reportViewConfig: DataSeries;
-  reportDefinitions: Record<string, string>;
+  reportDefinitions: URLReportDefinition;
 
   constructor(
     indexPattern: IndexPattern,
@@ -89,7 +89,7 @@ export class LensAttributes {
     seriesType?: SeriesType,
     filters?: UrlFilter[],
     operationType?: OperationType,
-    reportDefinitions?: Record<string, string>
+    reportDefinitions?: URLReportDefinition
   ) {
     this.indexPattern = indexPattern;
     this.layers = {};

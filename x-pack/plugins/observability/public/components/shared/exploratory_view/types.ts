@@ -67,6 +67,8 @@ export interface DataSeries {
   yTitle?: string;
 }
 
+export type URLReportDefinition = Record<string, string[]>;
+
 export interface SeriesUrl {
   time: {
     to: string;
@@ -77,8 +79,8 @@ export interface SeriesUrl {
   seriesType?: SeriesType;
   reportType: ReportViewTypeId;
   operationType?: OperationType;
-  dataType?: AppDataType;
-  reportDefinitions?: Record<string, string>;
+  dataType: AppDataType;
+  reportDefinitions?: URLReportDefinition;
 }
 
 export interface UrlFilter {
