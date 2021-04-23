@@ -9,13 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiPageContent,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPageContent, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -29,6 +23,7 @@ import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
 import { generateEnginePath } from '../../engine';
 
+import { EmptyState } from '../components';
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
@@ -144,19 +139,7 @@ export const CurationsTable: React.FC = () => {
       responsive
       hasActions
       loading={dataLoading}
-      noItemsMessage={
-        <EuiEmptyPrompt
-          iconType="pin"
-          title={
-            <h4>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.curations.table.empty.noCurationsTitle',
-                { defaultMessage: 'No curations yet' }
-              )}
-            </h4>
-          }
-        />
-      }
+      noItemsMessage={<EmptyState />}
       pagination={{
         ...convertMetaToPagination(meta),
         hidePerPageOptions: true,
