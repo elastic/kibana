@@ -4221,12 +4221,12 @@ boom@7.x.x, boom@^7.1.0, boom@^7.3.0:
     hoek "6.x.x"
 
 bounce@1.x.x:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/bounce/-/bounce-1.2.0.tgz#e3bac68c73fd256e38096551efc09f504873c8c8"
-  integrity sha512-8syCGe8B2/WC53118/F/tFy5aW00j+eaGPXmAUP7iBhxc+EBZZxS1vKelWyBCH6IqojgS2t1gF0glH30qAJKEw==
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/bounce/-/bounce-1.2.3.tgz#2b286d36eb21d5f08fe672dd8cd37a109baad121"
+  integrity sha512-3G7B8CyBnip5EahCZJjnvQ1HLyArC6P5e+xcolo13BVI9ogFaDOsNMAE7FIWliHtIkYI8/nTRCvCY9tZa3Mu4g==
   dependencies:
     boom "7.x.x"
-    hoek "5.x.x"
+    hoek "6.x.x"
 
 bourne@1.x.x:
   version "1.1.2"
