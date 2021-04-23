@@ -21,10 +21,18 @@ describe('Stack Alerts Feature Privileges', () => {
     await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
     const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting;
+    const typesInFeaturePrivilegeAll = BUILT_IN_ALERTS_FEATURE.privileges.all.alerting.all;
+    const typesInFeaturePrivilegeRead = BUILT_IN_ALERTS_FEATURE.privileges.read.alerting.read;
     expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilege.length);
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilegeAll.length);
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(
+      typesInFeaturePrivilegeRead.length
+    );
 
     alertingSetup.registerType.mock.calls.forEach((call) => {
       expect(typesInFeaturePrivilege.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
+      expect(typesInFeaturePrivilegeAll.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
+      expect(typesInFeaturePrivilegeRead.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
     });
   });
 });
