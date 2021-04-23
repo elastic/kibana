@@ -30,7 +30,7 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  const res = await http.put(`${BASE_ACTION_API_PATH}/connector/${id}`, {
+  const res = await http.put(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`, {
     body: JSON.stringify({
       name: connector.name,
       config: connector.config,
