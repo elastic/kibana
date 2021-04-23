@@ -26,9 +26,15 @@ export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
         const { id } = request.params;
         const client = context.logstash!.esClient;
 
-        await client.asCurrentUser.logstash.deletePipeline({ id });
-
-        return response.noContent();
+        try {
+          await client.asCurrentUser.logstash.deletePipeline({ id });
+          return response.noContent();
+        } catch (e) {
+          if (e.statusCode === 404) {
+            return response.notFound();
+          }
+          throw e;
+        }
       })
     )
   );
