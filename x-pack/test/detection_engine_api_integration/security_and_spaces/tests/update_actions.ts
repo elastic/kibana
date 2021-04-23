@@ -26,6 +26,7 @@ import {
   createNewAction,
   findImmutableRuleById,
   getPrePackagedRulesStatus,
+  getSimpleRuleOutput,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -57,6 +58,21 @@ export default ({ getService }: FtrProviderContext) => {
         const expected = {
           ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
           version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+        };
+        expect(bodyToCompare).to.eql(expected);
+      });
+
+      it('should be able to add a new webhook action and then remove the action from the rule again', async () => {
+        const hookAction = await createNewAction(supertest);
+        const rule = getSimpleRule();
+        await createRule(supertest, rule);
+        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
+        await updateRule(supertest, ruleToUpdate);
+        const ruleAfterActionRemoved = await updateRule(supertest, rule);
+        const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
+        const expected = {
+          ...getSimpleRuleOutput(),
+          version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
