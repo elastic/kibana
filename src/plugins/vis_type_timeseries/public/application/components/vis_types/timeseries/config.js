@@ -341,7 +341,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     name:
       model.split_color_mode === 'kibana'
         ? 'kibana_palette'
-        : model.split_color_mode || model.palette.name,
+        : model.split_color_mode || initialPalette.name,
   };
 
   return (
