@@ -253,7 +253,7 @@ export const QueryBarDefineRule = ({
     }
   };
 
-  const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate'], []);
+  const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate', 'createFrom'], []);
 
   return (
     <>
