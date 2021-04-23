@@ -86,7 +86,9 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
         </EuiPopover>
       </EuiFlexItem>
 
-      {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} hideActions={actionTimelineToHide} /> : null}
+      {showTimelineModal ? (
+        <OpenTimelineModal onClose={onCloseTimelineModal} hideActions={actionTimelineToHide} />
+      ) : null}
     </>
   );
 };
