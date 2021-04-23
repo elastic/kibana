@@ -44,7 +44,7 @@ import {
   CasesStatusResponse,
   CasesConfigurationsResponse,
 } from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
+import { postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -617,7 +617,6 @@ export const getAllUserAction = async (
   const { body: userActions } = await supertest
     .get(`${CASES_URL}/${caseId}/user_actions`)
     .set('kbn-xsrf', 'true')
-    .send()
     .expect(expectedHttpCode);
 
   return userActions;
@@ -660,7 +659,6 @@ export const getAllComments = async (
   const { body: comments } = await supertest
     .get(`${CASES_URL}/${caseId}/comments`)
     .set('kbn-xsrf', 'true')
-    .send()
     .expect(expectedHttpCode);
 
   return comments;
@@ -675,7 +673,6 @@ export const getComment = async (
   const { body: comment } = await supertest
     .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
     .set('kbn-xsrf', 'true')
-    .send()
     .expect(expectedHttpCode);
 
   return comment;
@@ -712,7 +709,6 @@ export const getConfiguration = async ({
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query(query)
-    .send()
     .expect(expectedHttpCode);
 
   return configuration;
@@ -759,7 +755,6 @@ export const getCaseConnectors = async (
   const { body: connectors } = await supertest
     .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
     .set('kbn-xsrf', 'true')
-    .send()
     .expect(expectedHttpCode);
 
   return connectors;
@@ -789,7 +784,6 @@ export const getAllCasesStatuses = async (
   const { body: statuses } = await supertest
     .get(CASE_STATUS_URL)
     .set('kbn-xsrf', 'true')
-    .send()
     .expect(expectedHttpCode);
 
   return statuses;
@@ -814,7 +808,6 @@ export const getCase = async ({
     )
     .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
-    .send()
     .expect(expectedHttpCode);
 
   return theCase;
@@ -858,7 +851,6 @@ export const getTags = async ({
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })
-    .send()
     .expect(expectedHttpCode);
 
   return res;
@@ -880,7 +872,6 @@ export const getReporters = async ({
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })
-    .send()
     .expect(expectedHttpCode);
 
   return res;
