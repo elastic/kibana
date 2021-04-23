@@ -14,7 +14,7 @@ current view of *Discover*&mdash;the columns selected in the document table,
 the sort order, and the index pattern.
 
 Saved searches are different from <<save-load-delete-query,saved queries>>, which store
-only the query and are available in any app that has a query bar. Saved queries
+only the query and are available in any app that has a query bar. Saved searches
 can serve as a foundation for building visualizations.
 
 
