@@ -7,8 +7,10 @@
 
 import React from 'react';
 
+import { EuiLink } from '@elastic/eui';
+
+import { getAppSearchUrl } from '../../../../../shared/enterprise_search_url';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../../shared/telemetry';
 import { ENGINE_PATH } from '../../../../routes';
 import { generateEncodedPath } from '../../../../utils/encode_path_params';
@@ -22,15 +24,20 @@ const sendEngineTableLinkClickTelemetry = () => {
 
 export const navigateToEngine = (engineName: string) => {
   sendEngineTableLinkClickTelemetry();
-  KibanaLogic.values.navigateToUrl(generateEncodedPath(ENGINE_PATH, { engineName }));
+  KibanaLogic.values.navigateToUrl(
+    getAppSearchUrl(generateEncodedPath(ENGINE_PATH, { engineName })),
+    { shouldNotCreateHref: true }
+  );
 };
 
 export const renderEngineLink = (engineName: string) => (
-  <EuiLinkTo
-    to={generateEncodedPath(ENGINE_PATH, { engineName })}
+  // eslint-disable-next-line @elastic/eui/href-or-on-click
+  <EuiLink
+    href={getAppSearchUrl(generateEncodedPath(ENGINE_PATH, { engineName }))}
+    target="_blank"
     onClick={sendEngineTableLinkClickTelemetry}
     data-test-subj="EngineName"
   >
     {engineName}
-  </EuiLinkTo>
+  </EuiLink>
 );

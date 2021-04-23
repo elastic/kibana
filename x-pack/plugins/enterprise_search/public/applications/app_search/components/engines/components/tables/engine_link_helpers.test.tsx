@@ -6,12 +6,13 @@
  */
 
 import { mockKibanaValues, mockTelemetryActions } from '../../../../../__mocks__';
+import '../../../../../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { EuiLink } from '@elastic/eui';
 
 import { navigateToEngine, renderEngineLink } from './engine_link_helpers';
 
@@ -21,7 +22,9 @@ describe('navigateToEngine', () => {
 
   it('sends the user to the engine page and triggers a telemetry event', () => {
     navigateToEngine('engine-a');
-    expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine-a');
+    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost:3002/as/engines/engine-a', {
+      shouldNotCreateHref: true,
+    });
     expect(sendAppSearchTelemetry).toHaveBeenCalledWith({
       action: 'clicked',
       metric: 'engine_table_link',
@@ -34,9 +37,9 @@ describe('renderEngineLink', () => {
 
   it('renders a link to the engine with telemetry', () => {
     const wrapper = shallow(<div>{renderEngineLink('engine-b')}</div>);
-    const link = wrapper.find(EuiLinkTo);
+    const link = wrapper.find(EuiLink);
 
-    expect(link.prop('to')).toEqual('/engines/engine-b');
+    expect(link.prop('href')).toEqual('http://localhost:3002/as/engines/engine-b');
 
     link.simulate('click');
     expect(sendAppSearchTelemetry).toHaveBeenCalledWith({
