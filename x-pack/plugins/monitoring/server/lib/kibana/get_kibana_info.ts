@@ -14,12 +14,15 @@ import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(resp: ElasticsearchResponse) {
-  const source = resp.hits?.hits[0]?._source.kibana_stats;
-  const kibana = source?.kibana;
+  const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
+  const mbSource = resp.hits?.hits[0]?._source.kibana?.stats;
+  const kibana = resp.hits?.hits[0]?._source.kibana?.kibana ?? legacySource?.kibana;
   return merge(kibana, {
-    availability: calculateAvailability(source?.timestamp),
-    os_memory_free: source?.os?.memory?.free_in_bytes,
-    uptime: source?.process?.uptime_in_millis,
+    availability: calculateAvailability(
+      resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp
+    ),
+    os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
+    uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
   });
 }
 
@@ -36,9 +39,13 @@ export function getKibanaInfo(
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.kibana_stats.kibana',
+      'hits.hits._source.kibana.kibana',
       'hits.hits._source.kibana_stats.os.memory.free_in_bytes',
+      'hits.hits._source.kibana.stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana_stats.process.uptime_in_millis',
+      'hits.hits._source.kibana.stats.process.uptime.ms',
       'hits.hits._source.kibana_stats.timestamp',
+      'hits.hits._source.@timestamp',
     ],
     body: {
       query: {

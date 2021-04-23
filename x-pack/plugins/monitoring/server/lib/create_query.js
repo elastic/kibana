@@ -52,13 +52,22 @@ export function createTimeFilter(options) {
  */
 export function createQuery(options) {
   options = defaults(options, { filters: [] });
-  const { type, clusterUuid, uuid, filters } = options;
+  const { type, types, clusterUuid, uuid, filters } = options;
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   let typeFilter;
   if (type) {
     typeFilter = { bool: { should: [{ term: { type } }, { term: { 'metricset.name': type } }] } };
+  } else if (types) {
+    typeFilter = {
+      bool: {
+        should: [
+          ...types.map((type) => ({ term: { type } })),
+          ...types.map((type) => ({ term: { 'metricset.name': type } })),
+        ],
+      },
+    };
   }
 
   let clusterUuidFilter;
