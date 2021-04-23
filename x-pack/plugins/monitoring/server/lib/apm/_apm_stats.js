@@ -27,7 +27,7 @@ export const apmAggFilterPath = [
   'aggregations.versions.buckets',
 ];
 
-export const apmUuidsAgg = (maxBucketSize) => ({
+export const apmUuidsAgg = maxBucketSize => ({
   total: {
     cardinality: {
       field: 'beats_stats.beat.uuid',
@@ -99,8 +99,8 @@ export const apmUuidsAgg = (maxBucketSize) => ({
   },
 });
 
-export const apmAggResponseHandler = (response) => {
-  const apmTotal = get(response, 'aggregations.total.value', null);
+export const apmAggResponseHandler = response => {
+  const apmTotal = get(response, 'aggregations.total.value', 0);
 
   const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
   const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
