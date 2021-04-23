@@ -787,7 +787,7 @@ export class CaseService {
     options,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
-      this.log.debug(`Attempting to GET all comments for id ${JSON.stringify(id)}`);
+      this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return soClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
@@ -814,7 +814,7 @@ export class CaseService {
         ...cloneDeep(options),
       });
     } catch (error) {
-      this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
+      this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
       throw error;
     }
   }
@@ -858,7 +858,7 @@ export class CaseService {
       }
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
-      return this.getAllComments({
+      return await this.getAllComments({
         soClient,
         id,
         options: {
@@ -891,7 +891,7 @@ export class CaseService {
       }
 
       this.log.debug(`Attempting to GET all comments for sub case caseID ${JSON.stringify(id)}`);
-      return this.getAllComments({
+      return await this.getAllComments({
         soClient,
         id,
         options: {

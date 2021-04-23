@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
@@ -18,8 +18,20 @@ import {
   createCase,
   createComment,
   getAllComments,
+  createCaseAsUser,
 } from '../../../../common/lib/utils';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -43,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: postCommentUserReq,
       });
-      const comments = await getAllComments(supertest, postedCase.id);
+      const comments = await getAllComments({ supertest, caseId: postedCase.id });
 
       expect(comments.length).to.eql(2);
     });
@@ -119,6 +131,105 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
         expect(body.length).to.eql(0);
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should get all comments when the user has the correct permissions', async () => {
+        const caseInfo = await createCaseAsUser({
+          supertestWithoutAuth,
+          user: superUser,
+          space: 'space1',
+          owner: 'securitySolutionFixture',
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          user: superUser,
+          space: 'space1',
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          user: superUser,
+          space: 'space1',
+        });
+
+        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+          let comments = await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            auth: { user, space: 'space1' },
+          });
+
+          expect(comments.length).to.eql(2);
+
+          // should retrieve the same number using the owner query param
+          comments = await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            auth: { user, space: 'space1' },
+            query: { owner: 'securitySolutionFixture' },
+          });
+
+          expect(comments.length).to.eql(2);
+        }
+      });
+
+      it('should not get comments when the user does not have correct permission', async () => {
+        const caseInfo = await createCaseAsUser({
+          supertestWithoutAuth,
+          user: superUser,
+          space: 'space1',
+          owner: 'securitySolutionFixture',
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          user: superUser,
+          space: 'space1',
+        });
+
+        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+          await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        }
+      });
+
+      it('should NOT get a case in a space with no permissions', async () => {
+        const caseInfo = await createCaseAsUser({
+          supertestWithoutAuth,
+          user: superUser,
+          space: 'space2',
+          owner: 'securitySolutionFixture',
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          user: superUser,
+          space: 'space2',
+        });
+
+        await getAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
       });
     });
   });

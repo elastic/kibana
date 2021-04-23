@@ -34,7 +34,6 @@ import {
   superUser,
   globalRead,
   obsSecRead,
-  obsSec,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -95,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send({ comment: 'unique', type: CommentType.user })
+        .send({ ...postCommentUserReq, comment: 'unique' })
         .expect(200);
 
       const { body: caseComments } = await supertest

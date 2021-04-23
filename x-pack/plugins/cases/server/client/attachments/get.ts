@@ -95,6 +95,7 @@ export async function find(
     const combinedFilter = combineFilters([
       stringToKueryNode(filter),
       combineAuthorizedAndOwnerFilter(
+        // TODO: remove this
         queryParams?.owner,
         authorizationFilter,
         CASE_COMMENT_SAVED_OBJECT
@@ -230,7 +231,8 @@ export async function getAll(
       operation: Operations.getAllComments,
     });
 
-    const filter = combineAuthorizedAndOwnerFilter(owner, authFilter);
+    // TODO: remove this
+    const filter = combineAuthorizedAndOwnerFilter(owner, authFilter, CASE_COMMENT_SAVED_OBJECT);
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({

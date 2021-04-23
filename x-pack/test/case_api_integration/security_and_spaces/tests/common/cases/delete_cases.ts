@@ -53,12 +53,21 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
       // ensure that we can get the comment before deleting the case
-      await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
+      await getComment({
+        supertest,
+        caseId: postedCase.id,
+        commentId: patchedCase.comments![0].id,
+      });
 
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
 
       // make sure the comment is now gone
-      await getComment(supertest, postedCase.id, patchedCase.comments![0].id, 404);
+      await getComment({
+        supertest,
+        caseId: postedCase.id,
+        commentId: patchedCase.comments![0].id,
+        expectedHttpCode: 404,
+      });
     });
 
     it('unhappy path - 404s when case is not there', async () => {

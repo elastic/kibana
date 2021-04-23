@@ -650,14 +650,14 @@ export const createComment = async ({
   user?: User;
   expectedHttpCode?: number;
 }): Promise<CaseResponse> => {
-  const { body: theCase } = await supertest
+  const { body: comment } = await supertest
     .post(`${getSpaceUrlPrefix(space)}${CASES_URL}/${caseId}/comments`)
     .set('kbn-xsrf', 'true')
     .auth(user.username, user.password)
     .send(params)
     .expect(expectedHttpCode);
 
-  return theCase;
+  return comment;
 };
 
 export const getAllUserAction = async (
@@ -688,45 +688,88 @@ export const updateCase = async (
   return cases;
 };
 
-export const deleteComment = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  commentId: string,
-  expectedHttpCode: number = 204
-): Promise<{} | Error> => {
+export const deleteComment = async ({
+  supertest,
+  caseId,
+  commentId,
+  expectedHttpCode = 204,
+  auth = { user: superUser },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  commentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space?: string };
+}): Promise<{} | Error> => {
   const { body: comment } = await supertest
-    .delete(`${CASES_URL}/${caseId}/comments/${commentId}`)
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
     .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode)
     .send();
 
   return comment;
 };
 
-export const getAllComments = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  expectedHttpCode: number = 200
-): Promise<AllCommentsResponse> => {
-  const { body: comments } = await supertest
-    .get(`${CASES_URL}/${caseId}/comments`)
+export const deleteAllComments = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 204,
+  auth = { user: superUser },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space?: string };
+}): Promise<{} | Error> => {
+  const { body: comment } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
     .set('kbn-xsrf', 'true')
-    .send()
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return comment;
+};
+
+export const getAllComments = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser },
+  query = {},
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  auth?: { user: User; space?: string };
+  expectedHttpCode?: number;
+  query?: Record<string, unknown> | string;
+}): Promise<AllCommentsResponse> => {
+  const { body: comments } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .auth(auth.user.username, auth.user.password)
+    .query(query)
     .expect(expectedHttpCode);
 
   return comments;
 };
 
-export const getComment = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  commentId: string,
-  expectedHttpCode: number = 200
-): Promise<CommentResponse> => {
+export const getComment = async ({
+  supertest,
+  caseId,
+  commentId,
+  expectedHttpCode = 200,
+  auth = { user: superUser },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  commentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space?: string };
+}): Promise<CommentResponse> => {
   const { body: comment } = await supertest
-    .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
-    .set('kbn-xsrf', 'true')
-    .send()
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
+    .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
   return comment;

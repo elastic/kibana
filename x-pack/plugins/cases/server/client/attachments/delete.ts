@@ -61,6 +61,10 @@ export async function deleteAll(
       associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
     });
 
+    if (comments.total <= 0) {
+      throw Boom.notFound(`No comments found for ${id}.`);
+    }
+
     await ensureAuthorized({
       authorization,
       auditLogger,
@@ -168,7 +172,7 @@ export async function deleteComment(
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment in route case id: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
       error,
       logger,
     });

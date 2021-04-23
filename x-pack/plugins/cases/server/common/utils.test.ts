@@ -412,6 +412,7 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "id": "mock-comment-1",
+              "owner": "securitySolution",
               "pushed_at": null,
               "pushed_by": null,
               "type": "user",

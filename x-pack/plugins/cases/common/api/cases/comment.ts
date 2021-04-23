@@ -119,6 +119,7 @@ export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
   subCaseId: rt.string,
+  // TODO: remove this
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 

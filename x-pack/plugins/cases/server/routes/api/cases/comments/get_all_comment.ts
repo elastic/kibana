@@ -23,6 +23,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
           schema.object({
             includeSubCaseComments: schema.maybe(schema.boolean()),
             subCaseId: schema.maybe(schema.string()),
+            // TODO: remove this
             owner: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
           })
         ),
