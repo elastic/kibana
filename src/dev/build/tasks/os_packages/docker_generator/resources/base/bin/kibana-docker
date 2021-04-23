@@ -273,6 +273,7 @@ kibana_vars=(
     xpack.reporting.queue.pollIntervalErrorMultiplier
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
+    xpack.reporting.roles.enabled
     xpack.rollup.enabled
     xpack.ruleRegistry.unsafe.write.enabled
     xpack.searchprofiler.enabled

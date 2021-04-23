@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -26,6 +26,7 @@ import {
 } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
+import { InstanceDetails } from './intance_details';
 
 type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -65,8 +66,47 @@ export function ServiceOverviewInstancesTable({
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
 
+  const [
+    itemIdToOpenActionMenuRowMap,
+    setItemIdToOpenActionMenuRowMap,
+  ] = useState<Record<string, boolean>>({});
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactNode>
+  >({});
+
+  useEffect(() => {
+    // Closes any open rows when fetching new items
+    setItemIdToExpandedRowMap({});
+  }, [status]);
+
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
+
+  const toggleRowActionMenu = (selectedServiceNodeName: string) => {
+    const actionMenuRowMapValues = { ...itemIdToOpenActionMenuRowMap };
+    if (actionMenuRowMapValues[selectedServiceNodeName]) {
+      delete actionMenuRowMapValues[selectedServiceNodeName];
+    } else {
+      actionMenuRowMapValues[selectedServiceNodeName] = true;
+    }
+    setItemIdToOpenActionMenuRowMap(actionMenuRowMapValues);
+  };
+
+  const toggleRowDetails = (selectedServiceNodeName: string) => {
+    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (expandedRowMapValues[selectedServiceNodeName]) {
+      delete expandedRowMapValues[selectedServiceNodeName];
+    } else {
+      expandedRowMapValues[selectedServiceNodeName] = (
+        <InstanceDetails
+          serviceNodeName={selectedServiceNodeName}
+          serviceName={serviceName}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(expandedRowMapValues);
+  };
 
   const columns = getColumns({
     agentName,
@@ -74,6 +114,10 @@ export function ServiceOverviewInstancesTable({
     latencyAggregationType,
     detailedStatsData,
     comparisonEnabled,
+    toggleRowDetails,
+    itemIdToExpandedRowMap,
+    toggleRowActionMenu,
+    itemIdToOpenActionMenuRowMap,
   });
 
   const pagination = {
@@ -89,7 +133,7 @@ export function ServiceOverviewInstancesTable({
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'All instances',
+              defaultMessage: 'Instances',
             })}
           </h2>
         </EuiTitle>
@@ -106,6 +150,8 @@ export function ServiceOverviewInstancesTable({
               pagination={pagination}
               sorting={{ sort: { field, direction } }}
               onChange={onChangeTableOptions}
+              itemId="serviceNodeName"
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             />
           </ServiceOverviewTableContainer>
         </TableFetchWrapper>
