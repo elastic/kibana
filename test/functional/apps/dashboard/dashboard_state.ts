@@ -298,8 +298,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
-            const color = isNewChartsLibraryEnabled ? 'rgb(102, 61, 184)' : 'rgb(87, 193, 123)';
-            // The default green color that was stored with the visualization before any dashboard overrides.
+            const color = isNewChartsLibraryEnabled ? 'rgb(111, 135, 216)' : 'rgb(87, 193, 123)';
+            // The default color that was stored with the visualization before any dashboard overrides.
             expect(pieSliceStyle.indexOf(color)).to.be.greaterThan(-1);
           });
         });
