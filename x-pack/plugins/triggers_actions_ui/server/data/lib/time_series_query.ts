@@ -156,7 +156,7 @@ export function getResultFromEs(
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
   if (!isGroupAgg && aggregations.dateAgg) {
-    const dateAgg = aggregations.dateAgg || {};
+    const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
