@@ -97,7 +97,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const pieChart = getService('pieChart');
   const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common']);
+  const elasticChart = getService('elasticChart');
+  const PageObjects = getPageObjects(['common', 'visChart']);
 
   describe('dashboard container', () => {
     before(async () => {
@@ -109,6 +110,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('pie charts', async () => {
+      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
       await pieChart.expectPieSliceCount(5);
     });
 

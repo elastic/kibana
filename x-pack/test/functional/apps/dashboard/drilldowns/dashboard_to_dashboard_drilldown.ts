@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
   const spaces = getService('spaces');
+  const elasticChart = getService('elasticChart');
 
   describe('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
@@ -211,7 +212,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await navigateWithinDashboard(async () => {
           await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
         });
-        await pieChart.expectPieSliceCount(10);
+        await elasticChart.setNewChartUiDebugFlag();
+        await pieChart.expectPieSliceCountEsCharts(10);
       });
     });
   });

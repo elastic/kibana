@@ -290,14 +290,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = isNewChartsLibraryEnabled
+            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
+            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+            const color = isNewChartsLibraryEnabled ? 'rgb(102, 61, 184)' : 'rgb(87, 193, 123)';
             // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(-1);
+            expect(pieSliceStyle.indexOf(color)).to.be.greaterThan(-1);
           });
         });
 

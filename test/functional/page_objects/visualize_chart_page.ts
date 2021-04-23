@@ -7,6 +7,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import Color from 'color';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -326,6 +327,15 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       if (await this.isNewLibraryChart(xyChartSelector)) {
         const items = (await this.getEsChartDebugState(xyChartSelector))?.legend?.items ?? [];
         return items.some(({ color: c }) => c === color);
+      }
+
+      if (await this.isNewLibraryChart(pieChartSelector)) {
+        const slices =
+          (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
+        return slices.some(({ color: c }) => {
+          const rgbColor = new Color(color).rgb().toString();
+          return c === rgbColor;
+        });
       }
 
       return await testSubjects.exists(`legendSelectedColor-${color}`);

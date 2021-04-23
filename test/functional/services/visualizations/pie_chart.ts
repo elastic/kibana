@@ -166,6 +166,13 @@ export function PieChartProvider({ getService, getPageObjects }: FtrProviderCont
       return slices.length;
     }
 
+    async expectPieSliceCountEsCharts(expectedCount: number) {
+      const slices =
+        (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      expect(slices.length).to.be(expectedCount);
+    }
+
     async expectPieSliceCount(expectedCount: number) {
       log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
       await retry.try(async () => {
