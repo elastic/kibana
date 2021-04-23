@@ -7,3 +7,4 @@
 
 export { SynonymIcon } from './synonym_icon';
 export { SynonymCard } from './synonym_card';
+export { EmptyState } from './empty_state';
