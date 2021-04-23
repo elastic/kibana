@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   condition: boolean | null;
-  then: () => Promise<any>;
-  else: () => Promise<any>;
+  then?(): Observable<any>;
+  else?(): Observable<any>;
 }
 
 export function ifFn(): ExpressionFunctionDefinition<'if', unknown, Arguments, unknown> {
@@ -29,24 +31,18 @@ export function ifFn(): ExpressionFunctionDefinition<'if', unknown, Arguments, u
       },
       then: {
         resolve: false,
-        help: argHelp.then,
+        help: argHelp.then!,
       },
       else: {
         resolve: false,
-        help: argHelp.else,
+        help: argHelp.else!,
       },
     },
     fn: async (input, args) => {
       if (args.condition) {
-        if (typeof args.then === 'undefined') {
-          return input;
-        }
-        return await args.then();
+        return args.then?.().pipe(take(1)).toPromise() ?? input;
       } else {
-        if (typeof args.else === 'undefined') {
-          return input;
-        }
-        return await args.else();
+        return args.else?.().pipe(take(1)).toPromise() ?? input;
       }
     },
   };
