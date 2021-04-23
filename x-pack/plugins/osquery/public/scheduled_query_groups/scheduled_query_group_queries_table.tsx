@@ -148,7 +148,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
       {
         field: 'vars.interval.value',
         name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle', {
-          defaultMessage: 'Interval',
+          defaultMessage: 'Interval (s)',
         }),
         width: '100px',
       },
