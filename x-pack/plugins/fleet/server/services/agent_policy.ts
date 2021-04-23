@@ -113,16 +113,16 @@ class AgentPolicyService {
     policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
-    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+    const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    const newAgentPolicy = {
+    const newAgentPolicy: NewAgentPolicy = {
       ...newAgentPolicyDefaults,
       ...preconfiguredAgentPolicy,
       is_preconfigured: true,
-    } as NewAgentPolicy;
+    };
 
     let searchParams;
     if (id) {
