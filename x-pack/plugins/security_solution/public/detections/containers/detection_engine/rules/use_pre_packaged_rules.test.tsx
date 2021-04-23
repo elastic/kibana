@@ -12,6 +12,15 @@ import * as api from './api';
 import { shallow } from 'enzyme';
 import * as i18n from './translations';
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+}));
+
 jest.mock('./api', () => ({
   getPrePackagedRulesStatus: jest.fn(),
   createPrepackagedRules: jest.fn(),
