@@ -119,6 +119,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
+              expect(updatedAlert.execution_status.status).to.eql('pending');
               const { _source: taskRecord } = await getScheduledTask(
                 updatedAlert.scheduled_task_id
               );
