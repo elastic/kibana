@@ -49,6 +49,11 @@ import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
+import { Ecs } from '@kbn/logging';
+import { EcsEventCategory } from '@kbn/logging';
+import { EcsEventKind } from '@kbn/logging';
+import { EcsEventOutcome } from '@kbn/logging';
+import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { estypes } from '@elastic/elasticsearch';
 import { ExistsParams } from 'elasticsearch';
@@ -381,6 +386,9 @@ export { ConfigPath }
 
 export { ConfigService }
 
+// @internal
+export type ConfigUsageData = Record<string, any | any[]>;
+
 // @public
 export interface ContextSetup {
     createContextContainer(): IContextContainer;
@@ -441,6 +449,13 @@ export interface CoreConfigUsageData {
             redirectHttpFromPortConfigured: boolean;
             supportedProtocols: string[];
             clientAuthentication: 'none' | 'optional' | 'required';
+        };
+        securityResponseHeaders: {
+            strictTransportSecurity: string;
+            xContentTypeOptions: string;
+            referrerPolicy: string;
+            permissionsPolicyConfigured: boolean;
+            disableEmbedding: boolean;
         };
     };
     // (undocumented)
@@ -551,6 +566,8 @@ export interface CoreUsageData extends CoreUsageStats {
 
 // @internal
 export interface CoreUsageDataStart {
+    // (undocumented)
+    getConfigsUsageData(): Promise<ConfigUsageData>;
     getCoreUsageData(): Promise<CoreUsageData>;
 }
 
@@ -757,6 +774,8 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
+    readonly disableEmbedding: boolean;
+    // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
@@ -876,6 +895,16 @@ export interface DiscoveredPlugin {
     readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+export { Ecs }
+
+export { EcsEventCategory }
+
+export { EcsEventKind }
+
+export { EcsEventOutcome }
+
+export { EcsEventType }
 
 // @public
 export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
@@ -1113,6 +1142,7 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 
 // @public
 export interface ICspConfig {
+    readonly disableEmbedding: boolean;
     readonly header: string;
     readonly rules: string[];
     readonly strict: boolean;
@@ -1652,6 +1682,13 @@ export { LogMeta }
 
 export { LogRecord }
 
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type MakeUsageFromSchema<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
+};
+
 // @public
 export interface MetricsServiceSetup {
     readonly collectionInterval: number;
@@ -1838,6 +1875,7 @@ export interface PluginConfigDescriptor<T = any> {
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
     };
+    exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
 
@@ -2769,7 +2807,7 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
     // (undocumented)
-    error: (msg: string, meta: LogMeta) => void;
+    error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
@@ -3224,9 +3262,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:296:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:401:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:326:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:326:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:329:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:434:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

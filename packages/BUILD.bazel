@@ -5,8 +5,11 @@ filegroup(
   srcs = [
       "//packages/elastic-datemath:build",
       "//packages/kbn-apm-utils:build",
+      "//packages/kbn-babel-preset:build",
       "//packages/kbn-config-schema:build",
+      "//packages/kbn-std:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-utility-types:build",
+      "//packages/kbn-utils:build",
   ],
 )

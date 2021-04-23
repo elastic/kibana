@@ -34,8 +34,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
-    unused('agents.kibana.ca_sha256'),
-    unused('agents.kibana.host'),
+    unused('agents.kibana'),
     unused('agents.maxConcurrentConnections'),
     unused('agents.agentPolicyRolloutRateLimitIntervalMs'),
     unused('agents.agentPolicyRolloutRateLimitRequestPerInterval'),
@@ -59,8 +58,8 @@ export const config: PluginConfigDescriptor = {
         })
       ),
     }),
-    packages: schema.maybe(PreconfiguredPackagesSchema),
-    agentPolicies: schema.maybe(PreconfiguredAgentPoliciesSchema),
+    packages: PreconfiguredPackagesSchema,
+    agentPolicies: PreconfiguredAgentPoliciesSchema,
   }),
 };
 

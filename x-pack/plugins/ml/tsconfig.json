@@ -25,7 +25,7 @@
     { "path": "../../../src/plugins/vis_type_vega/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
-    { "path": "../file_upload/tsconfig.json" },
+    { "path": "../file_data_visualizer/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },

@@ -19,9 +19,7 @@
     "@kbn/optimizer": "link:../kbn-optimizer"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/expect": "link:../kbn-expect",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/expect": "link:../kbn-expect"
   }
 }
