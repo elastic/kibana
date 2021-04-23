@@ -86,7 +86,7 @@ describe('Case Configuration API', () => {
       await postCaseConfigure(caseConfigurationMock, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         body:
-          '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"closure_type":"close-by-user"}',
+          '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"owner":"securitySolution","closure_type":"close-by-user"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });

@@ -876,3 +876,18 @@ export const getReporters = async ({
 
   return res;
 };
+
+export const pushCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  connectorId: string,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .post(`${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .set('kbn-xsrf', 'true')
+    .send({})
+    .expect(expectedHttpCode);
+
+  return res;
+};

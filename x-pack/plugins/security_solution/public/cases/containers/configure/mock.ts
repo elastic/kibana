@@ -146,6 +146,7 @@ export const caseConfigurationMock: CasesConfigureRequest = {
 };
 
 export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
+  id: '123',
   createdAt: '2020-04-06T13:03:18.657Z',
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   connector: {
@@ -160,4 +161,5 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
+  owner: 'securitySolution',
 };
