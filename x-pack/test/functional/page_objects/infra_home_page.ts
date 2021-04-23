@@ -57,6 +57,14 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('goToDocker');
     },
 
+    async goToSettings() {
+      await testSubjects.click('infrastructureNavLink_/settings');
+    },
+
+    async goToInventory() {
+      await testSubjects.click('infrastructureNavLink_/inventory');
+    },
+
     async goToMetricExplorer() {
       return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
     },
@@ -134,6 +142,13 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();
       await datePickerInput.type([date]);
+    },
+    async setAnomaliesThreshold(threshold: string) {
+      const thresholdInput = await find.byCssSelector(
+        `.euiFieldNumber.euiRangeInput.euiRangeInput--max`
+      );
+      await thresholdInput.clearValueWithKeyboard({ charByChar: true });
+      await thresholdInput.type([threshold]);
     },
   };
 }

@@ -13,6 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects(['common', 'infraHome']);
+  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
 
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
@@ -81,6 +82,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoAnomaliesMsg();
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();
         await pageObjects.infraHome.getNoAnomaliesMsg();
+        await pageObjects.infraHome.closeFlyout();
+      });
+      it('renders more anomalies on threshold change', async () => {
+        await pageObjects.infraHome.goToSettings();
+        await pageObjects.infraHome.setAnomaliesThreshold('25');
+        await infraSourceConfigurationForm.saveConfiguration();
+        await pageObjects.infraHome.goToInventory();
+        await pageObjects.infraHome.openAnomalyFlyout();
+        await pageObjects.infraHome.goToAnomaliesTab();
+        await pageObjects.infraHome.clickHostsAnomaliesDropdown();
+        const hostAnomalies = await pageObjects.infraHome.findAnomalies();
+        expect(hostAnomalies.length).to.be(3);
+        await pageObjects.infraHome.clickK8sAnomaliesDropdown();
+        const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
+        expect(k8sAnomalies.length).to.be(9);
       });
     });
   });
