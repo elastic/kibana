@@ -37,7 +37,6 @@ import { TimefilterContract } from '../../../../../../../src/plugins/data/public
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { ExplorerChartsData } from '../explorer_charts/explorer_charts_container_service';
 import { mlJobService } from '../../services/job_service';
 
 // Memoize the data fetching methods.
@@ -155,7 +154,6 @@ const loadExplorerDataProvider = (
     const dateFormatTz = getDateFormatTz();
 
     const interval = swimlaneBucketInterval.asSeconds();
-
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
     return forkJoin({
@@ -224,7 +222,21 @@ const loadExplorerDataProvider = (
       // show the view-by loading indicator
       // and pass on the data we already fetched.
       tap(explorerService.setViewBySwimlaneLoading),
-      tap(explorerService.setChartsDataLoading),
+      tap(({ anomalyChartRecords, topFieldValues }) => {
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          explorerService,
+          combinedJobRecords,
+          swimlaneContainerWidth,
+          selectedCells !== undefined && Array.isArray(anomalyChartRecords)
+            ? anomalyChartRecords
+            : [],
+          timerange.earliestMs,
+          timerange.latestMs,
+          timefilter,
+          tableSeverity
+        );
+      }),
       mergeMap(
         ({
           overallAnnotations,
@@ -236,18 +248,6 @@ const loadExplorerDataProvider = (
           tableData,
         }) =>
           forkJoin({
-            anomalyChartsData: memoizedAnomalyDataChange(
-              lastRefresh,
-              combinedJobRecords,
-              swimlaneContainerWidth,
-              selectedCells !== undefined && Array.isArray(anomalyChartRecords)
-                ? anomalyChartRecords
-                : [],
-              timerange.earliestMs,
-              timerange.latestMs,
-              timefilter,
-              tableSeverity
-            ),
             filteredTopInfluencers:
               (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
               anomalyChartRecords !== undefined &&
@@ -280,9 +280,6 @@ const loadExplorerDataProvider = (
               influencersFilterQuery
             ),
           }).pipe(
-            tap(({ anomalyChartsData }) => {
-              explorerService.setCharts(anomalyChartsData as ExplorerChartsData);
-            }),
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
               return {
                 overallAnnotations,

@@ -369,13 +369,17 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
-  const xDomain = swimlaneData
-    ? {
-        min: swimlaneData.earliest * 1000,
-        max: swimlaneData.latest * 1000,
-        minInterval: swimlaneData.interval * 1000,
-      }
-    : undefined;
+  const xDomain = useMemo(
+    () =>
+      swimlaneData
+        ? {
+            min: swimlaneData.earliest * 1000,
+            max: swimlaneData.latest * 1000,
+            minInterval: swimlaneData.interval * 1000,
+          }
+        : undefined,
+    [swimlaneData.earliest, swimlaneData.latest, swimlaneData.interval]
+  );
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
@@ -403,11 +407,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       onElementClick={onElementClick}
                       showLegend={showLegend}
                       legendPosition={Position.Top}
-                      xDomain={{
-                        min: swimlaneData.earliest * 1000,
-                        max: swimlaneData.latest * 1000,
-                        minInterval: swimlaneData.interval * 1000,
-                      }}
+                      xDomain={xDomain}
                       tooltip={tooltipOptions}
                       debugState={window._echDebugStateFlag ?? false}
                     />
