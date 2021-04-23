@@ -27,7 +27,7 @@ To view the surrounding documents, your index pattern must contain time-based ev
 
 . In the document table, click the expand icon (>).
 . Click **View surrounding documents**
-
++
 Now you can inspect the documents that occurred immediately before and after the event.
 
 Documents are sorted by the time field specified in the index pattern
