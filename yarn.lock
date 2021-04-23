@@ -8524,10 +8524,10 @@ fast-levenshtein@~2.0.4:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-safe-stringify@^2.0.4:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.6.tgz#04b26106cc56681f51a044cfc0d76cf0008ac2c2"
-  integrity sha512-q8BZ89jjc+mz08rSxROs8VsrBBcn1SIw1kq9NjolL509tkABRk9io01RAjSaEv1Xb2uFLt8VtRiZbGp5H8iDtg==
+fast-safe-stringify@2.0.x, fast-safe-stringify@^2.0.4:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.7.tgz#124aa885899261f68aedb42a7c080de9da608743"
+  integrity sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
 
 fastparse@^1.1.1:
   version "1.1.1"
@@ -9854,13 +9854,13 @@ good-listener@^1.2.2:
   dependencies:
     delegate "^3.1.2"
 
-good-squeeze@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/good-squeeze/-/good-squeeze-2.1.0.tgz#99cee91d26d591698a899c28e9310bcf3c6ae28a"
-  integrity sha1-mc7pHSbVkWmKiZwo6TELzzxq4oo=
+good-squeeze@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/good-squeeze/-/good-squeeze-5.1.0.tgz#265f3e8be6081aa44c55d484d1af375e166752b9"
+  integrity sha1-Jl8+i+YIGqRMVdSE0a83XhZnUrk=
   dependencies:
-    hoek "2.x.x"
-    json-stringify-safe "5.0.x"
+    fast-safe-stringify "2.0.x"
+    hoek "4.2.x"
 
 got@5.6.0:
   version "5.6.0"
@@ -10707,12 +10707,7 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hoek@2.x.x:
-  version "2.16.3"
-  resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
-  integrity sha1-ILt0A9POo5jpHcRxCo/xuCdKJe0=
-
-hoek@4.2.1:
+hoek@4.2.1, hoek@4.2.x:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-4.2.1.tgz#9634502aa12c445dd5a7c5734b572bb8738aacbb"
   integrity sha512-QLg82fGkfnJ/4iy1xZ81/9SIJiq1NGFUMGs6ParyjBZr6jW2Ufj/snDqTHixNlHdPNwN2RLVD0Pi3igeK9+JfA==
@@ -12849,7 +12844,7 @@ json-stringify-pretty-compact@1.0.4:
   resolved "https://registry.yarnpkg.com/json-stringify-pretty-compact/-/json-stringify-pretty-compact-1.0.4.tgz#d5161131be27fd9748391360597fcca250c6c5ce"
   integrity sha1-1RYRMb4n/ZdIORNgWX/MolDGxc4=
 
-json-stringify-safe@5.0.1, json-stringify-safe@5.0.x, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.1:
+json-stringify-safe@5.0.1, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=

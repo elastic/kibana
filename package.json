@@ -182,7 +182,7 @@
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
     "globby": "^8.0.1",
-    "good-squeeze": "2.1.0",
+    "good-squeeze": "5.1.0",
     "h2o2": "^8.2.0",
     "handlebars": "4.7.7",
     "hapi": "^17.8.5",
