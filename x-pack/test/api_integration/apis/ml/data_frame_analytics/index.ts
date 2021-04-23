@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update_spaces'));
     loadTestFile(require.resolve('./delete_spaces'));
     loadTestFile(require.resolve('./evaluate'));
+    loadTestFile(require.resolve('./explain'));
   });
 }

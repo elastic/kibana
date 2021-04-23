@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-/**
- * Empty/Error UI states
- */
-.emptyState {
-  min-height: $euiSizeXXL * 11.25;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  &__prompt > .euiIcon {
-    margin-bottom: $euiSizeS;
+export function parseDeploymentIdFromDeploymentUrl(deploymentUrl?: string) {
+  if (!deploymentUrl) {
+    return;
   }
+  return deploymentUrl.split('/').pop();
 }
