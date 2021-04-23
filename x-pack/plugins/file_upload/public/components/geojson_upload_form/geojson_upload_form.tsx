@@ -106,11 +106,13 @@ export class GeoJsonUploadForm extends Component<Props, State> {
       <EuiForm>
         <GeoJsonFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
-        <IndexNameForm
-          indexName={this.props.indexName}
-          indexNameError={this.props.indexNameError}
-          onIndexNameChange={this.props.onIndexNameChange}
-        />
+        {this.state.hasFile ? (
+          <IndexNameForm
+            indexName={this.props.indexName}
+            indexNameError={this.props.indexNameError}
+            onIndexNameChange={this.props.onIndexNameChange}
+          />
+        ) : null}
       </EuiForm>
     );
   }
