@@ -14,6 +14,7 @@ import {
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
+  Operator,
 } from '../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import {
@@ -75,7 +76,13 @@ export const tagsToEffectScope = (tags: string[]): EffectScope => {
   }
 };
 
-export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
+type TrustedAppsEntriesArray = Omit<EntriesArray, 'operator'> & {
+  operator: Operator | 'wildcard_caseless';
+};
+
+export const entriesToConditionEntriesMap = (
+  entries: TrustedAppsEntriesArray
+): ConditionEntriesMap => {
   return entries.reduce((result, entry) => {
     if (entry.field.startsWith('process.hash') && entry.type === 'match') {
       return {
