@@ -6,24 +6,13 @@ workflow.
 
 Some changes though are "substantial", and we ask that these be put
 through a bit of a design process and produce a consensus among the relevant
-Kibana team.
+Kibana teams.
 
 The "RFC" (request for comments) process is intended to provide a
 consistent and controlled path for new features to enter the project.
 
 [Active RFC List](https://github.com/elastic/kibana/pulls?q=is%3Aopen+is%3Apr+label%3ARFC)
 
-Kibana is still **actively developing** this process, and it will still change as
-more features are implemented and the community settles on specific approaches
-to feature development.
-
-## Contributor License Agreement (CLA)
-
-In order to accept your pull request, we need you to submit a CLA. You only need
-to do this once, so if you've done this for another Elastic open source
-project, you're good to go.
-
-**[Complete your CLA here.](https://www.elastic.co/contributor-agreement)**
 
 ## When to follow this process
 
@@ -49,12 +38,13 @@ implemented.
 
 Some changes do not require an RFC:
 
-  - Rephrasing, reorganizing or refactoring
-  - Addition or removal of warnings
+  - Rephrasing, reorganizing or refactoring.
+  - Addition or removal of warnings.
   - Additions that strictly improve objective, numerical quality
-  criteria (speedup, better browser support)
+  criteria (speedup, better browser support).
   - Addition of features that do not impact other Kibana plugins (do not
-  expose any API to other plugins)
+  expose any API to other plugins).
+
 
 ## What the process is
 
@@ -112,6 +102,7 @@ document somewhat in sync with the Kibana feature as planned,
 tracking such changes via followup pull requests to the document. You
 may include updates to the RFC in the same PR that makes the code change.
 
+
 ## Implementing an RFC
 
 The author of an RFC is not obligated to implement it. Of course, the
@@ -121,6 +112,7 @@ implementation for review after the RFC has been accepted.
 If you are interested in working on the implementation for an 'active'
 RFC, but cannot determine if someone else is already working on it,
 feel free to ask (e.g. by leaving a comment on the associated issue).
+
 
 ## Reviewing RFCs
 
