@@ -5,7 +5,7 @@ Once you've found a document of interest in *Discover*, you have two more ways t
 
 [float]
 [[discover-view-single-document]]
-=== View single document
+=== View a single document
 
 . In the document table, click the expand icon (>).
 . Click **View single document**
