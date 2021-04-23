@@ -1701,6 +1701,18 @@ describe('create()', () => {
     );
   });
 
+  test('throws an error if API key creation throws', async () => {
+    const data = getMockData();
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () => await alertsClient.create({ data })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error creating rule: could not create API key - no"`
+    );
+  });
+
   test('throws error when ensureActionTypeEnabled throws', async () => {
     const data = getMockData();
     alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {

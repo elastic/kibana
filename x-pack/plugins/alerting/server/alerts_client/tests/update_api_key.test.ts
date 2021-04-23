@@ -99,13 +99,13 @@ describe('updateApiKey()', () => {
       references: [],
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
+  });
+
+  test('updates the API key for the alert', async () => {
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
-  });
-
-  test('updates the API key for the alert', async () => {
     await alertsClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -145,7 +145,22 @@ describe('updateApiKey()', () => {
     );
   });
 
+  test('throws an error if API key creation throws', async () => {
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () => await alertsClient.updateApiKey({ id: '1' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating API key for rule: could not create API key - no"`
+    );
+  });
+
   test('falls back to SOC when getDecryptedAsInternalUser throws an error', async () => {
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',

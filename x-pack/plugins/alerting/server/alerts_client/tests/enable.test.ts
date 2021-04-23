@@ -359,6 +359,17 @@ describe('enable()', () => {
     );
   });
 
+  test('throws an error if API key creation throws', async () => {
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () => await alertsClient.enable({ id: '1' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error enabling rule: could not create API key - no"`
+    );
+  });
+
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
