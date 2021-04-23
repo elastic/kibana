@@ -9,15 +9,12 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPageContent, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { AppLogic } from '../../../app_logic';
-import { ENGINE_CREATION_PATH } from '../../../routes';
-
-import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
 
 import { EnginesOverviewHeader } from './header';
 
@@ -56,10 +53,13 @@ export const EmptyState: React.FC = () => {
             }
             actions={
               <>
-                <EuiButtonTo
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
                   data-test-subj="EmptyStateCreateFirstEngineCta"
                   fill
-                  to={ENGINE_CREATION_PATH}
+                  href={getAppSearchUrl('/engines/new')}
+                  target="_blank"
+                  iconType="popout"
                   onClick={() =>
                     sendAppSearchTelemetry({
                       action: 'clicked',
@@ -71,9 +71,8 @@ export const EmptyState: React.FC = () => {
                     'xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta',
                     { defaultMessage: 'Create an engine' }
                   )}
-                </EuiButtonTo>
+                </EuiButton>
                 <EuiSpacer size="xl" />
-                <SampleEngineCreationCta />
               </>
             }
           />
