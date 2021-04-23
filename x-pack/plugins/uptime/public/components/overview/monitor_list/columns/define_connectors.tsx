@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,42 +19,40 @@ const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink
 });
 
 export const DefineAlertConnectors = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onButtonClick = () => setIsPopoverOpen((val) => !val);
-  const closePopover = () => setIsPopoverOpen(false);
-
   const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
 
   return (
-    <EuiPopover
-      button={
-        <EuiSwitch
-          id={'defineAlertSettingsSwitch'}
-          label={ENABLE_STATUS_ALERT}
-          showLabel={!!isMonitorPage}
-          aria-label={ENABLE_STATUS_ALERT}
-          onChange={onButtonClick}
-          checked={false}
-          compressed={!isMonitorPage}
-          data-test-subj={'uptimeDisplayDefineConnector'}
-        />
+    <EuiFormRow
+      helpText={
+        <>
+          <FormattedMessage
+            id="xpack.uptime.monitorList.defineConnector.description"
+            defaultMessage="Define a default connector in the {link} to enable monitor status alerts."
+            values={{
+              link: (
+                <ReactRouterEuiLink
+                  to={SETTINGS_ROUTE + '?focusConnectorField=true'}
+                  data-test-subj={'uptimeSettingsLink'}
+                >
+                  {SETTINGS_LINK_TEXT}
+                </ReactRouterEuiLink>
+              ),
+            }}
+          />
+        </>
       }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
     >
-      <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
-        <FormattedMessage
-          id="xpack.uptime.monitorList.defineConnector.description"
-          defaultMessage="To start enabling alerts, please define a default alert action connector in"
-        />{' '}
-        <ReactRouterEuiLink
-          to={SETTINGS_ROUTE + '?focusConnectorField=true'}
-          data-test-subj={'uptimeSettingsLink'}
-        >
-          {SETTINGS_LINK_TEXT}
-        </ReactRouterEuiLink>
-      </EuiText>
-    </EuiPopover>
+      <EuiSwitch
+        id={'defineAlertSettingsSwitch'}
+        label={ENABLE_STATUS_ALERT}
+        showLabel={!!isMonitorPage}
+        aria-label={ENABLE_STATUS_ALERT}
+        onChange={() => {}}
+        checked={false}
+        compressed={true}
+        disabled={true}
+        data-test-subj={'uptimeDisplayDefineConnector'}
+      />
+    </EuiFormRow>
   );
 };

@@ -13,7 +13,7 @@ import {
   renderWithRouterRedux,
   shallowWithRouterRedux,
 } from '../../../../lib';
-import { EuiPopover, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiFormHelpText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 
@@ -63,10 +63,9 @@ describe('EnableAlertComponent', () => {
     const wrapper = mountWithRouterRedux(
       <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
     );
-    expect(wrapper.find(EuiPopover)).toHaveLength(1);
-    wrapper.find('button').simulate('click');
-    expect(wrapper.find(EuiText).text()).toBe(
-      'To start enabling alerts, please define a default alert action connector in Settings'
+    expect(wrapper.find(EuiFormHelpText)).toHaveLength(1);
+    expect(wrapper.find(EuiFormHelpText).text()).toBe(
+      'Define a default connector in the Settings to enable monitor status alerts.'
     );
     expect(wrapper.find(ReactRouterEuiLink)).toMatchInlineSnapshot(`
       <ReactRouterEuiLink

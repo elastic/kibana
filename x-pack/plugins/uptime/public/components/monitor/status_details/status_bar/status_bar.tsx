@@ -40,6 +40,41 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
   }
 `;
 
+const renderMonitorType = (type: string) => {
+  switch (type) {
+    case 'http':
+      return (
+        <FormattedMessage
+          id="xpack.uptime.monitorDetails.statusBar.pingType.http"
+          defaultMessage="HTTP"
+        />
+      );
+    case 'tcp':
+      return (
+        <FormattedMessage
+          id="xpack.uptime.monitorDetails.statusBar.pingType.tcp"
+          defaultMessage="TCP"
+        />
+      );
+    case 'icmp':
+      return (
+        <FormattedMessage
+          id="xpack.uptime.monitorDetails.statusBar.pingType.icmp"
+          defaultMessage="ICMP"
+        />
+      );
+    case 'browser':
+      return (
+        <FormattedMessage
+          id="xpack.uptime.monitorDetails.statusBar.pingType.browser"
+          defaultMessage="Browser"
+        />
+      );
+    default:
+      return '';
+  }
+};
+
 export const MonitorStatusBar: React.FC = () => {
   const { monitorId, monitorStatus, monitorLocations = {} } = useStatusBar();
 
@@ -77,7 +112,7 @@ export const MonitorStatusBar: React.FC = () => {
           <>
             <MonListTitle aria-label={labels.typeAriaLabel}>{labels.typeLabel}</MonListTitle>
             <MonListDescription data-test-subj="monitor-page-type">
-              {monitorStatus.monitor.type}
+              {renderMonitorType(monitorStatus?.monitor?.type)}
             </MonListDescription>
           </>
         )}
