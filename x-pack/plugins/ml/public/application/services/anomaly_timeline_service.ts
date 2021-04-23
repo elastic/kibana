@@ -11,7 +11,12 @@ import {
   TimeRange,
   UI_SETTINGS,
 } from '../../../../../../src/plugins/data/public';
-import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
+import {
+  getBoundsRoundedToInterval,
+  TimeBuckets,
+  TimeBucketsInterval,
+  TimeRangeBounds,
+} from '../util/time_buckets';
 import {
   ExplorerJob,
   OverallSwimlaneData,
@@ -92,9 +97,10 @@ export class AnomalyTimelineService {
    */
   public async loadOverallData(
     selectedJobs: ExplorerJob[],
-    chartWidth: number
+    chartWidth?: number,
+    bucketInterval?: TimeBucketsInterval
   ): Promise<OverallSwimlaneData> {
-    const interval = this.getSwimlaneBucketInterval(selectedJobs, chartWidth);
+    const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
     if (!selectedJobs || !selectedJobs.length) {
       throw new Error('Explorer jobs collection is required');
@@ -153,8 +159,9 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number,
-    influencersFilterQuery?: any
+    swimlaneContainerWidth?: number,
+    influencersFilterQuery?: any,
+    bucketInterval?: TimeBucketsInterval
   ): Promise<SwimlaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
@@ -162,10 +169,8 @@ export class AnomalyTimelineService {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
     }
 
-    const swimlaneBucketInterval = this.getSwimlaneBucketInterval(
-      selectedJobs,
-      swimlaneContainerWidth
-    );
+    const swimlaneBucketInterval =
+      bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth!);
 
     const searchBounds = getBoundsRoundedToInterval(
       timefilterBounds,
