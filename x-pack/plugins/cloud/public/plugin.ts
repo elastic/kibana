@@ -89,8 +89,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
 
-    this.checkIfAuthorizedForLinks().then((authorized) => {
-      if (authorized && baseUrl && deploymentUrl) {
+    const setLinks = (authorized: boolean) => {
+      if (!authorized) return;
+
+      if (baseUrl && deploymentUrl) {
         coreStart.chrome.setCustomNavLink({
           title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
             defaultMessage: 'Manage this deployment',
@@ -100,11 +102,17 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         });
       }
 
-      if (authorized && security && this.isCloudEnabled) {
+      if (security && this.isCloudEnabled) {
         const userMenuLinks = createUserMenuLinks(this.config);
-        security.navControlService.addUserMenuLinks(userMenuLinks);
+        security!.navControlService.addUserMenuLinks(userMenuLinks);
       }
-    });
+    };
+
+    this.checkIfAuthorizedForLinks()
+      .then(setLinks)
+      // In the event of an unexpected error, fail *open*.
+      // Cloud admin console will always perform the actual authorization checks.
+      .catch(() => setLinks(true));
   }
 
   /**

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { CloudPlugin } from './plugin';
 
-const nextTick = async () => await new Promise<void>((resolve) => setTimeout(() => resolve(), 1));
-
 describe('Cloud Plugin', () => {
   describe('#start', () => {
-    function setupPlugin({ roles = [] }: { roles?: string[] } = {}) {
+    function setupPlugin({
+      roles = [],
+      simulateUserError = false,
+    }: { roles?: string[]; simulateUserError?: boolean } = {}) {
       const plugin = new CloudPlugin(
         coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -27,26 +29,15 @@ describe('Cloud Plugin', () => {
       const coreSetup = coreMock.createSetup();
       const homeSetup = homePluginMock.createSetupContract();
       const securitySetup = securityMock.createSetup();
-      securitySetup.authc.getCurrentUser.mockResolvedValue({
-        username: 'alice',
-        email: 'alice@example.com',
-        full_name: 'alice example',
-        roles,
-        enabled: true,
-        authentication_type: '',
-        authentication_provider: {
-          name: '',
-          type: '',
-        },
-        authentication_realm: {
-          name: '',
-          type: '',
-        },
-        lookup_realm: {
-          name: '',
-          type: '',
-        },
-      });
+      if (simulateUserError) {
+        securitySetup.authc.getCurrentUser.mockRejectedValue(new Error('Something happened'));
+      } else {
+        securitySetup.authc.getCurrentUser.mockResolvedValue(
+          securityMock.createMockAuthenticatedUser({
+            roles,
+          })
+        );
+      }
 
       plugin.setup(coreSetup, { home: homeSetup, security: securitySetup });
 
@@ -89,6 +80,27 @@ describe('Cloud Plugin', () => {
       `);
     });
 
+    it('registers a custom nav link when there is an error retrieving the current user', async () => {
+      const { plugin } = setupPlugin({ simulateUserError: true });
+
+      const coreStart = coreMock.createStart();
+      const securityStart = securityMock.createStart();
+      plugin.start(coreStart, { security: securityStart });
+
+      await nextTick();
+
+      expect(coreStart.chrome.setCustomNavLink).toHaveBeenCalledTimes(1);
+      expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "euiIconType": "arrowLeft",
+            "href": "https://cloud.elastic.co/abc123",
+            "title": "Manage this deployment",
+          },
+        ]
+      `);
+    });
+
     it('does not register a custom nav link for non-superusers', async () => {
       const { plugin } = setupPlugin({ roles: ['not-a-superuser'] });
 
@@ -103,6 +115,37 @@ describe('Cloud Plugin', () => {
 
     it('registers user profile links for superusers', async () => {
       const { plugin } = setupPlugin({ roles: ['superuser'] });
+
+      const coreStart = coreMock.createStart();
+      const securityStart = securityMock.createStart();
+      plugin.start(coreStart, { security: securityStart });
+
+      await nextTick();
+
+      expect(securityStart.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
+      expect(securityStart.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "href": "https://cloud.elastic.co/profile/alice",
+              "iconType": "user",
+              "label": "Profile",
+              "order": 100,
+              "setAsProfile": true,
+            },
+            Object {
+              "href": "https://cloud.elastic.co/org/myOrg",
+              "iconType": "gear",
+              "label": "Account & Billing",
+              "order": 200,
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('registers profile links when there is an error retrieving the current user', async () => {
+      const { plugin } = setupPlugin({ simulateUserError: true });
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
