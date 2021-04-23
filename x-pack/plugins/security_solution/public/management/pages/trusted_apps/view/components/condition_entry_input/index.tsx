@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
   EuiSuperSelectOption,
@@ -69,10 +67,16 @@ export interface ConditionEntryInputProps {
 
 // adding a style prop on EuiFlexGroup works only partially
 // and for some odd reason garbles up gridTemplateAreas entry
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+const InputGroup = styled.div`
   display: grid;
   grid-template-columns: 25% 25% 45% 5%;
   grid-template-areas: 'field operator value remove';
+`;
+
+const InputItem = styled.div`
+  align-self: center;
+  margin: 4px;
+  vertical-align: baseline;
 `;
 
 const operatorOptions = (Object.keys(OperatorEntryField) as OperatorEntryField[]).map((value) => ({
@@ -153,14 +157,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     }, [entry, onVisited]);
 
     return (
-      <StyledEuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        direction="row"
-        data-test-subj={dataTestSubj}
-        responsive={false}
-      >
-        <EuiFlexItem style={{ gridArea: 'field' }}>
+      <InputGroup data-test-subj={dataTestSubj}>
+        <InputItem style={{ gridArea: 'field' }}>
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.field}>
             <EuiSuperSelect
               options={fieldOptions}
@@ -169,8 +167,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               data-test-subj={getTestId('field')}
             />
           </ConditionEntryCell>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ gridArea: 'operator' }}>
+        </InputItem>
+        <InputItem style={{ gridArea: 'operator' }}>
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
             {entry.field === ConditionEntryField.PATH ? (
               <EuiSuperSelect
@@ -188,8 +186,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               />
             )}
           </ConditionEntryCell>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ gridArea: 'value' }}>
+        </InputItem>
+        <InputItem style={{ gridArea: 'value' }}>
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText
               name="value"
@@ -201,8 +199,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               data-test-subj={getTestId('value')}
             />
           </ConditionEntryCell>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ gridArea: 'remove' }}>
+        </InputItem>
+        <InputItem style={{ gridArea: 'remove' }}>
           {/* Unicode `nbsp` is used below so that Remove button is property displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
             <EuiButtonIcon
@@ -217,8 +215,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               data-test-subj={getTestId('remove')}
             />
           </ConditionEntryCell>
-        </EuiFlexItem>
-      </StyledEuiFlexGroup>
+        </InputItem>
+      </InputGroup>
     );
   }
 );
