@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Boom } from '@hapi/boom';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
@@ -12,7 +13,8 @@ import { createCaseError } from '../../common/error';
 import { AttachmentService, CaseService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations } from '../../authorization';
-import { createAuditMsg } from '../utils';
+import { createAuditMsg, ensureAuthorized } from '../utils';
+import { EventOutcome } from '../../../../security/server';
 
 async function deleteSubCases({
   attachmentService,
@@ -61,17 +63,40 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
   } = clientArgs;
   try {
     const cases = await caseService.getCases({ soClient, caseIds: ids });
+    const soIds = new Set<string>();
     const owners = new Set<string>();
 
     for (const theCase of cases.saved_objects) {
+      // bulkGet can return an error.
+      if (theCase.error != null) {
+        throw createCaseError({
+          message: `Failed to delete cases ids: ${JSON.stringify(ids)}: ${theCase.error.error}`,
+          error: new Boom(theCase.error.message, { statusCode: theCase.error.statusCode }),
+          logger,
+        });
+      }
+
+      soIds.add(theCase.id);
       owners.add(theCase.attributes.owner);
     }
 
-    try {
-      await auth.ensureAuthorized([...owners.values()], Operations.deleteCase);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.deleteCase, error }));
-      throw error;
+    await ensureAuthorized({
+      operation: Operations.deleteCase,
+      owners: [...owners.values()],
+      authorization: auth,
+      auditLogger,
+      savedObjectIDs: [...soIds.values()],
+    });
+
+    // log that we're attempting to delete a case
+    for (const savedObjectID of soIds) {
+      auditLogger?.log(
+        createAuditMsg({
+          operation: Operations.deleteCase,
+          outcome: EventOutcome.UNKNOWN,
+          savedObjectID,
+        })
+      );
     }
 
     await Promise.all(
@@ -122,12 +147,11 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       soClient,
       actions: ids.map((id) =>
         buildCaseUserActionItem({
-          action: 'create',
+          action: 'delete',
           actionAt: deleteDate,
           actionBy: user,
           caseId: id,
           fields: [
-            'comment',
             'description',
             'status',
             'tags',
@@ -135,6 +159,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'connector',
             'settings',
             'owner',
+            'comment',
             ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
           ],
         })
