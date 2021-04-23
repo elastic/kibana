@@ -107,10 +107,8 @@ export function ReportDefinitionCol({
                       iconSide="right"
                       iconType="cross"
                       color="hollow"
-                      onClick={() => {}}
                       iconOnClick={() => onRemove(field)}
                       iconOnClickAriaLabel={'Click to remove'}
-                      onClickAriaLabel={'Click to remove'}
                     >
                       {labels[field]}: {(rtd?.[field] ?? []).join(', ')}
                     </EuiBadge>

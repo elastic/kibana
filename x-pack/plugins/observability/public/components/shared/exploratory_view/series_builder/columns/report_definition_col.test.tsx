@@ -51,13 +51,13 @@ describe('Series Builder ReportDefinitionCol', function () {
   it('should render selected report definitions', function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
-    screen.getByText('elastic-co');
+    screen.getByTitle('Web Application: elastic-co');
   });
 
   it('should be able to remove selected definition', function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
-    const removeBtn = screen.getByText(/elastic-co/i);
+    const removeBtn = screen.getByTitle(/Click to remove/i);
 
     fireEvent.click(removeBtn);
 
