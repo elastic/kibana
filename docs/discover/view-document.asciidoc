@@ -16,8 +16,8 @@ The **JSON** (JavaScript Object Notation) view allows you to look at how {es} re
 [role="screenshot"]
 image::images/discover-view-single-document.png[Discover single document view]
 
-The link is valid for the time the document is available in Elasticsearch. If you need another way to view single
-documents, you can extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
+The link is valid for the time the document is available in Elasticsearch. If you need to view a single document for 
+a longer time, extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
 
 [float]
 [[discover-view-surrounding-documents]]
@@ -30,8 +30,7 @@ To view the surrounding documents, your index pattern must contain time-based ev
 +
 Now you can inspect the documents that occurred immediately before and after the event.
 
-Documents are sorted by the time field specified in the index pattern
-and displayed using the same set of columns as the *Discover* view from which
+Documents are displayed using the same set of columns as the *Discover* view from which
 the context was opened. The anchor document is highlighted in blue.
 +
 [role="screenshot"]

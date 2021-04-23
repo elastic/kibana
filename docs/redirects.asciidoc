@@ -297,3 +297,8 @@ This content has moved. refer to <<tutorial-secure-access-to-kibana>>.
 == Search your data
 
 This content has moved. refer to <<kuery-query>>.
+
+[role="exclude",id="discover-document-context"]
+== View surrounding documents
+
+This content has moved. refer to <<discover-view-surrounding-documents>>.
