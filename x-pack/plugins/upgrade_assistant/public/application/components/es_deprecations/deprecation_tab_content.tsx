@@ -141,10 +141,12 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
 
   if (deprecations && deprecations.length === 0) {
     return (
-      <NoDeprecationsPrompt
-        deprecationType={checkupLabel}
-        navigateToOverviewPage={navigateToOverviewPage}
-      />
+      <div data-test-subj={`${checkupLabel}TabContent`}>
+        <NoDeprecationsPrompt
+          deprecationType={checkupLabel}
+          navigateToOverviewPage={navigateToOverviewPage}
+        />
+      </div>
     );
   }
 

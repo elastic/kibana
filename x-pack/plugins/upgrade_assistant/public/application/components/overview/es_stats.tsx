@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -46,6 +47,16 @@ const i18nTexts = {
       defaultMessage: 'View deprecations',
     }
   ),
+  loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
+    defaultMessage: 'Loading Elasticsearch deprecation stats…',
+  }),
+  getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsLabel', {
+      defaultMessage: 'This cluster has {criticalDeprecations} critical deprecations',
+      values: {
+        criticalDeprecations,
+      },
+    }),
   getTotalDeprecationsTooltip: (clusterCount: number, indexCount: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
       defaultMessage:
@@ -105,11 +116,27 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
                     esDeprecations?.indices.length ?? 0
                   )}
                   position="right"
+                  iconProps={{
+                    tabIndex: -1,
+                  }}
                 />
               </>
             }
             isLoading={isLoading}
-          />
+          >
+            {error === null && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getTotalDeprecationsTooltip(
+                        esDeprecations?.cluster.length ?? 0,
+                        esDeprecations?.indices.length ?? 0
+                      )}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </EuiStat>
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -120,6 +147,16 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
             titleColor="danger"
             isLoading={isLoading}
           >
+            {error === null && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+
             {error && <EsStatsErrors error={error} />}
           </EuiStat>
         </EuiFlexItem>
