@@ -15,8 +15,13 @@ export { registerCloudProviderUsageCollector } from './cloud';
 export { registerCspCollector } from './csp';
 export { registerCoreUsageCollector } from './core';
 export { registerLocalizationUsageCollector } from './localization';
+export { registerConfigUsageCollector } from './config_usage';
 export {
   registerUiCountersUsageCollector,
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
 } from './ui_counters';
+export {
+  registerUsageCountersRollups,
+  registerUsageCountersUsageCollector,
+} from './usage_counters';

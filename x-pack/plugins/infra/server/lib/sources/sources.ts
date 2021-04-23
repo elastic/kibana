@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -21,8 +20,9 @@ import {
   InfraStaticSourceConfiguration,
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
-  StaticSourceConfigurationRuntimeType,
   InfraSource,
+  sourceConfigurationConfigFilePropertiesRT,
+  SourceConfigurationConfigFileProperties,
 } from '../../../common/source_configuration/source_configuration';
 import { InfraConfig } from '../../../server';
 
@@ -160,12 +160,15 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.update(
+      // update() will perform a deep merge. We use create() with overwrite: true instead. mergeSourceConfiguration()
+      // ensures the correct and intended merging of properties.
+      await savedObjectsClient.create(
         infraSourceConfigurationSavedObjectName,
-        sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
+          id: sourceId,
           version,
+          overwrite: true,
         }
       )
     );
@@ -199,19 +202,32 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration = pipe(
-      runtimeTypes
-        .type({
-          sources: runtimeTypes.type({
-            default: StaticSourceConfigurationRuntimeType,
-          }),
-        })
-        .decode(this.libs.config),
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
+      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
       map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
       fold(constant({}), identity)
     );
 
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
+    // config file sources in 8.0.0.
+    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
+      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
+        logAlias?: string;
+      } = {
+        ...staticSourceConfiguration,
+        logIndices: {
+          type: 'index_name',
+          indexName: staticSourceConfiguration.logAlias,
+        },
+      };
+      delete convertedStaticSourceConfiguration.logAlias;
+      return mergeSourceConfiguration(
+        defaultSourceConfiguration,
+        convertedStaticSourceConfiguration
+      );
+    } else {
+      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    }
   }
 
   private async getSavedSourceConfiguration(

@@ -9,9 +9,5 @@
     "build": "tsc",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
-  },
-  "dependencies": {
-    "@kbn/utils": "link:../kbn-utils",
-    "@kbn/config-schema": "link:../kbn-config-schema"
   }
 }

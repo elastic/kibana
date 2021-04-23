@@ -230,6 +230,7 @@ export function IndexPatternDataPanel({
           onUpdateIndexPattern={onUpdateIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
         />
@@ -271,6 +272,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatternRefs,
   indexPatterns,
   existenceFetchFailed,
+  existenceFetchTimeout,
   query,
   dateRange,
   filters,
@@ -297,6 +299,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -314,7 +317,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     (type) => type in fieldTypeNames
   );
 
-  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
+  const fieldInfoUnavailable =
+    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
 
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
@@ -389,7 +393,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
-        hideDetails: fieldInfoUnavailable,
+        // Show details on timeout but not failure
+        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
           defaultMessage: `There are no available fields that contain data.`,
         }),
@@ -438,11 +443,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    existingFields,
-    currentIndexPattern,
     hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
+    existenceFetchTimeout,
+    currentIndexPattern,
+    existingFields,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
@@ -503,6 +509,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       patterns: [currentIndexPattern.id],
     });
     onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+    // start a new session so all charts are refreshed
+    data.search.session.start();
   }, [data, currentIndexPattern, onUpdateIndexPattern]);
 
   const editField = useMemo(
@@ -596,6 +604,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             gutterSize="s"
             alignItems="center"
             className="lnsInnerIndexPatternDataPanel__header"
+            responsive={false}
           >
             <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
@@ -792,6 +801,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
+            existenceFetchTimeout={existenceFetchTimeout}
             existFieldsInIndex={!!allFields.length}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}

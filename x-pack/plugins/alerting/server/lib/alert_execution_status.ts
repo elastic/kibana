@@ -8,6 +8,7 @@
 import { Logger } from 'src/core/server';
 import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
 import { getReasonFromError } from './error_with_reason';
+import { getEsErrorMessage } from './errors';
 
 export function executionStatusFromState(state: AlertTaskState): AlertExecutionStatus {
   const instanceIds = Object.keys(state.alertInstances ?? {});
@@ -23,7 +24,7 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
     status: 'error',
     error: {
       reason: getReasonFromError(error),
-      message: error.message,
+      message: getEsErrorMessage(error),
     },
   };
 }

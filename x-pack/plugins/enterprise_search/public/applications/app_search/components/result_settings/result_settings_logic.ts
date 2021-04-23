@@ -256,10 +256,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       // We cast this because it could be an empty object, which we can still treat as a FieldResultSetting safely
       const field = values.resultFields[fieldName] as FieldResultSetting;
       const raw = !field.raw;
+
       actions.updateField(fieldName, {
         ...omit(field, ['rawSize']),
         raw,
-        ...(raw ? { rawSize: field.rawSize } : {}),
+        ...(raw && field.rawSize ? { rawSize: field.rawSize } : {}),
       });
     },
     toggleSnippetForField: ({ fieldName }) => {

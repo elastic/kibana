@@ -18,8 +18,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
+      await security.role.create('test_reporting_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { dashboard: ['minimal_read', 'generate_report'] },
+          },
+        ],
+      });
       await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        ['test_logstash_reader', 'global_dashboard_read', 'test_reporting_user'],
         false
       );
     });

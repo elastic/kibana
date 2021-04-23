@@ -17,6 +17,7 @@ export const migrateSettingsToV7130: SavedObjectMigrationFn<
   Settings & {
     package_auto_upgrade: string;
     agent_auto_upgrade: string;
+    kibana_urls: string;
   },
   Settings
 > = (settingsDoc) => {
@@ -24,6 +25,10 @@ export const migrateSettingsToV7130: SavedObjectMigrationFn<
   delete settingsDoc.attributes.package_auto_upgrade;
   // @ts-expect-error
   delete settingsDoc.attributes.agent_auto_upgrade;
+  // @ts-expect-error
+  delete settingsDoc.attributes.kibana_urls;
+  // @ts-expect-error
+  delete settingsDoc.attributes.kibana_ca_sha256;
 
   return settingsDoc;
 };

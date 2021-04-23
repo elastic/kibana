@@ -49,28 +49,38 @@ import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
-import exceptionableFields from './exceptionable_fields.json';
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
+import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
+import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
   type: ExceptionListType,
   osTypes?: OsTypeArray
 ): IIndexPattern => {
-  if (type === 'endpoint') {
-    const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
-      ? (name: string) =>
-          exceptionableLinuxFields.includes(name) || exceptionableFields.includes(name)
-      : (name: string) =>
-          exceptionableWindowsMacFields.includes(name) || exceptionableFields.includes(name);
+  switch (type) {
+    case 'endpoint':
+      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
+        ? (name: string) =>
+            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
+        : (name: string) =>
+            exceptionableWindowsMacFields.includes(name) ||
+            exceptionableEndpointFields.includes(name);
 
-    return {
-      ...patterns,
-      fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
-    };
-  } else {
-    return patterns;
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
+      };
+    case 'endpoint_events':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) =>
+          exceptionableEndpointEventFields.includes(name)
+        ),
+      };
+    default:
+      return patterns;
   }
 };
 
