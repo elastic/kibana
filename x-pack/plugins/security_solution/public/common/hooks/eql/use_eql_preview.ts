@@ -27,18 +27,20 @@ import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { inputsModel } from '../../../common/store';
 import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
+import { useAppToasts } from '../use_app_toasts';
 
 export const useEqlPreview = (): [
   boolean,
   (arg: EqlPreviewRequest) => void,
   EqlPreviewResponse
 ] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const unsubscribeStream = useRef(new Subject());
   const [loading, setLoading] = useState(false);
   const didCancel = useRef(false);
+  const { addError, addWarning } = useAppToasts();
 
   const [response, setResponse] = useState<EqlPreviewResponse>({
     data: [],
@@ -53,7 +55,7 @@ export const useEqlPreview = (): [
   const searchEql = useCallback(
     ({ from, to, query, index, interval }: EqlPreviewRequest) => {
       if (parseScheduleDates(to) == null || parseScheduleDates(from) == null) {
-        notifications.toasts.addWarning('Time intervals are not defined.');
+        addWarning(i18n.EQL_TIME_INTERVAL_NOT_DEFINED);
         return;
       }
 
@@ -138,7 +140,7 @@ export const useEqlPreview = (): [
                 setResponse((prev) => ({ ...prev, inspect: formatInspect(res, index) }));
               } else if (isErrorResponse(res)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);
+                addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);
                 unsubscribeStream.current.next();
               }
             },
@@ -154,7 +156,7 @@ export const useEqlPreview = (): [
                   refetch: refetch.current,
                   totalCount: 0,
                 });
-                notifications.toasts.addError(err, {
+                addError(err, {
                   title: i18n.EQL_PREVIEW_FETCH_FAILURE,
                 });
               }
@@ -166,7 +168,7 @@ export const useEqlPreview = (): [
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning]
   );
 
   useEffect((): (() => void) => {
