@@ -230,18 +230,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not allow to change the owner of the configuration', async () => {
       const configuration = await createConfiguration(supertest);
-      const error = await updateConfiguration(
+      await updateConfiguration(
         supertest,
         configuration.id,
+        // @ts-expect-error
         { owner: 'observabilityFixture', version: configuration.version },
         400
       );
-
-      expect(error).to.eql({
-        error: 'Bad Request',
-        message: 'Owner cannot be changed',
-        statusCode: 400,
-      });
     });
 
     describe('rbac', () => {

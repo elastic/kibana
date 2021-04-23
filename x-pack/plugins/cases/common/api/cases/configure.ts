@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
+import { OmitProp } from '../runtime_types';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
@@ -20,9 +21,11 @@ const CasesConfigureBasicRt = rt.type({
   owner: rt.string,
 });
 
+const CasesConfigureBasicWithoutOwnerRt = rt.type(OmitProp(CasesConfigureBasicRt.props, 'owner'));
+
 export const CasesConfigureRequestRt = CasesConfigureBasicRt;
 export const CasesConfigurePatchRt = rt.intersection([
-  rt.partial(CasesConfigureBasicRt.props),
+  rt.partial(CasesConfigureBasicWithoutOwnerRt.props),
   rt.type({ version: rt.string }),
 ]);
 

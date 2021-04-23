@@ -249,12 +249,24 @@ async function update(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
+    const { version, ...queryWithoutVersion } = request;
+
+    /**
+     * Excess function does not supports union or intersection types.
+     * For that reason we need to check manually for excess properties
+     * in the partial attributes.
+     *
+     * The owner attribute should not be allowed.
+     */
+    pipe(
+      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
     const configuration = await caseConfigureService.get({
       soClient,
       configurationId,
     });
-
-    const { version, owner, connector, ...queryWithoutVersion } = request;
 
     await ensureAuthorized({
       operation: Operations.updateConfiguration,
@@ -279,13 +291,10 @@ async function update(
       );
     }
 
-    if (owner != null && owner !== configuration.attributes.owner) {
-      throw Boom.badRequest('Owner cannot be changed');
-    }
-
     let error = null;
     const updateDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];
+    const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
@@ -321,7 +330,7 @@ async function update(
       soClient,
       configurationId: configuration.id,
       updatedAttributes: {
-        ...queryWithoutVersion,
+        ...queryWithoutVersionAndConnector,
         ...(connector != null ? { connector: transformCaseConnectorToEsConnector(connector) } : {}),
         updated_at: updateDate,
         updated_by: user,
