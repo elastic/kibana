@@ -51,7 +51,6 @@ describe('BuilderExceptionListItemComponent', () => {
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
-            osTypes={['windows']}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
@@ -83,7 +82,6 @@ describe('BuilderExceptionListItemComponent', () => {
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
-            osTypes={['windows']}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
@@ -113,7 +111,6 @@ describe('BuilderExceptionListItemComponent', () => {
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
-            osTypes={['windows']}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
@@ -145,7 +142,6 @@ describe('BuilderExceptionListItemComponent', () => {
             isOnlyItem={false}
             listType="detection"
             onChangeExceptionItem={jest.fn()}
-            osTypes={['windows']}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
@@ -184,7 +180,6 @@ describe('BuilderExceptionListItemComponent', () => {
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
-          osTypes={['windows']}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
         />
@@ -215,7 +210,6 @@ describe('BuilderExceptionListItemComponent', () => {
           isOnlyItem={false}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
-          osTypes={['windows']}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
         />
@@ -247,7 +241,6 @@ describe('BuilderExceptionListItemComponent', () => {
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
-          osTypes={['windows']}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
         />
@@ -277,7 +270,6 @@ describe('BuilderExceptionListItemComponent', () => {
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
-          osTypes={['windows']}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
         />
@@ -309,7 +301,6 @@ describe('BuilderExceptionListItemComponent', () => {
           isOnlyItem={true}
           listType="detection"
           onChangeExceptionItem={jest.fn()}
-          osTypes={['windows']}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           setErrorsExist={jest.fn()}
         />

@@ -140,8 +140,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         indexPattern,
         entry,
         listType,
-        osTypes,
-        listTypeSpecificIndexPatternFilter
+        listTypeSpecificIndexPatternFilter,
+        osTypes
       );
       const comboBox = (
         <FieldComponent

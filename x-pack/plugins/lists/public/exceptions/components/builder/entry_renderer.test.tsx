@@ -76,7 +76,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={true}
       />
     );
@@ -107,7 +106,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -142,7 +140,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -179,7 +176,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -216,7 +212,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -253,7 +248,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={true}
       />
     );
@@ -290,7 +284,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={true}
       />
     );
@@ -327,7 +320,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -365,7 +357,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -421,7 +412,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -464,7 +454,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -503,7 +492,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -542,7 +530,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -581,7 +568,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -620,7 +606,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -665,7 +650,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
@@ -703,7 +687,6 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
-        osTypes={['windows']}
         showLabel={false}
       />
     );
