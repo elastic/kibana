@@ -195,7 +195,7 @@ const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
 
 export const createEntryMatch = (
   field: string,
-  operator: ConditionEntry['operator'],
+  operator: OperatorEntryField,
   value: string
 ): EntryMatch => {
   return { field, value, type: 'match', operator };
