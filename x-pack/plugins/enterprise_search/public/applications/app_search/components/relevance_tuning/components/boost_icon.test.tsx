@@ -11,14 +11,11 @@ import { shallow } from 'enzyme';
 
 import { EuiToken } from '@elastic/eui';
 
+import { BoostType } from '../types';
+
 import { BoostIcon } from './boost_icon';
-import { BoostType } from './types';
 
 describe('BoostIcon', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders a token according to the provided type', () => {
     const wrapper = shallow(<BoostIcon type={'value' as BoostType} />);
     expect(wrapper.find(EuiToken).prop('iconType')).toBe('tokenNumber');
