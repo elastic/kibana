@@ -54,9 +54,9 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
     },
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
-  const updateSettings = (name: string, value: string) => {
+  const updateSettings = (settingName: string, value: string) => {
     updateRepositorySettings({
-      [name]: value,
+      [settingName]: value,
     });
   };
 
