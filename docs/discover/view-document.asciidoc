@@ -1,7 +1,7 @@
 [[discover-view-document]]
 == View a document
 
-Once you've found a document of interest in Discover there are 2 more ways to view it.
+Once you've found a document of interest in *Discover*, you have two more ways to view it: as a single document and in context with surrounding documents.
 
 [float]
 [[discover-view-single-document]]
