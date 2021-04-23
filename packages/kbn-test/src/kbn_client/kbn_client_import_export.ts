@@ -56,7 +56,10 @@ export class KbnClientImportExport {
     return this.dir ? Path.resolve(this.dir, path) : path;
   }
 
-  async load(name: string, options?: { space?: string }) {
+  async load(name: string, options?: { space?: string }, logTypesF?: unknown) {
+    // @ts-ignore
+    if (logTypesF) this.log.debug(`### Logging SO Types ${await logTypesF()}`);
+
     const src = this.resolvePath(name);
     this.log.debug('resolved import for', name, 'to', src);
 
