@@ -126,7 +126,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     // use a memoized callback to
     // limit list iteration for re-renders
     const operatorOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
-      return (Object.keys(OperatorEntryField) as [ConditionEntry['operator']]).map((value) => ({
+      return (Object.keys(OperatorEntryField) as OperatorEntryField[]).map((value) => ({
         dropdownDisplay: OPERATOR_TITLES[value],
         inputDisplay: OPERATOR_TITLES[value],
         value,
