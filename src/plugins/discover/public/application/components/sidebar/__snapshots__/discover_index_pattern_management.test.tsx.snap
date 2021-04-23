@@ -634,21 +634,16 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
           "show": true,
         },
       },
+      "core": Object {
+        "application": Object {
+          "navigateToApp": [MockFunction],
+        },
+      },
       "history": [Function],
       "indexPatternFieldEditor": Object {
         "openEditor": [MockFunction],
         "userPermissions": Object {
-          "editIndexPattern": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "editIndexPattern": [Function],
         },
       },
       "uiSettings": Object {
@@ -657,5 +652,65 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
     }
   }
   useNewFieldsApi={true}
-/>
+>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonIcon
+        aria-label="Index pattern settings"
+        color="text"
+        data-test-subj="discoverIndexPatternActions"
+        iconType="boxesHorizontal"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    data-test-subj="discover-addRuntimeField-popover"
+    display="inlineBlock"
+    hasArrow={true}
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="s"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownCenter"
+      data-test-subj="discover-addRuntimeField-popover"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <EuiButtonIcon
+          aria-label="Index pattern settings"
+          color="text"
+          data-test-subj="discoverIndexPatternActions"
+          iconType="boxesHorizontal"
+          onClick={[Function]}
+        >
+          <button
+            aria-label="Index pattern settings"
+            className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="discoverIndexPatternActions"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              size="m"
+              type="boxesHorizontal"
+            >
+              <span
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="boxesHorizontal"
+                size="m"
+              />
+            </EuiIcon>
+          </button>
+        </EuiButtonIcon>
+      </div>
+    </div>
+  </EuiPopover>
+</DiscoverIndexPatternManagement>
 `;
