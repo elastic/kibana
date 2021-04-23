@@ -6,7 +6,6 @@
  */
 
 import { EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -45,9 +44,6 @@ export function TransactionTypeSelect() {
       <EuiSelectWithWidth
         onChange={handleChange}
         options={options}
-        prepend={i18n.translate('xpack.apm.transactionTypeSelectLabel', {
-          defaultMessage: 'Type',
-        })}
         value={transactionType}
       />
     </>

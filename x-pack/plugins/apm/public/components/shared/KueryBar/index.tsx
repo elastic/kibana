@@ -24,10 +24,6 @@ import { getBoolFilter } from './get_bool_filter';
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
-const Container = euiStyled.div`
-  margin-bottom: 10px;
-`;
-
 interface State {
   suggestions: QuerySuggestion[];
   isLoadingSuggestions: boolean;
@@ -145,16 +141,14 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
   }
 
   return (
-    <Container>
-      <Typeahead
-        isLoading={state.isLoadingSuggestions}
-        initialValue={urlParams.kuery}
-        onChange={onChange}
-        onSubmit={onSubmit}
-        suggestions={state.suggestions}
-        placeholder={placeholder}
-        prepend={props.prepend}
-      />
-    </Container>
+    <Typeahead
+      isLoading={state.isLoadingSuggestions}
+      initialValue={urlParams.kuery}
+      onChange={onChange}
+      onSubmit={onSubmit}
+      suggestions={state.suggestions}
+      placeholder={placeholder}
+      prepend={props.prepend}
+    />
   );
 }
