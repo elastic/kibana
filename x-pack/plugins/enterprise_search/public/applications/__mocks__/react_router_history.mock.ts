@@ -32,6 +32,7 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(() => mockHistory),
     useLocation: jest.fn(() => mockLocation),
     useParams: jest.fn(() => ({})),
+    useRouteMatch: jest.fn(() => null),
     // Note: RR's generatePath() opinionatedly encodeURI()s paths (although this doesn't actually
     // show up/affect the final browser URL). Since we already have a generateEncodedPath helper &
     // RR is removing this behavior in history 5.0+, I'm mocking tests to remove the extra encoding

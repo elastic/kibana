@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -86,11 +86,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
-      <Route path={ENGINE_PATH}>
-        <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
-          <EngineRouter />
-        </Layout>
-      </Route>
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           <Switch>
@@ -99,6 +94,9 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             </Route>
             <Route exact path={ENGINES_PATH}>
               <EnginesOverview />
+            </Route>
+            <Route path={ENGINE_PATH}>
+              <EngineRouter />
             </Route>
             <Route exact path={SETTINGS_PATH}>
               <Settings />
@@ -131,18 +129,16 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   );
 };
 
-interface AppSearchNavProps {
-  subNav?: React.ReactNode;
-}
-
-export const AppSearchNav: React.FC<AppSearchNavProps> = ({ subNav }) => {
+export const AppSearchNav: React.FC = () => {
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);
 
+  const isEngineRoute = !!useRouteMatch(ENGINE_PATH);
+
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to={ENGINES_PATH} subNav={subNav} isRoot>
+      <SideNavLink to={ENGINES_PATH} subNav={isEngineRoute ? <EngineNav /> : null} isRoot>
         {ENGINES_TITLE}
       </SideNavLink>
       {canViewSettings && <SideNavLink to={SETTINGS_PATH}>{SETTINGS_TITLE}</SideNavLink>}

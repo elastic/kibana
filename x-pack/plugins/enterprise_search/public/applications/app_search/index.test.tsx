@@ -6,12 +6,13 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import '../__mocks__/enterprise_search_url.mock';
 import { setMockValues, rerender } from '../__mocks__';
+import '../__mocks__/enterprise_search_url.mock';
+import '../__mocks__/react_router_history.mock';
 
 import React from 'react';
 
-import { Redirect } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
@@ -20,7 +21,7 @@ import { Layout, SideNav, SideNavLink } from '../shared/layout';
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
 
-import { EngineRouter } from './components/engine';
+import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
@@ -76,8 +77,8 @@ describe('AppSearchConfigured', () => {
   });
 
   it('renders with layout', () => {
-    expect(wrapper.find(Layout)).toHaveLength(2);
-    expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
@@ -150,11 +151,22 @@ describe('AppSearchNav', () => {
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
   });
 
-  it('renders an Engine subnav if passed', () => {
-    const wrapper = shallow(<AppSearchNav subNav={<div data-test-subj="subnav">Testing</div>} />);
-    const link = wrapper.find(SideNavLink).dive();
+  describe('engine subnavigation', () => {
+    const getEnginesLink = (wrapper: ShallowWrapper) => wrapper.find(SideNavLink).dive();
 
-    expect(link.find('[data-test-subj="subnav"]')).toHaveLength(1);
+    it('does not render the engine subnav on top-level routes', () => {
+      (useRouteMatch as jest.Mock).mockReturnValueOnce(false);
+      const wrapper = shallow(<AppSearchNav />);
+
+      expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(0);
+    });
+
+    it('renders the engine subnav if currently on an engine route', () => {
+      (useRouteMatch as jest.Mock).mockReturnValueOnce(true);
+      const wrapper = shallow(<AppSearchNav />);
+
+      expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(1);
+    });
   });
 
   it('renders the Settings link', () => {
