@@ -211,7 +211,7 @@
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.16",
     "object-path-immutable": "^0.5.3",
-    "oppsy": "^2.0.0",
+    "oppsy": "^2.0.1",
     "papaparse": "^5.2.0",
     "pdfmake": "^0.1.65",
     "pluralize": "3.1.0",
