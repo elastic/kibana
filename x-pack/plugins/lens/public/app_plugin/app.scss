@@ -5,19 +5,15 @@
 }
 
 .lnsApp {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-}
 
-.lnsApp__header {
-  border-bottom: $euiBorderThin;
+  > .kbnTopNavMenu__wrapper {
+    border-bottom: $euiBorderThin;
+  }
 }
 
 .lnsApp__frame {

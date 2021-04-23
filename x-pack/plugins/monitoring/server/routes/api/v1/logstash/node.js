@@ -72,7 +72,16 @@ export function logstashNodeRoute(server) {
 
       try {
         const [metrics, nodeSummary] = await Promise.all([
-          getMetrics(req, lsIndexPattern, metricSet),
+          getMetrics(req, lsIndexPattern, metricSet, [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'logstash_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
+          ]),
           getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
         ]);
 
