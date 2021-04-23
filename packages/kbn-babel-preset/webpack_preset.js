@@ -47,7 +47,14 @@ module.exports = () => {
           /x-pack[\/\\]plugins[\/\\](apm|beats_management|fleet|infra|lists|observability|osquery|security_solution|uptime)[\/\\]/,
           /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
         ],
-        plugins: [[require.resolve('babel-plugin-styled-components')]],
+        plugins: [
+          [
+            require.resolve('babel-plugin-styled-components'),
+            {
+              fileName: false,
+            },
+          ],
+        ],
       },
     ],
   };
