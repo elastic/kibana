@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { MlPluginStart } from '../index';
-import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
+import type { MlPluginStart } from '../index';
+import type { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 
 /**
  * Provides a URL to ML plugin page
