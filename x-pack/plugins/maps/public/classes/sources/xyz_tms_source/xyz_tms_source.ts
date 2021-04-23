@@ -23,16 +23,10 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   readonly _descriptor: XYZTMSSourceDescriptor;
 
-  static createDescriptor({
-    urlTemplate,
-    attributionText,
-    attributionUrl,
-  }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
+  static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
       type: XYZTMSSource.type,
       urlTemplate,
-      attributionText,
-      attributionUrl,
     };
   }
 
