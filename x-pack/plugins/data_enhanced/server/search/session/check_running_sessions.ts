@@ -125,10 +125,19 @@ function getSavedSearchSessionsPage$(
       sortOrder: 'asc',
       filter: nodeBuilder.or([
         nodeBuilder.and([
-          nodeBuilder.is(
-            `${SEARCH_SESSION_TYPE}.attributes.status`,
-            SearchSessionStatus.IN_PROGRESS.toString()
-          ),
+          nodeBuilder.or([
+            nodeBuilder.is(
+              `${SEARCH_SESSION_TYPE}.attributes.status`,
+              SearchSessionStatus.IN_PROGRESS.toString()
+            ),
+            nodeBuilder.and([
+              nodeBuilder.is(
+                `${SEARCH_SESSION_TYPE}.attributes.status`,
+                SearchSessionStatus.COMPLETE.toString()
+              ),
+              // TODO: check that attributes.expires < now
+            ]),
+          ]),
           nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'true'),
         ]),
         nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'false'),

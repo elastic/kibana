@@ -740,6 +740,96 @@ describe('getSearchStatus', () => {
       expect(savedObjectsClient.delete).not.toBeCalled();
     });
 
+    test('updates to expired if expiration time is due and search are still in progress', async () => {
+      savedObjectsClient.bulkUpdate = jest.fn();
+      const so = {
+        attributes: {
+          status: SearchSessionStatus.IN_PROGRESS,
+          touched: '123',
+          expires: moment().subtract(3, 'minutes').toISOString(),
+          idMapping: {
+            'search-hash': {
+              id: 'search-id',
+              strategy: 'cool',
+              status: SearchStatus.IN_PROGRESS,
+            },
+          },
+        },
+      };
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [so],
+        total: 1,
+      } as any);
+
+      mockClient.asyncSearch.status.mockResolvedValue({
+        body: {
+          is_partial: true,
+          is_running: true,
+        },
+      });
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
+      const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
+      expect(updatedAttributes.status).toBe(SearchSessionStatus.EXPIRED);
+      expect(updatedAttributes.touched).not.toBe('123');
+      expect(updatedAttributes.completed).toBeUndefined();
+      expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.IN_PROGRESS);
+      expect(updatedAttributes.idMapping['search-hash'].error).toBeUndefined();
+
+      expect(savedObjectsClient.delete).not.toBeCalled();
+    });
+
+    test('updates to expired if expiration time is due and was completed before', async () => {
+      savedObjectsClient.bulkUpdate = jest.fn();
+      const so = {
+        attributes: {
+          status: SearchSessionStatus.COMPLETE,
+          touched: '123',
+          idMapping: {
+            'search-hash': {
+              id: 'search-id',
+              strategy: 'cool',
+              status: SearchStatus.COMPLETE,
+            },
+          },
+          expires: moment().subtract(3, 'minutes').toISOString(),
+        },
+      };
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [so],
+        total: 1,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
+      const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
+      expect(updatedAttributes.status).toBe(SearchSessionStatus.EXPIRED);
+      expect(updatedAttributes.touched).not.toBe('123');
+      expect(updatedAttributes.completed).toBeUndefined();
+      expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.COMPLETE);
+      expect(updatedAttributes.idMapping['search-hash'].error).toBeUndefined();
+
+      expect(savedObjectsClient.delete).not.toBeCalled();
+    });
+
     test('updates to error if the search is errored', async () => {
       savedObjectsClient.bulkUpdate = jest.fn();
       const so = {

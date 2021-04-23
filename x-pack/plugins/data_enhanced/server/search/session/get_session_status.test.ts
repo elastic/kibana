@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
 import { SearchSessionStatus } from '../../../../../../src/plugins/data/common';
@@ -48,5 +49,17 @@ describe('getSessionStatus', () => {
       },
     };
     expect(getSessionStatus(session)).toBe(SearchSessionStatus.IN_PROGRESS);
+  });
+
+  test('returns an expired if expiration time is set', () => {
+    const session: any = {
+      idMapping: {
+        a: { status: SearchStatus.IN_PROGRESS },
+        b: { status: SearchStatus.COMPLETE },
+        c: { status: SearchStatus.IN_PROGRESS },
+      },
+      expires: moment().subtract(3, 'minutes').toISOString(),
+    };
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.EXPIRED);
   });
 });
