@@ -8,12 +8,7 @@
 import React, { ChangeEvent, Component } from 'react';
 import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  getExistingIndexNames,
-  getExistingIndexPatternNames,
-  checkIndexPatternValid,
-  // @ts-expect-error
-} from '../../util/indexing_service';
+import { validateIndexName } from '../../util/indexing_service';
 
 export interface Props {
   indexName?: string;
@@ -26,20 +21,9 @@ interface State {
 }
 
 export class IndexNameForm extends Component<Props, State> {
-  private _isMounted = false;
-
   state: State = {
     existingIndexNames: [],
   };
-
-  async componentDidMount() {
-    this._isMounted = true;
-    this._loadExistingIndexNames();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
 
   componentDidUpdate(prevProps: Props) {
     const { indexName: prevIndexName } = prevProps;
@@ -49,34 +33,8 @@ export class IndexNameForm extends Component<Props, State> {
     }
   }
 
-  _loadExistingIndexNames = async () => {
-    const indexNameList = await getExistingIndexNames();
-    const indexPatternList = await getExistingIndexPatternNames();
-    if (this._isMounted) {
-      this.setState({
-        existingIndexNames: [...indexNameList, ...indexPatternList],
-      });
-    }
-  };
-
-  _onIndexNameChange = (indexName: string) => {
-    let indexNameError: string | undefined;
-    if (this.state.existingIndexNames.includes(indexName)) {
-      indexNameError = i18n.translate(
-        'xpack.fileUpload.indexNameForm.indexNameAlreadyExistsErrorMessage',
-        {
-          defaultMessage: 'Index name already exists.',
-        }
-      );
-    } else if (!checkIndexPatternValid(indexName)) {
-      indexNameError = i18n.translate(
-        'xpack.fileUpload.indexNameForm.indexNameContainsIllegalCharactersErrorMessage',
-        {
-          defaultMessage: 'Index name contains illegal characters.',
-        }
-      );
-    }
-
+  _onIndexNameChange = async (indexName: string) => {
+    const indexNameError = await validateIndexName(indexName);
     this.props.onIndexNameChange(indexName, indexNameError);
   };
 
