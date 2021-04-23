@@ -22392,15 +22392,15 @@ vise@3.x.x:
   dependencies:
     hoek "5.x.x"
 
-vision@^5.3.3:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/vision/-/vision-5.4.0.tgz#fc620deb95227881ea8b8d8a044dc1d1fd40e584"
-  integrity sha512-f8kbjvo/dUbR4ZDF0pHPuOjQFg/6zOMlP1Tb9gK2ukCa7Ksd24174DCzubtov6AxIDhZhO5RYQeeDlF8ujlKWQ==
+vision@^5.4.4:
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/vision/-/vision-5.4.4.tgz#981b2d811a6061cc14cf2d5d05ad3bbc3ee59572"
+  integrity sha512-jFeH7pU/ODYmTOpY5jutMKU/fDr+P621WYEnWgqwDikxutBWJ+koxlgGnkZQoKY6JlYdY4Awo+rPN3DNdTeDKg==
   dependencies:
     boom "7.x.x"
-    hoek "5.x.x"
+    hoek "6.x.x"
     items "2.x.x"
-    joi "13.x.x"
+    joi "14.x.x"
 
 vm-browserify@0.0.4:
   version "0.0.4"
