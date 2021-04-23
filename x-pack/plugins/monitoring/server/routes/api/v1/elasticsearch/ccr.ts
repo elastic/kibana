@@ -13,7 +13,11 @@ import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
-import { ElasticsearchResponse, ElasticsearchSource } from '../../../../../common/types/es';
+import {
+  ElasticsearchResponse,
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatSource,
+} from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
@@ -97,9 +101,13 @@ function buildRequest(
     size: maxBucketSize,
     filterPath: [
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.read_exceptions',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.follower.index',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.follower.shard.number',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_read_millis',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.follower.time_since_last_read.ms',
       'aggregations.by_follower_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.remote_cluster.buckets.key',
@@ -115,10 +123,23 @@ function buildRequest(
         bool: {
           must: [
             {
-              term: {
-                type: {
-                  value: 'ccr_stats',
-                },
+              bool: {
+                should: [
+                  {
+                    term: {
+                      type: {
+                        value: 'ccr_stats',
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      'metricset.name': {
+                        value: 'ccr',
+                      },
+                    },
+                  },
+                ],
               },
             },
             {
@@ -209,29 +230,28 @@ export function ccrRoute(server: {
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const response: ElasticsearchResponse = await callWithRequest(
-          req,
-          'search',
-          buildRequest(req, config, esIndexPattern)
-        );
+        const params = buildRequest(req, config, esIndexPattern);
+        const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
 
         if (!response || Object.keys(response).length === 0) {
           return { data: [] };
         }
 
         const fullStats: {
-          [key: string]: Array<NonNullable<ElasticsearchSource['ccr_stats']>>;
+          [key: string]: Array<
+            | NonNullable<ElasticsearchLegacySource['ccr_stats']>
+            | NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['ccr']
+          >;
         } =
           response.hits?.hits.reduce((accum, hit) => {
             const innerHits = hit.inner_hits?.by_shard.hits?.hits ?? [];
-            const innerHitsSource = innerHits.map(
-              (innerHit) =>
-                innerHit._source.ccr_stats as NonNullable<ElasticsearchSource['ccr_stats']>
-            );
-            const grouped = groupBy(
-              innerHitsSource,
-              (stat) => `${stat.follower_index}:${stat.shard_id}`
-            );
+            const grouped = groupBy(innerHits, (innerHit) => {
+              if (innerHit._source.ccr_stats) {
+                return `${innerHit._source.ccr_stats.follower_index}:${innerHit._source.ccr_stats.shard_id}`;
+              } else if (innerHit._source.elasticsearch?.ccr?.follower?.shard) {
+                return `${innerHit._source.elasticsearch?.ccr?.follower?.index}:${innerHit._source.elasticsearch?.ccr?.follower?.shard?.number}`;
+              }
+            });
 
             return {
               ...accum,
@@ -268,14 +288,25 @@ export function ccrRoute(server: {
 
           stat.shards = get(bucket, 'by_shard_id.buckets').reduce(
             (accum2: any, shardBucket: any) => {
-              const fullStat = fullStats[`${bucket.key}:${shardBucket.key}`][0] ?? {};
+              const fullStat: any = fullStats[`${bucket.key}:${shardBucket.key}`][0];
+              const fullLegacyStat: ElasticsearchLegacySource = fullStat._source?.ccr_stats
+                ? fullStat._source
+                : null;
+              const fullMbStat: ElasticsearchMetricbeatSource = fullStat._source?.elasticsearch?.ccr
+                ? fullStat._source
+                : null;
+              const readExceptions =
+                fullLegacyStat?.ccr_stats?.read_exceptions ??
+                fullMbStat?.elasticsearch?.ccr?.read_exceptions ??
+                [];
               const shardStat = {
                 shardId: shardBucket.key,
-                error: fullStat.read_exceptions?.length
-                  ? fullStat.read_exceptions[0].exception?.type
-                  : null,
+                error: readExceptions.length ? readExceptions[0].exception?.type : null,
                 opsSynced: get(shardBucket, 'ops_synced.value'),
-                syncLagTime: fullStat.time_since_last_read_millis,
+                syncLagTime:
+                  // @ts-ignore
+                  fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
+                  fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
                 syncLagOps: get(shardBucket, 'lag_ops.value'),
                 syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
                 syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),

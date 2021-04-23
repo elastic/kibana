@@ -17,7 +17,7 @@ export default function ({ getService }) {
 
   describe('overview', () => {
     describe('with green platinum cluster', () => {
-      const archive = 'monitoring/singlecluster-green-platinum';
+      const archive = 'monitoring/singlecluster_green_platinum';
       const timeRange = {
         min: '2018-02-13T17:04:50.000Z',
         max: '2018-02-13T17:51:55.000Z',
@@ -42,7 +42,7 @@ export default function ({ getService }) {
     });
 
     describe('with red platinum cluster', () => {
-      const archive = 'monitoring/singlecluster-red-platinum';
+      const archive = 'monitoring/singlecluster_red_platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
         max: '2017-10-06T20:15:30.000Z',
@@ -67,7 +67,7 @@ export default function ({ getService }) {
     });
 
     describe('with shards relocating', () => {
-      const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
+      const archive = 'monitoring/singlecluster_three_nodes_shard_relocation';
       const timeRange = {
         min: '2017-10-05T20:31:17.081Z',
         max: '2017-10-05T20:35:39.428Z',
