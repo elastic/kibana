@@ -221,11 +221,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respect the owner filter when having permissions', async () => {
         await Promise.all([
-          await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+          createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
             user: obsSec,
             space: 'space1',
           }),
-          await createConfiguration(
+          createConfiguration(
             supertestWithoutAuth,
             { ...getConfigurationRequest(), owner: 'observabilityFixture' },
             200,
@@ -250,11 +250,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         await Promise.all([
-          await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
+          createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
             user: obsSec,
             space: 'space1',
           }),
-          await createConfiguration(
+          createConfiguration(
             supertestWithoutAuth,
             { ...getConfigurationRequest(), owner: 'observabilityFixture' },
             200,

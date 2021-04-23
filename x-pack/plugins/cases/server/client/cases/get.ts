@@ -93,6 +93,7 @@ export const get = async (
         })
       );
     }
+
     const theComments = await caseService.getAllCaseComments({
       soClient: savedObjectsClient,
       id,
@@ -141,12 +142,13 @@ export async function getTags(
 
     const { filter: authorizationFilter } = await getAuthorizationFilter({
       authorization: auth,
-      operation: Operations.getTags,
+      operation: Operations.findCases,
       auditLogger,
     });
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
+    // TODO: ensureSavedObjectsAreAuthorized + ensureSavedObjectsAreAuthorized if possible
     return await caseService.getTags({
       soClient,
       filter,
@@ -185,6 +187,7 @@ export async function getReporters(
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
+    // TODO: ensureSavedObjectsAreAuthorized + ensureSavedObjectsAreAuthorized if possible
     const reporters = await caseService.getReporters({
       soClient,
       filter,

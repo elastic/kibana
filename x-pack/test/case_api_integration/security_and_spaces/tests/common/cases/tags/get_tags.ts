@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respect the owner filter when having permissions', async () => {
         await Promise.all([
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
             200,
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             }
           ),
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
             200,
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         await Promise.all([
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
             200,
@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             }
           ),
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
             200,
