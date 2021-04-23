@@ -79,6 +79,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickHostsAnomaliesDropdown();
         await pageObjects.infraHome.setAnomaliesDate('Apr 23, 2021 @ 11:00:00.000');
         await pageObjects.infraHome.getNoAnomaliesMsg();
+        await pageObjects.infraHome.clickK8sAnomaliesDropdown();
+        await pageObjects.infraHome.getNoAnomaliesMsg();
       });
     });
   });
