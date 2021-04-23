@@ -14560,11 +14560,11 @@ mimic-response@^1.0.0:
   integrity sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
 
 mimos@4.x.x:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/mimos/-/mimos-4.0.0.tgz#76e3d27128431cb6482fd15b20475719ad626a5a"
-  integrity sha512-JvlvRLqGIlk+AYypWrbrDmhsM+6JVx/xBM5S3AMwTBz1trPCEoPN/swO2L4Wu653fL7oJdgk8DMQyG/Gq3JkZg==
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/mimos/-/mimos-4.0.2.tgz#f2762d7c60118ce51c2231afa090bc335d21d0f8"
+  integrity sha512-5XBsDqBqzSN88XPPH/TFpOalWOjHJM5Z2d3AMx/30iq+qXvYKd/8MPhqBwZDOLtoaIWInR3nLzMQcxfGK9djXA==
   dependencies:
-    hoek "5.x.x"
+    hoek "6.x.x"
     mime-db "1.x.x"
 
 min-document@^2.19.0:
