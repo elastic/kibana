@@ -9,7 +9,7 @@ Saved searches are good for adding search results to a dashboard.
 image::discover/images/saved-search.png[Example of Discover's save search option]
 
 
-A saved search stores the query text, filters, time range, and
+A saved search stores the query text, filters, and
 current view of *Discover*&mdash;the columns selected in the document table,
 the sort order, and the index pattern.
 
