@@ -852,9 +852,9 @@ export class AlertsClient {
 
     let createdAPIKey = null;
     try {
-      createdAPIKey = attributes.enabled
-        ? await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name))
-        : null;
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
     } catch (error) {
       throw Boom.badRequest(`Error creating API key - ${error.message}`);
     }
@@ -966,11 +966,9 @@ export class AlertsClient {
 
       let createdAPIKey = null;
       try {
-        createdAPIKey = attributes.enabled
-          ? await this.createAPIKey(
-              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-            )
-          : null;
+        createdAPIKey = await this.createAPIKey(
+          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+        );
       } catch (error) {
         throw Boom.badRequest(`Error creating API key - ${error.message}`);
       }
