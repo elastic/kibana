@@ -278,6 +278,8 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const connectorObj = {
           connector,
           closure_type: closureType,
+          // TODO: use constant after https://github.com/elastic/kibana/pull/97646 is being merged
+          owner: 'securitySolution',
         };
 
         const res =

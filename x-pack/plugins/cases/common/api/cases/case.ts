@@ -180,9 +180,7 @@ export const AllTagsFindRequestRt = rt.partial({
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
-export const AllReportersFindRequestRt = rt.partial({
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
+export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 /**
@@ -208,4 +206,4 @@ export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
 };
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
-export type AllReportersFindRequest = rt.TypeOf<typeof AllReportersFindRequestRt>;
+export type AllReportersFindRequest = AllTagsFindRequest;

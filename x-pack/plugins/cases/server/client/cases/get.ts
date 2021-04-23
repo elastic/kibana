@@ -148,7 +148,7 @@ export async function getTags(
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    // TODO: ensureSavedObjectsAreAuthorized + ensureSavedObjectsAreAuthorized if possible
+    // TODO: ensureSavedObjectsAreAuthorized + logSuccessfulAuthorization if possible
     return await caseService.getTags({
       soClient,
       filter,
@@ -187,7 +187,7 @@ export async function getReporters(
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    // TODO: ensureSavedObjectsAreAuthorized + ensureSavedObjectsAreAuthorized if possible
+    // TODO: ensureSavedObjectsAreAuthorized + logSuccessfulAuthorization if possible
     const reporters = await caseService.getReporters({
       soClient,
       filter,
