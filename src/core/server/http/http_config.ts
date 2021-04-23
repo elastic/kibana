@@ -20,6 +20,9 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
+// The lower-case set of response headers which are forbidden within `customResponseHeaders`.
+const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
+
 // before update to make sure it's in sync with validation rules in Legacy
 // https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
@@ -58,6 +61,16 @@ export const config = {
       ),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
+        validate(value) {
+          const forbiddenKeys = Object.keys(value).filter((headerName) =>
+            RESPONSE_HEADER_DENY_LIST.includes(headerName.toLowerCase())
+          );
+          if (forbiddenKeys.length > 0) {
+            return `The following custom response headers are not allowed to be set: ${forbiddenKeys.join(
+              ', '
+            )}`;
+          }
+        },
       }),
       host: schema.string({
         defaultValue: 'localhost',
