@@ -3080,9 +3080,11 @@ axobject-query@^2.0.1:
     ast-types-flow "0.0.7"
 
 b64@4.x.x:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/b64/-/b64-4.0.0.tgz#c37f587f0a383c7019e821120e8c3f58f0d22772"
-  integrity sha512-EhmUQodKB0sdzPPrbIWbGqA5cQeTWxYrAgNeeT1rLZWtD3tbNTnphz8J4vkXI3cPgBNlXBjzEbzDzq0Nwi4f9A==
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/b64/-/b64-4.1.2.tgz#7015372ba8101f7fb18da070717a93c28c8580d8"
+  integrity sha512-+GUspBxlH3CJaxMUGUE1EBoWM6RKgWiYwUDal0qdf8m3ArnXNN1KzKVo5HOnE/FSq4HHyWf3TlHLsZI8PKQgrQ==
+  dependencies:
+    hoek "6.x.x"
 
 babel-cli@^6.26.0:
   version "6.26.0"
