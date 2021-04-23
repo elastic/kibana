@@ -7,7 +7,13 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
-import type { AppDataType, ReportViewTypeId, SeriesUrl, UrlFilter } from '../types';
+import type {
+  AppDataType,
+  ReportViewTypeId,
+  SeriesUrl,
+  UrlFilter,
+  URLReportDefinition,
+} from '../types';
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
@@ -47,7 +53,7 @@ interface ShortUrlSeries {
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
-  [URL_KEYS.REPORT_DEFINITIONS]?: Record<string, string>;
+  [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
   time?: {
     to: string;
     from: string;
