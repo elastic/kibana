@@ -10455,15 +10455,15 @@ handlebars@4.7.7, handlebars@^4.0.1, handlebars@^4.0.3:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-hapi-auth-cookie@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-9.0.0.tgz#3b0af443334e2bd92490ddb17bed16e3e9edfd01"
-  integrity sha512-N71Mt7Jk0+7WLnuvfSv0DoGzgpn7TqOd+/AB73RfHpLvzYoskJ9AlFV3Op60DB01RJNaABZtdcH1l4HM3DMbog==
+hapi-auth-cookie@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-9.1.0.tgz#6593d5d37c34b8fcdf0c47624510395f7bc793e2"
+  integrity sha512-AFrFj6p7IHd/as0iQTIedc7HNUvqSN6OkurM1mk2smnVvTsXu5qr69jtsTMCMJE+gAL/mNI4Oq/AFOEdLGR0MQ==
   dependencies:
     boom "7.x.x"
     bounce "1.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
+    hoek "6.x.x"
+    joi "14.x.x"
 
 hapi@^17.8.5:
   version "17.8.5"
