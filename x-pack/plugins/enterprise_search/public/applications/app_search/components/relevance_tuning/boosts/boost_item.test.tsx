@@ -11,10 +11,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiAccordion } from '@elastic/eui';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon, ValueBadge } from '../components';
 import { BoostType } from '../types';
-
-import { ValueBadge } from '../value_badge';
 
 import { BoostItem } from './boost_item';
 import { BoostItemContent } from './boost_item_content';

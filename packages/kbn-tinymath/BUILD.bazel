@@ -1,5 +1,5 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("@npm//pegjs:index.bzl", "pegjs")
+load("@npm//peggy:index.bzl", "peggy")
 
 PKG_BASE_NAME = "kbn-tinymath"
 PKG_REQUIRE_NAME = "@kbn/tinymath"
@@ -30,16 +30,16 @@ DEPS = [
   "@npm//lodash",
 ]
 
-pegjs(
+peggy(
   name = "grammar",
   data = [
-    ":grammar/grammar.pegjs"
+    ":grammar/grammar.peggy"
   ],
   output_dir = True,
   args = [
     "-o",
     "$(@D)/index.js",
-    "./%s/grammar/grammar.pegjs" % package_name()
+    "./%s/grammar/grammar.peggy" % package_name()
   ],
 )
 

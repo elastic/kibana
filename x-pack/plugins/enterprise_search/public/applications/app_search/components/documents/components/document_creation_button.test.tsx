@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { DocumentCreationFlyout } from '../document_creation';
+import { DocumentCreationFlyout } from '../../document_creation';
 
 import { DocumentCreationButton } from './document_creation_button';
 
