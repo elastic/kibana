@@ -70,7 +70,7 @@ const HostNameComponent: React.FC<Props> = ({ fieldName, contextId, eventId, val
     <DefaultDraggable
       field={fieldName}
       id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      tooltipContent={hostName}
+      tooltipContent={fieldName}
       value={hostName}
     >
       <LinkAnchor
