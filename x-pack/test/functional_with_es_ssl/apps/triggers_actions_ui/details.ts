@@ -651,7 +651,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.eql([
           {
             instance: 'eu-east',
-            status: 'OK',
+            status: 'Recovered',
             start: '',
             duration: '',
           },
