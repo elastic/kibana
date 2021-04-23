@@ -477,7 +477,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
    * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ) {
@@ -486,7 +486,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     // is simply a helper that calls `find`, `openPointInTimeForType`, and
     // `closePointInTime` internally, so namespaces will already be handled
     // in those methods.
-    return this.client.createPointInTimeFinder(findOptions, {
+    return this.client.createPointInTimeFinder<T, A>(findOptions, {
       client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,

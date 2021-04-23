@@ -647,14 +647,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.closePointInTime(id, options);
   }
 
-  public createPointInTimeFinder(
+  public createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ) {
     // We don't need to perform an authorization check here or add an audit log, because
     // `createPointInTimeFinder` is simply a helper that calls `find`, `openPointInTimeForType`,
     // and `closePointInTime` internally, so authz checks and audit logs will already be applied.
-    return this.baseClient.createPointInTimeFinder(findOptions, {
+    return this.baseClient.createPointInTimeFinder<T, A>(findOptions, {
       client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,

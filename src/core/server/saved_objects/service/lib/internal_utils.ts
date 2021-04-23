@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Payload } from '@hapi/boom';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import type { SavedObject } from '../../types';
@@ -30,7 +31,7 @@ export function getBulkOperationError(
     error?: { type: string; reason: string; index: string };
     // Other fields are present on a bulk operation result but they are irrelevant for this function
   }
-) {
+): Payload | undefined {
   const { status, error } = rawResponse;
   if (error) {
     switch (status) {

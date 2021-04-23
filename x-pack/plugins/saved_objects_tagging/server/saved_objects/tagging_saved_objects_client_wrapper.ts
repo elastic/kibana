@@ -6,7 +6,6 @@
  */
 
 import {
-  ISavedObjectsPointInTimeFinder,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -135,11 +134,11 @@ export class TaggingSavedObjectsClientWrapper implements SavedObjectsClientContr
     return this.options.baseClient.closePointInTime(id, options);
   }
 
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder {
-    return this.options.baseClient.createPointInTimeFinder(findOptions, dependencies);
+  ) {
+    return this.options.baseClient.createPointInTimeFinder<T, A>(findOptions, dependencies);
   }
 
   async collectMultiNamespaceReferences(

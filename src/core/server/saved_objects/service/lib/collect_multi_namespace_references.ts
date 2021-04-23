@@ -106,9 +106,9 @@ export interface CollectMultiNamespaceReferencesParams {
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
-  createPointInTimeFinder: (
+  createPointInTimeFinder: <T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions
-  ) => ISavedObjectsPointInTimeFinder;
+  ) => ISavedObjectsPointInTimeFinder<T, A>;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
@@ -117,23 +117,57 @@ export interface CollectMultiNamespaceReferencesParams {
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
  */
-export async function collectMultiNamespaceReferences({
+export async function collectMultiNamespaceReferences(
+  params: CollectMultiNamespaceReferencesParams
+): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+  const { createPointInTimeFinder, objects } = params;
+  if (!objects.length) {
+    return { objects: [] };
+  }
+
+  const { objectMap, inboundReferencesMap } = await getObjectsAndReferences(params);
+  const objectsWithContext = Array.from(
+    inboundReferencesMap.entries()
+  ).map<SavedObjectReferenceWithContext>(([referenceKey, referenceVal]) => {
+    const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
+      const { type, id } = parseKey(objectKey);
+      return { type, id, name };
+    });
+    const { type, id } = parseKey(referenceKey);
+    const object = objectMap.get(referenceKey);
+    const spaces = object?.namespaces ?? [];
+    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
+  });
+
+  const aliasesMap = await checkLegacyUrlAliases(createPointInTimeFinder, objectsWithContext);
+  const results = objectsWithContext.map((obj) => {
+    const key = getKey(obj);
+    const val = aliasesMap.get(key);
+    const spacesWithMatchingAliases = val && Array.from(val);
+    return { ...obj, spacesWithMatchingAliases };
+  });
+
+  return {
+    objects: results,
+  };
+}
+
+/**
+ * Recursively fetches objects and their references, returning a map of the retrieved objects and a map of all inbound references.
+ */
+async function getObjectsAndReferences({
   registry,
   allowedTypes,
   client,
   serializer,
   getIndexForType,
-  createPointInTimeFinder,
   objects,
   options = {},
-}: CollectMultiNamespaceReferencesParams): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-  if (!objects.length) {
-    return { objects: [] };
-  }
+}: CollectMultiNamespaceReferencesParams) {
   const { namespace, purpose, typesToExclude = [] } = options;
   const inboundReferencesMap = objects.reduce(
     // Add the input objects to the references map so they are returned with the results, even if they have no inbound references
-    (acc, { type, id }) => acc.set(`${type}:${id}`, new Map()),
+    (acc, cur) => acc.set(getKey(cur), new Map()),
     new Map<string, Map<string, string>>()
   );
   const objectMap = new Map<string, SavedObject | null>();
@@ -168,7 +202,7 @@ export async function collectMultiNamespaceReferences({
     for (let i = 0; i < bulkGetObjects.length; i++) {
       // For every element in bulkGetObjects, there should be a matching element in bulkGetResponse.body.docs
       const { type, id } = bulkGetObjects[i];
-      const objectKey = `${type}:${id}`;
+      const objectKey = getKey({ type, id });
       const doc = bulkGetResponse.body.docs[i];
       // @ts-expect-error MultiGetHit._source is optional
       if (!doc.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
@@ -182,7 +216,7 @@ export async function collectMultiNamespaceReferences({
         if (!validObjectTypesFilter(reference)) {
           continue;
         }
-        const referenceKey = `${reference.type}:${reference.id}`;
+        const referenceKey = getKey(reference);
         const referenceVal = inboundReferencesMap.get(referenceKey) ?? new Map<string, string>();
         if (!referenceVal.has(objectKey)) {
           inboundReferencesMap.set(referenceKey, referenceVal.set(objectKey, reference.name));
@@ -196,36 +230,16 @@ export async function collectMultiNamespaceReferences({
     count++;
   }
 
-  const objectsWithContext = Array.from(
-    inboundReferencesMap.entries()
-  ).map<SavedObjectReferenceWithContext>(([referenceKey, referenceVal]) => {
-    const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
-      const { type, id } = parseKey(objectKey);
-      return { type, id, name };
-    });
-    const { type, id } = parseKey(referenceKey);
-    const object = objectMap.get(referenceKey);
-    const spaces = object?.namespaces ?? [];
-    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
-  });
-
-  const aliasesMap = await checkLegacyUrlAliases(createPointInTimeFinder, objectsWithContext);
-  const results = objectsWithContext.map((obj) => {
-    const key = `${obj.type}:${obj.id}`;
-    const val = aliasesMap.get(key);
-    const spacesWithMatchingAliases = val && Array.from(val);
-    return { ...obj, spacesWithMatchingAliases };
-  });
-
-  return {
-    objects: results,
-  };
+  return { objectMap, inboundReferencesMap };
 }
 
+/**
+ * Fetches all legacy URL aliases that match the given objects, returning a map of the matching aliases and what space(s) they exist in.
+ */
 async function checkLegacyUrlAliases(
-  createPointInTimeFinder: (
+  createPointInTimeFinder: <T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions
-  ) => ISavedObjectsPointInTimeFinder,
+  ) => ISavedObjectsPointInTimeFinder<T, A>,
   objects: SavedObjectReferenceWithContext[]
 ) {
   const filteredObjects = objects.filter(({ spaces }) => spaces.length !== 0);
@@ -233,7 +247,7 @@ async function checkLegacyUrlAliases(
     return new Map<string, Set<string>>();
   }
   const filter = createAliasKueryFilter(filteredObjects);
-  const finder = createPointInTimeFinder({
+  const finder = createPointInTimeFinder<LegacyUrlAlias>({
     type: LEGACY_URL_ALIAS_TYPE,
     perPage: ALIAS_SEARCH_PER_PAGE,
     filter,
@@ -243,12 +257,12 @@ async function checkLegacyUrlAliases(
   let error: Error | undefined;
   try {
     const responses: Array<SavedObjectsFindResult<LegacyUrlAlias>> = [];
-    for await (const response of finder.find<LegacyUrlAlias>()) {
+    for await (const response of finder.find()) {
       responses.push(...response.saved_objects);
     }
     for (const alias of responses) {
       const { sourceId, targetType, targetNamespace } = alias.attributes;
-      const key = `${targetType}:${sourceId}`;
+      const key = getKey({ type: targetType, id: sourceId });
       const val = aliasesMap.get(key) ?? new Set<string>();
       val.add(targetNamespace);
       aliasesMap.set(key, val);
@@ -280,6 +294,11 @@ function createAliasKueryFilter(objects: SavedObjectReferenceWithContext[]) {
     return acc;
   }, []);
   return buildNode('or', kueryNodes);
+}
+
+/** Takes an object with a `type` and `id` field and returns a key string */
+function getKey({ type, id }: { type: string; id: string }) {
+  return `${type}:${id}`;
 }
 
 /** Parses a 'type:id' key string and returns an object with a `type` field and an `id` field */

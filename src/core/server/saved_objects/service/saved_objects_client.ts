@@ -670,10 +670,10 @@ export class SavedObjectsClient {
    * }
    * ```
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder {
+  ): ISavedObjectsPointInTimeFinder<T, A> {
     return this._repository.createPointInTimeFinder(findOptions, {
       client: this,
       // Include dependencies last so that SO client wrappers have their settings applied.

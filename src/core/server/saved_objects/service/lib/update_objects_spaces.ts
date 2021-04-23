@@ -222,7 +222,7 @@ export async function updateObjectsSpaces({
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      const { remainingSpaces, isUpdateRequired } = getRemainingSpaces(
+      const { newSpaces, isUpdateRequired } = getNewSpacesArray(
         currentSpaces,
         spacesToAdd,
         spacesToRemove
@@ -230,7 +230,7 @@ export async function updateObjectsSpaces({
       const expectedResult = {
         type,
         id,
-        remainingSpaces,
+        newSpaces,
         ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
       };
 
@@ -240,8 +240,8 @@ export async function updateObjectsSpaces({
           _index: getIndexForType(type),
           ...versionProperties,
         };
-        if (remainingSpaces.length) {
-          const documentToSave = { updated_at: time, namespaces: remainingSpaces };
+        if (newSpaces.length) {
+          const documentToSave = { updated_at: time, namespaces: newSpaces };
           // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
           bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
         } else {
@@ -266,7 +266,7 @@ export async function updateObjectsSpaces({
           return expectedResult.error;
         }
 
-        const { type, id, remainingSpaces, esRequestIndex } = expectedResult.value;
+        const { type, id, newSpaces, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
           const response = bulkOperationResponse?.body.items[esRequestIndex] ?? {};
           const rawResponse = Object.values(response)[0] as any;
@@ -276,7 +276,7 @@ export async function updateObjectsSpaces({
           }
         }
 
-        return { id, type, spaces: remainingSpaces };
+        return { id, type, spaces: newSpaces };
       }
     ),
   };
@@ -288,14 +288,14 @@ function errorContent(error: DecoratedError) {
 }
 
 /** Gets the remaining spaces for an object after adding new ones and removing old ones. */
-function getRemainingSpaces(
+function getNewSpacesArray(
   existingSpaces: string[],
   spacesToAdd: string[],
   spacesToRemove: string[]
 ) {
   const addSet = new Set(spacesToAdd);
   const removeSet = new Set(spacesToRemove);
-  const remainingSpaces = existingSpaces
+  const newSpaces = existingSpaces
     .filter((x) => {
       addSet.delete(x);
       return !removeSet.delete(x);
@@ -304,7 +304,7 @@ function getRemainingSpaces(
 
   const isAnySpaceAdded = addSet.size > 0;
   const isAnySpaceRemoved = removeSet.size < spacesToRemove.length;
-  const isUpdateRequired = remainingSpaces.length === 0 || isAnySpaceAdded || isAnySpaceRemoved;
+  const isUpdateRequired = isAnySpaceAdded || isAnySpaceRemoved;
 
-  return { remainingSpaces, isUpdateRequired };
+  return { newSpaces, isUpdateRequired };
 }

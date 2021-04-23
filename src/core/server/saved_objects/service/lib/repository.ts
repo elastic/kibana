@@ -2118,10 +2118,10 @@ export class SavedObjectsRepository {
    * }
    * ```
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder {
+  ): ISavedObjectsPointInTimeFinder<T, A> {
     return new PointInTimeFinder(findOptions, {
       logger: this._logger,
       client: this,
