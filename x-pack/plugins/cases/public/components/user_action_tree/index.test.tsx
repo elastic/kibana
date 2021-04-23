@@ -50,7 +50,7 @@ jest.mock('./user_action_timestamp');
 
 const patchComment = jest.fn();
 
-describe(`UserActionTree Run #`, () => {
+describe(`UserActionTree`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };

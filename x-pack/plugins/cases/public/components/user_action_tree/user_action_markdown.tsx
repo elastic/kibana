@@ -14,7 +14,6 @@ import { Form, useForm, UseField } from '../../common/shared_imports';
 import { schema, Content } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
 
-// TODO: Need to migrate user_action_markdown.test.tsx still.
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
 `;
