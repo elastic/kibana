@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
     'copySavedObjectsToSpace',
   ]);
+  const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const log = getService('log');
   const browser = getService('browser');
@@ -213,6 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
         });
         await elasticChart.setNewChartUiDebugFlag();
+        await queryBar.submitQuery();
         await pieChart.expectPieSliceCountEsCharts(10);
       });
     });
