@@ -13,9 +13,6 @@
   "kibana": {
     "devOnly": true
   },
-  "dependencies": {
-    "@kbn/utils": "link:../kbn-utils"
-  },
   "devDependencies": {
     "@kbn/expect": "link:../kbn-expect"
   }
