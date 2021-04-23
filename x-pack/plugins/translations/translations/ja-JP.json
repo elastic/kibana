@@ -22151,7 +22151,6 @@
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start": "開始",
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status": "ステータス",
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.active": "アクティブ",
-    "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive": "OK",
     "xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle": "無効にする",
     "xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle": "ミュート",
     "xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle": "閉じる",

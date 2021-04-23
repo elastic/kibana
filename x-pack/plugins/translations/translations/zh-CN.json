@@ -22502,7 +22502,6 @@
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start": "启动",
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status": "状态",
     "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.active": "活动",
-    "xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive": "确定",
     "xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle": "禁用",
     "xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle": "静音",
     "xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle": "关闭",
