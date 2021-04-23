@@ -73,4 +73,15 @@ describe('interpreter/functions#pie', () => {
     expect(vislibSlicesResponseHandler).toHaveBeenCalledTimes(1);
     expect(vislibSlicesResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });
+
+  it('should escape single and double quotes in visConfig parse it', async () => {
+    const stringVisConfig =
+      '{"stringToTest":"field\\\'with\\\'\\\'single\\\'\\\\"and\\\\"\\\\"double\\\\"quotes"}';
+    const actual = await fn(context, { visConfig: stringVisConfig });
+
+    expect(actual).toHaveProperty(
+      'value.visConfig.stringToTest',
+      'field\\\'with\\\'\\\'single\\\'"and""double"quotes'
+    );
+  });
 });
