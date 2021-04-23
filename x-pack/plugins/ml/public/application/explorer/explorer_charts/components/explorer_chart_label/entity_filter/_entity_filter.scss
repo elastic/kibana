@@ -1,7 +1,10 @@
 .filter-button {
-  opacity: .3;
-  min-width: 14px;
-  padding-right: 0;
+  opacity: .5;
+  width: $euiSize;
+  height: $euiSize;
+
+  -webkit-transform: translateY(-1px);
+  transform: translateY(-1px);
 
   .euiIcon {
     width: $euiFontSizeXS;
