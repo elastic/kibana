@@ -42,7 +42,7 @@ interface BuilderExceptionListItemProps {
   autocompleteService: AutocompleteStart;
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
-  osTypes: OsTypeArray;
+  osTypes?: OsTypeArray;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;

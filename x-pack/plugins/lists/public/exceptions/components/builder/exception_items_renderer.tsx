@@ -73,7 +73,7 @@ export interface ExceptionBuilderProps {
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
-  osTypes: OsTypeArray;
+  osTypes?: OsTypeArray;
   indexPatterns: IIndexPattern;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;

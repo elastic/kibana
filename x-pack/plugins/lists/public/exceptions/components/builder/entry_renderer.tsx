@@ -47,7 +47,7 @@ export interface EntryItemProps {
   httpService: HttpStart;
   indexPattern: IIndexPattern;
   showLabel: boolean;
-  osTypes: OsTypeArray;
+  osTypes?: OsTypeArray;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: IIndexPattern,
