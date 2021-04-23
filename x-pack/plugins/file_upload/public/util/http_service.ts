@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { HttpFetchOptions } from 'kibana/public';
-// @ts-ignore
-import { getHttp } from '../../../../kibana_services';
+import { getHttp } from '../kibana_services';
 
 export interface HttpOptions {
   url: string;
@@ -62,4 +61,3 @@ async function doFetch(url: string, payload: HttpFetchOptions) {
     };
   }
 }
-

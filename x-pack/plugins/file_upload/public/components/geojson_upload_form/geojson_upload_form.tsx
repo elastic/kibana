@@ -13,6 +13,7 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { checkIndexPatternValid } from '../../../../../../../x-pack/plugins/file_upload/public/util/indexing_service';
 import { IndexNameForm } from './index_name_form';
+import { validateIndexName } from '../../util/indexing_service';
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {
@@ -48,7 +49,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
     indexNames: [],
   };
 
-  _onFileSelect = (onFileSelectParameters: OnFileSelectParameters) => {
+  _onFileSelect = async (onFileSelectParameters: OnFileSelectParameters) => {
     this.setState({
       hasFile: true,
       isPointsOnly: onFileSelectParameters.hasPoints && !onFileSelectParameters.hasShapes,
@@ -56,7 +57,8 @@ export class GeoJsonUploadForm extends Component<Props, State> {
 
     this.props.onFileSelect(onFileSelectParameters);
 
-    this.props.onIndexNameChange(onFileSelectParameters.indexName);
+    const indexNameError = await validateIndexName(onFileSelectParameters.indexName);
+    this.props.onIndexNameChange(onFileSelectParameters.indexName, indexNameError);
 
     const geoFieldType =
       onFileSelectParameters.hasPoints && !onFileSelectParameters.hasShapes
