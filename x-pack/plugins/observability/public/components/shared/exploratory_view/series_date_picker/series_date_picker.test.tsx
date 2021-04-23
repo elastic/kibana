@@ -16,6 +16,7 @@ describe('SeriesDatePicker', function () {
     mockUrlStorage({
       data: {
         'uptime-pings-histogram': {
+          dataType: 'synthetics',
           reportType: 'upp',
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
@@ -32,6 +33,7 @@ describe('SeriesDatePicker', function () {
       data: {
         'uptime-pings-histogram': {
           reportType: 'upp',
+          dataType: 'synthetics',
           breakdown: 'monitor.status',
         },
       },
@@ -40,6 +42,7 @@ describe('SeriesDatePicker', function () {
     expect(setSeries1).toHaveBeenCalledTimes(1);
     expect(setSeries1).toHaveBeenCalledWith('uptime-pings-histogram', {
       breakdown: 'monitor.status',
+      dataType: 'synthetics',
       reportType: 'upp',
       time: DEFAULT_TIME,
     });
@@ -49,6 +52,7 @@ describe('SeriesDatePicker', function () {
     const { setSeries } = mockUrlStorage({
       data: {
         'uptime-pings-histogram': {
+          dataType: 'synthetics',
           reportType: 'upp',
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
@@ -69,6 +73,7 @@ describe('SeriesDatePicker', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'monitor.status',
+      dataType: 'synthetics',
       reportType: 'upp',
       time: { from: 'now/d', to: 'now/d' },
     });

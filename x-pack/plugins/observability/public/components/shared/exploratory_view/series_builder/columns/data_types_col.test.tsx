@@ -10,12 +10,15 @@ import { fireEvent, screen } from '@testing-library/react';
 import { mockAppIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
+import { ReportDefinitionCol } from './report_definition_col';
 
 describe('DataTypesCol', function () {
+  const seriesId = 'test-series-id';
+
   mockAppIndexPattern();
 
   it('should render properly', function () {
-    const { getByText } = render(<DataTypesCol />);
+    const { getByText } = render(<DataTypesCol seriesId={seriesId} />);
 
     dataTypes.forEach(({ label }) => {
       getByText(label);
@@ -25,18 +28,18 @@ describe('DataTypesCol', function () {
   it('should set series on change', function () {
     const { setSeries } = mockUrlStorage({});
 
-    render(<DataTypesCol />);
+    render(<DataTypesCol seriesId={seriesId} />);
 
     fireEvent.click(screen.getByText(/user experience\(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, { dataType: 'ux' });
+    expect(setSeries).toHaveBeenCalledWith(seriesId, { dataType: 'ux' });
   });
 
   it('should set series on change on already selected', function () {
     mockUrlStorage({
       data: {
-        [NEW_SERIES_KEY]: {
+        [seriesId]: {
           dataType: 'synthetics',
           reportType: 'upp',
           breakdown: 'monitor.status',
@@ -45,7 +48,7 @@ describe('DataTypesCol', function () {
       },
     });
 
-    render(<DataTypesCol />);
+    render(<DataTypesCol seriesId={seriesId} />);
 
     const button = screen.getByRole('button', {
       name: /Synthetic Monitoring/i,

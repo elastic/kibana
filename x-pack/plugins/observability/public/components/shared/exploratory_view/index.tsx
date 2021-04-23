@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
@@ -19,7 +19,6 @@ import {
   withNotifyOnErrors,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
-import { WithHeaderLayout } from '../../app/layout/with_header';
 
 export function ExploratoryViewPage() {
   useBreadcrumbs([
@@ -29,8 +28,6 @@ export function ExploratoryViewPage() {
       }),
     },
   ]);
-
-  const theme = useContext(ThemeContext);
 
   const {
     services: { uiSettings, notifications },
@@ -45,15 +42,16 @@ export function ExploratoryViewPage() {
   });
 
   return (
-    <WithHeaderLayout
-      headerColor={theme.eui.euiColorEmptyShade}
-      bodyColor={theme.eui.euiPageBackgroundColor}
-    >
+    <Wrapper>
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView />
         </UrlStorageContextProvider>
       </IndexPatternContextProvider>
-    </WithHeaderLayout>
+    </Wrapper>
   );
 }
+
+const Wrapper = euiStyled.div`
+  padding: ${(props) => props.theme.eui.paddingSizes.l};
+`;

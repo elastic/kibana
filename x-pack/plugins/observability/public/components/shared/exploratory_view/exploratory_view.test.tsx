@@ -44,29 +44,6 @@ describe('ExploratoryView', () => {
     await waitFor(() => {
       screen.getByText(/open in lens/i);
       screen.getByRole('heading', { name: /exploratory view/i });
-      screen.getByRole('img', { name: /visulization/i });
-      screen.getByText(/add series/i);
-      screen.getByText(/no series found, please add a series\./i);
-    });
-  });
-
-  it('can add, cancel new series', async () => {
-    render(<ExploratoryView />);
-
-    await fireEvent.click(screen.getByText(/add series/i));
-
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-    });
-
-    await waitFor(() => {
-      screen.getByText(/select a data type to start building a series\./i);
-    });
-
-    await fireEvent.click(screen.getByText(/cancel/i));
-
-    await waitFor(() => {
-      screen.getByText(/add series/i);
     });
   });
 
@@ -74,6 +51,7 @@ describe('ExploratoryView', () => {
     mockUrlStorage({
       data: {
         'uptime-pings-histogram': {
+          dataType: 'synthetics',
           reportType: 'upp',
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
@@ -86,7 +64,6 @@ describe('ExploratoryView', () => {
     await waitFor(() => {
       screen.getByText(/open in lens/i);
       screen.getByRole('heading', { name: /uptime pings/i });
-      screen.getByText(/uptime-pings-histogram/i);
       screen.getByText(/Lens Embeddable Component/i);
       screen.getByRole('table', { name: /this table contains 1 rows\./i });
     });

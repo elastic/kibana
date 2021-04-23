@@ -47,7 +47,7 @@ export function ExploratoryView() {
     if (seriesBuilderRef?.current && wrapperRef.current) {
       const headerOffset = wrapperRef.current.getBoundingClientRect().top;
       const seriesOffset = seriesBuilderRef.current.getBoundingClientRect().height;
-      setHeight(`calc(100vh - ${seriesOffset + headerOffset + 32}px)`);
+      setHeight(`calc(100vh - ${seriesOffset + headerOffset + 40}px)`);
     }
   };
 

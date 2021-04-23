@@ -15,17 +15,17 @@ import {
   mockUseValuesList,
   render,
 } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { ReportDefinitionCol } from './report_definition_col';
 import { SERVICE_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Series Builder ReportDefinitionCol', function () {
   mockAppIndexPattern();
+  const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
+    seriesId,
     reportType: 'pld',
     indexPattern: mockIndexPattern,
-    seriesId: NEW_SERIES_KEY,
   });
 
   const { setSeries } = mockUrlStorage({
@@ -34,13 +34,13 @@ describe('Series Builder ReportDefinitionCol', function () {
         dataType: 'ux',
         reportType: 'pld',
         time: { from: 'now-30d', to: 'now' },
-        reportDefinitions: { [SERVICE_NAME]: 'elastic-co' },
+        reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
       },
     },
   });
 
   it('should render properly', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Web Application');
     screen.getByText('Environment');
@@ -49,20 +49,20 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   it('should render selected report definitions', function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('elastic-co');
   });
 
   it('should be able to remove selected definition', function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     const removeBtn = screen.getByText(/elastic-co/i);
 
     fireEvent.click(removeBtn);
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'ux',
       reportDefinitions: {},
       reportType: 'pld',
@@ -72,7 +72,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   it('should be able to unselected selected definition', async function () {
     mockUseValuesList(['elastic-co']);
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     const definitionBtn = screen.getByText(/web application/i);
 
