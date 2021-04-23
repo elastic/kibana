@@ -1,20 +1,19 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("@npm//peggy:index.bzl", "peggy")
+load("@npm//@babel/cli:index.bzl", "babel")
 
-PKG_BASE_NAME = "kbn-tinymath"
-PKG_REQUIRE_NAME = "@kbn/tinymath"
+PKG_BASE_NAME = "kbn-babel-code-parser"
+PKG_REQUIRE_NAME = "@kbn/babel-code-parser"
 
 SOURCE_FILES = glob(
   [
     "src/**/*",
-  ]
+  ],
+  exclude = [
+    "**/*.test.*"
+  ],
 )
 
-TYPE_FILES = [
-  "index.d.ts",
-]
-
-SRCS = SOURCE_FILES + TYPE_FILES
+SRCS = SOURCE_FILES
 
 filegroup(
   name = "srcs",
@@ -27,29 +26,31 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 DEPS = [
+  "//packages/kbn-babel-preset",
+  "@npm//@babel/parser",
+  "@npm//@babel/traverse",
   "@npm//lodash",
 ]
 
-peggy(
-  name = "grammar",
+babel(
+  name = "target",
   data = [
-    ":grammar/grammar.peggy"
-  ],
+      ":srcs",
+      ".babelrc",
+  ] + DEPS,
   output_dir = True,
   args = [
-    "-o",
-    "$(@D)/index.js",
-    "./%s/grammar/grammar.peggy" % package_name()
+      "./%s/src" % package_name(),
+      "--out-dir",
+      "$(@D)",
+      "--quiet"
   ],
 )
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = NPM_MODULE_EXTRA_FILES + [
-    ":srcs",
-    ":grammar"
-  ],
-  deps = DEPS,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = [":target"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
