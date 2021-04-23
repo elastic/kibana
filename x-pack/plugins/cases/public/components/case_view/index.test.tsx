@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import '../../common/mock/match_media';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
+import { Router, mockHistory } from '../__mock__/router';
 import { CaseComponent, CaseComponentProps, CaseView } from '.';
 import {
   basicCase,
@@ -152,10 +152,8 @@ describe('CaseView ', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
-
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockImplementation(() => ({
       isLoading: false,
@@ -177,44 +175,44 @@ describe('CaseView ', () => {
       expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
         data.title
       );
-
-      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
-        'Open'
-      );
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
-          .first()
-          .text()
-      ).toEqual(data.tags[0]);
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
-          .first()
-          .text()
-      ).toEqual(data.tags[1]);
-
-      expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
-        data.createdBy.username
-      );
-
-      expect(
-        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-      ).toEqual(data.createdAt);
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
-          .first()
-          .text()
-      ).toBe(data.description);
-
-      expect(
-        wrapper.find('button[data-test-subj="case-view-status-action-button"]').first().text()
-      ).toBe('Mark in progress');
     });
+
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
+      'Open'
+    );
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
+        .first()
+        .text()
+    ).toEqual(data.tags[0]);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
+        .first()
+        .text()
+    ).toEqual(data.tags[1]);
+
+    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
+      data.createdBy.username
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
+    ).toEqual(data.createdAt);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
+        .first()
+        .text()
+    ).toBe(data.description);
+
+    expect(
+      wrapper.find('button[data-test-subj="case-view-status-action-button"]').first().text()
+    ).toBe('Mark in progress');
   });
 
   it('should show closed indicators in header when case is closed', async () => {
@@ -350,20 +348,17 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    const newTitle = 'The new title';
+    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="editable-title-input-field"]`)
+      .last()
+      .simulate('change', { target: { value: newTitle } });
+
+    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
+
+    const updateObject = updateCaseProperty.mock.calls[0][0];
     await waitFor(() => {
-      const newTitle = 'The new title';
-      wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
-      wrapper.update();
-      wrapper
-        .find(`[data-test-subj="editable-title-input-field"]`)
-        .last()
-        .simulate('change', { target: { value: newTitle } });
-
-      wrapper.update();
-      wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
-
-      wrapper.update();
-      const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('title');
       expect(updateObject.updateValue).toEqual(newTitle);
     });
@@ -387,11 +382,10 @@ describe('CaseView ', () => {
       expect(
         wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
       ).toBeTruthy();
+    });
+    wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
-
-      wrapper.update();
-
+    await waitFor(() => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
     });
   });
@@ -553,8 +547,8 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
       expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
       expect(fetchCase).toBeCalled();
     });
@@ -615,18 +609,13 @@ describe('CaseView ', () => {
       .first()
       .text();
 
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
-    });
-
-    await waitFor(() => {
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-      wrapper.update();
-      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-    });
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    await waitFor(() => wrapper.update());
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    await waitFor(() => wrapper.update());
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
+    await waitFor(() => wrapper.update());
+    wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
 
     await waitFor(() => {
       wrapper.update();
@@ -637,7 +626,6 @@ describe('CaseView ', () => {
       ).toBe(connectorName);
     });
   });
-
   it('should update connector', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -661,14 +649,12 @@ describe('CaseView ', () => {
     wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
 
-    await waitFor(() => {
-      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-    });
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
 
+    await waitFor(() => wrapper.update());
     wrapper.find(`button[data-test-subj="edit-connectors-submit"]`).first().simulate('click');
 
     await waitFor(() => {
-      wrapper.update();
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
       expect(updateObject.updateKey).toEqual('connector');
@@ -736,11 +722,11 @@ describe('CaseView ', () => {
       </TestProviders>
     );
 
+    wrapper
+      .find('[data-test-subj="comment-action-show-alert-alert-action-id"] button')
+      .first()
+      .simulate('click');
     await waitFor(() => {
-      wrapper
-        .find('[data-test-subj="comment-action-show-alert-alert-action-id"] button')
-        .first()
-        .simulate('click');
       expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
     });
   });
@@ -775,9 +761,8 @@ describe('CaseView ', () => {
       </TestProviders>
     );
 
+    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
-
       wrapper.update();
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('settings');

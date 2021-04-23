@@ -15,11 +15,9 @@ describe('UserList ', () => {
   const caseLink = 'http://reddit.com';
   const user = { username: 'username', fullName: 'Full Name', email: 'testemail@elastic.co' };
   const open = jest.fn();
-  beforeAll(() => {
-    window.open = open;
-  });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    window.open = open;
   });
   it('triggers mailto when email icon clicked', () => {
     const wrapper = shallow(

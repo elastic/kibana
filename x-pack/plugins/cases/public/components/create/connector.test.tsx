@@ -143,7 +143,7 @@ describe('Connector', () => {
     );
   });
 
-  it(`it should change connector`, async () => {
+  it.only(`it should change connector`, async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <Connector isLoading={false} />
@@ -151,14 +151,17 @@ describe('Connector', () => {
     );
 
     await waitFor(() => {
+      // wrapper.update();
       expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
-      wrapper.update();
     });
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
+    // await waitFor(() => {
+    //   wrapper.update();
+    // });
 
     await waitFor(() => {
-      wrapper.update();
+      // wrapper.update();
       expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
     });
 
