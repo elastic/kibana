@@ -37,10 +37,12 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     xAxisColumn: {
       sourceField: 'performance.metric',
     },
-    yAxisColumn: {
-      sourceField: 'Records',
-      label: 'Pages loaded',
-    },
+    yAxisColumns: [
+      {
+        sourceField: 'Records',
+        label: 'Pages loaded',
+      },
+    ],
     hasOperationType: false,
     defaultFilters: [
       {
