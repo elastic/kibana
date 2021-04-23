@@ -164,11 +164,6 @@ describe('When the add exception modal is opened', () => {
     it('should render the os selection dropdown', () => {
       expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeTruthy();
     });
-    // it('should render the form builder controls disabled to start', () => {
-    //   expect(
-    //     wrapper.find('button[data-test-subj="exceptionsAndButton"]').exists()
-    //   ).toBeTruthy();
-    // });
   });
 
   describe('when there is alert data passed to an endpoint list exception', () => {
