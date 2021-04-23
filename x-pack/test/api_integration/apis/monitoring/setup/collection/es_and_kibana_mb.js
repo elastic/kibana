@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('es_and_kibana_mb', () => {
+  describe('es_and_kibana mb', () => {
     const archive = 'monitoring/setup/collection/es_and_kibana_mb';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
@@ -33,7 +33,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-
       expect(body).to.eql(fixture);
     });
   });

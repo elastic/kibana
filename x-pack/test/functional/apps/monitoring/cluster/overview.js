@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-green-gold', {
+        await setup('monitoring/singlecluster_green_gold', {
           from: 'Aug 23, 2017 @ 21:29:35.267',
           to: 'Aug 23, 2017 @ 21:47:25.556',
         });
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-platinum', {
+        await setup('monitoring/singlecluster_yellow_platinum', {
           from: 'Aug 29, 2017 @ 17:23:47.528',
           to: 'Aug 29, 2017 @ 17:25:50.701',
         });
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-basic', {
+        await setup('monitoring/singlecluster_yellow_basic', {
           from: 'Aug 29, 2017 @ 17:55:43.879',
           to: 'Aug 29, 2017 @ 18:01:34.958',
         });
