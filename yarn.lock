@@ -10465,10 +10465,10 @@ hapi-auth-cookie@^9.0.0:
     hoek "5.x.x"
     joi "13.x.x"
 
-hapi@^17.5.3:
-  version "17.6.0"
-  resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.6.0.tgz#158a2276253a8de727be678c4daeb1f73929e588"
-  integrity sha512-GSHjE1hJExluAukrT/QuYSk96irmbYBDd3wOgywiHsPoR2QeKgDnIttD+dB6NbADEmSdb9MS5gTUIVq0uHTdkA==
+hapi@^17.8.5:
+  version "17.8.5"
+  resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.8.5.tgz#31bc23dfd45c9cbc8b417ea2eaecd14694aa150e"
+  integrity sha512-+RnMWK/HI3VCvzfy0vO28YycMX19OiY8h9tYaDzjjOJ1eTh/HY2URvhFNkcqxZ1R1uoUdiB+pnjGi9e+vkaPEw==
   dependencies:
     accept "3.x.x"
     ammo "3.x.x"
@@ -10478,11 +10478,12 @@ hapi@^17.5.3:
     catbox "10.x.x"
     catbox-memory "3.x.x"
     heavy "6.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
+    hoek "6.x.x"
+    joi "14.x.x"
     mimos "4.x.x"
     podium "3.x.x"
     shot "4.x.x"
+    somever "2.x.x"
     statehood "6.x.x"
     subtext "6.x.x"
     teamwork "3.x.x"
@@ -12664,6 +12665,15 @@ joi@13.x.x, joi@^13.5.2:
   integrity sha512-xuY5VkHfeOYK3Hdi91ulocfuFopwgbSORmIwzcwHKESQhC7w1kD5jaVSPnqDxS2I8t3RZ9omCKAxNwXN5zG1/Q==
   dependencies:
     hoek "5.x.x"
+    isemail "3.x.x"
+    topo "3.x.x"
+
+joi@14.x.x:
+  version "14.3.1"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-14.3.1.tgz#164a262ec0b855466e0c35eea2a885ae8b6c703c"
+  integrity sha512-LQDdM+pkOrpAn4Lp+neNIFV3axv1Vna3j38bisbQhETPMANYRbFJFUyOZcOClYvM/hppMhGWuKSFEK9vjrB+bQ==
+  dependencies:
+    hoek "6.x.x"
     isemail "3.x.x"
     topo "3.x.x"
 
@@ -19272,6 +19282,14 @@ sockjs@^0.3.21:
     faye-websocket "^0.11.3"
     uuid "^3.4.0"
     websocket-driver "^0.7.4"
+
+somever@2.x.x:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/somever/-/somever-2.0.0.tgz#7bdbed3bee8ece2c7c8a2e7d9a1c022bd98d6c89"
+  integrity sha512-9JaIPP+HxwYGqCDqqK3tRaTqdtQHoK6Qy3IrXhIt2q5x8fs8RcfU7BMWlFTCOgFazK8p88zIv1tHQXvAwtXMyw==
+  dependencies:
+    bounce "1.x.x"
+    hoek "6.x.x"
 
 sort-keys@^2.0.0:
   version "2.0.0"

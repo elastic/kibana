@@ -185,7 +185,7 @@
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
     "handlebars": "4.7.7",
-    "hapi": "^17.5.3",
+    "hapi": "^17.8.5",
     "hjson": "3.1.0",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
