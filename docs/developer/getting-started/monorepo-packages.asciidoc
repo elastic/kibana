@@ -68,4 +68,5 @@ yarn kbn watch-bazel
 - @kbn/std
 - @kbn/tinymath
 - @kbn/utility-types
+- @kbn/utils
 

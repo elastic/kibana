@@ -563,7 +563,12 @@ export const InnerVisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const visibleErrorMessages = getOriginalRequestErrorMessages(error) || [errorMessage];
+          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const visibleErrorMessages = errorsFromRequest.length
+            ? errorsFromRequest
+            : errorMessage
+            ? [errorMessage]
+            : [];
 
           return (
             <EuiFlexGroup>
