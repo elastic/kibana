@@ -10,7 +10,7 @@
 import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -55,6 +55,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -101,7 +102,7 @@ export interface ILayer {
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactElement<any> | null;
+  icon: ReactNode;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };

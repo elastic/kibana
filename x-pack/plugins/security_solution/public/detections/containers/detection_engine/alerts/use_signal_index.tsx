@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { isSecurityAppError } from '../../../../common/utils/api';
@@ -35,7 +35,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     signalIndexMappingOutdated: null,
     createDeSignalIndex: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -63,7 +63,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
             createDeSignalIndex: createIndex,
           });
           if (isSecurityAppError(error) && error.body.status_code !== 404) {
-            errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_GET_NAME_FAILURE });
           }
         }
       }
@@ -93,7 +93,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
               signalIndexMappingOutdated: null,
               createDeSignalIndex: createIndex,
             });
-            errorToToaster({ title: i18n.SIGNAL_POST_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_POST_FAILURE });
           }
         }
       }
@@ -107,7 +107,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [dispatchToaster]);
+  }, [addError]);
 
   return { loading, ...signalIndex };
 };

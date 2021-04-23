@@ -9,7 +9,7 @@ pageLoadAssetSize:
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 413500
+  core: 414000
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -106,6 +106,7 @@ pageLoadAssetSize:
   indexPatternFieldEditor: 90489
   osquery: 107090
   fileUpload: 25664
+  fileDataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
   timelines: 28613

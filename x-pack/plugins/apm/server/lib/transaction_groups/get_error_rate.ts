@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
 
 import {
@@ -31,7 +32,6 @@ import {
   getTransactionErrorRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 
 export async function getErrorRate({
   environment,

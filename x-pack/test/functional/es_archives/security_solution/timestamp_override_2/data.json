@@ -1,0 +1,13 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "myfakeindex-2",
+    "source": {
+      "message": "hello world 2",
+      "event": {
+        "ingested": "2020-12-16T15:16:18.570Z"
+      }
+    },
+    "type": "_doc"
+  }
+}
