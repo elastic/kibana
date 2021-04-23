@@ -1,5 +1,5 @@
 [[kibana-concepts-analysts]]
-== {kib} concepts for analysts
+== {kib} concepts
 **_Learn the shared concepts for analyzing and visualizing your data_**
 
 As an analyst, you will use a combination of {kib} apps to analyze and
@@ -65,7 +65,7 @@ Each app in {kib} provides a time filter, and most apps also include semi-struct
 image:concepts/images/top-bar.png["Time filter, semi-structured search, and filters in a {kib} app"]
 
 If you frequently use any of the search options, you can click the
-save icon
+save query icon
 image:concepts/images/save-icon.png["save icon"] next to the
 semi-structured search to save or load a previously saved query.
 The saved query will always contain the semi-structured search query,
@@ -127,6 +127,7 @@ filters is combined with AND logic on the rest of the query.
 [role="screenshot"]
 image:concepts/images/add-filter-popup.png["Add filter popup"]
 
+
 [float]
 === Saving objects
 {kib} lets you save objects for your own future use or for sharing with others.
@@ -147,3 +148,14 @@ Use the global search to quickly open a saved object.
 
 * Try the {kib} <<get-started,Quick start>>, which shows you how to put these concepts into action.
 * Go to <<discover, Discover>> for instructions on searching your data.
+
+
+include::index-patterns.asciidoc[]
+
+include::set-time-filter.asciidoc[]
+
+include::kuery.asciidoc[]
+
+include::lucene.asciidoc[]
+
+include::save-query.asciidoc[]
