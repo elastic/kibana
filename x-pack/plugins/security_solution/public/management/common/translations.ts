@@ -21,6 +21,10 @@ export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAp
   defaultMessage: 'Trusted applications',
 });
 
+export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFiltersTab', {
+  defaultMessage: 'Event filters',
+});
+
 export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administration.list.beta', {
   defaultMessage: 'Beta',
 });
