@@ -177,7 +177,7 @@ const getSavedObjectTypes = (
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
-        preconfiguration_id: { type: 'keyword' },
+        is_preconfigured: { type: 'keyword' },
       },
     },
     migrations: {
@@ -366,7 +366,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        preconfiguration_id: { type: 'keyword' },
+        id: { type: 'keyword' },
       },
     },
   },

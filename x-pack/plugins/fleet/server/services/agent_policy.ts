@@ -118,20 +118,17 @@ class AgentPolicyService {
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    let searchParams;
-    let newAgentPolicy;
-    if (id) {
-      const preconfigurationId = String(id);
-      searchParams = {
-        searchFields: ['preconfiguration_id'],
-        search: escapeSearchQueryPhrase(preconfigurationId),
-      };
+    const newAgentPolicy = {
+      ...newAgentPolicyDefaults,
+      ...preconfiguredAgentPolicy,
+      is_preconfigured: true,
+    } as NewAgentPolicy;
 
-      newAgentPolicy = {
-        ...newAgentPolicyDefaults,
-        ...preconfiguredAgentPolicy,
-        preconfiguration_id: preconfigurationId,
-      } as NewAgentPolicy;
+    let searchParams;
+    if (id) {
+      searchParams = {
+        id: String(id),
+      };
     } else if (
       preconfiguredAgentPolicy.is_default ||
       preconfiguredAgentPolicy.is_default_fleet_server
@@ -144,13 +141,8 @@ class AgentPolicyService {
         ],
         search: 'true',
       };
-
-      newAgentPolicy = {
-        ...newAgentPolicyDefaults,
-        ...preconfiguredAgentPolicy,
-      } as NewAgentPolicy;
     }
-    if (!newAgentPolicy || !searchParams) throw new Error('Missing ID');
+    if (!searchParams) throw new Error('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
@@ -159,14 +151,39 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams: {
-      searchFields: string[];
-      search: string;
-    }
+    searchParams:
+      | { id: string }
+      | {
+          searchFields: string[];
+          search: string;
+        }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
+    // For preconfigured policies with a specified ID
+    if ('id' in searchParams) {
+      try {
+        const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
+          AGENT_POLICY_SAVED_OBJECT_TYPE,
+          searchParams.id
+        );
+        return {
+          created: false,
+          policy: {
+            id: agentPolicy.id,
+            ...agentPolicy.attributes,
+          },
+        };
+      } catch (e) {
+        return {
+          created: true,
+          policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+        };
+      }
+    }
+
+    // For default policies without a specified ID
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       ...searchParams,
@@ -571,9 +588,9 @@ class AgentPolicyService {
       );
     }
 
-    if (agentPolicy.preconfiguration_id) {
+    if (agentPolicy.is_preconfigured) {
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
-        preconfiguration_id: String(agentPolicy.preconfiguration_id),
+        id: String(id),
       });
     }
 

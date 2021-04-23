@@ -107,10 +107,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   const preconfiguredPolicies = await Promise.allSettled(
     policies.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
-        // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
+        // Check to see if a preconfigured policy with the same preconfiguration id was already deleted by the user
         const preconfigurationId = String(preconfiguredAgentPolicy.id);
         const searchParams = {
-          searchFields: ['preconfiguration_id'],
+          searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),
         };
         const deletionRecords = await soClient.find({
