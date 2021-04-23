@@ -3,19 +3,18 @@
 
 A saved search is a convenient way to reuse a search
 that you've created in *Discover*.
-Saved searches are good for adding search results to a dashboard.
+Saved searches are good for adding search results to a dashboard,
+and can also serve as a foundation for building visualizations.
 
 [role="screenshot"]
 image::discover/images/saved-search.png[Example of Discover's save search option]
 
 
-A saved search stores the query text, filters, and
+A saved search stores the query text, filters, time range, and
 current view of *Discover*&mdash;the columns selected in the document table,
 the sort order, and the index pattern.
-
-Saved searches are different from <<save-load-delete-query,saved queries>>, which store
-only the query and are available in any app that has a query bar. Saved searches
-can serve as a foundation for building visualizations.
+Saved searches are different from a <<save-load-delete-query,saved queries>>, which store
+just the query and are available in any app with a query bar.
 
 
 [role="xpack"]
@@ -32,11 +31,13 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
-. To reload your search in *Discover*, click *Open* in the toolbar, and select the saved search.
+. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search is also automatically selected.
-. To add your search results to a dashboard:
-.. On the dashboard, click *Add from library*.
-.. Find your saved search, and select it.
+. To add your search results to an existing dashboard:
+.. Open the dashboard, then click *Edit*.
+.. Click *Add from library*.
+.. Open the *Types* menu, then select *Saved search*.
+.. Select the the saved search that you want.
