@@ -24,8 +24,8 @@ describe('SourceRow', () => {
   it('renders the copy button', () => {
     const copyMock = jest.fn();
     const wrapper = shallow(<StatusItem details={details} />);
-
     const copyEl = shallow(<div>{wrapper.find(EuiCopy).props().children(copyMock)}</div>);
+
     expect(copyEl.find(EuiButton).props().onClick).toEqual(copyMock);
   });
 
