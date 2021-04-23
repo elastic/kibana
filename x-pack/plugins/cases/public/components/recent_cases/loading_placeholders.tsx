@@ -15,7 +15,7 @@ const LoadingPlaceholdersComponent: React.FC<{
   <>
     {[...Array(placeholders).keys()].map((_, i) => (
       <React.Fragment key={i}>
-        <EuiLoadingContent lines={lines} />
+        <EuiLoadingContent lines={lines} data-test-subj={'loadingPlaceholders'} />
         {i !== placeholders - 1 && <EuiSpacer size="l" />}
       </React.Fragment>
     ))}

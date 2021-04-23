@@ -68,7 +68,7 @@ const RecentCases = ({
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
       </>
-      <EuiText data-test-subj={'wowzeroni'} color="subdued" size="s">
+      <EuiText color="subdued" size="s">
         <RecentCasesComp
           caseDetailsNavigation={caseDetailsNavigation}
           createCaseNavigation={createCaseNavigation}
