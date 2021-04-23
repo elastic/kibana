@@ -1,4 +1,8 @@
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
+- TTL: (e.g. "7 days", time allocated for review comments)
+- Champion: (usually you, person who writes and updates the draft and incorporates feedback)
+- Main reviewer: (somebody familiar with the subject matter, who has committed to provide timely and detailed reviews for this RFC)
+- Owner: (team or person who will own this feature, if it is accepted)
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
