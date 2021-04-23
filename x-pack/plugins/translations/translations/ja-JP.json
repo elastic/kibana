@@ -20353,7 +20353,6 @@
     "xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel": "エントリを削除",
     "xpack.securitySolution.trustedapps.logicalConditionBuilder.group.andOperator": "AND",
     "xpack.securitySolution.trustedapps.logicalConditionBuilder.noEntries": "条件が定義されていません",
-    "xpack.securitySolution.trustedapps.noResults": "項目が見つかりません",
     "xpack.securitySolution.trustedapps.trustedapp.createdAt": "作成日",
     "xpack.securitySolution.trustedapps.trustedapp.createdBy": "作成者",
     "xpack.securitySolution.trustedapps.trustedapp.description": "説明",
