@@ -2,7 +2,7 @@
 
 exports[`AttributionControl is rendered 1`] = `
 <div
-  className="mapAttributionControl"
+  className="mapAttributionControl mapAttributionControl__fullScreen"
 >
   <EuiText
     size="xs"
