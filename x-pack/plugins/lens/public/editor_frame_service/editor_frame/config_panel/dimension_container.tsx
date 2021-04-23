@@ -61,6 +61,17 @@ export function DimensionContainer({
     [closeFlyout]
   );
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('lnsBody--overflowHidden');
+    } else {
+      document.body.classList.remove('lnsBody--overflowHidden');
+    }
+    return () => {
+      document.body.classList.remove('lnsBody--overflowHidden');
+    };
+  });
+
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
       <EuiWindowEvent event="keydown" handler={closeOnEscape} />
