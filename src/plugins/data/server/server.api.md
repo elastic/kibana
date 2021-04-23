@@ -6,9 +6,7 @@
 
 import { $Values } from '@kbn/utility-types';
 import { Adapters } from 'src/plugins/inspector/common';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { Assign } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/server';
