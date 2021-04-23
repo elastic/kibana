@@ -287,7 +287,7 @@ const PieComponent = (props: PieComponentProps) => {
             splitDimension={splitChartDimension}
           />
           <Settings
-            debugState={true}
+            debugState={window._echDebugStateFlag ?? false}
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
