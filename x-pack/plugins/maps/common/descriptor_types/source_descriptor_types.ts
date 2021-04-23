@@ -124,8 +124,6 @@ export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
-  attributionText: string;
-  attributionUrl: string;
 };
 
 export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
