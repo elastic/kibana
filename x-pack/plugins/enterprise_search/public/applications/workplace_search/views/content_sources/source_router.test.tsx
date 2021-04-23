@@ -8,6 +8,8 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
+import { mockLocation } from '../../../__mocks__/react_router_history.mock';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -30,6 +32,7 @@ import { SourceRouter } from './source_router';
 
 describe('SourceRouter', () => {
   const initializeSource = jest.fn();
+  const resetSourceState = jest.fn();
   const contentSource = contentSources[1];
   const customSource = contentSources[0];
   const mockValues = {
@@ -40,10 +43,11 @@ describe('SourceRouter', () => {
   beforeEach(() => {
     setMockActions({
       initializeSource,
+      resetSourceState,
     });
     setMockValues({ ...mockValues });
     (useParams as jest.Mock).mockImplementationOnce(() => ({
-      sourceId: '1',
+      sourceId: contentSource.id,
     }));
   });
 
@@ -113,5 +117,23 @@ describe('SourceRouter', () => {
       ...loadingBreadcrumbs,
       NAV.DISPLAY_SETTINGS,
     ]);
+  });
+
+  describe('reset state', () => {
+    it('does not reset state when switching between source tree views', () => {
+      mockLocation.pathname = `/sources/${contentSource.id}`;
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).not.toHaveBeenCalled();
+    });
+
+    it('resets state when leaving source tree', () => {
+      mockLocation.pathname = '/home';
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).toHaveBeenCalled();
+    });
   });
 });
