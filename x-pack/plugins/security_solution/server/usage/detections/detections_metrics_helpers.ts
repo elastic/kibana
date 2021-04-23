@@ -360,8 +360,6 @@ export const getMlJobMetrics = async (
             datafeed_id: datafeed?.datafeed_id,
             state: datafeed?.state,
             timing_stats: {
-              average_search_time_per_bucket_ms:
-                datafeed?.timing_stats.average_search_time_per_bucket_ms,
               bucket_count: datafeed?.timing_stats.bucket_count,
               exponential_average_search_time_per_hour_ms:
                 datafeed?.timing_stats.exponential_average_search_time_per_hour_ms,

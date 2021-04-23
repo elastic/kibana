@@ -24,6 +24,7 @@ import {
 
 import {
   areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   clearAllFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
@@ -196,6 +197,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
+    ],
+    resultFieldsEmpty: [
+      () => [selectors.resultFields],
+      (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
       () => [selectors.lastSavedResultFields, selectors.resultFields],

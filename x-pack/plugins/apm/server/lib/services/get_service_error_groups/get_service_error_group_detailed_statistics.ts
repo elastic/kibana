@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
@@ -17,7 +18,6 @@ import {
   rangeQuery,
   kqlQuery,
 } from '../../../../server/utils/queries';
-import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
