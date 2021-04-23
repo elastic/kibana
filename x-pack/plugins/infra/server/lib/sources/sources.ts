@@ -160,12 +160,15 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.update(
+      // update() will perform a deep merge. We use create() with overwrite: true instead. mergeSourceConfiguration()
+      // ensures the correct and intended merging of properties.
+      await savedObjectsClient.create(
         infraSourceConfigurationSavedObjectName,
-        sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
+          id: sourceId,
           version,
+          overwrite: true,
         }
       )
     );
