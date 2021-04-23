@@ -31,6 +31,12 @@ import { SetupGuide } from './components/setup_guide';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
+  it('always renders the Setup Guide', () => {
+    const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+  });
+
   it('renders AppSearchUnconfigured when config.host is not set', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<AppSearch />);
@@ -38,8 +44,15 @@ describe('AppSearch', () => {
     expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
   });
 
-  it('renders AppSearchConfigured when config.host set', () => {
-    setMockValues({ config: { host: 'some.url' } });
+  it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
+    setMockValues({ errorConnecting: true });
+    const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+  });
+
+  it('renders AppSearchConfigured when config.host is set & available', () => {
+    setMockValues({ errorConnecting: false, config: { host: 'some.url' } });
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchConfigured)).toHaveLength(1);
@@ -47,10 +60,9 @@ describe('AppSearch', () => {
 });
 
 describe('AppSearchUnconfigured', () => {
-  it('renders the Setup Guide and redirects to the Setup Guide', () => {
+  it('redirects to the Setup Guide', () => {
     const wrapper = shallow(<AppSearchUnconfigured />);
 
-    expect(wrapper.find(SetupGuide)).toHaveLength(1);
     expect(wrapper.find(Redirect)).toHaveLength(1);
   });
 });
@@ -72,13 +84,6 @@ describe('AppSearchConfigured', () => {
 
   it('mounts AppLogic with passed initial data props', () => {
     expect(AppLogic).toHaveBeenCalledWith(DEFAULT_INITIAL_APP_DATA);
-  });
-
-  it('renders ErrorConnecting', () => {
-    setMockValues({ myRole: {}, errorConnecting: true });
-    rerender(wrapper);
-
-    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
   });
 
   it('passes readOnlyMode state', () => {
