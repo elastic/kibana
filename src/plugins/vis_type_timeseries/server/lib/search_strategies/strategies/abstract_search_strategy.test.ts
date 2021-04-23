@@ -87,7 +87,6 @@ describe('AbstractSearchStrategy', () => {
           body: 'body',
           index: 'index',
         },
-        indexType: undefined,
       },
       {
         sessionId: '1',

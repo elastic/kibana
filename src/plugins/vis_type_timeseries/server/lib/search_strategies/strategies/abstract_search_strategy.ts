@@ -21,7 +21,7 @@ export abstract class AbstractSearchStrategy {
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesVisDataRequest,
     bodies: any[],
-    indexType?: string
+    strategy?: string
   ) {
     const requests: any[] = [];
 
@@ -30,12 +30,14 @@ export abstract class AbstractSearchStrategy {
         requestContext.search
           .search(
             {
-              indexType,
               params: {
                 ...body,
               },
             },
-            req.body.searchSession
+            {
+              ...req.body.searchSession,
+              ...(strategy ? { strategy } : {}),
+            }
           )
           .toPromise()
       );

@@ -18,6 +18,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
+import { ROLLUP_SEARCH_STRATEGY } from '../../../../../data/common';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -28,7 +29,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     req: VisTypeTimeseriesVisDataRequest,
     bodies: any[]
   ) {
-    return super.search(requestContext, req, bodies, 'rollup');
+    return super.search(requestContext, req, bodies, ROLLUP_SEARCH_STRATEGY);
   }
 
   async getRollupData(
