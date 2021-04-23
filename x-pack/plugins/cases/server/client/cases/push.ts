@@ -120,6 +120,10 @@ export const push = async (
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
     });
+
+    if (connectorMappings.length === 0) {
+      throw new Error('Connector mapping has not been created');
+    }
   } catch (e) {
     const message = `Error getting mapping for connector with id ${connector.id}: ${e.message}`;
     throw createCaseError({ message, error: e, logger });
@@ -131,7 +135,7 @@ export const push = async (
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings: connectorMappings,
+      mappings: connectorMappings[0].attributes.mappings,
       alerts,
     });
   } catch (e) {
