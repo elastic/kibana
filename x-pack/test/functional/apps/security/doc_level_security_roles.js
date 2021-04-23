@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'name:ABC Company name.keyword:ABC Company region:EAST region.keyword:EAST _id:doc1 _index:dlstest _score:0 _type:_doc'
+        'nameABC Companyname.keywordABC CompanyregionEASTregion.keywordEAST_iddoc1_indexdlstest_score0_type_doc'
       );
     });
     after('logout', async () => {

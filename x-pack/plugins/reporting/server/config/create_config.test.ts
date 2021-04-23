@@ -104,6 +104,9 @@ describe('Reporting server createConfig$', () => {
           "pollInterval": 3000,
           "timeout": 120000,
         },
+        "roles": Object {
+          "enabled": false,
+        },
       }
     `);
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
