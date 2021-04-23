@@ -49,6 +49,7 @@ import {
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
 import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import './_index.scss';
 
 interface ViewableDetector {
   index: number;
@@ -435,6 +436,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
       size="m"
       aria-labelledby="Add annotation"
       data-test-subj={'mlAnnotationFlyout'}
+      className={'mlAnnotationFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
