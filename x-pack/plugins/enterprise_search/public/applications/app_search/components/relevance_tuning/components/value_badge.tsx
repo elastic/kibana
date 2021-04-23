@@ -11,10 +11,11 @@ import classNames from 'classnames';
 
 import './value_badge.scss';
 
-export const ValueBadge: React.FC<{ children: React.ReactNode; disabled?: boolean }> = ({
-  children,
-  disabled = false,
-}) => {
+interface Props {
+  children: React.ReactNode;
+  disabled?: boolean;
+}
+export const ValueBadge: React.FC<Props> = ({ children, disabled = false }) => {
   const className = classNames('valueBadge', {
     'valueBadge--disabled': disabled,
   });
