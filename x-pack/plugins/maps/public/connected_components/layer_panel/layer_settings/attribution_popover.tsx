@@ -84,9 +84,7 @@ export class AttributionPopover extends Component<Props, State> {
 
   _renderContent() {
     const isComplete = this.state.label.length !== 0 && this.state.url.length !== 0;
-    const hasChanges =
-      (this.state.label.length !== 0 && this.state.label !== this.props.label) ||
-      (this.state.url.length !== 0 && this.state.url !== this.props.url);
+    const hasChanges = this.state.label !== this.props.label || this.state.url !== this.props.url;
     return (
       <div className="mapAttributionPopover">
         <EuiPopoverTitle>

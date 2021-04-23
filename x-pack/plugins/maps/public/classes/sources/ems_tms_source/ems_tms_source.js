@@ -113,13 +113,15 @@ export class EMSTMSSource extends AbstractTMSSource {
     }
   }
 
-  async getAttributions() {
-    const emsTMSService = await this._getEMSTMSService();
-    const markdown = emsTMSService.getMarkdownAttribution();
-    if (!markdown) {
-      return [];
-    }
-    return this.convertMarkdownLinkToObjectArr(markdown);
+  getAttributionProvider() {
+    return async () => {
+      const emsTMSService = await this._getEMSTMSService();
+      const markdown = emsTMSService.getMarkdownAttribution();
+      if (!markdown) {
+        return [];
+      }
+      return this.convertMarkdownLinkToObjectArr(markdown);
+    };
   }
 
   async getUrlTemplate() {

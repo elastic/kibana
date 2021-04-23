@@ -13,5 +13,4 @@ export interface ITMSSource extends ISource {
 
 export class AbstractTMSSource extends AbstractSource implements ITMSSource {
   getUrlTemplate(): Promise<string>;
-  getAttributions(): Promise<Attribution[]>;
 }

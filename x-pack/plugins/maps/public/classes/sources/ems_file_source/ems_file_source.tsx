@@ -186,9 +186,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     }
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    const emsFileLayer = await this.getEMSFileLayer();
-    return emsFileLayer.getAttributions();
+  getAttributionProvider(): () => Promise<Attribution[]> {
+    return async () => {
+      const emsFileLayer = await this.getEMSFileLayer();
+      return emsFileLayer.getAttributions();
+    };
   }
 
   async getLeftJoinFields() {

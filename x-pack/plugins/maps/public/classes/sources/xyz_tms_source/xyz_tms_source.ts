@@ -52,19 +52,6 @@ export class XYZTMSSource extends AbstractTMSSource {
     return this._descriptor.urlTemplate;
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl as string,
-            label: attributionText as string,
-          },
-        ]
-      : [];
-  }
-
   async getUrlTemplate(): Promise<string> {
     return this._descriptor.urlTemplate;
   }

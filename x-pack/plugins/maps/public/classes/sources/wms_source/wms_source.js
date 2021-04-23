@@ -53,20 +53,6 @@ export class WMSSource extends AbstractTMSSource {
     return this._descriptor.serviceUrl;
   }
 
-  getAttributions() {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl,
-            label: attributionText,
-          },
-        ]
-      : [];
-  }
-
   getUrlTemplate() {
     const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
     return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');

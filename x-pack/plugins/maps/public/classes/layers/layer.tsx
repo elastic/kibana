@@ -263,7 +263,7 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (this.hasErrors()) {
+    if (this.hasErrors() || !this.isVisible()) {
       return [];
     }
 
@@ -272,7 +272,7 @@ export class AbstractLayer implements ILayer {
       return attributionProvider();
     }
 
-    return this._descriptor.attribution !== undefined ? this._descriptor.attribution : [];
+    return this._descriptor.attribution !== undefined ? [this._descriptor.attribution] : [];
   }
 
   getStyleForEditing(): IStyle {
