@@ -26,9 +26,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));
     loadTestFile(require.resolve('./dashboard_to_url_drilldown'));
-    // Disabled for now as it requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
-    // setting set in kibana.yml to work. Once that is enabled by default, we can re-enable this test suite.
-    // loadTestFile(require.resolve('./explore_data_panel_action'));
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
+    loadTestFile(require.resolve('./explore_data_panel_action'));
 
     // Disabled for now as it requires xpack.discoverEnhanced.actions.exploreDataInChart.enabled
     // setting set in kibana.yml to work. Once that is enabled by default, we can re-enable this test suite.
