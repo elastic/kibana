@@ -75,6 +75,12 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   grid-template-areas: 'field operator value remove';
 `;
 
+const operatorOptions = (Object.keys(OperatorEntryField) as OperatorEntryField[]).map((value) => ({
+  dropdownDisplay: OPERATOR_TITLES[value],
+  inputDisplay: OPERATOR_TITLES[value],
+  value,
+}));
+
 export const ConditionEntryInput = memo<ConditionEntryInputProps>(
   ({
     os,
@@ -122,16 +128,6 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           : []),
       ];
     }, [os]);
-
-    // use a memoized callback to
-    // limit list iteration for re-renders
-    const operatorOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
-      return (Object.keys(OperatorEntryField) as OperatorEntryField[]).map((value) => ({
-        dropdownDisplay: OPERATOR_TITLES[value],
-        inputDisplay: OPERATOR_TITLES[value],
-        value,
-      }));
-    }, []);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
