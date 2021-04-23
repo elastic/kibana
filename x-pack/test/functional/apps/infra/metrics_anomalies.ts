@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();
         const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
         // expect 3 anomalies with default Anomaly Severity Threshold setting (50)
-        expect(k8sAnomalies.length).to.be(3);
+        expect(k8sAnomalies.length).to.be(1);
         await pageObjects.infraHome.closeFlyout();
       });
       it('renders the anomaly table after a date change with no anomalies', async () => {
@@ -93,10 +93,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToAnomaliesTab();
         await pageObjects.infraHome.clickHostsAnomaliesDropdown();
         const hostAnomalies = await pageObjects.infraHome.findAnomalies();
-        expect(hostAnomalies.length).to.be(3);
+        expect(hostAnomalies.length).to.be(4);
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();
         const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
-        expect(k8sAnomalies.length).to.be(9);
+        expect(k8sAnomalies.length).to.be(3);
       });
     });
   });
