@@ -49,7 +49,7 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   histogram: s.object({
     field: s.maybe(s.string()),
     interval: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number()),
+    min_doc_count: s.maybe(s.number({ min: 1 })),
     extended_bounds: s.maybe(
       s.object({
         min: s.number(),
@@ -78,7 +78,7 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
     include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
     execution_hint: s.maybe(s.string()),
     missing: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number()),
+    min_doc_count: s.maybe(s.number({ min: 1 })),
     size: s.maybe(s.number()),
     show_term_doc_count_error: s.maybe(s.boolean()),
     order: s.maybe(s.oneOf([s.literal('asc'), s.literal('desc')])),
