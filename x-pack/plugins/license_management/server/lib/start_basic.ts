@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../licensing/server';
-import { CallAsCurrentUser } from '../types';
-
-const getStartBasicPath = (acknowledge: boolean) =>
-  `/_license/start_basic${acknowledge ? '?acknowledge=true' : ''}`;
+import { IScopedClusterClient } from 'src/core/server';
+import { LicensingPluginStart } from '../../../licensing/server';
 
 interface StartBasicArg {
   acknowledge: boolean;
-  callAsCurrentUser: CallAsCurrentUser;
-  licensing: LicensingPluginSetup;
+  client: IScopedClusterClient;
+  licensing: LicensingPluginStart;
 }
 
-export async function startBasic({ acknowledge, callAsCurrentUser, licensing }: StartBasicArg) {
-  const options = {
-    method: 'POST',
-    path: getStartBasicPath(acknowledge),
-  };
+export async function startBasic({ acknowledge, client, licensing }: StartBasicArg) {
   try {
-    const response = await callAsCurrentUser('transport.request', options);
+    const { body: response } = await client.asCurrentUser.license.postStartBasic({ acknowledge });
     const { basic_was_started: basicWasStarted } = response;
     if (basicWasStarted) {
       await licensing.refresh();
