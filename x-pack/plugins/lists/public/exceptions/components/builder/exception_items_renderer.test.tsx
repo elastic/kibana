@@ -57,7 +57,6 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -104,7 +103,6 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -144,7 +142,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -181,7 +178,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -239,7 +235,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -308,7 +303,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -357,7 +351,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -394,7 +387,6 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
-          osTypes={['windows']}
         />
       </EuiThemeProvider>
     );
@@ -434,7 +426,6 @@ describe('ExceptionBuilderComponent', () => {
             listNamespaceType="single"
             ruleName="Test rule"
             onChange={jest.fn()}
-            osTypes={['windows']}
           />
         </EuiThemeProvider>
       );
