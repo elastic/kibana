@@ -65,9 +65,9 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     text: option,
   }));
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
-  const updateSettings = (e: React.ChangeEvent<HTMLInputElement>, settingsName: string) => {
+  const updateSettings = (name: string, value: string) => {
     updateRepositorySettings({
-      [settingsName]: e.target.value,
+      [name]: value,
     });
   };
 

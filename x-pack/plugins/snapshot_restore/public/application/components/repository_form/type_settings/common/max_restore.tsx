@@ -13,7 +13,7 @@ import { RepositorySettingsValidation } from '../../../../services/validation';
 interface Props {
   isInvalid: boolean;
   defaultValue: string;
-  updateSettings: (e: React.ChangeEvent<HTMLInputElement>, settingsName: string) => void;
+  updateSettings: (name: string, value: string) => void;
   error: RepositorySettingsValidation['maxRestoreBytesPerSec'];
 }
 
@@ -69,7 +69,7 @@ export const MaxRestoreField: React.FunctionComponent<Props> = ({
         <EuiFieldText
           defaultValue={defaultValue}
           fullWidth
-          onChange={(e) => updateSettings(e, 'maxRestoreBytesPerSec')}
+          onChange={(e) => updateSettings('maxRestoreBytesPerSec', e.target.value)}
           data-test-subj="maxRestoreBytesInput"
         />
       </EuiFormRow>

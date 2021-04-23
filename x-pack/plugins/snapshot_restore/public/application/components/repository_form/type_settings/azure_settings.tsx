@@ -53,9 +53,9 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
     text: option,
   }));
 
-  const updateSettings = (e: React.ChangeEvent<HTMLInputElement>, settingsName: string) => {
+  const updateSettings = (name: string, value: string) => {
     updateRepositorySettings({
-      [settingsName]: e.target.value,
+      [name]: value,
     });
   };
 

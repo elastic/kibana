@@ -13,7 +13,7 @@ import { RepositorySettingsValidation } from '../../../../services/validation';
 interface Props {
   isInvalid: boolean;
   defaultValue: string;
-  updateSettings: (e: React.ChangeEvent<HTMLInputElement>, settingsName: string) => void;
+  updateSettings: (name: string, value: string) => void;
   error: RepositorySettingsValidation['maxSnapshotBytesPerSec'];
 }
 
@@ -70,7 +70,7 @@ export const MaxSnapshotsField: React.FunctionComponent<Props> = ({
         <EuiFieldText
           defaultValue={defaultValue}
           fullWidth
-          onChange={(e) => updateSettings(e, 'maxSnapshotBytesPerSec')}
+          onChange={(e) => updateSettings('maxSnapshotBytesPerSec', e.target.value)}
           data-test-subj="maxSnapshotBytesInput"
         />
       </EuiFormRow>
