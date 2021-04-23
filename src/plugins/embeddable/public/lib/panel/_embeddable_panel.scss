@@ -123,10 +123,7 @@
   border-style: dashed !important;
   border-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-
-  @include kbnThemeStyle('v8') {
-    border-width: 1px;
-  }
+  border-width: 1px;
 
   &:hover,
   &:focus {
