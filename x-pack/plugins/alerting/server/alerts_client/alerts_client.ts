@@ -266,7 +266,7 @@ export class AlertsClient {
         ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
         : null;
     } catch (error) {
-      throw Boom.badRequest(`Error creating API key - ${error.message}`);
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
     this.validateActions(alertType, data.actions);
@@ -739,7 +739,7 @@ export class AlertsClient {
         ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
         : null;
     } catch (error) {
-      throw Boom.badRequest(`Error creating API key - ${error.message}`);
+      throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
@@ -856,7 +856,9 @@ export class AlertsClient {
         this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
       );
     } catch (error) {
-      throw Boom.badRequest(`Error creating API key - ${error.message}`);
+      throw Boom.badRequest(
+        `Error updating API key for rule: could not create API key - ${error.message}`
+      );
     }
 
     const updateAttributes = this.updateMeta({
@@ -970,7 +972,7 @@ export class AlertsClient {
           this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
         );
       } catch (error) {
-        throw Boom.badRequest(`Error creating API key - ${error.message}`);
+        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
       }
 
       const updateAttributes = this.updateMeta({
