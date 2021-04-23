@@ -11,7 +11,7 @@ import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { MlUrlGenerator } from '../../../../ml/public';
+import { mlPluginMock } from '../../../../ml/public/mocks';
 import { ApmRuleRegistry } from '../../plugin';
 
 const uiSettings: Record<string, unknown> = {
@@ -91,12 +91,7 @@ const mockConfig: ConfigSchema = {
 };
 
 const mockPlugin = {
-  ml: {
-    urlGenerator: new MlUrlGenerator({
-      appBasePath: '/app/ml',
-      useHash: false,
-    }),
-  },
+  ml: mlPluginMock.createSetupContract(),
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
