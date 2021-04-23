@@ -114,13 +114,11 @@ into Kibana.
     trigger an new final comment period, hence extension of the RFC *ttl* by 3
     days. The *champion* or the *main reviewer* must signal the extension with a
     comment on the RFC pull request.
-- An RFC may be rejected by the *main reviewer* or any *voluntary reviewer* from
-  Kibana.
 - An RFC may be either *rejected* or *accepted* at the close of its final
   comment period.
   - RFC is *rejected* if it has at least one rejection on the RFC pull request,
-    either from the *main reviewer* or any Kibana *voluntary reviewer*.
-    - If RFC is *rejected* the RFC pull request is closed.
+    either from the *main reviewer* or any Kibana *voluntary reviewer*. If RFC is
+    *rejected* the RFC pull request is closed.
   - For RFC to be *accepted* the pull request must:
     - Be approved by the *main reviewer*.
     - Not have any rejections from any *voluntary reviewers*.
