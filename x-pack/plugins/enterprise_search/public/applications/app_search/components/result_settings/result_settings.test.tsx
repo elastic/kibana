@@ -15,6 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader, EuiEmptyPrompt } from '@elastic/eui';
 
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -119,6 +121,14 @@ describe('ResultSettings', () => {
     const clearButton = shallow(buttons[2]);
     clearButton.simulate('click');
     expect(actions.clearAllFields).toHaveBeenCalled();
+  });
+
+  it('will prevent user from leaving the page if there are unsaved changes', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+    });
+    expect(subject().find(UnsavedChangesPrompt).prop('hasUnsavedChanges')).toBe(true);
   });
 
   describe('when there is no schema yet', () => {
