@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
-      it('should show correct time range string by timepicker', async function () {
+      it.only('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
