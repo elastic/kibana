@@ -188,7 +188,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       switchName: string,
       shouldBeCheckedAsString: string
     ) {
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
         await testSubjects.click('collapsedItemActions');
 
