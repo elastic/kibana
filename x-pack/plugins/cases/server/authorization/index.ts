@@ -71,7 +71,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     name: WriteOperations.CreateConfiguration,
     action: 'create-configuration',
     verbs: createVerbs,
-    docType: 'case-configuration',
+    docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateConfiguration]: {
@@ -119,7 +119,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     name: ReadOperations.FindConfigurations,
     action: 'find-configurations',
     verbs: accessVerbs,
-    docType: 'case-configuration',
+    docType: 'case configurations',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
 };
