@@ -236,6 +236,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         if (isEnabled) {
                           setIsEnabled(false);
                           await disableAlert(alert);
+                          // Reset dismiss if previously clicked
+                          setDissmissAlertErrors(false);
                         } else {
                           setIsEnabled(true);
                           await enableAlert(alert);
@@ -277,7 +279,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+            {alert.enabled && !dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
@@ -293,7 +295,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSpacer size="s" />
                     <EuiFlexGroup gutterSize="s" wrap={true}>
                       <EuiFlexItem grow={false}>
-                        <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                        <EuiButton
+                          data-test-subj="dismiss-execution-error"
+                          color="danger"
+                          onClick={() => setDissmissAlertErrors(true)}
+                        >
                           <FormattedMessage
                             id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
                             defaultMessage="Dismiss"
