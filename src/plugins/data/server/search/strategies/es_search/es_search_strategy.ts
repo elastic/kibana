@@ -14,7 +14,7 @@ import type { SearchUsage } from '../../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/usage';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
+import { getKbnServerError } from '../../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -29,12 +29,6 @@ export const esSearchStrategyProvider = (
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
-    // Only default index pattern type is supported here.
-    // See data_enhanced for other type support.
-    if (request.indexType) {
-      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
-    }
-
     const search = async () => {
       try {
         const config = await config$.pipe(first()).toPromise();

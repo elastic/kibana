@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import type { Indices } from '@elastic/elasticsearch/api/types';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
-export const ES_SEARCH_STRATEGY = 'es';
+export const ROLLUP_SEARCH_STRATEGY = 'rollup';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & estypes.SearchRequest;
+export interface IRollupSearchRequestParams extends estypes.SearchRequest {
+  index: Indices; // index is required
+}
 
-export type IEsSearchRequest = IKibanaSearchRequest<ISearchRequestParams>;
+export type IRollupSearchRequest = IKibanaSearchRequest<IRollupSearchRequestParams>;
 
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;
+export type IRollupSearchResponse<Source = any> = IKibanaSearchResponse<
+  estypes.SearchResponse<Source>
+>;

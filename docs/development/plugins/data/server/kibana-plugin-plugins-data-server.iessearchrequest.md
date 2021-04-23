@@ -2,17 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-server](./kibana-plugin-plugins-data-server.md) &gt; [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md)
 
-## IEsSearchRequest interface
+## IEsSearchRequest type
 
 <b>Signature:</b>
 
 ```typescript
-export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> 
+export declare type IEsSearchRequest = IKibanaSearchRequest<ISearchRequestParams>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [indexType](./kibana-plugin-plugins-data-server.iessearchrequest.indextype.md) | <code>string</code> |  |
-

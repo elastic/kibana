@@ -116,34 +116,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 when index type is provided in "es" strategy', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: {
-                indexType: 'baad',
-                params: {
-                  body: {
-                    query: {
-                      match_all: {},
-                    },
-                  },
-                },
-              },
-              options: {
-                strategy: 'es',
-              },
-            },
-          ],
-        });
-
-        expect(resp.status).to.be(200);
-        parseBfetchResponse(resp).forEach((responseJson, i) => {
-          expect(responseJson.id).to.be(i);
-          verifyErrorResponse(responseJson.error, 400, 'Unsupported index pattern type baad');
-        });
-      });
-
       describe('painless', () => {
         before(async () => {
           await esArchiver.loadIfNeeded(

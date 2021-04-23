@@ -29,17 +29,6 @@ const mockAsyncResponse = {
   },
 };
 
-const mockRollupResponse = {
-  body: {
-    _shards: {
-      total: 10,
-      failed: 1,
-      skipped: 2,
-      successful: 7,
-    },
-  },
-};
-
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockGetCaller = jest.fn();
@@ -131,29 +120,6 @@ describe('ES search strategy', () => {
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
-      });
-
-      it('calls the rollup API if the index is a rollup type', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
-
-        const params = { index: 'foo-程', body: {} };
-        const esSearch = await enhancedEsSearchStrategyProvider(mockLegacyConfig$, mockLogger);
-
-        await esSearch
-          .search(
-            {
-              indexType: 'rollup',
-              params,
-            },
-            {},
-            mockDeps
-          )
-          .toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const { method, path } = mockApiCaller.mock.calls[0][0];
-        expect(method).toBe('POST');
-        expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
       });
     });
 

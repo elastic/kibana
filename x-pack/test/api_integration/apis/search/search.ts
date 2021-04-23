@@ -109,25 +109,6 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'Request must contain a kbn-xsrf header.');
       });
 
-      it('should return 400 when unknown index type is provided', async () => {
-        const resp = await supertest
-          .post(`/internal/search/ese`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            indexType: 'baad',
-            params: {
-              body: {
-                query: {
-                  match_all: {},
-                },
-              },
-            },
-          })
-          .expect(400);
-
-        verifyErrorResponse(resp.body, 400, 'Unknown indexType');
-      });
-
       it('should return 400 if invalid id is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese/123`)
@@ -193,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 400 if rollup search is called without index', async () => {
         const resp = await supertest
-          .post(`/internal/search/ese`)
+          .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',
@@ -211,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 400 if rollup search is without non-existent index', async () => {
         const resp = await supertest
-          .post(`/internal/search/ese`)
+          .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',
@@ -231,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should rollup search', async () => {
         await supertest
-          .post(`/internal/search/ese`)
+          .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',

@@ -189,21 +189,4 @@ describe('ES search strategy', () => {
       done();
     }
   });
-
-  it('throws KbnServerError for unknown index type', async (done) => {
-    const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
-
-    try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
-        .search({ indexType: 'banana', params }, {}, getMockedDeps())
-        .toPromise();
-    } catch (e) {
-      expect(mockApiCaller).not.toBeCalled();
-      expect(e).toBeInstanceOf(KbnServerError);
-      expect(e.message).toBe('Unsupported index pattern type banana');
-      expect(e.statusCode).toBe(400);
-      expect(e.errBody).toBe(undefined);
-      done();
-    }
-  });
 });

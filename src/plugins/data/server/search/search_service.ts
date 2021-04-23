@@ -66,6 +66,7 @@ import {
   esRawResponse,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  ROLLUP_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl } from './expressions';
 import {
@@ -80,6 +81,7 @@ import { registerBsearchRoute } from './routes/bsearch';
 import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { rollupSearchStrategyProvider } from './strategies/rollup_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -156,6 +158,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      ROLLUP_SEARCH_STRATEGY,
+      rollupSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage
+      )
+    );
 
     registerBsearchRoute(bfetch, (request: KibanaRequest) => this.asScoped(request));
 

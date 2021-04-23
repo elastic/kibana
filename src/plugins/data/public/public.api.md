@@ -1141,10 +1141,7 @@ export type IEsError = KibanaServerError<IEsErrorAttributes>;
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
-    // (undocumented)
-    indexType?: string;
-}
+export type IEsSearchRequest = IKibanaSearchRequest<ISearchRequestParams>;
 
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2392,7 +2389,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
-    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
+    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "legacyHitsTotal" | "isStored" | "isRestore">;
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts

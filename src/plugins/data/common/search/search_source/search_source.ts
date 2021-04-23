@@ -96,6 +96,7 @@ import {
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { extractReferences } from './extract_references';
+import { ROLLUP_SEARCH_STRATEGY } from '../strategies/rollup_search';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -439,7 +440,12 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+    // force a rollup strategy in case this is a rollup index
+    if (!options.strategy && searchRequest.indexType === 'rollup') {
+      options.strategy = ROLLUP_SEARCH_STRATEGY;
+    }
+
+    return search({ params }, options).pipe(
       switchMap((response) => {
         return new Observable<IKibanaSearchResponse<any>>((obs) => {
           if (isErrorResponse(response)) {
