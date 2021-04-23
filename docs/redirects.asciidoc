@@ -292,3 +292,8 @@ This content has moved. refer to <<timelion>>.
 == Tutorial: Use role-based access control to customize Kibana spaces
 
 This content has moved. refer to <<tutorial-secure-access-to-kibana>>.
+
+[role="exclude",id="search"]
+== Search your data
+
+This content has moved. refer to <<kuery-query>>.

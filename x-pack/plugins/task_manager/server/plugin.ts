@@ -30,10 +30,13 @@ import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 
-export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
-  TaskTypeDictionary,
-  'registerTaskDefinitions'
->;
+export type TaskManagerSetupContract = {
+  /**
+   * @deprecated
+   */
+  index: string;
+  addMiddleware: (middleware: Middleware) => void;
+} & Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
@@ -98,6 +101,7 @@ export class TaskManagerPlugin
     });
 
     return {
+      index: this.config.index,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);

@@ -18,7 +18,7 @@ import {
   KibanaRequest,
   SavedObjectsUtils,
 } from '../../../../src/core/server';
-import { AuditLogger, EventOutcome } from '../../security/server';
+import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
@@ -154,7 +154,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -226,7 +226,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -460,7 +460,7 @@ export class ActionsClient {
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'action', id },
       })
     );

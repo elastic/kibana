@@ -33,6 +33,9 @@ function getProps(): DiscoverTopNavProps {
       discover: {
         save: true,
       },
+      advancedSettings: {
+        save: true,
+      },
     },
     uiSettings: mockUiSettings,
   } as unknown) as DiscoverServices;
