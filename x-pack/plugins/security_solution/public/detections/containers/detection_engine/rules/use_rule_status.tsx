@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
 import { getRuleStatusById, getRulesStatusByIds } from './api';
 import * as i18n from './translations';
@@ -30,7 +30,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
   const [ruleStatus, setRuleStatus] = useState<RuleStatus | null>(null);
   const fetchRuleStatus = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -50,7 +50,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       } catch (error) {
         if (isSubscribed) {
           setRuleStatus(null);
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -65,7 +65,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [id, dispatchToaster]);
+  }, [id, addError]);
 
   return [loading, ruleStatus, fetchRuleStatus.current];
 };
@@ -79,7 +79,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
 export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
   const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -106,7 +106,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       } catch (error) {
         if (isSubscribed) {
           setRuleStatuses([]);
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -122,7 +122,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rules, dispatchToaster]);
+  }, [rules, addError]);
 
   return { loading, rulesStatuses };
 };

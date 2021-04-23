@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { caseFn } from './case';
 
@@ -19,10 +20,10 @@ describe('case', () => {
 
   describe('function', () => {
     describe('no args', () => {
-      it('should return a case object that matches with the result as the context', async () => {
+      it('should return a case object that matches with the result as the context', () => {
         const context = null;
         const args = {};
-        expect(await fn(context, args)).toEqual({
+        expect(fn(context, args)).resolves.toEqual({
           type: 'case',
           matches: true,
           result: context,
@@ -31,24 +32,24 @@ describe('case', () => {
     });
 
     describe('no if or value', () => {
-      it('should return the result if provided', async () => {
+      it('should return the result if provided', () => {
         const context = null;
         const args = {
-          then: () => 'foo',
+          then: () => of('foo'),
         };
-        expect(await fn(context, args)).toEqual({
+        expect(fn(context, args)).resolves.toEqual({
           type: 'case',
           matches: true,
-          result: args.then(),
+          result: 'foo',
         });
       });
     });
 
     describe('with if', () => {
-      it('should return as the matches prop', async () => {
+      it('should return as the matches prop', () => {
         const context = null;
         const args = { if: false };
-        expect(await fn(context, args)).toEqual({
+        expect(fn(context, args)).resolves.toEqual({
           type: 'case',
           matches: args.if,
           result: context,
@@ -57,17 +58,17 @@ describe('case', () => {
     });
 
     describe('with value', () => {
-      it('should return whether it matches the context as the matches prop', async () => {
+      it('should return whether it matches the context as the matches prop', () => {
         const args = {
-          when: () => 'foo',
-          then: () => 'bar',
+          when: () => of('foo'),
+          then: () => of('bar'),
         };
-        expect(await fn('foo', args)).toEqual({
+        expect(fn('foo', args)).resolves.toEqual({
           type: 'case',
           matches: true,
-          result: args.then(),
+          result: 'bar',
         });
-        expect(await fn('bar', args)).toEqual({
+        expect(fn('bar', args)).resolves.toEqual({
           type: 'case',
           matches: false,
           result: null,
@@ -76,13 +77,13 @@ describe('case', () => {
     });
 
     describe('with if and value', () => {
-      it('should return the if as the matches prop', async () => {
+      it('should return the if as the matches prop', () => {
         const context = null;
         const args = {
           when: () => 'foo',
           if: true,
         };
-        expect(await fn(context, args)).toEqual({
+        expect(fn(context, args)).resolves.toEqual({
           type: 'case',
           matches: args.if,
           result: context,
