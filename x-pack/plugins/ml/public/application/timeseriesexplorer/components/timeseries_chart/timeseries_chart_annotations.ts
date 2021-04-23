@@ -132,6 +132,20 @@ export function renderAnnotations(
   const levelHeight = ANNOTATION_LEVEL_HEIGHT;
   const levels = getAnnotationLevels(focusAnnotationData);
 
+  const onAnnotationMouseOver = function (this: object, d: Annotation) {
+    showFocusChartTooltip(d, this);
+  };
+
+  const onAnnotationMouseOut = () => hideFocusChartTooltip();
+  const onAnnotationClick = (d: Annotation) => {
+    // clear a possible existing annotation set up for editing before setting the new one.
+    // this needs to be done explicitly here because a new annotation created using the brush tool
+    // could still be present in the chart.
+    annotationUpdatesService.setValue(null);
+    // set the actual annotation and trigger the flyout
+    annotationUpdatesService.setValue(d);
+  };
+
   const annotations = focusChart
     .select('.mlAnnotations')
     .selectAll('g.mlAnnotation')
@@ -148,18 +162,9 @@ export function renderAnnotations(
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .classed('mlAnnotationRect', true)
     .attr('mask', `url(#${ANNOTATION_MASK_ID})`)
-    .on('mouseover', function (this: object, d: Annotation) {
-      showFocusChartTooltip(d, this);
-    })
-    .on('mouseout', () => hideFocusChartTooltip())
-    .on('click', (d: Annotation) => {
-      // clear a possible existing annotation set up for editing before setting the new one.
-      // this needs to be done explicitly here because a new annotation created using the brush tool
-      // could still be present in the chart.
-      annotationUpdatesService.setValue(null);
-      // set the actual annotation and trigger the flyout
-      annotationUpdatesService.setValue(d);
-    });
+    .on('mouseover', onAnnotationMouseOver)
+    .on('mouseout', onAnnotationMouseOut)
+    .on('click', onAnnotationClick);
 
   rects
     .attr('x', (d: Annotation) => {
@@ -197,20 +202,17 @@ export function renderAnnotations(
     .attr('height', ANNOTATION_TEXT_RECT_HEIGHT)
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
-    .on('mouseover', function (this: object, d: Annotation) {
-      showFocusChartTooltip(d, this);
-    })
-    .on('mouseout', () => hideFocusChartTooltip())
-    .on('click', (d: Annotation) => {
-      // clear a possible existing annotation set up for editing before setting the new one.
-      // this needs to be done explicitly here because a new annotation created using the brush tool
-      // could still be present in the chart.
-      annotationUpdatesService.setValue(null);
-      // set the actual annotation and trigger the flyout
-      annotationUpdatesService.setValue(d);
-    });
+    .on('mouseover', onAnnotationMouseOver)
+    .on('mouseout', onAnnotationMouseOut)
+    .on('click', onAnnotationClick);
 
-  texts.enter().append('text').classed('mlAnnotationText', true);
+  texts
+    .enter()
+    .append('text')
+    .classed('mlAnnotationText', true)
+    .on('mouseover', onAnnotationMouseOver)
+    .on('mouseout', onAnnotationMouseOut)
+    .on('click', onAnnotationClick);
 
   function labelXOffset(ts: number) {
     const earliestMs = focusXScale.domain()[0];
