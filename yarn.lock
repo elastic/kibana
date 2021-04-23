@@ -4763,13 +4763,13 @@ caseless@~0.12.0:
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
 catbox-memory@3.x.x:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/catbox-memory/-/catbox-memory-3.1.2.tgz#4aeec1bc994419c0f7e60087f172aaedd9b4911c"
-  integrity sha512-lhWtutLVhsq3Mucxk2McxBPPibJ34WcHuWFz3xqub9u9Ve/IQYpZv3ijLhQXfQped9DXozURiaq9O3aZpP91eg==
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/catbox-memory/-/catbox-memory-3.1.4.tgz#114fd6da3b2630a5db2ff246db9ff2226148c2b0"
+  integrity sha512-1tDnll066au0HXBSDHS/YQ34MQ2omBsmnA9g/jseyq/M3m7UPrajVtPDZK/rXgikSC1dfjo9Pa+kQ1qcyG2d3g==
   dependencies:
     big-time "2.x.x"
     boom "7.x.x"
-    hoek "5.x.x"
+    hoek "6.x.x"
 
 catbox@10.x.x:
   version "10.0.6"
