@@ -2029,12 +2029,12 @@ abortcontroller-polyfill@^1.1.9:
   integrity sha512-omvG7zOHIs3BphdH62Kh3xy8nlftAsTyp7PDa9EmC3Jz9pa6sZFYk7UhNgu9Y4sIBhj6jF0RgeFZYvPnsP5sBw==
 
 accept@3.x.x:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/accept/-/accept-3.0.2.tgz#83e41cec7e1149f3fd474880423873db6c6cc9ac"
-  integrity sha512-bghLXFkCOsC1Y2TZ51etWfKDs6q249SAoHTZVfzWWdlZxoij+mgkj9AmUJWQpDY48TfnrTDIe43Xem4zdMe7mQ==
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/accept/-/accept-3.1.3.tgz#29c3e2b3a8f4eedbc2b690e472b9ebbdc7385e87"
+  integrity sha512-OgOEAidVEOKPup+Gv2+2wdH2AgVKI9LxsJ4hicdJ6cY0faUuZdZoi56kkXWlHp9qicN1nWQLmW5ZRGk+SBS5xg==
   dependencies:
     boom "7.x.x"
-    hoek "5.x.x"
+    hoek "6.x.x"
 
 accepts@~1.3.4, accepts@~1.3.5, accepts@~1.3.7:
   version "1.3.7"
