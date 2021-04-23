@@ -79,6 +79,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         transformRawDocs,
         state.outdatedDocuments,
         state.tempIndex,
+        /**
+         * Since we don't run a search against the target index, we disable "refresh" to speed up
+         * the migration process.
+         * Although any further step must run "refresh" for the target index
+         * before we reach out to the OUTDATED_DOCUMENTS_SEARCH step.
+         * Right now, we rely on UPDATE_TARGET_MAPPINGS + UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK
+         * to perform refresh.
+         */
         false
       ),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>

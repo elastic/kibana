@@ -813,10 +813,8 @@ describe('migration actions', () => {
 
   describe('openPit', () => {
     it('opens PointInTime for an index', async () => {
-      const pitResponse = (await openPit(
-        client,
-        'existing_index_with_docs'
-      )()) as Either.Right<OpenPitResponse>;
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
       expect(pitResponse.right.pitId).toEqual(expect.any(String));
 
@@ -836,46 +834,42 @@ describe('migration actions', () => {
 
   describe('readWithPit', () => {
     it('requests documents from an index using given PIT', async () => {
-      const pitResponse = (await openPit(
-        client,
-        'existing_index_with_docs'
-      )()) as Either.Right<OpenPitResponse>;
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
-      const docsResponse = (await readWithPit(
+      const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
         Option.none,
         1000,
         undefined
-      )()) as Either.Right<ReadWithPit>;
+      );
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
       await expect(docsResponse.right.outdatedDocuments.length).toBe(5);
     });
 
     it('requests the batchSize of documents from an index', async () => {
-      const pitResponse = (await openPit(
-        client,
-        'existing_index_with_docs'
-      )()) as Either.Right<OpenPitResponse>;
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
-      const docsResponse = (await readWithPit(
+      const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
         Option.none,
         3,
         undefined
-      )()) as Either.Right<ReadWithPit>;
+      );
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
       await expect(docsResponse.right.outdatedDocuments.length).toBe(3);
     });
 
     it('excludes documents with types listed in unusedTypesToExclude', async () => {
-      const pitResponse = (await openPit(
-        client,
-        'existing_index_with_docs'
-      )()) as Either.Right<OpenPitResponse>;
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
-      const docsResponse = (await readWithPit(
+      const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
         Option.some({
@@ -896,7 +890,9 @@ describe('migration actions', () => {
         }),
         1000,
         undefined
-      )()) as Either.Right<ReadWithPit>;
+      );
+
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
       expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title).sort())
         .toMatchInlineSnapshot(`
@@ -916,13 +912,10 @@ describe('migration actions', () => {
 
   describe('closePit', () => {
     it('closes PointInTime', async () => {
-      const pitResponse = (await openPit(
-        client,
-        'existing_index_with_docs'
-      )()) as Either.Right<OpenPitResponse>;
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
       const pitId = pitResponse.right.pitId;
-
       await closePit(client, pitId)();
 
       const searchTask = client.search({
@@ -948,23 +941,22 @@ describe('migration actions', () => {
         { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
       ];
 
-      await createIndex(client, index, {
+      const creteIndexTask = createIndex(client, index, {
         dynamic: true,
         properties: {},
-      })();
+      });
+      await creteIndexTask();
 
-      const result = (await transformDocs(
-        client,
-        async function (docs) {
-          for (const doc of docs) {
-            doc._source.value += 1;
-          }
-          return docs;
-        },
-        originalDocs,
-        index,
-        'wait_for'
-      )()) as Either.Right<'bulk_index_succeeded'>;
+      async function tranformRawDocs(docs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]> {
+        for (const doc of docs) {
+          doc._source.value += 1;
+        }
+        return docs;
+      }
+
+      const transformTask = transformDocs(client, tranformRawDocs, originalDocs, index, 'wait_for');
+
+      const result = (await transformTask()) as Either.Right<'bulk_index_succeeded'>;
 
       expect(result.right).toBe('bulk_index_succeeded');
 
