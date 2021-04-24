@@ -34,10 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/94545
-  describe.skip('discover data grid context tests', () => {
+  describe('discover data grid context tests', () => {
     before(async () => {
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
@@ -110,7 +110,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await docTable.getRowsText()).to.have.length(6);
+      await retry.waitFor('document table has a length of 6', async () => {
+        const nrOfDocs = (await docTable.getBodyRows()).length;
+        return nrOfDocs === 6;
+      });
     });
   });
 }

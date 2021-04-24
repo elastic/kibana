@@ -64,15 +64,23 @@ export const cumulativeSumOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined);
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
+      label: ofName(
+        ref && 'sourceField' in ref
+          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+          : undefined
+      ),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,

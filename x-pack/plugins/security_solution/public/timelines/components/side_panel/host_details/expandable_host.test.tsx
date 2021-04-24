@@ -10,7 +10,6 @@ import React from 'react';
 
 import '../../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -19,15 +18,6 @@ import {
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { ExpandableHostDetails } from './expandable_host';
-
-jest.mock('react-apollo', () => {
-  const original = jest.requireActual('react-apollo');
-  return {
-    ...original,
-    // eslint-disable-next-line react/display-name
-    Query: () => <></>,
-  };
-});
 
 describe('Expandable Host Component', () => {
   const state: State = {
@@ -39,13 +29,7 @@ describe('Expandable Host Component', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   const mockProps = {
     contextID: 'text-context',
@@ -70,9 +54,7 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('HostOverviewByNameComponentQuery').prop('indexNames')).toStrictEqual([
-        'IShouldBeUsed',
-      ]);
+      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(['IShouldBeUsed']);
     });
   });
 });

@@ -15,7 +15,7 @@ import {
   ISessionsClient,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { ACTION } from '../components/actions';
 import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
 import { SessionsConfigSchema } from '..';

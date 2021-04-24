@@ -70,9 +70,13 @@ export interface SearchableSnapshotAction {
 }
 
 export interface RolloverAction {
-  max_size?: string;
   max_age?: string;
   max_docs?: number;
+  max_primary_shard_size?: string;
+  /**
+   * @deprecated This will be removed in versions 8+ of the stack
+   */
+  max_size?: string;
 }
 
 export interface SerializedHotPhase extends SerializedPhase {
@@ -108,6 +112,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
 export interface SerializedColdPhase extends SerializedPhase {
   actions: {
     freeze?: {};
+    readonly?: {};
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;

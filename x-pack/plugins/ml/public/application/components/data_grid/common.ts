@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { estypes } from '@elastic/elasticsearch';
 import { useEffect, useMemo } from 'react';
 
 import {
@@ -49,7 +50,7 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import { RuntimeMappings, RuntimeField } from '../../../../common/types/fields';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
@@ -102,7 +103,7 @@ export function getCombinedRuntimeMappings(
 ): RuntimeMappings | undefined {
   let combinedRuntimeMappings = {};
 
-  // And runtime field mappings defined by index pattern
+  // Add runtime field mappings defined by index pattern
   if (indexPattern) {
     const computedFields = indexPattern?.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
@@ -146,6 +147,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'date':
         schema = 'datetime';
         break;
+      case 'nested':
       case 'geo_point':
         schema = 'json';
         break;
@@ -179,7 +181,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
+  fieldType: ES_FIELD_TYPES | undefined | estypes.RuntimeField['type']
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
@@ -236,6 +238,9 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
     case KBN_FIELD_TYPES.NUMBER:
       schema = 'numeric';
+      break;
+    case KBN_FIELD_TYPES.NESTED:
+      schema = 'json';
       break;
   }
 

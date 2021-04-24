@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import url from 'url';
-
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from 'kibana/server';
 
-import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, decodeCloudId } from '../../common';
+import { decodeCloudId, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
 
 import { appContextService } from './app_context';
@@ -67,25 +65,25 @@ export async function saveSettings(
 }
 
 export function createDefaultSettings(): BaseSettings {
-  const http = appContextService.getHttpSetup();
-  const serverInfo = http.getServerInfo();
-  const basePath = http.basePath;
+  const configFleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts;
+  const cloudFleetServerHosts = getCloudFleetServersHosts();
 
-  const cloud = appContextService.getCloud();
-  const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-  const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-  const flagsUrl = appContextService.getConfig()?.agents?.kibana?.host;
-  const defaultUrl = url.format({
-    protocol: serverInfo.protocol,
-    hostname: serverInfo.hostname,
-    port: serverInfo.port,
-    pathname: basePath.serverBasePath,
-  });
-
-  const fleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts ?? [];
+  const fleetServerHosts = configFleetServerHosts ?? cloudFleetServerHosts ?? [];
 
   return {
-    kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
     fleet_server_hosts: fleetServerHosts,
   };
+}
+
+export function getCloudFleetServersHosts() {
+  const cloudSetup = appContextService.getCloud();
+  if (cloudSetup && cloudSetup.isCloudEnabled && cloudSetup.cloudId && cloudSetup.deploymentId) {
+    const res = decodeCloudId(cloudSetup.cloudId);
+    if (!res) {
+      return;
+    }
+
+    // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
+    return [`https://${cloudSetup.deploymentId}.fleet.${res.host}`];
+  }
 }

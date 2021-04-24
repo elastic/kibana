@@ -64,6 +64,7 @@ import {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
+  ConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
@@ -74,6 +75,7 @@ export type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
 };
 
 export { bootstrap } from './bootstrap';
@@ -236,6 +238,11 @@ export type { IRenderOptions } from './rendering';
 export type {
   Logger,
   LoggerFactory,
+  Ecs,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
   LogMeta,
   LogRecord,
   LogLevel,
@@ -256,6 +263,7 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  MakeUsageFromSchema,
 } from './plugins';
 
 export {
@@ -405,8 +413,6 @@ export type {
   SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
-
-export type { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';

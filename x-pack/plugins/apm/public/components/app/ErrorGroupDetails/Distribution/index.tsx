@@ -19,9 +19,12 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React from 'react';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
+import { AlertType } from '../../../../../common/alert_types';
+import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
 
 type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
@@ -60,6 +63,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
   const xMax = d3.max(buckets, (d) => d.x0);
 
   const xFormatter = niceTimeFormatter([xMin, xMax]);
+
+  const { alerts } = useApmServiceContext();
 
   const tooltipProps: SettingsSpec['tooltip'] = {
     headerFormatter: (tooltip: TooltipValue) => {
@@ -108,6 +113,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
             data={buckets}
             color={theme.eui.euiColorVis1}
           />
+          {getAlertAnnotations({
+            alerts: alerts?.filter(
+              (alert) => alert['rule.id'] === AlertType.ErrorCount
+            ),
+            theme,
+          })}
         </Chart>
       </div>
     </div>
