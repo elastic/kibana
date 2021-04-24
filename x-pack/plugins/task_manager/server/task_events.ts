@@ -17,7 +17,6 @@ import { TaskRunResult } from './task_running';
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
-  TASK_DEFERRED = 'TASK_DEFERRED',
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
@@ -101,19 +100,6 @@ export function asTaskRunEvent(
   };
 }
 
-export function asTaskDeferredEvent(
-  id: string,
-  event: Result<RanTask, ErroredTask>,
-  timing?: TaskTiming
-): TaskRun {
-  return {
-    id,
-    type: TaskEventType.TASK_DEFERRED,
-    event,
-    timing,
-  };
-}
-
 export function asTaskClaimEvent(
   id: string,
   event: Result<ConcreteTaskInstance, ClaimTaskErr>,
@@ -170,9 +156,6 @@ export function isTaskMarkRunningEvent(
 }
 export function isTaskRunEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskRun {
   return taskEvent.type === TaskEventType.TASK_RUN;
-}
-export function isTaskDeferredEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskRun {
-  return taskEvent.type === TaskEventType.TASK_DEFERRED;
 }
 export function isTaskClaimEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskClaim {
   return taskEvent.type === TaskEventType.TASK_CLAIM;
