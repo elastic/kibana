@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { SYNONYMS_TITLE } from './constants';
-export { Synonyms } from './synonyms';
-export { SynonymsLogic } from './synonyms_logic';
+export { SynonymIcon } from './synonym_icon';
+export { SynonymCard } from './synonym_card';
+export { EmptyState } from './empty_state';
