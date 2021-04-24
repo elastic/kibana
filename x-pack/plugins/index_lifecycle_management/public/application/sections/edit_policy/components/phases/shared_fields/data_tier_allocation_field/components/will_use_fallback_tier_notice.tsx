@@ -27,8 +27,7 @@ const i18nTexts = {
     }),
     body: (nodeRole: DataTierRole) =>
       i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.willUseFallbackTierDescription', {
-        defaultMessage:
-          'This policy will move data in the warm phase to {tier} tier nodes instead.',
+        defaultMessage: 'If no warm nodes are available, data is stored in the {tier} tier.',
         values: { tier: nodeRoleToFallbackTierMap[nodeRole] },
       }),
   },
@@ -38,8 +37,7 @@ const i18nTexts = {
     }),
     body: (nodeRole: DataTierRole) =>
       i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.willUseFallbackTierDescription', {
-        defaultMessage:
-          'This policy will move data in the cold phase to {tier} tier nodes instead.',
+        defaultMessage: 'If no cold nodes are available, data is stored in the {tier} tier.',
         values: { tier: nodeRoleToFallbackTierMap[nodeRole] },
       }),
   },
@@ -49,7 +47,7 @@ const customizeWithNodeAttributeDescription = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.customizeWithNodeAttributeDescription',
   {
     defaultMessage:
-      'Define custom node attributes in elasticsearch.yml to allocate indices based on these attributes.',
+      'To allocate data to particular data nodes, use role-based allocation or configure custom node attributes in elasticsearch.yml.',
   }
 );
 

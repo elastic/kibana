@@ -24,7 +24,7 @@ const i18nTexts = {
   },
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultToDataTiersDescription', {
     defaultMessage:
-      'Define custom node attributes in elasticsearch.yml to allocate indices based on these attributes instead.',
+      'To control allocation with custom node attributes instead of the built-in node roles, configure node attributes in elasticsearch.yml.',
   }),
 };
 

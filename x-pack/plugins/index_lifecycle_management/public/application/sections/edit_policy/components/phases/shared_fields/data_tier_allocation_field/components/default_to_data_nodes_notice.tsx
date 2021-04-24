@@ -13,11 +13,11 @@ import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultToDataNodesLabel', {
-    defaultMessage: 'Indices will be allocated to available data nodes',
+    defaultMessage: 'Store data on any available data node',
   }),
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultToDataNodesDescription', {
     defaultMessage:
-      'Define custom node attributes in elasticsearch.yml to allocate indices based on these attributes instead.',
+      'To allocate data to particular data nodes, use role-based allocation or configure custom node attributes in elasticsearch.yml.',
   }),
 };
 

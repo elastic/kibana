@@ -36,7 +36,7 @@ const learnMoreLink = (
 const i18nTexts = {
   allocateToDataNodesOption: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.allocateToDataNodesOption',
-    { defaultMessage: 'Allocate to available data nodes' }
+    { defaultMessage: 'Any data node' }
   ),
 };
 
