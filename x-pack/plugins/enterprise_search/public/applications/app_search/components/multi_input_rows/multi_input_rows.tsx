@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { CONTINUE_BUTTON_LABEL } from '../../../shared/constants';
 
@@ -25,8 +25,9 @@ import { filterEmptyValues } from './utils';
 interface Props {
   id: string;
   initialValues?: string[];
-  onSubmit?(values: string[]): void;
   onChange?(values: string[]): void;
+  onSubmit?(values: string[]): void;
+  showSubmitButton?: boolean;
   submitButtonText?: string;
   addRowText?: string;
   deleteRowLabel?: string;
@@ -36,8 +37,9 @@ interface Props {
 export const MultiInputRows: React.FC<Props> = ({
   id,
   initialValues = [''],
-  onSubmit,
   onChange,
+  onSubmit,
+  showSubmitButton = true,
   submitButtonText = CONTINUE_BUTTON_LABEL,
   addRowText = ADD_VALUE_BUTTON_LABEL,
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
@@ -54,7 +56,15 @@ export const MultiInputRows: React.FC<Props> = ({
   }, [values]);
 
   return (
-    <>
+    <EuiForm
+      id={id}
+      component="form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (onSubmit) onSubmit(filterEmptyValues(values));
+      }}
+      data-test-subj="multiInputRowsForm"
+    >
       {values.map((value: string, index: number) => {
         const firstRow = index === 0;
         const lastRow = index === values.length - 1;
@@ -80,19 +90,19 @@ export const MultiInputRows: React.FC<Props> = ({
       >
         {addRowText}
       </EuiButtonEmpty>
-      {onSubmit && (
+      {showSubmitButton && onSubmit && (
         <>
           <EuiSpacer />
           <EuiButton
             fill
             isDisabled={hasOnlyOneValue && hasEmptyValues}
-            onClick={() => onSubmit(filterEmptyValues(values))}
             data-test-subj="submitInputValuesButton"
+            type="submit"
           >
             {submitButtonText}
           </EuiButton>
         </>
       )}
-    </>
+    </EuiForm>
   );
 };
