@@ -20,3 +20,20 @@ export const SYNONYMS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.synonyms.title',
   { defaultMessage: 'Synonyms' }
 );
+
+export const CREATE_SUCCESS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.synonyms.createSuccessMessage',
+  { defaultMessage: 'Synonym set created' }
+);
+export const UPDATE_SUCCESS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.synonyms.updateSuccessMessage',
+  { defaultMessage: 'Synonym set updated' }
+);
+export const DELETE_SUCCESS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.synonyms.deleteSuccessMessage',
+  { defaultMessage: 'Synonym set deleted' }
+);
+export const SYNONYM_IMPACT_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.synonyms.impactDescription',
+  { defaultMessage: 'The set will impact your results shortly.' }
+);
