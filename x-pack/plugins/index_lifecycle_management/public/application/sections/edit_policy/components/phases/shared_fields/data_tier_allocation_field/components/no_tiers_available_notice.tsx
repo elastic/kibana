@@ -30,15 +30,6 @@ const i18nTexts = {
         'Assign at least one node to the cold, warm, or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no available nodes.',
     }),
   },
-  frozen: {
-    title: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.noTiersAvailableTitle', {
-      defaultMessage: 'No nodes assigned to the frozen tier',
-    }),
-    body: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.noTiersAvailableBody', {
-      defaultMessage:
-        'Assign at least one node to the frozen, cold, warm, or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no available nodes.',
-    }),
-  },
 };
 
 interface Props {
