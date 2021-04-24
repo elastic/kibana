@@ -18,7 +18,6 @@ import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
 import { asOk } from './lib/result_type';
-import { EphemeralTaskManagerRunner } from './task_running/ephemeral_task_runner';
 
 interface Opts {
   maxWorkers$: Observable<number>;
@@ -122,7 +121,6 @@ export class TaskPool {
         tasksToRun
           .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
           .map(async (taskRunner) => {
-            // console.log('map', { taskRunner })
             this.tasksInPool.set(taskRunner.id, taskRunner);
             return taskRunner
               .markTaskAsRunning()
@@ -161,15 +159,6 @@ export class TaskPool {
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
-    if (taskRunner.isEphemeral && (taskRunner as EphemeralTaskManagerRunner).markTaskAsDeferred) {
-      (taskRunner as EphemeralTaskManagerRunner).markTaskAsDeferred();
-      setTimeout(() => this.runTaskRunner(taskRunner));
-    } else {
-      this.runTaskRunner(taskRunner);
-    }
-  }
-
-  private runTaskRunner(taskRunner: TaskRunner) {
     taskRunner
       .run()
       .catch((err) => {

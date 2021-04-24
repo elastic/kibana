@@ -143,6 +143,8 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
+    const promises = [];
+
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
@@ -156,58 +158,62 @@ export function createExecutionHandler<
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      // console.log(`Queuing action ${action.actionTypeId}`, { params: action.params })
-      await actionsClient.executeEphemeralTask({
-        taskType: `actions:${action.actionTypeId}`,
-        params: {
-          ...action.params,
-          taskParams: {
-            actionId: action.id,
-            apiKey,
-          },
-          // taskParams: {
-          //   actionId: action.id,
-          //   apiKey,
-          //   params: action.params,
-          // },
-        },
-        state: {},
+      const promise = new Promise(async (resolve, reject) => {
+        try {
+          await actionsClient.executeEphemeralTask({
+            taskType: `actions:${action.actionTypeId}`,
+            params: {
+              ...action.params,
+              taskParams: {
+                actionId: action.id,
+                apiKey,
+              },
+            },
+            state: {},
+          });
+
+          const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+          const event: IEvent = {
+            event: { action: EVENT_LOG_ACTIONS.executeAction },
+            kibana: {
+              alerting: {
+                instance_id: alertInstanceId,
+                action_group_id: actionGroup,
+                action_subgroup: actionSubgroup,
+              },
+              saved_objects: [
+                { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+                { type: 'action', id: action.id, ...namespace },
+              ],
+            },
+          };
+
+          event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+            actionSubgroup
+              ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+              : `actionGroup: '${actionGroup}'`
+          } action: ${actionLabel}`;
+          eventLogger.logEvent(event);
+          resolve(true);
+        } catch (err) {
+          return reject(err);
+        }
       });
-      // console.log('Action queued');
-      // await actionsClient.enqueueExecution({
-      //   id: action.id,
-      //   params: action.params,
-      //   spaceId,
-      //   apiKey: apiKey ?? null,
-      //   source: asSavedObjectExecutionSource({
-      //     id: alertId,
-      //     type: 'alert',
-      //   }),
+      promises.push(promise);
+      // await actionsClient.executeEphemeralTask({
+      //   taskType: `actions:${action.actionTypeId}`,
+      //   params: {
+      //     ...action.params,
+      //     taskParams: {
+      //       actionId: action.id,
+      //       apiKey,
+      //     },
+      //   },
+      //   state: {},
       // });
-
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
-      const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
-        kibana: {
-          alerting: {
-            instance_id: alertInstanceId,
-            action_group_id: actionGroup,
-            action_subgroup: actionSubgroup,
-          },
-          saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
-          ],
-        },
-      };
-
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      } action: ${actionLabel}`;
-      eventLogger.logEvent(event);
     }
+
+    await Promise.all(promises);
   };
 }
