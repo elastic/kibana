@@ -5,6 +5,14 @@
  * 2.0.
  */
 
-export { SYNONYMS_TITLE } from './constants';
-export { Synonyms } from './synonyms';
-export { SynonymsLogic } from './synonyms_logic';
+import { Meta } from '../../../../../common/types';
+
+export interface SynonymSet {
+  id: string;
+  synonyms: string[];
+}
+
+export interface SynonymsApiResponse {
+  results: SynonymSet[];
+  meta: Meta;
+}
