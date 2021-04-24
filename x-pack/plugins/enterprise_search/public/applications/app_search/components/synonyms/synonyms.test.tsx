@@ -17,7 +17,7 @@ import { EuiPageHeader, EuiButton, EuiPagination } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 
-import { SynonymCard, EmptyState } from './components';
+import { SynonymCard, SynonymModal, EmptyState } from './components';
 
 import { Synonyms } from './';
 
@@ -35,6 +35,7 @@ describe('Synonyms', () => {
   const actions = {
     loadSynonyms: jest.fn(),
     onPaginate: jest.fn(),
+    openModal: jest.fn(),
   };
 
   beforeEach(() => {
@@ -47,7 +48,7 @@ describe('Synonyms', () => {
     const wrapper = shallow(<Synonyms />);
 
     expect(wrapper.find(SynonymCard)).toHaveLength(3);
-    // TODO: Check for synonym modal
+    expect(wrapper.find(SynonymModal)).toHaveLength(1);
   });
 
   it('renders a create action button', () => {
@@ -58,7 +59,7 @@ describe('Synonyms', () => {
       .dive();
 
     wrapper.find(EuiButton).simulate('click');
-    // TODO: Expect open modal action
+    expect(actions.openModal).toHaveBeenCalled();
   });
 
   it('renders an empty state if no synonyms exist', () => {

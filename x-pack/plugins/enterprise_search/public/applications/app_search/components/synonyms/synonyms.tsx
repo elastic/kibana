@@ -25,13 +25,13 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { Loading } from '../../../shared/loading';
 import { getEngineBreadcrumbs } from '../engine';
 
-import { SynonymCard, EmptyState } from './components';
+import { SynonymCard, SynonymModal, EmptyState } from './components';
 import { SYNONYMS_TITLE } from './constants';
 
 import { SynonymsLogic } from './';
 
 export const Synonyms: React.FC = () => {
-  const { loadSynonyms, onPaginate } = useActions(SynonymsLogic);
+  const { loadSynonyms, onPaginate, openModal } = useActions(SynonymsLogic);
   const { synonymSets, meta, dataLoading } = useValues(SynonymsLogic);
   const hasSynonyms = synonymSets.length > 0;
 
@@ -54,7 +54,7 @@ export const Synonyms: React.FC = () => {
       <EuiPageHeader
         pageTitle={SYNONYMS_TITLE}
         rightSideItems={[
-          <EuiButton fill onClick={() => {} /* TODO */}>
+          <EuiButton fill onClick={() => openModal(null)}>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.synonyms.createSynonymSetButtonLabel',
               { defaultMessage: 'Create a synonym set' }
@@ -84,6 +84,7 @@ export const Synonyms: React.FC = () => {
         ) : (
           <EmptyState />
         )}
+        <SynonymModal />
       </EuiPageContentBody>
     </>
   );
