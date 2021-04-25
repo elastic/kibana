@@ -38,7 +38,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   return (
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
-        size="s"
+        size="xs"
         iconSize="s"
         aria-label={buttonLabel}
         data-test-subj="docTableExpandToggleColumn"
