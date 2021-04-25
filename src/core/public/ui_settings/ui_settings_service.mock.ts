@@ -23,12 +23,10 @@ const createSetupContractMock = () => {
     isCustom: jest.fn(),
     isOverridden: jest.fn(),
     getUpdate$: jest.fn(),
-    getSaved$: jest.fn(),
     getUpdateErrors$: jest.fn(),
   };
   setupContract.get$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
-  setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getAll.mockReturnValue({});
 

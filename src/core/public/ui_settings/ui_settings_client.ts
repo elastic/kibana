@@ -24,7 +24,6 @@ interface UiSettingsClientParams {
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
-  private readonly saved$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
@@ -39,7 +38,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     params.done$.subscribe({
       complete: () => {
         this.update$.complete();
-        this.saved$.complete();
         this.updateErrors$.complete();
       },
     });
@@ -120,10 +118,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.update$.asObservable();
   }
 
-  getSaved$() {
-    return this.saved$.asObservable();
-  }
-
   getUpdateErrors$() {
     return this.updateErrors$.asObservable();
   }
@@ -155,7 +149,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     try {
       const { settings } = await this.api.batchSet(key, newVal);
       this.cache = defaultsDeep({}, defaults, settings);
-      this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {
       this.setLocally(key, initialVal);

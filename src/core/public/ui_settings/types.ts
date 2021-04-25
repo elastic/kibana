@@ -94,16 +94,6 @@ export interface IUiSettingsClient {
   }>;
 
   /**
-   * Returns an Observable that notifies subscribers of each update to the uiSettings,
-   * including the key, newValue, and oldValue of the setting that changed.
-   */
-  getSaved$: <T = any>() => Observable<{
-    key: string;
-    newValue: T;
-    oldValue: T;
-  }>;
-
-  /**
    * Returns an Observable that notifies subscribers of each error while trying to update
    * the settings, containing the actual Error class.
    */
