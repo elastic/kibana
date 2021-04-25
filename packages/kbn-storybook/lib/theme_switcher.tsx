@@ -11,12 +11,14 @@ import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/comp
 import { useGlobals } from '@storybook/api';
 import { Link } from '@storybook/components/dist/tooltip/TooltipLinkList';
 
+const defaultTheme = 'v8.light';
+
 export function ThemeSwitcher(props: any) {
   const [globals, updateGlobals] = useGlobals();
   const selectedTheme = globals.euiTheme;
 
-  if (!selectedTheme) {
-    updateGlobals({ euiTheme: 'v8.light' });
+  if (!selectedTheme || selectedTheme === defaultTheme) {
+    updateGlobals({ euiTheme: defaultTheme });
   }
 
   const links: Link[] = [
@@ -33,7 +35,9 @@ export function ThemeSwitcher(props: any) {
   ].map((link) => ({
     ...link,
     onClick: (_event, item) => {
-      updateGlobals({ euiTheme: item.id });
+      if (item.id !== selectedTheme) {
+        updateGlobals({ euiTheme: item.id });
+      }
     },
     active: selectedTheme === link.id,
   }));

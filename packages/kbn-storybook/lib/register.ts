@@ -23,9 +23,16 @@ addons.setConfig({
   panelPosition: 'bottom',
   isToolshown: true,
 });
-console.log('register');
-addons.register('kibana/eui-theme-switcher', () => {
-  console.log('add?');
+
+addons.register('kibana/eui-theme-switcher', (api) => {
+  const channel = api.getChannel();
+  channel.on('globalsUpdated', ({ globals }) => {
+    console.log({ globals });
+    const stylesheet = document.getElementById('eui-theme-css');
+    console.log((stylesheet as HTMLLinkElement | null)?.href);
+    debugger;
+  });
+
   addons.add('kibana/eui-theme-switcher', {
     title: 'EUI Theme Switcher',
     type: types.TOOL,
