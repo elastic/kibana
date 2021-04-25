@@ -30,6 +30,8 @@ export const userMlCapabilities = {
   canGetAnnotations: false,
   canCreateAnnotation: false,
   canDeleteAnnotation: false,
+  // Alerts
+  canUseMlAlerts: false,
 };
 
 export const adminMlCapabilities = {
@@ -59,6 +61,7 @@ export const adminMlCapabilities = {
   canStartStopDataFrameAnalytics: false,
   // Alerts
   canCreateMlAlerts: false,
+  canUseMlAlerts: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
