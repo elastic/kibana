@@ -602,25 +602,76 @@
         "cluster_uuid": {
           "type": "keyword"
         },
+        "interval_ms": {
+          "type": "long"
+        },
         "logstash_state": {
           "properties": {
+            "ephemeral_id": {
+              "type": "keyword"
+            },
+            "host": {
+              "type": "keyword"
+            },
+            "http_address": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
             "pipeline": {
               "properties": {
+                "batch_size": {
+                  "type": "integer"
+                },
+                "ephemeral_id": {
+                  "type": "keyword"
+                },
+                "format": {
+                  "type": "keyword"
+                },
                 "hash": {
                   "type": "keyword"
                 },
                 "id": {
                   "type": "keyword"
+                },
+                "representation": {
+                  "enabled": false
+                },
+                "version": {
+                  "type": "keyword"
+                },
+                "workers": {
+                  "type": "short"
                 }
               }
+            },
+            "snapshot": {
+              "type": "boolean"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "uuid": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
             }
           }
         },
         "logstash_stats": {
           "properties": {
+            "batch_size": {
+              "type": "integer"
+            },
             "events": {
               "properties": {
                 "duration_in_millis": {
+                  "type": "long"
+                },
+                "filtered": {
                   "type": "long"
                 },
                 "in": {
@@ -633,12 +684,43 @@
             },
             "jvm": {
               "properties": {
+                "gc": {
+                  "properties": {
+                    "collectors": {
+                      "properties": {
+                        "old": {
+                          "properties": {
+                            "collection_count": {
+                              "type": "long"
+                            },
+                            "collection_time_in_millis": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "young": {
+                          "properties": {
+                            "collection_count": {
+                              "type": "long"
+                            },
+                            "collection_time_in_millis": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
                 "mem": {
                   "properties": {
                     "heap_max_in_bytes": {
                       "type": "long"
                     },
                     "heap_used_in_bytes": {
+                      "type": "long"
+                    },
+                    "heap_used_percent": {
                       "type": "long"
                     }
                   }
@@ -650,6 +732,34 @@
             },
             "logstash": {
               "properties": {
+                "ephemeral_id": {
+                  "type": "keyword"
+                },
+                "host": {
+                  "type": "keyword"
+                },
+                "http_address": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "pipeline": {
+                  "properties": {
+                    "batch_size": {
+                      "type": "long"
+                    },
+                    "workers": {
+                      "type": "short"
+                    }
+                  }
+                },
+                "snapshot": {
+                  "type": "boolean"
+                },
+                "status": {
+                  "type": "keyword"
+                },
                 "uuid": {
                   "type": "keyword"
                 },
@@ -664,6 +774,9 @@
                   "properties": {
                     "cpu": {
                       "properties": {
+                        "control_group": {
+                          "type": "keyword"
+                        },
                         "stat": {
                           "properties": {
                             "number_of_elapsed_periods": {
@@ -681,6 +794,9 @@
                     },
                     "cpuacct": {
                       "properties": {
+                        "control_group": {
+                          "type": "keyword"
+                        },
                         "usage_nanos": {
                           "type": "long"
                         }
@@ -709,12 +825,24 @@
             },
             "pipelines": {
               "properties": {
+                "ephemeral_id": {
+                  "type": "keyword"
+                },
                 "events": {
                   "properties": {
                     "duration_in_millis": {
                       "type": "long"
                     },
+                    "filtered": {
+                      "type": "long"
+                    },
+                    "in": {
+                      "type": "long"
+                    },
                     "out": {
+                      "type": "long"
+                    },
+                    "queue_push_duration_in_millis": {
                       "type": "long"
                     }
                   }
@@ -727,6 +855,9 @@
                 },
                 "queue": {
                   "properties": {
+                    "events_count": {
+                      "type": "long"
+                    },
                     "max_queue_size_in_bytes": {
                       "type": "long"
                     },
@@ -738,8 +869,29 @@
                     }
                   }
                 },
+                "reloads": {
+                  "properties": {
+                    "failures": {
+                      "type": "long"
+                    },
+                    "successes": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "vertices": {
                   "properties": {
+                    "double_gauges": {
+                      "properties": {
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "double"
+                        }
+                      },
+                      "type": "nested"
+                    },
                     "duration_in_millis": {
                       "type": "long"
                     },
@@ -752,11 +904,22 @@
                     "id": {
                       "type": "keyword"
                     },
+                    "long_counters": {
+                      "properties": {
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "long"
+                        }
+                      },
+                      "type": "nested"
+                    },
                     "pipeline_ephemeral_id": {
                       "type": "keyword"
                     },
                     "queue_push_duration_in_millis": {
-                      "type": "float"
+                      "type": "long"
                     }
                   },
                   "type": "nested"
@@ -772,6 +935,12 @@
                       "type": "long"
                     }
                   }
+                },
+                "max_file_descriptors": {
+                  "type": "long"
+                },
+                "open_file_descriptors": {
+                  "type": "long"
                 }
               }
             },
@@ -779,13 +948,30 @@
               "properties": {
                 "events_count": {
                   "type": "long"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "reloads": {
+              "properties": {
+                "failures": {
+                  "type": "long"
+                },
+                "successes": {
+                  "type": "long"
                 }
               }
             },
             "timestamp": {
               "type": "date"
+            },
+            "workers": {
+              "type": "short"
             }
-          }
+          },
+          "type": "object"
         },
         "metricset": {
           "properties": {
@@ -797,6 +983,29 @@
                 }
               },
               "type": "text"
+            }
+          }
+        },
+        "source_node": {
+          "properties": {
+            "host": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "format": "date_time",
+              "type": "date"
+            },
+            "transport_address": {
+              "type": "keyword"
+            },
+            "uuid": {
+              "type": "keyword"
             }
           }
         },

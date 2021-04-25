@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -58,7 +59,7 @@ export default function ({ getPageObjects, getService }) {
         // const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
         // expect(hasSourceFilter).to.be(true);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
     });
@@ -77,7 +78,7 @@ export default function ({ getPageObjects, getService }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.equal(2);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
 

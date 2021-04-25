@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,7 +16,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
+import { State, SeriesType, visualizationTypes, XYLayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -57,7 +58,7 @@ function getDescription(state?: State) {
     return {
       icon: LensIconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-        defaultMessage: 'Mixed H. bar',
+        defaultMessage: 'Mixed bar horizontal',
       }),
     };
   }
@@ -73,7 +74,7 @@ function getDescription(state?: State) {
 
   return {
     icon: visualizationType.icon,
-    label: visualizationType.label,
+    label: visualizationType.fullLabel || visualizationType.label,
   };
 }
 
@@ -339,11 +340,11 @@ export const getXyVisualization = ({
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
-    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+    const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
-    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
 
     const errors: Array<{
@@ -354,20 +355,49 @@ export const getXyVisualization = ({
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+      const checks: Array<[string, (layer: XYLayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
         ['Break down', hasNoSplitAccessor],
       ];
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
           accessors.length > 0 || xAccessor != null || splitAccessor != null
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
         if (!result.valid) {
           errors.push(result.payload);
+        }
+      }
+    }
+
+    if (datasourceLayers && state) {
+      for (const layer of state.layers) {
+        const datasourceAPI = datasourceLayers[layer.layerId];
+        if (datasourceAPI) {
+          for (const accessor of layer.accessors) {
+            const operation = datasourceAPI.getOperationForColumnId(accessor);
+            if (operation && operation.dataType !== 'number') {
+              errors.push({
+                shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
+                  defaultMessage: `Wrong data type for {axis}.`,
+                  values: {
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+                longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
+                  defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
+                  values: {
+                    label: operation.label,
+                    dataType: operation.dataType,
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+              });
+            }
+          }
         }
       }
     }
@@ -382,7 +412,7 @@ export const getXyVisualization = ({
 
     const layers = state.layers;
 
-    const filteredLayers = layers.filter(({ accessors }: LayerConfig) => accessors.length > 0);
+    const filteredLayers = layers.filter(({ accessors }: XYLayerConfig) => accessors.length > 0);
     const accessorsWithArrayValues = [];
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
@@ -409,8 +439,8 @@ export const getXyVisualization = ({
 
 function validateLayersForDimension(
   dimension: string,
-  layers: LayerConfig[],
-  missingCriteria: (layer: LayerConfig) => boolean
+  layers: XYLayerConfig[],
+  missingCriteria: (layer: XYLayerConfig) => boolean
 ):
   | { valid: true }
   | {
@@ -480,7 +510,7 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
+function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
   return {
     layerId,
     seriesType,

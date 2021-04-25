@@ -11,11 +11,12 @@ import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
+import { ObservableLike } from '@kbn/utility-types';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 // Warning: (ae-missing-release-tag) "AnyExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -111,16 +112,15 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
     // (undocumented)
-    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
+    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
-    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
+    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
-    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
-    // (undocumented)
-    get result(): Promise<Output | ExpressionValueError>;
-    start(input?: Input): void;
+    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
+    readonly result: Observable<Output | ExpressionValueError>;
+    start(input?: Input): Observable<Output | ExpressionValueError>;
     readonly state: ExecutionContainer<Output | ExpressionValueError>;
 }
 
@@ -138,12 +138,10 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
     getKibanaRequest?: () => KibanaRequest;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
-    getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
     inspectorAdapters: InspectorAdapters;
+    isSyncColorsEnabled?: () => boolean;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -232,7 +230,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Promise<Output>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -532,7 +530,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
+    constructor(element: HTMLElement, { onRenderError, renderMode, syncColors, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -550,6 +548,16 @@ export class ExpressionRenderHandler {
     // (undocumented)
     update$: Observable<UpdateValue | null>;
     }
+
+// Warning: (ae-missing-release-tag) "ExpressionsInspectorAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class ExpressionsInspectorAdapter extends EventEmitter {
+    // (undocumented)
+    get ast(): any;
+    // (undocumented)
+    logAST(ast: any): void;
+}
 
 // Warning: (ae-missing-release-tag) "ExpressionsPublicPlugin" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -904,6 +912,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     searchSessionId?: string;
     // (undocumented)
+    syncColors?: boolean;
+    // (undocumented)
     uiState?: unknown;
     // (undocumented)
     variables?: Record<string, any>;
@@ -921,11 +931,12 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
+    isSyncColorsEnabled: () => boolean;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -1096,6 +1107,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
 
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
+
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -1138,7 +1161,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 // Warning: (ae-missing-release-tag) "TypeString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>>;
 
 // Warning: (ae-missing-release-tag) "TypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1153,8 +1176,8 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/expressions/common/ast/types.ts:40:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_types/specs/error.ts:31:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

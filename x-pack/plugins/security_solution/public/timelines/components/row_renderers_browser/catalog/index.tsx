@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { ExternalLinkIcon } from '../../../../common/components/external_link_icon';
 
 import { RowRendererId } from '../../../../../common/types/timeline';
 import {
+  AlertsExample,
   AuditdExample,
   AuditdFileExample,
+  LibraryExample,
   NetflowExample,
+  RegistryExample,
   SuricataExample,
   SystemExample,
   SystemDnsExample,
@@ -21,6 +24,7 @@ import {
   SystemFimExample,
   SystemSecurityEventExample,
   SystemSocketExample,
+  ThreatMatchExample,
   ZeekExample,
 } from '../examples';
 import * as i18n from './translations';
@@ -33,7 +37,6 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
     data-test-subj="externalLink"
   >
     {children}
-    <ExternalLinkIcon data-test-subj="externalLinkIcon" />
   </EuiLink>
 );
 
@@ -46,6 +49,13 @@ export interface RowRendererOption {
 }
 
 export const renderers: RowRendererOption[] = [
+  {
+    id: RowRendererId.alerts,
+    name: i18n.ALERTS_NAME,
+    description: i18n.ALERTS_DESCRIPTION,
+    example: AlertsExample,
+    searchableDescription: i18n.ALERTS_DESCRIPTION,
+  },
   {
     id: RowRendererId.auditd,
     name: i18n.AUDITD_NAME,
@@ -73,6 +83,13 @@ export const renderers: RowRendererOption[] = [
     ),
     example: AuditdFileExample,
     searchableDescription: `${i18n.AUDITD_FILE_NAME} ${i18n.AUDITD_FILE_DESCRIPTION_PART1}`,
+  },
+  {
+    id: RowRendererId.library,
+    name: i18n.LIBRARY_NAME,
+    description: i18n.LIBRARY_DESCRIPTION,
+    example: LibraryExample,
+    searchableDescription: i18n.LIBRARY_DESCRIPTION,
   },
   {
     id: RowRendererId.system_security_event,
@@ -140,6 +157,13 @@ export const renderers: RowRendererOption[] = [
     searchableDescription: `${i18n.PROCESS_DESCRIPTION_PART1} ${i18n.PROCESS_DESCRIPTION_PART2}`,
   },
   {
+    id: RowRendererId.registry,
+    name: i18n.REGISTRY_NAME,
+    description: i18n.REGISTRY_DESCRIPTION,
+    example: RegistryExample,
+    searchableDescription: i18n.REGISTRY_DESCRIPTION,
+  },
+  {
     id: RowRendererId.system_fim,
     name: i18n.FIM_NAME,
     description: i18n.FIM_DESCRIPTION_PART1,
@@ -180,6 +204,13 @@ export const renderers: RowRendererOption[] = [
     ),
     example: SuricataExample,
     searchableDescription: `${i18n.SURICATA_DESCRIPTION_PART1} ${i18n.SURICATA_NAME} ${i18n.SURICATA_DESCRIPTION_PART2}`,
+  },
+  {
+    id: RowRendererId.threat_match,
+    name: i18n.THREAT_MATCH_NAME,
+    description: i18n.THREAT_MATCH_DESCRIPTION,
+    example: ThreatMatchExample,
+    searchableDescription: `${i18n.THREAT_MATCH_NAME} ${i18n.THREAT_MATCH_DESCRIPTION}`,
   },
   {
     id: RowRendererId.zeek,

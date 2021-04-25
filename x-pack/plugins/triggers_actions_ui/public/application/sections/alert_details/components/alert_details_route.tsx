@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { ToastsApi } from 'kibana/public';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
@@ -21,16 +21,17 @@ import {
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type AlertDetailsRouteProps = RouteComponentProps<{
-  alertId: string;
+  ruleId: string;
 }> &
   Pick<ActionApis, 'loadActionTypes'> &
   Pick<AlertApis, 'loadAlert' | 'loadAlertTypes'>;
 
 export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
-    params: { alertId },
+    params: { ruleId },
   },
   loadAlert,
   loadAlertTypes,
@@ -47,7 +48,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
     getAlertData(
-      alertId,
+      ruleId,
       loadAlert,
       loadAlertTypes,
       loadActionTypes,
@@ -56,7 +57,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       setActionTypes,
       toasts
     );
-  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
+  }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
 
   return alert && alertType && actionTypes ? (
     <AlertDetails
@@ -66,14 +67,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       requestRefresh={async () => requestRefresh(Date.now())}
     />
   ) : (
-    <div
-      style={{
-        textAlign: 'center',
-        margin: '4em 0em',
-      }}
-    >
-      <EuiLoadingSpinner size="l" />
-    </div>
+    <CenterJustifiedSpinner />
   );
 };
 
@@ -111,7 +105,7 @@ export async function getAlertData(
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertMessage',
         {
-          defaultMessage: 'Unable to load alert: {message}',
+          defaultMessage: 'Unable to load rule: {message}',
           values: {
             message: e.message,
           },

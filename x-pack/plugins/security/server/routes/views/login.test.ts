@@ -1,34 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
+
 import { Type } from '@kbn/config-schema';
-import {
+import type {
   HttpResources,
   HttpResourcesRequestHandler,
-  IRouter,
   RequestHandler,
-  kibanaResponseFactory,
   RouteConfig,
-} from '../../../../../../src/core/server';
-import { SecurityLicense } from '../../../common/licensing';
-import { LoginSelectorProvider } from '../../../common/login_state';
-import { ConfigType } from '../../config';
-import { defineLoginRoutes } from './login';
+} from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import {
-  coreMock,
-  httpServerMock,
-  httpResourcesMock,
-} from '../../../../../../src/core/server/mocks';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { LoginSelectorProvider } from '../../../common/login_state';
+import type { ConfigType } from '../../config';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineLoginRoutes } from './login';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let license: jest.Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {
@@ -145,7 +143,7 @@ describe('Login view routes', () => {
       return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
     }
 
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [loginStateRouteConfig, loginStateRouteHandler] = router.get.mock.calls.find(

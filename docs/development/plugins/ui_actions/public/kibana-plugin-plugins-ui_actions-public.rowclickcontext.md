@@ -15,5 +15,5 @@ export interface RowClickContext
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [data](./kibana-plugin-plugins-ui_actions-public.rowclickcontext.data.md) | <code>{</code><br/><code>        rowIndex: number;</code><br/><code>        table: Datatable;</code><br/><code>        columns?: string[];</code><br/><code>    }</code> |  |
-|  [embeddable](./kibana-plugin-plugins-ui_actions-public.rowclickcontext.embeddable.md) | <code>IEmbeddable</code> |  |
+|  [embeddable](./kibana-plugin-plugins-ui_actions-public.rowclickcontext.embeddable.md) | <code>unknown</code> |  |
 

@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
+  setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { GROUPS_PATH } from '../../routes';
-
 import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
@@ -223,10 +224,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         );
 
         const error = e.response?.status === 404 ? NOT_FOUND_MESSAGE : e;
-        FlashMessagesLogic.actions.setQueuedMessages({
-          type: 'error',
-          message: error,
-        });
+        setQueuedErrorMessage(error);
 
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       }
@@ -360,16 +358,16 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       }
     },
     showConfirmDeleteModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     showManageUsersModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     showSharedSourcesModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetFlashMessages: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

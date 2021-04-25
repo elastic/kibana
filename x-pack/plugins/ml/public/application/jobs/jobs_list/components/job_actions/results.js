@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -38,16 +39,6 @@ export function ResultLinks({ jobs }) {
   const singleMetricDisabledMessage =
     jobs.length === 1 && jobs[0].isNotSingleMetricViewerJobMessage;
 
-  const singleMetricDisabledMessageText =
-    singleMetricDisabledMessage !== undefined
-      ? i18n.translate('xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText', {
-          defaultMessage: 'Disabled because {reason}.',
-          values: {
-            reason: singleMetricDisabledMessage,
-          },
-        })
-      : undefined;
-
   const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
@@ -61,7 +52,7 @@ export function ResultLinks({ jobs }) {
       {singleMetricVisible && (
         <EuiToolTip
           position="bottom"
-          content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
+          content={singleMetricDisabledMessage ?? openJobsInSingleMetricViewerText}
         >
           <EuiButtonIcon
             href={timeSeriesExplorerLink}

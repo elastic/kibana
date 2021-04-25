@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="kbnDocTable__container kbnDocTable__padBottom">
-      <table class="kbnDocTable table" ng-if="indexPattern">
+      <table class="kbnDocTable table" ng-if="indexPattern" data-test-subj="docTable">
         <thead
           kbn-table-header
           columns="columns"
@@ -44,8 +44,10 @@
             index-pattern="indexPattern"
             filter="filter"
             class="kbnDocTable__row"
+            data-test-subj="docTableRow"
             on-add-column="onAddColumn"
             on-remove-column="onRemoveColumn"
+            use-new-fields-api="useNewFieldsApi"
           ></tr>
         </tbody>
       </table>
@@ -97,6 +99,7 @@
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
         on-add-column="onAddColumn"
         on-remove-column="onRemoveColumn"
+        use-new-fields-api="useNewFieldsApi"
       ></tr>
     </tbody>
   </table>

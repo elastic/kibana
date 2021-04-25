@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -31,6 +20,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const docTable = getService('docTable');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
+  const dataGrid = getService('dataGrid');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -88,7 +78,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      return await dataGrid.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -147,12 +137,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickHistogramBar() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
-      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
+      await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
@@ -188,26 +180,31 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocHeader() {
-      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await docHeader.getVisibleText();
+      const docHeader = await dataGrid.getHeaders();
+      return docHeader.join();
     }
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
-      const rows = await testSubjects.findAll('docTableRow');
-      return rows;
+      return await dataGrid.getBodyRows();
     }
 
     public async getDocTableIndex(index: number) {
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      // Remove control columns
+      return result.slice(2).join(' ');
+    }
+
+    public async getDocTableIndexLegacy(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
-      );
-      return await field.getVisibleText();
+    public async getDocTableField(index: number, cellIdx: number = 2) {
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      return result[cellIdx];
     }
 
     public async skipToEndOfDocTable() {
@@ -219,24 +216,35 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return skipButton.click();
     }
 
+    /**
+     * When scrolling down the legacy table there's a link to scroll up
+     * So this is done by this function
+     */
+    public async backToTop() {
+      const skipButton = await testSubjects.find('discoverBackToTop');
+      return skipButton.click();
+    }
+
     public async getDocTableFooter() {
       return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {
-      await find.clickByCssSelector('.fa-sort-down');
+      await dataGrid.clickDocSortAsc();
     }
 
     public async clickDocSortUp() {
-      await find.clickByCssSelector('.fa-sort-up');
+      await dataGrid.clickDocSortDesc();
+    }
+
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
     }
 
     public async getMarks() {
       const table = await docTable.getTable();
-      const $ = await table.parseDomContent();
-      return $('mark')
-        .toArray()
-        .map((mark) => $(mark).text());
+      const marks = await table.findAllByTagName('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     public async toggleSidebarCollapse() {
@@ -251,6 +259,34 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         .map((field) => $(field).text());
     }
 
+    public async editField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.click(`field-${field}`);
+        await testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
+    }
+
+    public async removeField(field: string) {
+      await testSubjects.click(`field-${field}`);
+      await testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+      await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    }
+
+    public async clickIndexPatternActions() {
+      await retry.try(async () => {
+        await testSubjects.click('discoverIndexPatternActions');
+        await testSubjects.existOrFail('discover-addRuntimeField-popover');
+      });
+    }
+
+    public async clickAddNewField() {
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-add-field');
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
+    }
+
     public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }
@@ -263,8 +299,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
-    public async clickFieldSort(field: string) {
-      return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+    public async clickFieldSort(field: string, text = 'Sort New-Old') {
+      await dataGrid.clickDocSortAsc(field, text);
     }
 
     public async clickFieldListItemToggle(field: string) {
@@ -336,8 +372,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(name: string) {
-      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await testSubjects.click(`docTableRemoveHeader-${name}`);
+      await dataGrid.clickRemoveColumn(name);
     }
 
     public async openSidebarFieldFilter() {
@@ -351,7 +386,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
-      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+      await elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
     }
 
     public async waitForDocTableLoadingComplete() {

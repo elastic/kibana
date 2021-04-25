@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
@@ -77,6 +78,7 @@ const apmPerAgentSchema: Pick<
     java: long,
     'js-base': long,
     nodejs: long,
+    php: long,
     python: long,
     ruby: long,
     'rum-js': long,
@@ -98,6 +100,7 @@ const apmPerAgentSchema: Pick<
     java: agentSchema,
     'js-base': agentSchema,
     nodejs: agentSchema,
+    php: agentSchema,
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
@@ -115,7 +118,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
   },
   environments: {
-    services_without_environments: long,
+    services_without_environment: long,
     services_with_multiple_environments: long,
     top_environments: { type: 'array', items: { type: 'keyword' } },
   },
@@ -191,5 +194,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     agents: { took: { ms: long } },
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
+    environments: { took: { ms: long } },
   },
 };

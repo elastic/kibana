@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { getUserPrivilege } from './api';
 import * as i18n from './translations';
 
@@ -16,6 +17,8 @@ export interface ReturnPrivilegeUser {
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
+  hasIndexMaintenance: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -26,22 +29,29 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
       ReturnPrivilegeUser,
-      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
+      | 'isAuthenticated'
+      | 'hasEncryptionKey'
+      | 'hasIndexManage'
+      | 'hasIndexWrite'
+      | 'hasIndexUpdateDelete'
+      | 'hasIndexMaintenance'
     >
   >({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,
     hasIndexWrite: null,
+    hasIndexUpdateDelete: null,
+    hasIndexMaintenance: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     setLoading(true);
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const privilege = await getUserPrivilege({
           signal: abortCtrl.signal,
@@ -53,12 +63,14 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
               hasEncryptionKey: privilege.has_encryption_key,
-              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
+              hasIndexMaintenance: privilege.index[indexName].maintenance,
               hasIndexWrite:
                 privilege.index[indexName].create ||
                 privilege.index[indexName].create_doc ||
                 privilege.index[indexName].index ||
                 privilege.index[indexName].write,
+              hasIndexUpdateDelete: privilege.index[indexName].write,
             });
           }
         }
@@ -69,22 +81,23 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             hasEncryptionKey: false,
             hasIndexManage: false,
             hasIndexWrite: false,
+            hasIndexUpdateDelete: false,
+            hasIndexMaintenance: false,
           });
-          errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.PRIVILEGE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [addError]);
 
   return { loading, ...privilegeUser };
 };

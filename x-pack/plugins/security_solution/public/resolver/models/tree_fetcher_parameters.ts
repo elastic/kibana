@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TreeFetcherParameters } from '../types';
@@ -19,7 +20,6 @@ export function equal(param1: TreeFetcherParameters, param2?: TreeFetcherParamet
   }
   if (
     param1.databaseDocumentID !== param2.databaseDocumentID ||
-    param1.dataRequestID !== param2.dataRequestID ||
     param1.filters.from !== param2.filters.from ||
     param1.filters.to !== param2.filters.to
   ) {

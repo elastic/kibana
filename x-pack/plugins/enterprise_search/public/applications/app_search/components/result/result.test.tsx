@@ -1,20 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { mockKibanaValues } from '../../../__mocks__';
+
 import React from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiPanel } from '@elastic/eui';
 
+import { SchemaTypes } from '../../../shared/types';
+
+import { Result } from './result';
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
-import { Result } from './result';
 
 describe('Result', () => {
   const props = {
+    isMetaEngine: false,
     result: {
       id: {
         raw: '1',
@@ -30,16 +38,22 @@ describe('Result', () => {
       },
       _meta: {
         id: '1',
-        scopedId: '1',
         score: 100,
         engine: 'my-engine',
       },
     },
   };
 
+  const schema = {
+    title: 'text' as SchemaTypes,
+    description: 'text' as SchemaTypes,
+    length: 'number' as SchemaTypes,
+  };
+
   it('renders', () => {
     const wrapper = shallow(<Result {...props} />);
     expect(wrapper.find(EuiPanel).exists()).toBe(true);
+    expect(wrapper.find(EuiPanel).prop('title')).toEqual('Document 1');
   });
 
   it('should render a ResultField for each field except id and _meta', () => {
@@ -51,19 +65,89 @@ describe('Result', () => {
     ]);
   });
 
-  it('passes through showScore and resultMeta to ResultHeader', () => {
-    const wrapper = shallow(<Result {...props} showScore={true} />);
-    expect(wrapper.find(ResultHeader).prop('showScore')).toBe(true);
-    expect(wrapper.find(ResultHeader).prop('resultMeta')).toEqual({
-      id: '1',
-      scopedId: '1',
-      score: 100,
-      engine: 'my-engine',
+  describe('header', () => {
+    it('renders a header', () => {
+      const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
+      const header = wrapper.find(ResultHeader);
+
+      expect(header.exists()).toBe(true);
+      expect(header.prop('isMetaEngine')).toBe(true); // passed through from props
+      expect(header.prop('showScore')).toBe(true); // passed through from props
+      expect(header.prop('resultMeta')).toEqual({
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      }); // passed through from meta in result prop
+      expect(header.prop('documentLink')).toBe(undefined); // based on shouldLinkToDetailPage prop
     });
+
+    it('passes documentLink when shouldLinkToDetailPage is true', () => {
+      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
+      const header = wrapper.find(ResultHeader);
+
+      expect(header.prop('documentLink')).toBe('/engines/my-engine/documents/1');
+    });
+  });
+
+  describe('actions', () => {
+    const actions = [
+      {
+        title: 'Hide',
+        onClick: jest.fn(),
+        iconType: 'eyeClosed',
+      },
+      {
+        title: 'Bookmark',
+        onClick: jest.fn(),
+        iconType: 'starFilled',
+      },
+    ];
+
+    it('passes actions to the header', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} />);
+      expect(wrapper.find(ResultHeader).prop('actions')).toEqual(actions);
+    });
+
+    it('adds a link action to the start of the actions array if shouldLinkToDetailPage is passed', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
+
+      const passedActions = wrapper.find(ResultHeader).prop('actions');
+      expect(passedActions.length).toEqual(3); // In addition to the 2 actions passed, we also have a link action
+
+      const linkAction = passedActions[0];
+      expect(linkAction.title).toEqual('Visit document details');
+
+      linkAction.onClick();
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/engines/my-engine/documents/1');
+    });
+  });
+
+  describe('dragging', () => {
+    // In the real world, the drag library sets data attributes, role, tabIndex, etc.
+    const mockDragHandleProps = ({
+      someMockProp: true,
+    } as unknown) as DraggableProvidedDragHandleProps;
+
+    it('will render a drag handle with the passed props', () => {
+      const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);
+
+      expect(wrapper.find('.appSearchResult__dragHandle')).toHaveLength(1);
+      expect(wrapper.find('.appSearchResult__dragHandle').prop('someMockProp')).toEqual(true);
+    });
+  });
+
+  it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
+    const wrapper = shallow(<Result {...props} schemaForTypeHighlights={schema} />);
+    expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
+      'text',
+      'text',
+      'number',
+    ]);
   });
 
   describe('when there are more than 5 fields', () => {
     const propsWithMoreFields = {
+      isMetaEngine: false,
       result: {
         id: {
           raw: '1',
@@ -88,7 +172,6 @@ describe('Result', () => {
         },
         _meta: {
           id: '1',
-          scopedId: '1',
           score: 100,
           engine: 'my-engine',
         },
@@ -102,18 +185,16 @@ describe('Result', () => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
       });
 
-      it('renders a collapse button', () => {
+      it('renders a hidden fields toggle button', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(false);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(true);
-      });
-
-      it('renders a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').text()).toEqual(
-          '1 more fields'
-        );
       });
 
       it('shows no more than 5 fields', () => {
@@ -126,20 +207,22 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
       });
 
-      it('renders a collapse button', () => {
+      it('renders correct toggle text', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').text()).toEqual(
+          'Hide additional fields<EuiIcon />'
+        );
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(true);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(false);
-      });
-
-      it('does not render a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').exists()).toBe(false);
       });
 
       it('shows all fields', () => {
@@ -152,23 +235,23 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
       });
 
-      it('renders a collapse button', () => {
+      it('renders correct toggle text', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').text()).toEqual(
+          'Show 1 additional field<EuiIcon />'
+        );
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(false);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(true);
-      });
-
-      it('renders a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').text()).toEqual(
-          '1 more fields'
-        );
       });
 
       it('shows no more than 5 fields', () => {

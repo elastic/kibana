@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useEffect } from 'react';
@@ -22,15 +23,18 @@ export const EmptyState: React.FC = ({ children }) => {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!data || data?.docCount === 0 || data?.indexExists === false) {
-      dispatch(indexStatusAction.get());
-    }
-    // Don't add data , it will create endless loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, lastRefresh]);
+  const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
 
   useEffect(() => {
+    if (noDataInfo) {
+      // only call when we haven't fetched it already
+      dispatch(indexStatusAction.get());
+    }
+  }, [dispatch, lastRefresh, noDataInfo]);
+
+  useEffect(() => {
+    // using separate side effect, we want to call index status,
+    // every statue indices setting changes
     dispatch(indexStatusAction.get());
   }, [dispatch, heartbeatIndices]);
 

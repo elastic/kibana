@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -19,7 +20,11 @@ import moment from 'moment';
 
 import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
+import {
+  getFormattedSeverityScore,
+  getSeverityColor,
+  getSeverityWithLow,
+} from '../../../../common/util/anomaly_utils';
 import {
   getChartType,
   getTickValues,
@@ -28,7 +33,6 @@ import {
   chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -58,7 +62,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService } = this.props;
+    const { tooManyBuckets, tooltipService, timeBuckets } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -258,7 +262,6 @@ export class ExplorerChartDistribution extends React.Component {
 
     function drawRareChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
@@ -457,7 +460,7 @@ export class ExplorerChartDistribution extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
-        const displayScore = score > 0 ? score : '< 1';
+        const displayScore = getFormattedSeverityScore(score);
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',

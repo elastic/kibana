@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { ConnectorTypes } from '../../../../../cases/common/api';
 import { ActionConnector } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
@@ -19,6 +21,7 @@ export interface Props {
   onChange: (id: string) => void;
   selectedConnector: string;
   appendAddConnectorButton?: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const ICON_SIZE = 'm';
@@ -31,7 +34,7 @@ const EuiIconExtended = styled(EuiIcon)`
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
       </EuiFlexItem>
@@ -60,29 +63,36 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   onChange,
   selectedConnector,
   appendAddConnectorButton = false,
+  hideConnectorServiceNowSir = false,
 }) => {
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
-      (acc, connector) => [
-        ...acc,
-        {
-          value: connector.id,
-          inputDisplay: (
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIconExtended
-                  type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
-                  size={ICON_SIZE}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <span>{connector.name}</span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          'data-test-subj': `dropdown-connector-${connector.id}`,
-        },
-      ],
+      (acc, connector) => {
+        if (hideConnectorServiceNowSir && connector.actionTypeId === ConnectorTypes.serviceNowSIR) {
+          return acc;
+        }
+
+        return [
+          ...acc,
+          {
+            value: connector.id,
+            inputDisplay: (
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconExtended
+                    type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
+                    size={ICON_SIZE}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>{connector.name}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            'data-test-subj': `dropdown-connector-${connector.id}`,
+          },
+        ];
+      },
       [noConnectorOption]
     );
 

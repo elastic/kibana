@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, FC } from 'react';
@@ -24,7 +25,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.scrollSize.description"
-          defaultMessage="The maximum number of documents requested for a search."
+          defaultMessage="The maximum number of documents to return in each search request."
         />
       }
     >

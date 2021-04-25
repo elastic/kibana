@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -129,31 +130,12 @@ export const schemas: Record<string, FormSchema> = {
         },
       ],
     },
-    dataStream: {
+    doCreateDataStream: {
       type: FIELD_TYPES.TOGGLE,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.datastreamLabel', {
         defaultMessage: 'Create data stream',
       }),
       defaultValue: false,
-      serializer: (value) => {
-        if (value === true) {
-          // For now, ES expects an empty object when defining a data stream
-          // https://github.com/elastic/elasticsearch/pull/59317
-          return {};
-        }
-      },
-      deserializer: (value) => {
-        if (typeof value === 'boolean') {
-          return value;
-        }
-
-        /**
-         * For now, it is enough to have a "data_stream" declared on the index template
-         * to assume that the template creates a data stream. In the future, this condition
-         * might change
-         */
-        return value !== undefined;
-      },
     },
     order: {
       type: FIELD_TYPES.NUMBER,

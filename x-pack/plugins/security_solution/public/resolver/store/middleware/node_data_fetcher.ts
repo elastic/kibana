@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -37,13 +38,12 @@ export function NodeDataFetcher(
      * This gets the visible nodes that we haven't already requested or received data for
      */
     const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     if (newIDsToRequest.size <= 0) {
       return;
     }
 
-    const newID = selectors.refreshCount(state);
     /**
      * Dispatch an action indicating that we are going to request data for a set of nodes so that we can show a loading
      * state for those nodes in the UI.
@@ -55,7 +55,6 @@ export function NodeDataFetcher(
       type: 'appRequestingNodeData',
       payload: {
         requestedIDs: newIDsToRequest,
-        dataRequestID: newID,
       },
     });
 
@@ -76,7 +75,6 @@ export function NodeDataFetcher(
         type: 'serverFailedToReturnNodeData',
         payload: {
           requestedIDs: newIDsToRequest,
-          dataRequestID: newID,
         },
       });
     }
@@ -114,7 +112,6 @@ export function NodeDataFetcher(
            *  if that node is still in view we'll request its node data.
            */
           numberOfRequestedEvents: nodeDataLimit,
-          dataRequestID: newID,
         },
       });
     }

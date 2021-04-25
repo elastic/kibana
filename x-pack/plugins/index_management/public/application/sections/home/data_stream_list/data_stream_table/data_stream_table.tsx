@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment } from 'react';
@@ -70,6 +71,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
@@ -90,12 +92,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     });
 
     columns.push({
-      field: 'storageSize',
+      field: 'storageSizeBytes',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
         defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
     });
   }
 
@@ -229,6 +233,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
+        tableLayout={'auto'}
       />
     </>
   );

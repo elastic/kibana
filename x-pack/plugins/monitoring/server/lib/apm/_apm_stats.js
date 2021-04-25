@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -93,13 +94,13 @@ export const apmUuidsAgg = (maxBucketSize) => ({
 });
 
 export const apmAggResponseHandler = (response) => {
-  const apmTotal = get(response, 'aggregations.total.value', null);
+  const apmTotal = get(response, 'aggregations.total.value', 0);
 
-  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
-  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
-  const memRssMax = get(response, 'aggregations.max_mem_rss_total.value', null);
-  const memRssMin = get(response, 'aggregations.min_mem_rss_total.value', null);
-  const memTotal = get(response, 'aggregations.max_mem_total_total.value', null);
+  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', 0);
+  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', 0);
+  const memRssMax = get(response, 'aggregations.max_mem_rss_total.value', 0);
+  const memRssMin = get(response, 'aggregations.min_mem_rss_total.value', 0);
+  const memTotal = get(response, 'aggregations.max_mem_total_total.value', 0);
 
   return {
     apmTotal,

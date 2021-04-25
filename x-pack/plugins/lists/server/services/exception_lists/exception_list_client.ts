@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -51,6 +52,7 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
+import { createEndpointEventFiltersList } from './create_endoint_event_filters_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -101,6 +103,18 @@ export class ExceptionListClient {
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointTrustedAppsList({
+      savedObjectsClient,
+      user,
+      version: 1,
+    });
+  };
+
+  /**
+   * Create the Endpoint Event Filters Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createEndpointEventFiltersList = async (): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return createEndpointEventFiltersList({
       savedObjectsClient,
       user,
       version: 1,

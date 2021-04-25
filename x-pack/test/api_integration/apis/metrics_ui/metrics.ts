@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
+import { InfraTimerangeInput } from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
-import { InfraNodeType, InfraTimerangeInput } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
@@ -19,7 +20,7 @@ const { min, max } = DATES['7.0.0'].hosts;
 interface NodeDetailsRequest {
   metrics: InventoryMetric[];
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: string;
   sourceId: string;
   timerange: InfraTimerangeInput;
   cloudId?: string;
@@ -44,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       return response.body;
     };
 
-    it('should basically work', () => {
+    it('should basically work', async () => {
       const data = fetchNodeDetails({
         sourceId: 'default',
         metrics: ['hostCpuUsage'],
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {
@@ -73,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should support multiple metrics', () => {
+    it('should support multiple metrics', async () => {
       const data = fetchNodeDetails({
         sourceId: 'default',
         metrics: ['hostCpuUsage', 'hostLoad'],
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {
@@ -91,6 +92,31 @@ export default function ({ getService }: FtrProviderContext) {
         }
 
         expect(resp.metrics.length).to.equal(2);
+      });
+    });
+
+    it('should return multiple values for hostSystemOverview metric', () => {
+      const data = fetchNodeDetails({
+        sourceId: 'default',
+        metrics: ['hostSystemOverview'],
+        timerange: {
+          to: max,
+          from: min,
+          interval: '>=1m',
+        },
+        nodeId: 'demo-stack-mysql-01',
+        nodeType: 'host',
+      });
+      return data.then((resp) => {
+        if (!resp) {
+          return;
+        }
+
+        const hostSystemOverviewMetric = resp.metrics.find(
+          (metric) => metric.id === 'hostSystemOverview'
+        );
+
+        expect(hostSystemOverviewMetric?.series.length).to.be.greaterThan(1);
       });
     });
   });

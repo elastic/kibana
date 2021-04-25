@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
@@ -15,17 +16,17 @@ export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction'
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
 ) {
-  return createAction<typeof APPLY_TIME_RANGE_SELECTION_ACTION>({
+  return createAction<SwimLaneDrilldownContext>({
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,
-    getIconType(context: ActionContextMapping[typeof APPLY_TIME_RANGE_SELECTION_ACTION]): string {
+    getIconType(context): string {
       return 'timeline';
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.applyTimeRangeSelectionTitle', {
         defaultMessage: 'Apply time range selection',
       }),
-    async execute({ embeddable, data }: SwimLaneDrilldownContext) {
+    async execute({ embeddable, data }) {
       if (!data) {
         throw new Error('No swim lane selection data provided');
       }
@@ -47,7 +48,7 @@ export function createApplyTimeRangeSelectionAction(
         mode: 'absolute',
       });
     },
-    async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
+    async isCompatible({ embeddable, data }) {
       return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE && data !== undefined;
     },
   });

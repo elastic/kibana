@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
@@ -20,13 +23,12 @@ import {
   getPinOnClick,
   InvestigateInResolverAction,
 } from '../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { inputsModel } from '../../../../../common/store';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
@@ -35,26 +37,27 @@ import * as i18n from '../translations';
 interface Props {
   id: string;
   actionsColumnWidth: number;
-  activeTab?: TimelineTabs;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  expanded: boolean;
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: () => void;
+  notesCount: number;
+  onEventDetailsPanelOpened: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   onRuleChange?: () => void;
+  hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   showNotes: boolean;
+  tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes: () => void;
 }
@@ -65,26 +68,27 @@ export const EventColumnView = React.memo<Props>(
   ({
     id,
     actionsColumnWidth,
-    activeTab,
     ariaRowindex,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     eventIdToNoteIds,
-    expanded,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
-    onEventToggled,
+    notesCount,
+    onEventDetailsPanelOpened,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
     refetch,
+    hasRowRenderers,
     onRuleChange,
+    renderCellValue,
     selectedEventIds,
     showCheckboxes,
     showNotes,
+    tabType,
     timelineId,
     toggleShowNotes,
   }) => {
@@ -92,6 +96,8 @@ export const EventColumnView = React.memo<Props>(
     const timelineType = useShallowEqualSelector(
       (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
     );
+
+    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
 
     // Each action button shall announce itself to screen readers via an `aria-label`
     // in the following format:
@@ -172,7 +178,6 @@ export const EventColumnView = React.memo<Props>(
                 ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
                 key="attach-to-case"
                 ecsRowData={ecsData}
-                disabled={eventType !== 'signal'}
               />,
             ]
           : []),
@@ -181,7 +186,7 @@ export const EventColumnView = React.memo<Props>(
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal'}
+          disabled={eventType !== 'signal' && (!isEventFilteringEnabled || eventType !== 'raw')}
           refetch={refetch}
           onRuleChange={onRuleChange}
         />,
@@ -203,6 +208,7 @@ export const EventColumnView = React.memo<Props>(
         timelineId,
         timelineType,
         toggleShowNotes,
+        isEventFilteringEnabled,
       ]
     );
 
@@ -215,22 +221,22 @@ export const EventColumnView = React.memo<Props>(
           checked={Object.keys(selectedEventIds).includes(id)}
           columnValues={columnValues}
           onRowSelected={onRowSelected}
-          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
           loadingEventIds={loadingEventIds}
-          onEventToggled={onEventToggled}
+          onEventDetailsPanelOpened={onEventDetailsPanelOpened}
           showCheckboxes={showCheckboxes}
         />
-
         <DataDrivenColumns
           _id={id}
-          activeTab={activeTab}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
+          hasRowRenderers={hasRowRenderers}
+          notesCount={notesCount}
+          renderCellValue={renderCellValue}
+          tabType={tabType}
           timelineId={timelineId}
         />
       </EventsTrData>

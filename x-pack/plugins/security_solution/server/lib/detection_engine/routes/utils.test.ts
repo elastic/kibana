@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -9,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
@@ -27,15 +28,16 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
-import { getResult } from './__mocks__/request_responses';
-import { AlertExecutionStatusErrorReasons } from '../../../../../alerts/common';
+import { getAlertMock } from './__mocks__/request_responses';
+import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom('some boom message');
+      const boom = new Boom.Boom('some boom message');
       const transformed = transformError(boom);
       expect(transformed).toEqual({
         message: 'An internal server error occurred',
@@ -124,7 +126,7 @@ describe('utils', () => {
 
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformBulkError('rule-1', boom);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -252,7 +254,7 @@ describe('utils', () => {
 
   describe('transformImportError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformImportError('rule-1', boom, {
         success_count: 1,
         success: false,
@@ -478,12 +480,12 @@ describe('utils', () => {
       alertsClient = alertsClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], alertsClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getResult();
+      const foundRule = getAlertMock(getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,

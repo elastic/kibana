@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import { CallOutType, CallOutMessage } from './callout_types';
-import { CallOutDescription } from './callout_description';
 import { CallOutDismissButton } from './callout_dismiss_button';
 
 export interface CallOutProps {
@@ -16,6 +17,7 @@ export interface CallOutProps {
   iconType?: string;
   dismissButtonText?: string;
   onDismiss?: (message: CallOutMessage) => void;
+  showDismissButton?: boolean;
 }
 
 const CallOutComponent: FC<CallOutProps> = ({
@@ -23,8 +25,9 @@ const CallOutComponent: FC<CallOutProps> = ({
   iconType,
   dismissButtonText,
   onDismiss,
+  showDismissButton = true,
 }) => {
-  const { type, id, title } = message;
+  const { type, id, title, description } = message;
   const finalIconType = iconType ?? getDefaultIconType(type);
 
   return (
@@ -35,8 +38,10 @@ const CallOutComponent: FC<CallOutProps> = ({
       data-test-subj={`callout-${id}`}
       data-test-messages={`[${id}]`}
     >
-      <CallOutDescription messages={message} />
-      <CallOutDismissButton message={message} text={dismissButtonText} onClick={onDismiss} />
+      {description}
+      {showDismissButton && (
+        <CallOutDismissButton message={message} text={dismissButtonText} onClick={onDismiss} />
+      )}
     </EuiCallOut>
   );
 };
@@ -52,7 +57,7 @@ const getDefaultIconType = (type: CallOutType): string => {
     case 'danger':
       return 'alert';
     default:
-      return '';
+      return assertUnreachable(type);
   }
 };
 

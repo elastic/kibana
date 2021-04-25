@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { prefixIndexPattern } from '../ccs_utils';
@@ -31,7 +32,7 @@ export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,
-        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
+        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs, true),
       };
     }, {}),
   };

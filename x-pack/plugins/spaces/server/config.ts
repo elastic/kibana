@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Observable } from 'rxjs';
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type {
-  PluginInitializerContext,
-  ConfigDeprecationProvider,
   ConfigDeprecation,
+  ConfigDeprecationProvider,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { Observable } from 'rxjs';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -21,11 +24,11 @@ export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>();
 }
 
-const disabledDeprecation: ConfigDeprecation = (config, fromPath, log) => {
+const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
   if (config.xpack?.spaces?.enabled === false) {
-    log(
-      `Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`
-    );
+    addDeprecation({
+      message: `Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
+    });
   }
   return config;
 };

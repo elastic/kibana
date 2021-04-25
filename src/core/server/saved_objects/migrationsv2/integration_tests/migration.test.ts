@@ -1,23 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
@@ -30,6 +21,14 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
+
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -41,7 +40,7 @@ describe('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: oss ? 'oss' : 'trial',
+          license: 'trial',
           dataArchive,
         },
       },
@@ -56,16 +55,16 @@ describe('migration v2', () => {
         logging: {
           appenders: {
             file: {
-              kind: 'file',
-              path: join(__dirname, 'migration_test_kibana.log'),
+              type: 'file',
+              fileName: logFilePath,
               layout: {
-                kind: 'json',
+                type: 'json',
               },
             },
           },
           loggers: [
             {
-              context: 'root',
+              name: 'root',
               appenders: ['file'],
             },
           ],
@@ -127,13 +126,15 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  describe('migrating from 7.3.0-xpack version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/87968
+  describe.skip('migrating from 7.3.0-xpack version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: false,
-        dataArchive: join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
       });
     });
 
@@ -172,7 +173,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
@@ -186,9 +189,10 @@ describe('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: true,
-        dataArchive: join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
       });
     });
 
@@ -227,7 +231,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];

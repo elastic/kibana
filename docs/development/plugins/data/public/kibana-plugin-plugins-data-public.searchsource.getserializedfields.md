@@ -9,8 +9,15 @@ serializes search source fields (which can later be passed to [ISearchStartSearc
 <b>Signature:</b>
 
 ```typescript
-getSerializedFields(): SearchSourceFields;
+getSerializedFields(recurse?: boolean): SearchSourceFields;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  recurse | <code>boolean</code> |  |
+
 <b>Returns:</b>
 
 `SearchSourceFields`

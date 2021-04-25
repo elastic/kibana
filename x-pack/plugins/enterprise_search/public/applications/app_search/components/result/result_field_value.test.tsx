@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { ResultFieldValue } from '.';
@@ -159,9 +161,9 @@ describe('ResultFieldValue', () => {
       );
     });
 
-    it('will render content as html with class names appended to em tags', () => {
+    it('will render content as html with mark tags', () => {
       expect(wrapper.find('div').html()).toContain(
-        'a <em class="enterpriseSearchResultHighlight">long</em> description'
+        'a <mark class="euiMark">long</mark> description'
       );
     });
 

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
 
 export async function fetchDiskUsageNodeStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   duration: string,
@@ -97,9 +99,10 @@ export async function fetchDiskUsageNodeStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertDiskUsageNodeStats[] = [];
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
+  const { buckets: clusterBuckets = [] } = response.aggregations!.clusters;
 
   if (!clusterBuckets.length) {
     return stats;

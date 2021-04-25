@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -42,7 +43,8 @@ export function esOverviewRoute(server) {
       const filebeatIndexPattern = prefixIndexPattern(
         config,
         config.get('monitoring.ui.logs.index'),
-        '*'
+        '*',
+        true
       );
 
       const start = req.payload.timeRange.min;
@@ -52,7 +54,7 @@ export function esOverviewRoute(server) {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
           getClusterStats(req, esIndexPattern, clusterUuid),
           getMetrics(req, esIndexPattern, metricSet),
-          getLastRecovery(req, esIndexPattern),
+          getLastRecovery(req, esIndexPattern, config.get('monitoring.ui.max_bucket_size')),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
@@ -61,12 +63,13 @@ export function esOverviewRoute(server) {
           clusterStats
         );
 
-        return {
+        const result = {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           metrics,
           logs,
           shardActivity,
         };
+        return result;
       } catch (err) {
         throw handleError(err, req);
       }

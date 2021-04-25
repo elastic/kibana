@@ -12,17 +12,16 @@ Array [
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "count": Object {
-              "value_count": Object {
-                "field": "transaction.duration.us",
-              },
-            },
             "transaction_type": Object {
-              "top_hits": Object {
-                "_source": Array [
-                  "transaction.type",
+              "top_metrics": Object {
+                "metrics": Array [
+                  Object {
+                    "field": "transaction.type",
+                  },
                 ],
-                "size": 1,
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },
@@ -57,11 +56,6 @@ Array [
                   "gte": 1528113600000,
                   "lte": 1528977600000,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
               },
             },
           ],
@@ -126,11 +120,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
           "must_not": Array [
             Object {
@@ -191,11 +180,6 @@ Array [
                   "gte": 1528113600000,
                   "lte": 1528977600000,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
               },
             },
           ],
@@ -226,17 +210,16 @@ Array [
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "count": Object {
-              "value_count": Object {
-                "field": "transaction.duration.us",
-              },
-            },
             "transaction_type": Object {
-              "top_hits": Object {
-                "_source": Array [
-                  "transaction.type",
+              "top_metrics": Object {
+                "metrics": Array [
+                  Object {
+                    "field": "transaction.type",
+                  },
                 ],
-                "size": 1,
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },
@@ -250,12 +233,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -264,13 +243,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],
@@ -305,12 +283,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -319,13 +293,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],
@@ -360,12 +333,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -374,13 +343,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],
@@ -421,12 +389,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -435,13 +399,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],

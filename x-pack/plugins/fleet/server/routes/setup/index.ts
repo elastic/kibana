@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IRouter } from 'src/core/server';
+
+import type { IRouter } from 'src/core/server';
 
 import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import { FleetConfigType } from '../../../common';
-import { getFleetStatusHandler, createFleetSetupHandler, FleetSetupHandler } from './handlers';
-import { PostFleetSetupRequestSchema } from '../../types';
+import type { FleetConfigType } from '../../../common';
+
+import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: IRouter) => {
   router.post(
@@ -19,18 +21,19 @@ export const registerFleetSetupRoute = (router: IRouter) => {
       // and will see `Unable to initialize Ingest Manager` in the UI
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    FleetSetupHandler
+    fleetSetupHandler
   );
 };
 
+// That route is used by agent to setup Fleet
 export const registerCreateFleetSetupRoute = (router: IRouter) => {
   router.post(
     {
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
-      validate: PostFleetSetupRequestSchema,
+      validate: false,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    createFleetSetupHandler
+    fleetSetupHandler
   );
 };
 

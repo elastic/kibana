@@ -1,20 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useDispatch } from 'react-redux';
 
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
@@ -41,8 +39,10 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -110,11 +110,10 @@ interface Props {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
-  expandedEvent: TimelineExpandedEvent;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
-  id: string;
+  id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
   isLive: boolean;
@@ -124,6 +123,8 @@ interface Props {
   kqlMode: KqlMode;
   query: Query;
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   start: string;
   sort: Sort[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -138,7 +139,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   docValueFields,
   end,
-  expandedEvent,
   filters,
   headerFilterGroup,
   id,
@@ -149,15 +149,16 @@ const EventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
-  query,
   onRuleChange,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   sort,
   utilityBar,
   graphEventId,
 }) => {
-  const dispatch = useDispatch();
-  const { globalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -180,16 +181,13 @@ const EventsViewerComponent: React.FC<Props> = ({
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
         <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExitFullScreen />
+          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
         </EuiFlexItem>
       </TitleFlexGroup>
     ),
-    [justTitle]
+    [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
-  const prevCombinedQueries = useRef<{
-    filterQuery: string;
-  } | null>(null);
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -216,16 +214,11 @@ const EventsViewerComponent: React.FC<Props> = ({
     queryFields,
   ]);
 
-  const prevSortField = useRef<
-    Array<{
-      field: string;
-      direction: Direction;
-    }>
-  >([]);
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
+        type: columnType,
         direction: sortDirection as Direction,
       })),
     [sort]
@@ -246,17 +239,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     endDate: end,
     skip: !canQueryTimeline,
   });
-
-  useEffect(() => {
-    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
-      prevCombinedQueries.current = combinedQueries;
-      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
-    }
-    if (!deepEqual(prevSortField.current, sortField)) {
-      prevSortField.current = sortField;
-      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
-    }
-  }, [combinedQueries, dispatch, id, sortField]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -333,7 +315,10 @@ const EventsViewerComponent: React.FC<Props> = ({
                     isEventViewer={true}
                     onRuleChange={onRuleChange}
                     refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
                     sort={sort}
+                    tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
@@ -365,6 +350,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
 export const EventsViewer = React.memo(
   EventsViewerComponent,
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
@@ -381,6 +367,8 @@ export const EventsViewer = React.memo(
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
     deepEqual(prevProps.query, nextProps.query) &&
+    prevProps.renderCellValue === nextProps.renderCellValue &&
+    prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.start === nextProps.start &&
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.utilityBar === nextProps.utilityBar &&

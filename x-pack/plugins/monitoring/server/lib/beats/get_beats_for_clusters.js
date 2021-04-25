@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
@@ -38,7 +40,7 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const clusterUuid = cluster.cluster_uuid;
+      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
       const params = {
         index: beatsIndexPattern,
         size: 0,

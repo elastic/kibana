@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -29,22 +18,15 @@ import {
   Query,
   TimeRange,
 } from '../../../../common';
-import { FormatFactory } from '../../../../common/field_formats/utils';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
-
-import type { AddFilters } from './build_tabular_inspector_data';
-import { buildTabularInspectorData } from './build_tabular_inspector_data';
 
 /** @internal */
 export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
-  addFilters?: AddFilters;
   aggs: IAggConfigs;
-  deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
   indexPattern?: IndexPattern;
   inspectorAdapters: Adapters;
@@ -55,24 +37,24 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  getNow?: () => Date;
 }
 
 export const handleRequest = async ({
   abortSignal,
-  addFilters,
   aggs,
-  deserializeFieldFormat,
   filters,
   indexPattern,
   inspectorAdapters,
-  metricsAtAllLevels,
   partialRows,
   query,
   searchSessionId,
   searchSourceService,
   timeFields,
   timeRange,
+  getNow,
 }: RequestHandlerParams) => {
+  const forceNow = getNow?.();
   const searchSource = await searchSourceService.create();
 
   searchSource.setField('index', indexPattern);
@@ -89,6 +71,7 @@ export const handleRequest = async ({
   const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
   aggs.setTimeRange(timeRange as TimeRange);
+  aggs.setTimeFields(timeFields);
 
   // For now we need to mirror the history of the passed search source, since
   // the request inspector wouldn't work otherwise.
@@ -101,9 +84,7 @@ export const handleRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function () {
-    return aggs.toDsl(metricsAtAllLevels);
-  });
+  requestSearchSource.setField('aggs', aggs);
 
   requestSearchSource.onRequestStart((paramSearchSource, options) => {
     return aggs.onSearchRequestStart(paramSearchSource, options);
@@ -120,7 +101,7 @@ export const handleRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
         .filter(isRangeFilter);
     });
   }
@@ -128,69 +109,28 @@ export const handleRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  let request;
-  if (inspectorAdapters.requests) {
-    inspectorAdapters.requests.reset();
-    request = inspectorAdapters.requests.start(
-      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-        defaultMessage: 'Data',
-      }),
-      {
+  inspectorAdapters.requests?.reset();
+
+  const response = await requestSearchSource
+    .fetch$({
+      abortSignal,
+      sessionId: searchSessionId,
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+          defaultMessage: 'Data',
+        }),
         description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
           defaultMessage:
             'This request queries Elasticsearch to fetch the data for the visualization.',
         }),
-        searchSessionId,
-      }
-    );
-    request.stats(getRequestInspectorStats(requestSearchSource));
-  }
+      },
+    })
+    .toPromise();
 
-  try {
-    const response = await requestSearchSource.fetch({
-      abortSignal,
-      sessionId: searchSessionId,
-    });
-
-    if (request) {
-      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
-    }
-
-    (searchSource as any).rawResponse = response;
-  } catch (e) {
-    // Log any error during request to the inspector
-    if (request) {
-      request.error({ json: e });
-    }
-    throw e;
-  } finally {
-    // Add the request body no matter if things went fine or not
-    if (request) {
-      request.json(await requestSearchSource.getSearchRequestBody());
-    }
-  }
-
-  // Note that rawResponse is not deeply cloned here, so downstream applications using courier
-  // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
-  // response data incorrectly in the inspector.
-  let response = (searchSource as any).rawResponse;
-  for (const agg of aggs.aggs) {
-    if (typeof agg.type.postFlightRequest === 'function') {
-      response = await agg.type.postFlightRequest(
-        response,
-        aggs,
-        agg,
-        requestSearchSource,
-        inspectorAdapters.requests,
-        abortSignal,
-        searchSessionId
-      );
-    }
-  }
-
-  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
+  const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
   const tabifyParams = {
-    metricsAtAllLevels,
+    metricsAtAllLevels: aggs.hierarchical,
     partialRows,
     timeRange: parsedTimeRange
       ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
@@ -198,17 +138,6 @@ export const handleRequest = async ({
   };
 
   const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
-
-  if (inspectorAdapters.data) {
-    inspectorAdapters.data.setTabularLoader(
-      () =>
-        buildTabularInspectorData(tabifiedResponse, {
-          addFilters,
-          deserializeFieldFormat,
-        }),
-      { returnsFormattedValues: true }
-    );
-  }
 
   return tabifiedResponse;
 };

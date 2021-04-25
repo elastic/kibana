@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -16,6 +18,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -25,9 +28,11 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
+    timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -36,23 +41,20 @@ describe('EventDetails', () => {
     isAlert: true,
   };
 
-  const wrapper = mount(
-    <TestProviders>
-      <EventDetails {...defaultProps} />
-    </TestProviders>
-  );
-
-  const alertsWrapper = mount(
-    <TestProviders>
-      <EventDetails {...alertsProps} />
-    </TestProviders>
-  );
-
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
+  let wrapper: ReactWrapper;
+  let alertsWrapper: ReactWrapper;
+  beforeAll(async () => {
+    wrapper = mount(
+      <TestProviders>
+        <EventDetails {...defaultProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    alertsWrapper = mount(
+      <TestProviders>
+        <EventDetails {...alertsProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    await waitFor(() => wrapper.update());
   });
 
   describe('tabs', () => {
@@ -75,13 +77,14 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
+        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
+            .containsMatchingElement(<span>{expectedCopy}</span>)
         ).toBeTruthy();
       });
     });

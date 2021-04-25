@@ -1,33 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
-import { mapToObject } from '@kbn/std';
-import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
+import {
+  ConfigService,
+  Env,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+  ensureValidConfiguration,
+} from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService, ensureValidConfiguration } from './legacy';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -42,7 +36,6 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as devConfig } from './dev';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
@@ -52,6 +45,7 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
+import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 
@@ -78,6 +72,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly deprecations: DeprecationsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -113,6 +108,7 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+    this.deprecations = new DeprecationsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -129,25 +125,13 @@ export class Server {
     const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevCliParent) {
-      // Immediately terminate in case of invalid configuration
-      // This needs to be done after plugin discovery
-      await this.configService.validate();
-      await ensureValidConfiguration(this.configService, legacyConfigSetup);
-    }
+    // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
+    await ensureValidConfiguration(this.configService);
 
     const contextServiceSetup = this.context.setup({
-      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any KP plugin
-      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-      //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginTree.asOpaqueIds,
-        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
 
     const httpSetup = await this.http.setup({
@@ -206,6 +190,12 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+      elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -220,19 +210,18 @@ export class Server {
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      deprecations: deprecationsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
-      plugins: mapToObject(pluginsSetup.contracts),
-      uiPlugins,
+      http: httpSetup,
     });
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup);
+    this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     return coreSetup;
@@ -258,6 +247,7 @@ export class Server {
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
+      exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
     this.coreStart = {
@@ -270,15 +260,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
     };
 
-    const pluginsStart = await this.plugins.start(this.coreStart);
-
-    await this.legacy.start({
-      core: {
-        ...this.coreStart,
-        plugins: pluginsStart,
-      },
-      plugins: mapToObject(pluginsStart.contracts),
-    });
+    await this.plugins.start(this.coreStart);
 
     await this.http.start();
 
@@ -290,28 +272,29 @@ export class Server {
     this.log.debug('stopping server');
 
     await this.legacy.stop();
+    await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
-    await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.deprecations.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
-      async (context, req, res): Promise<RequestHandlerContext['core']> => {
+      (context, req, res): RequestHandlerContext['core'] => {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
 
-  public async setupCoreConfig() {
+  public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
@@ -320,7 +303,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      devConfig,
       kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
@@ -336,7 +318,7 @@ export class Server {
       if (descriptor.deprecations) {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
-      await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
+
+import type { ReactEventHandler } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -17,9 +20,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { ApplicationStart } from 'kibana/public';
-import {
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import type { ApplicationStart } from 'kibana/public';
+
+import type {
   AgentPolicy,
   PackageInfo,
   NewPackagePolicy,
@@ -35,23 +39,21 @@ import {
 } from '../../../hooks';
 import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { PLUGIN_ID } from '../../../../../../common/constants';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
 import { CreatePackagePolicyPageLayout } from './components';
-import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
-import {
-  PackagePolicyValidationResults,
-  validatePackagePolicy,
-  validationHasErrors,
-} from './services';
+import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
+import type { PackagePolicyValidationResults } from './services';
+import { validatePackagePolicy, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { PLUGIN_ID } from '../../../../../../common/constants';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -215,7 +217,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     return from === 'policy'
       ? getHref('policy_details', { policyId: agentPolicyId || policyId })
-      : getHref('integration_details', { pkgkey });
+      : getHref('integration_details_overview', { pkgkey });
   }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(

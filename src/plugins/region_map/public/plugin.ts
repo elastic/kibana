@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -30,7 +20,8 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsEmsPluginSetup } from '../../maps_ems/public';
 import {
   setCoreService,
   setFormatService,
@@ -44,9 +35,10 @@ import { RegionMapsConfigType } from './index';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { SharePluginStart } from '../../share/public';
+import { getRegionMapRenderer } from './region_map_renderer';
 
 /** @private */
-interface RegionMapVisualizationDependencies {
+export interface RegionMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
@@ -58,6 +50,7 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -74,9 +67,8 @@ export interface RegionMapsConfig {
   layers: any[];
 }
 
-export interface RegionMapPluginSetup {
-  config: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RegionMapPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RegionMapPluginStart {}
 
@@ -88,33 +80,32 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     this._initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, mapsEms }: RegionMapPluginSetupDependencies
   ) {
     const config = {
       ...this._initializerContext.config.get<RegionMapsConfigType>(),
       // The maps legacy plugin updates the regionmap config directly in service_settings,
       // future work on how configurations across the different plugins are organized would
       // ideally constrain regionmap config updates to occur only from this plugin
-      ...mapsLegacy.config.regionmap,
+      ...mapsEms.config.regionmap,
     };
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
-      getServiceSettings: mapsLegacy.getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
     };
 
     expressions.registerFunction(createRegionMapFn);
+    expressions.registerRenderer(getRegionMapRenderer(visualizationDependencies));
 
     visualizations.createBaseVisualization(
       createRegionMapTypeDefinition(visualizationDependencies)
     );
 
-    return {
-      config,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: RegionMapPluginStartDependencies) {

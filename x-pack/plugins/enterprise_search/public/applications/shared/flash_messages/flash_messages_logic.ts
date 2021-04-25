@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { ReactNode } from 'react';
+
+import { EuiGlobalToastListToast as IToast } from '@elastic/eui';
 
 import { KibanaLogic } from '../kibana';
 
-export interface IFlashMessage {
-  type: 'success' | 'info' | 'warning' | 'error';
-  message: ReactNode;
-  description?: ReactNode;
-}
+import { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
   messages: IFlashMessage[];
   queuedMessages: IFlashMessage[];
+  toastMessages: IToast[];
   historyListener: Function | null;
 }
 interface FlashMessagesActions {
@@ -25,6 +24,9 @@ interface FlashMessagesActions {
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
+  addToastMessage(newToast: IToast): { newToast: IToast };
+  dismissToastMessage(removedToast: IToast): { removedToast: IToast };
+  clearToastMessages(): void;
   setHistoryListener(historyListener: Function): { historyListener: Function };
 }
 
@@ -38,6 +40,9 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
+    addToastMessage: (newToast) => ({ newToast }),
+    dismissToastMessage: (removedToast) => ({ removedToast }),
+    clearToastMessages: () => null,
     setHistoryListener: (historyListener) => ({ historyListener }),
   },
   reducers: {
@@ -53,6 +58,15 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
       {
         setQueuedMessages: (_, { messages }) => messages,
         clearQueuedMessages: () => [],
+      },
+    ],
+    toastMessages: [
+      [],
+      {
+        addToastMessage: (toasts, { newToast }) => [...toasts, newToast],
+        dismissToastMessage: (toasts, { removedToast }) =>
+          toasts.filter(({ id }) => id !== removedToast.id),
+        clearToastMessages: () => [],
       },
     ],
     historyListener: [

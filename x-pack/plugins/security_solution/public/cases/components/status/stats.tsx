@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { statuses } from './config';
 
 export interface Props {
@@ -21,10 +22,14 @@ const StatsComponent: React.FC<Props> = ({ caseCount, caseStatus, isLoading, dat
     () => [
       {
         title: statuses[caseStatus].stats.title,
-        description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
+        description: isLoading ? (
+          <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />
+        ) : (
+          caseCount ?? 'N/A'
+        ),
       },
     ],
-    [caseCount, caseStatus, isLoading]
+    [caseCount, caseStatus, dataTestSubj, isLoading]
   );
   return (
     <EuiDescriptionList data-test-subj={dataTestSubj} textStyle="reverse" listItems={statusStats} />

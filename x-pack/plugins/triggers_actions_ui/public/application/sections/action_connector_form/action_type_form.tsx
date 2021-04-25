@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Suspense, useEffect, useState } from 'react';
@@ -22,19 +23,17 @@ import {
   EuiFormLabel,
   EuiFormControlLayout,
   EuiSuperSelect,
-  EuiLoadingSpinner,
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { pick } from 'lodash';
-import { AlertActionParam } from '../../../../../alerts/common';
+import { partition, pick } from 'lodash';
+import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
-  ActionVariable,
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
@@ -106,6 +105,7 @@ export const ActionTypeForm = ({
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
   const selectedActionGroup =
     actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+  const [actionGroup, setActionGroup] = useState<string>();
 
   useEffect(() => {
     setAvailableActionVariables(
@@ -113,11 +113,22 @@ export const ActionTypeForm = ({
     );
     if (defaultParams) {
       for (const [key, paramValue] of Object.entries(defaultParams)) {
-        setActionParamsProperty(key, paramValue, index);
+        if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
+          setActionParamsProperty(key, paramValue, index);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
+
+  useEffect(() => {
+    if (defaultParams && actionGroup) {
+      for (const [key, paramValue] of Object.entries(defaultParams)) {
+        setActionParamsProperty(key, paramValue, index);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionGroup]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
@@ -204,7 +215,7 @@ export const ActionTypeForm = ({
                   >
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run When"
+                      defaultMessage="Run when"
                     />
                   </EuiFormLabel>
                 }
@@ -222,6 +233,7 @@ export const ActionTypeForm = ({
                   valueOfSelected={selectedActionGroup.id}
                   onChange={(group) => {
                     setActionGroupIdByIndex(group, index);
+                    setActionGroup(group);
                   }}
                 />
               </EuiFormControlLayout>
@@ -280,15 +292,7 @@ export const ActionTypeForm = ({
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
+          <Suspense fallback={null}>
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}
@@ -390,9 +394,21 @@ function getAvailableActionVariables(
   actionVariables: ActionVariables,
   actionGroup?: ActionGroupWithMessageVariables
 ) {
-  return transformActionVariables(
+  const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionGroup?.omitOptionalMessageVariables
       ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
       : actionVariables
-  ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
+  );
+
+  // partition deprecated items so they show up last
+  const partitionedActionVariables = partition(
+    transformedActionVariables,
+    (v) => v.deprecated !== true
+  );
+  return partitionedActionVariables.reduce((acc, curr) => {
+    return [
+      ...acc,
+      ...curr.sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase())),
+    ];
+  }, []);
 }

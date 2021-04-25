@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, useState } from 'react';
@@ -27,6 +28,8 @@ export type OnCloseFn = (type: CloseTypes) => void;
 export type GetExportUrlFn = (type: ExportUrlTypes, layout: LayoutType) => string;
 
 export interface Props {
+  /** Flag to include the Reporting option only if Reporting is enabled */
+  includeReporting: boolean;
   /** Handler to invoke when an export URL is copied to the clipboard. */
   onCopy: OnCopyFn;
   /** Handler to invoke when an end product is exported. */
@@ -38,7 +41,12 @@ export interface Props {
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExportUrl }) => {
+export const ShareMenu: FunctionComponent<Props> = ({
+  includeReporting,
+  onCopy,
+  onExport,
+  getExportUrl,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = () => {
@@ -72,16 +80,18 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
           closePopover();
         },
       },
-      {
-        name: strings.getShareDownloadPDFTitle(),
-        icon: 'document',
-        panel: {
-          id: 1,
-          title: strings.getShareDownloadPDFTitle(),
-          content: getPDFPanel(closePopover),
-        },
-        'data-test-subj': 'sharePanel-PDFReports',
-      },
+      includeReporting
+        ? {
+            name: strings.getShareDownloadPDFTitle(),
+            icon: 'document',
+            panel: {
+              id: 1,
+              title: strings.getShareDownloadPDFTitle(),
+              content: getPDFPanel(closePopover),
+            },
+            'data-test-subj': 'sharePanel-PDFReports',
+          }
+        : false,
       {
         name: strings.getShareWebsiteTitle(),
         icon: <EuiIcon type="globe" size="m" />,
@@ -90,7 +100,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
           closePopover();
         },
       },
-    ],
+    ].filter(Boolean),
   });
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
@@ -122,6 +132,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
 };
 
 ShareMenu.propTypes = {
+  includeReporting: PropTypes.bool.isRequired,
   onCopy: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
   getExportUrl: PropTypes.func.isRequired,

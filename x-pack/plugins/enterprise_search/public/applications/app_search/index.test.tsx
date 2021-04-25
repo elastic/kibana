@@ -1,23 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
+import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import '../__mocks__/enterprise_search_url.mock';
-import { setMockValues, setMockActions } from '../__mocks__';
+import { setMockValues, rerender } from '../__mocks__';
 
 import React from 'react';
+
 import { Redirect } from 'react-router-dom';
-import { shallow } from 'enzyme';
+
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { SetupGuide } from './components/setup_guide';
-import { ErrorConnecting } from './components/error_connecting';
-import { EnginesOverview } from './components/engines';
+
+jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
+import { AppLogic } from './app_logic';
+
 import { EngineRouter } from './components/engine';
+import { EngineCreation } from './components/engine_creation';
+import { EnginesOverview } from './components/engines';
+import { ErrorConnecting } from './components/error_connecting';
+import { MetaEngineCreation } from './components/meta_engine_creation';
+import { RoleMappingsRouter } from './components/role_mappings';
+import { SetupGuide } from './components/setup_guide';
+
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -46,59 +56,84 @@ describe('AppSearchUnconfigured', () => {
 });
 
 describe('AppSearchConfigured', () => {
-  beforeEach(() => {
-    // Mock resets
+  let wrapper: ShallowWrapper;
+
+  beforeAll(() => {
     setMockValues({ myRole: {} });
-    setMockActions({ initializeAppData: () => {} });
+    wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
   });
 
   it('renders with layout', () => {
-    const wrapper = shallow(<AppSearchConfigured />);
-
     expect(wrapper.find(Layout)).toHaveLength(2);
     expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
-  it('initializes app data with passed props', () => {
-    const initializeAppData = jest.fn();
-    setMockActions({ initializeAppData });
-
-    shallow(<AppSearchConfigured ilmEnabled={true} />);
-
-    expect(initializeAppData).toHaveBeenCalledWith({ ilmEnabled: true });
-  });
-
-  it('does not re-initialize app data', () => {
-    const initializeAppData = jest.fn();
-    setMockActions({ initializeAppData });
-    setMockValues({ myRole: {}, hasInitialized: true });
-
-    shallow(<AppSearchConfigured />);
-
-    expect(initializeAppData).not.toHaveBeenCalled();
+  it('mounts AppLogic with passed initial data props', () => {
+    expect(AppLogic).toHaveBeenCalledWith(DEFAULT_INITIAL_APP_DATA);
   });
 
   it('renders ErrorConnecting', () => {
     setMockValues({ myRole: {}, errorConnecting: true });
-
-    const wrapper = shallow(<AppSearchConfigured />);
+    rerender(wrapper);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
   });
 
   it('passes readOnlyMode state', () => {
     setMockValues({ myRole: {}, readOnlyMode: true });
-
-    const wrapper = shallow(<AppSearchConfigured />);
+    rerender(wrapper);
 
     expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
-    // TODO: Use this section for routes wrapped in canViewX conditionals
-    // e.g., it('renders settings if a user can view settings')
+    describe('canViewRoleMappings', () => {
+      it('renders RoleMappings when canViewRoleMappings is true', () => {
+        setMockValues({ myRole: { canViewRoleMappings: true } });
+        rerender(wrapper);
+        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(1);
+      });
+
+      it('does not render RoleMappings when user canViewRoleMappings is false', () => {
+        setMockValues({ myRole: { canManageEngines: false } });
+        rerender(wrapper);
+        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(0);
+      });
+    });
+
+    describe('canManageEngines', () => {
+      it('renders EngineCreation when user canManageEngines is true', () => {
+        setMockValues({ myRole: { canManageEngines: true } });
+        rerender(wrapper);
+
+        expect(wrapper.find(EngineCreation)).toHaveLength(1);
+      });
+
+      it('does not render EngineCreation when user canManageEngines is false', () => {
+        setMockValues({ myRole: { canManageEngines: false } });
+        rerender(wrapper);
+
+        expect(wrapper.find(EngineCreation)).toHaveLength(0);
+      });
+    });
+
+    describe('canManageMetaEngines', () => {
+      it('renders MetaEngineCreation when user canManageMetaEngines is true', () => {
+        setMockValues({ myRole: { canManageMetaEngines: true } });
+        rerender(wrapper);
+
+        expect(wrapper.find(MetaEngineCreation)).toHaveLength(1);
+      });
+
+      it('does not render MetaEngineCreation when user canManageMetaEngines is false', () => {
+        setMockValues({ myRole: { canManageMetaEngines: false } });
+        rerender(wrapper);
+
+        expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
+      });
+    });
   });
 });
 
@@ -135,8 +170,6 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewRoleMappings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as#/role-mappings'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/role_mappings');
   });
 });

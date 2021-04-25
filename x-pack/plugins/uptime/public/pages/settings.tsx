@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -33,6 +34,7 @@ import {
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
+import { BLANK_STR, SPACE_STR } from './translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -64,7 +66,9 @@ const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldEr
   if (formFields) {
     const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
 
-    const indError = heartbeatIndices.match(/^\S+$/) ? '' : Translations.BLANK_STR;
+    const indErrorSpace = heartbeatIndices.includes(' ') ? SPACE_STR : '';
+
+    const indError = indErrorSpace || (heartbeatIndices.match(/^\S+$/) ? '' : BLANK_STR);
 
     const expError = isValidCertVal(certExpirationThreshold);
     const ageError = isValidCertVal(certAgeThreshold);
@@ -145,7 +149,6 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>

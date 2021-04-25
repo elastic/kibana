@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -13,17 +14,22 @@ import {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
-  HorizontalAlignment,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
+import { Status } from '../status';
+import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
+import { ALERTS } from '../../../app/home/translations';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -53,10 +59,14 @@ export const getCasesColumns = (
   const columns = [
     {
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = !isModal ? (
-            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              title={theCase.title}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+            >
               {theCase.title}
             </CaseDetailsLink>
           ) : (
@@ -65,12 +75,12 @@ export const getCasesColumns = (
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
-            <>
-              {caseDetailsLinkComponent}
-              <Spacer>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>{caseDetailsLinkComponent}</EuiFlexItem>
+              <EuiFlexItem>
                 <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
-              </Spacer>
-            </>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }
         return getEmptyTagValue();
@@ -121,32 +131,25 @@ export const getCasesColumns = (
       truncateText: true,
     },
     {
-      align: 'right' as HorizontalAlignment,
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
+    {
+      align: RIGHT_ALIGNMENT,
       field: 'totalComment',
       name: i18n.COMMENTS,
-      sortable: true,
       render: (totalComment: Case['totalComment']) =>
         totalComment != null
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
           : getEmptyTagValue(),
     },
-    filterStatus === CaseStatuses.open
+    filterStatus === CaseStatuses.closed
       ? {
-          field: 'createdAt',
-          name: i18n.OPENED_ON,
-          sortable: true,
-          render: (createdAt: Case['createdAt']) => {
-            if (createdAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-createdAt`}>
-                  <FormattedRelativePreferenceDate value={createdAt} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
-        }
-      : {
           field: 'closedAt',
           name: i18n.CLOSED_ON,
           sortable: true,
@@ -155,6 +158,21 @@ export const getCasesColumns = (
               return (
                 <span data-test-subj={`case-table-column-closedAt`}>
                   <FormattedRelativePreferenceDate value={closedAt} />
+                </span>
+              );
+            }
+            return getEmptyTagValue();
+          },
+        }
+      : {
+          field: 'createdAt',
+          name: i18n.OPENED_ON,
+          sortable: true,
+          render: (createdAt: Case['createdAt']) => {
+            if (createdAt != null) {
+              return (
+                <span data-test-subj={`case-table-column-createdAt`}>
+                  <FormattedRelativePreferenceDate value={createdAt} />
                 </span>
               );
             }
@@ -180,6 +198,24 @@ export const getCasesColumns = (
           );
         }
         return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.STATUS,
+      render: (theCase: Case) => {
+        if (theCase?.subCases == null || theCase.subCases.length === 0) {
+          if (theCase.status == null || theCase.type === CaseType.collection) {
+            return getEmptyTagValue();
+          }
+          return <Status type={theCase.status} />;
+        }
+
+        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+        return badges.map(({ color, count }, index) => (
+          <EuiBadge key={index} color={color}>
+            {count}
+          </EuiBadge>
+        ));
       },
     },
     {

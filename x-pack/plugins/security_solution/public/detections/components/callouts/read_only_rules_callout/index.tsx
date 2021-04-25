@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo } from 'react';
@@ -14,7 +15,7 @@ const readOnlyAccessToRulesMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-rules',
   title: i18n.READ_ONLY_RULES_CALLOUT_TITLE,
-  description: <p>{i18n.READ_ONLY_RULES_CALLOUT_MSG}</p>,
+  description: i18n.readOnlyRulesCallOutBody(),
 };
 
 const ReadOnlyRulesCallOutComponent = () => {

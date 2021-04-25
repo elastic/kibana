@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -41,7 +42,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
 
   const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
-  const { data: newAlert } = useSelector(newAlertSelector);
+  const { data: newAlert, error: newAlertError } = useSelector(newAlertSelector);
 
   const isNewAlert = newAlert?.params.search.includes(monitorId);
 
@@ -84,7 +85,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
 
   useEffect(() => {
     setIsLoading(false);
-  }, [hasAlert, deletedAlertId]);
+  }, [hasAlert, deletedAlertId, newAlertError]);
 
   const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 

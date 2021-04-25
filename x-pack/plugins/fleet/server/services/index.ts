@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent, EsAssetReference } from '../types';
-import * as settingsService from './settings';
-import { getAgent, listAgents } from './agents';
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
-import { agentPolicyService } from './agent_policy';
+import type { KibanaRequest } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
+import type { AgentStatus, Agent, EsAssetReference } from '../types';
+
+import type { getAgentById, getAgentsByKuery } from './agents';
+import type { agentPolicyService } from './agent_policy';
+import * as settingsService from './settings';
+
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
 
 /**
@@ -42,22 +46,22 @@ export interface AgentService {
   /**
    * Get an Agent by id
    */
-  getAgent: typeof getAgent;
+  getAgent: typeof getAgentById;
   /**
    * Authenticate an agent with access toekn
    */
   authenticateAgentWithAccessToken(
-    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
+  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
   /**
    * List agents
    */
-  listAgents: typeof listAgents;
+  listAgents: typeof getAgentsByKuery;
 }
 
 export interface AgentPolicyServiceInterface {
@@ -76,3 +80,9 @@ export { settingsService };
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+
+// Artifacts services
+export * from './artifacts';
+
+// Policy preconfiguration functions
+export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';

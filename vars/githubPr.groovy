@@ -169,12 +169,18 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
     ? getBuildStatusIncludingMetrics()
     : buildUtils.getBuildStatus()
 
+  def storybooksUrl = buildState.get('storybooksUrl')
+  def storybooksMessage = storybooksUrl ? "* [Storybooks Preview](${storybooksUrl})" : "* Storybooks not built"
+
   if (!isFinal) {
+    storybooksMessage = storybooksUrl ? storybooksMessage : "* Storybooks not built yet"
+
     def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
     messages << """
       ## :hourglass_flowing_sand: Build in-progress${failuresPart}
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
       * This comment will update when the build is complete
     """
   } else if (status == 'SUCCESS') {
@@ -182,12 +188,16 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
+      ${getDocsChangesLink()}
     """
   } else if(status == 'UNSTABLE') {
     def message = """
       ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
+      ${getDocsChangesLink()}
     """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
@@ -202,8 +212,10 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       ## :broken_heart: Build Failed
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
+      ${getDocsChangesLink()}
     """
   }
 
@@ -231,6 +243,13 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   }
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
+
+  catchErrors {
+    def assignees = getAssignees()
+    if (assignees) {
+      messages << "cc " + assignees.collect { "@${it}"}.join(" ")
+    }
+  }
 
   info.builds << [
     status: status,
@@ -292,6 +311,26 @@ def getCommitHash() {
   return env.ghprbActualCommit
 }
 
+def getDocsChangesLink() {
+  def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
+
+  try {
+    // httpRequest throws on status codes >400 and failures
+    def resp = httpRequest([ method: "GET", url: url ])
+
+    if (resp.contains("There aren't any differences!")) {
+      return ""
+    }
+
+    return "* [Documentation Changes](${url})"
+  } catch (ex) {
+    print "Failed to reach ${url}"
+    buildUtils.printStacktrace(ex)
+  }
+
+  return ""
+}
+
 def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
@@ -305,4 +344,20 @@ def shouldCheckCiMetricSuccess() {
   }
 
   return true
+}
+
+def getPR() {
+  withGithubCredentials {
+    def path = "repos/elastic/kibana/pulls/${env.ghprbPullId}"
+    return githubApi.get(path)
+  }
+}
+
+def getAssignees() {
+  def pr = getPR()
+  if (!pr) {
+    return []
+  }
+
+  return pr.assignees.collect { it.login }
 }

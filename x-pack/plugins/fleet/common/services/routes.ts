@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
@@ -33,6 +35,10 @@ export const epmRouteService = {
 
   getInfoPath: (pkgkey: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  },
+
+  getStatsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getFilePath: (filePath: string) => {
@@ -158,6 +164,7 @@ export const settingsRoutesService = {
 
 export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

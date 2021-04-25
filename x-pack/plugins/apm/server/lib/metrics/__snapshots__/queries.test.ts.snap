@@ -72,22 +72,17 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],
@@ -160,22 +155,17 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -323,22 +313,17 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -416,22 +401,17 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -499,22 +479,17 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -602,15 +577,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -622,8 +588,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
         ],
@@ -696,15 +666,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -716,8 +677,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
           Object {
@@ -865,15 +830,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -885,8 +841,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
           Object {
@@ -964,15 +924,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -984,8 +935,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
           Object {
@@ -1053,15 +1008,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -1073,8 +1019,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
           Object {
@@ -1170,11 +1120,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -1251,11 +1196,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -1412,11 +1352,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "exists": Object {
               "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
@@ -1501,11 +1436,6 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
               "agent.name": "java",
             },
           },
@@ -1575,11 +1505,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {

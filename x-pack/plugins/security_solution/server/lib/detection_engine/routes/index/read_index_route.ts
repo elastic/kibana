@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -12,7 +13,7 @@ import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 
-export const readIndexRoute = (router: IRouter) => {
+export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -25,7 +26,7 @@ export const readIndexRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
@@ -33,12 +34,12 @@ export const readIndexRoute = (router: IRouter) => {
         }
 
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
+        const indexExists = await getIndexExists(esClient, index);
 
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
           try {
-            const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
+            const indexVersion = await getIndexVersion(esClient, index);
             mappingOutdated = isOutdated({
               current: indexVersion,
               target: SIGNALS_TEMPLATE_VERSION,

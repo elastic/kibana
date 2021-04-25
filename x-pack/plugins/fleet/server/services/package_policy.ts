@@ -1,33 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { KibanaRequest, RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
+
+import type { KibanaRequest } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import uuid from 'uuid';
-import { AuthenticatedUser } from '../../../security/server';
+
+import type { AuthenticatedUser } from '../../../security/server';
 import {
-  DeletePackagePoliciesResponse,
-  PackagePolicyInput,
-  NewPackagePolicyInput,
-  PackagePolicyInputStream,
-  PackageInfo,
-  ListWithKuery,
   packageToPackagePolicy,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
 } from '../../common';
+import type {
+  DeletePackagePoliciesResponse,
+  PackagePolicyInput,
+  NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
+  PackagePolicyInputStream,
+  PackageInfo,
+  ListWithKuery,
+  ListResult,
+} from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
+  HostedAgentPolicyRestrictionRelatedError,
+  IngestManagerError,
+  ingestErrorToResponseOptions,
+} from '../errors';
+import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  CallESAsCurrentUser,
-  NewPackagePolicySchema,
-  UpdatePackagePolicySchema,
 } from '../types';
+import type { ExternalCallback } from '..';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -36,7 +53,6 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
-import { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -47,23 +63,36 @@ function getDataset(st: string) {
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
-    callCluster: CallESAsCurrentUser,
+    esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
+    options?: {
+      id?: string;
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force?: boolean;
+      skipEnsureInstalled?: boolean;
+    }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
     }
+    if (parentAgentPolicy.is_managed && !options?.force) {
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
+      );
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new IngestManagerError(
+        'There is already a package with the same name on this agent policy'
+      );
+    }
+
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -72,25 +101,32 @@ class PackagePolicyService {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const [, pkgInfo] = await Promise.all([
-        ensureInstalledPackage({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          callCluster,
-        }),
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
-        }),
-      ]);
+      const pkgInfoPromise = getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packagePolicy.package.version,
+      });
+
+      let pkgInfo;
+      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
+      else {
+        const [, packageInfo] = await Promise.all([
+          ensureInstalledPackage({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            esClient,
+          }),
+          pkgInfoPromise,
+        ]);
+        pkgInfo = packageInfo;
+      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
         const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
-          throw new Error(
+          throw new IngestManagerError(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
@@ -116,10 +152,17 @@ class PackagePolicyService {
     );
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.policy_id, [newSo.id], {
-      user: options?.user,
-      bumpRevision: options?.bumpRevision ?? true,
-    });
+    await agentPolicyService.assignPackagePolicies(
+      soClient,
+      esClient,
+      packagePolicy.policy_id,
+      [newSo.id],
+      {
+        user: options?.user,
+        bumpRevision: options?.bumpRevision ?? true,
+        force: options?.force,
+      }
+    );
 
     return {
       id: newSo.id,
@@ -130,6 +173,7 @@ class PackagePolicyService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -167,6 +211,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
       soClient,
+      esClient,
       agentPolicyId,
       newSos.map((newSo) => newSo.id),
       {
@@ -226,7 +271,7 @@ class PackagePolicyService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: PackagePolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
@@ -250,8 +295,33 @@ class PackagePolicyService {
     };
   }
 
+  public async listIds(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery
+  ): Promise<ListResult<string>> {
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+
+    const packagePolicies = await soClient.find<{}>({
+      type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
+      page,
+      perPage,
+      fields: [],
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+    });
+
+    return {
+      items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
+      total: packagePolicies.total,
+      page,
+      perPage,
+    };
+  }
+
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser }
@@ -267,20 +337,21 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) =>
-            siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) =>
+          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
     }
 
-    let inputs = await restOfPackagePolicy.inputs.map((input) =>
+    let inputs = restOfPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
+
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
 
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
@@ -308,7 +379,7 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, packagePolicy.policy_id, {
+    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
@@ -317,8 +388,9 @@ class PackagePolicyService {
 
   public async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
+    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
   ): Promise<DeletePackagePoliciesResponse> {
     const result: DeletePackagePoliciesResponse = [];
 
@@ -331,10 +403,12 @@ class PackagePolicyService {
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
+            esClient,
             packagePolicy.policy_id,
             [packagePolicy.id],
             {
               user: options?.user,
+              force: options?.force,
             }
           );
         }
@@ -344,10 +418,11 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
-      } catch (e) {
+      } catch (error) {
         result.push({
           id,
           success: false,
+          ...ingestErrorToResponseOptions(error),
         });
       }
     }
@@ -437,7 +512,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
-  if (!input.enabled || !pkgInfo.policy_templates?.[0].inputs) {
+  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
     return undefined;
   }
 
@@ -534,5 +609,43 @@ async function _compilePackageStream(
   return { ...stream };
 }
 
+function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+  const resultInputs = [...newInputs];
+
+  for (const input of resultInputs) {
+    const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (input.vars && oldInput?.vars) {
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+    }
+    if (input.streams && oldInput?.streams) {
+      for (const stream of input.streams) {
+        const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (stream.vars && oldStream?.vars) {
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+        }
+      }
+    }
+  }
+
+  return resultInputs;
+}
+
+function _enforceFrozenVars(
+  oldVars: Record<string, PackagePolicyConfigRecordEntry>,
+  newVars: Record<string, PackagePolicyConfigRecordEntry>
+) {
+  const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (val.frozen) {
+      resultVars[key] = val;
+    } else {
+      resultVars[key] = newVars[key];
+    }
+  }
+  return resultVars;
+}
+
 export type PackagePolicyServiceInterface = PackagePolicyService;
 export const packagePolicyService = new PackagePolicyService();
+
+export type { PackagePolicyService };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -20,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
-  EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
 
@@ -29,9 +29,10 @@ import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
+import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -175,11 +176,13 @@ export class EditJobFlyoutUI extends Component {
   extractJob(job, hasDatafeed) {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
+    const jobClosed = job.state === JOB_STATE.CLOSED;
 
     this.setState({
       job,
       hasDatafeed,
       datafeedRunning,
+      jobClosed,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
@@ -195,16 +198,24 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      if (jobDetails.jobGroups.some((j) => this.props.allJobIds.includes(j))) {
-        jobGroupsValidationError = i18n.translate(
-          'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
-          {
-            defaultMessage:
-              'A job with this ID already exists. Groups and jobs cannot use the same ID.',
+      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      if (jobGroupsValidationError === '') {
+        ml.jobs.jobsExist(jobDetails.jobGroups, true).then((resp) => {
+          const groups = Object.values(resp);
+          const valid = groups.some((g) => g.exists === true && g.isGroup === false) === false;
+          if (valid === false) {
+            this.setState({
+              jobGroupsValidationError: i18n.translate(
+                'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
+                {
+                  defaultMessage:
+                    'A job with this ID already exists. Groups and jobs cannot use the same ID.',
+                }
+              ),
+              isValidJobDetails: false,
+            });
           }
-        );
-      } else {
-        jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+        });
       }
     }
 
@@ -309,6 +320,7 @@ export class EditJobFlyoutUI extends Component {
         isValidJobDetails,
         isValidJobCustomUrls,
         datafeedRunning,
+        jobClosed,
       } = this.state;
 
       const tabs = [
@@ -319,6 +331,7 @@ export class EditJobFlyoutUI extends Component {
           }),
           content: (
             <JobDetails
+              jobClosed={jobClosed}
               datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
               jobGroups={jobGroups}
@@ -433,38 +446,36 @@ export class EditJobFlyoutUI extends Component {
 
     if (this.state.isConfirmationModalVisible) {
       confirmationModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
-                defaultMessage="Save changes before leaving?"
-              />
-            }
-            onCancel={() => this.closeFlyout(true)}
-            onConfirm={() => this.save()}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
-                defaultMessage="Leave anyway"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
-                defaultMessage="Save changes"
-              />
-            }
-            defaultFocusedButton="confirm"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
-                defaultMessage="If you don't save, your changes will be lost."
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
+              defaultMessage="Save changes before leaving?"
+            />
+          }
+          onCancel={() => this.closeFlyout(true)}
+          onConfirm={() => this.save()}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
+              defaultMessage="Leave anyway"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
+              defaultMessage="Save changes"
+            />
+          }
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
+              defaultMessage="If you don't save, your changes will be lost."
+            />
+          </p>
+        </EuiConfirmModal>
       );
     }
 

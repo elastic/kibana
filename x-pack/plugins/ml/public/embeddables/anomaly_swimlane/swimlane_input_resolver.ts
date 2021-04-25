@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { isEqual } from 'lodash';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   map,
-  pluck,
   skipWhile,
   startWith,
   switchMap,
@@ -27,33 +26,21 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/apply_influencer_filters_action';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { processFilters } from '../common/process_filters';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
-
-function getJobsObservable(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  anomalyDetectorService: AnomalyDetectorService
-) {
-  return embeddableInput.pipe(
-    pluck('jobIds'),
-    distinctUntilChanged(isEqual),
-    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds))
-  );
-}
 
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
@@ -94,7 +81,7 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     const subscription = combineLatest([
-      getJobsObservable(embeddableInput, anomalyDetectorService),
+      getJobsObservable(embeddableInput, anomalyDetectorService, setError),
       embeddableInput,
       chartWidth$.pipe(skipWhile((v) => !v)),
       fromPage$,
@@ -111,6 +98,11 @@ export function useSwimlaneInputResolver(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
+          if (!jobs) {
+            // couldn't load the list of jobs
+            return of(undefined);
+          }
+
           const {
             viewBy,
             swimlaneType: swimlaneTypeInput,
@@ -138,7 +130,7 @@ export function useSwimlaneInputResolver(
 
           let appliedFilters: any;
           try {
-            appliedFilters = processFilters(filters, query);
+            appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
           } catch (e) {
             // handle query syntax errors
             setError(e);
@@ -230,45 +222,4 @@ export function useSwimlaneInputResolver(
     isLoading,
     error,
   ];
-}
-
-export function processFilters(filters: Filter[], query: Query) {
-  const inputQuery =
-    query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : query.query;
-
-  const must = [inputQuery];
-  const mustNot = [];
-  for (const filter of filters) {
-    // ignore disabled filters as well as created by swim lane selection
-    if (filter.meta.disabled || filter.meta.controlledBy === CONTROLLED_BY_SWIM_LANE_FILTER)
-      continue;
-
-    const {
-      meta: { negate, type, key: fieldName },
-    } = filter;
-
-    let filterQuery = filter.query;
-
-    if (filterQuery === undefined && type === 'exists') {
-      filterQuery = {
-        exists: {
-          field: fieldName,
-        },
-      };
-    }
-
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
-    }
-  }
-  return {
-    bool: {
-      must,
-      must_not: mustNot,
-    },
-  };
 }

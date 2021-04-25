@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export default function ({ getService }) {
 
   describe('nodes', () => {
     describe('with green platinum cluster', () => {
-      const archive = 'monitoring/singlecluster-green-platinum';
+      const archive = 'monitoring/singlecluster_green_platinum';
       const timeRange = {
         min: '2018-02-13T17:04:50.000Z',
         max: '2018-02-13T17:51:55.000Z',
@@ -45,7 +46,7 @@ export default function ({ getService }) {
     });
 
     describe('with red platinum cluster', () => {
-      const archive = 'monitoring/singlecluster-red-platinum';
+      const archive = 'monitoring/singlecluster_red_platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
         max: '2017-10-06T20:15:30.000Z',
@@ -74,7 +75,7 @@ export default function ({ getService }) {
     });
 
     describe('with green trial cluster and node in cpu group', () => {
-      const archive = 'monitoring/singlecluster-green-trial-two-nodes-one-cgrouped';
+      const archive = 'monitoring/singlecluster_green_trial_two_nodes_one_cgrouped';
       const timeRange = {
         min: '2018-02-13T19:18:02.000Z',
         max: '2018-02-13T19:26:14.000Z',

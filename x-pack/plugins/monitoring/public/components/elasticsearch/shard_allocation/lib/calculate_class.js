@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import { get } from 'lodash';
 
 export function calculateClass(item, initial) {
   const classes = [item.type];
@@ -11,9 +13,16 @@ export function calculateClass(item, initial) {
   }
   if (item.type === 'shard') {
     classes.push('monShard');
-    classes.push((item.primary && 'primary') || 'replica');
-    classes.push(item.state.toLowerCase());
-    if (item.state === 'UNASSIGNED' && item.primary) {
+    if (get(item, 'shard.primary', item.primary)) {
+      classes.push('primary');
+    } else {
+      classes.push('replica');
+    }
+    classes.push(get(item, 'shard.state', item.state).toLowerCase());
+    if (
+      get(item, 'shard.state', item.state) === 'UNASSIGNED' &&
+      get(item, 'shard.primary', item.primary)
+    ) {
       classes.push('emergency');
     }
   }

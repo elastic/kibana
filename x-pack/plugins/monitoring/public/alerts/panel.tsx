@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import {
   EuiSpacer,
@@ -10,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
@@ -47,12 +50,24 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       </EuiListGroup>
     ) : null;
 
+  const { code } = alertState.state.ui.message;
   return (
     <Fragment>
       <div style={{ padding: '1rem' }}>
         <EuiTitle size="xs">
           <h5>{replaceTokens(alertState.state.ui.message)}</h5>
         </EuiTitle>
+        {code?.length ? (
+          <EuiCodeBlock
+            fontSize="s"
+            paddingSize="s"
+            language="json"
+            isCopyable={true}
+            overflowHeight={150}
+          >
+            {code}
+          </EuiCodeBlock>
+        ) : null}
         {nextStepsUi ? <EuiSpacer size="s" /> : null}
         {nextStepsUi}
       </div>

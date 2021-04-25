@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Creation or Modification of a new GPO Scheduled Task or Service",
   "query": "event.category:file and not event.type:deletion and file.path:(C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\ScheduledTasks\\\\ScheduledTasks.xml or C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\Preferences\\\\Services\\\\Services.xml) and not process.name:dfsrs.exe",
   "risk_score": 21,
@@ -37,23 +38,9 @@
           "reference": "https://attack.mitre.org/techniques/T1053/"
         }
       ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0002",
-        "name": "Execution",
-        "reference": "https://attack.mitre.org/tactics/TA0002/"
-      },
-      "technique": [
-        {
-          "id": "T1021",
-          "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
-        }
-      ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 4
 }

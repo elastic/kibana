@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
@@ -60,6 +61,11 @@ export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+/**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
 
 /**
  * Stats for related events for a particular node in a resolver graph.
@@ -140,207 +146,6 @@ export interface NewResolverTree {
 }
 
 /**
- * Statistical information for a node in a resolver tree.
- * @deprecated use {@link EventStats} instead to model the stats for a node
- */
-export interface ResolverNodeStats {
-  /**
-   * The stats for related events (excludes alerts and process events) for a particular node in the resolver tree.
-   */
-  events: EventStats;
-  /**
-   * The total number of alerts that exist for a node.
-   */
-  totalAlerts: number;
-}
-
-/**
- * A child node can also have additional children so we need to provide a pagination cursor.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverChildNode extends ResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
-}
-
-/**
- * Safe version of `ResolverChildNode`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
-}
-
-/**
- * The response structure for the children route. The structure is an array of nodes where each node
- * has an array of lifecycle events.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverChildren {
-  childNodes: ResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * Safe version of `ResolverChildren`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverChildren {
-  childNodes: SafeResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * A flattened tree representing the nodes in a resolver graph.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: ResolverChildren;
-  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: ResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverTree`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: SafeResolverChildren;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: SafeResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * The lifecycle events (start, end etc) for a node.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverLifecycleNode`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * The response structure when searching for ancestors of a node.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: ResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
-}
-
-/**
- * Safe version of `ResolverAncestry`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: SafeResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
-}
-
-/**
  * Response structure for the related events route.
  *
  * @deprecated use {@link ResolverNode} instead
@@ -358,15 +163,6 @@ export interface ResolverRelatedEvents {
 export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
   nextEvent: string | null;
-}
-
-/**
- * Response structure for the alerts route.
- */
-export interface ResolverRelatedAlerts {
-  entityID: string;
-  alerts: SafeResolverEvent[];
-  nextAlert: string | null;
 }
 
 /**
@@ -584,12 +380,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -597,9 +393,14 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
+  UPDATING = 'updating',
+
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
 }
 
 export enum MetadataQueryStrategyVersions {
@@ -635,13 +436,8 @@ export type HostInfo = Immutable<{
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
@@ -1026,12 +822,17 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    ransomware: ProtectionFields;
     logging: {
       file: string;
     };
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -1047,7 +848,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
     popup: {
       malware: {
         message: string;
@@ -1080,7 +881,7 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+    'events' | 'malware' | 'ransomware' | 'popup' | 'antivirus_registration' | 'advanced'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
@@ -1092,8 +893,8 @@ export interface UIPolicyConfig {
   linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
-/** Policy: Malware protection fields */
-export interface MalwareFields {
+/** Policy:  Protection fields */
+export interface ProtectionFields {
   mode: ProtectionModes;
 }
 
@@ -1137,6 +938,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**

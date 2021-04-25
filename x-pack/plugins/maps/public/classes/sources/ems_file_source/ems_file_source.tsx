@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
@@ -17,7 +18,7 @@ import {
   VECTOR_SHAPE_TYPE,
   FORMAT_TYPE,
 } from '../../../../common/constants';
-import { getEmsFileLayers } from '../../../meta';
+import { fetchGeoJson, getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
@@ -122,12 +123,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const emsFileLayer = await this.getEMSFileLayer();
-    // @ts-ignore
-    const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
-      featureCollectionPath: 'data',
-      fetchUrl: emsFileLayer.getDefaultFormatUrl(),
-    });
+    const featureCollection = await fetchGeoJson(
+      emsFileLayer.getDefaultFormatUrl(),
+      emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
+      'data'
+    );
 
     const emsIdField = emsFileLayer.getFields().find((field) => {
       return field.type === 'id';

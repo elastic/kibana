@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export * from './models';
 export * from './rest_spec';
+import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
@@ -23,9 +26,14 @@ export interface FleetConfigType {
       host?: string;
       ca_sha256?: string;
     };
+    fleet_server?: {
+      hosts?: string[];
+    };
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
+  agentPolicies?: PreconfiguredAgentPolicy[];
+  packages?: PreconfiguredPackage[];
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -13,7 +14,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButton,
-  EuiSearchBar,
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
@@ -47,18 +47,17 @@ import {
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
-import { useTableSettings } from '../analytics_list/use_table_settings';
-import { filterAnalyticsModels } from '../../../../common/search_bar_filters';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { usePageUrlState } from '../../../../../util/url_state';
+import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
 export type ModelItem = TrainedModelConfigResponse & {
-  type?: string;
+  type?: string[];
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
 };
@@ -71,6 +70,11 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   sortField: ModelsTableToConfigMapping.id,
   sortDirection: 'asc',
 });
+
+export const BUILT_IN_MODEL_TYPE = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.builtInModelLabel',
+  { defaultMessage: 'built-in' }
+);
 
 export const ModelsList: FC = () => {
   const {
@@ -98,7 +102,6 @@ export const ModelsList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
   const { toasts } = useNotifications();
 
-  const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
@@ -110,36 +113,15 @@ export const ModelsList: FC = () => {
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
-  const updateFilteredItems = (queryClauses: any) => {
-    if (queryClauses.length) {
-      const filtered = filterAnalyticsModels(items, queryClauses);
-      setFilteredModels(filtered);
-    } else {
-      setFilteredModels(items);
-    }
-  };
-
-  const filterList = () => {
-    if (searchQueryText !== '') {
-      const query = EuiSearchBar.Query.parse(searchQueryText);
-      let clauses: any = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      updateFilteredItems(clauses);
-    } else {
-      updateFilteredItems([]);
-    }
-  };
-
-  useEffect(() => {
-    filterList();
-  }, [searchQueryText, items]);
+  const isBuiltInModel = useCallback(
+    (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
+    []
+  );
 
   /**
-   * Fetches inference trained models.
+   * Fetches trained models.
    */
-  const fetchData = useCallback(async () => {
+  const fetchModelsData = useCallback(async () => {
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
@@ -150,10 +132,16 @@ export const ModelsList: FC = () => {
       const expandedItemsToRefresh = [];
 
       for (const model of response) {
-        const tableItem = {
+        const tableItem: ModelItem = {
           ...model,
+          // Extract model types
           ...(typeof model.inference_config === 'object'
-            ? { type: Object.keys(model.inference_config)[0] }
+            ? {
+                type: [
+                  ...Object.keys(model.inference_config),
+                  ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
+                ],
+              }
             : {}),
         };
         newItems.push(tableItem);
@@ -189,7 +177,7 @@ export const ModelsList: FC = () => {
   // Subscribe to the refresh observable to trigger reloading the model list.
   useRefreshAnalyticsList({
     isLoading: setIsLoading,
-    onRefresh: fetchData,
+    onRefresh: fetchModelsData,
   });
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -368,7 +356,7 @@ export const ModelsList: FC = () => {
       onClick: async (model) => {
         await prepareModelsForDeletion([model]);
       },
-      available: (item) => canDeleteDataFrameAnalytics,
+      available: (item) => canDeleteDataFrameAnalytics && !isBuiltInModel(item),
       enabled: (item) => {
         // TODO check for permissions to delete ingest pipelines.
         // ATM undefined means pipelines fetch failed server-side.
@@ -418,13 +406,30 @@ export const ModelsList: FC = () => {
       truncateText: true,
     },
     {
+      field: ModelsTableToConfigMapping.description,
+      width: '350px',
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
+        defaultMessage: 'Description',
+      }),
+      sortable: false,
+      truncateText: true,
+    },
+    {
       field: ModelsTableToConfigMapping.type,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
       }),
       sortable: true,
       align: 'left',
-      render: (type: string) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      render: (types: string[]) => (
+        <EuiFlexGroup gutterSize={'xs'} wrap>
+          {types.map((type) => (
+            <EuiFlexItem key={type} grow={false}>
+              <EuiBadge color="hollow">{type}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -458,12 +463,6 @@ export const ModelsList: FC = () => {
         ]
       : [];
 
-  const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
-    filteredModels,
-    pageState,
-    updatePageState
-  );
-
   const toolsLeft = (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -495,15 +494,27 @@ export const ModelsList: FC = () => {
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
     ? {
         selectableMessage: (selectable, item) => {
-          return selectable
-            ? i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
-                defaultMessage: 'Select a model',
-              })
-            : i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
-                defaultMessage: 'Model has associated pipelines',
-              });
+          if (selectable) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
+              defaultMessage: 'Select a model',
+            });
+          }
+
+          if (Array.isArray(item.pipelines) && item.pipelines.length > 0) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
+              defaultMessage: 'Model has associated pipelines',
+            });
+          }
+
+          if (isBuiltInModel(item)) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.builtInModelMessage', {
+              defaultMessage: 'Built-in model',
+            });
+          }
+
+          return '';
         },
-        selectable: (item) => !item.pipelines,
+        selectable: (item) => !item.pipelines && !isBuiltInModel(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -533,6 +544,7 @@ export const ModelsList: FC = () => {
         }
       : {}),
   };
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -555,9 +567,6 @@ export const ModelsList: FC = () => {
           items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
           search={search}
           selection={selection}
           rowProps={(item) => ({

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
@@ -15,7 +16,7 @@ import {
 } from '../../../task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -136,14 +137,17 @@ export async function getDailyEvents(
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
 
+  // @ts-expect-error no way to declare aggregations for search response
   metrics.aggregations!.daily.buckets.forEach((daily) => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.regularEvents.names.buckets.forEach((bucket) => {
       byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.suggestionEvents.names.buckets.forEach((bucket) => {
       suggestionsByType[bucket.key] =
         (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);

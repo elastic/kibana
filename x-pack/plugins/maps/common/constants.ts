@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
@@ -28,6 +30,9 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 export const APP_ICON_SOLUTION = 'logoKibana';
+export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
+  defaultMessage: 'Maps',
+});
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
@@ -35,13 +40,21 @@ export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+// Identifies vector tile "too many features" feature.
+// "too many features" feature is a box showing area that contains too many features for single ES search response
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
+// Identifies centroid feature.
+// Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
+
+export const MVT_TOKEN_PARAM_NAME = 'token';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -49,6 +62,9 @@ export function getNewMapPath() {
 }
 export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
+}
+export function getEditPath(id: string) {
+  return `/${MAP_PATH}/${id}`;
 }
 
 export enum LAYER_TYPE {
@@ -68,12 +84,13 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
-  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+  TABLE_SOURCE = 'TABLE_SOURCE',
 }
 
 export enum FIELD_ORIGIN {
@@ -117,15 +134,15 @@ export enum ES_SPATIAL_RELATIONS {
   WITHIN = 'WITHIN',
 }
 
-export const GEO_JSON_TYPE = {
-  POINT: 'Point',
-  MULTI_POINT: 'MultiPoint',
-  LINE_STRING: 'LineString',
-  MULTI_LINE_STRING: 'MultiLineString',
-  POLYGON: 'Polygon',
-  MULTI_POLYGON: 'MultiPolygon',
-  GEOMETRY_COLLECTION: 'GeometryCollection',
-};
+export enum GEO_JSON_TYPE {
+  POINT = 'Point',
+  MULTI_POINT = 'MultiPoint',
+  LINE_STRING = 'LineString',
+  MULTI_LINE_STRING = 'MultiLineString',
+  POLYGON = 'Polygon',
+  MULTI_POLYGON = 'MultiPolygon',
+  GEOMETRY_COLLECTION = 'GeometryCollection',
+}
 
 export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;
@@ -281,3 +298,11 @@ export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 export type RawValue = string | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
+
+export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+
+export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
+
+export const emsWorldLayerId = 'world_countries';
+export const emsRegionLayerId = 'administrative_regions_lvl2';
+export const emsUsaZipLayerId = 'usa_zip_codes';

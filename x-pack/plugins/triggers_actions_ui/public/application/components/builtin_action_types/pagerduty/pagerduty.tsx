@@ -1,17 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import {
   PagerDutyActionConnector,
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams,
+  EventActionOptions,
 } from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
@@ -36,15 +43,18 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: PagerDutyActionConnector
+    ): ConnectorValidationResult<PagerDutyConfig, PagerDutySecrets> => {
+      const secretsErrors = {
         routingKey: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = {
+        secrets: { errors: secretsErrors },
+      };
 
       if (!action.secrets.routingKey) {
-        errors.routingKey.push(
+        secretsErrors.routingKey.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
             {
@@ -55,14 +65,17 @@ export function getActionType(): ActionTypeModel<
       }
       return validationResult;
     },
-    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: PagerDutyActionParams
+    ): GenericValidationResult<
+      Pick<PagerDutyActionParams, 'summary' | 'timestamp' | 'dedupKey'>
+    > => {
       const errors = {
         summary: new Array<string>(),
         timestamp: new Array<string>(),
         dedupKey: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (
         !actionParams.dedupKey?.length &&
         (actionParams.eventAction === 'resolve' || actionParams.eventAction === 'acknowledge')
@@ -76,7 +89,10 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (!actionParams.summary?.length) {
+      if (
+        actionParams.eventAction === EventActionOptions.TRIGGER &&
+        !actionParams.summary?.length
+      ) {
         errors.summary.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',

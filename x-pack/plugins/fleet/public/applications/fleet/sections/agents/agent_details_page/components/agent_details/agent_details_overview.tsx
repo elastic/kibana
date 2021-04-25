@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -16,21 +19,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent, AgentPolicy } from '../../../../../types';
-import { useKibanaVersion, useLink } from '../../../../../hooks';
+
+import type { Agent, AgentPolicy } from '../../../../../types';
+import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { LinkAndRevision } from '../../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
+
+// Allows child text to be truncated
+const FlexItemWithMinWidth = styled(EuiFlexItem)`
+  min-width: 0px;
+`;
 
 export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
-  const { getHref } = useLink();
   const kibanaVersion = useKibanaVersion();
   return (
     <EuiPanel>
-      <EuiDescriptionList>
+      <EuiDescriptionList compressed>
         {[
           {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
@@ -43,13 +51,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <LinkAndRevision
-                href={getHref('policy_details', { policyId: agentPolicy.id })}
-                title={agentPolicy.name || agent.policy_id}
-                revision={agentPolicy.revision}
-              >
-                {agentPolicy.name || agentPolicy.id}
-              </LinkAndRevision>
+              <AgentPolicySummaryLine policy={agentPolicy} />
             ) : (
               agent.policy_id || '-'
             ),
@@ -161,16 +163,16 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           },
         ].map(({ title, description }) => {
           return (
-            <EuiDescriptionList compressed>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={3}>
-                  <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={7}>
-                  <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionList>
+            <EuiFlexGroup>
+              <FlexItemWithMinWidth grow={3}>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+              </FlexItemWithMinWidth>
+              <FlexItemWithMinWidth grow={7}>
+                <EuiDescriptionListDescription className="eui-textTruncate">
+                  {description}
+                </EuiDescriptionListDescription>
+              </FlexItemWithMinWidth>
+            </EuiFlexGroup>
           );
         })}
       </EuiDescriptionList>

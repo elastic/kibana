@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -27,9 +28,9 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     selectedActionType,
   ]);
   return (
-    <EuiFlexGroup data-test-subj="static-mappings" alignItems="center">
+    <EuiFlexGroup data-test-subj="static-mappings" alignItems="center" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup component="span" justifyContent="spaceBetween">
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem component="span" grow={false}>
             <EuiCode data-test-subj="field-mapping-source">{securitySolutionField}</EuiCode>
           </EuiFlexItem>
@@ -39,7 +40,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup component="span" justifyContent="spaceBetween">
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem component="span" grow={false}>
             {isLoading ? (
               <EuiLoadingSpinner size="m" />

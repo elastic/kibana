@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { InfraSources } from './sources';
 
 describe('the InfraSources lib', () => {
@@ -18,7 +20,7 @@ describe('the InfraSources lib', () => {
         updated_at: '2000-01-01T00:00:00.000Z',
         attributes: {
           metricAlias: 'METRIC_ALIAS',
-          logAlias: 'LOG_ALIAS',
+          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
@@ -37,7 +39,7 @@ describe('the InfraSources lib', () => {
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
-          logAlias: 'LOG_ALIAS',
+          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
@@ -54,7 +56,7 @@ describe('the InfraSources lib', () => {
         config: createMockStaticConfiguration({
           default: {
             metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
+            logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
             fields: {
               host: 'HOST',
               pod: 'POD',
@@ -84,7 +86,7 @@ describe('the InfraSources lib', () => {
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
-          logAlias: 'LOG_ALIAS',
+          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
@@ -116,7 +118,7 @@ describe('the InfraSources lib', () => {
         updatedAt: 946684800000,
         configuration: {
           metricAlias: expect.any(String),
-          logAlias: expect.any(String),
+          logIndices: expect.any(Object),
           fields: {
             container: expect.any(String),
             host: expect.any(String),
@@ -132,9 +134,8 @@ describe('the InfraSources lib', () => {
 
 const createMockStaticConfiguration = (sources: any) => ({
   enabled: true,
-  query: {
-    partitionSize: 1,
-    partitionFactor: 1,
+  inventory: {
+    compositeSize: 2000,
   },
   sources,
 });

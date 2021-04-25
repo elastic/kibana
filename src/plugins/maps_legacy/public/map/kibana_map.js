@@ -1,30 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EventEmitter } from 'events';
-import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
-import { ORIGIN } from '../common/constants/origin';
-import { getToasts } from '../kibana_services';
+import { ORIGIN } from '../../../maps_ems/common';
 import { L } from '../leaflet';
 
 function makeFitControl(fitContainer, kibanaMap) {
@@ -490,22 +477,6 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
-  _addMaxZoomMessage = (layer) => {
-    const zoomWarningMsg = createZoomWarningMsg(
-      getToasts(),
-      this.getZoomLevel,
-      this.getMaxZoomLevel
-    );
-
-    this._leafletMap.on('zoomend', zoomWarningMsg);
-    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
-
-    layer.on('remove', () => {
-      this._leafletMap.off('zoomend', zoomWarningMsg);
-      this._containerNode.removeAttribute('data-test-subj');
-    });
-  };
-
   setLegendPosition(position) {
     if (this._legendPosition === position) {
       if (!this._leafletLegendControl) {
@@ -583,11 +554,6 @@ export class KibanaMap extends EventEmitter {
       });
 
       this._leafletBaseLayer = baseLayer;
-      if (settings.options.showZoomMessage) {
-        baseLayer.on('add', () => {
-          this._addMaxZoomMessage(baseLayer);
-        });
-      }
       this._leafletBaseLayer.addTo(this._leafletMap);
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
@@ -672,14 +638,13 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  persistUiStateForVisualization(visualization) {
+  persistUiStateForVisualization(uiState) {
     function persistMapStateInUiState() {
-      const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
 
       if (isNaN(zoomFromUiState) || this.getZoomLevel() !== zoomFromUiState) {
-        visualization.uiStateVal('mapZoom', this.getZoomLevel());
+        uiState.set('mapZoom', this.getZoomLevel());
       }
       const centerFromMap = this.getCenter();
       if (
@@ -687,24 +652,17 @@ export class KibanaMap extends EventEmitter {
         centerFromMap.lon !== centerFromUIState[1] ||
         centerFromMap.lat !== centerFromUIState[0]
       ) {
-        visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
+        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
     }
 
-    this._leafletMap.on('resize', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
-    this._leafletMap.on('load', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }
 
-  useUiStateFromVisualization(visualization) {
-    const uiState = visualization.getUiState();
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
+  useUiStateFromVisualization(uiState) {
+    const zoomFromUiState = parseInt(uiState?.get('mapZoom'));
+    const centerFromUIState = uiState?.get('mapCenter');
     if (!isNaN(zoomFromUiState)) {
       this.setZoomLevel(zoomFromUiState);
     }

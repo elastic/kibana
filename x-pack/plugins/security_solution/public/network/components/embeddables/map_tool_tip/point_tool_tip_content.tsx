@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -13,9 +14,9 @@ import {
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { FlowTarget } from '../../../../graphql/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 interface PointToolTipContentProps {
   contextId: string;

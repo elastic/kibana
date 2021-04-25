@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import execa from 'execa';
@@ -76,6 +77,7 @@ async function copySourceAndBabelify() {
           '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
           'plugins/canvas/shareable_runtime/test/**',
+          'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
         allowEmpty: true,
       }
@@ -92,12 +94,16 @@ async function copySourceAndBabelify() {
 }
 
 async function buildCanvasShareableRuntime() {
-  await execa(process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
-    cwd: XPACK_DIR,
-    stdio: ['ignore', 'inherit', 'inherit'],
-    // @ts-ignore Incorrect @types - execa supports `buffer`
-    buffer: false,
-  });
+  await execa(
+    process.execPath,
+    ['--preserve-symlinks', 'plugins/canvas/scripts/shareable_runtime'],
+    {
+      cwd: XPACK_DIR,
+      stdio: ['ignore', 'inherit', 'inherit'],
+      // @ts-ignore Incorrect @types - execa supports `buffer`
+      buffer: false,
+    }
+  );
 }
 
 async function generateNoticeText() {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -21,9 +22,11 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
-  resetPasswordUrl: schema.maybe(schema.string()),
-  deploymentUrl: schema.maybe(schema.string()),
-  accountUrl: schema.maybe(schema.string()),
+  cname: schema.maybe(schema.string()),
+  base_url: schema.maybe(schema.string()),
+  profile_url: schema.maybe(schema.string()),
+  deployment_url: schema.maybe(schema.string()),
+  organization_url: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -31,9 +34,11 @@ export type CloudConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     id: true,
-    resetPasswordUrl: true,
-    deploymentUrl: true,
-    accountUrl: true,
+    cname: true,
+    base_url: true,
+    profile_url: true,
+    deployment_url: true,
+    organization_url: true,
   },
   schema: configSchema,
 };

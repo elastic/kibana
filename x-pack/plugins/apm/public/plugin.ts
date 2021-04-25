@@ -1,15 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ConfigSchema } from '.';
-import {
-  FetchDataParams,
-  HasDataParams,
-  ObservabilityPluginSetup,
-} from '../../observability/public';
+import { i18n } from '@kbn/i18n';
+import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
   CoreSetup,
@@ -18,44 +15,54 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerts/public';
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import {
+} from '../../alerting/public';
+import type { FeaturesPluginSetup } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { MapsStartApi } from '../../maps/public';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import type {
+  FetchDataParams,
+  HasDataParams,
+  ObservabilityPublicSetup,
+} from '../../observability/public';
+import { FormatterRuleRegistry } from '../../observability/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
+import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { MapsStartApi } from '../../maps/public';
 
-export type ApmPluginSetup = void;
+export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
+export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
+
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerts?: AlertingPluginPublicSetup;
+  alerting?: AlertingPluginPublicSetup;
   ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
-  alerts?: AlertingPluginPublicStart;
+  alerting?: AlertingPluginPublicStart;
   ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
@@ -80,54 +87,57 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    if (plugins.observability) {
-      const getApmDataHelper = async () => {
-        const {
-          fetchObservabilityOverviewPageData,
-          hasData,
-          createCallApmApi,
-        } = await import('./services/rest/apm_observability_overview_fetchers');
-        // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: {} as APMRuleFieldMap,
+      ctor: FormatterRuleRegistry,
+    });
+    const getApmDataHelper = async () => {
+      const {
+        fetchObservabilityOverviewPageData,
+        getHasData,
+        createCallApmApi,
+      } = await import('./services/rest/apm_observability_overview_fetchers');
+      // have to do this here as well in case app isn't mounted yet
+      createCallApmApi(core);
 
-        return { fetchObservabilityOverviewPageData, hasData };
-      };
-      plugins.observability.dashboard.register({
-        appName: 'apm',
-        hasData: async () => {
-          const dataHelper = await getApmDataHelper();
-          return await dataHelper.hasData();
-        },
-        fetchData: async (params: FetchDataParams) => {
-          const dataHelper = await getApmDataHelper();
-          return await dataHelper.fetchObservabilityOverviewPageData(params);
-        },
-      });
+      return { fetchObservabilityOverviewPageData, getHasData };
+    };
+    plugins.observability.dashboard.register({
+      appName: 'apm',
+      hasData: async () => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.getHasData();
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.fetchObservabilityOverviewPageData(params);
+      },
+    });
 
-      const getUxDataHelper = async () => {
-        const {
-          fetchUxOverviewDate,
-          hasRumData,
-          createCallApmApi,
-        } = await import('./components/app/RumDashboard/ux_overview_fetchers');
-        // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+    const getUxDataHelper = async () => {
+      const {
+        fetchUxOverviewDate,
+        hasRumData,
+        createCallApmApi,
+      } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+      // have to do this here as well in case app isn't mounted yet
+      createCallApmApi(core);
 
-        return { fetchUxOverviewDate, hasRumData };
-      };
+      return { fetchUxOverviewDate, hasRumData };
+    };
 
-      plugins.observability.dashboard.register({
-        appName: 'ux',
-        hasData: async (params?: HasDataParams) => {
-          const dataHelper = await getUxDataHelper();
-          return await dataHelper.hasRumData(params!);
-        },
-        fetchData: async (params: FetchDataParams) => {
-          const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate(params);
-        },
-      });
-    }
+    plugins.observability.dashboard.register({
+      appName: 'ux',
+      hasData: async (params?: HasDataParams) => {
+        const dataHelper = await getUxDataHelper();
+        return await dataHelper.hasRumData(params!);
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUxDataHelper();
+        return await dataHelper.fetchUxOverviewDate(params);
+      },
+    });
 
     core.application.register({
       id: 'apm',
@@ -137,23 +147,52 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
+        searchDeepLinks: [
+          {
+            id: 'services',
+            title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+              defaultMessage: 'Services',
+            }),
+            path: '/services',
+          },
+          {
+            id: 'traces',
+            title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+              defaultMessage: 'Traces',
+            }),
+            path: '/traces',
+          },
+          {
+            id: 'service-map',
+            title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+              defaultMessage: 'Service Map',
+            }),
+            path: '/service-map',
+          },
+        ],
+      },
 
-      async mount(params: AppMountParameters<unknown>) {
+      async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
+        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(
+        return renderApp({
           coreStart,
-          pluginSetupDeps,
-          params,
+          pluginsSetup: pluginSetupDeps,
+          appMountParameters,
           config,
-          corePlugins as ApmPluginStartDeps
-        );
+          pluginsStart: pluginsStart as ApmPluginStartDeps,
+          apmRuleRegistry,
+        });
       },
     });
+
+    registerApmAlerts(apmRuleRegistry);
 
     core.application.register({
       id: 'ux',
@@ -161,26 +200,47 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-
-      async mount(params: AppMountParameters<unknown>) {
+      meta: {
+        keywords: [
+          'RUM',
+          'Real User Monitoring',
+          'DEM',
+          'Digital Experience Monitoring',
+          'EUM',
+          'End User Monitoring',
+          'UX',
+          'Javascript',
+          'APM',
+          'Mobile',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+      },
+      async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application/csmApp'),
           core.getStartServices(),
         ]);
 
-        return renderApp(
-          coreStart,
-          pluginSetupDeps,
-          params,
+        return renderApp({
+          core: coreStart,
+          deps: pluginSetupDeps,
+          appMountParameters,
           config,
-          corePlugins as ApmPluginStartDeps
-        );
+          corePlugins: corePlugins as ApmPluginStartDeps,
+          apmRuleRegistry,
+        });
       },
     });
+
+    return {
+      ruleRegistry: apmRuleRegistry,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-    registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
   }
 }

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useState } from 'react';
+import React, { useMemo, useCallback, memo, useState, useContext } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
   EuiLink,
-  EuiHealth,
+  EuiBadge,
   EuiToolTip,
   EuiSelectableProps,
   EuiSuperDatePicker,
@@ -32,13 +33,14 @@ import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
 import { NavigateToAppOptions } from 'kibana/public';
+import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import {
-  HOST_STATUS_TO_HEALTH_COLOR,
-  POLICY_STATUS_TO_HEALTH_COLOR,
+  HOST_STATUS_TO_BADGE_COLOR,
+  POLICY_STATUS_TO_BADGE_COLOR,
   POLICY_STATUS_TO_TEXT,
 } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -71,11 +73,24 @@ const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
+  isBadge?: boolean;
   dataTestSubj: string;
-}>(({ name, href, route, dataTestSubj }) => {
+}>(({ name, href, route, isBadge = false, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
+  const theme = useContext(ThemeContext);
 
-  return (
+  return isBadge ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      data-test-subj={dataTestSubj}
+      className="eui-textTruncate"
+      href={href}
+      onClick={clickHandler}
+      style={{ color: theme.eui.euiColorInk }}
+    >
+      {name}
+    </EuiLink>
+  ) : (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
@@ -305,17 +320,17 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
           return (
-            <EuiHealth
-              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+            <EuiBadge
+              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
               data-test-subj="rowHostStatus"
               className="eui-textTruncate"
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
                 values={{ hostStatus }}
               />
-            </EuiHealth>
+            </EuiBadge>
           );
         },
       },
@@ -374,8 +389,8 @@ export const EndpointList = () => {
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+            <EuiBadge
+              color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
@@ -383,9 +398,10 @@ export const EndpointList = () => {
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
+                isBadge
                 dataTestSubj="policyStatusCellLink"
               />
-            </EuiHealth>
+            </EuiBadge>
           );
         },
       },
@@ -617,12 +633,12 @@ export const EndpointList = () => {
                     <LinkToApp
                       appId="fleet"
                       appPath={`#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                        kuery: 'packages : "endpoint"',
                       })}`}
                       href={`${services?.application?.getUrlForApp(
                         'fleet'
                       )}#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                        kuery: 'packages : "endpoint"',
                       })}`}
                     >
                       <FormattedMessage

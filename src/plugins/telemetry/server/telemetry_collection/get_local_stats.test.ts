@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { merge, omit } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -25,6 +15,7 @@ import {
   createCollectorFetchContextMock,
 } from '../../../usage_collection/server/mocks';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { StatsCollectionConfig } from '../../../telemetry_collection_manager/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -35,60 +26,59 @@ function mockUsageCollection(kibanaUsage = {}) {
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
-  esClient.cluster.stats
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+  esClient.info.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
     {
-      body: {
-        cluster_name: 'testCluster',
-        nodes: {
-          some_node_id: {
-            timestamp: 1588617023177,
-            since: 1588616945163,
-            rest_actions: {
-              nodes_usage_action: 1,
-              create_index_action: 1,
-              document_get_action: 1,
-              search_action: 19,
-              nodes_info_action: 36,
+      body: { ...clusterInfo },
+    }
+  );
+  esClient.cluster.stats
+    // @ts-expect-error we only care about the response body
+    .mockResolvedValue({ body: { ...clusterStats } });
+  esClient.nodes.usage.mockResolvedValue({
+    // @ts-expect-error we only care about the response body
+    body: {
+      cluster_name: 'testCluster',
+      nodes: {
+        some_node_id: {
+          timestamp: 1588617023177,
+          since: 1588616945163,
+          rest_actions: {
+            nodes_usage_action: 1,
+            create_index_action: 1,
+            document_get_action: 1,
+            search_action: 19,
+            nodes_info_action: 36,
+          },
+          aggregations: {
+            scripted_metric: {
+              other: 7,
             },
-            aggregations: {
-              terms: {
-                bytes: 2,
-              },
-              scripted_metric: {
-                other: 7,
-              },
+            terms: {
+              bytes: 2,
             },
           },
         },
       },
-    }
-  );
-  // @ts-ignore we only care about the response body
+    },
+  });
+  // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
 }
 
-function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: {}) {
+function mockStatsCollectionConfig(
+  clusterInfo: any,
+  clusterStats: any,
+  kibana: {}
+): StatsCollectionConfig {
   return {
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
-    timestamp: Date.now(),
   };
 }
 
@@ -197,7 +187,7 @@ describe('get_local_stats', () => {
   describe('handleLocalStats', () => {
     it('returns expected object without xpack or kibana data', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,
@@ -214,7 +204,7 @@ describe('get_local_stats', () => {
 
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,
@@ -240,7 +230,7 @@ describe('get_local_stats', () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { ...statsCollectionConfig },
+        statsCollectionConfig,
         context
       );
       const result = response[0];
@@ -256,7 +246,7 @@ describe('get_local_stats', () => {
 
     it('returns an empty array when no cluster uuid is provided', async () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
-      const response = await getLocalStats([], { ...statsCollectionConfig }, context);
+      const response = await getLocalStats([], statsCollectionConfig, context);
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
     });

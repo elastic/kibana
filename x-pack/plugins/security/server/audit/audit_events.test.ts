@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
+
+import { httpServerMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { AuthenticationResult } from '../authentication';
 import {
-  EventOutcome,
+  httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
+  SpaceAuditAction,
+  spaceAuditEvent,
   userLoginEvent,
-  httpRequestEvent,
 } from './audit_events';
-import { AuthenticationResult } from '../authentication';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { httpServerMock } from 'src/core/server/mocks';
 
 describe('#savedObjectEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -29,9 +33,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -57,9 +65,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -89,9 +101,13 @@ describe('#savedObjectEvent', () => {
         },
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -115,6 +131,12 @@ describe('#savedObjectEvent', () => {
     ).not.toBeUndefined();
     expect(
       savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+    expect(
+      savedObjectEvent({
         action: SavedObjectAction.FIND,
         savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
       })
@@ -131,6 +153,18 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: SavedObjectAction.GET,
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
         savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
       })
     ).toBeUndefined();
@@ -174,9 +208,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_remove_references",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "change",
+          "type": Array [
+            "change",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -205,7 +243,9 @@ describe('#userLoginEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "success",
         },
         "kibana": Object {
@@ -241,7 +281,9 @@ describe('#userLoginEvent', () => {
         },
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "failure",
         },
         "kibana": Object {
@@ -268,7 +310,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -282,7 +326,7 @@ describe('#httpRequestEvent', () => {
           "path": "/path",
           "port": undefined,
           "query": undefined,
-          "scheme": "http:",
+          "scheme": "http",
         },
       }
     `);
@@ -305,7 +349,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -319,8 +365,105 @@ describe('#httpRequestEvent', () => {
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",
-          "scheme": "http:",
+          "scheme": "http",
         },
+      }
+    `);
+  });
+});
+
+describe('#spaceAuditEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        outcome: 'unknown',
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "space_create",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "creation",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "User is creating space [id=SPACE_ID]",
+      }
+    `);
+  });
+
+  test('creates event with `success` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "space_create",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "creation",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "User has created space [id=SPACE_ID]",
+      }
+    `);
+  });
+
+  test('creates event with `failure` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "space_create",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "creation",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "Failed attempt to create space [id=SPACE_ID]",
       }
     `);
   });

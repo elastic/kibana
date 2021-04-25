@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,7 +14,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
-import { apolloClientObservable, kibanaObservable } from '../test_providers';
+import { kibanaObservable } from '../test_providers';
 import { createStore, State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
@@ -57,14 +58,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
 
-  const store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage,
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const MockKibanaContextProvider = createKibanaContextProviderMock();
 

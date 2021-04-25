@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -13,6 +14,7 @@ import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
@@ -27,14 +29,22 @@ import { GetUrlForApp } from '../../common/components/navigation/types';
 import { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { ADMINISTRATION } from '../../app/home/translations';
 import { AdministrationSubTab } from '../types';
-import { ENDPOINTS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from '../common/translations';
+import {
+  ENDPOINTS_TAB,
+  EVENT_FILTERS_TAB,
+  POLICIES_TAB,
+  TRUSTED_APPS_TAB,
+} from '../common/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
+import { EventFiltersContainer } from './event_filters';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
   [AdministrationSubTab.policies]: POLICIES_TAB,
   [AdministrationSubTab.trustedApps]: TRUSTED_APPS_TAB,
+  [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
 };
 
 export function getBreadcrumbs(
@@ -74,7 +84,7 @@ const NoPermissions = memo(() => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
             />
           </EuiText>
         }
@@ -87,6 +97,7 @@ NoPermissions.displayName = 'NoPermissions';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
+  const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
   if (!isIngestEnabled) {
@@ -98,6 +109,11 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
+
+      {isEventFilteringEnabled && (
+        <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
+      )}
+
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact

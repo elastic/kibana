@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { of } from 'rxjs';
@@ -33,16 +22,12 @@ import { UI_SETTINGS } from '../../../../data/server';
 describe('es', () => {
   let tlConfig;
 
-  function stubRequestAndServer(response, indexPatternSavedObjects = []) {
+  function stubRequestAndServer(response) {
     return {
       context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
-      savedObjectsClient: {
-        find: function () {
-          return Promise.resolve({
-            saved_objects: indexPatternSavedObjects,
-          });
-        },
-      },
+      getIndexPatternsService: () => ({
+        find: async () => [],
+      }),
     };
   }
 
@@ -60,19 +45,26 @@ describe('es', () => {
         });
     });
 
-    test('should call data search with sessionId', async () => {
+    test('should call data search with sessionId, isRestore and isStored', async () => {
       tlConfig = {
         ...stubRequestAndServer({ rawResponse: esResponse }),
         request: {
           body: {
-            sessionId: 1,
+            searchSession: {
+              sessionId: '1',
+              isRestore: true,
+              isStored: false,
+            },
           },
         },
       };
 
       await invoke(es, [5], tlConfig);
 
-      expect(tlConfig.context.search.search.mock.calls[0][1]).toHaveProperty('sessionId', 1);
+      const res = tlConfig.context.search.search.mock.calls[0][1];
+      expect(res).toHaveProperty('sessionId', '1');
+      expect(res).toHaveProperty('isRestore', true);
+      expect(res).toHaveProperty('isStored', false);
     });
 
     test('returns a seriesList', () => {
@@ -131,12 +123,34 @@ describe('es', () => {
       const emptyScriptedFields = [];
 
       test('adds a metric agg for each metric', () => {
-        config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
+        config.metric = [
+          'sum:beer',
+          'avg:bytes',
+          'percentiles:bytes',
+          'cardinality:\\:sample',
+          'sum:\\:beer',
+          'percentiles:\\:\\:bytes:1.2,1.3,2.7',
+          'percentiles:\\:bytes\\:123:20.0,50.0,100.0',
+          'percentiles:a:2',
+        ];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).toEqual({ avg: { field: 'bytes' } });
         expect(agg.time_buckets.aggs['percentiles(bytes)']).toEqual({
           percentiles: { field: 'bytes' },
+        });
+        expect(agg.time_buckets.aggs['cardinality(:sample)']).toEqual({
+          cardinality: { field: ':sample' },
+        });
+        expect(agg.time_buckets.aggs['sum(:beer)']).toEqual({ sum: { field: ':beer' } });
+        expect(agg.time_buckets.aggs['percentiles(::bytes)']).toEqual({
+          percentiles: { field: '::bytes', percents: [1.2, 1.3, 2.7] },
+        });
+        expect(agg.time_buckets.aggs['percentiles(:bytes:123)']).toEqual({
+          percentiles: { field: ':bytes:123', percents: [20.0, 50.0, 100.0] },
+        });
+        expect(agg.time_buckets.aggs['percentiles(a)']).toEqual({
+          percentiles: { field: 'a', percents: [2] },
         });
       });
 
@@ -162,6 +176,13 @@ describe('es', () => {
 
       test('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
+        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
+        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
+      });
+
+      test('has a special `count` metric with redundant field which use a script', () => {
+        config.metric = ['count:beer'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
@@ -313,10 +334,10 @@ describe('es', () => {
 
     describe('config.split', () => {
       test('adds terms aggs, in order, under the filters agg', () => {
-        config.split = ['beer:5', 'wine:10'];
+        config.split = ['beer:5', 'wine:10', ':lemo:nade::15', ':jui:ce:723::45'];
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        const aggs = request.params.body.aggs.q.aggs;
+        let aggs = request.params.body.aggs.q.aggs;
 
         expect(aggs.beer.meta.type).toEqual('split');
         expect(aggs.beer.terms.field).toEqual('beer');
@@ -325,6 +346,18 @@ describe('es', () => {
         expect(aggs.beer.aggs.wine.meta.type).toEqual('split');
         expect(aggs.beer.aggs.wine.terms.field).toEqual('wine');
         expect(aggs.beer.aggs.wine.terms.size).toEqual(10);
+
+        aggs = aggs.beer.aggs.wine.aggs;
+        expect(aggs).toHaveProperty(':lemo:nade:');
+        expect(aggs[':lemo:nade:'].meta.type).toEqual('split');
+        expect(aggs[':lemo:nade:'].terms.field).toEqual(':lemo:nade:');
+        expect(aggs[':lemo:nade:'].terms.size).toEqual(15);
+
+        aggs = aggs[':lemo:nade:'].aggs;
+        expect(aggs).toHaveProperty(':jui:ce:723:');
+        expect(aggs[':jui:ce:723:'].meta.type).toEqual('split');
+        expect(aggs[':jui:ce:723:'].terms.field).toEqual(':jui:ce:723:');
+        expect(aggs[':jui:ce:723:'].terms.size).toEqual(45);
       });
 
       test('adds scripted terms aggs, in order, under the filters agg', () => {

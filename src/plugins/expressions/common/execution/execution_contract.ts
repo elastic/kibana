@@ -1,22 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 import { Execution } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
@@ -49,18 +40,21 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * This function never throws.
    */
   getData = async (): Promise<Output | ExpressionValueError> => {
-    try {
-      return await this.execution.result;
-    } catch (e) {
-      return {
-        type: 'error',
-        error: {
-          name: e.name,
-          message: e.message,
-          stack: e.stack,
-        },
-      };
-    }
+    return this.execution.result
+      .pipe(
+        take(1),
+        catchError(({ name, message, stack }) =>
+          of({
+            type: 'error',
+            error: {
+              name,
+              message,
+              stack,
+            },
+          } as ExpressionValueError)
+        )
+      )
+      .toPromise();
   };
 
   /**

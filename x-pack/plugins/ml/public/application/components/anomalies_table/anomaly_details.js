@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -122,14 +123,14 @@ function getDetailsItems(anomaly, examples, filter) {
   }
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.timeTitle', {
-      defaultMessage: 'time',
+      defaultMessage: 'Time',
     }),
     description: timeDesc,
   });
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
-      defaultMessage: 'function',
+      defaultMessage: 'Function',
     }),
     description:
       source.function !== ML_JOB_AGGREGATION.METRIC ? source.function : source.function_description,
@@ -138,7 +139,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (source.field_name !== undefined) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.fieldNameTitle', {
-        defaultMessage: 'fieldName',
+        defaultMessage: 'Field name',
       }),
       description: source.field_name,
     });
@@ -148,7 +149,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (anomaly.actual !== undefined && showActualForFunction(functionDescription) === true) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
-        defaultMessage: 'actual',
+        defaultMessage: 'Actual',
       }),
       description: formatValue(anomaly.actual, source.function, undefined, source),
     });
@@ -157,7 +158,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (anomaly.typical !== undefined && showTypicalForFunction(functionDescription) === true) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
-        defaultMessage: 'typical',
+        defaultMessage: 'Typical',
       }),
       description: formatValue(anomaly.typical, source.function, undefined, source),
     });
@@ -165,7 +166,7 @@ function getDetailsItems(anomaly, examples, filter) {
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.jobIdTitle', {
-      defaultMessage: 'job ID',
+      defaultMessage: 'Job ID',
     }),
     description: anomaly.jobId,
   });
@@ -176,7 +177,7 @@ function getDetailsItems(anomaly, examples, filter) {
   ) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle', {
-        defaultMessage: 'multi-bucket impact',
+        defaultMessage: 'Multi-bucket impact',
       }),
       description: getMultiBucketImpactLabel(source.multi_bucket_impact),
     });
@@ -184,7 +185,7 @@ function getDetailsItems(anomaly, examples, filter) {
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle', {
-      defaultMessage: 'probability',
+      defaultMessage: 'Probability',
     }),
     description: source.probability,
   });
@@ -564,7 +565,7 @@ export class AnomalyDetails extends Component {
             <EuiLink onClick={() => this.toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionShowLessLinkText"
-                defaultMessage="show less"
+                defaultMessage="Show less"
               />
             </EuiLink>
           )}

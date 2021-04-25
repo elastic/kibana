@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { IEsError } from 'src/plugins/data/public';
 
 import { useToasts } from '../lib/kibana';
 import { useAppToasts } from './use_app_toasts';
 
 jest.mock('../lib/kibana');
 
-describe('useDeleteList', () => {
+describe('useAppToasts', () => {
   let addErrorMock: jest.Mock;
   let addSuccessMock: jest.Mock;
   let addWarningMock: jest.Mock;
@@ -36,22 +38,6 @@ describe('useDeleteList', () => {
     expect(addErrorMock).toHaveBeenCalledWith(error, { title: 'title' });
   });
 
-  it("uses a AppError's body.message as the toastMessage", async () => {
-    const kibanaApiError = {
-      message: 'Not Found',
-      body: { status_code: 404, message: 'Detailed Message' },
-    };
-
-    const { result } = renderHook(() => useAppToasts());
-
-    result.current.addError(kibanaApiError, { title: 'title' });
-
-    expect(addErrorMock).toHaveBeenCalledWith(kibanaApiError, {
-      title: 'title',
-      toastMessage: 'Detailed Message',
-    });
-  });
-
   it('converts an unknown error to an Error', () => {
     const unknownError = undefined;
 
@@ -61,6 +47,27 @@ describe('useDeleteList', () => {
 
     expect(addErrorMock).toHaveBeenCalledWith(Error(`${undefined}`), {
       title: 'title',
+    });
+  });
+
+  it('works normally with a bsearch type error', async () => {
+    const error = ({
+      message: 'some message',
+      attributes: {},
+      err: {
+        statusCode: 400,
+        innerMessages: { somethingElse: 'message' },
+      },
+    } as unknown) as IEsError;
+    const { result } = renderHook(() => useAppToasts());
+
+    result.current.addError(error, { title: 'title' });
+    const errorObj = addErrorMock.mock.calls[0][0];
+    expect(errorObj).toEqual({
+      message: 'some message (400)',
+      name: 'some message',
+      stack:
+        '{\n  "statusCode": 400,\n  "innerMessages": {\n    "somethingElse": "message"\n  }\n}',
     });
   });
 });

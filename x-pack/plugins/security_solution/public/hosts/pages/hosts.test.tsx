@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -11,7 +12,6 @@ import { Router } from 'react-router-dom';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import '../../common/mock/match_media';
 import {
-  apolloClientObservable,
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
@@ -143,13 +143,7 @@ describe('Hosts - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

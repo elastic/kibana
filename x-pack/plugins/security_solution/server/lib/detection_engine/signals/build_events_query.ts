@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
+import { SortResults } from '@elastic/elasticsearch/api/types';
+import { isEmpty } from 'lodash';
 import {
   SortOrderOrUndefined,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
-  aggregations?: unknown;
+  aggregations?: Record<string, estypes.AggregationContainer>;
   index: string[];
   from: string;
   to: string;
-  filter: unknown;
+  filter?: estypes.QueryContainer;
   size: number;
   sortOrder?: SortOrderOrUndefined;
-  searchAfterSortId: string | number | undefined;
+  searchAfterSortIds: SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
 }
 
@@ -28,75 +31,80 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
-  searchAfterSortId,
+  searchAfterSortIds,
   sortOrder,
   timestampOverride,
 }: BuildEventsSearchQuery) => {
-  const timestamp = timestampOverride ?? '@timestamp';
-  const docFields =
+  const defaultTimeFields = ['@timestamp'];
+  const timestamps =
+    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
+
+  const rangeFilter: estypes.QueryContainer[] =
     timestampOverride != null
       ? [
           {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
+            range: {
+              [timestampOverride]: {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
           },
           {
-            field: timestampOverride,
-            format: 'strict_date_optional_time',
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                      gte: from,
+                      // @ts-expect-error
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: timestampOverride,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           },
         ]
       : [
           {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
           },
         ];
 
-  const filterWithTime = [
+  const filterWithTime: estypes.QueryContainer[] = [
+    // but tests contain undefined, so I suppose it's desired behaviour
+    // @ts-expect-error undefined in not assignable to QueryContainer
     filter,
-    {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      gte: from,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      lte: to,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
+    { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
 
   const searchQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       docvalue_fields: docFields,
       query: {
@@ -109,23 +117,47 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
-        {
-          [timestamp]: {
-            order: sortOrder ?? 'asc',
-          },
-        },
+        ...(timestampOverride != null
+          ? [
+              {
+                [timestampOverride]: {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]
+          : [
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]),
       ],
     },
   };
 
-  if (searchAfterSortId) {
+  if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: [searchAfterSortId],
+        search_after: searchAfterSortIds,
       },
     };
   }

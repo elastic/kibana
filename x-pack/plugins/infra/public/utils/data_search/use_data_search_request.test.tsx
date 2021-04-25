@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -17,6 +18,7 @@ import {
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginKibanaContextValue } from '../../hooks/use_kibana';
+import { normalizeDataSearchResponses } from './normalize_data_search_responses';
 import { useDataSearch } from './use_data_search_request';
 
 describe('useDataSearch hook', () => {
@@ -34,6 +36,7 @@ describe('useDataSearch hook', () => {
       () =>
         useDataSearch({
           getRequest,
+          parseResponses: noopParseResponse,
         }),
       {
         wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
@@ -48,7 +51,7 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
   });
 
-  it('creates search requests with the given params and options', async () => {
+  it('creates search requests with the given params and options and parses the responses', async () => {
     const dataMock = createDataPluginMock();
     const searchResponseMock$ = of<IKibanaSearchResponse>({
       rawResponse: {
@@ -78,6 +81,7 @@ describe('useDataSearch hook', () => {
       () =>
         useDataSearch({
           getRequest,
+          parseResponses: noopParseResponse,
         }),
       {
         wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
@@ -112,10 +116,11 @@ describe('useDataSearch hook', () => {
     });
     expect(firstRequest).toHaveProperty('options.strategy', 'test-search-strategy');
     expect(firstRequest).toHaveProperty('response$', expect.any(Observable));
-    await expect(firstRequest.response$.toPromise()).resolves.toEqual({
-      rawResponse: {
-        firstKey: 'firstValue',
+    await expect(firstRequest.response$.toPromise()).resolves.toMatchObject({
+      data: {
+        firstKey: 'firstValue', // because this specific response parser just copies the raw response
       },
+      errors: [],
     });
   });
 
@@ -145,6 +150,7 @@ describe('useDataSearch hook', () => {
       () =>
         useDataSearch({
           getRequest,
+          parseResponses: noopParseResponse,
         }),
       {
         wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
@@ -186,3 +192,8 @@ const createDataPluginMock = () => {
   };
   return dataMock;
 };
+
+const noopParseResponse = normalizeDataSearchResponses(
+  null,
+  <Response extends any>(response: Response) => ({ data: response })
+);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -29,12 +30,19 @@ import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import { StepDefineFormProps } from '../step_define_form';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
+import { getCombinedRuntimeMappings } from '../../../../../common/request';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
   transformConfig?: TransformBaseConfig,
   indexPattern?: StepDefineFormProps['searchItems']['indexPattern']
 ): StepDefineExposedState {
+  // apply runtime fields from both the index pattern and inline configurations
+  state.runtimeMappings = getCombinedRuntimeMappings(
+    indexPattern,
+    transformConfig?.source?.runtime_mappings
+  );
+
   if (transformConfig === undefined) {
     return state;
   }
@@ -106,6 +114,5 @@ export function applyTransformConfigToDefineState(
 
   // applying a transform config to wizard state will always result in a valid configuration
   state.valid = true;
-
   return state;
 }

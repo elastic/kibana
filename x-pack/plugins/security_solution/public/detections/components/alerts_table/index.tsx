@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
@@ -47,25 +48,27 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 interface OwnProps {
-  timelineId: TimelineIdLiteral;
-  canUserCRUD: boolean;
   defaultFilters?: Filter[];
-  hasIndexWrite: boolean;
   from: string;
+  hasIndexMaintenance: boolean;
+  hasIndexWrite: boolean;
   loading: boolean;
   onRuleChange?: () => void;
-  showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
+  timelineId: TimelineIdLiteral;
   to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  timelineId,
-  canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
@@ -73,16 +76,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   from,
   globalFilters,
   globalQuery,
+  hasIndexMaintenance,
   hasIndexWrite,
   isSelectAllChecked,
   loading,
   loadingEventIds,
   onRuleChange,
+  onShowBuildingBlockAlertsChanged,
+  onShowOnlyThreatIndicatorAlertsChanged,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
   showBuildingBlockAlerts,
-  onShowBuildingBlockAlertsChanged,
+  showOnlyThreatIndicatorAlerts,
+  timelineId,
   to,
 }) => {
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
@@ -259,32 +266,36 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     (refetchQuery: inputsModel.Refetch, totalCount: number) => {
       return (
         <AlertsUtilityBar
-          canUserCRUD={canUserCRUD}
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
-          hasIndexWrite={hasIndexWrite}
           currentFilter={filterGroup}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+          onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
-          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
+          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
     [
-      canUserCRUD,
-      hasIndexWrite,
       clearSelectionCallback,
       filterGroup,
-      showBuildingBlockAlerts,
-      onShowBuildingBlockAlertsChanged,
+      hasIndexMaintenance,
+      hasIndexWrite,
       loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
       selectAllOnAllPagesCallback,
       selectedEventIds,
+      showBuildingBlockAlerts,
       showClearSelectionAction,
+      showOnlyThreatIndicatorAlerts,
       updateAlertsStatusCallback,
     ]
   );
@@ -335,6 +346,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
+      renderCellValue={DefaultCellRenderer}
+      rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -36,7 +25,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { FIELD_TYPES } from '../../../../common/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
@@ -121,8 +110,7 @@ export const SplitByTermsUI = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.splits.terms.byLabel"
@@ -130,21 +118,18 @@ export const SplitByTermsUI = ({
                 description="This labels a field selector allowing the user to chose 'by' which field to group."
               />
             }
-          >
-            <FieldSelect
-              data-test-subj="groupByField"
-              indexPattern={indexPattern}
-              onChange={handleSelectChange('terms_field')}
-              value={model.terms_field}
-              fields={fields}
-              uiRestrictions={uiRestrictions}
-              type={'terms'}
-            />
-          </EuiFormRow>
+            data-test-subj="groupByField"
+            indexPattern={indexPattern}
+            onChange={handleSelectChange('terms_field')}
+            value={model.terms_field}
+            fields={fields}
+            uiRestrictions={uiRestrictions}
+            type={'terms'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {selectedFieldType === FIELD_TYPES.STRING && (
+      {selectedFieldType === KBN_FIELD_TYPES.STRING && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -213,6 +198,7 @@ export const SplitByTermsUI = ({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount, terms]}
+              fields={fields[indexPattern]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by}
@@ -247,7 +233,7 @@ SplitByTermsUI.propTypes = {
   intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   fields: PropTypes.object,
   uiRestrictions: PropTypes.object,
   seriesQuantity: PropTypes.object,

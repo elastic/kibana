@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 export const GetCategoriesRequestSchema = {
@@ -32,6 +34,12 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const GetStatsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+  }),
+};
+
 export const InstallPackageFromRegistryRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
@@ -57,4 +65,9 @@ export const DeletePackageRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };

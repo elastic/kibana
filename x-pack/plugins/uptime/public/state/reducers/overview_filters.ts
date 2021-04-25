@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions, Action } from 'redux-actions';
@@ -10,7 +11,6 @@ import {
   fetchOverviewFilters,
   fetchOverviewFiltersFail,
   fetchOverviewFiltersSuccess,
-  setOverviewFilters,
   GetOverviewFiltersPayload,
   OverviewFiltersPayload,
 } from '../actions';
@@ -49,11 +49,6 @@ export const overviewFiltersReducer = handleActions<OverviewFiltersState, Overvi
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,
-    }),
-
-    [String(setOverviewFilters)]: (state, action: Action<OverviewFilters>) => ({
-      ...state,
-      filters: action.payload,
     }),
   },
   initialState

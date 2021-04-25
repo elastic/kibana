@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,13 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CCR_READ_EXCEPTIONS,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../../../common/constants';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/ccr', {
   template,
@@ -37,6 +44,12 @@ uiRoutes.when('/elasticsearch/ccr', {
         getPageData,
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CCR_READ_EXCEPTIONS],
+          },
+        },
       });
 
       $scope.$watch(
@@ -45,7 +58,20 @@ uiRoutes.when('/elasticsearch/ccr', {
           if (!data) {
             return;
           }
-          this.renderReact(<Ccr data={data.data} />);
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Ccr data={data.data} alerts={this.alerts} />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
+          );
         }
       );
     }

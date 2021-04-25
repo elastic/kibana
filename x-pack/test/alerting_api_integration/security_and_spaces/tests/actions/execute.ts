@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -47,11 +48,11 @@ export default function ({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle execute request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -64,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-1:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -116,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
 
               await validateEventLog({
                 spaceId: space.id,
-                actionId: createdAction.id,
+                connectorId: createdAction.id,
                 outcome: 'success',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
@@ -128,11 +129,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it(`shouldn't execute an action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -145,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-4:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -185,11 +186,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after action is updated', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -201,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action updated',
@@ -216,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-2:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -273,7 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it(`should handle execute request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -309,7 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({});
@@ -337,11 +338,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after changing config properties', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'test email action',
-              actionTypeId: '.email',
+              connector_type_id: '.email',
               config: {
                 from: 'email-from-1@example.com',
                 // this host is specifically added to allowedHosts in:
@@ -358,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'a test email action 2',
@@ -374,7 +375,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -412,17 +413,17 @@ export default function ({ getService }: FtrProviderContext) {
           let searchResult: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.authorization',
+              connector_type_id: 'test.authorization',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -459,11 +460,9 @@ export default function ({ getService }: FtrProviderContext) {
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...indexedRecord._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...indexedRecord._source.state.savedObjectsClientError,
@@ -502,23 +501,24 @@ export default function ({ getService }: FtrProviderContext) {
 
   interface ValidateEventLogParams {
     spaceId: string;
-    actionId: string;
+    connectorId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, outcome, message, errorMessage } = params;
+    const { spaceId, connectorId, outcome, message, errorMessage } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
         getService,
         spaceId,
         type: 'action',
-        id: actionId,
+        id: connectorId,
         provider: 'actions',
         actions: new Map([['execute', { equal: 1 }]]),
+        filter: 'event.action:(execute)',
       });
     });
 
@@ -548,7 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         rel: 'primary',
         type: 'action',
-        id: actionId,
+        id: connectorId,
         namespace: spaceId,
       },
     ]);

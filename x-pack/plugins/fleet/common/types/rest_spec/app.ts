@@ -1,10 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface CheckPermissionsResponse {
   error?: 'MISSING_SECURITY' | 'MISSING_SUPERUSER_ROLE';
   success: boolean;
+}
+
+export interface GenerateServiceTokenResponse {
+  name: string;
+  value: string;
 }

@@ -1,82 +1,83 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from '@kbn/logging';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getServicesProjection } from '../../../projections/services';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import {
-  getAgentNames,
-  getEnvironments,
-  getHealthStatuses,
-  getTransactionDurationAverages,
-  getTransactionErrorRates,
-  getTransactionRates,
-} from './get_services_items_stats';
+import { getHealthStatuses } from './get_health_statuses';
+import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export type ServicesItemsSetup = Setup & SetupTimeRange;
-export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
+
+const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
+  environment,
+  kuery,
   setup,
   searchAggregatedTransactions,
   logger,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }) {
-  const params = {
-    projection: getServicesProjection({
+  return withApmSpan('get_services_items', async () => {
+    const params = {
+      environment,
+      kuery,
       setup,
       searchAggregatedTransactions,
-    }),
-    setup,
-    searchAggregatedTransactions,
-  };
+      maxNumServices: MAX_NUMBER_OF_SERVICES,
+    };
 
-  const [
-    transactionDurationAverages,
-    agentNames,
-    transactionRates,
-    transactionErrorRates,
-    environments,
-    healthStatuses,
-  ] = await Promise.all([
-    getTransactionDurationAverages(params),
-    getAgentNames(params),
-    getTransactionRates(params),
-    getTransactionErrorRates(params),
-    getEnvironments(params),
-    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
-      logger.error(err);
-      return [];
-    }),
-  ]);
+    const [
+      transactionStats,
+      servicesFromMetricDocuments,
+      healthStatuses,
+    ] = await Promise.all([
+      getServiceTransactionStats(params),
+      getServicesFromMetricDocuments(params),
+      getHealthStatuses(params).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
+    ]);
 
-  const apmServiceMetrics = joinByKey(
-    [
-      ...transactionDurationAverages,
-      ...agentNames,
-      ...transactionRates,
-      ...transactionErrorRates,
-      ...environments,
-    ],
-    'serviceName'
-  );
+    const foundServiceNames = transactionStats.map(
+      ({ serviceName }) => serviceName
+    );
 
-  const apmServices = apmServiceMetrics.map(({ serviceName }) => serviceName);
+    const servicesWithOnlyMetricDocuments = servicesFromMetricDocuments.filter(
+      ({ serviceName }) => !foundServiceNames.includes(serviceName)
+    );
 
-  // make sure to exclude health statuses from services
-  // that are not found in APM data
+    const allServiceNames = foundServiceNames.concat(
+      servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
+    );
 
-  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
-    apmServices.includes(serviceName)
-  );
+    // make sure to exclude health statuses from services
+    // that are not found in APM data
+    const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+      allServiceNames.includes(serviceName)
+    );
 
-  const allMetrics = [...apmServiceMetrics, ...matchedHealthStatuses];
-
-  return joinByKey(allMetrics, 'serviceName');
+    return joinByKey(
+      asMutableArray([
+        ...transactionStats,
+        ...servicesWithOnlyMetricDocuments,
+        ...matchedHealthStatuses,
+      ] as const),
+      'serviceName'
+    );
+  });
 }

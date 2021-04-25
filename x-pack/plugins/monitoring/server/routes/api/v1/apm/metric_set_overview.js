@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const metricSet = [
@@ -16,6 +17,10 @@ export const metricSet = [
   {
     keys: ['apm_mem_alloc', 'apm_mem_rss', 'apm_mem_gc_next'],
     name: 'apm_memory',
+  },
+  {
+    keys: ['apm_cgroup_memory_usage', 'apm_cgroup_memory_limit', 'apm_mem_gc_next'],
+    name: 'apm_memory_cgroup',
   },
   {
     keys: ['apm_output_events_total', 'apm_output_events_active', 'apm_output_events_acked'],

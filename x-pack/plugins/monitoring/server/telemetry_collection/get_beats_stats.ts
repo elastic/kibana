@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -76,7 +77,7 @@ export interface BeatsStats {
       queue?: {
         name?: string;
       };
-      heartbeat?: HeartbeatBase;
+      heartbeat?: Heartbeat;
       functionbeat?: {
         functions?: {
           count?: number;
@@ -90,11 +91,11 @@ export interface BeatsStats {
   };
 }
 
+type Heartbeat = HeartbeatBase & { [key: string]: HeartbeatBase | undefined };
+
 interface HeartbeatBase {
   monitors: number;
   endpoints: number;
-  // I have to add the '| number' bit because otherwise TS complains about 'monitors' and 'endpoints' not being of type HeartbeatBase
-  [key: string]: HeartbeatBase | number | undefined;
 }
 
 export interface BeatsBaseStats {
@@ -121,7 +122,7 @@ export interface BeatsBaseStats {
     count: number;
     architectures: BeatsArchitecture[];
   };
-  heartbeat?: HeartbeatBase;
+  heartbeat?: Heartbeat;
   functionbeat?: {
     functions: {
       count: number;
@@ -236,7 +237,7 @@ export function processResults(
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
             endpoints: 0,
-          };
+          } as Heartbeat; // Needed because TS complains about the additional index signature
         }
         const clusterHb = clusters[clusterUuid].heartbeat!;
 
@@ -318,7 +319,7 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -382,7 +383,7 @@ async function fetchBeatsByType(
 }
 
 export async function fetchBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -392,7 +393,7 @@ export async function fetchBeatsStats(
 }
 
 export async function fetchBeatsStates(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -410,7 +411,7 @@ export interface BeatsStatsByClusterUuid {
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string

@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Command Shell Activity Started via RunDLL32",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.name : (\"cmd.exe\", \"powershell.exe\") and\n  process.parent.name : \"rundll32.exe\" and \n  /* common FPs can be added here */\n  not process.parent.args : \"C:\\\\Windows\\\\System32\\\\SHELL32.dll,RunAsNewUser_RunDLL\"\n",
   "risk_score": 21,
@@ -34,16 +35,19 @@
         {
           "id": "T1059",
           "name": "Command and Scripting Interpreter",
-          "reference": "https://attack.mitre.org/techniques/T1059/"
-        },
-        {
-          "id": "T1086",
-          "name": "PowerShell",
-          "reference": "https://attack.mitre.org/techniques/T1086/"
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

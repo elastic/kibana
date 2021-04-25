@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
+        await setup('monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
@@ -107,8 +108,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');

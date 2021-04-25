@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AppFrontendLibs } from './common/lib/lib';
 import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -33,10 +33,11 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -69,7 +70,7 @@ export interface PluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export interface AppObservableLibs extends AppFrontendLibs {
+export interface AppObservableLibs {
   kibana: CoreStart;
 }
 

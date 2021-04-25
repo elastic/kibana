@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -118,6 +107,27 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(genericError).not.toBe(error);
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
     expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(true);
+  });
+
+  it('if saved objects index does not exist makes NotFound a SavedObjectsClient/generalError', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 404,
+        body: {
+          error: {
+            reason:
+              'no such index [.kibana_8.0.0] and [require_alias] request flag is [true] and [.kibana_8.0.0] is not an alias',
+          },
+        },
+      })
+    );
+    expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(false);
+    const genericError = decorateEsError(error);
+    expect(genericError.message).toEqual(
+      `Saved object index alias [.kibana_8.0.0] not found: Response Error`
+    );
+    expect(genericError.output.statusCode).toBe(500);
+    expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(true);
   });
 
   it('makes BadRequest a SavedObjectsClient/BadRequest error', () => {

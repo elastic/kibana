@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
+import { estypes } from '@elastic/elasticsearch';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';
 
@@ -13,6 +15,7 @@ export const createLogEntryDatasetsQuery = (
   timestampField: string,
   startTime: number,
   endTime: number,
+  runtimeMappings: estypes.RuntimeFields,
   size: number,
   afterKey?: CompositeDatasetKey
 ) => ({
@@ -37,6 +40,7 @@ export const createLogEntryDatasetsQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     aggs: {
       dataset_buckets: {
         composite: {

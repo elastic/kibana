@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -25,17 +26,20 @@ import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/a
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
   );
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
@@ -52,6 +56,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    setLazyJobCount,
     false,
     false
   );
@@ -107,7 +112,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
           }
           actions={
             <EuiButton
-              onClick={redirectToDataFrameAnalyticsManagementPage}
+              onClick={() => setIsSourceIndexModalVisible(true)}
               color="primary"
               fill
               iconType="plusInCircle"
@@ -156,6 +161,9 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
             </EuiButton>
           </div>
         </>
+      )}
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </EuiPanel>
   );

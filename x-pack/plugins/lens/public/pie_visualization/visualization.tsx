@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,12 +12,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { LayerState, PieVisualizationState } from './types';
+import { PieLayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
@@ -44,16 +45,19 @@ export const getPieVisualization = ({
       id: 'donut',
       icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
+      groupLabel: CHART_NAMES.donut.groupLabel,
     },
     {
       id: 'pie',
       icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
+      groupLabel: CHART_NAMES.pie.groupLabel,
     },
     {
       id: 'treemap',
       icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
+      groupLabel: CHART_NAMES.treemap.groupLabel,
     },
   ],
 
@@ -192,11 +196,6 @@ export const getPieVisualization = ({
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
-
-      shape:
-        prevState.shape === 'donut' && prevState.layers.every((l) => l.groups.length === 1)
-          ? 'pie'
-          : prevState.shape,
       layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
@@ -226,7 +225,7 @@ export const getPieVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
@@ -273,7 +272,7 @@ export const getPieVisualization = ({
     ));
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // not possible to break it?
     return undefined;
   },

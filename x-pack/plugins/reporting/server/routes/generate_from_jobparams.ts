@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -23,26 +24,22 @@ export function registerGenerateFromJobParams(
   const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
+  // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
+  // public method to return this array
+  // const registry = reporting.getExportTypesRegistry();
+  // const kibanaAccessControlTags = registry.getAllAccessControlTags();
+  const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
+  const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
+
   router.post(
     {
       path: `${BASE_GENERATE}/{exportType}`,
       validate: {
-        params: schema.object({
-          exportType: schema.string({ minLength: 2 }),
-        }),
-        body: schema.nullable(
-          schema.object({
-            jobParams: schema.maybe(schema.string()),
-          })
-        ),
-        query: schema.nullable(
-          schema.object({
-            jobParams: schema.string({
-              defaultValue: '',
-            }),
-          })
-        ),
+        params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
+        body: schema.nullable(schema.object({ jobParams: schema.maybe(schema.string()) })),
+        query: schema.nullable(schema.object({ jobParams: schema.string({ defaultValue: '' }) })),
       },
+      options: { tags: kibanaAccessControlTags },
     },
     userHandler(async (user, context, req, res) => {
       let jobParamsRison: null | string = null;

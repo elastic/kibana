@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -60,6 +61,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -69,7 +71,12 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
           : undefined,
     };
   },
-  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
+      layer,
+      thisColumnId,
+      changedColumnId
+    ),
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
       id: columnId,
@@ -81,4 +88,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return true;
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };

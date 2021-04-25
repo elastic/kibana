@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,6 +12,8 @@ import { shallow, mount, ReactWrapper } from 'enzyme';
 import '../../../../common/mock/match_media';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -36,6 +39,7 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   }),
   createPrepackagedRules: jest.fn(),
 }));
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 const props = {
   createPrePackagedRules: jest.fn(),
@@ -45,6 +49,14 @@ const props = {
 };
 
 describe('PrePackagedRulesPrompt', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
   it('renders correctly', () => {
     const wrapper = shallow(<PrePackagedRulesPrompt {...props} />);
 

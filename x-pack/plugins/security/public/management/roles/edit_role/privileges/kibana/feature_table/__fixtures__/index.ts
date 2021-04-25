@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-
-import { EuiCheckbox, EuiCheckboxProps, EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
+import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test/jest';
-import { EuiAccordion } from '@elastic/eui';
+
 import { SubFeatureForm } from '../sub_feature_form';
 
 export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {

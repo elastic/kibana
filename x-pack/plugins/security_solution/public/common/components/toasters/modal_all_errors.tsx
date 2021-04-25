@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiButton,
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -35,36 +35,34 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
   if (!isShowing || toast == null) return null;
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={handleClose}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <EuiModal onClose={handleClose}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiCallOut title={toast.title} color="danger" size="s" iconType="alert" />
-          <EuiSpacer size="s" />
-          {toast.errors != null &&
-            toast.errors.map((error, index) => (
-              <EuiAccordion
-                key={`${toast.id}-${index}`}
-                id="accordion1"
-                initialIsOpen={index === 0 ? true : false}
-                buttonContent={error.length > 100 ? `${error.substring(0, 100)} ...` : error}
-                data-test-subj="modal-all-errors-accordion"
-              >
-                <MyEuiCodeBlock>{error}</MyEuiCodeBlock>
-              </EuiAccordion>
-            ))}
-        </EuiModalBody>
+      <EuiModalBody>
+        <EuiCallOut title={toast.title} color="danger" size="s" iconType="alert" />
+        <EuiSpacer size="s" />
+        {toast.errors != null &&
+          toast.errors.map((error, index) => (
+            <EuiAccordion
+              key={`${toast.id}-${index}`}
+              id="accordion1"
+              initialIsOpen={index === 0 ? true : false}
+              buttonContent={error.length > 100 ? `${error.substring(0, 100)} ...` : error}
+              data-test-subj="modal-all-errors-accordion"
+            >
+              <MyEuiCodeBlock>{error}</MyEuiCodeBlock>
+            </EuiAccordion>
+          ))}
+      </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButton onClick={handleClose} fill data-test-subj="modal-all-errors-close">
-            {i18n.CLOSE_ERROR_MODAL}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+      <EuiModalFooter>
+        <EuiButton onClick={handleClose} fill data-test-subj="modal-all-errors-close">
+          {i18n.CLOSE_ERROR_MODAL}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 

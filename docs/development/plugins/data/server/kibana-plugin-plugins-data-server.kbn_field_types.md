@@ -21,13 +21,17 @@ export declare enum KBN_FIELD_TYPES
 |  BOOLEAN | <code>&quot;boolean&quot;</code> |  |
 |  CONFLICT | <code>&quot;conflict&quot;</code> |  |
 |  DATE | <code>&quot;date&quot;</code> |  |
+|  DATE\_RANGE | <code>&quot;date_range&quot;</code> |  |
 |  GEO\_POINT | <code>&quot;geo_point&quot;</code> |  |
 |  GEO\_SHAPE | <code>&quot;geo_shape&quot;</code> |  |
 |  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |
 |  IP | <code>&quot;ip&quot;</code> |  |
+|  IP\_RANGE | <code>&quot;ip_range&quot;</code> |  |
+|  MISSING | <code>&quot;missing&quot;</code> |  |
 |  MURMUR3 | <code>&quot;murmur3&quot;</code> |  |
 |  NESTED | <code>&quot;nested&quot;</code> |  |
 |  NUMBER | <code>&quot;number&quot;</code> |  |
+|  NUMBER\_RANGE | <code>&quot;number_range&quot;</code> |  |
 |  OBJECT | <code>&quot;object&quot;</code> |  |
 |  STRING | <code>&quot;string&quot;</code> |  |
 |  UNKNOWN | <code>&quot;unknown&quot;</code> |  |

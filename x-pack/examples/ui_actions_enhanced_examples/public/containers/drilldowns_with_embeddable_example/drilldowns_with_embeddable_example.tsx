@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,10 +19,12 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
-import { EmbeddableRoot } from '../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableRoot,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
 import { useUiActions } from '../../context';
-import { VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 export const job: SampleMlJob = {
   job_id: '123',
@@ -43,7 +46,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
   );
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
-  const viewRef = React.useRef<'create' | 'manage'>('create');
+  const viewRef = React.useRef<'/create' | '/manage'>('/create');
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -54,7 +57,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
           icon: 'plusInCircle',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'create';
+            viewRef.current = '/create';
             setShowManager((x) => !x);
           },
         },
@@ -63,7 +66,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
           icon: 'list',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'manage';
+            viewRef.current = '/manage';
             setShowManager((x) => !x);
           },
         },
@@ -119,12 +122,13 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
-          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-            onClose={() => setShowManager(false)}
-            viewMode={viewRef.current}
+          <plugins.uiActionsEnhanced.DrilldownManager
+            key={viewRef.current}
+            initialRoute={viewRef.current}
             dynamicActionManager={managerWithEmbeddable}
             triggers={[VALUE_CLICK_TRIGGER]}
             placeContext={{ embeddable }}
+            onClose={() => setShowManager(false)}
           />
         </EuiFlyout>
       )}

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import ace from 'brace';
@@ -42,8 +31,8 @@ const rangeToAceRange = ({ start, end }: Range) =>
   new _AceRange(start.lineNumber - 1, start.column - 1, end.lineNumber - 1, end.column - 1);
 
 export class LegacyCoreEditor implements CoreEditor {
-  private _aceOnPaste: any;
-  $actions: any;
+  private _aceOnPaste: Function;
+  $actions: JQuery<HTMLElement>;
   resize: () => void;
 
   constructor(private readonly editor: IAceEditor, actions: HTMLElement) {
@@ -52,7 +41,9 @@ export class LegacyCoreEditor implements CoreEditor {
 
     const session = this.editor.getSession();
     session.setMode(new InputMode.Mode());
-    (session as any).setFoldStyle('markbeginend');
+    ((session as unknown) as { setFoldStyle: (style: string) => void }).setFoldStyle(
+      'markbeginend'
+    );
     session.setTabSize(2);
     session.setUseWrapMode(true);
 
@@ -83,7 +74,7 @@ export class LegacyCoreEditor implements CoreEditor {
         // torn down, e.g. by closing the History tab, and we don't need to do anything further.
         if (session.bgTokenizer) {
           // Wait until the bgTokenizer is done running before executing the callback.
-          if ((session.bgTokenizer as any).running) {
+          if (((session.bgTokenizer as unknown) as { running: boolean }).running) {
             setTimeout(check, checkInterval);
           } else {
             resolve();
@@ -208,7 +199,7 @@ export class LegacyCoreEditor implements CoreEditor {
       .addMarker(rangeToAceRange(range), 'ace_snippet-marker', 'fullLine', false);
   }
 
-  removeMarker(ref: any) {
+  removeMarker(ref: number) {
     this.editor.getSession().removeMarker(ref);
   }
 
@@ -233,8 +224,10 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   isCompleterActive() {
-    // Secrets of the arcane here.
-    return Boolean((this.editor as any).completer && (this.editor as any).completer.activated);
+    return Boolean(
+      ((this.editor as unknown) as { completer: { activated: unknown } }).completer &&
+        ((this.editor as unknown) as { completer: { activated: unknown } }).completer.activated
+    );
   }
 
   private forceRetokenize() {
@@ -261,7 +254,7 @@ export class LegacyCoreEditor implements CoreEditor {
     this._aceOnPaste.call(this.editor, text);
   }
 
-  private setActionsBar = (value?: any, topOrBottom: 'top' | 'bottom' = 'top') => {
+  private setActionsBar = (value: number | null, topOrBottom: 'top' | 'bottom' = 'top') => {
     if (value === null) {
       this.$actions.css('visibility', 'hidden');
     } else {
@@ -282,7 +275,7 @@ export class LegacyCoreEditor implements CoreEditor {
   };
 
   private hideActionsBar = () => {
-    this.setActionsBar();
+    this.setActionsBar(null);
   };
 
   execCommand(cmd: string) {
@@ -306,7 +299,7 @@ export class LegacyCoreEditor implements CoreEditor {
     });
   }
 
-  legacyUpdateUI(range: any) {
+  legacyUpdateUI(range: Range) {
     if (!this.$actions) {
       return;
     }
@@ -371,14 +364,19 @@ export class LegacyCoreEditor implements CoreEditor {
     ace.define(
       'ace/autocomplete/text_completer',
       ['require', 'exports', 'module'],
-      function (require: any, exports: any) {
-        exports.getCompletions = function (
-          innerEditor: any,
-          session: any,
-          pos: any,
-          prefix: any,
-          callback: any
-        ) {
+      function (
+        require: unknown,
+        exports: {
+          getCompletions: (
+            innerEditor: unknown,
+            session: unknown,
+            pos: unknown,
+            prefix: unknown,
+            callback: (e: null | Error, values: string[]) => void
+          ) => void;
+        }
+      ) {
+        exports.getCompletions = function (innerEditor, session, pos, prefix, callback) {
           callback(null, []);
         };
       }
@@ -398,7 +396,7 @@ export class LegacyCoreEditor implements CoreEditor {
           DO_NOT_USE_2: IAceEditSession,
           pos: { row: number; column: number },
           prefix: string,
-          callback: (...args: any[]) => void
+          callback: (...args: unknown[]) => void
         ) => {
           const position: Position = {
             lineNumber: pos.row + 1,

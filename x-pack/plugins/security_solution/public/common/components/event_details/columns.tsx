@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -20,7 +21,6 @@ import styled from 'styled-components';
 
 import { onFocusReFocusDraggable } from '../accessibility/helpers';
 import { BrowserFields } from '../../containers/source';
-import { ToStringArray } from '../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
@@ -51,6 +51,14 @@ const HoverActionsContainer = styled(EuiPanel)`
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;
+
+const FullWidthFlexItem = styled(EuiFlexItem)`
+  width: 100%;
+`;
+
 export const getColumns = ({
   browserFields,
   columnHeaders,
@@ -76,24 +84,28 @@ export const getColumns = ({
     sortable: false,
     truncateText: false,
     width: '30px',
-    render: (field: string) => (
-      <EuiToolTip content={i18n.VIEW_COLUMN(field)}>
-        <EuiCheckbox
-          aria-label={i18n.VIEW_COLUMN(field)}
-          checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
-          data-test-subj={`toggle-field-${field}`}
-          data-colindex={1}
-          id={field}
-          onChange={() =>
-            toggleColumn({
-              columnHeaderType: defaultColumnHeaderType,
-              id: field,
-              width: DEFAULT_COLUMN_MIN_WIDTH,
-            })
-          }
-        />
-      </EuiToolTip>
-    ),
+    render: (field: string, data: EventFieldsData) => {
+      const label = data.isObjectArray ? i18n.NESTED_COLUMN(field) : i18n.VIEW_COLUMN(field);
+      return (
+        <EuiToolTip content={label}>
+          <EuiCheckbox
+            aria-label={label}
+            checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
+            data-test-subj={`toggle-field-${field}`}
+            data-colindex={1}
+            id={field}
+            onChange={() =>
+              toggleColumn({
+                columnHeaderType: defaultColumnHeaderType,
+                id: field,
+                width: DEFAULT_COLUMN_MIN_WIDTH,
+              })
+            }
+            disabled={data.isObjectArray && data.type !== 'geo_point'}
+          />
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'field',
@@ -109,38 +121,42 @@ export const getColumns = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DroppableWrapper
-            droppableId={getDroppableId(
-              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-            )}
-            key={getDroppableId(
-              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-            )}
-            isDropDisabled={true}
-            type={DRAG_TYPE_FIELD}
-            renderClone={(provided) => (
-              <div
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                ref={provided.innerRef}
-                tabIndex={-1}
-              >
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={field} />
-                </DragEffects>
-              </div>
-            )}
-          >
-            <DraggableFieldsBrowserField
-              browserFields={browserFields}
-              categoryId={data.category}
-              fieldName={field}
-              fieldCategory={data.category}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
-          </DroppableWrapper>
+          {data.isObjectArray && data.type !== 'geo_point' ? (
+            <>{field}</>
+          ) : (
+            <DroppableWrapper
+              droppableId={getDroppableId(
+                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+              )}
+              key={getDroppableId(
+                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+              )}
+              isDropDisabled={true}
+              type={DRAG_TYPE_FIELD}
+              renderClone={(provided) => (
+                <div
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  tabIndex={-1}
+                >
+                  <DragEffects>
+                    <DraggableFieldBadge fieldId={field} />
+                  </DragEffects>
+                </div>
+              )}
+            >
+              <DraggableFieldsBrowserField
+                browserFields={browserFields}
+                categoryId={data.category}
+                fieldName={field}
+                fieldCategory={data.category}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+              />
+            </DroppableWrapper>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
@@ -158,11 +174,16 @@ export const getColumns = ({
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
-      <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
+    render: (values: string[] | null | undefined, data: EventFieldsData) => (
+      <FullWidthFlexGroup
+        direction="column"
+        alignItems="flexStart"
+        component="span"
+        gutterSize="none"
+      >
         {values != null &&
           values.map((value, i) => (
-            <EuiFlexItem
+            <FullWidthFlexItem
               grow={false}
               component="span"
               key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
@@ -177,14 +198,15 @@ export const getColumns = ({
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={getLinkValue(data.field)}
                   />
                 )}
               </div>
-            </EuiFlexItem>
+            </FullWidthFlexItem>
           ))}
-      </EuiFlexGroup>
+      </FullWidthFlexGroup>
     ),
   },
   {

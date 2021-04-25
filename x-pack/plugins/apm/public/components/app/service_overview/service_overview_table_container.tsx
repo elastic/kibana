@@ -1,28 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import styled from 'styled-components';
+import React, { ReactNode } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
  * The height for a table on the overview page. Is the height of a 5-row basic
  * table.
  */
-const tableHeight = 298;
+const tableHeight = 282;
 
 /**
  * A container for the table. Sets height and flex properties on the EUI Basic
  * Table contained within and the first child div of that. This makes it so the
  * pagination controls always stay fixed at the bottom in the same position.
  *
+ * Only do this when we're at a non-mobile breakpoint.
+ *
  * Hide the empty message when we don't yet have any items and are still loading.
  */
-export const ServiceOverviewTableContainer = styled.div<{
+const ServiceOverviewTableContainerDiv = euiStyled.div<{
   isEmptyAndLoading: boolean;
+  shouldUseMobileLayout: boolean;
 }>`
-  height: ${tableHeight}px;
+  ${({ shouldUseMobileLayout }) =>
+    shouldUseMobileLayout
+      ? ''
+      : `
+  min-height: ${tableHeight}px;
   display: flex;
   flex-direction: column;
 
@@ -34,10 +44,29 @@ export const ServiceOverviewTableContainer = styled.div<{
     > :first-child {
       flex-grow: 1;
     }
-  }
+  `}
 
   .euiTableRowCell {
     visibility: ${({ isEmptyAndLoading }) =>
       isEmptyAndLoading ? 'hidden' : 'visible'};
   }
 `;
+
+export function ServiceOverviewTableContainer({
+  children,
+  isEmptyAndLoading,
+}: {
+  children?: ReactNode;
+  isEmptyAndLoading: boolean;
+}) {
+  const { isMedium } = useBreakPoints();
+
+  return (
+    <ServiceOverviewTableContainerDiv
+      isEmptyAndLoading={isEmptyAndLoading}
+      shouldUseMobileLayout={isMedium}
+    >
+      {children}
+    </ServiceOverviewTableContainerDiv>
+  );
+}

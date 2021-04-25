@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -34,6 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        runtimeFields: {
+          lowercase_central_air: {
+            type: 'keyword',
+            script: 'emit(params._source.CentralAir.toLowerCase())',
+          },
+        },
         modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
@@ -48,6 +55,27 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Exterior1st', legend: '2 categories' },
             { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
+          ],
+          scatterplotMatrixColorsWizard: [
+            // markers
+            { color: '#52B398', percentage: 15 },
+            // grey boilerplate
+            { color: '#6A717D', percentage: 33 },
+          ],
+          scatterplotMatrixColorStatsResults: [
+            // red markers
+            { color: '#D98071', percentage: 1 },
+            // tick/grid/axis, grey markers
+            { color: '#6A717D', percentage: 33 },
+            { color: '#D3DAE6', percentage: 8 },
+            { color: '#98A1B3', percentage: 12 },
+            // anti-aliasing
+            { color: '#F5F7FA', percentage: 30 },
+          ],
+          runtimeFieldsEditorContent: [
+            '{',
+            '  "lowercase_central_air": {',
+            '    "type": "keyword",',
           ],
           row: {
             type: 'outlier_detection',
@@ -71,6 +99,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -85,6 +117,22 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
 
+          await ml.testExecution.logTestStep('displays the runtime mappings editor switch');
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingSwitchExists();
+
+          await ml.testExecution.logTestStep('enables the runtime mappings editor');
+          await ml.dataFrameAnalyticsCreation.toggleRuntimeMappingsEditorSwitch(true);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(['']);
+
+          await ml.testExecution.logTestStep('sets runtime mappings');
+          await ml.dataFrameAnalyticsCreation.setRuntimeMappingsEditorContent(
+            JSON.stringify(testData.runtimeFields)
+          );
+          await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
+
           await ml.testExecution.logTestStep('does not display the dependent variable input');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputMissing();
 
@@ -95,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
 
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
@@ -104,6 +152,21 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorsWizard
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -139,6 +202,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
           );
+
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -221,6 +291,24 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStatsResults
+          );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {

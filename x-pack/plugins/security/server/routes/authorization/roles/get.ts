@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '../..';
-import { createLicensedRouteHandler } from '../../licensed_route_handler';
+
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
@@ -22,14 +24,15 @@ export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
       try {
         const {
           body: elasticsearchRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole({
+          name: request.params.name,
+        });
 
         const elasticsearchRole = elasticsearchRoles[request.params.name];
         if (elasticsearchRole) {
           return response.ok({
             body: transformElasticsearchRoleToRole(
+              // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
               elasticsearchRole,
               request.params.name,
               authz.applicationName

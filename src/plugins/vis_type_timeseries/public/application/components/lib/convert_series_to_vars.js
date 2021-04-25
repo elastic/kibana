@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { getLastValue } from '../../../../common/get_last_value';
+import { emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
@@ -30,9 +20,8 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
     series
       .filter((row) => _.startsWith(row.id, seriesModel.id))
       .forEach((row) => {
-        const varName = [_.snakeCase(row.label), _.snakeCase(seriesModel.var_name)]
-          .filter((v) => v)
-          .join('.');
+        const label = row.label ? _.snakeCase(row.label) : emptyLabel;
+        const varName = [label, _.snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter = createTickFormatter(
           seriesModel.formatter,
@@ -54,7 +43,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
           },
         };
         set(variables, varName, data);
-        set(variables, `${_.snakeCase(row.label)}.label`, row.label);
+        set(variables, `${label}.label`, row.label);
 
         /**
          * Handle the case when a field has "key_as_string" value.
@@ -65,7 +54,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
          */
         if (row.labelFormatted) {
           const val = labelDateFormatter(row.labelFormatted, dateFormat);
-          set(variables, `${_.snakeCase(row.label)}.formatted`, val);
+          set(variables, `${label}.formatted`, val);
         }
       });
   });

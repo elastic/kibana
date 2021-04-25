@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { AnyAction, Dispatch } from 'redux';
@@ -12,7 +14,12 @@ import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import {
+  KBN_IS_CENTROID_FEATURE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SOURCE_DATA_REQUEST_ID,
+} from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -38,7 +45,7 @@ import {
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../classes/layers/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
@@ -47,8 +54,8 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: object, meta?: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta: DataMeta): void;
+  stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
@@ -227,11 +234,15 @@ function endDataLoad(
   data: object,
   meta: DataMeta
 ) {
-  return async (
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
+    const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
+    if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      throw new DataRequestAbortError();
+    }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
 
@@ -240,7 +251,10 @@ function endDataLoad(
       const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
       if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
-        resultMeta.featuresCount = features.length;
+        const featuresWithoutCentroids = features.filter((feature) => {
+          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
+        });
+        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
       eventHandlers.onDataLoadEnd({
@@ -293,7 +307,6 @@ function onDataLoadError(
     dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
-      data: null,
       layerId,
       dataId,
       requestToken,

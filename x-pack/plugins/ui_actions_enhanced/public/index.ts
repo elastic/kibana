@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializerContext } from '../../../../src/core/public';
@@ -34,5 +35,8 @@ export {
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
+} from './drilldowns';
 export * from './drilldowns/url_drilldown';

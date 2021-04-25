@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
@@ -102,8 +103,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
           ...toQuery(history.location.search),
           page: options.page.index,
           pageSize: options.page.size,
-          sortField: options.sort!.field,
-          sortDirection: options.sort!.direction,
+          sortField: options.sort?.field,
+          sortDirection: options.sort?.direction,
         }),
       });
     },

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
@@ -135,6 +137,7 @@ describe('sortLayer', () => {
         { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
         { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
         { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `gl-draw-polygon-fill-active.cold`, type: 'fill' } as MbLayer,
         {
           id: `${CHARLIE_LAYER_ID}_text`,
           type: 'symbol',
@@ -158,6 +161,7 @@ describe('sortLayer', () => {
       'alpha_text',
       'alpha_circle',
       'charlie_text',
+      'gl-draw-polygon-fill-active.cold',
       'SPATIAL_FILTERS_LAYER_ID_fill',
       'SPATIAL_FILTERS_LAYER_ID_circle',
     ]);

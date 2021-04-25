@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -15,12 +17,15 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
+import _ from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { RoleIndexPrivilege } from '../../../../../../common/model';
-import { RoleValidator } from '../../validate_role';
+
+import type { RoleIndexPrivilege } from '../../../../../../common/model';
+import type { RoleValidator } from '../../validate_role';
 
 const fromOption = (option: any) => option.label;
 const toOption = (value: string) => ({ label: value });
@@ -128,6 +133,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
+                onCreateOption={this.onCreateCustomPrivilege}
                 isDisabled={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
@@ -387,6 +393,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
+    });
+  };
+
+  private onCreateCustomPrivilege = (customPrivilege: string) => {
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      privileges: [...this.props.indexPrivilege.privileges, customPrivilege],
     });
   };
 

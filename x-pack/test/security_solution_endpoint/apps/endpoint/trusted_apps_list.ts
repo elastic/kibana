@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -45,9 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('trustedAppDeleteButton');
       await testSubjects.click('trustedAppDeletionConfirm');
       await testSubjects.waitForDeleted('trustedAppDeletionConfirm');
-      expect(await testSubjects.getVisibleText('trustedAppsListViewCountLabel')).to.equal(
-        '0 trusted applications'
-      );
+      expect(await testSubjects.existOrFail('trustedAppEmptyState'));
     });
   });
 };

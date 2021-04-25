@@ -1,18 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { Cloud } from './fields/cloud';
 import { Container } from './fields/container';
+import { Host } from './fields/host';
 import { Kubernetes } from './fields/kubernetes';
+import { Service } from './fields/service';
 
 type BaseMetric = APMBaseDoc & {
   processor: {
     name: 'metric';
     event: 'metric';
   };
+  cloud?: Cloud;
+  container?: Container;
+  kubernetes?: Kubernetes;
+  service?: Service;
+  host?: Host;
 };
 
 type BaseBreakdownMetric = BaseMetric & {
@@ -85,8 +94,6 @@ type TransactionDurationMetric = BaseMetric & {
     environment?: string;
     version?: string;
   };
-  container?: Container;
-  kubernetes?: Kubernetes;
 };
 
 export type SpanDestinationMetric = BaseMetric & {

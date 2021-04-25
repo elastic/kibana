@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,9 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
 export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.infra.metrics.alerting.threshold.alertState', {
     defaultMessage: 'ALERT',
+  }),
+  [AlertStates.WARNING]: i18n.translate('xpack.infra.metrics.alerting.threshold.warningState', {
+    defaultMessage: 'WARNING',
   }),
   [AlertStates.NO_DATA]: i18n.translate('xpack.infra.metrics.alerting.threshold.noDataState', {
     defaultMessage: 'NO DATA',

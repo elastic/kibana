@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -37,6 +26,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/panel_types';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -111,8 +101,9 @@ const TopHitAggUi = (props) => {
     order: 'desc',
   };
   const model = { ...defaults, ...props.model };
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
@@ -125,8 +116,8 @@ const TopHitAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+  const field = fields[fieldsSelector].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
@@ -167,21 +158,17 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={aggWithOptionsRestrictFields}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={aggWithOptionsRestrictFields}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -232,23 +219,19 @@ const TopHitAggUi = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('order_by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.orderByLabel"
                 defaultMessage="Order by"
               />
             }
-          >
-            <FieldSelect
-              restrict={ORDER_DATE_RESTRICT_FIELDS}
-              value={model.order_by}
-              onChange={handleSelectChange('order_by')}
-              indexPattern={indexPattern}
-              fields={fields}
-            />
-          </EuiFormRow>
+            restrict={ORDER_DATE_RESTRICT_FIELDS}
+            value={model.order_by}
+            onChange={handleSelectChange('order_by')}
+            indexPattern={indexPattern}
+            fields={fields}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

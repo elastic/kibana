@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -56,6 +57,28 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
+        outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it("should update a rule's machine learning job ID if given a legacy job ID format", async () => {
+        await createRule(supertest, getSimpleMlRule('rule-1'));
+
+        // update rule's machine_learning_job_id
+        const updatedRule = getSimpleMlRuleUpdate('rule-1');
+        // @ts-expect-error updatedRule is the full union type here and thus is not narrowed to our ML params
+        updatedRule.machine_learning_job_id = 'legacy_job_id';
+        delete updatedRule.id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule)
+          .expect(200);
+
+        const outputRule = getSimpleMlRuleOutput();
+        outputRule.machine_learning_job_id = ['legacy_job_id'];
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);

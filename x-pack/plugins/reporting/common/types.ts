@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface PageSizeParams {
@@ -39,16 +40,17 @@ export interface LayoutParams {
 export interface ReportDocumentHead {
   _id: string;
   _index: string;
-  _seq_no: unknown;
-  _primary_term: unknown;
+  _seq_no: number;
+  _primary_term: number;
 }
 
 export interface TaskRunResult {
   content_type: string | null;
   content: string | null;
-  csv_contains_formulas?: boolean;
   size: number;
+  csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
+  needs_sorting?: boolean;
   warnings?: string[];
 }
 
@@ -75,7 +77,6 @@ export interface ReportSource {
   started_at?: string;
   completed_at?: string;
   created_at: string;
-  priority?: number;
   process_expiration?: string;
 }
 
@@ -112,7 +113,6 @@ export interface ReportApiJSON {
   kibana_id: string;
   browser_type: string | undefined;
   created_at: string;
-  priority?: number;
   jobtype: string;
   created_by: string | false;
   timeout?: number;

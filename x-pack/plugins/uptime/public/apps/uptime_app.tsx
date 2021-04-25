@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
@@ -29,7 +30,8 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { EuiThemeProvider } from '../../../observability/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface UptimeAppColors {
   danger: string;
@@ -95,12 +97,20 @@ const Application = (props: UptimeAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
+  const storage = new Storage(window.localStorage);
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
         <ReduxProvider store={store}>
           <KibanaContextProvider
-            services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
+            services={{
+              ...core,
+              ...plugins,
+              storage,
+              data: startPlugins.data,
+              triggersActionsUi: startPlugins.triggersActionsUi,
+            }}
           >
             <Router history={appMountParameters.history}>
               <EuiThemeProvider darkMode={darkMode}>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable no-duplicate-imports */
@@ -209,11 +210,6 @@ export interface TreeFetcherParameters {
    */
   indices: string[];
 
-  /**
-   * The count of data invalidation actions at the time the data was requested.
-   */
-  dataRequestID?: number;
-
   filters: TimeFilters;
 }
 
@@ -244,21 +240,11 @@ export interface NodeEventsInCategoryState {
 
   lastCursorRequested?: null | string;
 
-  /**
-   * Request ID for the currently displayed events.
-   */
-  dataRequestID?: number;
-
   pendingRequest?: {
     /**
      * Parameters used for a request currently in progress.
      */
     parameters: PanelViewAndParameters;
-
-    /**
-     * Request ID for any inflight requests
-     */
-    dataRequestID: number;
   };
 
   /**
@@ -316,7 +302,6 @@ export interface NodeData {
    * An indication of the current state for retrieving the data.
    */
   status: NodeDataStatus;
-  dataRequestID: number;
 }
 
 /**
@@ -331,18 +316,12 @@ export interface DataState {
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
 
   /**
-   * A counter used to have resolver fetch updated data.
-   */
-  readonly refreshCount: number;
-
-  /**
    * Used when the panelView is `eventDetail`.
    *
    */
   readonly currentRelatedEvent: {
     loading: boolean;
     data: SafeResolverEvent | null;
-    dataRequestID?: number;
   };
 
   readonly tree?: {
@@ -396,6 +375,8 @@ export interface DataState {
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
+
+  readonly indices: string[];
 
   /**
    * The `search` part of the URL.

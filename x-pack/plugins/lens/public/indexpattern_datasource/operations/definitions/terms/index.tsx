@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -12,29 +13,41 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiSpacer,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiText,
+  EuiAccordion,
+  EuiIconTip,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
+import type { IndexPatternLayer } from '../../../types';
 
-function ofName(name: string) {
+function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
     defaultMessage: 'Top values of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        }),
+    },
   });
 }
 
-function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed && column.operationType !== 'last_value';
+function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
+  const column = layer.columns[columnId];
+  return (
+    column &&
+    !column.isBucketed &&
+    column.operationType !== 'last_value' &&
+    !('references' in column) &&
+    !isReferenced(layer, columnId)
+  );
 }
 
 const DEFAULT_SIZE = 3;
@@ -44,7 +57,9 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
   params: {
     size: number;
-    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
+    // another option or whether the user explicitly chose to make it alphabetical.
+    orderBy: { type: 'alphabetical'; fallback?: boolean } | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
     missingBucket?: boolean;
@@ -89,9 +104,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   },
   buildColumn({ layer, field, indexPattern }) {
     const existingMetricColumn = Object.entries(layer.columns)
-      .filter(
-        ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
-      )
+      .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
@@ -108,15 +121,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: {
         size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
-          ? { type: 'column', columnId: existingMetricColumn }
-          : { type: 'alphabetical' },
+          ? {
+              type: 'column',
+              columnId: existingMetricColumn,
+            }
+          : { type: 'alphabetical', fallback: true },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern) => {
+  toEsAggsFn: (column, columnId, _indexPattern, layer) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
@@ -137,7 +153,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {
@@ -151,28 +167,40 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: newParams,
     };
   },
-  onOtherColumnChanged: (currentColumn, columns) => {
-    if (currentColumn.params.orderBy.type === 'column') {
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
+    const columns = layer.columns;
+    const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
+    if (currentColumn.params.orderBy.type === 'column' || currentColumn.params.orderBy.fallback) {
       // check whether the column is still there and still a metric
-      const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
-      if (!columnSortedBy || !isSortableByColumn(columnSortedBy)) {
+      const columnSortedBy =
+        currentColumn.params.orderBy.type === 'column'
+          ? columns[currentColumn.params.orderBy.columnId]
+          : undefined;
+      if (
+        !columnSortedBy ||
+        (currentColumn.params.orderBy.type === 'column' &&
+          !isSortableByColumn(layer, currentColumn.params.orderBy.columnId))
+      ) {
+        // check whether we can find another metric column to sort by
+        const existingMetricColumn = Object.entries(layer.columns)
+          .filter(([columnId]) => isSortableByColumn(layer, columnId))
+          .map(([id]) => id)[0];
         return {
           ...currentColumn,
           params: {
             ...currentColumn.params,
-            orderBy: { type: 'alphabetical' },
-            orderDirection: 'asc',
+            orderBy: existingMetricColumn
+              ? { type: 'column', columnId: existingMetricColumn }
+              : { type: 'alphabetical', fallback: true },
+            orderDirection: existingMetricColumn ? 'desc' : 'asc',
           },
         };
       }
     }
     return currentColumn;
   },
-  paramEditor: function ParamEditor({ state, setState, currentColumn, layerId }) {
-    const indexPattern = currentColumn && state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
     const hasRestrictions = indexPattern.hasRestrictions;
-
-    const [popoverOpen, setPopoverOpen] = useState(false);
 
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
@@ -184,7 +212,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
 
     function fromValue(value: string): TermsIndexPatternColumn['params']['orderBy'] {
       if (value === 'alphabetical') {
-        return { type: 'alphabetical' };
+        return { type: 'alphabetical', fallback: false };
       }
       const parts = value.split(SEPARATOR);
       return {
@@ -193,11 +221,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       };
     }
 
-    const orderOptions = Object.entries(state.layers[layerId].columns)
-      .filter(([_columnId, column]) => isSortableByColumn(column))
-      .map(([columnId, column]) => {
+    const orderOptions = Object.entries(layer.columns)
+      .filter(([sortId]) => isSortableByColumn(layer, sortId))
+      .map(([sortId, column]) => {
         return {
-          value: toValue({ type: 'column', columnId }),
+          value: toValue({ type: 'column', columnId: sortId }),
           text: column.label,
         };
       });
@@ -216,14 +244,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           display="columnCompressed"
           fullWidth
         >
-          <ValuesRangeInput
+          <ValuesInput
             value={currentColumn.params.size}
             onChange={(value) => {
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'size',
                   value,
                 })
@@ -231,77 +258,26 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }}
           />
         </EuiFormRow>
-        {!hasRestrictions && (
-          <EuiText textAlign="right">
-            <EuiPopover
-              ownFocus
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => {
-                    setPopoverOpen(true);
-                  }}
-                >
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={popoverOpen}
-              closePopover={() => {
-                setPopoverOpen(false);
-              }}
-            >
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Group other values as "Other"',
-                })}
-                compressed
-                data-test-subj="indexPattern-terms-other-bucket"
-                checked={Boolean(currentColumn.params.otherBucket)}
-                onChange={(e: EuiSwitchEvent) =>
-                  setState(
-                    updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
-                      paramName: 'otherBucket',
-                      value: e.target.checked,
-                    })
-                  )
-                }
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include documents without this field',
-                })}
-                compressed
-                disabled={!currentColumn.params.otherBucket}
-                data-test-subj="indexPattern-terms-missing-bucket"
-                checked={Boolean(currentColumn.params.missingBucket)}
-                onChange={(e: EuiSwitchEvent) =>
-                  setState(
-                    updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
-                      paramName: 'missingBucket',
-                      value: e.target.checked,
-                    })
-                  )
-                }
-              />
-            </EuiPopover>
-            <EuiSpacer size="s" />
-          </EuiText>
-        )}
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-            defaultMessage: 'Order by',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+                defaultMessage: 'Rank by',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderByHelp', {
+                  defaultMessage: `Specifies the dimension the top values are ranked by.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -310,26 +286,48 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const newOrderByValue = fromValue(e.target.value);
+              const updatedLayer = updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'orderBy',
+                value: newOrderByValue,
+              });
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
-                  paramName: 'orderBy',
-                  value: fromValue(e.target.value),
+                  layer: updatedLayer,
+                  columnId,
+                  paramName: 'orderDirection',
+                  value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
                 })
-              )
-            }
+              );
+            }}
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-            defaultMessage: 'Order direction',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+                defaultMessage: 'Rank direction',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
+                  defaultMessage: `Specifies the ranking order of the top values.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -352,21 +350,71 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             ]}
             value={currentColumn.params.orderDirection}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'orderDirection',
                   value: e.target.value as 'asc' | 'desc',
                 })
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>
+        {!hasRestrictions && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id="lnsTermsAdvanced"
+              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                defaultMessage: 'Advanced',
+              })}
+            >
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                  defaultMessage: 'Group other values as "Other"',
+                })}
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                  defaultMessage: 'Include documents without this field',
+                })}
+                compressed
+                disabled={!currentColumn.params.otherBucket}
+                data-test-subj="indexPattern-terms-missing-bucket"
+                checked={Boolean(currentColumn.params.missingBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+            </EuiAccordion>
+          </>
+        )}
       </>
     );
   },

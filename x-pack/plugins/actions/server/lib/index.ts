@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { ExecutorError } from './executor_error';
@@ -11,6 +12,7 @@ export { ActionExecutor, ActionExecutorContract } from './action_executor';
 export { ILicenseState, LicenseState } from './license_state';
 export { verifyApiAccess } from './verify_api_access';
 export { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
+export { spaceIdToNamespace } from './space_id_to_namespace';
 export {
   ActionTypeDisabledError,
   ActionTypeDisabledReason,

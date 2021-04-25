@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Bluebird from 'bluebird';
@@ -31,7 +32,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.cluster_uuid;
+    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
     const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
@@ -39,7 +40,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
       ignoreUnavailable: true,
       body: {
         query: createQuery({
-          type: 'kibana_stats',
+          types: ['stats', 'kibana_stats'],
           start,
           end,
           clusterUuid,

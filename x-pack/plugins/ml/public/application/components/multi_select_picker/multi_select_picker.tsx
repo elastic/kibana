@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -84,6 +85,7 @@ export const MultiSelectPicker: FC<{
 
   const button = (
     <EuiFilterButton
+      data-test-subj={`${dataTestSubj}-button`}
       iconType="arrowDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -98,32 +100,41 @@ export const MultiSelectPicker: FC<{
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
-        id="popoverExampleMultiSelect"
+        ownFocus
+        data-test-subj={`${dataTestSubj}-popover`}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
       >
         <EuiPopoverTitle paddingSize="s">
-          <EuiFieldSearch compressed onChange={(e) => setSearchTerm(e.target.value)} />
+          <EuiFieldSearch
+            compressed
+            onChange={(e) => setSearchTerm(e.target.value)}
+            data-test-subj={`${dataTestSubj}-searchInput`}
+          />
         </EuiPopoverTitle>
         <div style={{ maxHeight: 250, overflow: 'auto' }}>
           {Array.isArray(items) && items.length > 0 ? (
-            items.map((item, index) => (
-              <EuiFilterSelectItem
-                checked={
-                  checkedOptions &&
-                  checkedOptions.findIndex((fieldValue) => fieldValue === item.value) > -1
-                    ? 'on'
-                    : undefined
-                }
-                key={index}
-                onClick={() => handleOnChange(index)}
-                style={{ flexDirection: 'row' }}
-              >
-                {item.name ?? item.value}
-              </EuiFilterSelectItem>
-            ))
+            items.map((item, index) => {
+              const checked =
+                checkedOptions &&
+                checkedOptions.findIndex((fieldValue) => fieldValue === item.value) > -1;
+
+              return (
+                <EuiFilterSelectItem
+                  checked={checked ? 'on' : undefined}
+                  key={index}
+                  onClick={() => handleOnChange(index)}
+                  style={{ flexDirection: 'row' }}
+                  data-test-subj={`${dataTestSubj}-option-${item.value}${
+                    checked ? '-checked' : ''
+                  }`}
+                >
+                  {item.name ?? item.value}
+                </EuiFilterSelectItem>
+              );
+            })
           ) : (
             <NoFilterItems />
           )}

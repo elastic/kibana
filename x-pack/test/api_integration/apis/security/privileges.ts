@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect/expect.js';
@@ -20,9 +22,33 @@ export default function ({ getService }: FtrProviderContext) {
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
         const expected = {
           features: {
-            discover: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            dashboard: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            discover: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+              'generate_report',
+            ],
+            visualize: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'generate_report',
+            ],
+            dashboard: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+              'generate_report',
+              'download_csv_report',
+            ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
@@ -31,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
-            canvas: ['all', 'read'],
+            canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
             uptime: ['all', 'read'],

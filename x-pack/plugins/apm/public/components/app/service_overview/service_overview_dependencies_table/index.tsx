@@ -1,45 +1,110 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
-  asDuration,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { keyBy } from 'lodash';
+import React from 'react';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
+import {
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { TableLinkFlexItem } from '../table_link_flex_item';
-import { AgentIcon } from '../../../shared/AgentIcon';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { px, unit } from '../../../../style/variables';
+import { AgentIcon } from '../../../shared/AgentIcon';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
+import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 interface Props {
   serviceName: string;
 }
 
+type ServiceDependencyPeriods = ServiceDependencyItem & {
+  latency: { previousPeriodTimeseries?: Coordinate[] };
+  throughput: { previousPeriodTimeseries?: Coordinate[] };
+  errorRate: { previousPeriodTimeseries?: Coordinate[] };
+  previousPeriodImpact?: number;
+};
+
+function mergeCurrentAndPreviousPeriods({
+  currentPeriod = [],
+  previousPeriod = [],
+}: {
+  currentPeriod?: ServiceDependencyItem[];
+  previousPeriod?: ServiceDependencyItem[];
+}): ServiceDependencyPeriods[] {
+  const previousPeriodMap = keyBy(previousPeriod, 'name');
+
+  return currentPeriod.map((currentDependency) => {
+    const previousDependency = previousPeriodMap[currentDependency.name];
+    if (!previousDependency) {
+      return currentDependency;
+    }
+    return {
+      ...currentDependency,
+      latency: {
+        ...currentDependency.latency,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.latency.timeseries,
+          previousPeriodTimeseries: previousDependency.latency?.timeseries,
+        }),
+      },
+      throughput: {
+        ...currentDependency.throughput,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.throughput.timeseries,
+          previousPeriodTimeseries: previousDependency.throughput?.timeseries,
+        }),
+      },
+      errorRate: {
+        ...currentDependency.errorRate,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.errorRate.timeseries,
+          previousPeriodTimeseries: previousDependency.errorRate?.timeseries,
+        }),
+      },
+      previousPeriodImpact: previousDependency.impact,
+    };
+  });
+}
+
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
-  const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
+  const {
+    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
+  } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
+  const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
     {
       field: 'name',
       name: i18n.translate(
@@ -53,7 +118,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <TruncateWithTooltip
             text={item.name}
             content={
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {item.type === 'service' ? (
                     <AgentIcon agentName={item.agentName} />
@@ -63,7 +128,13 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {item.type === 'service' ? (
-                    <ServiceOverviewLink serviceName={item.serviceName}>
+                    <ServiceOverviewLink
+                      serviceName={item.serviceName}
+                      environment={getNextEnvironmentUrlParam({
+                        requestedEnvironment: item.environment,
+                        currentEnvironmentUrlParam: environment,
+                      })}
+                    >
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (
@@ -82,7 +153,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnLatency',
         {
-          defaultMessage: 'Latency',
+          defaultMessage: 'Latency (avg.)',
         }
       ),
       width: px(unit * 10),
@@ -91,7 +162,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
-            valueLabel={asDuration(latency.value)}
+            comparisonSeries={
+              comparisonEnabled ? latency.previousPeriodTimeseries : undefined
+            }
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },
@@ -101,9 +175,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
@@ -112,6 +184,11 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis0"
             series={throughput.timeseries}
+            comparisonSeries={
+              comparisonEnabled
+                ? throughput.previousPeriodTimeseries
+                : undefined
+            }
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -133,6 +210,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis7"
             series={errorRate.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -148,40 +228,75 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar size="m" value={impact} />;
+      render: (_, { impact, previousPeriodImpact }) => {
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={impact} size="m" />
+            </EuiFlexItem>
+            {comparisonEnabled && previousPeriodImpact !== undefined && (
+              <EuiFlexItem>
+                <ImpactBar
+                  value={previousPeriodImpact}
+                  size="s"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       sortable: true,
     },
   ];
+  // Fetches current period dependencies
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
 
-  const {
-    urlParams: { start, end, environment },
-  } = useUrlParams();
-
-  const { data = [], status } = useFetcher(() => {
-    if (!start || !end) {
-      return;
-    }
-
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-      params: {
-        path: {
-          serviceName,
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: { serviceName },
+          query: { start, end, environment, numBuckets: 20 },
         },
-        query: {
-          start,
-          end,
-          environment: environment || ENVIRONMENT_ALL.value,
-          numBuckets: 20,
+      });
+    },
+    [start, end, serviceName, environment]
+  );
+
+  // Fetches previous period dependencies
+  const { data: previousPeriodData, status: previousPeriodStatus } = useFetcher(
+    (callApmApi) => {
+      if (!comparisonStart || !comparisonEnd) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: { serviceName },
+          query: {
+            start: comparisonStart,
+            end: comparisonEnd,
+            environment,
+            numBuckets: 20,
+          },
         },
-      },
-    });
-  }, [start, end, serviceName, environment]);
+      });
+    },
+    [comparisonStart, comparisonEnd, serviceName, environment]
+  );
+
+  const serviceDependencies = mergeCurrentAndPreviousPeriods({
+    currentPeriod: data?.serviceDependencies,
+    previousPeriod: previousPeriodData?.serviceDependencies,
+  });
 
   // need top-level sortable fields for the managed table
-  const items = data.map((item) => ({
+  const items = serviceDependencies.map((item) => ({
     ...item,
     errorRateValue: item.errorRate.value,
     latencyValue: item.latency.value,
@@ -190,10 +305,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate(
@@ -205,7 +320,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <ServiceMapLink serviceName={serviceName}>
               {i18n.translate(
                 'xpack.apm.serviceOverview.dependenciesTableLinkText',
@@ -214,7 +329,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 }
               )}
             </ServiceMapLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -228,7 +343,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               columns={columns}
               items={items}
               allowNeutralSort={false}
-              loading={status === FETCH_STATUS.LOADING}
+              loading={
+                status === FETCH_STATUS.LOADING ||
+                previousPeriodStatus === FETCH_STATUS.LOADING
+              }
               pagination={{
                 initialPageSize: 5,
                 pageSizeOptions: [5],

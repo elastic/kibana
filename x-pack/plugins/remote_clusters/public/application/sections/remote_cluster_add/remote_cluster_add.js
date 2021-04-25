@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
@@ -72,7 +73,7 @@ export class RemoteClusterAdd extends PureComponent {
           description={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClustersDescription"
-              defaultMessage="Add a remote cluster that connects to seed nodes or a single proxy address."
+              defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
             />
           }
         />

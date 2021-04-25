@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
-
-import { DEFAULT_META } from '../../../shared/constants';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { NOT_FOUND_PATH } from '../../routes';
+import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
-  setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
@@ -38,31 +37,9 @@ export interface SourceActions {
     source: { name: string }
   ): { sourceId: string; source: { name: string } };
   resetSourceState(): void;
-  removeContentSource(
-    sourceId: string,
-    successCallback: () => void
-  ): { sourceId: string; successCallback(): void };
-  initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
-  getSourceConfigData(serviceType: string): { serviceType: string };
+  removeContentSource(sourceId: string): { sourceId: string };
+  initializeSource(sourceId: string): { sourceId: string };
   setButtonNotLoading(): void;
-}
-
-interface SourceConfigData {
-  serviceType: string;
-  name: string;
-  configured: boolean;
-  categories: string[];
-  needsPermissions?: boolean;
-  privateSourcesEnabled: boolean;
-  configuredFields: {
-    publicKey: string;
-    privateKey: string;
-    consumerKey: string;
-    baseUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-  };
-  accountContextOnly?: boolean;
 }
 
 interface SourceValues {
@@ -73,7 +50,6 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
-  sourceConfigData: SourceConfigData;
 }
 
 interface SearchResultsResponse {
@@ -86,20 +62,17 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
-    setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
-    initializeSource: (sourceId: string, history: object) => ({ sourceId, history }),
+    initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
-    removeContentSource: (sourceId: string, successCallback: () => void) => ({
+    removeContentSource: (sourceId: string) => ({
       sourceId,
-      successCallback,
     }),
-    getSourceConfigData: (serviceType: string) => ({ serviceType }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
   },
@@ -116,43 +89,29 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
-      },
-    ],
-    sourceConfigData: [
-      {} as SourceConfigData,
-      {
-        setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        setSourceConfigData: () => false,
-        resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
+        resetSourceState: () => true,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [
@@ -190,8 +149,12 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
+        if (response.errors) {
+          setErrorMessage(response.errors);
+        } else {
+          clearFlashMessages();
+        }
       } catch (e) {
-        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
         if (e.response.status === 404) {
           KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
         } else {
@@ -200,7 +163,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     initializeFederatedSummary: async ({ sourceId }) => {
-      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
+      const route = `/api/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
         const response = await HttpLogic.values.http.get(route);
         actions.onUpdateSummary(response.summary);
@@ -245,8 +208,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       }
     },
-    removeContentSource: async ({ sourceId, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+    removeContentSource: async ({ sourceId }) => {
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
@@ -263,21 +226,11 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
             }
           )
         );
-        successCallback();
+        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       } catch (e) {
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
-      }
-    },
-    getSourceConfigData: async ({ serviceType }) => {
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
-
-      try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setSourceConfigData(response);
-      } catch (e) {
-        flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {
@@ -292,7 +245,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       );
     },
     resetSourceState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

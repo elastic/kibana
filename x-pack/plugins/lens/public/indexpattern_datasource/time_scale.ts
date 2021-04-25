@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment-timezone';
@@ -96,8 +97,8 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
       }
 
       const targetUnitInMs = unitInMs[targetUnit];
-      const timeInfo = await data.search.aggs.getDateMetaByDatatableColumn(dateColumnDefinition);
-      const intervalDuration = timeInfo && search.aggs.parseInterval(timeInfo.interval);
+      const timeInfo = search.aggs.getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition);
+      const intervalDuration = timeInfo?.interval && search.aggs.parseInterval(timeInfo.interval);
 
       if (!timeInfo || !intervalDuration) {
         throw new Error(

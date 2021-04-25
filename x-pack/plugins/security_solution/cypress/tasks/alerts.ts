@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -34,13 +35,25 @@ export const addExceptionFromFirstAlert = () => {
 };
 
 export const closeFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.get(CLOSE_ALERT_BTN).click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
+
+  cy.get(CLOSE_ALERT_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.be.visible');
 };
 
 export const closeAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
-  cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  cy.get(TAKE_ACTION_POPOVER_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
+
+  cy.get(CLOSE_SELECTED_ALERTS_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.be.visible');
 };
 
 export const expandFirstAlert = () => {
@@ -110,13 +123,18 @@ export const waitForAlerts = () => {
 };
 
 export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
-    (response) => {
-      if (response.status !== 200) {
-        cy.wait(7500);
-      }
+  cy.request({
+    url: '/api/detection_engine/index',
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.request({
+        method: 'POST',
+        url: `/api/detection_engine/index`,
+        headers: { 'kbn-xsrf': 'create-signals-index' },
+      });
     }
-  );
+  });
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

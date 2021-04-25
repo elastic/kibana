@@ -1,11 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TimelineId,
+} from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -16,7 +22,6 @@ import {
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../../common/mock';
 
 import {
@@ -27,7 +32,6 @@ import {
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -37,12 +41,14 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
+  updateGraphEventId,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel, TimelineTabs } from './model';
+import { ColumnHeaderOptions, TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {
@@ -69,6 +75,7 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.graph,
   columns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
@@ -77,9 +84,14 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -104,6 +116,7 @@ const basicTimeline: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
@@ -835,65 +848,40 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#updateTimelineDescription', () => {
-    const newDescription = 'a new description';
-
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should update the timeline description', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual(newDescription);
-    });
-
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: '      breathing room      ',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual('breathing room ');
-    });
-  });
-
-  describe('#updateTimelineTitle', () => {
+  describe('#updateTimelineTitleAndDescription', () => {
     const newTitle = 'a new title';
+    const newDescription = 'breathing room';
 
     test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineTitle({
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '',
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline title', () => {
-      const update = updateTimelineTitle({
+    test('should update the timeline title and description', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: newDescription,
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update.foo.title).toEqual(newTitle);
+      expect(update.foo.description).toEqual(newDescription);
     });
 
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineTitle({
+    test('should always trim all leading whitespace', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '      breathing room      ',
         title: '      room at the back      ',
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.title).toEqual('room at the back ');
+      expect(update.foo.title).toEqual('room at the back');
+      expect(update.foo.description).toEqual('breathing room');
     });
   });
 
@@ -958,6 +946,7 @@ describe('Timeline', () => {
         sort: [
           {
             columnId: 'some column',
+            columnType: 'text',
             sortDirection: Direction.desc,
           },
         ],
@@ -969,7 +958,9 @@ describe('Timeline', () => {
     });
 
     test('should update the sort attribute', () => {
-      expect(update.foo.sort).toEqual([{ columnId: 'some column', sortDirection: Direction.desc }]);
+      expect(update.foo.sort).toEqual([
+        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+      ]);
     });
   });
 
@@ -1771,6 +1762,57 @@ describe('Timeline', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('#updateGraphEventId', () => {
+    test('should return a new reference and not the same reference', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '123',
+        timelineById: timelineByIdMock,
+      });
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should empty graphEventId', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '',
+        timelineById: timelineByIdMock,
+      });
+      expect(update.foo.graphEventId).toEqual('');
+    });
+
+    test('should empty graphEventId and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '',
+        timelineById: timelineByIdMock,
+      });
+      expect(update.foo.graphEventId).toEqual('');
+      expect(update.foo.activeTab).toEqual(timelineByIdMock.foo.activeTab);
+      expect(update.foo.prevActiveTab).toEqual(timelineByIdMock.foo.prevActiveTab);
+    });
+
+    test('should empty graphEventId and return to the previous tab if TimelineId === TimelineId.active', () => {
+      const mock = cloneDeep(timelineByIdMock);
+      mock[TimelineId.active] = {
+        ...timelineByIdMock.foo,
+        activeTab: TimelineTabs.graph,
+        prevActiveTab: TimelineTabs.eql,
+      };
+      delete mock.foo;
+
+      const update = updateGraphEventId({
+        id: TimelineId.active,
+        graphEventId: '',
+        timelineById: mock,
+      });
+
+      expect(update[TimelineId.active].graphEventId).toEqual('');
+      expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
+      expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
     });
   });
 });

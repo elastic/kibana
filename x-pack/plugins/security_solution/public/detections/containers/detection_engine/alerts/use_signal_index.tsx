@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { isSecurityAppError } from '../../../../common/utils/api';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 
 export interface ReturnSignalIndex {
   loading: boolean;
@@ -34,7 +35,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     signalIndexMappingOutdated: null,
     createDeSignalIndex: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -62,7 +63,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
             createDeSignalIndex: createIndex,
           });
           if (isSecurityAppError(error) && error.body.status_code !== 404) {
-            errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_GET_NAME_FAILURE });
           }
         }
       }
@@ -92,7 +93,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
               signalIndexMappingOutdated: null,
               createDeSignalIndex: createIndex,
             });
-            errorToToaster({ title: i18n.SIGNAL_POST_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_POST_FAILURE });
           }
         }
       }
@@ -106,8 +107,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [addError]);
 
   return { loading, ...signalIndex };
 };

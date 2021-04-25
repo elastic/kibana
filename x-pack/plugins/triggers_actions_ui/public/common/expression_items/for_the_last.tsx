@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -22,7 +23,7 @@ import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface ForLastExpressionProps {
+export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
@@ -65,6 +66,7 @@ export const ForLastExpression = ({
               defaultMessage: 'for the last',
             }
           )}
+          data-test-subj="forLastExpression"
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
             (timeWindowSize ?? '').toString()
@@ -84,6 +86,7 @@ export const ForLastExpression = ({
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
@@ -126,3 +129,6 @@ export const ForLastExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ForLastExpression as default };

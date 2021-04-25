@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useShallowEqualSelector } from '../../../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../../../store/timeline';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../../events';
@@ -17,6 +19,7 @@ import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
 import { useManageTimeline } from '../../../../manage_timeline';
+import { isEqlOnSelector } from './selectors';
 
 interface Props {
   header: ColumnHeaderOptions;
@@ -32,9 +35,12 @@ export const HeaderComponent: React.FC<Props> = ({
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const getIsEqlOn = useMemo(() => isEqlOnSelector(), []);
+  const isEqlOn = useShallowEqualSelector((state) => getIsEqlOn(state, timelineId));
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
+    const columnType = header.type ?? 'text';
     const sortDirection = getNewSortDirectionOnClick({
       clickedHeader: header,
       currentSort: sort,
@@ -46,6 +52,7 @@ export const HeaderComponent: React.FC<Props> = ({
         ...sort,
         {
           columnId,
+          columnType,
           sortDirection,
         },
       ];
@@ -54,6 +61,7 @@ export const HeaderComponent: React.FC<Props> = ({
         ...sort.slice(0, headerIndex),
         {
           columnId,
+          columnType,
           sortDirection,
         },
         ...sort.slice(headerIndex + 1),
@@ -78,6 +86,7 @@ export const HeaderComponent: React.FC<Props> = ({
     getManageTimelineById,
     timelineId,
   ]);
+  const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
 
   return (
     <>
@@ -86,6 +95,7 @@ export const HeaderComponent: React.FC<Props> = ({
         isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
+        showSortingCapability={showSortingCapability}
         sort={sort}
       >
         <Actions

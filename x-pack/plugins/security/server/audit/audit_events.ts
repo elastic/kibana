@@ -1,43 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { AuthenticationResult } from '../authentication/authentication_result';
+import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
+
+import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
- * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html
+ * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html
  *
  * If you add additional fields to the schema ensure you update the Kibana Filebeat module:
  * https://github.com/elastic/beats/tree/master/filebeat/module/kibana
  *
  * @public
  */
-export interface AuditEvent {
-  /**
-   * Human readable message describing action, outcome and user.
-   *
-   * @example
-   * User [jdoe] logged in using basic provider [name=basic1]
-   */
+export interface AuditEvent extends LogMeta {
   message: string;
-  event: {
-    action: string;
-    category?: EventCategory;
-    type?: EventType;
-    outcome?: EventOutcome;
-    module?: string;
-    dataset?: string;
-  };
-  user?: {
-    name: string;
-    email?: string;
-    full_name?: string;
-    hash?: string;
-    roles?: readonly string[];
-  };
   kibana?: {
     /**
      * The ID of the space associated with this event.
@@ -80,52 +61,6 @@ export interface AuditEvent {
      */
     delete_from_spaces?: readonly string[];
   };
-  error?: {
-    code?: string;
-    message?: string;
-  };
-  http?: {
-    request?: {
-      method?: string;
-      body?: {
-        content: string;
-      };
-    };
-    response?: {
-      status_code?: number;
-    };
-  };
-  url?: {
-    domain?: string;
-    full?: string;
-    path?: string;
-    port?: number;
-    query?: string;
-    scheme?: string;
-  };
-}
-
-export enum EventCategory {
-  DATABASE = 'database',
-  WEB = 'web',
-  IAM = 'iam',
-  AUTHENTICATION = 'authentication',
-  PROCESS = 'process',
-}
-
-export enum EventType {
-  USER = 'user',
-  GROUP = 'group',
-  CREATION = 'creation',
-  ACCESS = 'access',
-  CHANGE = 'change',
-  DELETION = 'deletion',
-}
-
-export enum EventOutcome {
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  UNKNOWN = 'unknown',
 }
 
 export interface HttpRequestParams {
@@ -139,8 +74,8 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
     message: `User is requesting [${url.pathname}] endpoint`,
     event: {
       action: 'http_request',
-      category: EventCategory.WEB,
-      outcome: EventOutcome.UNKNOWN,
+      category: ['web'],
+      outcome: 'unknown',
     },
     http: {
       request: {
@@ -152,7 +87,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       path: url.pathname,
       port: url.port ? parseInt(url.port, 10) : undefined,
       query: url.search ? url.search.slice(1) : undefined,
-      scheme: url.protocol,
+      scheme: url.protocol ? url.protocol.substr(0, url.protocol.length - 1) : undefined,
     },
   };
 }
@@ -174,12 +109,12 @@ export function userLoginEvent({
       : `Failed attempt to login using ${authenticationType} provider [name=${authenticationProvider}]`,
     event: {
       action: 'user_login',
-      category: EventCategory.AUTHENTICATION,
-      outcome: authenticationResult.user ? EventOutcome.SUCCESS : EventOutcome.FAILURE,
+      category: ['authentication'],
+      outcome: authenticationResult.user ? 'success' : 'failure',
     },
     user: authenticationResult.user && {
       name: authenticationResult.user.username,
-      roles: authenticationResult.user.roles,
+      roles: authenticationResult.user.roles as string[],
     },
     kibana: {
       space_id: undefined, // Ensure this does not get populated by audit service
@@ -198,24 +133,38 @@ export function userLoginEvent({
 export enum SavedObjectAction {
   CREATE = 'saved_object_create',
   GET = 'saved_object_get',
+  RESOLVE = 'saved_object_resolve',
   UPDATE = 'saved_object_update',
   DELETE = 'saved_object_delete',
   FIND = 'saved_object_find',
   ADD_TO_SPACES = 'saved_object_add_to_spaces',
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
+  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
+  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
 }
 
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
+const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
+  saved_object_resolve: ['resolve', 'resolving', 'resolved'],
   saved_object_update: ['update', 'updating', 'updated'],
   saved_object_delete: ['delete', 'deleting', 'deleted'],
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
+  saved_object_open_point_in_time: [
+    'open point-in-time',
+    'opening point-in-time',
+    'opened point-in-time',
+  ],
+  saved_object_close_point_in_time: [
+    'close point-in-time',
+    'closing point-in-time',
+    'closed point-in-time',
+  ],
   saved_object_remove_references: [
     'remove references to',
     'removing references to',
@@ -223,20 +172,23 @@ const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
   ],
 };
 
-const eventTypes: Record<SavedObjectAction, EventType> = {
-  saved_object_create: EventType.CREATION,
-  saved_object_get: EventType.ACCESS,
-  saved_object_update: EventType.CHANGE,
-  saved_object_delete: EventType.DELETION,
-  saved_object_find: EventType.ACCESS,
-  saved_object_add_to_spaces: EventType.CHANGE,
-  saved_object_delete_from_spaces: EventType.CHANGE,
-  saved_object_remove_references: EventType.CHANGE,
+const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
+  saved_object_create: 'creation',
+  saved_object_get: 'access',
+  saved_object_resolve: 'access',
+  saved_object_update: 'change',
+  saved_object_delete: 'deletion',
+  saved_object_find: 'access',
+  saved_object_add_to_spaces: 'change',
+  saved_object_delete_from_spaces: 'change',
+  saved_object_open_point_in_time: 'creation',
+  saved_object_close_point_in_time: 'deletion',
+  saved_object_remove_references: 'change',
 };
 
 export interface SavedObjectEventParams {
   action: SavedObjectAction;
-  outcome?: EventOutcome;
+  outcome?: EcsEventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   addToSpaces?: readonly string[];
   deleteFromSpaces?: readonly string[];
@@ -252,16 +204,16 @@ export function savedObjectEvent({
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
-  const [present, progressive, past] = eventVerbs[action];
+  const [present, progressive, past] = savedObjectAuditVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
+    : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
-  const type = eventTypes[action];
+  const type = savedObjectAuditTypes[action];
 
   if (
-    type === EventType.ACCESS &&
+    type === 'access' &&
     savedObject &&
     (savedObject.type === 'config' || savedObject.type === 'telemetry')
   ) {
@@ -272,14 +224,78 @@ export function savedObjectEvent({
     message,
     event: {
       action,
-      category: EventCategory.DATABASE,
-      type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+      category: ['database'],
+      type: [type],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     kibana: {
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export enum SpaceAuditAction {
+  CREATE = 'space_create',
+  GET = 'space_get',
+  UPDATE = 'space_update',
+  DELETE = 'space_delete',
+  FIND = 'space_find',
+}
+
+const spaceAuditVerbs: Record<SpaceAuditAction, VerbsTuple> = {
+  space_create: ['create', 'creating', 'created'],
+  space_get: ['access', 'accessing', 'accessed'],
+  space_update: ['update', 'updating', 'updated'],
+  space_delete: ['delete', 'deleting', 'deleted'],
+  space_find: ['access', 'accessing', 'accessed'],
+};
+
+const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
+  space_create: 'creation',
+  space_get: 'access',
+  space_update: 'change',
+  space_delete: 'deletion',
+  space_find: 'access',
+};
+
+export interface SpacesAuditEventParams {
+  action: SpaceAuditAction;
+  outcome?: EcsEventOutcome;
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+  error?: Error;
+}
+
+export function spaceAuditEvent({
+  action,
+  savedObject,
+  outcome,
+  error,
+}: SpacesAuditEventParams): AuditEvent {
+  const doc = savedObject ? `space [id=${savedObject.id}]` : 'spaces';
+  const [present, progressive, past] = spaceAuditVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+  const type = spaceAuditTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: [type],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
     },
     error: error && {
       code: error.name,

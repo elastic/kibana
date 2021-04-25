@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -31,8 +32,6 @@ export interface Pagination {
 }
 
 export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
-
-export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
 
 export interface PersistHookProps {
   http: HttpStart;
@@ -86,8 +85,19 @@ export interface ApiCallByIdProps {
 export interface ApiCallMemoProps {
   id: string;
   namespaceType: NamespaceType;
-  onError: (arg: string[]) => void;
+  onError: (arg: Error) => void;
   onSuccess: () => void;
+}
+
+// TODO: Switch to use ApiCallMemoProps
+// after cleaning up exceptions/api file to
+// remove unnecessary validation checks
+export interface ApiListExportProps {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+  onError: (err: Error) => void;
+  onSuccess: (blob: Blob) => void;
 }
 
 export interface ApiCallFindListsItemsMemoProps {
@@ -116,6 +126,8 @@ export interface ExceptionListFilter {
   name?: string | null;
   list_id?: string | null;
   created_by?: string | null;
+  type?: string | null;
+  tags?: string | null;
 }
 
 export interface UseExceptionListsProps {
@@ -154,5 +166,13 @@ export interface UpdateExceptionListItemProps {
 
 export interface AddEndpointExceptionListProps {
   http: HttpStart;
+  signal: AbortSignal;
+}
+
+export interface ExportExceptionListProps {
+  http: HttpStart;
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
 }

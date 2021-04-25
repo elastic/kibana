@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PsExec Network Connection",
   "query": "sequence by process.entity_id\n  [process where process.name : \"PsExec.exe\" and event.type == \"start\"]\n  [network where process.name : \"PsExec.exe\"]\n",
   "risk_score": 21,
@@ -35,9 +36,16 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1569",
+          "name": "System Services",
+          "reference": "https://attack.mitre.org/techniques/T1569/",
+          "subtechnique": [
+            {
+              "id": "T1569.002",
+              "name": "Service Execution",
+              "reference": "https://attack.mitre.org/techniques/T1569/002/"
+            }
+          ]
         }
       ]
     },
@@ -48,15 +56,9 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "technique": [
-        {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 7
 }

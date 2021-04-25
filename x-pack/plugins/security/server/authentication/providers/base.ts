@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
+  Headers,
+  HttpServiceSetup,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  ILegacyClusterClient,
-  Headers,
-} from '../../../../../../src/core/server';
+} from 'src/core/server';
+
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
-import { Tokens } from '../tokens';
+import type { DeauthenticationResult } from '../deauthentication_result';
+import type { Tokens } from '../tokens';
 
 /**
  * Represents available provider options.
@@ -25,7 +27,7 @@ import { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
-  client: ILegacyClusterClient;
+  client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {
@@ -111,9 +113,12 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
-      await this.options.client
-        .asScoped({ headers: { ...request.headers, ...authHeaders } })
-        .callAsCurrentUser('shield.authenticate')
+      // @ts-expect-error @elastic/elasticsearch `AuthenticateResponse` type doesn't define `authentication_type` and `enabled`.
+      (
+        await this.options.client
+          .asScoped({ headers: { ...request.headers, ...authHeaders } })
+          .asCurrentUser.security.authenticate()
+      ).body
     );
   }
 

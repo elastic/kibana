@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertTypeModel } from '../../types';
@@ -30,7 +31,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -52,7 +52,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -69,7 +68,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'disabled-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -91,7 +89,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -130,7 +127,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'my-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -147,7 +143,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'my-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -164,7 +159,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'disabled-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {

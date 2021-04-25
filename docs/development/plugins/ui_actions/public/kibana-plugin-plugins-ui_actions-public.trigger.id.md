@@ -4,10 +4,10 @@
 
 ## Trigger.id property
 
-Unique name of the trigger as identified in `ui_actions` plugin trigger registry, such as "SELECT\_RANGE\_TRIGGER" or "VALUE\_CLICK\_TRIGGER".
+Unique name of the trigger as identified in `ui_actions` plugin trigger registry.
 
 <b>Signature:</b>
 
 ```typescript
-id: ID;
+id: string;
 ```

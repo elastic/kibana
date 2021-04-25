@@ -1,21 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
 
 import { ICommand, ICommandConfig } from './commands';
 import { CliError } from './utils/errors';
@@ -25,10 +16,13 @@ import { renderProjectsTree } from './utils/projects_tree';
 import { Kibana } from './utils/kibana';
 
 export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
+  const runStartTime = Date.now();
+  let kbn;
+
   try {
     log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
-    const kbn = await Kibana.loadFrom(config.rootPath);
+    kbn = await Kibana.loadFrom(config.rootPath);
     const projects = kbn.getFilteredProjects({
       skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
       ossOnly: Boolean(config.options.oss),
@@ -52,7 +46,54 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       ...config,
       kbn,
     });
+
+    if (command.reportTiming) {
+      const reporter = CiStatsReporter.fromEnv(log);
+      await reporter.timings({
+        upstreamBranch: kbn.kibanaProject.json.branch,
+        // prevent loading @kbn/utils by passing null
+        kibanaUuid: kbn.getUuid() || null,
+        timings: [
+          {
+            group: command.reportTiming.group,
+            id: command.reportTiming.id,
+            ms: Date.now() - runStartTime,
+            meta: {
+              success: true,
+            },
+          },
+        ],
+      });
+    }
   } catch (error) {
+    if (command.reportTiming) {
+      // if we don't have a kbn object then things are too broken to report on
+      if (kbn) {
+        try {
+          const reporter = CiStatsReporter.fromEnv(log);
+          await reporter.timings({
+            upstreamBranch: kbn.kibanaProject.json.branch,
+            // prevent loading @kbn/utils by passing null
+            kibanaUuid: kbn.getUuid() || null,
+            timings: [
+              {
+                group: command.reportTiming.group,
+                id: command.reportTiming.id,
+                ms: Date.now() - runStartTime,
+                meta: {
+                  success: false,
+                },
+              },
+            ],
+          });
+        } catch (e) {
+          // prevent hiding bootstrap errors
+          log.error('failed to report timings:');
+          log.error(e);
+        }
+      }
+    }
+
     log.error(`[${command.name}] failed:`);
 
     if (error instanceof CliError) {

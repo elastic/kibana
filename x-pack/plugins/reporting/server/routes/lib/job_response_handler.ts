@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory } from 'kibana/server';
@@ -31,37 +32,42 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
-    const { docId } = params;
+    try {
+      const { docId } = params;
 
-    const doc = await jobsQuery.get(user, docId, { includeContent: !opts.excludeContent });
-    if (!doc) {
-      return res.notFound();
-    }
+      const doc = await jobsQuery.get(user, docId, { includeContent: !opts.excludeContent });
+      if (!doc) {
+        return res.notFound();
+      }
 
-    const { jobtype: jobType } = doc._source;
+      const { jobtype: jobType } = doc._source;
 
-    if (!validJobTypes.includes(jobType)) {
-      return res.unauthorized({
-        body: `Sorry, you are not authorized to download ${jobType} reports`,
+      if (!validJobTypes.includes(jobType)) {
+        return res.unauthorized({
+          body: `Sorry, you are not authorized to download ${jobType} reports`,
+        });
+      }
+
+      const payload = getDocumentPayload(doc);
+
+      if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
+        return res.badRequest({
+          body: `Unsupported content-type of ${payload.contentType} specified by job output`,
+        });
+      }
+
+      return res.custom({
+        body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+        statusCode: payload.statusCode,
+        headers: {
+          ...payload.headers,
+          'content-type': payload.contentType || '',
+        },
       });
+    } catch (err) {
+      const { logger } = reporting.getPluginSetupDeps();
+      logger.error(err);
     }
-
-    const payload = getDocumentPayload(doc);
-
-    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
-      return res.badRequest({
-        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
-      });
-    }
-
-    return res.custom({
-      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
-      statusCode: payload.statusCode,
-      headers: {
-        ...payload.headers,
-        'content-type': payload.contentType || '',
-      },
-    });
   };
 }
 

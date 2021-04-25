@@ -1,23 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { esdsl } from './esdsl';
+import { getEsdsl } from './esdsl';
+import { MockedKeys } from '@kbn/utility-types/target/jest';
+import { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
+import { StartServicesAccessor } from 'kibana/public';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -27,26 +21,38 @@ jest.mock('@kbn/i18n', () => {
   };
 });
 
-jest.mock('../../services', () => ({
-  getUiSettings: () => ({
-    get: () => true,
-  }),
-  getSearchService: () => ({
-    search: jest.fn((params: any) => {
-      return {
-        toPromise: async () => {
-          return { rawResponse: params };
-        },
-      };
-    }),
-  }),
-}));
-
 describe('esdsl', () => {
+  let getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+  let startDependencies: MockedKeys<
+    StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>
+  >;
+  let esdsl: EsdslExpressionFunctionDefinition;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    startDependencies = [
+      {
+        uiSettings: {
+          get: jest.fn().mockReturnValue(true),
+        },
+      },
+      {},
+      {
+        search: {
+          search: jest.fn((params: any) => of({ rawResponse: params })),
+        },
+      },
+    ];
+    getStartServices = jest
+      .fn()
+      .mockResolvedValue(new Promise((resolve) => resolve(startDependencies)));
+    esdsl = getEsdsl({ getStartServices });
+  });
+
   describe('correctly handles input', () => {
     test('throws on invalid json input', async () => {
       const fn = async function () {
-        await esdsl().fn(null, { dsl: 'invalid json', index: 'test', size: 0 }, {
+        await esdsl.fn(null, { dsl: 'invalid json', index: 'test', size: 0 }, {
           inspectorAdapters: {},
         } as any);
       };
@@ -61,7 +67,7 @@ describe('esdsl', () => {
     });
 
     test('adds filters', async () => {
-      const result = await esdsl().fn(
+      const result = await esdsl.fn(
         {
           type: 'kibana_context',
           filters: [
@@ -79,7 +85,7 @@ describe('esdsl', () => {
     });
 
     test('adds filters to query with filters', async () => {
-      const result = await esdsl().fn(
+      const result = await esdsl.fn(
         {
           type: 'kibana_context',
           filters: [
@@ -101,7 +107,7 @@ describe('esdsl', () => {
     });
 
     test('adds query', async () => {
-      const result = await esdsl().fn(
+      const result = await esdsl.fn(
         {
           type: 'kibana_context',
           query: { language: 'lucene', query: '*' },
@@ -114,7 +120,7 @@ describe('esdsl', () => {
     });
 
     test('adds query to a query with filters', async () => {
-      const result = await esdsl().fn(
+      const result = await esdsl.fn(
         {
           type: 'kibana_context',
           query: { language: 'lucene', query: '*' },
@@ -131,7 +137,7 @@ describe('esdsl', () => {
     });
 
     test('ignores timerange', async () => {
-      const result = await esdsl().fn(
+      const result = await esdsl.fn(
         {
           type: 'kibana_context',
           timeRange: { from: 'now-15m', to: 'now' },
@@ -145,7 +151,7 @@ describe('esdsl', () => {
   });
 
   test('correctly handles filter, query and timerange on context', async () => {
-    const result = await esdsl().fn(
+    const result = await esdsl.fn(
       {
         type: 'kibana_context',
         query: { language: 'lucene', query: '*' },

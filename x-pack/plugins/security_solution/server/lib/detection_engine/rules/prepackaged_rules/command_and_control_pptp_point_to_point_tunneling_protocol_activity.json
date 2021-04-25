@@ -6,13 +6,14 @@
   "false_positives": [
     "Some networks may utilize PPTP protocols but this is uncommon as more modern VPN technologies are available. Usage that is unfamiliar to local network administrators can be unexpected and suspicious. Torrenting applications may use this port. Because this port is in the ephemeral range, this rule may false under certain conditions, such as when an application server replies to a client that used this port by coincidence. This is uncommon but such servers can be excluded."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PPTP (Point to Point Tunneling Protocol) Activity",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:1723",
   "risk_score": 21,
@@ -33,15 +34,10 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "technique": [
-        {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        }
-      ]
+      "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

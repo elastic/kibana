@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { migrationStateActionMachine } from './migrations_state_action_machine';
@@ -27,6 +16,11 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 
 describe('migrationsStateActionMachine', () => {
+  beforeAll(() => {
+    jest
+      .spyOn(global.Date, 'now')
+      .mockImplementation(() => new Date('2021-04-12T16:00:00.000Z').valueOf());
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -38,6 +32,14 @@ describe('migrationsStateActionMachine', () => {
     targetMappings: { properties: {} },
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
+    migrationsConfig: {
+      batchSize: 1000,
+      pollInterval: 0,
+      scrollDuration: '0s',
+      skip: false,
+      enableV2: true,
+      retryAttempts: 5,
+    },
   });
 
   const next = jest.fn((s: State) => {
@@ -115,25 +117,25 @@ describe('migrationsStateActionMachine', () => {
             "[.my-so-index] Log from LEGACY_REINDEX control state",
           ],
           Array [
-            "[.my-so-index] INIT -> LEGACY_REINDEX",
+            "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
           ],
           Array [
             "[.my-so-index] Log from LEGACY_DELETE control state",
           ],
           Array [
-            "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
+            "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
           ],
           Array [
             "[.my-so-index] Log from LEGACY_DELETE control state",
           ],
           Array [
-            "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE",
+            "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
           ],
           Array [
             "[.my-so-index] Log from DONE control state",
           ],
           Array [
-            "[.my-so-index] LEGACY_DELETE -> DONE",
+            "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
           ],
         ],
         "log": Array [],
@@ -142,8 +144,8 @@ describe('migrationsStateActionMachine', () => {
       }
     `);
   });
-  it('resolves when reaching the DONE state', () => {
-    return expect(
+  it('resolves when reaching the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState,
         logger: mockLogger.get(),
@@ -152,8 +154,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.anything());
   });
-  it('resolves with migrated status if some sourceIndex in the DONE state', () => {
-    return expect(
+  it('resolves with migrated status if some sourceIndex in the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
         logger: mockLogger.get(),
@@ -162,8 +164,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'migrated' }));
   });
-  it('resolves with patched status if none sourceIndex in the DONE state', () => {
-    return expect(
+  it('resolves with patched status if none sourceIndex in the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.none } },
         logger: mockLogger.get(),
@@ -172,8 +174,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'patched' }));
   });
-  it('rejects with error message when reaching the FATAL state', () => {
-    return expect(
+  it('rejects with error message when reaching the FATAL state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
@@ -209,49 +211,90 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_DELETE",
           Object {
-            "controlState": "LEGACY_DELETE",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-            ],
-            "outdatedDocuments": Array [
-              "1234",
-            ],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_DELETE",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                ],
+                "outdatedDocuments": Array [
+                  "1234",
+                ],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
+                          },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
         Array [
@@ -264,53 +307,94 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_DELETE -> FATAL",
           Object {
-            "controlState": "FATAL",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-              Object {
-                "level": "info",
-                "message": "Log from FATAL control state",
-              },
-            ],
-            "outdatedDocuments": Array [
-              "1234",
-            ],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "FATAL",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                  Object {
+                    "level": "info",
+                    "message": "Log from FATAL control state",
+                  },
+                ],
+                "outdatedDocuments": Array [
+                  "1234",
+                ],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
+                          },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
       ]
@@ -325,20 +409,25 @@ describe('migrationsStateActionMachine', () => {
         next: () => {
           throw new ResponseError(
             elasticsearchClientMock.createApiResponse({
-              body: { error: { type: 'snapshot_in_progress_exception', reason: 'error reason' } },
+              body: {
+                error: {
+                  type: 'snapshot_in_progress_exception',
+                  reason: 'Cannot delete indices that are being snapshotted',
+                },
+              },
             })
           );
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. ResponseError: snapshot_in_progress_exception]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
         "debug": Array [],
         "error": Array [
           Array [
-            "[.my-so-index] [snapshot_in_progress_exception]: error reason",
+            "[.my-so-index] [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted",
           ],
           Array [
             "[.my-so-index] migration failed, dumping execution log:",
@@ -363,7 +452,7 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: this action throws]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Error: this action throws]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
@@ -409,47 +498,88 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_REINDEX",
           Object {
-            "controlState": "LEGACY_REINDEX",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_REINDEX control state",
-              },
-            ],
-            "outdatedDocuments": Array [],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_REINDEX",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_REINDEX control state",
+                  },
+                ],
+                "outdatedDocuments": Array [],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
+                          },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
         Array [
@@ -459,51 +589,92 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
           Object {
-            "controlState": "LEGACY_DELETE",
-            "currentAlias": ".my-so-index",
-            "indexPrefix": ".my-so-index",
-            "kibanaVersion": "7.11.0",
-            "legacyIndex": ".my-so-index",
-            "logs": Array [
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_REINDEX control state",
-              },
-              Object {
-                "level": "info",
-                "message": "Log from LEGACY_DELETE control state",
-              },
-            ],
-            "outdatedDocuments": Array [],
-            "outdatedDocumentsQuery": Object {
-              "bool": Object {
-                "should": Array [],
-              },
-            },
-            "preMigrationScript": Object {
-              "_tag": "None",
-            },
-            "reason": "the fatal reason",
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetIndexMappings": Object {
-              "properties": Object {},
-            },
-            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
-            "tempIndexMappings": Object {
-              "dynamic": false,
-              "properties": Object {
-                "migrationVersion": Object {
-                  "dynamic": "true",
-                  "type": "object",
+            "kibana": Object {
+              "migrationState": Object {
+                "batchSize": 1000,
+                "controlState": "LEGACY_DELETE",
+                "currentAlias": ".my-so-index",
+                "indexPrefix": ".my-so-index",
+                "kibanaVersion": "7.11.0",
+                "legacyIndex": ".my-so-index",
+                "logs": Array [
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_REINDEX control state",
+                  },
+                  Object {
+                    "level": "info",
+                    "message": "Log from LEGACY_DELETE control state",
+                  },
+                ],
+                "outdatedDocuments": Array [],
+                "outdatedDocumentsQuery": Object {
+                  "bool": Object {
+                    "should": Array [],
+                  },
                 },
-                "type": Object {
-                  "type": "keyword",
+                "preMigrationScript": Object {
+                  "_tag": "None",
                 },
+                "reason": "the fatal reason",
+                "retryAttempts": 5,
+                "retryCount": 0,
+                "retryDelay": 0,
+                "targetIndexMappings": Object {
+                  "properties": Object {},
+                },
+                "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+                "tempIndexMappings": Object {
+                  "dynamic": false,
+                  "properties": Object {
+                    "migrationVersion": Object {
+                      "dynamic": "true",
+                      "type": "object",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "unusedTypesQuery": Object {
+                  "_tag": "Some",
+                  "value": Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "term": Object {
+                            "type": "fleet-agent-events",
+                          },
+                        },
+                        Object {
+                          "term": Object {
+                            "type": "tsvb-validation-telemetry",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Array [
+                              Object {
+                                "match": Object {
+                                  "type": "search-session",
+                                },
+                              },
+                              Object {
+                                "match": Object {
+                                  "search-session.persisted": false,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                "versionAlias": ".my-so-index_7.11.0",
+                "versionIndex": ".my-so-index_7.11.0_001",
               },
             },
-            "versionAlias": ".my-so-index_7.11.0",
-            "versionIndex": ".my-so-index_7.11.0_001",
           },
         ],
       ]

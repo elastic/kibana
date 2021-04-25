@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { ReportingSetup } from '../../reporting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
@@ -24,6 +25,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   bfetch: BfetchServerSetup;
+  reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -33,39 +35,12 @@ export class CanvasPlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
 
-    plugins.features.registerKibanaFeature({
-      id: 'canvas',
-      name: 'Canvas',
-      order: 300,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      app: ['canvas', 'kibana'],
-      catalogue: ['canvas'],
-      privileges: {
-        all: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: ['canvas-workpad', 'canvas-element'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show'],
-        },
-        read: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
     const canvasRouter = coreSetup.http.createRouter();
 
@@ -83,9 +58,7 @@ export class CanvasPlugin implements Plugin {
     );
 
     // we need the kibana index provided by global config for the Canvas usage collector
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    const globalConfig = this.initializerContext.config.legacy.get();
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
     setupInterpreter(plugins.expressions);

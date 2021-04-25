@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import { Logger } from 'src/core/server';
 import {
@@ -36,6 +38,8 @@ export class TelemetryDiagTask {
         title: 'Security Solution Telemetry Diagnostics task',
         timeout: TelemetryDiagTaskConstants.TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          const { state } = taskInstance;
+
           return {
             run: async () => {
               const executeTo = moment().utc().toISOString();
@@ -43,11 +47,13 @@ export class TelemetryDiagTask {
                 executeTo,
                 taskInstance.state?.lastExecutionTimestamp
               );
-              await this.runTask(taskInstance.id, executeFrom, executeTo);
+              const hits = await this.runTask(taskInstance.id, executeFrom, executeTo);
 
               return {
                 state: {
                   lastExecutionTimestamp: executeTo,
+                  lastDiagAlertCount: hits,
+                  runs: (state.runs || 0) + 1,
                 },
               };
             },
@@ -81,7 +87,7 @@ export class TelemetryDiagTask {
         schedule: {
           interval: TelemetryDiagTaskConstants.INTERVAL,
         },
-        state: {},
+        state: { runs: 0 },
         params: { version: TelemetryDiagTaskConstants.VERSION },
       });
     } catch (e) {
@@ -97,13 +103,13 @@ export class TelemetryDiagTask {
     this.logger.debug(`Running task ${taskId}`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
-      return;
+      return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
       this.logger.debug(`Telemetry is not opted-in.`);
-      return;
+      return 0;
     }
 
     const response = await this.sender.fetchDiagnosticAlerts(searchFrom, searchTo);
@@ -111,11 +117,12 @@ export class TelemetryDiagTask {
     const hits = response.hits?.hits || [];
     if (!Array.isArray(hits) || !hits.length) {
       this.logger.debug('no diagnostic alerts retrieved');
-      return;
+      return 0;
     }
+    this.logger.debug(`Received ${hits.length} diagnostic alerts`);
 
     const diagAlerts: TelemetryEvent[] = hits.map((h) => h._source);
-    this.logger.debug(`Received ${diagAlerts.length} diagnostic alerts`);
     this.sender.queueTelemetryEvents(diagAlerts);
+    return diagAlerts.length;
   };
 }

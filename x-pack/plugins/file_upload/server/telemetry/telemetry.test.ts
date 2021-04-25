@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getTelemetry, updateTelemetry } from './telemetry';
@@ -19,7 +20,7 @@ function mockInit(getVal: any = { attributes: {} }): any {
   };
 }
 
-describe('file upload plugin telemetry', () => {
+describe('ml plugin telemetry', () => {
   describe('getTelemetry', () => {
     it('should get existing telemetry', async () => {
       const internalRepo = mockInit();
@@ -34,7 +35,9 @@ describe('file upload plugin telemetry', () => {
     it('should update existing telemetry', async () => {
       const internalRepo = mockInit({
         attributes: {
-          filesUploadedTotalCount: 2,
+          file_upload: {
+            index_creation_count: 2,
+          },
         },
       });
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compile } from './url_template';
@@ -10,6 +11,18 @@ import moment from 'moment-timezone';
 test('should compile url without variables', () => {
   const url = 'https://elastic.co';
   expect(compile(url, {})).toBe(url);
+});
+
+test('by default, encodes URI', () => {
+  const url = 'https://elastic.co?foo=head%26shoulders';
+  expect(compile(url, {})).not.toBe(url);
+  expect(compile(url, {})).toBe('https://elastic.co?foo=head%2526shoulders');
+});
+
+test('when URI encoding is disabled, should not encode URI', () => {
+  const url =
+    'https://xxxxx.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3D-1%26sysparm_query%3Dshort_description%3DHello';
+  expect(compile(url, {}, false)).toBe(url);
 });
 
 test('should fail on unknown syntax', () => {

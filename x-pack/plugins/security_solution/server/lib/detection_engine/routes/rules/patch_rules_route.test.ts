@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -10,7 +11,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getFindResultStatus,
-  getResult,
+  getAlertMock,
   getPatchRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
@@ -19,22 +20,23 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('patch_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
-    clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
 
     patchRulesRoute(server.router, ml);
@@ -103,7 +105,7 @@ describe('patch_rules', () => {
           data: expect.objectContaining({
             params: expect.objectContaining({
               anomalyThreshold: 4,
-              machineLearningJobId: 'some_job_id',
+              machineLearningJobId: ['some_job_id'],
             }),
           }),
         })

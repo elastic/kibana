@@ -1,35 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
-
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
-
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -53,9 +43,14 @@ export const DashboardListing = ({
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
+      dashboardPanelStorage,
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
+
+  const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
+    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
+  );
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -94,23 +89,39 @@ export const DashboardListing = ({
 
   const tableColumns = useMemo(
     () =>
-      getTableColumns((id) => redirectTo({ destination: 'dashboard', id }), savedObjectsTagging),
-    [savedObjectsTagging, redirectTo]
+      getTableColumns(
+        core.application,
+        kbnUrlStateStorage,
+        core.uiSettings.get('state:storeInSessionStorage'),
+        savedObjectsTagging
+      ),
+    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
+  const createItem = useCallback(() => {
+    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+      redirectTo({ destination: 'dashboard' });
+    } else {
+      confirmCreateWithUnsaved(
+        core.overlays,
+        () => {
+          dashboardPanelStorage.clearPanels();
+          redirectTo({ destination: 'dashboard' });
+        },
+        () => redirectTo({ destination: 'dashboard' })
+      );
+    }
+  }, [dashboardPanelStorage, redirectTo, core.overlays]);
+
   const noItemsFragment = useMemo(
-    () =>
-      getNoItemsMessage(hideWriteControls, core.application, () =>
-        redirectTo({ destination: 'dashboard' })
-      ),
-    [redirectTo, core.application, hideWriteControls]
+    () => getNoItemsMessage(hideWriteControls, core.application, createItem),
+    [createItem, core.application, hideWriteControls]
   );
 
   const fetchItems = useCallback(
     (filter: string) => {
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
-
       if (savedObjectsTagging) {
         const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
           useName: true,
@@ -128,12 +139,17 @@ export const DashboardListing = ({
   );
 
   const deleteItems = useCallback(
-    (dashboards: Array<{ id: string }>) => savedDashboards.delete(dashboards.map((d) => d.id)),
-    [savedDashboards]
+    (dashboards: Array<{ id: string }>) => {
+      dashboards.map((d) => dashboardPanelStorage.clearPanels(d.id));
+      setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+      return savedDashboards.delete(dashboards.map((d) => d.id));
+    },
+    [savedDashboards, dashboardPanelStorage]
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id }),
+    ({ id }: { id: string | undefined }) =>
+      redirectTo({ destination: 'dashboard', id, editMode: true }),
     [redirectTo]
   );
 
@@ -151,7 +167,7 @@ export const DashboardListing = ({
   } = dashboardListingTable;
   return (
     <TableListView
-      createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
+      createItem={hideWriteControls ? undefined : createItem}
       deleteItems={hideWriteControls ? undefined : deleteItems}
       initialPageSize={savedObjects.settings.getPerPage()}
       editItem={hideWriteControls ? undefined : editItem}
@@ -170,12 +186,22 @@ export const DashboardListing = ({
         listingLimit,
         tableColumns,
       }}
-    />
+    >
+      <DashboardUnsavedListing
+        redirectTo={redirectTo}
+        unsavedDashboardIds={unsavedDashboardIds}
+        refreshUnsavedDashboards={() =>
+          setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges())
+        }
+      />
+    </TableListView>
   );
 };
 
 const getTableColumns = (
-  redirectTo: (id?: string) => void,
+  application: ApplicationStart,
+  kbnUrlStateStorage: IKbnUrlStateStorage,
+  useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return [
@@ -183,9 +209,15 @@ const getTableColumns = (
       field: 'title',
       name: dashboardListingTable.getTitleColumnName(),
       sortable: true,
-      render: (field: string, record: { id: string; title: string }) => (
+      render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
-          onClick={() => redirectTo(record.id)}
+          href={getDashboardListItemLink(
+            application,
+            kbnUrlStateStorage,
+            useHash,
+            record.id,
+            record.timeRestore
+          )}
           data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
         >
           {field}

@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -52,12 +48,14 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  const assertDataStreamStorageSizeExists = (storageSize: string) => {
-    // Storage size of a document doesn't like it would be deterministic (could vary depending
+  const assertDataStreamStorageSizeExists = (storageSize: string, storageSizeBytes: number) => {
+    // Storage size of a document doesn't look like it would be deterministic (could vary depending
     // on how ES, Lucene, and the file system interact), so we'll just assert its presence and
     // type.
     expect(storageSize).to.be.ok();
     expect(typeof storageSize).to.be('string');
+    expect(storageSizeBytes).to.be.ok();
+    expect(typeof storageSizeBytes).to.be('number');
   };
 
   describe('Data streams', function () {
@@ -120,10 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(testDataStream).to.be.ok();
 
         // ES determines these values so we'll just echo them back.
-
         const { name: indexName, uuid } = testDataStream!.indices[0];
-        const { storageSize, ...dataStreamWithoutStorageSize } = testDataStream!;
-        assertDataStreamStorageSizeExists(storageSize);
+        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
+        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
@@ -153,8 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = dataStream.indices[0];
-        const { storageSize, ...dataStreamWithoutStorageSize } = dataStream;
-        assertDataStreamStorageSizeExists(storageSize);
+        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = dataStream;
+        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,

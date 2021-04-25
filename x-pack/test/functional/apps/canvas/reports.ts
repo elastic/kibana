@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,7 +20,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
+      await security.role.create('test_reporting_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { canvas: ['minimal_read', 'generate_report'] },
+          },
+        ],
+      });
+      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
       await esArchiver.load('canvas/reports');
       await browser.setWindowSize(1600, 850);
     });
@@ -183,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "
         `);
 
-        expectSnapshot(res.get('content-length')).toMatchInline(`"20726"`);
+        expect(res.get('content-length')).to.be('20725');
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {
@@ -327,12 +338,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         /Filter /FlateDecode
         /ColorSpace /DeviceRGB
         /SMask 14 0 R
-        /Length 18
+        /Length 17
         >>
         "
         `);
 
-        expectSnapshot(res.get('content-length')).toMatchInline(`"1599"`);
+        expect(res.get('content-length')).to.be('1598');
       });
     });
   });

@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { buildAggBody } from './agg_body';
-import { search } from '../../../../../../plugins/data/server';
+import { search, METRIC_TYPES } from '../../../../../data/server';
+
 const { dateHistogramInterval } = search.aggs;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
@@ -40,29 +29,39 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
   };
 
   dateAgg.time_buckets.aggs = {};
-  _.each(config.metric, function (metric) {
-    metric = metric.split(':');
-    if (metric[0] === 'count') {
+  (config.metric || []).forEach((metric) => {
+    const metricBody = {};
+    const [metricName, metricArgs] = metric.split(/:(.+)/);
+    if (metricName === METRIC_TYPES.COUNT) {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
       // It simplifies the aggregation tree walking code considerably
-      dateAgg.time_buckets.aggs[metric] = {
+      metricBody[metricName] = {
         bucket_script: {
           buckets_path: '_count',
           script: { source: '_value', lang: 'expression' },
         },
       };
-    } else if (metric[0] && metric[1]) {
-      const metricName = metric[0] + '(' + metric[1] + ')';
-      dateAgg.time_buckets.aggs[metricName] = {};
-      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
-      if (metric[0] === 'percentiles' && metric[2]) {
-        let percentList = metric[2].split(',');
+    } else if (metricName && metricArgs) {
+      const splittedArgs = metricArgs.split(/(.*[^\\]):/).filter(Boolean);
+      const field = splittedArgs[0].replace(/\\:/g, ':');
+      const percentArgs = splittedArgs[1];
+      const metricKey = metricName + '(' + field + ')';
+
+      metricBody[metricKey] = { [metricName]: buildAggBody(field, scriptedFields) };
+
+      if (metricName === METRIC_TYPES.PERCENTILES && percentArgs) {
+        let percentList = percentArgs.split(',');
         percentList = percentList.map((x) => parseFloat(x));
-        dateAgg.time_buckets.aggs[metricName][metric[0]].percents = percentList;
+        metricBody[metricKey][metricName].percents = percentList;
       }
     } else {
       throw new Error('`metric` requires metric:field or simply count');
     }
+
+    dateAgg.time_buckets.aggs = {
+      ...dateAgg.time_buckets.aggs,
+      ...metricBody,
+    };
   });
 
   return dateAgg;
