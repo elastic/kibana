@@ -38,6 +38,13 @@ import { SavedObjectAction, savedObjectEvent } from '../audit';
 import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { SpacesService } from '../plugin';
+import type {
+  EnsureAuthorizedActionResult,
+  EnsureAuthorizedDependencies,
+  EnsureAuthorizedOptions,
+  EnsureAuthorizedResult,
+} from './ensure_authorized';
+import { ensureAuthorized } from './ensure_authorized';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -57,36 +64,20 @@ interface SavedObjectsNamespaces {
   saved_objects: SavedObjectNamespaces[];
 }
 
-interface EnsureAuthorizedOptions {
+interface LegacyEnsureAuthorizedOptions {
   args?: Record<string, unknown>;
   auditAction?: string;
   requireFullAuthorization?: boolean;
 }
 
-interface EnsureAuthorizedResult {
+interface LegacyEnsureAuthorizedResult {
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
-  typeMap: Map<string, EnsureAuthorizedTypeResult>;
+  typeMap: Map<string, LegacyEnsureAuthorizedTypeResult>;
 }
-interface EnsureAuthorizedTypeResult {
+interface LegacyEnsureAuthorizedTypeResult {
   authorizedSpaces: string[];
   isGloballyAuthorized?: boolean;
 }
-
-interface EnsureAuthorizedV2Options {
-  /** Whether or not to throw an error if the user is not fully authorized. Default is true. */
-  requireFullAuthorization?: boolean;
-}
-
-interface EnsureAuthorizedV2Result<T extends string> {
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
-  typeActionMap: Map<string, Record<T, EnsureAuthorizedV2ActionResult>>;
-}
-
-interface EnsureAuthorizedV2ActionResult {
-  authorizedSpaces: string[];
-  isGloballyAuthorized?: boolean;
-}
-
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -839,8 +830,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     typeOrTypes: string | string[],
     action: string,
     namespaceOrNamespaces: undefined | string | Array<undefined | string>,
-    options: EnsureAuthorizedOptions = {}
-  ): Promise<EnsureAuthorizedResult> {
+    options: LegacyEnsureAuthorizedOptions = {}
+  ): Promise<LegacyEnsureAuthorizedResult> {
     const { args, auditAction = action, requireFullAuthorization = true } = options;
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
@@ -855,7 +846,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     ).sort() as string[];
 
     const missingPrivileges = this.getMissingPrivileges(privileges);
-    const typeMap = privileges.kibana.reduce<Map<string, EnsureAuthorizedTypeResult>>(
+    const typeMap = privileges.kibana.reduce<Map<string, LegacyEnsureAuthorizedTypeResult>>(
       (acc, { resource, privilege, authorized }) => {
         if (!authorized) {
           return acc;
@@ -921,56 +912,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     types: string[],
     actions: string[],
     namespaces: string[],
-    options: EnsureAuthorizedV2Options = {}
-  ): Promise<EnsureAuthorizedV2Result<T>> {
-    const { requireFullAuthorization = true } = options;
-    const privilegeActionsMap = new Map(
-      types.flatMap((type) =>
-        actions.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
-      )
-    );
-    const privilegeActions = Array.from(privilegeActionsMap.keys());
-    const result = await this.checkPrivileges(privilegeActions, namespaces);
-
-    const { hasAllRequested, privileges } = result;
-    const missingPrivileges = this.getMissingPrivileges(privileges);
-    const typeActionMap = privileges.kibana.reduce<
-      Map<string, Record<T, EnsureAuthorizedV2ActionResult>>
-    >((acc, { resource, privilege, authorized }) => {
-      if (!authorized) {
-        return acc;
-      }
-      const { type, action } = privilegeActionsMap.get(privilege)!; // always defined
-      const value = acc.get(type) ?? ({} as Record<T, EnsureAuthorizedV2ActionResult>);
-      const record: EnsureAuthorizedV2ActionResult = value[action as T] ?? { authorizedSpaces: [] };
-      if (resource === undefined) {
-        return acc.set(type, { ...value, [action]: { ...record, isGloballyAuthorized: true } });
-      }
-      const authorizedSpaces = record.authorizedSpaces.concat(resource);
-      return acc.set(type, { ...value, [action]: { ...record, authorizedSpaces } });
-    }, new Map());
-
-    if (hasAllRequested) {
-      return { typeActionMap, status: 'fully_authorized' };
-    } else if (!requireFullAuthorization) {
-      const isPartiallyAuthorized = privileges.kibana.some(({ authorized }) => authorized);
-      if (isPartiallyAuthorized) {
-        return { typeActionMap, status: 'partially_authorized' };
-      } else {
-        return { typeActionMap, status: 'unauthorized' };
-      }
-    } else {
-      const targetTypesAndActions = uniq(
-        missingPrivileges
-          .map(({ privilege }) => {
-            const { type, action } = privilegeActionsMap.get(privilege)!;
-            return `(${type} ${action})`;
-          })
-          .sort()
-      ).join(',');
-      const msg = `Unable to ${targetTypesAndActions}`;
-      throw this.errors.decorateForbiddenError(new Error(msg));
-    }
+    options?: EnsureAuthorizedOptions
+  ) {
+    const ensureAuthorizedDependencies: EnsureAuthorizedDependencies = {
+      actions: this.actions,
+      errors: this.errors,
+      checkSavedObjectsPrivilegesAsCurrentUser: this.checkSavedObjectsPrivilegesAsCurrentUser,
+    };
+    return ensureAuthorized<T>(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }
 
   /**
@@ -980,7 +929,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private ensureAuthorizedInAllSpaces<T extends string>(
     objects: Array<{ type: string }>,
     action: T,
-    typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
+    typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
     spaces: string[]
   ) {
     const uniqueTypes = uniq(objects.map(({ type }) => type));
@@ -1141,7 +1090,7 @@ function namespaceComparator(a: string, b: string) {
 function isAuthorizedForObjectInAllSpaces<T extends string>(
   objectType: string,
   action: T,
-  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
+  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
   spacesToAuthorizeFor: string[]
 ) {
   const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
@@ -1155,7 +1104,7 @@ function isAuthorizedForObjectInAllSpaces<T extends string>(
 function getRedactedSpaces<T extends string>(
   objectType: string,
   action: T,
-  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
+  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
   spacesToRedact: string[]
 ) {
   const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
@@ -1171,8 +1120,8 @@ function getRedactedSpaces<T extends string>(
 function getEnsureAuthorizedV2ActionResult<T extends string>(
   objectType: string,
   action: T,
-  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap']
-): EnsureAuthorizedV2ActionResult {
-  const record = typeActionMap.get(objectType) ?? ({} as Record<T, EnsureAuthorizedV2ActionResult>);
+  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap']
+): EnsureAuthorizedActionResult {
+  const record = typeActionMap.get(objectType) ?? ({} as Record<T, EnsureAuthorizedActionResult>);
   return record[action] ?? { authorizedSpaces: [] };
 }
