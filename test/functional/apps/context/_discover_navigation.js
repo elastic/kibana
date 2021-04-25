@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
-        defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
 
@@ -50,6 +49,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
+
     after(async () => {
       await kibanaServer.uiSettings.replace({});
     });
