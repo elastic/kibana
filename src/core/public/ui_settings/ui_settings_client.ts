@@ -116,29 +116,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
-  overrideLocalDefault(key: string, newDefault: any) {
-    // capture the previous value
-    const prevDefault = this.defaults[key] ? this.defaults[key].value : undefined;
-
-    // update defaults map
-    this.defaults[key] = {
-      ...(this.defaults[key] || {}),
-      value: newDefault,
-    };
-
-    // update cached default value
-    this.cache[key] = {
-      ...(this.cache[key] || {}),
-      value: newDefault,
-    };
-
-    // don't broadcast change if userValue was already overriding the default
-    if (this.cache[key].userValue == null) {
-      this.update$.next({ key, newValue: newDefault, oldValue: prevDefault });
-      this.saved$.next({ key, newValue: newDefault, oldValue: prevDefault });
-    }
-  }
-
   getUpdate$() {
     return this.update$.asObservable();
   }

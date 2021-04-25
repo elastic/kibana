@@ -54,12 +54,6 @@ export interface IUiSettingsClient {
   set: (key: string, value: any) => Promise<boolean>;
 
   /**
-   * Overrides the default value for a setting in this specific browser tab. If the page
-   * is reloaded the default override is lost.
-   */
-  overrideLocalDefault: (key: string, newDefault: any) => void;
-
-  /**
    * Removes the user-defined value for a setting, causing it to revert to the default. This
    * method behaves the same as calling `set(key, null)`, including the synchronization, custom
    * setting, and error behavior of that method.
