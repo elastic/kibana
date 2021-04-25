@@ -40,5 +40,3 @@ export interface ILMPolicy {
     >;
   };
 }
-
-export type FieldMap = Record<string, { type: string; required?: boolean; array?: boolean }>;

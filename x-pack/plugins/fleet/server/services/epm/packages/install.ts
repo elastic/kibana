@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
-import { defaultPackages } from '../../../../common';
 import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
   IngestManagerError,
@@ -21,7 +21,6 @@ import {
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import type {
-  AssetReference,
   Installation,
   AssetType,
   EsAssetReference,
@@ -35,77 +34,30 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import {
-  isRequiredPackage,
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
+import { isRequiredPackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
-export async function installLatestPackage(options: {
+export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  esClient: ElasticsearchClient;
-}): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, esClient } = options;
-  try {
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-    const pkgkey = Registry.pkgToPkgKey({
-      name: latestPackage.name,
-      version: latestPackage.version,
-    });
-    return installPackage({
-      installSource: 'registry',
-      savedObjectsClient,
-      pkgkey,
-      esClient,
-    }).then(({ assets }) => assets);
-  } catch (err) {
-    throw err;
-  }
-}
-
-export async function ensureInstalledDefaultPackages(
-  savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-): Promise<Installation[]> {
-  const installations = [];
-  const bulkResponse = await bulkInstallPackages({
-    savedObjectsClient,
-    packagesToInstall: Object.values(defaultPackages),
-    esClient,
-  });
-
-  for (const resp of bulkResponse) {
-    if (isBulkInstallError(resp)) {
-      throw resp.error;
-    } else {
-      installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
-    }
-  }
-
-  const retrievedInstallations = await Promise.all(installations);
-  return retrievedInstallations.map((installation, index) => {
-    if (!installation) {
-      throw new Error(`could not get installation ${bulkResponse[index].name}`);
-    }
-    return installation;
-  });
-}
-
-export async function isPackageVersionInstalled(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion?: string;
-}): Promise<Installation | false> {
+  pkgVersion: string;
+}): Promise<{ package: Installation; installType: InstallType } | false> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
-  if (installedPackage && (!pkgVersion || installedPackage.version === pkgVersion)) {
-    return installedPackage;
+  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedPackage = installedPackageObject?.attributes;
+  if (
+    installedPackage &&
+    (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
+  ) {
+    let installType: InstallType;
+    try {
+      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
+    } catch (e) {
+      installType = 'unknown';
+    }
+    return { package: installedPackage, installType };
   }
   return false;
 }
@@ -115,37 +67,51 @@ export async function ensureInstalledPackage(options: {
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
-  force?: boolean;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion, force } = options;
-  const installedPackage = await isPackageVersionInstalled({
+  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+
+  // If pkgVersion isn't specified, find the latest package version
+  const pkgKeyProps = pkgVersion
+    ? { name: pkgName, version: pkgVersion }
+    : await Registry.fetchFindLatestPackage(pkgName);
+
+  const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
-    pkgName,
-    pkgVersion,
+    pkgName: pkgKeyProps.name,
+    pkgVersion: pkgKeyProps.version,
   });
-  if (installedPackage) {
-    return installedPackage;
+  if (installedPackageResult) {
+    return installedPackageResult.package;
   }
-  // if the requested packaged was not found to be installed, install
-  if (pkgVersion) {
-    const pkgkey = Registry.pkgToPkgKey({
-      name: pkgName,
-      version: pkgVersion,
-    });
-    await installPackage({
-      installSource: 'registry',
-      savedObjectsClient,
-      pkgkey,
-      esClient,
-      force,
-    });
-  } else {
-    await installLatestPackage({
-      savedObjectsClient,
-      pkgName,
-      esClient,
-    });
+  const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
+  const installResult = await installPackage({
+    installSource: 'registry',
+    savedObjectsClient,
+    pkgkey,
+    esClient,
+    force: true, // Always force outdated packages to be installed if a later version isn't installed
+  });
+
+  if (installResult.error) {
+    const errorPrefix =
+      installResult.installType === 'update' || installResult.installType === 'reupdate'
+        ? i18n.translate('xpack.fleet.epm.install.packageUpdateError', {
+            defaultMessage: 'Error updating {pkgName} to {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          })
+        : i18n.translate('xpack.fleet.epm.install.packageInstallError', {
+            defaultMessage: 'Error installing {pkgName} {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          });
+    throw new Error(`${errorPrefix}: ${installResult.error.message}`);
   }
+
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
   return installation;
@@ -208,6 +174,7 @@ export async function handleInstallPackageFailure({
 export interface IBulkInstallPackageError {
   name: string;
   error: Error;
+  installType?: InstallType;
 }
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
@@ -228,54 +195,62 @@ async function installPackageFromRegistry({
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
 
-  // get the currently installed package
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installType = getInstallType({ pkgVersion, installedPkg });
+  // if an error happens during getInstallType, report that we don't know
+  let installType: InstallType = 'unknown';
 
-  // get latest package version
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-
-  // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
-  const installOutOfDateVersionOk =
-    force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
-
-  // if the requested version is the same as installed version, check if we allow it based on
-  // current installed package status and force flag, if we don't allow it,
-  // just return the asset references from the existing installation
-  if (
-    installedPkg?.attributes.version === pkgVersion &&
-    installedPkg?.attributes.install_status === 'installed'
-  ) {
-    if (!force) {
-      logger.debug(`${pkgkey} is already installed, skipping installation`);
-      return {
-        assets: [
-          ...installedPkg.attributes.installed_es,
-          ...installedPkg.attributes.installed_kibana,
-        ],
-        status: 'already_installed',
-      };
-    }
-  }
-
-  // if the requested version is out-of-date of the latest package version, check if we allow it
-  // if we don't allow it, return an error
-  if (semverLt(pkgVersion, latestPackage.version)) {
-    if (!installOutOfDateVersionOk) {
-      throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
-    }
-    logger.debug(
-      `${pkgkey} is out-of-date, installing anyway due to ${
-        force ? 'force flag' : `install type ${installType}`
-      }`
-    );
-  }
-
-  // get package info
-  const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
-
-  // try installing the package, if there was an error, call error handler and rethrow
   try {
+    // get the currently installed package
+    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installType = getInstallType({ pkgVersion, installedPkg });
+
+    // get latest package version
+    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+
+    // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+    const installOutOfDateVersionOk =
+      force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+
+    // if the requested version is the same as installed version, check if we allow it based on
+    // current installed package status and force flag, if we don't allow it,
+    // just return the asset references from the existing installation
+    if (
+      installedPkg?.attributes.version === pkgVersion &&
+      installedPkg?.attributes.install_status === 'installed'
+    ) {
+      if (!force) {
+        logger.debug(`${pkgkey} is already installed, skipping installation`);
+        return {
+          assets: [
+            ...installedPkg.attributes.installed_es,
+            ...installedPkg.attributes.installed_kibana,
+          ],
+          status: 'already_installed',
+          installType,
+        };
+      }
+    }
+
+    // if the requested version is out-of-date of the latest package version, check if we allow it
+    // if we don't allow it, return an error
+    if (semverLt(pkgVersion, latestPackage.version)) {
+      if (!installOutOfDateVersionOk) {
+        throw new PackageOutdatedError(
+          `${pkgkey} is out-of-date and cannot be installed or updated`
+        );
+      }
+      logger.debug(
+        `${pkgkey} is out-of-date, installing anyway due to ${
+          force ? 'force flag' : `install type ${installType}`
+        }`
+      );
+    }
+
+    // get package info
+    const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
+
+    // try installing the package, if there was an error, call error handler and rethrow
+    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
+    // @ts-ignore
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -284,19 +259,26 @@ async function installPackageFromRegistry({
       packageInfo,
       installType,
       installSource: 'registry',
-    }).then((assets) => {
-      return { assets, status: 'installed' };
-    });
+    })
+      .then((assets) => {
+        return { assets, status: 'installed', installType };
+      })
+      .catch(async (err: Error) => {
+        await handleInstallPackageFailure({
+          savedObjectsClient,
+          error: err,
+          pkgName,
+          pkgVersion,
+          installedPkg,
+          esClient,
+        });
+        return { error: err, installType };
+      });
   } catch (e) {
-    await handleInstallPackageFailure({
-      savedObjectsClient,
+    return {
       error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      esClient,
-    });
-    throw e;
+      installType,
+    };
   }
 }
 
@@ -313,46 +295,57 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
-  const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
+  // if an error happens during getInstallType, report that we don't know
+  let installType: InstallType = 'unknown';
+  try {
+    const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
-  const installedPkg = await getInstallationObject({
-    savedObjectsClient,
-    pkgName: packageInfo.name,
-  });
+    const installedPkg = await getInstallationObject({
+      savedObjectsClient,
+      pkgName: packageInfo.name,
+    });
 
-  const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
-  if (installType !== 'install') {
-    throw new PackageOperationNotSupportedError(
-      `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
-    );
+    installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+    if (installType !== 'install') {
+      throw new PackageOperationNotSupportedError(
+        `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
+      );
+    }
+
+    const installSource = 'upload';
+    const paths = await unpackBufferToCache({
+      name: packageInfo.name,
+      version: packageInfo.version,
+      installSource,
+      archiveBuffer,
+      contentType,
+    });
+
+    setPackageInfo({
+      name: packageInfo.name,
+      version: packageInfo.version,
+      packageInfo,
+    });
+    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
+    // @ts-ignore
+    return _installPackage({
+      savedObjectsClient,
+      esClient,
+      installedPkg,
+      paths,
+      packageInfo,
+      installType,
+      installSource,
+    })
+      .then((assets) => {
+        return { assets, status: 'installed', installType };
+      })
+      .catch(async (err: Error) => {
+        return { error: err, installType };
+      });
+  } catch (e) {
+    return { error: e, installType };
   }
-
-  const installSource = 'upload';
-  const paths = await unpackBufferToCache({
-    name: packageInfo.name,
-    version: packageInfo.version,
-    installSource,
-    archiveBuffer,
-    contentType,
-  });
-
-  setPackageInfo({
-    name: packageInfo.name,
-    version: packageInfo.version,
-    packageInfo,
-  });
-
-  return _installPackage({
-    savedObjectsClient,
-    esClient,
-    installedPkg,
-    paths,
-    packageInfo,
-    installType,
-    installSource,
-  }).then((assets) => {
-    return { assets, status: 'installed' };
-  });
 }
 
 export type InstallPackageParams = {
@@ -379,7 +372,7 @@ export async function installPackage(args: InstallPackageParams) {
       esClient,
       force,
     }).then(async (installResult) => {
-      if (skipPostInstall) {
+      if (skipPostInstall || installResult.error) {
         return installResult;
       }
       logger.debug(`install of ${pkgkey} finished, running post-install`);
@@ -401,7 +394,7 @@ export async function installPackage(args: InstallPackageParams) {
       archiveBuffer,
       contentType,
     }).then(async (installResult) => {
-      if (skipPostInstall) {
+      if (skipPostInstall || installResult.error) {
         return installResult;
       }
       logger.debug(`install of uploaded package finished, running post-install`);

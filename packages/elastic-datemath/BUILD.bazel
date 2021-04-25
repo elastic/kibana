@@ -4,15 +4,15 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 PKG_BASE_NAME = "elastic-datemath"
 PKG_REQUIRE_NAME = "@elastic/datemath"
 
-SOURCE_FILES = [
+SOURCE_FILES = glob([
   "src/index.ts",
-]
+])
 
 SRCS = SOURCE_FILES
 
 filegroup(
   name = "srcs",
-  srcs = glob(SOURCE_FILES),
+  srcs = SRCS,
 )
 
 NPM_MODULE_EXTRA_FILES = [
@@ -40,6 +40,7 @@ ts_config(
 
 ts_project(
   name = "tsc",
+  args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
   declaration = True,
@@ -53,7 +54,7 @@ ts_project(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [],
+  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [":tsc"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
@@ -61,7 +62,6 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [
     ":%s" % PKG_BASE_NAME,
   ]

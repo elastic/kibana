@@ -5,7 +5,7 @@
 
 --
 
-Alerting allows you to define *rules* to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, connectors>> and <<rule-types, rules>> (known as stack rules) for you to use.
+Alerting allows you to define *rules* to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, connectors>> and <<stack-rules, rules>> (known as stack rules) for you to use.
 
 image::images/alerting-overview.png[Rules and Connectors UI]
 
@@ -47,7 +47,7 @@ to control the details of the conditions to detect.
 
 For example, an <<rule-type-index-threshold, index threshold rule type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
 
-See <<rule-types>> for the types of rules provided by {kib} and how they express their conditions.
+See <<stack-rules>> and <<domain-specific-rules>> for the types of rules provided by {kib} and how they express their conditions.
 
 [float]
 [[alerting-concepts-scheduling]]

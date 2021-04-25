@@ -224,6 +224,21 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
         });
 
+        it('creates a single Machine Learning rule from a legacy ML Rule format', async () => {
+          const legacyMlRule = {
+            ...getSimpleMlRule(),
+            machine_learning_job_id: 'some_job_id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(legacyMlRule)
+            .expect(200);
+
+          const bodyToCompare = removeServerGeneratedProperties(body);
+          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+        });
+
         it('should create a single Machine Learning rule', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)

@@ -46,6 +46,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
   withServices,
   withProps(
     ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
+      includeReporting: services.reporting.includeReporting(),
       getExportUrl: (type, layout) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(
@@ -91,6 +92,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
               .catch((err: Error) => {
                 services.notify.error(err, {
                   title: strings.getExportPDFErrorTitle(workpad.name),
+                  'data-test-subj': 'queueReportError',
                 });
               });
           case 'json':
