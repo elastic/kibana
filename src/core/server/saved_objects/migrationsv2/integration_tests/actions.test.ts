@@ -865,7 +865,7 @@ describe('migration actions', () => {
       await expect(docsResponse.right.outdatedDocuments.length).toBe(3);
     });
 
-    it('excludes documents with types listed in unusedTypesToExclude', async () => {
+    it('it excludes documents not matching the provided "unusedTypesQuery"', async () => {
       const openPitTask = openPit(client, 'existing_index_with_docs');
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
@@ -941,11 +941,11 @@ describe('migration actions', () => {
         { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
       ];
 
-      const creteIndexTask = createIndex(client, index, {
+      const createIndexTask = createIndex(client, index, {
         dynamic: true,
         properties: {},
       });
-      await creteIndexTask();
+      await createIndexTask();
 
       async function tranformRawDocs(docs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]> {
         for (const doc of docs) {

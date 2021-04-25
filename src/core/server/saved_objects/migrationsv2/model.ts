@@ -506,8 +506,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      const { sourceIndexPitId, ...state } = stateP;
       return {
-        ...stateP,
+        ...state,
         controlState: 'SET_TEMP_WRITE_BLOCK',
         sourceIndex: stateP.sourceIndex as Option.Some<string>,
       };

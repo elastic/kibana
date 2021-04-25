@@ -9,11 +9,11 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import uuidv5 from 'uuid/v5';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
+import { deterministicallyRegenerateObjectId } from '../../migrations/core/document_migrator';
 
 const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
 
@@ -147,7 +147,7 @@ describe('migration v2', () => {
       hidden: false,
       mappings: { properties: { name: { type: 'text' } } },
       namespaceType: 'multiple',
-      convertToMultiNamespaceTypeVersion: '8.0.0',
+      convertToMultiNamespaceTypeVersion: '7.13.0',
     });
 
     coreSetup.savedObjects.registerType({
@@ -155,7 +155,7 @@ describe('migration v2', () => {
       hidden: false,
       mappings: { properties: { nomnom: { type: 'integer' } } },
       namespaceType: 'multiple-isolated',
-      convertToMultiNamespaceTypeVersion: '8.0.0',
+      convertToMultiNamespaceTypeVersion: '7.13.0',
     });
 
     const coreStart = await root.start();
@@ -165,8 +165,8 @@ describe('migration v2', () => {
 
     // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
     // object is created which links the old ID to the new ID
-    const newFooId = uuidv5('spacex:foo:1', uuidv5.DNS);
-    const newBarId = uuidv5('spacex:bar:1', uuidv5.DNS);
+    const newFooId = deterministicallyRegenerateObjectId('spacex', 'foo', '1');
+    const newBarId = deterministicallyRegenerateObjectId('spacex', 'bar', '1');
 
     expect(migratedDocs).toEqual(
       [
@@ -176,7 +176,7 @@ describe('migration v2', () => {
           foo: { name: 'Foo 1 default' },
           references: [],
           namespaces: ['default'],
-          migrationVersion: { foo: '8.0.0' },
+          migrationVersion: { foo: '7.13.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -186,7 +186,7 @@ describe('migration v2', () => {
           references: [],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { foo: '8.0.0' },
+          migrationVersion: { foo: '7.13.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -208,7 +208,7 @@ describe('migration v2', () => {
           bar: { nomnom: 1 },
           references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
           namespaces: ['default'],
-          migrationVersion: { bar: '8.0.0' },
+          migrationVersion: { bar: '7.13.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -218,7 +218,7 @@ describe('migration v2', () => {
           references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { bar: '8.0.0' },
+          migrationVersion: { bar: '7.13.0' },
           coreMigrationVersion: pkg.version,
         },
         {
