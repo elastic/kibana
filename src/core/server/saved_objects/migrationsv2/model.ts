@@ -227,7 +227,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: source,
+          sourceIndex: Option.some(source) as Option.Some<string>,
           sourceIndexMappings: indices[source].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
@@ -303,7 +303,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    // If the write block is sucessfully in place
+    // If the write block is successfully in place
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
     } else if (Either.isLeft(res)) {
@@ -431,14 +431,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'SET_SOURCE_WRITE_BLOCK',
-        sourceIndex: Option.some(source) as Option.Some<string>,
+        sourceIndex: source,
         targetIndex: target,
         targetIndexMappings: disableUnknownTypeMappingFields(
           stateP.targetIndexMappings,
           stateP.sourceIndexMappings
         ),
         versionIndexReadyActions: Option.some<AliasAction[]>([
-          { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
+          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
           { add: { index: target, alias: stateP.currentAlias } },
           { add: { index: target, alias: stateP.versionAlias } },
           { remove_index: { index: stateP.tempIndex } },

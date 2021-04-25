@@ -301,14 +301,12 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(initState, res) as FatalState;
+        const newState = model(initState, res) as WaitForYellowSourceState;
 
-        expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_7.invalid.0_001',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
       });
+
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -332,15 +330,14 @@ describe('migrations v2 model', () => {
             },
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_7.11.0_001',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_7.11.0_001');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_3': {
@@ -351,12 +348,10 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(initState, res);
+        const newState = model(initState, res) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_3',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_3');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -422,12 +417,10 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.11.0_001',
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: 'my-saved-objects_3',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('my-saved-objects_3');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -451,12 +444,11 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.12.0_001',
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: 'my-saved-objects_7.11.0',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('my-saved-objects_7.11.0');
+
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -664,7 +656,7 @@ describe('migrations v2 model', () => {
       const waitForYellowSourceState: WaitForYellowSourceState = {
         ...baseState,
         controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: '.kibana_3',
+        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
         sourceIndexMappings: mappingsWithUnknownType,
       };
 

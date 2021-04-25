@@ -132,7 +132,7 @@ export type FatalState = BaseState & {
 export interface WaitForYellowSourceState extends BaseState {
   /** Wait for the source index to be yellow before requesting it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
-  readonly sourceIndex: string;
+  readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
 }
 
