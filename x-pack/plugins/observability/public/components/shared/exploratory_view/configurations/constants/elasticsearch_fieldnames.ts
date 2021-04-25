@@ -119,6 +119,7 @@ export const TRANSACTION_URL = 'url.full';
 export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
+export const USER_AGENT_OS_VERSION = 'user_agent.os.version';
 
 export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
 export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';

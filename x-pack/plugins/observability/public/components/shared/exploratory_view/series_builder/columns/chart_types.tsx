@@ -16,9 +16,11 @@ import { SeriesType } from '../../../../../../../lens/public';
 
 export function SeriesChartTypesSelect({
   seriesId,
+  seriesTypes,
   defaultChartType,
 }: {
   seriesId: string;
+  seriesTypes?: SeriesType[];
   defaultChartType: SeriesType;
 }) {
   const { series, setSeries, allSeries } = useUrlStorage(seriesId);
@@ -41,7 +43,17 @@ export function SeriesChartTypesSelect({
       label={i18n.translate('xpack.observability.expView.chartTypes.label', {
         defaultMessage: 'Chart type',
       })}
-      includeChartTypes={['bar', 'bar_horizontal', 'line', 'area', 'bar_stacked', 'area_stacked']}
+      includeChartTypes={
+        seriesTypes || [
+          'bar',
+          'bar_horizontal',
+          'line',
+          'area',
+          'bar_stacked',
+          'area_stacked',
+          'bar_horizontal_percentage_stacked',
+        ]
+      }
     />
   );
 }

@@ -20,6 +20,7 @@ export type {
   ValueLabelConfig,
   YAxisMode,
   XYCurveType,
+  YConfig,
 } from './xy_visualization/types';
 export type { DataType, OperationMetadata } from './types';
 export type {

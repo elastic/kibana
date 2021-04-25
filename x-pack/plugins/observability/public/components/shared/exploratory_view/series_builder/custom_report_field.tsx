@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useUrlStorage } from '../hooks/use_url_storage';
 import { ReportDefinition } from '../types';
+import { ReportMaxWidthStyle } from './columns/report_definition_col';
 
 interface Props {
   field: string;
@@ -23,7 +24,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
   const { reportDefinitions: rtd = {} } = series;
 
   const onChange = (value: string) => {
-    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: value } });
+    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: [value] } });
   };
 
   const { reportDefinitions } = series;
@@ -31,15 +32,15 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
   const options = opts ?? [];
 
   return (
-    <div style={{ maxWidth: 250 }}>
+    <div style={ReportMaxWidthStyle}>
       <EuiSuperSelect
         compressed
         prepend={'Metric'}
-        options={options.map(({ label, field: fd, description }) => ({
-          value: fd,
+        options={options.map(({ label, field: fd, id, description }) => ({
+          value: fd || id,
           inputDisplay: label,
         }))}
-        valueOfSelected={reportDefinitions?.[field] || defaultValue || options?.[0].field}
+        valueOfSelected={reportDefinitions?.[field]?.[0] || defaultValue || options?.[0].field}
         onChange={(value) => onChange(value)}
       />
     </div>

@@ -68,3 +68,6 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   logs: 'infra_logs',
   cpu: 'infra_metrics',
 };
+
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
+export const FILTER_RECORDS = 'FILTER_RECORDS';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
@@ -29,7 +29,7 @@ function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefini
   return null;
 }
 
-const MaxWidthStyle = { maxWidth: 250 };
+export const ReportMaxWidthStyle = { maxWidth: 290 };
 
 export function ReportDefinitionCol({
   dataViewSeries,
@@ -83,8 +83,9 @@ export function ReportDefinitionCol({
       <EuiFlexItem>
         <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
+      <EuiHorizontalRule margin="xs" />
       {indexPattern &&
-        reportDefinitions.map(({ field, custom, options, defaultValue }) => (
+        reportDefinitions.map(({ field, custom, options }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
@@ -119,22 +120,26 @@ export function ReportDefinitionCol({
               <CustomReportField
                 field={field}
                 options={options}
-                defaultValue={defaultValue}
+                defaultValue={options?.[0].id || options?.[0].field}
                 seriesId={seriesId}
               />
             )}
           </EuiFlexItem>
         ))}
       {(hasOperationType || columnType === 'operation') && (
-        <EuiFlexItem style={MaxWidthStyle}>
+        <EuiFlexItem style={ReportMaxWidthStyle}>
           <OperationTypeSelect
             seriesId={seriesId}
             defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem style={MaxWidthStyle}>
-        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} />
+      <EuiFlexItem style={ReportMaxWidthStyle}>
+        <SeriesChartTypesSelect
+          seriesId={seriesId}
+          defaultChartType={defaultSeriesType}
+          seriesTypes={dataViewSeries.seriesTypes}
+        />
       </EuiFlexItem>
     </FlexGroup>
   );
