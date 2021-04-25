@@ -275,9 +275,9 @@ export const getSavedObjects = (): SavedObject[] => [
     attributes: {
       title: 'kibana_sample_data_logs',
       timeFieldName: 'timestamp',
-      fields:
-        '[{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.getHour()","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap: '{"hour_of_day":{}}',
+      runtimeFieldMap:
+        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.getHour());"}}}',
     },
     references: [],
   },

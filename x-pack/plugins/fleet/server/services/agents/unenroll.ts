@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
-import { AgentUnenrollmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -28,8 +28,8 @@ async function unenrollAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new AgentUnenrollmentError(
-      `Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
   }
 
@@ -52,7 +52,7 @@ export async function unenrollAgent(
     return forceUnenrollAgent(soClient, esClient, agentId);
   }
   const now = new Date().toISOString();
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: now,
     type: 'UNENROLL',
@@ -106,7 +106,6 @@ export async function unenrollAgents(
   } else {
     // Create unenroll action for each agent
     await bulkCreateAgentActions(
-      soClient,
       esClient,
       agentsToUpdate.map((agent) => ({
         agent_id: agent.id,

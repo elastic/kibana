@@ -1,0 +1,97 @@
+---
+id: formLibCoreUseMultiFields
+slug: /form-lib/core/use-multi-fields
+title: <UseMultiFields />
+summary: Because sometimes you need more than one field
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+You might find yourself at some point wanting to hook multiple fields to a component because that component accepts multiple values. In that case you will have to nest multiple `<UseField />` with their child function, which is not very elegant.
+
+```js
+<UseField path="maxValue">
+  {maxValueField => {
+    return (
+      <UseField path="minValue">
+        {minValueField => {
+          return (
+            <EuiDualRange
+              min={0}
+              max={100}
+              value={[minValueField.value, maxValueField.value]}
+              onChange={([minValue, maxValue]) => {
+                minValueField.setValue(minValue);
+                maxValueField.setValue(maxValue);
+              }}
+            />
+          )
+        }}
+      </UseField>
+    )
+  }}
+</UseField>
+```
+
+You can use `<UseMultiField />` to provide any number of fields and you will get them back in a single child function.
+
+```js
+const fields = {
+  min: {
+    // Any prop you would normally pass to <UseField />
+    path: 'minValue',
+    config: {
+      ...
+    }
+  },
+  max: {
+    path: 'maxValue',
+  },
+};
+
+<UseMultiField fields={fields}>
+  {({ min, max }) => {
+    return (
+      <EuiDualRange
+        min={0}
+        max={100}
+        value={[min.value, max.value]}
+        onChange={([minValue, maxValue]) => {
+          min.setValue(minValue);
+          max.setValue(maxValue);
+        }}
+      />
+    );
+  }}
+</UseMultiField>
+```
+
+## Props
+
+### fields (required)
+
+**Type:** `{ [fieldId: string]: UseFieldProps }`
+
+A map of field id to `<UseField />` props.  The id does not have to match the field path, it will simply help you identify the fields that you get back in the child function.
+
+### children
+
+**Type:** `(fields: { fieldId: string: FieldHook }) => JSX.Element`
+
+The children of `<UseMultiField />` is a function child which receives a map of field id to FieldHook. You are then responsible to return a JSX element from that function.  
+
+## Typescript value type
+
+You can provide the field value type for each field (`unknown` by default) on the component. 
+
+```js
+interface Fields {
+  min: number;
+  max: number;
+}
+
+// You are then required to provide those exact 2 fields in the "fields" prop
+<UseMultiField<Fields> fields={{ min: { ... }, max: { ... } }}>
+  ...
+</UseMultiField>
+```

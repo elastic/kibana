@@ -38,7 +38,7 @@ export class RequestFlyout extends PureComponent<Props> {
     return (
       <EuiFlyout maxWidth={480} onClose={close}>
         <EuiFlyoutHeader>
-          <EuiTitle>
+          <EuiTitle data-test-subj="remoteClusterRequestFlyoutTitle">
             <h2>
               {name ? (
                 <FormattedMessage
