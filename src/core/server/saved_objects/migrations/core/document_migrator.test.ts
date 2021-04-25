@@ -186,7 +186,7 @@ describe('DocumentMigrator', () => {
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be less than '8.0.0'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be less than '7.13.0'.`
       );
     });
 
