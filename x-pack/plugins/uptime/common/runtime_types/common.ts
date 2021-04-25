@@ -30,6 +30,7 @@ export const SummaryType = t.partial({
 export const StatesIndexStatusType = t.type({
   indexExists: t.boolean,
   docCount: t.number,
+  indices: t.string,
 });
 
 export const DateRangeType = t.type({

@@ -12,12 +12,15 @@ import {
   KibanaRequest,
   CoreStart,
 } from 'src/core/server';
+import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
+import { APMRuleRegistry } from '../plugin';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
 }
 
 export type InspectResponse = Array<{
@@ -59,4 +62,5 @@ export interface APMRouteHandlerResources {
       start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
     };
   };
+  apmRuleRegistry: APMRuleRegistry;
 }
