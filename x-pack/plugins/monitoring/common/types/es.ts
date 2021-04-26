@@ -39,15 +39,31 @@ export interface ElasticsearchSourceKibanaStats {
     response_times?: {
       max?: number;
     };
+    transport_address?: string;
+    host?: string;
   };
   os?: {
     memory?: {
       free_in_bytes?: number;
     };
+    load?: {
+      '1m'?: number;
+    };
+  };
+  response_times?: {
+    average?: number;
+    max?: number;
+  };
+  requests?: {
+    total?: number;
   };
   process?: {
     uptime_in_millis?: number;
+    memory?: {
+      resident_set_size_in_bytes?: number;
+    };
   };
+  concurrent_connections?: number;
 }
 
 export interface ElasticsearchSourceLogstashPipelineVertex {
@@ -100,6 +116,7 @@ export interface ElasticsearchNodeStats {
 
 export interface ElasticsearchIndexStats {
   index?: string;
+  name?: string;
   shards: {
     primaries: number;
   };
@@ -139,15 +156,21 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
+      fs: {
+        available_in_bytes?: number;
+        total_in_bytes?: number;
+      };
       versions?: string[];
     };
     indices?: {
       count?: number;
       docs?: {
+        deleted?: number;
         count?: number;
       };
       shards?: {
         total?: number;
+        primaries?: number;
       };
       store?: {
         size_in_bytes?: number;
@@ -156,6 +179,7 @@ export interface ElasticsearchLegacySource {
   };
   cluster_state?: {
     status?: string;
+    state_uuid?: string;
     nodes?: {
       [nodeUuid: string]: {
         ephemeral_id?: string;
@@ -189,14 +213,46 @@ export interface ElasticsearchLegacySource {
   };
   logstash_stats?: {
     timestamp?: string;
-    logstash?: {};
-    events?: {};
-    reloads?: {};
+    logstash?: {
+      timestamp?: string;
+      pipeline: {
+        batch_size: number;
+        workers: number;
+      };
+      http_address: string;
+      name: string;
+      host: string;
+      uuid: string;
+      version: string;
+      status: string;
+    };
     queue?: {
       type?: string;
     };
     jvm?: {
       uptime_in_millis?: number;
+      mem?: {
+        heap_used_percent?: number;
+      };
+    };
+    process?: {
+      cpu?: {
+        percent?: number;
+      };
+    };
+    os?: {
+      cpu?: {
+        load_average?: {
+          '1m'?: number;
+        };
+      };
+    };
+    events?: {
+      out?: number;
+    };
+    reloads?: {
+      failures?: number;
+      successes?: number;
     };
   };
   beats_stats?: {
@@ -276,14 +332,12 @@ export interface ElasticsearchLegacySource {
   };
   index_stats?: ElasticsearchIndexStats;
   node_stats?: ElasticsearchNodeStats;
-  service?: {
-    address?: string;
-  };
   shard?: {
     index?: string;
     shard?: string;
+    state?: string;
     primary?: boolean;
-    relocating_node?: string;
+    relocating_node: string | null;
     node?: string;
   };
   ccr_stats?: {
@@ -303,17 +357,309 @@ export interface ElasticsearchLegacySource {
 }
 
 export interface ElasticsearchIndexRecoveryShard {
-  start_time_in_millis: number;
-  stop_time_in_millis: number;
+  id?: number;
+  name?: string;
+  stage?: string;
+  type?: string;
+  primary?: boolean;
+  source?: {
+    name?: string;
+    transport_address?: string;
+  };
+  target?: {
+    name?: string;
+    transport_address?: string;
+  };
+  index?: {
+    files?: {
+      percent?: string;
+      recovered?: number;
+      total?: number;
+      reused?: number;
+    };
+    size?: {
+      recovered_in_bytes?: number;
+      reused_in_bytes?: number;
+      total_in_bytes?: number;
+    };
+  };
+  start_time_in_millis?: number;
+  stop_time_in_millis?: number;
+  translog?: {
+    total?: number;
+    percent?: string;
+    total_on_start?: number;
+  };
 }
 
 export interface ElasticsearchMetricbeatNode {
+  name?: string;
   stats?: ElasticsearchNodeStats;
 }
 
 export interface ElasticsearchMetricbeatSource {
+  '@timestamp'?: string;
+  service?: {
+    address?: string;
+  };
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
+    index?: ElasticsearchIndexStats & {
+      recovery?: ElasticsearchIndexRecoveryShard;
+    };
+    version?: string;
+    shard?: ElasticsearchLegacySource['shard'] & {
+      number?: string;
+      relocating_node?: {
+        id?: string;
+      };
+    };
+    ml?: {
+      job?: {
+        id?: string;
+        state?: string;
+        model_size?: {};
+        data_counts?: {
+          processed_record_count?: number;
+        };
+        forecasts_stats?: {
+          total?: number;
+        };
+      };
+    };
+    ccr?: {
+      leader?: {
+        index?: string;
+      };
+      follower?: {
+        index?: string;
+        shard?: {
+          number?: number;
+        };
+        time_since_last_read?: {
+          ms?: number;
+        };
+        operations_written?: number;
+        failed_read_requests?: number;
+      };
+
+      read_exceptions?: Array<{
+        exception?: {
+          type?: string;
+        };
+      }>;
+    };
+    cluster?: {
+      name?: string;
+      id?: string;
+      stats?: {
+        license?: ElasticsearchLegacySource['license'];
+        state?: {
+          state_uuid?: string;
+          master_node?: string;
+          nodes?: {
+            [uuid: string]: {};
+          };
+        };
+        status?: string;
+        version?: string;
+        indices?: {
+          total?: number;
+          docs?: {
+            deleted?: number;
+            total?: number;
+          };
+          shards?: {
+            count?: number;
+            primaries?: number;
+          };
+          store?: {
+            size?: {
+              bytes?: number;
+            };
+          };
+        };
+        nodes?: {
+          versions?: string[];
+          count?: number;
+          jvm?: {
+            max_uptime?: {
+              ms?: number;
+            };
+            memory?: {
+              heap?: {
+                used?: {
+                  bytes?: number;
+                };
+                max?: {
+                  bytes?: number;
+                };
+              };
+            };
+          };
+          fs?: {
+            available?: {
+              bytes?: number;
+            };
+            total?: {
+              bytes?: number;
+            };
+          };
+        };
+        stack?: {
+          xpack?: {
+            ccr?: {
+              available?: boolean;
+              enabled?: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  kibana?: {
+    kibana?: {
+      transport_address?: string;
+      name?: string;
+      host?: string;
+      uuid?: string;
+      status?: string;
+    };
+    stats?: {
+      concurrent_connections?: number;
+      process?: {
+        uptime?: {
+          ms?: number;
+        };
+        memory?: {
+          heap?: {
+            size_limit?: {
+              bytes?: number;
+            };
+          };
+          resident_set_size?: {
+            bytes?: number;
+          };
+        };
+      };
+      os?: {
+        load?: {
+          '1m'?: number;
+        };
+        memory?: {
+          free_in_bytes?: number;
+        };
+      };
+      request?: {
+        disconnects?: number;
+        total?: number;
+      };
+      response_time?: {
+        avg?: {
+          ms?: number;
+        };
+        max?: {
+          ms?: number;
+        };
+      };
+    };
+  };
+  logstash?: {
+    node?: {
+      stats?: {
+        timestamp?: string;
+        logstash?: {
+          pipeline: {
+            batch_size: number;
+            workers: number;
+          };
+          http_address: string;
+          name: string;
+          host: string;
+          uuid: string;
+          version: string;
+          status: string;
+        };
+        queue?: {
+          type?: string;
+        };
+        jvm?: {
+          uptime_in_millis?: number;
+          mem?: {
+            heap_used_percent?: number;
+          };
+        };
+        process?: {
+          cpu?: {
+            percent?: number;
+          };
+        };
+        os?: {
+          cpu?: {
+            load_average?: {
+              '1m'?: number;
+            };
+          };
+        };
+        events?: {
+          out?: number;
+        };
+        reloads?: {
+          failures?: number;
+          successes?: number;
+        };
+      };
+    };
+  };
+  beat?: {
+    stats?: {
+      timestamp?: string;
+      beat?: {
+        uuid?: string;
+        name?: string;
+        type?: string;
+        version?: string;
+        host?: string;
+      };
+      handles?: {
+        limit?: {
+          hard?: number;
+          soft?: number;
+        };
+      };
+      info?: {
+        uptime?: {
+          ms?: number;
+        };
+      };
+      memstats?: {
+        memory?: {
+          alloc?: number;
+        };
+      };
+      libbeat?: {
+        config?: {
+          reloads?: number;
+        };
+        output?: {
+          type?: string;
+          read?: {
+            errors?: number;
+          };
+          write?: {
+            bytes?: string;
+            errors?: number;
+          };
+        };
+        pipeline?: {
+          events?: {
+            total?: number;
+            published?: number;
+            dropped?: number;
+          };
+        };
+      };
+    };
   };
 }
 

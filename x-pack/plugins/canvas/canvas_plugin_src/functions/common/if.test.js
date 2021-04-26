@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { ifFn } from './if';
 
@@ -19,52 +20,68 @@ describe('if', () => {
 
   describe('function', () => {
     describe('condition passed', () => {
-      it('with then', async () => {
-        expect(await fn(null, { condition: true, then: () => 'foo' })).toBe('foo');
-        expect(await fn(null, { condition: true, then: () => 'foo', else: () => 'bar' })).toBe(
-          'foo'
-        );
+      it('with then', () => {
+        expect(fn(null, { condition: true, then: () => of('foo') })).resolves.toBe('foo');
+        expect(
+          fn(null, { condition: true, then: () => of('foo'), else: () => of('bar') })
+        ).resolves.toBe('foo');
       });
 
-      it('without then', async () => {
-        expect(await fn(null, { condition: true })).toBe(null);
-        expect(await fn('some context', { condition: true })).toBe('some context');
+      it('without then', () => {
+        expect(fn(null, { condition: true })).resolves.toBe(null);
+        expect(fn('some context', { condition: true })).resolves.toBe('some context');
       });
     });
 
     describe('condition failed', () => {
-      it('with else', async () =>
+      it('with else', () =>
         expect(
-          await fn('some context', { condition: false, then: () => 'foo', else: () => 'bar' })
-        ).toBe('bar'));
+          fn('some context', {
+            condition: false,
+            then: () => of('foo'),
+            else: () => of('bar'),
+          })
+        ).resolves.toBe('bar'));
 
-      it('without else', async () =>
-        expect(await fn('some context', { condition: false, then: () => 'foo' })).toBe(
+      it('without else', () =>
+        expect(fn('some context', { condition: false, then: () => of('foo') })).resolves.toBe(
           'some context'
         ));
     });
 
     describe('falsy values', () => {
       describe('for then', () => {
-        it('with null', async () =>
-          expect(await fn('some context', { condition: true, then: () => null })).toBe(null));
+        it('with null', () => {
+          expect(fn('some context', { condition: true, then: () => of(null) })).resolves.toBe(null);
+        });
 
-        it('with false', async () =>
-          expect(await fn('some context', { condition: true, then: () => false })).toBe(false));
+        it('with false', () => {
+          expect(fn('some context', { condition: true, then: () => of(false) })).resolves.toBe(
+            false
+          );
+        });
 
-        it('with 0', async () =>
-          expect(await fn('some context', { condition: true, then: () => 0 })).toBe(0));
+        it('with 0', () => {
+          expect(fn('some context', { condition: true, then: () => of(0) })).resolves.toBe(0);
+        });
       });
 
       describe('for else', () => {
-        it('with null', async () =>
-          expect(await fn('some context', { condition: false, else: () => null })).toBe(null));
+        it('with null', () => {
+          expect(fn('some context', { condition: false, else: () => of(null) })).resolves.toBe(
+            null
+          );
+        });
 
-        it('with false', async () =>
-          expect(await fn('some context', { condition: false, else: () => false })).toBe(false));
+        it('with false', () => {
+          expect(fn('some context', { condition: false, else: () => of(false) })).resolves.toBe(
+            false
+          );
+        });
 
-        it('with 0', async () =>
-          expect(await fn('some context', { condition: false, else: () => 0 })).toBe(0));
+        it('with 0', () => {
+          expect(fn('some context', { condition: false, else: () => of(0) })).resolves.toBe(0);
+        });
       });
     });
   });

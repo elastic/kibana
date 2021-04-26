@@ -289,6 +289,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
+        message:
+          'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),

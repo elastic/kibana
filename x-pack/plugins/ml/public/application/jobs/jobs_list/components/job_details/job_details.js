@@ -70,6 +70,7 @@ export class JobDetailsUI extends Component {
         modelSizeStats,
         jobTimingStats,
         datafeedTimingStats,
+        alertRules,
       } = extractJobDetails(job, basePath);
 
       const { showFullDetails, refreshJobList } = this.props;
@@ -83,7 +84,7 @@ export class JobDetailsUI extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-job-settings"
-              sections={[general, customUrl, node, calendars]}
+              sections={[general, customUrl, node, calendars, alertRules]}
             />
           ),
           time: job.open_time,

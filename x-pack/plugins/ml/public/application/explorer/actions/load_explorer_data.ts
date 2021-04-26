@@ -39,6 +39,7 @@ import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { ExplorerChartsData } from '../explorer_charts/explorer_charts_container_service';
 import { mlJobService } from '../../services/job_service';
+import { TimeBucketsInterval } from '../../util/time_buckets';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -75,7 +76,7 @@ export interface LoadExplorerDataConfig {
   noInfluencersConfigured: boolean;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[];
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: TimeBucketsInterval;
   swimlaneLimit: number;
   tableInterval: string;
   tableSeverity: number;
