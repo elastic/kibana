@@ -16,7 +16,7 @@ const createStartContractMock = () => {
       bulkUpdate: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
-      find: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      find: jest.fn(),
       get: jest.fn(),
       update: jest.fn(),
     },

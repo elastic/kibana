@@ -22,6 +22,9 @@ const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
 
+// Replace mock to support syntax using `.then()` as used in transform code.
+coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
+
 const appDependencies: AppDependencies = {
   application: coreStart.application,
   chrome: coreStart.chrome,
