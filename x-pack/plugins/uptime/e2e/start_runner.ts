@@ -25,7 +25,7 @@ async function startRunner(
   getService: FtrProviderContext['getService'],
   runnerExecution: typeof run
 ) {
-  await runnerExecution({ journeyName: 'uptime', headless: false, sandbox: false });
+  await runnerExecution({ journeyName: 'uptime', headless: true, sandbox: false });
 }
 
 async function waitForES() {
