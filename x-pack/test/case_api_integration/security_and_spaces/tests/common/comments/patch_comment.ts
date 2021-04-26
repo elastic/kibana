@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
@@ -21,6 +21,7 @@ import {
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
+  getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
   createCaseAction,
@@ -34,6 +35,16 @@ import {
   createComment,
   updateComment,
 } from '../../../../common/lib/utils';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -154,12 +165,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      const updatedCase = await updateComment(supertest, postedCase.id, {
-        id: patchedCase.comments![0].id,
-        version: patchedCase.comments![0].version,
-        comment: newComment,
-        type: CommentType.user,
-        owner: 'securitySolution',
+      const updatedCase = await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          comment: newComment,
+          type: CommentType.user,
+          owner: 'securitySolution',
+        },
       });
 
       const userComment = updatedCase.comments![0] as AttributesTypeUser;
@@ -175,17 +190,21 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: postCommentAlertReq,
       });
-      const updatedCase = await updateComment(supertest, postedCase.id, {
-        id: patchedCase.comments![0].id,
-        version: patchedCase.comments![0].version,
-        type: CommentType.alert,
-        alertId: 'new-id',
-        index: postCommentAlertReq.index,
-        rule: {
-          id: 'id',
-          name: 'name',
+      const updatedCase = await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.alert,
+          alertId: 'new-id',
+          index: postCommentAlertReq.index,
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
+          owner: 'securitySolution',
         },
-        owner: 'securitySolution',
       });
 
       const alertComment = updatedCase.comments![0] as AttributesTypeAlerts;
@@ -207,49 +226,49 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      await updateComment(
+      await updateComment({
         supertest,
-        postedCase.id,
-        {
+        caseId: postedCase.id,
+        req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           type: CommentType.user,
           comment: postCommentUserReq.comment,
           owner: 'changedOwner',
         },
-        400
-      );
+        expectedHttpCode: 400,
+      });
     });
 
     it('unhappy path - 404s when comment is not there', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      await updateComment(
+      await updateComment({
         supertest,
-        postedCase.id,
-        {
+        caseId: postedCase.id,
+        req: {
           id: 'id',
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
           owner: 'securitySolution',
         },
-        404
-      );
+        expectedHttpCode: 404,
+      });
     });
 
     it('unhappy path - 404s when case is not there', async () => {
-      await updateComment(
+      await updateComment({
         supertest,
-        'fake-id',
-        {
+        caseId: 'fake-id',
+        req: {
           id: 'id',
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
           owner: 'securitySolution',
         },
-        404
-      );
+        expectedHttpCode: 404,
+      });
     });
 
     it('unhappy path - 400s when trying to change comment type', async () => {
@@ -260,10 +279,10 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      await updateComment(
+      await updateComment({
         supertest,
-        postedCase.id,
-        {
+        caseId: postedCase.id,
+        req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           type: CommentType.alert,
@@ -275,8 +294,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           owner: 'securitySolution',
         },
-        400
-      );
+        expectedHttpCode: 400,
+      });
     });
 
     it('unhappy path - 400s when missing attributes for type user', async () => {
@@ -287,16 +306,16 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      await updateComment(
+      await updateComment({
         supertest,
-        postedCase.id,
+        caseId: postedCase.id,
         // @ts-expect-error
-        {
+        req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
         },
-        400
-      );
+        expectedHttpCode: 400,
+      });
     });
 
     it('unhappy path - 400s when adding excess attributes for type user', async () => {
@@ -308,10 +327,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       for (const attribute of ['alertId', 'index']) {
-        await updateComment(
+        await updateComment({
           supertest,
-          postedCase.id,
-          {
+          caseId: postedCase.id,
+          req: {
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
             comment: 'a comment',
@@ -319,8 +338,8 @@ export default ({ getService }: FtrProviderContext): void => {
             [attribute]: attribute,
             owner: 'securitySolution',
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       }
     });
 
@@ -344,17 +363,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const attribute of ['alertId', 'index']) {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        await updateComment(
+        await updateComment({
           supertest,
-          postedCase.id,
+          caseId: postedCase.id,
           // @ts-expect-error
-          {
+          req: {
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
             ...requestAttributes,
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       }
     });
 
@@ -367,10 +386,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       for (const attribute of ['comment']) {
-        await updateComment(
+        await updateComment({
           supertest,
-          postedCase.id,
-          {
+          caseId: postedCase.id,
+          req: {
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
             type: CommentType.alert,
@@ -383,8 +402,8 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolution',
             [attribute]: attribute,
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       }
     });
 
@@ -397,18 +416,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await updateComment(
+      await updateComment({
         supertest,
-        postedCase.id,
-        {
+        caseId: postedCase.id,
+        req: {
           id: patchedCase.comments![0].id,
           version: 'version-mismatch',
           type: CommentType.user,
           comment: newComment,
           owner: 'securitySolution',
         },
-        409
-      );
+        expectedHttpCode: 409,
+      });
     });
 
     describe('alert format', () => {
@@ -427,10 +446,10 @@ export default ({ getService }: FtrProviderContext): void => {
             params: postCommentAlertReq,
           });
 
-          await updateComment(
+          await updateComment({
             supertest,
-            patchedCase.id,
-            {
+            caseId: patchedCase.id,
+            req: {
               id: patchedCase.comments![0].id,
               version: patchedCase.comments![0].version,
               type: type as AlertComment,
@@ -439,8 +458,8 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolution',
               rule: postCommentAlertReq.rule,
             },
-            400
-          );
+            expectedHttpCode: 400,
+          });
         });
       }
 
@@ -462,46 +481,157 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          await updateComment(supertest, postedCase.id, {
-            id: patchedCase.comments![0].id,
-            version: patchedCase.comments![0].version,
-            type: type as AlertComment,
-            alertId,
-            index,
-            owner: 'securitySolution',
-            rule: postCommentAlertReq.rule,
+          await updateComment({
+            supertest,
+            caseId: postedCase.id,
+            req: {
+              id: patchedCase.comments![0].id,
+              version: patchedCase.comments![0].version,
+              type: type as AlertComment,
+              alertId,
+              index,
+              owner: 'securitySolution',
+              rule: postCommentAlertReq.rule,
+            },
           });
         });
       }
     });
 
     describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });
 
       it('should update a comment that the user has permissions for', async () => {
-        it('should patch a comment', async () => {
-          const postedCase = await createCase(supertest, postCaseReq);
-          const patchedCase = await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: postCommentUserReq,
-          });
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
 
-          const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-          const updatedCase = await updateComment(supertest, postedCase.id, {
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const newComment = 'Well I decided to update my comment. So what? Deal with it.';
+        const updatedCase = await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...postCommentUserReq,
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
             comment: newComment,
-            type: CommentType.user,
-            owner: 'securitySolution',
+          },
+          auth: { user: secOnly, space: 'space1' },
+        });
+
+        const userComment = updatedCase.comments![0] as AttributesTypeUser;
+        expect(userComment.comment).to.eql(newComment);
+        expect(userComment.type).to.eql(CommentType.user);
+        expect(updatedCase.updated_by).to.eql(defaultUser);
+        expect(userComment.owner).to.eql('securitySolutionFixture');
+      });
+
+      it('should not update a comment that has a different owner thant he user has access to', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const patchedCase = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const newComment = 'Well I decided to update my comment. So what? Deal with it.';
+        await updateComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          req: {
+            ...postCommentUserReq,
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+            comment: newComment,
+          },
+          auth: { user: obsOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT update a comment`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const patchedCase = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: 'space1' },
           });
 
-          const userComment = updatedCase.comments![0] as AttributesTypeUser;
-          expect(userComment.comment).to.eql(newComment);
-          expect(userComment.type).to.eql(CommentType.user);
-          expect(updatedCase.updated_by).to.eql(defaultUser);
+          const newComment = 'Well I decided to update my comment. So what? Deal with it.';
+          await updateComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            req: {
+              ...postCommentUserReq,
+              id: patchedCase.comments![0].id,
+              version: patchedCase.comments![0].version,
+              comment: newComment,
+            },
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should not update a comment in a space the user does not have permissions', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space2' }
+        );
+
+        const patchedCase = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space2' },
+        });
+
+        const newComment = 'Well I decided to update my comment. So what? Deal with it.';
+        await updateComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          req: {
+            ...postCommentUserReq,
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+            comment: newComment,
+          },
+          auth: { user: secOnly, space: 'space2' },
+          // getting the case will fail in the saved object layer with a 403
+          expectedHttpCode: 403,
         });
       });
     });

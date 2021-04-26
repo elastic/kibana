@@ -10,10 +10,14 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
-import { postCaseReq, postCommentAlertReq, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCaseReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   createCaseAction,
-  createCaseAsUser,
   createComment,
   createSubCase,
   deleteAllCaseItems,
@@ -23,6 +27,7 @@ import {
   deleteComments,
   ensureSavedObjectIsAuthorized,
   getSpaceUrlPrefix,
+  createCase,
 } from '../../../../common/lib/utils';
 
 import {
@@ -179,19 +184,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const [secCase, obsCase] = await Promise.all([
           // Create case owned by the security solution user
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: secOnly,
-            space: space1,
-            owner: 'securitySolutionFixture',
-          }),
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: secOnly, space: space1 }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            { user: obsOnly, space: space1 }
+          ),
           // Create case owned by the observability user
-          createCaseAsUser({
-            supertestWithoutAuth,
-            user: obsOnly,
-            space: space1,
-            owner: 'observabilityFixture',
-          }),
         ]);
 
         await Promise.all([
@@ -199,15 +204,13 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: secCase.id,
             params: postCommentUserReq,
-            user: secOnly,
-            space: space1,
+            auth: { user: secOnly, space: space1 },
           }),
           createComment({
             supertest: supertestWithoutAuth,
             caseId: obsCase.id,
             params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
-            user: obsOnly,
-            space: space1,
+            auth: { user: obsOnly, space: space1 },
           }),
         ]);
 
@@ -282,17 +285,16 @@ export default ({ getService }: FtrProviderContext): void => {
           scenario.space
         } - should NOT read a comment`, async () => {
           // super user creates a case and comment in the appropriate space
-          const caseInfo = await createCaseAsUser({
+          const caseInfo = await createCase(
             supertestWithoutAuth,
-            user: superUser,
-            space: scenario.space,
-            owner: 'securitySolutionFixture',
-          });
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: scenario.space }
+          );
 
           await createComment({
             supertest: supertestWithoutAuth,
-            user: superUser,
-            space: scenario.space,
+            auth: { user: superUser, space: scenario.space },
             params: { ...postCommentUserReq, owner: 'securitySolutionFixture' },
             caseId: caseInfo.id,
           });
@@ -306,17 +308,16 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       it('should not return any comments when trying to exploit RBAC through the search query parameter', async () => {
-        const obsCase = await createCaseAsUser({
+        const obsCase = await createCase(
           supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
 
         await createComment({
           supertest: supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
+          auth: { user: superUser, space: 'space1' },
           params: { ...postCommentUserReq, owner: 'observabilityFixture' },
           caseId: obsCase.id,
         });
@@ -335,17 +336,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should not allow retrieving unauthorized comments using the filter field', async () => {
-        const obsCase = await createCaseAsUser({
+        const obsCase = await createCase(
           supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
 
         await createComment({
           supertest: supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
+          auth: { user: superUser, space: 'space1' },
           params: { ...postCommentUserReq, owner: 'observabilityFixture' },
           caseId: obsCase.id,
         });
@@ -364,10 +364,11 @@ export default ({ getService }: FtrProviderContext): void => {
       // This test ensures that the user is not allowed to define the namespaces query param
       // so she cannot search across spaces
       it('should NOT allow to pass a namespaces query parameter', async () => {
-        const obsCase = await createCaseAsUser({
-          supertestWithoutAuth: supertest,
-          owner: 'observabilityFixture',
-        });
+        const obsCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200
+        );
 
         await createComment({
           supertest,

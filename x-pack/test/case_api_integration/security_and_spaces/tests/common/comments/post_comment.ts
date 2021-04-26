@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
@@ -24,6 +24,7 @@ import {
   postCommentAlertReq,
   postCollectionReq,
   postCommentGenAlertReq,
+  getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
   createCaseAction,
@@ -50,6 +51,16 @@ import {
   createRule,
   getQuerySignalIds,
 } from '../../../../../detection_engine_api_integration/utils';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -84,6 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_at: null,
           pushed_by: null,
           updated_by: null,
+          owner: 'securitySolutionFixture',
         });
 
         // updates the case correctly after adding a comment
@@ -112,6 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_at: null,
           pushed_by: null,
           updated_by: null,
+          owner: 'securitySolutionFixture',
         });
 
         // updates the case correctly after adding a comment
@@ -133,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action_field: ['comment'],
           action: 'create',
           action_by: defaultUser,
-          new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}"}`,
+          new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}","owner":"securitySolutionFixture"}`,
           old_value: null,
           case_id: `${postedCase.id}`,
           comment_id: `${patchedCase.comments![0].id}`,
@@ -143,7 +156,19 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      // TODO: create test that checks that you can't create a comment with a different owner than the case
+      it('400s when attempting to create a comment with a different owner than the case', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' })
+        );
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
+          expectedHttpCode: 400,
+        });
+      });
 
       it('400s when type is missing', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
@@ -182,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: CommentType.user,
               [attribute]: attribute,
               comment: 'a comment',
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
             expectedHttpCode: 400,
           });
@@ -200,12 +225,18 @@ export default ({ getService }: FtrProviderContext): void => {
             id: 'id',
             name: 'name',
           },
+          owner: 'securitySolutionFixture',
         };
 
         for (const attribute of ['alertId', 'index']) {
           const requestAttributes = omit(attribute, allRequestAttributes);
-          // @ts-expect-error
-          await createComment(supertest, postedCase.id, requestAttributes, 400);
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            // @ts-expect-error
+            params: requestAttributes,
+            expectedHttpCode: 400,
+          });
         }
       });
 
@@ -225,7 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
             expectedHttpCode: 400,
           });
@@ -348,7 +379,7 @@ export default ({ getService }: FtrProviderContext): void => {
               id: 'id',
               name: 'name',
             },
-            owner: 'securitySolution',
+            owner: 'securitySolutionFixture',
             type: CommentType.alert,
           },
         });
@@ -401,7 +432,7 @@ export default ({ getService }: FtrProviderContext): void => {
               id: 'id',
               name: 'name',
             },
-            owner: 'securitySolution',
+            owner: 'securitySolutionFixture',
             type: CommentType.alert,
           },
         });
@@ -487,6 +518,85 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(subCaseComments.total).to.be(2);
         expect(subCaseComments.comments[0].type).to.be(CommentType.generatedAlert);
         expect(subCaseComments.comments[1].type).to.be(CommentType.user);
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('should create a comment when the user has the correct permissions for that owner', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: secOnly, space: 'space1' },
+        });
+      });
+
+      it('should not create a comment when the user does not have permissions for that owner', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200,
+          { user: obsOnly, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
+          auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should not create a comment`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should not create a comment in a space the user does not have permissions for', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space2' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
       });
     });
   });

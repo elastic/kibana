@@ -44,7 +44,7 @@ import {
   CasesStatusResponse,
   CasesConfigurationsResponse,
 } from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
+import { postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -538,54 +538,8 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const getSpaceUrlPrefix = (spaceId?: string) => {
+export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-};
-
-export const createCaseAsUser = async ({
-  supertestWithoutAuth,
-  user = superUser,
-  space,
-  owner,
-  expectedHttpCode = 200,
-}: {
-  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
-  user?: User;
-  space?: string;
-  owner?: string;
-  expectedHttpCode?: number;
-}): Promise<CaseResponse> => {
-  const { body: theCase } = await supertestWithoutAuth
-    .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
-    .auth(user.username, user.password)
-    .set('kbn-xsrf', 'true')
-    .send(getPostCaseRequest({ owner }))
-    .expect(expectedHttpCode);
-
-  return theCase;
-};
-
-export const findCasesAsUser = async ({
-  supertestWithoutAuth,
-  user,
-  space,
-  expectedHttpCode = 200,
-  appendToUrl = '',
-}: {
-  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
-  user: User;
-  space: string;
-  expectedHttpCode?: number;
-  appendToUrl?: string;
-}): Promise<CasesFindResponse> => {
-  const { body: res } = await supertestWithoutAuth
-    .get(`${getSpaceUrlPrefix(space)}${CASES_URL}/_find?sortOrder=asc&${appendToUrl}`)
-    .auth(user.username, user.password)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(expectedHttpCode);
-
-  return res;
 };
 
 interface OwnerEntity {
@@ -648,13 +602,13 @@ export const createComment = async ({
   supertest,
   caseId,
   params,
-  auth = { user: superUser, space: undefined },
+  auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
   params: CommentRequest;
-  auth?: { user: User; space: string | undefined };
+  auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<CaseResponse> => {
   const { body: comment } = await supertest
@@ -699,13 +653,13 @@ export const deleteComment = async ({
   caseId,
   commentId,
   expectedHttpCode = 204,
-  auth = { user: superUser },
+  auth = { user: superUser, space: null },
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
-  auth?: { user: User; space?: string };
+  auth?: { user: User; space: string | null };
 }): Promise<{} | Error> => {
   const { body: comment } = await supertest
     .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
@@ -721,12 +675,12 @@ export const deleteAllComments = async ({
   supertest,
   caseId,
   expectedHttpCode = 204,
-  auth = { user: superUser },
+  auth = { user: superUser, space: null },
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
   expectedHttpCode?: number;
-  auth?: { user: User; space?: string };
+  auth?: { user: User; space: string | null };
 }): Promise<{} | Error> => {
   const { body: comment } = await supertest
     .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
@@ -742,11 +696,11 @@ export const getAllComments = async ({
   supertest,
   caseId,
   expectedHttpCode = 200,
-  auth = { user: superUser, space: undefined },
+  auth = { user: superUser, space: null },
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
-  auth?: { user: User; space: string | undefined };
+  auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<AllCommentsResponse> => {
   const { body: comments } = await supertest
@@ -778,16 +732,24 @@ export const getComment = async ({
   return comment;
 };
 
-export const updateComment = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  req: CommentPatchRequest,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse> => {
+export const updateComment = async ({
+  supertest,
+  caseId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  req: CommentPatchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
   const { body: res } = await supertest
-    .patch(`${CASES_URL}/${caseId}/comments`)
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
     .set('kbn-xsrf', 'true')
     .send(req)
+    .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
   return res;

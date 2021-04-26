@@ -119,6 +119,10 @@ export async function update(
       attachmentId: queryCommentId,
     });
 
+    if (myComment == null) {
+      throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
+    }
+
     await ensureAuthorized({
       authorization,
       auditLogger,
@@ -126,10 +130,6 @@ export async function update(
       savedObjectIDs: [myComment.id],
       owners: [myComment.attributes.owner],
     });
-
-    if (myComment == null) {
-      throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
-    }
 
     if (myComment.attributes.type !== queryRestAttributes.type) {
       throw Boom.badRequest(`You cannot change the type of the comment.`);

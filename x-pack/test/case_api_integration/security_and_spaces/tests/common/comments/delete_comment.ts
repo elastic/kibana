@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -21,7 +21,6 @@ import {
   createCase,
   createComment,
   deleteComment,
-  createCaseAsUser,
   deleteAllComments,
 } from '../../../../common/lib/utils';
 import {
@@ -188,19 +187,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete a comment from the appropriate owner', async () => {
-        const secCase = await createCaseAsUser({
+        const secCase = await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
-        });
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: secOnly, space: 'space1' }
+        );
 
         const commentResp = await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
-          user: secOnly,
-          space: 'space1',
+          auth: { user: secOnly, space: 'space1' },
         });
 
         await deleteComment({
@@ -212,27 +210,25 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete multiple comments from the appropriate owner', async () => {
-        const secCase = await createCaseAsUser({
+        const secCase = await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: secOnly, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
+          params: postCommentUserReq,
+          auth: { user: secOnly, space: 'space1' },
         });
 
         await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
-          user: secOnly,
-          space: 'space1',
-        });
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          params: postCommentUserReq,
-          user: secOnly,
-          space: 'space1',
+          auth: { user: secOnly, space: 'space1' },
         });
 
         await deleteAllComments({
@@ -243,19 +239,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should not delete a comment from a different owner', async () => {
-        const secCase = await createCaseAsUser({
+        const secCase = await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
-        });
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: secOnly, space: 'space1' }
+        );
 
         const commentResp = await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
-          user: secOnly,
-          space: 'space1',
+          auth: { user: secOnly, space: 'space1' },
         });
 
         await deleteComment({
@@ -278,19 +273,18 @@ export default ({ getService }: FtrProviderContext): void => {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT delete a comment`, async () => {
-          const postedCase = await createCaseAsUser({
+          const postedCase = await createCase(
             supertestWithoutAuth,
-            user: superUser,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-          });
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
 
           const commentResp = await createComment({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             params: postCommentUserReq,
-            user: superUser,
-            space: 'space1',
+            auth: { user: superUser, space: 'space1' },
           });
 
           await deleteComment({
@@ -311,19 +305,18 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       it('should NOT delete a comment in a space with where the user does not have permissions', async () => {
-        const postedCase = await createCaseAsUser({
+        const postedCase = await createCase(
           supertestWithoutAuth,
-          user: superUser,
-          space: 'space2',
-          owner: 'securitySolutionFixture',
-        });
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space2' }
+        );
 
         const commentResp = await createComment({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           params: postCommentUserReq,
-          user: superUser,
-          space: 'space2',
+          auth: { user: superUser, space: 'space2' },
         });
 
         await deleteComment({

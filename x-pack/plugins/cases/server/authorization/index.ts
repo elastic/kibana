@@ -6,7 +6,11 @@
  */
 
 import { EventType } from '../../../security/server';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -82,6 +86,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
+  [ReadOperations.FindConfigurations]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.FindConfigurations,
+    action: 'find-configurations',
+    verbs: accessVerbs,
+    docType: 'case configurations',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
   [ReadOperations.GetCase]: {
     type: EventType.ACCESS,
     name: ReadOperations.GetCase,
@@ -96,6 +108,22 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'find-cases',
     verbs: accessVerbs,
     docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetTags]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetCase,
+    action: 'get-tags',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetReporters]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetReporters,
+    action: 'get-reporters',
+    verbs: accessVerbs,
+    docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
   // comments operations
@@ -124,7 +152,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [WriteOperations.UpdateComment]: {
-    type: EventType.DELETION,
+    type: EventType.CHANGE,
     name: WriteOperations.UpdateComment,
     action: 'update-comments',
     verbs: updateVerbs,
@@ -154,28 +182,5 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-  [ReadOperations.GetTags]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.GetCase,
-    action: 'get-tags',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.GetReporters]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.GetReporters,
-    action: 'get-reporters',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.FindConfigurations]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.FindConfigurations,
-    action: 'find-configurations',
-    verbs: accessVerbs,
-    docType: 'case configurations',
-    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
 };
