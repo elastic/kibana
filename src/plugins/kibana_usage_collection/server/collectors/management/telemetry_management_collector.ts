@@ -13,7 +13,7 @@ import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
-  return async function fetchUsageStats(): Promise<Partial<UsageStats> | undefined> {
+  return async function fetchUsageStats(): Promise<UsageStats | undefined> {
     const uiSettingsClient = getUiSettingsClient();
     if (!uiSettingsClient) {
       return;
@@ -27,7 +27,8 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
         obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
       }, {});
-    return modifiedEntries;
+    // TODO: It would be Partial<UsageStats>, but the telemetry-tools for the schema extraction still does not support it. We need to fix it before setting the right Partial<UsageStats> type
+    return (modifiedEntries as unknown) as UsageStats;
   };
 }
 
@@ -35,7 +36,7 @@ export function registerManagementUsageCollector(
   usageCollection: UsageCollectionSetup,
   getUiSettingsClient: () => IUiSettingsClient | undefined
 ) {
-  const collector = usageCollection.makeUsageCollector<Partial<UsageStats> | undefined>({
+  const collector = usageCollection.makeUsageCollector<UsageStats | undefined>({
     type: 'stack_management',
     isReady: () => typeof getUiSettingsClient() !== 'undefined',
     fetch: createCollectorFetch(getUiSettingsClient),
