@@ -53,7 +53,7 @@ describe('Series Builder ReportDefinitionCol', function () {
   it('should render selected report definitions', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
-    expect(await screen.findByText('Search Web Application')).toBeInTheDocument();
+    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
 
     expect(screen.getAllByTestId('comboBoxToggleListButton')[0]).toBeInTheDocument();
   });
