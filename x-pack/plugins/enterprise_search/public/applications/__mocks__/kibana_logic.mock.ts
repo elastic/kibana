@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
+import { mockHistory } from './react_router_history.mock';
 
-import { mockHistory } from './';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 
 export const mockKibanaValues = {
   config: { host: 'http://localhost:3002' },

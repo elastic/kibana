@@ -63,6 +63,17 @@ export function DimensionContainer({
     [closeFlyout]
   );
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('lnsBody--overflowHidden');
+    } else {
+      document.body.classList.remove('lnsBody--overflowHidden');
+    }
+    return () => {
+      document.body.classList.remove('lnsBody--overflowHidden');
+    };
+  });
+
   return isOpen ? (
     <div ref={panelRef}>
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
@@ -71,7 +82,7 @@ export function DimensionContainer({
           <div
             role="dialog"
             aria-labelledby="lnsDimensionContainerTitle"
-            className="lnsDimensionContainer"
+            className="lnsDimensionContainer euiFlyout"
           >
             <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
               <EuiFlexGroup
@@ -79,6 +90,7 @@ export function DimensionContainer({
                 alignItems="center"
                 className="lnsDimensionContainer__headerLink"
                 onClick={closeFlyout}
+                responsive={false}
               >
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
