@@ -25,7 +25,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     },
   };
 
-  const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+  const configStr = JSON.stringify(visConfig);
   const visTypePie = buildExpressionFunction<VisTypeVislibPieExpressionFunctionDefinition>(
     vislibPieName,
     {
