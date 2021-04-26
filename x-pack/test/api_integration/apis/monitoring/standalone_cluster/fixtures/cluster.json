@@ -55,7 +55,8 @@
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": []
   },
   "isPrimary": false
 }]
