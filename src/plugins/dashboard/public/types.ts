@@ -101,6 +101,7 @@ export interface DashboardAppState {
   getLatestDashboardState?: () => DashboardState;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
+  applyFilters?: (query: Query, filters: Filter[]) => void;
 }
 
 /**

@@ -45,6 +45,7 @@ import {
 } from '../../services/embeddable';
 import { DashboardConstants } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import { TopNavMenuProps } from '../../../../navigation/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -55,17 +56,22 @@ export interface DashboardTopNavState {
 
 type CompleteDashboardAppState = Required<
   DashboardAppState,
-  'indexPatterns' | 'savedDashboard' | 'dashboardContainer' | 'getLatestDashboardState'
+  | 'getLatestDashboardState'
+  | 'dashboardContainer'
+  | 'savedDashboard'
+  | 'indexPatterns'
+  | 'applyFilters'
 >;
 
 export const isCompleteDashboardAppState = (
   state: DashboardAppState
 ): state is CompleteDashboardAppState => {
   return (
+    Boolean(state.getLatestDashboardState) &&
     Boolean(state.dashboardContainer) &&
     Boolean(state.savedDashboard) &&
     Boolean(state.indexPatterns) &&
-    Boolean(state.getLatestDashboardState)
+    Boolean(state.applyFilters)
   );
 };
 
@@ -396,7 +402,7 @@ export function DashboardTopNav({
     setMounted(false);
   });
 
-  const getNavBarProps = () => {
+  const getNavBarProps = (): TopNavMenuProps => {
     const { hasUnsavedChanges, savedDashboard } = dashboardAppState;
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || state.chromeIsVisible) && !dashboardState.fullScreenMode;
@@ -442,7 +448,6 @@ export function DashboardTopNav({
       config: showTopNavMenu ? topNav : undefined,
       className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
       screenTitle,
-      showTopNavMenu,
       showSearchBar,
       showQueryBar,
       showQueryInput,
@@ -454,19 +459,20 @@ export function DashboardTopNav({
       useDefaultBehaviors: true,
       onQuerySubmit,
       onSavedQueryUpdated: (savedQuery: SavedQuery) => {
-        // const allFilters = data.query.filterManager.getFilters();
-        // data.query.filterManager.setFilters(allFilters);
-        // dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
-        // if (savedQuery.attributes.timefilter) {
-        //   timefilter.setTime({
-        //     from: savedQuery.attributes.timefilter.from,
-        //     to: savedQuery.attributes.timefilter.to,
-        //   });
-        //   if (savedQuery.attributes.timefilter.refreshInterval) {
-        //     timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
-        //   }
-        // }
-        // setState((s) => ({ ...s, savedQuery }));
+        // TODO: Figure out why this isn't run -- even in master
+        const allFilters = data.query.filterManager.getFilters();
+        data.query.filterManager.setFilters(allFilters);
+        dashboardAppState.applyFilters(savedQuery.attributes.query, allFilters);
+        if (savedQuery.attributes.timefilter) {
+          timefilter.setTime({
+            from: savedQuery.attributes.timefilter.from,
+            to: savedQuery.attributes.timefilter.to,
+          });
+          if (savedQuery.attributes.timefilter.refreshInterval) {
+            timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+          }
+        }
+        setState((s) => ({ ...s, savedQuery }));
       },
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,

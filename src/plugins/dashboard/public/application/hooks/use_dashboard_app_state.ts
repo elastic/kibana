@@ -235,6 +235,7 @@ export const useDashboardAppState = ({
       docTitle.change(savedDashboardState.title || getNewDashboardTitle());
       setDashboardAppState((s) => ({
         ...s,
+        applyFilters,
         savedDashboard,
         dashboardContainer,
         updateLastSavedState,

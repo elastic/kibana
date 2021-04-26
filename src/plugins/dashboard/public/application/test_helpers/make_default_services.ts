@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createBrowserHistory } from 'history';
 import {
   IUiSettingsClient,
   PluginInitializerContext,
@@ -51,16 +50,14 @@ export function makeDefaultServices(): DashboardAppServices {
   } as unknown) as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
-  const history = createBrowserHistory();
-
   const defaultCapabilities: DashboardCapabilities = {
-    show: false,
-    createNew: false,
-    saveQuery: false,
-    createShortUrl: false,
-    hideWriteControls: true,
-    mapsCapabilities: { save: false },
-    visualizeCapabilities: { save: false },
+    show: true,
+    createNew: true,
+    saveQuery: true,
+    createShortUrl: true,
+    hideWriteControls: false,
+    mapsCapabilities: { save: true },
+    visualizeCapabilities: { save: true },
     storeSearchSession: true,
   };
 
@@ -75,11 +72,11 @@ export function makeDefaultServices(): DashboardAppServices {
     data: dataPluginMock.createStartContract(),
     indexPatterns: {} as IndexPatternsContract,
     savedQueryService: {} as SavedQueryService,
+    scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     urlForwarding: {} as UrlForwardingStart,
     uiSettings: {} as IUiSettingsClient,
     allowByValueEmbeddables: true,
-    scopedHistory: () => history,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     dashboardSessionStorage,
