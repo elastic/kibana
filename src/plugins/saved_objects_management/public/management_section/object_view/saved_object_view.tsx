@@ -89,7 +89,7 @@ export class SavedObjectEdition extends Component<
       <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
         <Header
           canEdit={canEdit}
-          canDelete={canDelete}
+          canDelete={canDelete && !object?.meta.hiddenType}
           canViewInApp={canView}
           type={type}
           onDeleteClick={() => this.delete()}

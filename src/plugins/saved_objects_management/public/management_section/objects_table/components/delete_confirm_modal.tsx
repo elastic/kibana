@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import {
   EuiInMemoryTable,
   EuiLoadingElastic,
@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -42,6 +43,13 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   onCancel,
   selectedObjects,
 }) => {
+  const undeletableObjects = useMemo(() => {
+    return selectedObjects.filter((obj) => obj.meta.hiddenType);
+  }, [selectedObjects]);
+  const deletableObjects = useMemo(() => {
+    return selectedObjects.filter((obj) => !obj.meta.hiddenType);
+  }, [selectedObjects]);
+
   if (isDeleting) {
     return (
       <EuiOverlayMask>
@@ -49,7 +57,6 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
       </EuiOverlayMask>
     );
   }
-
   // can't use `EuiConfirmModal` here as the confirm modal body is wrapped
   // inside a `<p>` element, causing UI glitches with the table.
   return (
@@ -63,6 +70,29 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        {undeletableObjects.length > 0 && (
+          <>
+            <EuiCallOut
+              data-test-subj="cannotDeleteObjectsConfirmWarning"
+              title={
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title"
+                  defaultMessage="Some objects cannot deleted"
+                />
+              }
+              iconType="alert"
+              color="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
+                  defaultMessage="Some of the selected objects cannot be deleted, and are not listed in the table summary"
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <p>
           <FormattedMessage
             id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
@@ -71,7 +101,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         </p>
         <EuiSpacer size="m" />
         <EuiInMemoryTable
-          items={selectedObjects}
+          items={deletableObjects}
           columns={[
             {
               field: 'type',
