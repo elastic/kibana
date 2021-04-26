@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { Logger, ElasticsearchClient } from 'kibana/server';
+import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -137,7 +138,7 @@ export async function timeSeriesQuery(
     esResult = (await esClient.search(esQuery, { ignore: [404] })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
-    logger.warn(`${logPrefix} error: ${err.message}`);
+    logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);
     return { results: [] };
   }
 
@@ -146,7 +147,7 @@ export async function timeSeriesQuery(
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 
-function getResultFromEs(
+export function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
   esResult: estypes.SearchResponse<unknown>
@@ -154,8 +155,8 @@ function getResultFromEs(
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
-  if (!isGroupAgg) {
-    const dateAgg = aggregations.dateAgg || {};
+  if (!isGroupAgg && aggregations.dateAgg) {
+    const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],

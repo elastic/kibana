@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
@@ -28,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -108,24 +108,20 @@ export class TablePanelConfig extends Component<
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem data-test-subj="groupByField">
-                  <EuiFormRow
-                    id={htmlId('field')}
+                  <FieldSelect
                     label={
                       <FormattedMessage
                         id="visTypeTimeseries.table.dataTab.groupByFieldLabel"
                         defaultMessage="Group by field"
                       />
                     }
-                  >
-                    <FieldSelect
-                      fields={this.props.fields}
-                      value={model.pivot_id}
-                      indexPattern={model.index_pattern}
-                      onChange={this.handlePivotChange}
-                      uiRestrictions={this.context.uiRestrictions}
-                      type={BUCKET_TYPES.TERMS}
-                    />
-                  </EuiFormRow>
+                    fields={this.props.fields}
+                    value={model.pivot_id}
+                    indexPattern={model.index_pattern}
+                    onChange={this.handlePivotChange}
+                    uiRestrictions={this.context.uiRestrictions}
+                    type={BUCKET_TYPES.TERMS}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow
@@ -220,6 +216,7 @@ export class TablePanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -249,18 +246,20 @@ export class TablePanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
-                  <FormattedMessage
-                    id="visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

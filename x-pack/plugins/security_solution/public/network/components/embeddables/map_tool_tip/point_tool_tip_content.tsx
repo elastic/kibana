@@ -14,9 +14,9 @@ import {
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { FlowTarget } from '../../../../graphql/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 interface PointToolTipContentProps {
   contextId: string;

@@ -51,9 +51,9 @@ export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec e
 export const createErrorFromShardFailure = (failure: ShardFailure): SearchStrategyError => ({
   type: 'shardFailure' as const,
   shardInfo: {
-    index: failure.index,
-    node: failure.node,
-    shard: failure.shard,
+    index: failure.index ?? null,
+    node: failure.node ?? null,
+    shard: failure.shard ?? null,
   },
-  message: failure.reason.reason,
+  message: failure.reason?.reason ?? null,
 });

@@ -113,7 +113,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
             title={
               <FormattedMessage
                 id="xpack.fleet.settingsConfirmModal.calloutTitle"
-                defaultMessage="This action will update all agent policies and enrolled agents."
+                defaultMessage="This action updates all agent policies and enrolled agents"
               />
             }
             color="warning"
@@ -124,13 +124,13 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.settingsConfirmModal.fleetServerChangedText"
-                    defaultMessage="If agents are unable to connect at the new {fleetServerUrl}, they will log an error and report an unhealthy status. They will remain on the current agent policy version and check for updates at the old URL until they successfully connect at the new URL"
+                    defaultMessage="Agents that cannot connect to the new {fleetServerHosts} log an error. The agents remain on the current policy and check for updates at the old URL until they connect at the new URL."
                     values={{
-                      fleetServerUrl: (
+                      fleetServerHosts: (
                         <strong>
                           <FormattedMessage
-                            id="xpack.fleet.settingsConfirmModal.fleetServerUrl"
-                            defaultMessage="Fleet Server URL"
+                            id="xpack.fleet.settingsConfirmModal.fleetServerHosts"
+                            defaultMessage="Fleet Server hosts"
                           />
                         </strong>
                       ),
@@ -143,13 +143,13 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.settingsConfirmModal.eserverChangedText"
-                    defaultMessage="If agents are unable to connect at the new {elasticsearchUrl}, Fleet Server will report them as healthy but they will be unable to send data to Elasticsearch. This will not update URL that Fleet server itself uses to connect to Elasticsearch; you must manually reenroll it to update the URL"
+                    defaultMessage="Agents that cannot connect at the new {elasticsearchHosts} have a healthy status even though they are unable to send data. To update the URL that Fleet Server uses to connect to Elasticsearch, you must reenroll Fleet Server."
                     values={{
-                      elasticsearchUrl: (
+                      elasticsearchHosts: (
                         <strong>
                           <FormattedMessage
-                            id="xpack.fleet.settingsConfirmModal.elasticsearchUrl"
-                            defaultMessage="Elasticsearch URL"
+                            id="xpack.fleet.settingsConfirmModal.elasticsearchHosts"
+                            defaultMessage="Elasticsearch hosts"
                           />
                         </strong>
                       ),
@@ -178,7 +178,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
           <EuiButton onClick={onConfirm} fill>
             <FormattedMessage
               id="xpack.fleet.settingsConfirmModal.confirmButton"
-              defaultMessage="Confirm changes"
+              defaultMessage="Apply settings"
             />
           </EuiButton>
         </EuiModalFooter>

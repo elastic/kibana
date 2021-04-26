@@ -18,11 +18,7 @@ export class SearchAbortController {
   private destroyed = false;
   private reason?: AbortReason;
 
-  constructor(abortSignal?: AbortSignal, timeout?: number) {
-    if (abortSignal) {
-      this.addAbortSignal(abortSignal);
-    }
-
+  constructor(timeout?: number) {
     if (timeout) {
       this.timeoutSub = timer(timeout).subscribe(() => {
         this.reason = AbortReason.Timeout;
@@ -41,6 +37,7 @@ export class SearchAbortController {
   };
 
   public cleanup() {
+    if (this.destroyed) return;
     this.destroyed = true;
     this.timeoutSub?.unsubscribe();
     this.inputAbortSignals.forEach((abortSignal) => {

@@ -125,7 +125,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     return null;
   }
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',

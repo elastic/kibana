@@ -32,7 +32,7 @@ export abstract class Container<
   extends Embeddable<TContainerInput, TContainerOutput>
   implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
-  protected readonly children: {
+  public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 

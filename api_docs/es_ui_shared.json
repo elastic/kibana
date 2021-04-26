@@ -39,6 +39,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -69,6 +70,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.Unnamed.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -94,6 +96,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFrequency.$1",
                 "type": "CompoundType",
                 "label": "frequency",
                 "isRequired": true,
@@ -138,17 +141,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFields.$1",
                 "type": "Object",
                 "label": "fields",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "esUiShared",
-                    "scope": "public",
-                    "docId": "kibEsUiSharedPluginApi",
-                    "section": "def-public.FieldToValueMap",
-                    "text": "FieldToValueMap"
-                  }
+                  "FieldToValueMap"
                 ],
                 "description": [],
                 "source": {
@@ -159,13 +157,7 @@
             ],
             "signature": [
               "(fields: ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.FieldToValueMap",
-                "text": "FieldToValueMap"
-              },
+              "FieldToValueMap",
               ") => void"
             ],
             "description": [],
@@ -223,6 +215,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.attemptToURIDecode.$1",
             "type": "string",
             "label": "value",
             "isRequired": false,
@@ -254,6 +247,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.AuthorizationProvider.$1",
             "type": "Object",
             "label": "{ privilegesEndpoint, httpClient, children }",
             "isRequired": true,
@@ -292,6 +286,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.extractQueryParams.$1",
             "type": "string",
             "label": "queryString",
             "isRequired": true,
@@ -333,6 +328,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.NotAuthorizedSection.$1",
             "type": "Object",
             "label": "{ title, message }",
             "isRequired": true,
@@ -364,6 +360,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.SectionError.$1",
             "type": "CompoundType",
             "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
             "isRequired": true,
@@ -395,6 +392,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.SectionLoading.$1",
             "type": "CompoundType",
             "label": "{ inline, children, ...rest }",
             "isRequired": true,
@@ -426,6 +424,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.sendRequest.$1",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -445,6 +444,7 @@
             }
           },
           {
+            "id": "def-public.sendRequest.$2",
             "type": "Object",
             "label": "{ path, method, body, query, asSystemRequest }",
             "isRequired": true,
@@ -523,6 +523,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useRequest.$1",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -542,6 +543,7 @@
             }
           },
           {
+            "id": "def-public.useRequest.$2",
             "type": "Object",
             "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
             "isRequired": true,
@@ -603,6 +605,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.WithPrivileges.$1",
             "type": "Object",
             "label": "{ privileges: requiredPrivileges, children }",
             "isRequired": true,
@@ -1217,13 +1220,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameBeginsWithPeriod",
-                "text": "indexNameBeginsWithPeriod"
-              }
+              "indexNameBeginsWithPeriod"
             ]
           },
           {
@@ -1238,13 +1235,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.findIllegalCharactersInIndexName",
-                "text": "findIllegalCharactersInIndexName"
-              }
+              "findIllegalCharactersInIndexName"
             ]
           },
           {
@@ -1259,13 +1250,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameContainsSpaces",
-                "text": "indexNameContainsSpaces"
-              }
+              "indexNameContainsSpaces"
             ]
           }
         ],
@@ -1287,6 +1272,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.handleEsError.$1",
             "type": "Object",
             "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
             "isRequired": true,
@@ -1331,6 +1317,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.isEsError.$1",
             "type": "Object",
             "label": "err",
             "isRequired": true,
@@ -1357,6 +1344,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.parseEsError.$1",
             "type": "string",
             "label": "err",
             "isRequired": true,

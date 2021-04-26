@@ -18,6 +18,7 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
+    "AnalyticsNewJobCaps",
     "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
@@ -125,9 +126,6 @@
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
-
-    "NotificationSettings",
-    "GetNotificationSettings",
 
     "DatafeedService",
     "CreateDatafeed",

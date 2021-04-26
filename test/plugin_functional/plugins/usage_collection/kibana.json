@@ -1,0 +1,9 @@
+{
+  "id": "usageCollectionTestPlugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["usageCollectionTestPlugin"],
+  "requiredPlugins": ["usageCollection"],
+  "server": true,
+  "ui": false
+}

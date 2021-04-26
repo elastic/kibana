@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
@@ -17,7 +16,7 @@ import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
-import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
@@ -25,7 +24,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'upd', label: 'Monitor duration' },
     { id: 'upp', label: 'Pings histogram' },
   ],
-  rum: [
+  ux: [
     { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
   ],
@@ -33,13 +32,13 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'svl', label: 'Latency' },
     { id: 'tpt', label: 'Throughput' },
   ],
-  logs: [
+  infra_logs: [
     {
       id: 'logs',
       label: 'Logs Frequency',
     },
   ],
-  metrics: [
+  infra_metrics: [
     { id: 'cpu', label: 'CPU usage' },
     { id: 'mem', label: 'Memory usage' },
     { id: 'nwk', label: 'Network activity' },
@@ -49,11 +48,20 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
 export function SeriesBuilder() {
   const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { dataType, reportType, reportDefinitions = {}, filters = [] } = series;
+  const {
+    dataType,
+    seriesType,
+    reportType,
+    reportDefinitions = {},
+    filters = [],
+    operationType,
+    breakdown,
+    time,
+  } = series;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern, loading, hasData } = useAppIndexPatternContext();
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
@@ -63,19 +71,23 @@ export function SeriesBuilder() {
     });
   };
 
+  useEffect(() => {
+    setIsFlyoutVisible(!!series.dataType);
+  }, [series.dataType]);
+
   const columns = [
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.dataType', {
         defaultMessage: 'Data Type',
       }),
-      width: '20%',
+      width: '15%',
       render: (val: string) => <DataTypesCol />,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.report', {
         defaultMessage: 'Report',
       }),
-      width: '20%',
+      width: '15%',
       render: (val: string) => (
         <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
@@ -85,16 +97,25 @@ export function SeriesBuilder() {
         defaultMessage: 'Definition',
       }),
       width: '30%',
-      render: (val: string) =>
-        reportType && indexPattern ? (
-          <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
-        ) : null,
+      render: (val: string) => {
+        if (dataType && hasData) {
+          return loading ? (
+            INITIATING_VIEW
+          ) : reportType ? (
+            <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
+          ) : (
+            SELECT_REPORT_TYPE
+          );
+        }
+
+        return null;
+      },
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.filters', {
         defaultMessage: 'Filters',
       }),
-      width: '25%',
+      width: '20%',
       render: (val: string) =>
         reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
     },
@@ -102,7 +123,7 @@ export function SeriesBuilder() {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdown', {
         defaultMessage: 'Breakdowns',
       }),
-      width: '25%',
+      width: '20%',
       field: 'id',
       render: (val: string) =>
         reportType && indexPattern ? (
@@ -119,12 +140,15 @@ export function SeriesBuilder() {
         ReportViewTypes[reportType]
       }`;
 
-      const newSeriesN = {
-        reportType,
-        time: { from: 'now-30m', to: 'now' },
+      const newSeriesN: SeriesUrl = {
+        time,
         filters,
+        breakdown,
+        reportType,
+        seriesType,
+        operationType,
         reportDefinitions,
-      } as SeriesUrl;
+      };
 
       setSeries(newSeriesId, newSeriesN).then(() => {
         removeSeries(NEW_SERIES_KEY);
@@ -139,16 +163,23 @@ export function SeriesBuilder() {
 
   if (isFlyoutVisible) {
     flyout = (
-      <BottomFlyout aria-labelledby="flyoutTitle">
+      <>
         <EuiBasicTable
           items={items as any}
           columns={columns}
           cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
         />
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plus" color="primary" onClick={addSeries}>
+            <EuiButton
+              fill
+              iconType="plus"
+              color="primary"
+              onClick={addSeries}
+              size="s"
+              isDisabled={!series?.reportType}
+            >
               {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
                 defaultMessage: 'Add',
               })}
@@ -156,6 +187,7 @@ export function SeriesBuilder() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              size="s"
               iconType="cross"
               color="text"
               onClick={() => {
@@ -169,7 +201,7 @@ export function SeriesBuilder() {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </BottomFlyout>
+      </>
     );
   }
 
@@ -196,6 +228,16 @@ export function SeriesBuilder() {
   );
 }
 
-const BottomFlyout = styled.div`
-  height: 300px;
-`;
+export const INITIATING_VIEW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.initView',
+  {
+    defaultMessage: 'Initiating view ...',
+  }
+);
+
+const SELECT_REPORT_TYPE = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectReportType',
+  {
+    defaultMessage: 'Select a report type to define visualization.',
+  }
+);

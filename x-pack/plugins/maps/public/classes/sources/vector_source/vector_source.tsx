@@ -66,20 +66,6 @@ export interface IVectorSource extends ISource {
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
 }
 
-export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }>;
-  getMinZoom(): number;
-  getMaxZoom(): number;
-  getLayerName(): string;
-}
-
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getFieldNames(): string[] {
     return [];

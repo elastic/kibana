@@ -72,6 +72,11 @@ export default function ({ getService }: FtrProviderContext) {
             // anti-aliasing
             { color: '#F5F7FA', percentage: 30 },
           ],
+          runtimeFieldsEditorContent: [
+            '{',
+            '  "lowercase_central_air": {',
+            '    "type": "keyword",',
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
@@ -124,9 +129,9 @@ export default function ({ getService }: FtrProviderContext) {
             JSON.stringify(testData.runtimeFields)
           );
           await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
-          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent([
-            '{"lowercase_central_air":{"type":"keyword","script":"emit(params._source.CentralAir.toLowerCase())"}}',
-          ]);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
 
           await ml.testExecution.logTestStep('does not display the dependent variable input');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputMissing();

@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 import {
   Container,
   ErrorEmbeddable,
@@ -20,6 +21,10 @@ import {
   DashboardContainerServices,
 } from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import {
+  createExtract,
+  createInject,
+} from '../../../common/embeddable/dashboard_container_persistable_state';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -32,7 +37,10 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(private readonly getStartServices: () => Promise<DashboardContainerServices>) {}
+  constructor(
+    private readonly getStartServices: () => Promise<DashboardContainerServices>,
+    private readonly persistableStateService: EmbeddablePersistableStateService
+  ) {}
 
   public isEditable = async () => {
     // Currently unused for dashboards
@@ -41,7 +49,7 @@ export class DashboardContainerFactoryDefinition
 
   public readonly getDisplayName = () => {
     return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'dashboard',
+      defaultMessage: 'Dashboard',
     });
   };
 
@@ -62,4 +70,8 @@ export class DashboardContainerFactoryDefinition
     const services = await this.getStartServices();
     return new DashboardContainer(initialInput, services, parent);
   };
+
+  public inject = createInject(this.persistableStateService);
+
+  public extract = createExtract(this.persistableStateService);
 }
