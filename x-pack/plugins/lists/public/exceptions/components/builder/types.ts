@@ -9,6 +9,7 @@ import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
   CreateExceptionListItemSchema,
+  EntriesMatchWildcardCaseless,
   Entry,
   EntryExists,
   EntryMatch,
@@ -34,7 +35,7 @@ export interface EmptyEntry {
   id: string;
   field: string | undefined;
   operator: OperatorEnum;
-  type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
+  type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY | OperatorTypeEnum.WILDCARD;
   value: string | string[] | undefined;
 }
 
@@ -53,6 +54,7 @@ export interface EmptyNestedEntry {
   entries: Array<
     | (EntryMatch & { id?: string })
     | (EntryMatchAny & { id?: string })
+    | (EntriesMatchWildcardCaseless & { id?: string })
     | (EntryExists & { id?: string })
   >;
 }
@@ -69,6 +71,7 @@ export type BuilderEntryNested = Omit<EntryNested, 'entries'> & {
   entries: Array<
     | (EntryMatch & { id?: string })
     | (EntryMatchAny & { id?: string })
+    | (EntriesMatchWildcardCaseless & { id?: string })
     | (EntryExists & { id?: string })
   >;
 };

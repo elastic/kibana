@@ -12,12 +12,27 @@ import { entriesMatch } from './entry_match';
 import { entriesExists } from './entry_exists';
 import { entriesList } from './entry_list';
 import { entriesNested } from './entry_nested';
+import { entriesMatchWildcardCaseless } from './entry_match_wildcard_caseless';
 
-export const entry = t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists]);
+export const entry = t.union([
+  entriesMatch,
+  entriesMatchAny,
+  entriesList,
+  entriesExists,
+  entriesNested,
+  entriesMatchWildcardCaseless,
+]);
 export type Entry = t.TypeOf<typeof entry>;
 
 export const entriesArray = t.array(
-  t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists, entriesNested])
+  t.union([
+    entriesMatch,
+    entriesMatchAny,
+    entriesList,
+    entriesExists,
+    entriesNested,
+    entriesMatchWildcardCaseless,
+  ])
 );
 export type EntriesArray = t.TypeOf<typeof entriesArray>;
 
