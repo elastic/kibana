@@ -11,27 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { validateIndexName } from '../../util/indexing_service';
 
 export interface Props {
-  indexName?: string;
+  indexName: string;
   indexNameError?: string;
   onIndexNameChange: (name: string, error?: string) => void;
 }
 
-interface State {
-  existingIndexNames: string[];
-}
-
-export class IndexNameForm extends Component<Props, State> {
-  state: State = {
-    existingIndexNames: [],
-  };
-
-  _onIndexNameChange = async (indexName: string) => {
+export class IndexNameForm extends Component<Props> {
+  _onIndexNameChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const indexName = event.target.value;
     const indexNameError = await validateIndexName(indexName);
     this.props.onIndexNameChange(indexName, indexNameError);
-  };
-
-  _onIndexNameChangeEvent = (event: ChangeEvent<HTMLInputElement>) => {
-    this._onIndexNameChange(event.target.value);
   };
 
   render() {
@@ -49,7 +38,7 @@ export class IndexNameForm extends Component<Props, State> {
           <EuiFieldText
             data-test-subj="fileUploadIndexNameInput"
             value={this.props.indexName}
-            onChange={this._onIndexNameChangeEvent}
+            onChange={this._onIndexNameChange}
             isInvalid={!!errors.length}
             aria-label={i18n.translate('xpack.fileUpload.indexNameForm.indexNameReqField', {
               defaultMessage: 'Index name, required field',

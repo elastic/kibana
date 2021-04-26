@@ -37,14 +37,12 @@ interface Props {
 interface State {
   hasFile: boolean;
   isPointsOnly: boolean;
-  indexNames: string[];
 }
 
 export class GeoJsonUploadForm extends Component<Props, State> {
   state: State = {
     hasFile: false,
     isPointsOnly: false,
-    indexNames: [],
   };
 
   _onFileSelect = async (onFileSelectParameters: OnFileSelectParameters) => {
