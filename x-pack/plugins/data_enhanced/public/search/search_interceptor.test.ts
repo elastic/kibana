@@ -273,6 +273,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -281,6 +282,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -317,6 +319,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -341,6 +344,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -349,6 +353,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -381,6 +386,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -425,6 +431,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -433,6 +440,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -473,6 +481,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -481,6 +490,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -707,6 +717,7 @@ describe('EnhancedSearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
