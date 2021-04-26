@@ -24,10 +24,12 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
+  VALIDATION_RESULT,
 } from '../../../../../../common/types/categories';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { isCcsIndexPattern } from '../../../../util/index_utils';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
@@ -43,6 +45,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
   private _partitionFieldName: string | null = null;
+  private _ccsVersionFailure: boolean = false;
 
   constructor(
     indexPattern: IndexPattern,
@@ -126,9 +129,38 @@ export class CategorizationJobCreator extends JobCreator {
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
+    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    if (this._ccsVersionFailure === true) {
+      // if the index pattern contains a cross-cluster search, one of the clusters may
+      // be on a version which doesn't support the fields API (e.g. 6.8)
+      // and so the categorization examples endpoint will fail
+      // if this is the case, we need to allow the user to progress in the wizard.
+      this._overallValidStatus = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
+    }
+
     this._wizardInitialized$.next(true);
 
-    return { examples, sampleSize, overallValidStatus, validationChecks };
+    return {
+      examples,
+      sampleSize,
+      overallValidStatus,
+      validationChecks,
+      ccsVersionFailure: this._ccsVersionFailure,
+    };
+  }
+
+  // Check to see if the examples failed due to a cross-cluster search being used
+  private _checkCcsFailure(
+    examples: CategoryFieldExample[],
+    status: CATEGORY_EXAMPLES_VALIDATION_STATUS,
+    checks: FieldExampleCheck[]
+  ) {
+    return (
+      examples.length === 0 &&
+      status === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID &&
+      checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES &&
+      isCcsIndexPattern(this.indexPatternTitle)
+    );
   }
 
   public get categoryFieldExamples() {

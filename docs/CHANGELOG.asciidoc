@@ -226,8 +226,17 @@ To use verbose logging without {es} query logs, configure the query logs to `off
 ----
 logging:
   loggers:
-     - context: elasticsearch.query
-       level: off
+    - name: elasticsearch.query
+      level: off
+----
+To log the elasticsearch query only:
+[source,js]
+----
+logging:
+  loggers:
+    - name: elasticsearch.query
+      level: all
+      appenders: [console]
 ----
 ====
       

@@ -1,0 +1,65 @@
+---
+id: formLibCoreUseFormData
+slug: /form-lib/core/use-form-data
+title: useFormData()
+summary: Get fields value updates from anywhere
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+**Returns:** `[rawFormData, () => T]`
+
+Use the `useFormData` hook to access and react to form field value changes. The hook accepts an optional options object.
+
+Have a look at the examples on how to use this hook in <DocLink id="formLibExampleListeningToChanges" text="the 'Listening to changes' page" />.
+
+## Options
+
+### form
+
+**Type:** `FormHook`  
+
+The form hook object. It is only required to provide the form hook object in your **root form component**.
+
+```js
+const RootFormComponent = () => {
+  // root form component, where the form object is declared
+  const { form } = useForm();
+  const [formData] = useFormData({ form });
+
+  return (
+    <Form form={form}>
+      <ChildComponent />
+    </Form>
+  );
+};
+
+const ChildComponent = () => {
+  const [formData] = useFormData(); // no need to provide the form object
+  return (
+    <div>...</div>
+  );
+};
+```
+
+### watch
+
+**Type:** `string | string[]`  
+
+This option lets you define which field(s) to get updates from. If you don't specify a `watch` option, you will get updates when any form field changes. This will trigger a re-render of your component. If you want to only get update when a specific field changes you can pass it in the `watch`.
+
+```js
+// Only get update whenever the "type" field changes
+const [{ type }] = useFormData({ watch: 'type' });
+
+// Only get update whenever either the "type" or the "subType" field changes
+const [{ type, subType }] = useFormData({ watch: ['type', 'subType'] });
+```
+
+## Return
+
+As you have noticed, you get back an array from the hook. The first element of the array is form data and the second argument is a handler to get the **serialized** form data if needed.
+
+```js
+const [formData, getSerializedData] = useFormData();
+```
