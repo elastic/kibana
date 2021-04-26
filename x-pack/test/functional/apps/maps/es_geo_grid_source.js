@@ -142,7 +142,7 @@ export default function ({ getPageObjects, getService }) {
 
         it('should apply query to geotile_grid aggregation request', async () => {
           const response = await PageObjects.maps.getResponse();
-          expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
+          expect(response.rawResponse.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
 
