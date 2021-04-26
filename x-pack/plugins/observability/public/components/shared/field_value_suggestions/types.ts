@@ -34,4 +34,5 @@ export type FieldValueSelectionProps = CommonProps & {
   onChange: (val?: string[]) => void;
   values?: string[];
   setQuery: Dispatch<SetStateAction<string>>;
+  asCombobox: boolean;
 };

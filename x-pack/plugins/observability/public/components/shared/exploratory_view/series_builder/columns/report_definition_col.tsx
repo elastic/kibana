@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
@@ -88,32 +88,32 @@ export function ReportDefinitionCol({
           <EuiFlexItem key={field}>
             {!custom ? (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
-                <EuiFlexItem grow={false} style={{ flexBasis: 250 }}>
+                <EuiFlexItem>
                   <FieldValueSuggestions
                     label={labels[field]}
                     sourceField={field}
                     indexPattern={indexPattern}
                     selectedValue={rtd?.[field]}
                     onChange={(val?: string[]) => onChange(field, val)}
-                    filters={(filters ?? []).map(({ query }) => query)}
+                    filters={(filters ?? []).map(({ query, exists }) => query || { exists })}
                     time={series.time}
                     fullWidth={true}
                   />
                 </EuiFlexItem>
-                {rtd?.[field] && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      className="globalFilterItem"
-                      iconSide="right"
-                      iconType="cross"
-                      color="hollow"
-                      iconOnClick={() => onRemove(field)}
-                      iconOnClickAriaLabel={'Click to remove'}
-                    >
-                      {labels[field]}: {(rtd?.[field] ?? []).join(', ')}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
+                {/* {rtd?.[field] && (*/}
+                {/*  <EuiFlexItem grow={false}>*/}
+                {/*    <EuiBadge*/}
+                {/*      className="globalFilterItem"*/}
+                {/*      iconSide="right"*/}
+                {/*      iconType="cross"*/}
+                {/*      color="hollow"*/}
+                {/*      iconOnClick={() => onRemove(field)}*/}
+                {/*      iconOnClickAriaLabel={'Click to remove'}*/}
+                {/*    >*/}
+                {/*      {labels[field]}: {(rtd?.[field] ?? []).join(', ')}*/}
+                {/*    </EuiBadge>*/}
+                {/*  </EuiFlexItem>*/}
+                {/* )}*/}
               </EuiFlexGroup>
             ) : (
               <CustomReportField

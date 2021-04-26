@@ -8,11 +8,14 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import {
   EuiButton,
+  EuiComboBox,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
+  EuiFormControlLayout,
+  EuiComboBoxOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -38,6 +41,7 @@ export function FieldValueSelection({
   forceOpen,
   anchorPosition,
   singleSelection,
+  asCombobox,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(
@@ -61,9 +65,32 @@ export function FieldValueSelection({
     setOptions(optionsN);
   };
 
+  const onComboChange = (selectedValuesN: Array<EuiComboBoxOption<string>>) => {
+    onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
+  };
+
   const onValueChange = (evt: FormEvent<HTMLInputElement>) => {
     setQuery((evt.target as HTMLInputElement).value);
   };
+
+  if (asCombobox) {
+    return (
+      <ComboWrapper>
+        <EuiFormControlLayout fullWidth prepend={label}>
+          <EuiComboBox
+            fullWidth
+            isLoading={loading}
+            onSearchChange={(searchVal) => {
+              setQuery(searchVal);
+            }}
+            options={options}
+            selectedOptions={options.filter((opt) => selectedValue?.includes(opt.label))}
+            onChange={onComboChange}
+          />
+        </EuiFormControlLayout>
+      </ComboWrapper>
+    );
+  }
 
   const anchorButton = (
     <EuiButton
@@ -149,6 +176,17 @@ const Wrapper = styled.div`
       max-width: 250px;
       .euiButton {
         width: 100%;
+      }
+    }
+  }
+`;
+
+const ComboWrapper = styled.div`
+  &&& {
+    .euiFormControlLayout {
+      height: auto;
+      .euiFormControlLayout__prepend {
+        margin: auto;
       }
     }
   }

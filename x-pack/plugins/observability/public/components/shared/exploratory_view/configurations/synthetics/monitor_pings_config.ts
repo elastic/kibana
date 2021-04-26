@@ -7,8 +7,10 @@
 
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
+import { buildExistsFilter, buildPhraseFilter } from '../utils';
+import { TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 
-export function getMonitorPingsConfig({ seriesId }: ConfigProps): DataSeries {
+export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'uptime-pings',
@@ -33,7 +35,7 @@ export function getMonitorPingsConfig({ seriesId }: ConfigProps): DataSeries {
     hasOperationType: false,
     defaultFilters: ['observer.geo.name', 'monitor.type', 'monitor.name', 'monitor.id'],
     breakdowns: ['observer.geo.name', 'monitor.type'],
-    filters: [],
+    filters: [...buildExistsFilter('summary.up', indexPattern)],
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
       {

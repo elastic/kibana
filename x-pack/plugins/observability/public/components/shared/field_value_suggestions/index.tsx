@@ -30,7 +30,14 @@ export function FieldValueSuggestions({
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
+  const { values, loading } = useValuesList({
+    indexPattern,
+    query,
+    sourceField,
+    filters,
+    time,
+    keepHistory: true,
+  });
 
   useDebounce(
     () => {
@@ -54,6 +61,7 @@ export function FieldValueSuggestions({
       forceOpen={forceOpen}
       anchorPosition={anchorPosition}
       width={width}
+      asCombobox={true}
     />
   );
 }
