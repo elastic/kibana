@@ -23,7 +23,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
   const { reportDefinitions: rtd = {} } = series;
 
   const onChange = (value: string) => {
-    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: value } });
+    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: [value] } });
   };
 
   const { reportDefinitions } = series;
@@ -35,7 +35,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
       <EuiSuperSelect
         compressed
         prepend={'Metric'}
-        options={options.map(({ label, field: fd, description }) => ({
+        options={options.map(({ label, field: fd }) => ({
           value: fd,
           inputDisplay: label,
         }))}

@@ -21,6 +21,7 @@ describe('OperationTypeSelect', function () {
     mockUrlStorage({
       data: {
         'performance-distribution': {
+          dataType: 'ux',
           reportType: 'kpi',
           operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
@@ -37,6 +38,7 @@ describe('OperationTypeSelect', function () {
     const { setSeries } = mockUrlStorage({
       data: {
         'series-id': {
+          dataType: 'ux',
           reportType: 'kpi',
           operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
