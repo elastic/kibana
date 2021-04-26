@@ -22,6 +22,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -72,6 +73,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
           "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -116,6 +118,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
           "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -160,6 +163,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
           "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -204,6 +208,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }

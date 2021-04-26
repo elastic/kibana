@@ -17,6 +17,9 @@ import {
   getRequestId,
 } from '@kbn/server-http-tools';
 
+import type { Duration } from 'moment';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
@@ -80,6 +83,7 @@ export class HttpServer {
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
   private handleServerResponseEvent?: (req: Request) => void;
+  private stopping = false;
   private stopped = false;
 
   private readonly log: Logger;
@@ -87,7 +91,11 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
-  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
+  constructor(
+    private readonly logger: LoggerFactory,
+    private readonly name: string,
+    private readonly shutdownTimeout$: Observable<Duration>
+  ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -118,6 +126,7 @@ export class HttpServer {
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupRequestStateAssignment(config);
+    this.setupGracefulShutdownHandlers();
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -153,7 +162,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`start called after stop`);
       return;
     }
@@ -213,19 +222,29 @@ export class HttpServer {
   }
 
   public async stop() {
-    this.stopped = true;
+    this.stopping = true;
     if (this.server === undefined) {
+      this.stopping = false;
+      this.stopped = true;
       return;
     }
 
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+
+      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
+
+      this.log.debug(`http server stopped`);
+
+      // Removing the listener after stopping so we don't leave any pending requests unhandled
       if (this.handleServerResponseEvent) {
         this.server.events.removeListener('response', this.handleServerResponseEvent);
       }
-      await this.server.stop();
     }
+    this.stopping = false;
+    this.stopped = true;
   }
 
   private getAuthOption(
@@ -244,6 +263,18 @@ export class HttpServer {
     if (authRequired === false) {
       return false;
     }
+  }
+
+  private setupGracefulShutdownHandlers() {
+    this.registerOnPreRouting((request, response, toolkit) => {
+      if (this.stopping || this.stopped) {
+        return response.customError({
+          statusCode: 503,
+          body: { message: 'Kibana is shutting down and not accepting new incoming requests' },
+        });
+      }
+      return toolkit.next();
+    });
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
@@ -266,7 +297,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupConditionalCompression called after stop`);
     }
 
@@ -296,14 +327,14 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupResponseLogging called after stop`);
     }
 
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, ...meta } = getEcsResponseLog(request, this.log);
+      const { message, meta } = getEcsResponseLog(request, this.log);
       log.debug(message!, meta);
     };
 
@@ -325,7 +356,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreAuth called after stop`);
     }
 
@@ -336,7 +367,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPostAuth called after stop`);
     }
 
@@ -347,7 +378,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreRouting called after stop`);
     }
 
@@ -358,7 +389,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreResponse called after stop`);
     }
 
@@ -372,7 +403,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`createCookieSessionStorageFactory called after stop`);
     }
     if (this.cookieSessionStorageCreated) {
@@ -392,7 +423,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerAuth called after stop`);
     }
     if (this.authRegistered) {
@@ -438,7 +469,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerStaticDir called after stop`);
     }
 

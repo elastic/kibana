@@ -12,6 +12,7 @@ const DRILLDOWN_TO_PIE_CHART_NAME = 'Go to pie chart dashboard';
 const DRILLDOWN_TO_AREA_CHART_NAME = 'Go to area chart dashboard';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
@@ -27,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const security = getService('security');
   const spaces = getService('spaces');
@@ -49,18 +49,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardEditMode(
           dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
         );
-
         // create drilldown
         await dashboardPanelActions.openContextMenu();
         await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
         await dashboardDrilldownPanelActions.clickCreateDrilldown();
         await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
+        await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
         await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
           drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
           destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
         });
         await dashboardDrilldownsManage.saveChanges();
-        await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
+        await dashboardDrilldownsManage.closeFlyout();
 
         // check that drilldown notification badge is shown
         expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);

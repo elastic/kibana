@@ -364,7 +364,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           }
           return !option.key?.includes(runtimeMappingKey);
         });
-        // Runtime mappings have been removed
+        // Runtime fields have been removed
         if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
           setDependentVariableOptions(filteredOptions);
         } else if (runtimeMappings) {
@@ -374,7 +374,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         }
       }
 
-      // Update includes - remove previous runtime mappings then add supported runtime fields to includes
+      // Update includes - remove previous runtime fields then add supported runtime fields to includes
       const updatedIncludes = includes.filter((field) => {
         const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
         return !isRemovedRuntimeField;

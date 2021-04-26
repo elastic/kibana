@@ -15,6 +15,11 @@ body.canvas-isFullscreen {
     display: none;
   }
 
+  // hide global banners
+  #globalBannerList {
+    display: none;
+  }
+
   // set the background color
   .canvasLayout {
     background: $euiColorInk;

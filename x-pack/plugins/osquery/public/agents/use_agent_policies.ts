@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { mapKeys } from 'lodash';
 import { useQueries, UseQueryResult } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
-import {
-  AgentPolicy,
-  agentPolicyRouteService,
-  GetOneAgentPolicyResponse,
-} from '../../../fleet/common';
+import { agentPolicyRouteService, GetOneAgentPolicyResponse } from '../../../fleet/common';
 
 export const useAgentPolicies = (policyIds: string[] = []) => {
   const { http } = useKibana().services;
@@ -26,13 +23,7 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
 
   const agentPoliciesLoading = agentResponse.some((p) => p.isLoading);
   const agentPolicies = agentResponse.map((p) => p.data?.item);
-  const agentPolicyById = agentPolicies.reduce((acc, p) => {
-    if (!p) {
-      return acc;
-    }
-    acc[p.id] = p;
-    return acc;
-  }, {} as { [key: string]: AgentPolicy });
+  const agentPolicyById = mapKeys(agentPolicies, 'id');
 
   return { agentPoliciesLoading, agentPolicies, agentPolicyById };
 };

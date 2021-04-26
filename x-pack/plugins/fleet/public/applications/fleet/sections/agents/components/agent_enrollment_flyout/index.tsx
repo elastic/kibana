@@ -129,12 +129,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody
         banner={
-          fleetServerHosts.length === 0 ? (
+          fleetServerHosts.length === 0 && mode === 'managed' ? (
             <MissingFleetServerHostCallout onClose={onClose} />
           ) : undefined
         }
       >
-        {fleetServerHosts.length === 0 ? null : mode === 'managed' ? (
+        {fleetServerHosts.length === 0 && mode === 'managed' ? null : mode === 'managed' ? (
           <ManagedInstructions agentPolicies={agentPolicies} />
         ) : (
           <StandaloneInstructions agentPolicies={agentPolicies} />

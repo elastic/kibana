@@ -17,7 +17,9 @@ export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_reg
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    writeEnabled: schema.boolean({ defaultValue: false }),
+    unsafe: schema.object({
+      write: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+    }),
   }),
 };
 
