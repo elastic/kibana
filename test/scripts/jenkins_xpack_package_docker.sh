@@ -4,7 +4,7 @@ set -e
 
 source src/dev/ci_setup/setup_env.sh
 
-gsutil -q -m cp "gs://ci-artifacts.kibana.dev/package-testing/$GIT_COMMIT/kibana-*-docker-image.tar.gz" ./target
+gsutil -q -m cp "gs://ci-artifacts.kibana.dev/package-testing/$GIT_COMMIT/kibana-[0-9]*-docker-image.tar.gz" ./target
 
 export VAGRANT_CWD=test/package
 vagrant up docker --no-provision
