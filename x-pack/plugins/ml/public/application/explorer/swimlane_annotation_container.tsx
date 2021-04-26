@@ -143,7 +143,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .on('mouseout', () => tooltipService.hide());
       });
     }
-  }, [chartWidth, domain, annotationsData]);
+  }, [chartWidth, domain, annotationsData, tooltipService]);
 
   return <div ref={canvasRef} />;
 };
