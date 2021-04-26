@@ -12,7 +12,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('deleteAlerts', () => {
   test('should call delete API for each alert', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2', '/'];
     const result = await deleteAlerts({ http, ids });
     expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
@@ -24,7 +24,7 @@ describe('deleteAlerts', () => {
           "/api/alerting/rule/2",
         ],
         Array [
-          "/api/alerting/rule/3",
+          "/api/alerting/rule/%2F",
         ],
       ]
     `);
