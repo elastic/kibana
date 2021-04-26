@@ -242,8 +242,7 @@ class TimeseriesChartIntl extends Component {
       this.props.renderFocusChartOnly === false ||
       prevProps.svgWidth !== this.props.svgWidth ||
       prevProps.showAnnotations !== this.props.showAnnotations ||
-      prevProps.annotationData !== this.props.annotationData ||
-      prevProps.showForecast !== this.props.showForecast
+      prevProps.annotationData !== this.props.annotationData
     ) {
       this.renderChart();
       this.drawContextChartSelection();
@@ -970,8 +969,6 @@ class TimeseriesChartIntl extends Component {
       contextForecastData,
       modelPlotEnabled,
       annotationData,
-      showAnnotations,
-      showForecast,
     } = this.props;
     const data = contextChartData;
 
@@ -984,8 +981,7 @@ class TimeseriesChartIntl extends Component {
       .domain(this.calculateContextXAxisDomain());
 
     const combinedData =
-      showForecast && Array.isArray(contextForecastData) ? data.concat(contextForecastData) : data;
-
+      contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
     each(combinedData, (item) => {
       const lowerBound = item.lower ?? Number.MAX_VALUE;
@@ -1027,9 +1023,7 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
-    const brushChartHeight = showAnnotations
-      ? cxtChartHeight + swlHeight + annotationHeight
-      : cxtChartHeight + swlHeight;
+    const brushChartHeight = cxtChartHeight + swlHeight + annotationHeight;
 
     // Add borders left and right.
     borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);
@@ -1104,7 +1098,7 @@ class TimeseriesChartIntl extends Component {
     const ctxAnnotations = cxtGroup
       .select('.mlContextAnnotations')
       .selectAll('g.mlContextAnnotation')
-      .data(showAnnotations && annotationData ? annotationData : [], (d) => d._id || '');
+      .data(annotationData, (d) => d._id || '');
 
     ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
 
@@ -1149,7 +1143,6 @@ class TimeseriesChartIntl extends Component {
         return width;
       });
 
-    ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
     ctxAnnotationRects.exit().remove();
 
     // Create the path elements for the forecast value line and bounds area.
@@ -1158,14 +1151,12 @@ class TimeseriesChartIntl extends Component {
         .append('path')
         .datum(contextForecastData)
         .attr('class', 'area forecast')
-        .attr('d', contextBoundsArea)
-        .classed('hidden', !showForecast);
+        .attr('d', contextBoundsArea);
       cxtGroup
         .append('path')
         .datum(contextForecastData)
         .attr('class', 'values-line forecast')
-        .attr('d', contextValuesLine)
-        .classed('hidden', !showForecast);
+        .attr('d', contextValuesLine);
     }
 
     // Create and draw the anomaly swimlane.
