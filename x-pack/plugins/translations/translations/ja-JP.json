@@ -15242,7 +15242,6 @@
     "xpack.monitoring.cluster.overview.apmPanel.lastEventDescription": "{timeOfLastEvent} 前",
     "xpack.monitoring.cluster.overview.apmPanel.lastEventLabel": "最後のイベント",
     "xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel": "メモリー使用状況",
-    "xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel": "APM Server 概要",
     "xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel": "APM Server 概要",
     "xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel": "処理済みのイベント",
     "xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel": "APM Server：{apmsTotal}",
