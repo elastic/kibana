@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
+import { Attribution } from '../../../classes/sources/source';
+import { ILayer } from '../../../classes/layers/layer';
 
-export class AttributionControl extends React.Component {
+export interface Props {
+  isFullScreen: boolean;
+  layerList: ILayer[];
+}
+
+interface State {
+  uniqueAttributions: Attribution[];
+}
+
+export class AttributionControl extends Component<Props, State> {
+  private _isMounted = false;
   state = {
     uniqueAttributions: [],
   };
@@ -60,7 +72,7 @@ export class AttributionControl extends React.Component {
     }
   };
 
-  _renderAttribution({ url, label }) {
+  _renderAttribution({ url, label }: Attribution) {
     if (!url) {
       return label;
     }
@@ -90,6 +102,7 @@ export class AttributionControl extends React.Component {
     return (
       <div
         className={classNames('mapAttributionControl', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           mapAttributionControl__fullScreen: this.props.isFullScreen,
         })}
       >
