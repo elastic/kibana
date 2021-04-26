@@ -17,7 +17,6 @@ import { getListArrayMock } from '../../../../common/detection_engine/schemas/ty
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
-// @ts-expect-error
 moment.suppressDeprecationWarnings = true;
 
 import {
