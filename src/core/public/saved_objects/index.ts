@@ -17,8 +17,10 @@ export type {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
+export { ResolvedSimpleSavedObject } from './resolved_simple_saved_object';
 export { SimpleSavedObject } from './simple_saved_object';
 export type { SavedObjectsStart } from './saved_objects_service';
 export type {

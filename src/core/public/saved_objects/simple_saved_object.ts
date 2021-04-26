@@ -30,6 +30,7 @@ export class SimpleSavedObject<T = unknown> {
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
+  public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
     private client: SavedObjectsClientContract,
@@ -42,6 +43,7 @@ export class SimpleSavedObject<T = unknown> {
       references,
       migrationVersion,
       coreMigrationVersion,
+      namespaces,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -51,6 +53,7 @@ export class SimpleSavedObject<T = unknown> {
     this._version = version;
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
+    this.namespaces = namespaces;
     if (error) {
       this.error = error;
     }

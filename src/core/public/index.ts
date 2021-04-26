@@ -97,7 +97,7 @@ export type {
   NavigateToAppOptions,
 } from './application';
 
-export { SimpleSavedObject } from './saved_objects';
+export { ResolvedSimpleSavedObject, SimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -106,6 +106,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
