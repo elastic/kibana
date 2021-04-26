@@ -13,6 +13,7 @@ import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
+import { CpuUtilization } from './lib/observed_cpu_utilization';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
@@ -33,19 +34,39 @@ export interface TaskTiming {
   start: number;
   stop: number;
 }
-export type WithTaskTiming<T> = T & { timing: TaskTiming };
+
+export interface TaskMetrics {
+  cpu: CpuUtilization;
+  timing: TaskTiming;
+}
 
 export function startTaskTimer(): () => TaskTiming {
   const start = Date.now();
   return () => ({ start, stop: Date.now() });
 }
 
-export interface TaskEvent<OkResult, ErrorResult, ID = string> {
-  id?: ID;
-  timing?: TaskTiming;
-  type: TaskEventType;
-  event: Result<OkResult, ErrorResult>;
-}
+export type TaskEvent<
+  OkResult,
+  ErrorResult,
+  ID = string,
+  Metrics = Partial<TaskMetrics> | undefined
+> = WithMetrics<
+  {
+    id?: ID;
+    type: TaskEventType;
+    event: Result<OkResult, ErrorResult>;
+  },
+  Metrics
+>;
+
+type WithMetrics<T, Metrics> = Metrics extends NonNullable<infer MetricsT>
+  ? T & {
+      metrics: MetricsT;
+    }
+  : T & {
+      metrics?: Metrics;
+    };
+
 export interface RanTask {
   task: ConcreteTaskInstance;
   result: TaskRunResult;
@@ -64,6 +85,13 @@ export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
+// helper type which ensure the T has a `metrics` field of type TaskMetrics
+export type TaskEventWithMetrics<T> = T extends TaskEvent<infer Ok, infer Err, infer ID>
+  ? TaskEvent<Ok, Err, ID, NonNullable<TaskMetrics>>
+  : T extends TaskEvent<infer Ok, infer Err>
+  ? TaskEvent<Ok, Err, string, NonNullable<TaskMetrics>>
+  : never;
+
 export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
@@ -77,39 +105,39 @@ export type ErrResultOf<EventType> = EventType extends TaskEvent<infer OkResult,
 export function asTaskMarkRunningEvent(
   id: string,
   event: Result<ConcreteTaskInstance, Error>,
-  timing?: TaskTiming
+  metrics?: Partial<TaskMetrics>
 ): TaskMarkRunning {
   return {
     id,
     type: TaskEventType.TASK_MARK_RUNNING,
     event,
-    timing,
+    metrics,
   };
 }
 
 export function asTaskRunEvent(
   id: string,
   event: Result<RanTask, ErroredTask>,
-  timing?: TaskTiming
+  metrics?: Partial<TaskMetrics>
 ): TaskRun {
   return {
     id,
     type: TaskEventType.TASK_RUN,
     event,
-    timing,
+    metrics,
   };
 }
 
 export function asTaskClaimEvent(
   id: string,
   event: Result<ConcreteTaskInstance, ClaimTaskErr>,
-  timing?: TaskTiming
+  metrics?: Partial<TaskMetrics>
 ): TaskClaim {
   return {
     id,
     type: TaskEventType.TASK_CLAIM,
     event,
-    timing,
+    metrics,
   };
 }
 
@@ -117,24 +145,24 @@ export function asTaskRunRequestEvent(
   id: string,
   // we only emit a TaskRunRequest event when it fails
   event: Err<Error>,
-  timing?: TaskTiming
+  metrics?: Partial<TaskMetrics>
 ): TaskRunRequest {
   return {
     id,
     type: TaskEventType.TASK_RUN_REQUEST,
     event,
-    timing,
+    metrics,
   };
 }
 
 export function asTaskPollingCycleEvent<T = string>(
   event: Result<ClaimAndFillPoolResult, PollingError<T>>,
-  timing?: TaskTiming
+  metrics?: Partial<TaskMetrics>
 ): TaskPollingCycle<T> {
   return {
     type: TaskEventType.TASK_POLLING_CYCLE,
     event,
-    timing,
+    metrics,
   };
 }
 

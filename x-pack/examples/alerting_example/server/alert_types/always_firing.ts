@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import { range } from 'lodash';
+import sleep from 'sleep';
 import { AlertType } from '../../../../plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
@@ -60,6 +61,19 @@ export const alertType: AlertType<
   }) {
     const count = (state.count ?? 0) + 1;
 
+    console.log(`==============================`);
+    console.log(`==============================`);
+    console.log(`==============================`);
+    console.log(`Sleeping CPU for ${instances} seconds`);
+    for (let x = 0; x < instances; x++) {
+      // await sleepForSecond();
+      await mySlowFunction(3);
+    }
+    console.log(`Woken CPU up`);
+    console.log(`==============================`);
+    console.log(`==============================`);
+    console.log(`==============================`);
+
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
@@ -75,3 +89,26 @@ export const alertType: AlertType<
   },
   producer: ALERTING_EXAMPLE_APP_ID,
 };
+
+async function sleepForSecond() {
+  await delay(200);
+  console.log(`.`);
+  sleep.sleep(1);
+}
+
+function delay(ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+}
+
+async function mySlowFunction(baseNumber) {
+  await delay(200);
+  console.log(`.`);
+  console.time('mySlowFunction');
+  let result = 0;
+  for (let i = Math.pow(baseNumber, 7); i >= 0; i--) {
+    result += Math.atan(i) * Math.tan(i);
+  }
+  console.timeEnd('mySlowFunction');
+}

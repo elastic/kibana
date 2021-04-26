@@ -35,6 +35,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
+  TaskMetrics,
 } from '../task_events';
 import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
@@ -50,6 +51,7 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
+import { CpuUtilizationObservation } from '../lib/observed_cpu_utilization';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
@@ -90,6 +92,7 @@ type Opts = {
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
+  cpuUtilizationObservation: CpuUtilizationObservation;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -131,6 +134,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private cpuUtilizationObservation: CpuUtilizationObservation;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -150,6 +154,7 @@ export class TaskManagerRunner implements TaskRunner {
     beforeRun,
     beforeMarkRunning,
     defaultMaxAttempts,
+    cpuUtilizationObservation,
     onTaskEvent = identity,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
@@ -160,6 +165,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
+    this.cpuUtilizationObservation = cpuUtilizationObservation;
   }
 
   /**
@@ -253,19 +259,22 @@ export class TaskManagerRunner implements TaskRunner {
     });
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
+      const stopCpuObservation = this.cpuUtilizationObservation();
       const result = await this.task.run();
       const validatedResult = this.validateResult(result);
       if (apmTrans) apmTrans.end('success');
-      return this.processResult(validatedResult, stopTaskTimer());
+      return this.processResult(validatedResult, {
+        cpu: await stopCpuObservation(),
+        timing: stopTaskTimer(),
+      });
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       if (apmTrans) apmTrans.end('error');
-      return this.processResult(
-        asErr({ error: err, state: modifiedContext.taskInstance.state }),
-        stopTaskTimer()
-      );
+      return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }), {
+        timing: stopTaskTimer(),
+      });
     }
   }
 
@@ -511,7 +520,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResult(
     result: Result<SuccessfulRunResult, FailedRunResult>,
-    taskTiming: TaskTiming
+    taskMetrics: Partial<TaskMetrics>
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
     await eitherAsync(
@@ -526,7 +535,7 @@ export class TaskManagerRunner implements TaskRunner {
                 ? this.processResultForRecurringTask(result)
                 : this.processResultWhenDone()),
             }),
-            taskTiming
+            taskMetrics
           )
         );
       },
@@ -535,7 +544,7 @@ export class TaskManagerRunner implements TaskRunner {
           asTaskRunEvent(
             this.id,
             asErr({ task, result: await this.processResultForRecurringTask(result), error }),
-            taskTiming
+            taskMetrics
           )
         );
       }

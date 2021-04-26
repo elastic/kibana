@@ -25,6 +25,7 @@ import {
   asTaskPollingCycleEvent,
   TaskManagerStat,
   asTaskManagerStatEvent,
+  TaskEventWithMetrics,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -44,6 +45,7 @@ import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { CpuUtilizationObservation } from './lib/observed_cpu_utilization';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -52,6 +54,7 @@ export type TaskPollingLifecycleOpts = {
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  cpuUtilizationObservation: CpuUtilizationObservation;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -61,6 +64,8 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat;
+
+export type TaskLifecycleEventWithMetrics = TaskEventWithMetrics<TaskLifecycleEvent>;
 
 /**
  * The public interface into the task manager system.
@@ -82,6 +87,7 @@ export class TaskPollingLifecycle {
   private pollingSubscription: Subscription = Subscription.EMPTY;
 
   private middleware: Middleware;
+  private cpuUtilizationObservation: CpuUtilizationObservation;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -98,11 +104,13 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    cpuUtilizationObservation,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
+    this.cpuUtilizationObservation = cpuUtilizationObservation;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -217,6 +225,7 @@ export class TaskPollingLifecycle {
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
+      cpuUtilizationObservation: this.cpuUtilizationObservation,
     });
   };
 

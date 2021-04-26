@@ -10,16 +10,16 @@ import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { TaskLifecycleEvent, TaskLifecycleEventWithMetrics } from '../polling_lifecycle';
 import {
   isTaskRunEvent,
   isTaskPollingCycleEvent,
   TaskRun,
   ErroredTask,
   RanTask,
-  TaskTiming,
   isTaskManagerStatEvent,
   TaskManagerStat,
+  TaskMetrics,
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
@@ -48,6 +48,7 @@ interface FillPoolStat extends JsonObject {
 
 interface ExecutionStat extends JsonObject {
   duration: Record<string, number[]>;
+  cpu_utilization: Record<string, number[]>;
   result_frequency_percent_as_number: Record<string, TaskRunResult[]>;
 }
 
@@ -89,6 +90,7 @@ export interface SummarizedTaskRunStat extends JsonObject {
   load: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
+    cpuUtilization: Record<string, AveragedStat>;
     result_frequency_percent_as_number: Record<string, ResultFrequencySummary>;
   };
   polling: FillPoolRawStat | Omit<FillPoolRawStat, 'last_successful_poll'>;
@@ -105,7 +107,9 @@ export function createTaskRunAggregator(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
     map((taskEvent: TaskLifecycleEvent) => {
       const { task, result }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
-      return taskRunEventToStat(task, taskEvent.timing!, result);
+      // safe Typescript casting as `hasTiming` in the filter ensures this has metrics
+      // I wish Rxjs could infer that
+      return taskRunEventToStat(task, (taskEvent as TaskLifecycleEventWithMetrics).metrics, result);
     })
   );
 
@@ -144,7 +148,8 @@ export function createTaskRunAggregator(
           result,
           stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
         } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
-        const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
+        const duration =
+          (taskEvent?.metrics?.timing?.stop ?? 0) - (taskEvent?.metrics?.timing?.start ?? 0);
         return {
           polling: {
             last_successful_poll: new Date().toISOString(),
@@ -202,7 +207,7 @@ export function createTaskRunAggregator(
       startWith({
         drift: [],
         drift_by_type: {},
-        execution: { duration: {}, result_frequency_percent_as_number: {} },
+        execution: { duration: {}, cpu_utilization: {}, result_frequency_percent_as_number: {} },
       })
     ),
     taskManagerLoadStatEvents$.pipe(startWith({ load: [] })),
@@ -237,28 +242,32 @@ export function createTaskRunAggregator(
   );
 }
 
-function hasTiming(taskEvent: TaskLifecycleEvent) {
-  return !!taskEvent?.timing;
+function hasTiming(taskEvent: TaskLifecycleEvent): taskEvent is TaskLifecycleEventWithMetrics {
+  return !!taskEvent?.metrics?.timing;
 }
 
 function createTaskRunEventToStat(runningAverageWindowSize: number) {
   const driftQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const driftByTaskQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
+  const taskRunObservedCpuUtilizationQueue = createMapOfRunningAveragedStats<number>(
+    runningAverageWindowSize
+  );
   const resultFrequencyQueue = createMapOfRunningAveragedStats<TaskRunResult>(
     runningAverageWindowSize
   );
   return (
     task: ConcreteTaskInstance,
-    timing: TaskTiming,
+    metrics: TaskMetrics,
     result: TaskRunResult
-  ): Omit<TaskRunStat, 'polling'> => {
-    const drift = timing!.start - task.runAt.getTime();
+  ): Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'> => {
+    const drift = metrics.timing.start - task.runAt.getTime();
     return {
       drift: driftQueue(drift),
       drift_by_type: driftByTaskQueue(task.taskType, drift),
       execution: {
-        duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
+        duration: taskRunDurationQueue(task.taskType, metrics.timing.stop - metrics.timing.start),
+        cpu_utilization: taskRunObservedCpuUtilizationQueue(task.taskType, metrics.cpu),
         result_frequency_percent_as_number: resultFrequencyQueue(task.taskType, result),
       },
     };
@@ -298,7 +307,11 @@ export function summarizeTaskRunStat(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     drift_by_type,
     load,
-    execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
+    execution: {
+      duration,
+      cpu_utilization: cpuUtilization,
+      result_frequency_percent_as_number: executionResultFrequency,
+    },
   }: TaskRunStat,
   config: TaskManagerConfig
 ): { value: SummarizedTaskRunStat; status: HealthStatus } {
@@ -323,6 +336,9 @@ export function summarizeTaskRunStat(
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
+        cpuUtilization: mapValues(cpuUtilization, (typedCpuUtilization) =>
+          calculateRunningAverage(typedCpuUtilization)
+        ),
         result_frequency_percent_as_number: mapValues(
           executionResultFrequency,
           (typedResultFrequencies, taskType) =>
