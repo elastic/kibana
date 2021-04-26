@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
@@ -22,7 +22,7 @@ export function setupSavedObjects(
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action,
+    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
   });
 
@@ -40,7 +40,7 @@ export function setupSavedObjects(
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action_task_params,
+    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

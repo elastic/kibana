@@ -86,7 +86,6 @@ export interface WorkloadAggregation {
 
 // The type of a bucket in the scheduleDensity range aggregation
 type ScheduleDensityResult = AggregationResultOf<
-  // @ts-expect-error AggregationRange reqires from: number
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
@@ -137,9 +136,7 @@ export function createWorkloadAggregator(
                   field: 'task.runAt',
                   ranges: [
                     {
-                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       from: `now`,
-                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
                     },
                   ],
