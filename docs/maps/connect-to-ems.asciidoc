@@ -67,7 +67,7 @@ docker run --rm --init --publish 8080:8080 \
   {ems-docker-image}
 ----------------------------------
 
-Once {hosted-ems} is running, follow instructions from the webpage at `localhost:8080` to define a configuration file and additionally download a more detailed basemaps database.
+Once {hosted-ems} is running, follow instructions from the webpage at `localhost:8080` to define a configuration file and optionally download a more detailed basemaps database.
 
 [role="screenshot"]
 image::images/elastic-maps-server-instructions.png[Set-up instructions]
