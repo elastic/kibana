@@ -13,12 +13,12 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('enableAlert', () => {
   test('should call enable alert API', async () => {
-    const result = await enableAlert({ http, id: '1' });
+    const result = await enableAlert({ http, id: '1/' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerting/rule/1/_enable",
+          "/api/alerting/rule/1%2F/_enable",
         ],
       ]
     `);
@@ -27,7 +27,7 @@ describe('enableAlert', () => {
 
 describe('enableAlerts', () => {
   test('should call enable alert API per alert', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2', '/'];
     const result = await enableAlerts({ http, ids });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
@@ -39,7 +39,7 @@ describe('enableAlerts', () => {
           "/api/alerting/rule/2/_enable",
         ],
         Array [
-          "/api/alerting/rule/3/_enable",
+          "/api/alerting/rule/%2F/_enable",
         ],
       ]
     `);

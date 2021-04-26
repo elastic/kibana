@@ -119,6 +119,7 @@ export interface LegacyRequest {
 }
 
 export interface LegacyServer {
+  log: Logger;
   route: (params: any) => void;
   config: () => {
     get: (key: string) => string | undefined;
