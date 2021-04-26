@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
+        await setup('monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
@@ -108,6 +108,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
           expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');

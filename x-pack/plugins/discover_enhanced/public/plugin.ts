@@ -56,8 +56,10 @@ export class DiscoverEnhancedPlugin
     if (isSharePluginInstalled) {
       const params = { start };
 
-      const exploreDataAction = new ExploreDataContextMenuAction(params);
-      uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
+      if (this.config.actions.exploreDataInContextMenu.enabled) {
+        const exploreDataAction = new ExploreDataContextMenuAction(params);
+        uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
+      }
 
       if (this.config.actions.exploreDataInChart.enabled) {
         const exploreDataChartAction = new ExploreDataChartAction(params);
