@@ -38,6 +38,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      enabledAfterImport: true,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -56,6 +57,7 @@ describe('getActionRoute', () => {
         "body": Object {
           "config": Object {},
           "connector_type_id": "2",
+          "enabled_after_import": true,
           "id": "1",
           "is_preconfigured": false,
           "name": "action name",
@@ -73,6 +75,7 @@ describe('getActionRoute', () => {
         name: 'action name',
         config: {},
         is_preconfigured: false,
+        enabled_after_import: true,
       },
     });
   });

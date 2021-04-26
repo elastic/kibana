@@ -19,11 +19,13 @@ const paramSchema = schema.object({
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
+  enabledAfterImport,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  enabled_after_import: enabledAfterImport,
 });
 
 export const getActionRoute = (

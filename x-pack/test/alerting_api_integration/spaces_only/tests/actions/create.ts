@@ -41,6 +41,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'My action',
         connector_type_id: 'test.index-record',
+        enabled_after_import: true,
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
@@ -79,6 +80,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: false,
           name: 'My action',
           actionTypeId: 'test.index-record',
+          enabledAfterImport: true,
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },

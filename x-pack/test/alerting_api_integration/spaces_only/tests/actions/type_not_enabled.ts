@@ -62,6 +62,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        enabledAfterImport: true,
         name: 'an action created before test.not-enabled was disabled',
       });
     });
@@ -89,6 +90,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        enabledAfterImport: true,
         name: 'an action created before test.not-enabled was disabled',
       });
     });

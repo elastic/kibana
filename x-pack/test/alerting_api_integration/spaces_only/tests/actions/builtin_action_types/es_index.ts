@@ -41,6 +41,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
+        enabledAfterImport: true,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -57,6 +58,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         isPreconfigured: false,
+        enabledAfterImport: true,
         name: 'An index action',
         actionTypeId: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
@@ -82,6 +84,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
+        enabledAfterImport: true,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -100,6 +103,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
+        enabledAfterImport: true,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,

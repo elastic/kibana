@@ -81,6 +81,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'An IBM Resilient action',
           connector_type_id: '.resilient',
+          enabled_after_import: true,
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
@@ -96,6 +97,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'An IBM Resilient action',
           connector_type_id: '.resilient',
+          enabled_after_import: true,
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,

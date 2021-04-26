@@ -41,6 +41,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'An email action',
         connector_type_id: '.email',
+        enabled_after_import: true,
         config: {
           service: '__json',
           hasAuth: true,
@@ -62,6 +63,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'An email action',
         connector_type_id: '.email',
+        enabled_after_import: true,
         config: {
           from: 'bob@example.com',
           service: '__json',

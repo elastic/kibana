@@ -39,12 +39,14 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      enabledAfterImport: true,
     };
 
     const createApiResult = {
-      ...omit(createResult, ['actionTypeId', 'isPreconfigured']),
+      ...omit(createResult, ['actionTypeId', 'isPreconfigured', 'enabledAfterImport']),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
+      enabled_after_import: createResult.enabledAfterImport,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -99,6 +101,8 @@ describe('createActionRoute', () => {
       id: '1',
       name: 'My name',
       actionTypeId: 'abc',
+      // "enabled_after_import": true,
+      enabledAfterImport: true,
       config: { foo: true },
       isPreconfigured: false,
     });
@@ -138,6 +142,7 @@ describe('createActionRoute', () => {
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
+      enabledAfterImport: true,
       isPreconfigured: false,
     });
 

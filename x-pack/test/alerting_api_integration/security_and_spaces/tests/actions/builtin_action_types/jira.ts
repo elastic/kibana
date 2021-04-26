@@ -78,6 +78,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'A jira action',
           connector_type_id: '.jira',
+          enabled_after_import: true,
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
@@ -93,6 +94,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'A jira action',
           connector_type_id: '.jira',
+          enabled_after_import: true,
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
