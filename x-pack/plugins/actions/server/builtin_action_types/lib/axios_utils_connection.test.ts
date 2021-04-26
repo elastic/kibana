@@ -11,6 +11,7 @@ import http from 'http';
 import https from 'https';
 import axios from 'axios';
 import { duration as momentDuration } from 'moment';
+import { schema } from '@kbn/config-schema';
 
 import { request } from './axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -256,6 +257,12 @@ const BaseActionsConfig: ActionsConfig = {
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
+  cleanupFailedExecutionsTask: {
+    enabled: true,
+    cleanupInterval: schema.duration().validate('5m'),
+    idleInterval: schema.duration().validate('1h'),
+    pageSize: 100,
+  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
