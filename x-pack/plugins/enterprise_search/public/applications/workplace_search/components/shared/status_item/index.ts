@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { SEARCH_UI_TITLE } from './constants';
-export { SearchUI } from './search_ui';
+export { StatusItem } from './status_item';
