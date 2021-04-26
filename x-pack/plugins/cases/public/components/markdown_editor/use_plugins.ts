@@ -20,7 +20,7 @@ export const usePlugins = () => {
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
+    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);

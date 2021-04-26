@@ -10,7 +10,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
+import {
+  createKibanaContextProviderMock,
+  createStartServicesMock,
+} from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 
 interface Props {
