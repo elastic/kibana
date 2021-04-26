@@ -3511,6 +3511,7 @@ Object {
     "format": "0,0.[00]",
     "getDateHistogramSubAggs": [Function],
     "label": "Pipeline Throughput",
+    "mbField": "logstash.node.stats.pipelines.events.out",
     "timestampField": "logstash_stats.timestamp",
     "units": "e/s",
     "uuidField": "logstash_stats.logstash.uuid",

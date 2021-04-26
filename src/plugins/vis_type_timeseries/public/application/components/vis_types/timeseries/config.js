@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
@@ -23,8 +24,6 @@ import {
   EuiCode,
   EuiHorizontalRule,
   EuiFieldNumber,
-  EuiFormLabel,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
@@ -235,14 +234,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.chartLine.stepsLabel"
-              defaultMessage="Steps"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.steps} name="steps" onChange={props.onChange} />
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.chartLine.stepsLabel', {
+              defaultMessage: 'Steps',
+            })}
+          >
+            <YesNo value={model.steps} name="steps" onChange={props.onChange} />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -408,14 +406,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.hideInLegendLabel"
-              defaultMessage="Hide in legend"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.hideInLegendLabel', {
+              defaultMessage: 'Hide in legend',
+            })}
+          >
+            <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
+          </EuiFormRow>
         </EuiFlexItem>
         {palettesRegistry && (
           <EuiFlexItem grow={true}>
@@ -443,14 +440,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.separateAxisLabel"
-              defaultMessage="Separate axis?"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.separateAxisLabel', {
+              defaultMessage: 'Separate axis?',
+            })}
+          >
+            <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -523,18 +519,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.overrideIndexPatternLabel"
-              defaultMessage="Override Index Pattern?"
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.overrideIndexPatternLabel', {
+              defaultMessage: 'Override Index Pattern?',
+            })}
+          >
+            <YesNo
+              value={model.override_index_pattern}
+              name="override_index_pattern"
+              onChange={props.onChange}
             />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo
-            value={model.override_index_pattern}
-            name="override_index_pattern"
-            onChange={props.onChange}
-          />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern

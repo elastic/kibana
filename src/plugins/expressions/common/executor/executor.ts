@@ -9,6 +9,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { cloneDeep, mapValues } from 'lodash';
+import { Observable } from 'rxjs';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -17,7 +18,7 @@ import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
-import { typeSpecs } from '../expression_types/specs';
+import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
@@ -156,14 +157,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<Input, Output>(
+  public run<Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
     params: ExpressionExecutionParams = {}
-  ) {
-    const execution = this.createExecution(ast, params);
-    execution.start(input);
-    return (await execution.result) as Output;
+  ): Observable<Output | ExpressionValueError> {
+    return this.createExecution<Input, Output>(ast, params).start(input);
   }
 
   public createExecution<Input = unknown, Output = unknown>(
