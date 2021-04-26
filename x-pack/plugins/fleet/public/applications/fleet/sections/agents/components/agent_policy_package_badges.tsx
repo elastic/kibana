@@ -71,7 +71,18 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
           <EuiBadge key={idx} color="hollow">
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <PackageIcon packageName={pkg.name} version={pkg.version} size="s" tryApi={true} />
+                <PackageIcon
+                  packageName={pkg.name}
+                  version={pkg.version}
+                  tryApi={true}
+                  style={
+                    // when a custom SVG is used the logo is rendered with <img class="euiIcon euiIcon--small">
+                    // this collides with some EuiText (+img) CSS from the EuiIcon component
+                    // which  makes the button large, wide, and poorly layed out
+                    // override those styles until the bug is fixed or we find a better approach
+                    { margin: 'unset', width: '16px' }
+                  }
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{pkg.title}</EuiFlexItem>
             </EuiFlexGroup>

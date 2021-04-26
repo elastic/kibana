@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
+import { ML_ALERT_TYPES } from '../../../../plugins/ml/common/constants/alerts';
+import { Alert } from '../../../../plugins/alerting/common';
+import { MlAnomalyDetectionAlertParams } from '../../../../plugins/ml/common/types/alerts';
 
 export function MachineLearningAlertingProvider(
   { getService }: FtrProviderContext,
@@ -17,6 +20,7 @@ export function MachineLearningAlertingProvider(
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const supertest = getService('supertest');
 
   return {
     async selectAnomalyDetectionAlertType() {
@@ -103,6 +107,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async assertLookbackInterval(expectedValue: string) {
+      await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute(
         'mlAnomalyAlertLookbackInterval',
         'value'
@@ -114,6 +119,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async assertTopNBuckets(expectedNumberOfBuckets: number) {
+      await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
       expect(actualValue).to.eql(
         expectedNumberOfBuckets,
@@ -133,15 +139,31 @@ export function MachineLearningAlertingProvider(
       await this.assertTopNBuckets(numberOfBuckets);
     },
 
+    async isAdvancedSectionOpened() {
+      return await find.existsByDisplayedByCssSelector('#mlAnomalyAlertAdvancedSettings');
+    },
+
     async ensureAdvancedSectionOpen() {
       await retry.tryForTime(5000, async () => {
-        const isVisible = await find.existsByDisplayedByCssSelector(
-          '#mlAnomalyAlertAdvancedSettings'
-        );
-        if (!isVisible) {
+        if (!(await this.isAdvancedSectionOpened())) {
           await testSubjects.click('mlAnomalyAlertAdvancedSettingsTrigger');
+          expect(await this.isAdvancedSectionOpened()).to.eql(true);
         }
       });
+    },
+
+    async cleanAnomalyDetectionRules() {
+      const { body: anomalyDetectionRules } = await supertest
+        .get(`/api/alerting/rules/_find`)
+        .query({ filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}` })
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      for (const rule of anomalyDetectionRules.data as Array<
+        Alert<MlAnomalyDetectionAlertParams>
+      >) {
+        await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo').expect(204);
+      }
     },
   };
 }
