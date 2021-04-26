@@ -343,6 +343,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
+The client-side plugin configures following values:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]

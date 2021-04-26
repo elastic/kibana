@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('instance detail', () => {
-    const archive = 'monitoring/beats-with-restarted-instance';
+    const archive = 'monitoring/beats_with_restarted_instance';
     const timeRange = {
       min: '2018-02-09T20:49:00Z',
       max: '2018-02-09T21:50:00Z',
