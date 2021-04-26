@@ -47,7 +47,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { readReporters } from './read_reporters';
 import { ClientArgs } from '..';
 
 interface PushedArgs {
