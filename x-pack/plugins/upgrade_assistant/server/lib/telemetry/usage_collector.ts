@@ -131,14 +131,41 @@ export function registerUpgradeAssistantUsageCollector({
       schema: {
         features: {
           deprecation_logging: {
-            enabled: { type: 'boolean' },
+            enabled: {
+              type: 'boolean',
+              _meta: {
+                description: 'Whether user has enabled Elasticsearch deprecation logging',
+              },
+            },
           },
         },
         ui_open: {
-          cluster: { type: 'long' },
-          indices: { type: 'long' },
-          overview: { type: 'long' },
-          kibana: { type: 'long' },
+          cluster: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of times a user opened the Elasticsearch cluster deprecations page',
+            },
+          },
+          indices: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of times a user opened the Elasticsearch index deprecations page',
+            },
+          },
+          overview: {
+            type: 'long',
+            _meta: {
+              description: 'Number of times a user opened the overview page',
+            },
+          },
+          kibana: {
+            type: 'long',
+            _meta: {
+              description: 'Number of times a user opened the Kibana deprecations page',
+            },
+          },
         },
         ui_reindex: {
           close: { type: 'long' },
