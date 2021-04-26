@@ -564,7 +564,7 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 /**
- * To enable modifing of alerts in Stack Managment > Actions
+ * To enable modifing of alerts in Stack Management > Actions
  */
 export const ALERT_REQUIRES_APP_CONTEXT = false;
 
