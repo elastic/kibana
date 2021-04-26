@@ -51,6 +51,7 @@ export function getArgValueSuggestions() {
 
         return (await indexPatterns.find(search, size)).map(({ title }) => ({
           name: title,
+          insertText: title,
         }));
       },
       async metric(partial: string, functionArgs: TimelionExpressionFunction[]) {
@@ -81,7 +82,14 @@ export function getArgValueSuggestions() {
               containsFieldName(valueSplit[1], field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
+          .map((field) => {
+            const suggestionValue = field.name.replaceAll(':', '\\:');
+            return {
+              name: `${valueSplit[0]}:${suggestionValue}`,
+              help: field.type,
+              insertText: suggestionValue,
+            };
+          });
       },
       async split(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -105,7 +113,7 @@ export function getArgValueSuggestions() {
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: field.name, help: field.type }));
+          .map((field) => ({ name: field.name, help: field.type, insertText: field.name }));
       },
       async timefield(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -121,7 +129,7 @@ export function getArgValueSuggestions() {
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: field.name }));
+          .map((field) => ({ name: field.name, insertText: field.name }));
       },
     },
   };

@@ -30,6 +30,11 @@ interface Props {
   metrics: { [key: string]: unknown };
   seriesToShow: unknown[];
   title: string;
+  summary: {
+    config: {
+      container: boolean;
+    };
+  };
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {
@@ -42,8 +47,13 @@ const createCharts = (series: unknown[], props: Partial<Props>) => {
   });
 };
 
-export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }: Props) => {
-  const topSeries = [metrics.apm_cpu, metrics.apm_memory, metrics.apm_os_load];
+export const ApmMetrics = ({ stats, metrics, seriesToShow, title, summary, ...props }: Props) => {
+  if (!metrics) {
+    return null;
+  }
+  const topSeries = [metrics.apm_cpu, metrics.apm_os_load];
+  const { config } = summary || stats;
+  topSeries.push(config.container ? metrics.apm_memory_cgroup : metrics.apm_memory);
 
   return (
     <EuiPage>

@@ -10,7 +10,7 @@
     "data",
     "cloud",
     "features",
-    "fileUpload",
+    "fileDataVisualizer",
     "licensing",
     "share",
     "embeddable",
@@ -28,7 +28,8 @@
     "management",
     "licenseManagement",
     "maps",
-    "lens"
+    "lens",
+    "usageCollection"
   ],
   "server": true,
   "ui": true,

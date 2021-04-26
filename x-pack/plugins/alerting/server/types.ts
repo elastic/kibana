@@ -46,6 +46,7 @@ export interface AlertingApiRequestHandlerContext {
   getAlertsClient: () => AlertsClient;
   listTypes: AlertTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  areApiKeysEnabled: () => Promise<boolean>;
 }
 
 /**

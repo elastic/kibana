@@ -116,7 +116,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyDocumentSummary">
+        <EuiPanel
+          hasShadow={false}
+          color="subdued"
+          paddingSize="l"
+          data-test-subj="EmptyDocumentSummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{SOURCES_NO_CONTENT_TITLE}</h2>}
             iconType="documents"
@@ -163,7 +168,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyActivitySummary">
+        <EuiPanel
+          paddingSize="l"
+          hasShadow={false}
+          color="subdued"
+          data-test-subj="EmptyActivitySummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{EMPTY_ACTIVITY_TITLE}</h2>}
             iconType="clock"

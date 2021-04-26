@@ -12,6 +12,7 @@ export const apmAlertResponseExample = [
     'rule.name': 'Error count threshold | opbeans-java (smith test)',
     'kibana.rac.alert.duration.us': 180057000,
     'kibana.rac.alert.status': 'open',
+    'kibana.rac.alert.severity.level': 'warning',
     tags: ['apm', 'service.name:opbeans-java'],
     'kibana.rac.alert.uuid': '0175ec0a-a3b1-4d41-b557-e21c2d024352',
     'rule.uuid': '474920d0-93e9-11eb-ac86-0b455460de81',
@@ -46,16 +47,6 @@ export const apmAlertResponseExample = [
     'processor.event': ['error'],
   },
 ];
-
-export const flyoutItemExample = {
-  link: '/app/apm/services/opbeans-java?rangeFrom=now-15m&rangeTo=now',
-  reason: 'Error count for opbeans-java was above the threshold',
-  active: true,
-  start: 1618235449493,
-  duration: 180057000,
-  ruleCategory: 'Error count threshold',
-  ruleName: 'Error count threshold | opbeans-java (smith test)',
-};
 
 export const dynamicIndexPattern = {
   fields: [

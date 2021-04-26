@@ -131,6 +131,7 @@ export const importTimelines = async (
               timelineType,
               version,
             } = parsedTimeline;
+
             const parsedTimelineObject = omit(timelineSavedObjectOmittedFields, parsedTimeline);
             let newTimeline = null;
             try {

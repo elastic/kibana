@@ -10,13 +10,14 @@ import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiTitle,
   EuiSpacer,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -28,20 +29,21 @@ import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
-import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
+import {
+  EnginesOverviewHeader,
+  LoadingState,
+  EmptyState,
+  EmptyMetaEnginesState,
+} from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
-  META_ENGINE_EMPTY_PROMPT_DESCRIPTION,
-  META_ENGINE_EMPTY_PROMPT_TITLE,
   META_ENGINES_TITLE,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
-
-import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -79,15 +81,20 @@ export const EnginesOverview: React.FC = () => {
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
-      <EuiPageContent hasBorder panelPaddingSize="s" className="enginesOverview">
+      <EuiPageContent hasBorder>
         <FlashMessages />
-        <EuiPageContentHeader responsive={false}>
+        <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
-            <EuiTitle size="s">
-              <h2>
-                <EngineIcon /> {ENGINES_TITLE}
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EngineIcon />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2>{ENGINES_TITLE}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             {canManageEngines && (
@@ -104,7 +111,7 @@ export const EnginesOverview: React.FC = () => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           <EnginesTable
             items={engines}
             loading={enginesLoading}
@@ -118,14 +125,19 @@ export const EnginesOverview: React.FC = () => {
 
         {hasPlatinumLicense && (
           <>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="xxl" />
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle size="s">
-                  <h2>
-                    <MetaEngineIcon /> {META_ENGINES_TITLE}
-                  </h2>
-                </EuiTitle>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <MetaEngineIcon />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2>{META_ENGINES_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 {canManageEngines && (
@@ -142,6 +154,7 @@ export const EnginesOverview: React.FC = () => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
+              <EuiSpacer size="m" />
               <MetaEnginesTable
                 items={metaEngines}
                 loading={metaEnginesLoading}
@@ -149,23 +162,7 @@ export const EnginesOverview: React.FC = () => {
                   ...convertMetaToPagination(metaEnginesMeta),
                   hidePerPageOptions: true,
                 }}
-                noItemsMessage={
-                  <EuiEmptyPrompt
-                    title={<h2>{META_ENGINE_EMPTY_PROMPT_TITLE}</h2>}
-                    body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
-                    actions={
-                      canManageEngines && (
-                        <EuiButtonTo
-                          data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
-                          fill
-                          to={META_ENGINE_CREATION_PATH}
-                        >
-                          {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                        </EuiButtonTo>
-                      )
-                    }
-                  />
-                }
+                noItemsMessage={<EmptyMetaEnginesState />}
                 onChange={handlePageChange(onMetaEnginesPagination)}
               />
             </EuiPageContentBody>

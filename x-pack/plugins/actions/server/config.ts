@@ -75,6 +75,12 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  cleanupFailedExecutionsTask: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    cleanupInterval: schema.duration({ defaultValue: '5m' }),
+    idleInterval: schema.duration({ defaultValue: '1h' }),
+    pageSize: schema.number({ defaultValue: 100 }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
