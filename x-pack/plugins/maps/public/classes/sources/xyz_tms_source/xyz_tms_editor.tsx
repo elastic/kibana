@@ -10,7 +10,6 @@
 import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export type XYZTMSSourceConfig = {
   urlTemplate: string;

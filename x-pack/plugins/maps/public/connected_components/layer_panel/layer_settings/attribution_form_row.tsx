@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionPopover } from './attribution_popover';
 

@@ -11,7 +11,7 @@ import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { AbstractTMSSource } from '../tms_source';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty } from '../source';
+import { ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {

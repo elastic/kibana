@@ -30,13 +30,14 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
+  Attribution,
   ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';

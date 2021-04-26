@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ILayer } from '../../../classes/layers/layer';
+import { Attribution } from '../../../../common/descriptor_types';
 
 interface Props {
   onChange: (attribution: Attribution) => void;

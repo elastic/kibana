@@ -30,8 +30,6 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     updateAlpha: (id: string, alpha: number) => dispatch(updateLayerAlpha(id, alpha)),
     updateLabelsOnTop: (id: string, areLabelsOnTop: boolean) =>
       dispatch(updateLabelsOnTop(id, areLabelsOnTop)),
-    setLayerAttribution: (id: string, attribution: Attribution) =>
-      dispatch(setLayerAttribution(id, attribution)),
   };
 }
 

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
-import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import {
   SOURCE_TYPES,
@@ -186,7 +186,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     }
   }
 
-  getAttributionProvider(): () => Promise<Attribution[]> {
+  getAttributionProvider() {
     return async () => {
       const emsFileLayer = await this.getEMSFileLayer();
       return emsFileLayer.getAttributions();
