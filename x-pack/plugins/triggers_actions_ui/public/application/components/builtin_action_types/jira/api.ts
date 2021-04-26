@@ -17,12 +17,15 @@ export async function getIssueTypes({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'issueTypes', subActionParams: {} },
-    }),
-    signal,
-  });
+  return await http.post(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'issueTypes', subActionParams: {} },
+      }),
+      signal,
+    }
+  );
 }
 
 export async function getFieldsByIssueType({
@@ -36,12 +39,15 @@ export async function getFieldsByIssueType({
   connectorId: string;
   id: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
-    }),
-    signal,
-  });
+  return await http.post(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
+      }),
+      signal,
+    }
+  );
 }
 
 export async function getIssues({
@@ -55,12 +61,15 @@ export async function getIssues({
   connectorId: string;
   title: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'issues', subActionParams: { title } },
-    }),
-    signal,
-  });
+  return await http.post(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'issues', subActionParams: { title } },
+      }),
+      signal,
+    }
+  );
 }
 
 export async function getIssue({
@@ -74,10 +83,13 @@ export async function getIssue({
   connectorId: string;
   id: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'issue', subActionParams: { id } },
-    }),
-    signal,
-  });
+  return await http.post(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'issue', subActionParams: { id } },
+      }),
+      signal,
+    }
+  );
 }
