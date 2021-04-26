@@ -13,7 +13,8 @@ import { act } from 'react-dom/test-utils';
 import * as alertApi from '../state/api/alerts';
 
 describe('settings', () => {
-  describe('form', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/97067
+  describe.skip('form', () => {
     beforeAll(() => {
       jest.spyOn(alertApi, 'fetchActionTypes').mockImplementation(async () => [
         {
