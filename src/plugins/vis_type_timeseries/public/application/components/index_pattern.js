@@ -126,6 +126,7 @@ export const IndexPattern = ({
   );
   const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
   const isDataTimerangeModeInvalid =
+    !disabled &&
     selectedTimeRangeOption &&
     !isTimerangeModeEnabled(selectedTimeRangeOption.value, uiRestrictions);
 
