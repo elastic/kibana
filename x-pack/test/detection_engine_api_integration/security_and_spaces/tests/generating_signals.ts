@@ -1076,7 +1076,6 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
-        // TODO: flesh top level fields out
         it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
           const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
