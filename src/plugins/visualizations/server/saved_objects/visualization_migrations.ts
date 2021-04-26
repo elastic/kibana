@@ -1008,6 +1008,7 @@ const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
                   name: 'kibana_palette',
                 },
               }),
+              distinctColors: true,
             },
           }),
         },

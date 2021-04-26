@@ -39,13 +39,14 @@ export const getPieVisRenderer: (
     });
 
     const services = await getStartDeps();
+    const palettesRegistry = await palettes.getPalettes();
 
     render(
       <I18nProvider>
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
           <PieComponent
             chartsThemeService={theme}
-            palettes={palettes}
+            palettesRegistry={palettesRegistry}
             visParams={visConfig}
             visData={visData}
             renderComplete={handlers.done}

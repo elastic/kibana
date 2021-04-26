@@ -61,7 +61,7 @@ export interface PieComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
-  palettes: ChartsPluginSetup['palettes'];
+  palettesRegistry: PaletteRegistry;
   services: DataPublicPluginStart;
   syncColors: boolean;
 }
@@ -74,7 +74,6 @@ const PieComponent = (props: PieComponentProps) => {
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -84,14 +83,6 @@ const PieComponent = (props: PieComponentProps) => {
     },
     [props]
   );
-
-  useEffect(() => {
-    const fetchPalettes = async () => {
-      const palettes = await props.palettes.getPalettes();
-      setPalettesRegistry(palettes);
-    };
-    fetchPalettes();
-  }, [props.palettes]);
 
   // handles slice click event
   const handleSliceClick = useCallback(
@@ -212,7 +203,7 @@ const PieComponent = (props: PieComponentProps) => {
         visParams,
         props.uiState?.get('vis.colors', {}),
         visData.rows,
-        palettesRegistry,
+        props.palettesRegistry,
         services.fieldFormats,
         syncColors
       ),
@@ -220,8 +211,8 @@ const PieComponent = (props: PieComponentProps) => {
       bucketColumns,
       visParams,
       props.uiState,
+      props.palettesRegistry,
       visData.rows,
-      palettesRegistry,
       services.fieldFormats,
       syncColors,
     ]

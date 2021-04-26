@@ -1707,6 +1707,12 @@ describe('migration visualization', () => {
       },
     });
 
+    it('should return original doc if not area, line or histogram chart', () => {
+      const doc = getTestDoc('pie');
+      const migratedTestDoc = migrate(doc);
+      expect(migratedTestDoc).toEqual(doc);
+    });
+
     it('should decorate existing docs with isVislibVis flag', () => {
       const migratedTestDoc = migrate(getTestDoc());
       const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
@@ -2010,6 +2016,13 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+
+    it('should default the distinct colors per slice setting to true', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { distinctColors } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(distinctColors).toBe(true);
     });
   });
 });
