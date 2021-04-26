@@ -20,7 +20,7 @@ export function getLeadControlColumns() {
   return [
     {
       id: 'openDetails',
-      width: 32,
+      width: 24,
       headerCellRender: () => (
         <EuiScreenReaderOnly>
           <span>
@@ -34,7 +34,7 @@ export function getLeadControlColumns() {
     },
     {
       id: 'select',
-      width: 32,
+      width: 24,
       rowCellRender: SelectButton,
       headerCellRender: () => (
         <EuiScreenReaderOnly>

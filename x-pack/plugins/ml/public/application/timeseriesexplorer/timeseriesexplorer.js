@@ -390,7 +390,6 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   displayErrorToastMessages = (error, title) => {
-    console.log('displayErrorToastMessages', error, title);
     if (this.props.toastNotificationService) {
       this.props.toastNotificationService.displayErrorToast(error, title);
     }
