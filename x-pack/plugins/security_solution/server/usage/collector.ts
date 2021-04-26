@@ -247,7 +247,6 @@ export const registerCollector: RegisterCollector = ({
               peak_model_bytes: { type: 'long' },
             },
             timing_stats: {
-              average_bucket_processing_time_ms: { type: 'long' },
               bucket_count: { type: 'long' },
               exponential_average_bucket_processing_time_ms: { type: 'long' },
               exponential_average_bucket_processing_time_per_hour_ms: { type: 'long' },

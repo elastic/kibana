@@ -80,7 +80,6 @@ export interface MlJobModelSize {
 }
 
 export interface MlTimingStats {
-  average_bucket_processing_time_ms: number;
   bucket_count: number;
   exponential_average_bucket_processing_time_ms: number;
   exponential_average_bucket_processing_time_per_hour_ms: number;

@@ -3430,6 +3430,40 @@
         }
       }
     },
+    "ml": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "xpack.ml.anomaly_detection_alert": {
+              "properties": {
+                "count_by_result_type": {
+                  "properties": {
+                    "record": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using record result type"
+                      }
+                    },
+                    "influencer": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using influencer result type"
+                      }
+                    },
+                    "bucket": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using bucket result type"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kibana_settings": {
       "properties": {
         "xpack": {
@@ -4877,9 +4911,6 @@
                   },
                   "timing_stats": {
                     "properties": {
-                      "average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
                       "bucket_count": {
                         "type": "long"
                       },

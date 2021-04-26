@@ -230,6 +230,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, getType } from '../../expression_types';
@@ -13,7 +15,7 @@ import { Datatable, getType } from '../../expression_types';
 export interface MapColumnArguments {
   id?: string | null;
   name: string;
-  expression?: (datatable: Datatable) => Promise<boolean | number | string | null>;
+  expression?(datatable: Datatable): Observable<boolean | number | string | null>;
   copyMetaFrom?: string | null;
 }
 
@@ -79,7 +81,11 @@ export const mapColumn: ExpressionFunctionDefinition<
     },
   },
   fn: (input, args) => {
-    const expression = args.expression || (() => Promise.resolve(null));
+    const expression = (...params: Parameters<Required<MapColumnArguments>['expression']>) =>
+      args
+        .expression?.(...params)
+        .pipe(take(1))
+        .toPromise() ?? Promise.resolve(null);
     const columnId = args.id != null ? args.id : args.name;
 
     const columns = [...input.columns];

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionsConfig } from './config';
 import {
@@ -24,6 +25,12 @@ const defaultActionsConfig: ActionsConfig = {
   rejectUnauthorized: true,
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
+  cleanupFailedExecutionsTask: {
+    enabled: true,
+    cleanupInterval: schema.duration().validate('5m'),
+    idleInterval: schema.duration().validate('1h'),
+    pageSize: 100,
+  },
 };
 
 describe('ensureUriAllowed', () => {
