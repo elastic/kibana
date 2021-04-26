@@ -368,13 +368,45 @@ export function getIndexPatternDatasource({
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
 
-    getErrorMessages(state, layersGroups) {
+    getErrorMessages(state, layersGroups = {}) {
       if (!state) {
         return;
       }
+      // check that all accessors dimensions declared are matched up in the datasource
+      // Assumption here is that layer ids cannot go out of sync between the vis and datasource
+      const visSyncErrors = Object.keys(state.layers).map((layerId) => {
+        const layer = state.layers[layerId];
+        const group = layersGroups?.[layerId] || [];
+        return group
+          .map(({ accessors, groupLabel }) => {
+            const accessorErrors = accessors.filter(
+              ({ columnId }) => !layer.columns[columnId] && !layer.incompleteColumns?.[columnId]
+            ).length;
+            if (!accessorErrors) {
+              return;
+            }
+            return {
+              shortMessage: i18n.translate('xpack.lens.indexPattern.visSyncErrorMessagesShort', {
+                defaultMessage: 'Configuration error',
+              }),
+              longMessage: i18n.translate('xpack.lens.indexPattern.visSyncErrorMessages', {
+                defaultMessage:
+                  '"{label}" contains {count, plural, one {an} other {multiple}} incomplete {count, plural, one {configuration} other {configurations}}',
+                values: {
+                  label: groupLabel,
+                  count: accessorErrors,
+                },
+              }),
+            };
+          })
+          .filter(Boolean) as Array<{
+          shortMessage: string;
+          longMessage: string;
+        }>;
+      });
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.values(state.layers).map((layer) =>
+      const dataErrors = Object.values(state.layers).map((layer) =>
         (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
           (message) => ({
             shortMessage: '', // Not displayed currently
@@ -382,6 +414,12 @@ export function getIndexPatternDatasource({
           })
         )
       );
+
+      // reconcyle errors by layers here
+      const layerErrors = Object.keys(state.layers).map((_layerId, i) => [
+        ...dataErrors[i],
+        ...visSyncErrors[i],
+      ]);
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {
