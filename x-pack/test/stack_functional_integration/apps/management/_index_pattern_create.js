@@ -41,16 +41,26 @@ export default ({ getService, getPageObjects }) => {
 
       it('should have expected table headers', async function checkingHeader() {
         const headers = await PageObjects.settings.getTableHeader();
+        headers.map(async function compareHead(header) {
+          const text = await header.getVisibleText();
+          log.debug(text);
+        });
         log.debug('header.length = ' + headers.length);
-        const expectedHeaders = [
-          'Name',
-          'Type',
-          'Format',
-          'Searchable',
-          'Aggregatable',
-          'Excluded',
-        ];
-
+        let expectedHeaders;
+        log.debug(`process.env.LOCALE=${process.env.LOCALE}`);
+        switch (process.env.LOCALE) {
+          case 'ja-JP':
+            log.debug('testing Japanese now ------------');
+            expectedHeaders = ['名前', '型', 'フォーマット', '検索可能', '集約可能', '除外'];
+            break;
+          case 'zh-CN':
+            log.debug('testing Chinese now ------------');
+            expectedHeaders = ['名称', '类型', '格式', '可搜索', '可聚合', '已排除'];
+            break;
+          default:
+            log.debug('testing default English now ------------');
+            expectedHeaders = ['Name', 'Type', 'Format', 'Searchable', 'Aggregatable', 'Excluded'];
+        }
         expect(headers.length).to.be(expectedHeaders.length);
 
         await Promise.all(
