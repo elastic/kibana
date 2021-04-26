@@ -17,7 +17,7 @@ import * as urlHelpers from './Links/url_helpers';
 // min-width on here to the width when "request" is loaded so it doesn't start
 // out collapsed and change its width when the list of transaction types is loaded.
 const EuiSelectWithWidth = styled(EuiSelect)`
-  min-width: 157px;
+  min-width: 200px;
 `;
 
 export function TransactionTypeSelect() {
