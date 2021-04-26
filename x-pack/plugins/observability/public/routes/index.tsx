@@ -15,6 +15,7 @@ import { jsonRt } from './json_rt';
 import { AlertsPage } from '../pages/alerts';
 import { CasesPage } from '../pages/cases';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
+import { useTrackPageview } from '..';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 

@@ -19,8 +19,12 @@ import {
   withNotifyOnErrors,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
+import { useTrackPageview } from '../../..';
 
 export function ExploratoryViewPage() {
+  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
+  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });
+
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.overview.exploratoryView', {
