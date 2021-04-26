@@ -59,7 +59,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
         reportType: 'upd',
         time: { from: dateRangeStart, to: dateRangeEnd },
         reportDefinitions: {
-          'monitor.id': monitorId as string,
+          'monitor.id': [monitorId] as string[],
         },
         breakdown: 'observer.geo.name',
         operationType: 'average',

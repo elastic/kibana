@@ -169,6 +169,7 @@ export function SeriesBuilder({
         items={items as any}
         columns={columns}
         cellProps={{ style: { borderRight: '1px solid #d3dae6', verticalAlign: 'initial' } }}
+        tableLayout="auto"
       />
     </div>
   );

@@ -17,6 +17,9 @@ import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
+import { PersistableFilter } from '../../../../../../../lens/common';
+import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
+import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
 
 function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
   const { reportDefinitions } = dataView;
@@ -68,15 +71,18 @@ export function ReportDefinitionCol({
     }
   };
 
-  const onRemove = (field: string) => {
-    delete rtd[field];
-    setSeries(seriesId, {
-      ...series,
-      reportDefinitions: rtd,
-    });
-  };
-
   const columnType = getColumnType(dataViewSeries, rtd);
+  const queryFilters: ESFilter[] = [];
+
+  (filters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
+    if (qFilter.query) {
+      queryFilters.push(qFilter.query);
+    }
+    const existFilter = qFilter as ExistsFilter;
+    if (existFilter.exists) {
+      queryFilters.push({ exists: existFilter.exists });
+    }
+  });
 
   return (
     <FlexGroup direction="column" gutterSize="s">
@@ -95,25 +101,11 @@ export function ReportDefinitionCol({
                     indexPattern={indexPattern}
                     selectedValue={rtd?.[field]}
                     onChange={(val?: string[]) => onChange(field, val)}
-                    filters={(filters ?? []).map(({ query, exists }) => query || { exists })}
+                    filters={queryFilters}
                     time={series.time}
                     fullWidth={true}
                   />
                 </EuiFlexItem>
-                {/* {rtd?.[field] && (*/}
-                {/*  <EuiFlexItem grow={false}>*/}
-                {/*    <EuiBadge*/}
-                {/*      className="globalFilterItem"*/}
-                {/*      iconSide="right"*/}
-                {/*      iconType="cross"*/}
-                {/*      color="hollow"*/}
-                {/*      iconOnClick={() => onRemove(field)}*/}
-                {/*      iconOnClickAriaLabel={'Click to remove'}*/}
-                {/*    >*/}
-                {/*      {labels[field]}: {(rtd?.[field] ?? []).join(', ')}*/}
-                {/*    </EuiBadge>*/}
-                {/*  </EuiFlexItem>*/}
-                {/* )}*/}
               </EuiFlexGroup>
             ) : (
               <CustomReportField

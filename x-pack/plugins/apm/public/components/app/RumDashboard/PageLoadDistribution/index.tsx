@@ -88,10 +88,11 @@ export function PageLoadDistribution() {
   const exploratoryViewLink = createExploratoryViewUrl(
     {
       [`${serviceName}-page-views`]: {
+        dataType: 'ux',
         reportType: 'pld',
         time: { from: rangeFrom!, to: rangeTo! },
         reportDefinitions: {
-          'service.name': serviceName?.[0] as string,
+          'service.name': serviceName as string[],
         },
         ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
       },

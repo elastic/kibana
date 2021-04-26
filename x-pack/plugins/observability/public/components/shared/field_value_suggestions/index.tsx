@@ -11,6 +11,7 @@ import { useDebounce } from 'react-use';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
+import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
   fullWidth,
@@ -25,6 +26,7 @@ export function FieldValueSuggestions({
   forceOpen,
   anchorPosition,
   singleSelection,
+  asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
@@ -47,8 +49,10 @@ export function FieldValueSuggestions({
     [debouncedValue]
   );
 
+  const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
+
   return (
-    <FieldValueSelection
+    <SelectionComponent
       fullWidth={fullWidth}
       singleSelection={singleSelection}
       values={values as string[]}
@@ -61,7 +65,6 @@ export function FieldValueSuggestions({
       forceOpen={forceOpen}
       anchorPosition={anchorPosition}
       width={width}
-      asCombobox={true}
     />
   );
 }

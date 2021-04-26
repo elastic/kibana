@@ -7,8 +7,7 @@
 
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
-import { buildExistsFilter, buildPhraseFilter } from '../utils';
-import { TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
+import { buildExistsFilter } from '../utils';
 
 export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
