@@ -36,9 +36,6 @@ module.exports = {
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: 2018,
-        babelOptions: {
-          configFile: require.resolve('@kbn/babel-code-parser/.babelrc'),
-        },
       },
 
       rules: {
