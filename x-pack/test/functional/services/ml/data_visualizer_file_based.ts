@@ -126,7 +126,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       });
     },
 
-    async selectCreateFileBeatConfig() {
+    async selectCreateFilebeatConfig() {
       await testSubjects.scrollIntoView('fileDataVisFilebeatConfigLink');
       await testSubjects.click('fileDataVisFilebeatConfigLink');
       await testSubjects.existOrFail('fileDataVisFilebeatConfigPanel');

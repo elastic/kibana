@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.startImportAndWaitForProcessing();
 
           await ml.testExecution.logTestStep('creates filebeat config');
-          await ml.dataVisualizerFileBased.selectCreateFileBeatConfig();
+          await ml.dataVisualizerFileBased.selectCreateFilebeatConfig();
         });
       });
     }
