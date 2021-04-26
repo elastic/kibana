@@ -17,7 +17,7 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
@@ -70,23 +70,47 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
+  // TODO undo this before pushing
   const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
 
-  const [hostIsolationPanelOpen, setHostIsolationPanel] = useState(false);
+  const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
   const showAlertDetails = useCallback(() => {
-    setHostIsolationPanel(false);
+    setIsHostIsolationPanel(false);
   }, []);
 
-  const showHostIsolationPanel = useCallback(() => {
-    setHostIsolationPanel(true);
+  const showHostIsolationPanel = useCallback((action) => {
+    if (action === 'isolateHost') {
+      setIsHostIsolationPanel(true);
+    }
   }, []);
 
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
-  const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, detailsData)?.values;
+  const isEndpointAlert = useMemo(() => {
+    const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, detailsData)?.values;
+    return findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
+  }, [detailsData]);
 
-  const isEndpointAlert = findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
+  const backToAlertDetailsLink = useMemo(() => {
+    return (
+      <>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          iconSide="left"
+          flush="left"
+          onClick={() => showAlertDetails()}
+        >
+          <EuiText size="xs">
+            <p>{ALERT_DETAILS}</p>
+          </EuiText>
+        </EuiButtonEmpty>
+        <EuiTitle>
+          <h2>{ISOLATE_HOST}</h2>
+        </EuiTitle>
+      </>
+    );
+  }, [showAlertDetails]);
 
   if (!expandedEvent?.eventId) {
     return null;
@@ -95,28 +119,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   return isFlyoutView ? (
     <>
       <EuiFlyoutHeader hasBorder>
-        {hostIsolationPanelOpen ? (
-          <>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              iconSide="left"
-              flush="left"
-              onClick={() => showAlertDetails()}
-            >
-              <EuiText size="xs">
-                <p>{ALERT_DETAILS}</p>
-              </EuiText>
-            </EuiButtonEmpty>
-            <EuiTitle>
-              <h2>{ISOLATE_HOST}</h2>
-            </EuiTitle>
-          </>
+        {isHostIsolationPanelOpen ? (
+          backToAlertDetailsLink
         ) : (
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
         )}
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        {hostIsolationPanelOpen ? (
+        {isHostIsolationPanelOpen ? (
           <HostIsolationPanel details={detailsData} cancelCallback={showAlertDetails} />
         ) : (
           <ExpandableEvent
@@ -130,11 +140,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isHostIsolationEnabled && isEndpointAlert && hostIsolationPanelOpen === false && (
+      {isEndpointAlert && isHostIsolationPanelOpen === false && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TakeActionDropdown showPanelCallback={showHostIsolationPanel} />
+              <TakeActionDropdown onChange={showHostIsolationPanel} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />

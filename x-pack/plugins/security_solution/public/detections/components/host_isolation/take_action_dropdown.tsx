@@ -5,50 +5,54 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import { ISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 export const TakeActionDropdown = React.memo(
-  ({ showPanelCallback }: { showPanelCallback: () => void }) => {
-    const [isPopoverOpen, setPopover] = useState(false);
+  ({ onChange }: { onChange: (action: 'isolateHost') => void }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const closePopover = () => {
-      setPopover(false);
-    };
+    const closePopoverHandler = useCallback(() => {
+      setIsPopoverOpen(false);
+    }, []);
 
-    const takeActionItems = [
-      <EuiContextMenuItem
-        key="isolateHost"
-        onClick={() => {
-          setPopover(false);
-          showPanelCallback();
-        }}
-      >
-        {ISOLATE_HOST}
-      </EuiContextMenuItem>,
-    ];
+    const takeActionItems = useMemo(() => {
+      return [
+        <EuiContextMenuItem
+          key="isolateHost"
+          onClick={() => {
+            setIsPopoverOpen(false);
+            onChange('isolateHost');
+          }}
+        >
+          {ISOLATE_HOST}
+        </EuiContextMenuItem>,
+      ];
+    }, [onChange]);
 
-    const takeActionButton = (
-      <EuiButton
-        iconSide="right"
-        fill
-        iconType="arrowDown"
-        onClick={() => {
-          setPopover(!isPopoverOpen);
-        }}
-      >
-        {TAKE_ACTION}
-      </EuiButton>
-    );
+    const takeActionButton = useMemo(() => {
+      return (
+        <EuiButton
+          iconSide="right"
+          fill
+          iconType="arrowDown"
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
+          {TAKE_ACTION}
+        </EuiButton>
+      );
+    }, [isPopoverOpen]);
 
     return (
       <EuiPopover
         id="hostIsolationTakeActionPanel"
         button={takeActionButton}
         isOpen={isPopoverOpen}
-        closePopover={closePopover}
+        closePopover={closePopoverHandler}
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >

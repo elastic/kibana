@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useCallback, useState } from 'react';
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { HOST_ISOLATION_FAILURE } from './translations';
 import { isSecurityAppError } from '../../../../common/utils/api';
 import { createHostIsolation } from './api';
 
@@ -26,42 +26,26 @@ export const useHostIsolation = ({
   comment,
 }: UseHostIsolationProps): HostIsolationStatus => {
   const [loading, setLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   const isolateHost = useCallback(async () => {
-    let isSubscribed = true;
-    let isolated = false;
-
     try {
       setLoading(true);
       const isolationStatus = await createHostIsolation({ agentId, comment });
-
-      if (isSubscribed && isolationStatus != null) {
-        if (isolationStatus.action) {
-          isolated = true;
-        }
-      }
+      setLoading(false);
+      return isolationStatus.action ? true : false;
     } catch (error) {
-      if (isSubscribed) {
-        isolated = false;
-      }
+      setLoading(false);
+      addError(error.message, { title: HOST_ISOLATION_FAILURE });
+
       // 500 error
       if (isSecurityAppError(error) && error.body.status_code !== 404) {
-        errorToToaster({
-          title: i18n.translate('xpack.securitySolution.hostIsolation.apiError', {
-            defaultMessage: 'Stuff went wrong',
-          }),
-          error,
-          dispatchToaster,
+        addError(error.message, {
+          title: HOST_ISOLATION_FAILURE,
         });
       }
+      return false;
     }
-    if (isSubscribed) {
-      setLoading(false);
-    }
-
-    isSubscribed = false;
-    return isolated;
-  }, [agentId, comment, dispatchToaster]);
+  }, [agentId, comment, addError]);
   return { loading, isolateHost };
 };

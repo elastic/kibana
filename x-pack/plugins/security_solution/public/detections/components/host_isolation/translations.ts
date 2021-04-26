@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.hostIsolation.isolateHost.isolateHost',
+  'xpack.securitySolution.endpoint.hostIsolation.isolateHost.isolateHost',
   {
     defaultMessage: 'Isolate host',
   }
@@ -18,27 +18,27 @@ export const COMMENT = i18n.translate('xpack.securitySolution.endpoint.hostIsola
   defaultMessage: 'Comment',
 });
 
-export const CANCEL = i18n.translate('xpack.securitySolution.hostIsolation.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const CONFIRM = i18n.translate('xpack.securitySolution.hostIsolation.confirm', {
-  defaultMessage: 'Confirm',
-});
-
 export const COMMENT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
   { defaultMessage: 'You may leave an optional note here.' }
 );
 
+export const CANCEL = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const CONFIRM = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.confirm', {
+  defaultMessage: 'Confirm',
+});
+
 export const CASES_ASSOCIATED_WITH_ALERT = i18n.translate(
-  'xpack.securitySolution.hostIsolation.isolateHost.casesAssociatedWihtAlert',
+  'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWihtAlert',
   {
     defaultMessage: ' cases associated with the rule ',
   }
 );
 
 export const RETURN_TO_ALERT_DETAILS = i18n.translate(
-  'xpack.securitySolution.hostIsolation.returnToAlertDetails',
+  'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',
   { defaultMessage: 'Return to alert details' }
 );

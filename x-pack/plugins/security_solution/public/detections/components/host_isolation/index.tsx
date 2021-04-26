@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { find } from 'lodash/fp';
 import {
   EuiCallOut,
@@ -41,116 +41,139 @@ export const HostIsolationPanel = React.memo(
     cancelCallback: () => void;
   }) => {
     const [comment, setComment] = useState('');
-    const [isIsolated, setIsolated] = useState(false);
+    const [isIsolated, setIsIsolated] = useState(false);
 
-    const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
-    const agentId = findAgentId ? findAgentId[0] : '';
-    const findHostName = find({ category: 'host', field: 'host.name' }, details)?.values;
-    const hostName = findHostName ? findHostName[0] : '';
-    const findAlertRule = find({ category: 'signal', field: 'signal.rule.name' }, details)?.values;
-    const alertRule = findAlertRule ? findAlertRule[0] : '';
+    const agentId = useMemo(() => {
+      const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
+      return findAgentId ? findAgentId[0] : '';
+    }, [details]);
+
+    const hostName = useMemo(() => {
+      const findHostName = find({ category: 'host', field: 'host.name' }, details)?.values;
+      return findHostName ? findHostName[0] : '';
+    }, [details]);
+
+    const alertRule = useMemo(() => {
+      const findAlertRule = find({ category: 'signal', field: 'signal.rule.name' }, details)
+        ?.values;
+      return findAlertRule ? findAlertRule[0] : '';
+    }, [details]);
 
     const { loading, isolateHost } = useHostIsolation({ agentId, comment });
 
-    const confirmHostIsolation = async () => {
+    const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await isolateHost();
-      setIsolated(hostIsolated);
-    };
+      setIsIsolated(hostIsolated);
+    }, [isolateHost]);
 
+    const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
+
+    // a placeholder until we get the case count returned from a new case route in a future pr
     const caseCount: number = 0;
 
-    return isIsolated ? (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          iconType="check"
-          color="success"
-          title={i18n.translate('xpack.securitySolution.hostIsolation.successfulIsolation.title', {
-            defaultMessage: 'Host Isolation on {hostname} successfully submitted',
-            values: { hostname: hostName },
-          })}
-        >
-          {caseCount > 0 && (
-            <>
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.hostIsolation.successfulIsolation.cases"
-                    defaultMessage="This case has been attached to the following {caseCount, plural, one {case} other {cases}}:"
-                    values={{ caseCount }}
-                  />
-                </p>
-              </EuiText>
-              <EuiText size="s">
-                <ul>
-                  <li>
+    const hostIsolated = useMemo(() => {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            iconType="check"
+            color="success"
+            title={i18n.translate(
+              'xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.title',
+              {
+                defaultMessage: 'Host Isolation on {hostname} successfully submitted',
+                values: { hostname: hostName },
+              }
+            )}
+          >
+            {caseCount > 0 && (
+              <>
+                <EuiText size="s">
+                  <p>
                     <FormattedMessage
-                      id="xpack.securitySolution.hostIsolation.placeholderCase"
-                      defaultMessage="Case"
+                      id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
+                      defaultMessage="This case has been attached to the following {caseCount, plural, one {case} other {cases}}:"
+                      values={{ caseCount }}
                     />
-                  </li>
-                </ul>
-              </EuiText>
-            </>
-          )}
-        </EuiCallOut>
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={() => cancelCallback()}>
-              <EuiText size="s">
-                <p>{RETURN_TO_ALERT_DETAILS}</p>
-              </EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    ) : (
-      <>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
-              defaultMessage="Isolate host {hostname} from network. This action will be added to the {cases}."
-              values={{
-                hostname: <b>{hostName}</b>,
-                cases: (
-                  <b>
-                    {caseCount}
-                    {CASES_ASSOCIATED_WITH_ALERT}
-                    {alertRule}
-                  </b>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiTitle size="xs">
-          <h4>{COMMENT}</h4>
-        </EuiTitle>
-        <EuiTextArea
-          data-test-subj="host_isolation_comment"
-          fullWidth={true}
-          placeholder={COMMENT_PLACEHOLDER}
-          value={comment}
-          onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setComment(event.target.value)
-          }
-        />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => cancelCallback()}>{CANCEL}</EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={confirmHostIsolation} isLoading={loading}>
-              {CONFIRM}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
+                  </p>
+                </EuiText>
+                <EuiText size="s">
+                  <ul>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
+                        defaultMessage="Case"
+                      />
+                    </li>
+                  </ul>
+                </EuiText>
+              </>
+            )}
+          </EuiCallOut>
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="right" onClick={backToAlertDetails}>
+                <EuiText size="s">
+                  <p>{RETURN_TO_ALERT_DETAILS}</p>
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    }, [backToAlertDetails, hostName]);
+
+    const hostNotIsolated = useMemo(() => {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
+                defaultMessage="Isolate host {hostname} from network. This action will be added to the {cases}."
+                values={{
+                  hostname: <b>{hostName}</b>,
+                  cases: (
+                    <b>
+                      {caseCount}
+                      {CASES_ASSOCIATED_WITH_ALERT}
+                      {alertRule}
+                    </b>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h4>{COMMENT}</h4>
+          </EuiTitle>
+          <EuiTextArea
+            data-test-subj="host_isolation_comment"
+            fullWidth={true}
+            placeholder={COMMENT_PLACEHOLDER}
+            value={comment}
+            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setComment(event.target.value)
+            }
+          />
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={backToAlertDetails}>{CANCEL}</EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={confirmHostIsolation} isLoading={loading}>
+                {CONFIRM}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    }, [alertRule, backToAlertDetails, comment, confirmHostIsolation, hostName, loading]);
+
+    return isIsolated ? hostIsolated : hostNotIsolated;
   }
 );
 
