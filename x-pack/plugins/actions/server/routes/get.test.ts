@@ -75,7 +75,7 @@ describe('getActionRoute', () => {
         name: 'action name',
         config: {},
         is_preconfigured: false,
-        is_missing_secrets: true,
+        is_missing_secrets: false,
       },
     });
   });
