@@ -52,7 +52,7 @@ export function getSessionIndexTemplate(indexName: string) {
       },
     },
     mappings: {
-      dynamic: 'strict' as 'strict',
+      dynamic: 'strict',
       properties: {
         usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
@@ -61,7 +61,7 @@ export function getSessionIndexTemplate(indexName: string) {
         accessAgreementAcknowledged: { type: 'boolean' },
         content: { type: 'binary' },
       },
-    },
+    } as const,
   });
 }
 
@@ -339,6 +339,7 @@ export class SessionIndex {
         try {
           await this.options.elasticsearchClient.indices.putTemplate({
             name: sessionIndexTemplateName,
+            // @ts-expect-error @elastic-elasticsearch types don't support nested properties
             body: getSessionIndexTemplate(this.indexName),
           });
           this.options.logger.debug('Successfully created session index template.');
