@@ -206,7 +206,7 @@ export const PaginatedContent = memo(
           </div>
         </div>
 
-        {pagination && (
+        {pagination && (children || items.length > 0) && (
           <div data-test-subj={getTestId('footer')}>
             <EuiSpacer size="l" />
 
