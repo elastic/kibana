@@ -15,7 +15,6 @@ import { useSourcererScope } from '../../common/containers/sourcerer';
 import {
   TestProviders,
   mockGlobalState,
-  apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
@@ -146,13 +145,7 @@ describe('Network page - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

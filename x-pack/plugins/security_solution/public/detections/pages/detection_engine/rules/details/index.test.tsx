@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
@@ -60,13 +59,7 @@ const state: State = {
   ...mockGlobalState,
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {

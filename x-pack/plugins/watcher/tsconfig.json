@@ -23,6 +23,7 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
+    { "path": "../license_api_guard/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
   ]

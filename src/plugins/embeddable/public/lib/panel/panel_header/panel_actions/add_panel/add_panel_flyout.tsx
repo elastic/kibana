@@ -26,6 +26,7 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  showCreateNewMenu?: boolean;
 }
 
 interface State {
@@ -134,7 +135,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           defaultMessage: 'No matching objects found.',
         })}
       >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        {this.props.showCreateNewMenu ? (
+          <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        ) : null}
       </SavedObjectFinder>
     );
 

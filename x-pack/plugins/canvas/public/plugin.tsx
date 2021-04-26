@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
   CoreStart,
@@ -49,6 +50,7 @@ export interface CanvasSetupDeps {
 export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  reporting?: ReportingStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;

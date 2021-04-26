@@ -13,12 +13,22 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
 
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
   describe('maps loaded from sample data', () => {
     before(async () => {
+      //installing the sample data with test user with super user role and then switching roles with limited privileges
+      await security.testUser.setRoles(['superuser'], false);
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.addSampleDataSet('ecommerce');
+      await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.home.addSampleDataSet('logs');
       const SAMPLE_DATA_RANGE = `[
         {
           "from": "now-30d",
@@ -80,15 +90,23 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await kibanaServer.uiSettings.update({
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
+      //running the rest of the tests with limited roles
+      await security.testUser.setRoles(['global_maps_all', 'kibana_sample_read'], false);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.removeSampleDataSet('ecommerce');
+      await PageObjects.home.removeSampleDataSet('flights');
+      await PageObjects.home.removeSampleDataSet('logs');
     });
 
     describe('ecommerce', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
@@ -104,11 +122,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.removeSampleDataSet('ecommerce');
       });
 
       it('should load layers', async () => {
@@ -122,11 +135,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
@@ -138,11 +146,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.removeSampleDataSet('flights');
       });
 
       it('should load saved object and display layers', async () => {
@@ -156,11 +159,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
     describe('web logs', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
@@ -173,11 +171,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.home.removeSampleDataSet('logs');
       });
 
       it('should load saved object and display layers', async () => {

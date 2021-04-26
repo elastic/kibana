@@ -21,6 +21,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -36,12 +37,18 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     xAxisColumn: {
       sourceField: 'performance.metric',
     },
-    yAxisColumn: {
-      sourceField: 'Records',
-      label: 'Pages loaded',
-    },
+    yAxisColumns: [
+      {
+        sourceField: 'Records',
+        label: 'Pages loaded',
+      },
+    ],
     hasOperationType: false,
     defaultFilters: [
+      {
+        field: TRANSACTION_URL,
+        isNegated: false,
+      },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,

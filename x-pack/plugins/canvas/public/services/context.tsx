@@ -56,6 +56,7 @@ export const ServicesProvider: FC<{
     platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),
     search: specifiedProviders.search.getService(),
+    reporting: specifiedProviders.reporting.getService(),
     labs: specifiedProviders.labs.getService(),
   };
   return <context.Provider value={value}>{children}</context.Provider>;

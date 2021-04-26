@@ -9,13 +9,15 @@ import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { ResultsTable } from '../../results/results_table';
-import { ActionResultsTable } from '../../action_results/action_results_table';
+import { ActionResultsSummary } from '../../action_results/action_results_summary';
 
 interface ResultTabsProps {
   actionId: string;
+  agentIds?: string[];
+  isLive?: boolean;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId }) => {
+const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, isLive }) => {
   const tabs = useMemo(
     () => [
       {
@@ -24,7 +26,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId }) => {
         content: (
           <>
             <EuiSpacer />
-            <ActionResultsTable actionId={actionId} />
+            <ActionResultsSummary actionId={actionId} agentIds={agentIds} isLive={isLive} />
           </>
         ),
       },
@@ -34,12 +36,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId }) => {
         content: (
           <>
             <EuiSpacer />
-            <ResultsTable actionId={actionId} />
+            <ResultsTable actionId={actionId} isLive={isLive} />
           </>
         ),
       },
     ],
-    [actionId]
+    [actionId, agentIds, isLive]
   );
 
   return (

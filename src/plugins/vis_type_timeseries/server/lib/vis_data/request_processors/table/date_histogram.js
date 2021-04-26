@@ -23,7 +23,7 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
 
     const meta = {
       timeField,
-      index: seriesIndex.indexPattern?.id,
+      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
     };
 
     const getDateHistogramForLastBucketMode = () => {

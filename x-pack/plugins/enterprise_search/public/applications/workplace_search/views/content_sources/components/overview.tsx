@@ -116,7 +116,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyDocumentSummary">
+        <EuiPanel
+          hasShadow={false}
+          color="subdued"
+          paddingSize="l"
+          data-test-subj="EmptyDocumentSummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{SOURCES_NO_CONTENT_TITLE}</h2>}
             iconType="documents"
@@ -163,7 +168,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyActivitySummary">
+        <EuiPanel
+          paddingSize="l"
+          hasShadow={false}
+          color="subdued"
+          data-test-subj="EmptyActivitySummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{EMPTY_ACTIVITY_TITLE}</h2>}
             iconType="clock"
@@ -230,7 +240,12 @@ export const Overview: React.FC = () => {
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
         {groups.map((group, index) => (
           <EuiFlexItem key={index}>
-            <EuiPanelTo to={getGroupPath(group.id)} data-test-subj="SourceGroupLink">
+            <EuiPanelTo
+              hasShadow={false}
+              color="subdued"
+              to={getGroupPath(group.id)}
+              data-test-subj="SourceGroupLink"
+            >
               <EuiText size="s" className="eui-textTruncate">
                 <strong>{group.name}</strong>
               </EuiText>
@@ -248,7 +263,7 @@ export const Overview: React.FC = () => {
         <h4>{CONFIGURATION_TITLE}</h4>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
           {details.map((detail, index) => (
             <EuiFlexGroup
@@ -276,7 +291,7 @@ export const Overview: React.FC = () => {
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={aclImage} size="l" color="primary" />
@@ -298,7 +313,7 @@ export const Overview: React.FC = () => {
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel data-test-subj="DocumentPermissionsDisabled">
+      <EuiPanel hasShadow={false} color="subdued" data-test-subj="DocumentPermissionsDisabled">
         <EuiText size="s">
           <EuiFlexGroup wrap gutterSize="m" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -329,7 +344,7 @@ export const Overview: React.FC = () => {
   );
 
   const sourceStatus = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
@@ -353,7 +368,7 @@ export const Overview: React.FC = () => {
   );
 
   const permissionsStatus = (
-    <EuiPanel data-test-subj="PermissionsStatus">
+    <EuiPanel hasShadow={false} color="subdued" data-test-subj="PermissionsStatus">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{STATUS_HEADING}</EuiTextColor>
@@ -389,7 +404,7 @@ export const Overview: React.FC = () => {
   );
 
   const credentials = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{CREDENTIALS_TITLE}</EuiTextColor>
@@ -409,7 +424,7 @@ export const Overview: React.FC = () => {
     title: string;
     children: React.ReactNode;
   }) => (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{DOCUMENTATION_LINK_TITLE}</EuiTextColor>
@@ -424,7 +439,7 @@ export const Overview: React.FC = () => {
   );
 
   const documentPermssionsLicenseLocked = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <LicenseBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">

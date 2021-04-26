@@ -10,7 +10,7 @@ import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
 
-import Axios, { AxiosResponse } from 'axios';
+import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 
 const isConcliftOnGetError = (error: any) => {
@@ -53,6 +53,7 @@ export interface ReqOptions {
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
+  responseType?: ResponseType;
 }
 
 const delay = (ms: number) =>
@@ -84,11 +85,16 @@ export class KbnClientRequester {
   }
 
   public resolveUrl(relativeUrl: string = '/') {
-    return Url.resolve(this.pickUrl(), relativeUrl);
+    let baseUrl = this.pickUrl();
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
+    const relative = relativeUrl.startsWith('/') ? relativeUrl.slice(1) : relativeUrl;
+    return Url.resolve(baseUrl, relative);
   }
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
-    const url = Url.resolve(this.pickUrl(), options.path);
+    const url = this.resolveUrl(options.path);
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
@@ -107,6 +113,9 @@ export class KbnClientRequester {
             'kbn-xsrf': 'kbn-client',
           },
           httpsAgent: this.httpsAgent,
+          responseType: options.responseType,
+          // work around https://github.com/axios/axios/issues/2791
+          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
           paramsSerializer: (params) => Qs.stringify(params),
         });
 

@@ -13,8 +13,11 @@ import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
-import { internalRuleUpdate } from '../schemas/rule_schemas';
-import { RuleTypeParams } from '../types';
+import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -73,7 +76,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
+}: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   if (rule == null) {
     return null;
   }
@@ -151,7 +154,7 @@ export const patchRules = async ({
       severity,
       severityMapping,
       threat,
-      threshold,
+      threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
       threatFilters,
       threatIndex,
       threatQuery,
@@ -167,7 +170,9 @@ export const patchRules = async ({
       version: calculatedVersion,
       exceptionsList,
       anomalyThreshold,
-      machineLearningJobId,
+      machineLearningJobId: machineLearningJobId
+        ? normalizeMachineLearningJobIds(machineLearningJobId)
+        : undefined,
     }
   );
 
@@ -187,13 +192,10 @@ export const patchRules = async ({
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }
 
-  /**
-   * TODO: Remove this use of `as` by utilizing the proper type
-   */
-  const update = (await alertsClient.update({
+  const update = await alertsClient.update({
     id: rule.id,
     data: validated,
-  })) as PartialAlert<RuleTypeParams>;
+  });
 
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });

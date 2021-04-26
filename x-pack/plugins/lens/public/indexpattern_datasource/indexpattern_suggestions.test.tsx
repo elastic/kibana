@@ -70,7 +70,10 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
-  documentField,
+  {
+    ...documentField,
+    displayName: 'Records label',
+  },
 ];
 
 const fieldsTwo = [
@@ -962,7 +965,19 @@ describe('IndexPattern Data Source suggestions', () => {
             currentLayer: {
               ...initialState.layers.currentLayer,
               columns: {
-                cola: initialState.layers.currentLayer.columns.cola,
+                cola: {
+                  dataType: 'string',
+                  isBucketed: true,
+                  sourceField: 'source',
+                  label: 'values of source',
+                  customLabel: true,
+                  operationType: 'terms',
+                  params: {
+                    orderBy: { type: 'alphabetical', fallback: false },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
               },
               columnOrder: ['cola'],
             },
@@ -2230,7 +2245,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records',
+                    label: 'Cumulative sum of Records label',
                     scale: undefined,
                   },
                 },

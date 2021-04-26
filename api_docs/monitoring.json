@@ -119,9 +119,9 @@
           "lineNumber": 92
         },
         "signature": [
-          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
+          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; logs: Readonly<{} & { index: string; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
           "Duration",
-          "; }>; agent: Readonly<{} & { interval: string; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "; }>; agent: Readonly<{} & { interval: string; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
         "initialIsOpen": false
       }

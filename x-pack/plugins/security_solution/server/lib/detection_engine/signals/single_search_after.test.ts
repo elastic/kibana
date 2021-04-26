@@ -34,7 +34,7 @@ describe('singleSearchAfter', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchResult } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -44,7 +44,6 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -53,7 +52,7 @@ describe('singleSearchAfter', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -63,7 +62,6 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -104,7 +102,7 @@ describe('singleSearchAfter', () => {
       })
     );
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -114,21 +112,20 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
     ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortIds = ['1234567891111'];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsWithSortId()
       )
     );
     const { searchResult } = await singleSearchAfter({
-      searchAfterSortId,
+      searchAfterSortIds,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -138,18 +135,17 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
   test('if singleSearchAfter throws error', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortIds = ['1234567891111'];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
     await expect(
       singleSearchAfter({
-        searchAfterSortId,
+        searchAfterSortIds,
         index: [],
         from: 'now-360s',
         to: 'now',
@@ -159,7 +155,6 @@ describe('singleSearchAfter', () => {
         filter: undefined,
         timestampOverride: undefined,
         buildRuleMessage,
-        excludeDocsWithTimestampOverride: false,
       })
     ).rejects.toThrow('Fake Error');
   });

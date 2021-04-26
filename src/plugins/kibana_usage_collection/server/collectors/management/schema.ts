@@ -189,6 +189,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:maxDocFieldsDisplayed': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   defaultColumns: {
     type: 'array',
     items: {
@@ -426,10 +430,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'banners:backgroundColor': {
     type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableAlertingExperience': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:presentation:unifiedToolbar': {

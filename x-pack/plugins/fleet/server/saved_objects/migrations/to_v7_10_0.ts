@@ -91,6 +91,7 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
   },
   Settings
 > = (settingsDoc) => {
+  // @ts-expect-error
   settingsDoc.attributes.kibana_urls = [settingsDoc.attributes.kibana_url];
   // @ts-expect-error
   delete settingsDoc.attributes.kibana_url;

@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
@@ -46,6 +47,7 @@ export class DocViewerTab extends React.Component<Props, State> {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
       nextProps.id !== this.props.id ||
+      !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
       nextState.hasError
     );
   }

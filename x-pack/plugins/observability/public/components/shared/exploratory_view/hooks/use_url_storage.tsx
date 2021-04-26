@@ -56,7 +56,7 @@ interface ShortUrlSeries {
 export type AllShortSeries = Record<string, ShortUrlSeries>;
 export type AllSeries = Record<string, SeriesUrl>;
 
-export const NEW_SERIES_KEY = 'newSeriesKey';
+export const NEW_SERIES_KEY = 'new-series-key';
 
 export function useUrlStorage(seriesId?: string) {
   const allSeriesKey = 'sr';

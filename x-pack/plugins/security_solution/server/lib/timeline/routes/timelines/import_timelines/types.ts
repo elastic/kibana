@@ -7,9 +7,9 @@
 import { BulkError } from '../../../../detection_engine/routes/utils';
 
 import { SavedTimeline } from '../../../../../../common/types/timeline';
-import { NoteResult } from '../../../../../graphql/types';
 import { HapiReadableStream } from '../../../../detection_engine/rules/types';
 import { TimelineStatusActions } from '../../../utils/common';
+import { NoteResult } from '../../../../../../common/types/timeline/note';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;

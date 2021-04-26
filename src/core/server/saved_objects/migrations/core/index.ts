@@ -14,3 +14,4 @@ export type { LogFn, SavedObjectsMigrationLogger } from './migration_logger';
 export type { MigrationResult, MigrationStatus } from './migration_coordinator';
 export { createMigrationEsClient } from './migration_es_client';
 export type { MigrationEsClient } from './migration_es_client';
+export { excludeUnusedTypesQuery } from './elastic_index';

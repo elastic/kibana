@@ -7,11 +7,8 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { I18nProvider } from '@kbn/i18n/react';
-import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
+
 import React from 'react';
-import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
@@ -36,12 +33,6 @@ interface Props {
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
 
-export const apolloClient = new ApolloClient({
-  cache: new Cache(),
-  link: new ApolloLink((o, f) => (f ? f(o) : null)),
-});
-
-export const apolloClientObservable = new BehaviorSubject(apolloClient);
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 
 Object.defineProperty(window, 'localStorage', {
@@ -54,24 +45,16 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
-      <ApolloProvider client={apolloClient}>
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      </ApolloProvider>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+        </ThemeProvider>
+      </ReduxStoreProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
 );

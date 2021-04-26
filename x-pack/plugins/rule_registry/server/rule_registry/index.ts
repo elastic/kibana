@@ -7,6 +7,7 @@
 
 import { CoreSetup, Logger, RequestHandlerContext } from 'kibana/server';
 import { inspect } from 'util';
+import { AlertsClient } from '../../../alerting/server';
 import { SpacesServiceStart } from '../../../spaces/server';
 import {
   ActionVariable,
@@ -15,14 +16,19 @@ import {
   AlertTypeState,
 } from '../../../alerting/common';
 import { createReadySignal, ClusterClientAdapter } from '../../../event_log/server';
-import { FieldMap, ILMPolicy } from './types';
+import { ILMPolicy } from './types';
 import { RuleParams, RuleType } from '../types';
-import { mergeFieldMaps } from './field_map/merge_field_maps';
-import { OutputOfFieldMap } from './field_map/runtime_type_from_fieldmap';
+import {
+  mergeFieldMaps,
+  TypeOfFieldMap,
+  FieldMap,
+  FieldMapType,
+  BaseRuleFieldMap,
+  runtimeTypeFromFieldMap,
+} from '../../common';
 import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
 import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
-import { DefaultFieldMap } from './defaults/field_map';
 import { ScopedRuleRegistryClient } from './create_scoped_rule_registry_client/types';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
@@ -38,20 +44,25 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   writeEnabled: boolean;
 }
 
-export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
+export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
   private readonly esAdapter: ClusterClientAdapter<{
-    body: OutputOfFieldMap<TFieldMap>;
+    body: TypeOfFieldMap<TFieldMap>;
     index: string;
   }>;
   private readonly children: Array<RuleRegistry<TFieldMap>> = [];
+  private readonly types: Array<RuleType<TFieldMap, any, any>> = [];
+
+  private readonly fieldmapType: FieldMapType<TFieldMap>;
 
   constructor(private readonly options: RuleRegistryOptions<TFieldMap>) {
     const { logger, coreSetup } = options;
 
+    this.fieldmapType = runtimeTypeFromFieldMap(options.fieldMap);
+
     const { wait, signal } = createReadySignal<boolean>();
 
     this.esAdapter = new ClusterClientAdapter<{
-      body: OutputOfFieldMap<TFieldMap>;
+      body: TypeOfFieldMap<TFieldMap>;
       index: string;
     }>({
       wait,
@@ -103,6 +114,11 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
     const templateExists = await this.esAdapter.doesIndexTemplateExist(indexAliasName);
 
+    const mappings = mappingFromFieldMap(this.options.fieldMap);
+
+    const esClient = (await this.options.coreSetup.getStartServices())[0].elasticsearch.client
+      .asInternalUser;
+
     if (!templateExists) {
       await this.esAdapter.createIndexTemplate(indexAliasName, {
         index_patterns: [`${indexAliasName}-*`],
@@ -114,7 +130,16 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
           'sort.field': '@timestamp',
           'sort.order': 'desc',
         },
-        mappings: mappingFromFieldMap(this.options.fieldMap),
+        mappings,
+      });
+    } else {
+      await esClient.indices.putTemplate({
+        name: indexAliasName,
+        body: {
+          index_patterns: [`${indexAliasName}-*`],
+          mappings,
+        },
+        create: false,
       });
     }
 
@@ -128,24 +153,86 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
           },
         },
       });
+    } else {
+      const { body: aliases } = (await esClient.indices.getAlias({
+        index: indexAliasName,
+      })) as { body: Record<string, { aliases: Record<string, { is_write_index: boolean }> }> };
+
+      const writeIndex = Object.entries(aliases).find(
+        ([indexName, alias]) => alias.aliases[indexAliasName]?.is_write_index === true
+      )![0];
+
+      const { body: fieldsInWriteIndex } = await esClient.fieldCaps({
+        index: writeIndex,
+        fields: '*',
+      });
+
+      const fieldsNotOrDifferentInIndex = Object.entries(this.options.fieldMap).filter(
+        ([fieldName, descriptor]) => {
+          return (
+            !fieldsInWriteIndex.fields[fieldName] ||
+            !fieldsInWriteIndex.fields[fieldName][descriptor.type]
+          );
+        }
+      );
+
+      if (fieldsNotOrDifferentInIndex.length > 0) {
+        this.options.logger.debug(
+          `Some fields were not found in write index mapping: ${Object.keys(
+            Object.fromEntries(fieldsNotOrDifferentInIndex)
+          ).join(',')}`
+        );
+        this.options.logger.info(`Updating index mapping due to new fields`);
+
+        await esClient.indices.putMapping({
+          index: indexAliasName,
+          body: mappings,
+        });
+      }
     }
   }
 
-  createScopedRuleRegistryClient({
+  getFieldMapType() {
+    return this.fieldmapType;
+  }
+
+  getRuleTypeById(ruleTypeId: string) {
+    return this.types.find((type) => type.id === ruleTypeId);
+  }
+
+  getRegistryByRuleTypeId(ruleTypeId: string): RuleRegistry<TFieldMap> | undefined {
+    if (this.getRuleTypeById(ruleTypeId)) {
+      return this;
+    }
+
+    return this.children.find((child) => child.getRegistryByRuleTypeId(ruleTypeId));
+  }
+
+  async createScopedRuleRegistryClient({
     context,
+    alertsClient,
   }: {
     context: RequestHandlerContext;
-  }): ScopedRuleRegistryClient<TFieldMap> | undefined {
+    alertsClient: AlertsClient;
+  }): Promise<ScopedRuleRegistryClient<TFieldMap> | undefined> {
     if (!this.options.writeEnabled) {
       return undefined;
     }
     const { indexAliasName, indexTarget } = this.getEsNames();
 
+    const frameworkAlerts = (
+      await alertsClient.find({
+        options: {
+          perPage: 1000,
+        },
+      })
+    ).data;
+
     return createScopedRuleRegistryClient({
-      savedObjectsClient: context.core.savedObjects.getClient({ includedHiddenTypes: ['alert'] }),
+      ruleUuids: frameworkAlerts.map((frameworkAlert) => frameworkAlert.id),
       scopedClusterClient: context.core.elasticsearch.client,
       clusterClientAdapter: this.esAdapter,
-      fieldMap: this.options.fieldMap,
+      registry: this,
       indexAliasName,
       indexTarget,
       logger: this.options.logger,
@@ -159,6 +246,8 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
     const { indexAliasName, indexTarget } = this.getEsNames();
 
+    this.types.push(type);
+
     this.options.alertingPluginSetupContract.registerType<
       AlertTypeParams,
       AlertTypeState,
@@ -168,7 +257,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     >({
       ...type,
       executor: async (executorOptions) => {
-        const { services, namespace, alertId, name, tags } = executorOptions;
+        const { services, alertId, name, tags } = executorOptions;
 
         const rule = {
           id: type.id,
@@ -189,13 +278,12 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
             ...(this.options.writeEnabled
               ? {
                   scopedRuleRegistryClient: createScopedRuleRegistryClient({
-                    savedObjectsClient: services.savedObjectsClient,
                     scopedClusterClient: services.scopedClusterClient,
+                    ruleUuids: [rule.uuid],
                     clusterClientAdapter: this.esAdapter,
-                    fieldMap: this.options.fieldMap,
+                    registry: this,
                     indexAliasName,
                     indexTarget,
-                    namespace,
                     ruleData: {
                       producer,
                       rule,

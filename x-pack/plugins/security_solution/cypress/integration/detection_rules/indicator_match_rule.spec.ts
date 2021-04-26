@@ -65,11 +65,14 @@ import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details
 import {
   changeRowsPerPageTo300,
   duplicateFirstRule,
+  duplicateSelectedRules,
   duplicateRuleFromMenu,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
+  selectNumberOfRules,
+  checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, reload } from '../../tasks/common';
@@ -99,7 +102,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { waitForKibana } from '../../tasks/edit_rule';
+import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
@@ -564,16 +567,26 @@ describe('indicator match', () => {
       it('Allows the rule to be duplicated from the table', () => {
         waitForKibana();
         duplicateFirstRule();
-        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
+        goBackToRuleDetails();
+        goBackToAllRulesTable();
+        checkDuplicatedRule();
+      });
+
+      it("Allows the rule to be duplicated from the table's bulk actions", () => {
+        waitForKibana();
+        selectNumberOfRules(1);
+        duplicateSelectedRules();
+        checkDuplicatedRule();
       });
 
       it('Allows the rule to be duplicated from the edit screen', () => {
         waitForKibana();
         goToRuleDetails();
         duplicateRuleFromMenu();
+        goBackToRuleDetails();
         goBackToAllRulesTable();
         reload();
-        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
+        checkDuplicatedRule();
       });
     });
   });

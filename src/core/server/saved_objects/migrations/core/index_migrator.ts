@@ -189,8 +189,7 @@ async function migrateSourceToDest(context: Context) {
         serializer,
         documentMigrator.migrateAndConvert,
         // @ts-expect-error @elastic/elasticsearch `Hit._id` may be a string | number in ES, but we always expect strings in the SO index.
-        docs,
-        log
+        docs
       )
     );
   }

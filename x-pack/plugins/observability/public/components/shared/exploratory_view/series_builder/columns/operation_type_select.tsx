@@ -29,7 +29,9 @@ export function OperationTypeSelect({
 
   useEffect(() => {
     setSeries(seriesId, { ...series, operationType: operationType || defaultOperationType });
-  }, [defaultOperationType, seriesId, operationType, setSeries, series]);
+    // We only want to call this when defaultOperationType changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultOperationType]);
 
   const options = [
     {
@@ -72,6 +74,7 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
+      prepend="Calculation"
       data-test-subj="operationTypeSelect"
       compressed
       valueOfSelected={operationType || defaultOperationType}

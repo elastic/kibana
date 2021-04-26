@@ -24,6 +24,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
 } from '../../../core/public';
+import { VisualizationsStart } from '../../visualizations/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
@@ -115,15 +116,18 @@ export interface DashboardStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spacesOss?: SpacesOssPluginStart;
+  visualizations: VisualizationsStart;
 }
 
 export type DashboardSetup = void;
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
+  getDashboardContainerByValueRenderer: () => ReturnType<
+    typeof createDashboardContainerByValueRenderer
+  >;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
-  DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
 }
 
 export class DashboardPlugin
@@ -260,8 +264,16 @@ export class DashboardPlugin
       },
     });
 
-    const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
-    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
+    getStartServices().then((coreStart) => {
+      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(
+        getStartServices,
+        coreStart.embeddable
+      );
+      embeddable.registerEmbeddableFactory(
+        dashboardContainerFactory.type,
+        dashboardContainerFactory
+      );
+    });
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
@@ -403,17 +415,24 @@ export class DashboardPlugin
       savedObjects: plugins.savedObjects,
       embeddableStart: plugins.embeddable,
     });
-    const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
-      DASHBOARD_CONTAINER_TYPE
-    )! as DashboardContainerFactory;
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
+      getDashboardContainerByValueRenderer: () => {
+        const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
+          DASHBOARD_CONTAINER_TYPE
+        );
+
+        if (!dashboardContainerFactory) {
+          throw new Error(`${DASHBOARD_CONTAINER_TYPE} Embeddable Factory not found`);
+        }
+
+        return createDashboardContainerByValueRenderer({
+          factory: dashboardContainerFactory as DashboardContainerFactory,
+        });
+      },
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
-      DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
-        factory: dashboardContainerFactory,
-      }),
     };
   }
 

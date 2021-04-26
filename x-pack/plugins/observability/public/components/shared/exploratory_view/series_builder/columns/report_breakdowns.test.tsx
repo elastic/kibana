@@ -45,7 +45,7 @@ describe('Series Builder ReportBreakdowns', function () {
     fireEvent.click(screen.getByText(/operating system/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
       breakdown: USER_AGENT_OS,
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },
@@ -66,7 +66,7 @@ describe('Series Builder ReportBreakdowns', function () {
     fireEvent.click(screen.getByText(/no breakdown/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
       breakdown: undefined,
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },

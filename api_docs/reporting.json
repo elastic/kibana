@@ -19,6 +19,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.Unnamed.$1",
                 "type": "Object",
                 "label": "http",
                 "isRequired": true,
@@ -55,6 +56,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getReportURL.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -85,6 +87,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.downloadReport.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -115,6 +118,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.deleteReport.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -140,6 +144,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.list.$1",
                 "type": "number",
                 "label": "page",
                 "isRequired": true,
@@ -153,6 +158,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.list.$2",
                 "type": "Array",
                 "label": "jobIds",
                 "isRequired": true,
@@ -168,13 +174,7 @@
             ],
             "signature": [
               "(page?: number, jobIds?: string[]) => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.JobQueueEntry",
-                "text": "JobQueueEntry"
-              },
+              "JobQueueEntry",
               "[]>"
             ],
             "description": [],
@@ -208,18 +208,13 @@
             "label": "getContent",
             "signature": [
               "(jobId: string) => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.JobContent",
-                "text": "JobContent"
-              },
+              "JobContent",
               ">"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getContent.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -246,18 +241,13 @@
             "label": "getInfo",
             "signature": [
               "(jobId: string) => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "common",
-                "docId": "kibReportingPluginApi",
-                "section": "def-common.ReportApiJSON",
-                "text": "ReportApiJSON"
-              },
+              "ReportApiJSON",
               ">"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getInfo.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -283,6 +273,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.findForJobIds.$1",
                 "type": "Array",
                 "label": "jobIds",
                 "isRequired": true,
@@ -298,13 +289,7 @@
             ],
             "signature": [
               "(jobIds: string[]) => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "common",
-                "docId": "kibReportingPluginApi",
-                "section": "def-common.ReportDocument",
-                "text": "ReportDocument"
-              },
+              "ReportDocument",
               "[]>"
             ],
             "description": [],
@@ -321,6 +306,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.$1",
                 "type": "string",
                 "label": "exportType",
                 "isRequired": true,
@@ -334,6 +320,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.$2",
                 "type": "Object",
                 "label": "jobParams",
                 "isRequired": true,
@@ -364,6 +351,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.createReportingJob.$1",
                 "type": "string",
                 "label": "exportType",
                 "isRequired": true,
@@ -377,6 +365,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.createReportingJob.$2",
                 "type": "Any",
                 "label": "jobParams",
                 "isRequired": true,
@@ -423,6 +412,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getDownloadLink.$1",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -470,13 +460,7 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.DiagnoseResponse",
-                "text": "DiagnoseResponse"
-              },
+              "DiagnoseResponse",
               ">"
             ],
             "description": [],
@@ -494,13 +478,7 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.DiagnoseResponse",
-                "text": "DiagnoseResponse"
-              },
+              "DiagnoseResponse",
               ">"
             ],
             "description": [],
@@ -518,13 +496,7 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.DiagnoseResponse",
-                "text": "DiagnoseResponse"
-              },
+              "DiagnoseResponse",
               ">"
             ],
             "description": [],
@@ -595,6 +567,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -636,13 +609,7 @@
                 "text": "CoreSetup"
               },
               "<object, unknown>, { home, management, licensing, uiActions, share }: ",
-              {
-                "pluginId": "reporting",
-                "scope": "public",
-                "docId": "kibReportingPluginApi",
-                "section": "def-public.ReportingPublicPluginSetupDendencies",
-                "text": "ReportingPublicPluginSetupDendencies"
-              },
+              "ReportingPublicPluginSetupDendencies",
               ") => ",
               {
                 "pluginId": "reporting",
@@ -655,6 +622,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -675,17 +643,12 @@
                 }
               },
               {
+                "id": "def-public.ReportingPublicPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ home, management, licensing, uiActions, share }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "public",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-public.ReportingPublicPluginSetupDendencies",
-                    "text": "ReportingPublicPluginSetupDendencies"
-                  }
+                  "ReportingPublicPluginSetupDendencies"
                 ],
                 "description": [],
                 "source": {
@@ -726,6 +689,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -836,17 +800,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.Unnamed.$1",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
+                  "LevelLogger"
                 ],
                 "description": [],
                 "source": {
@@ -855,6 +814,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.Unnamed.$2",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -866,9 +826,9 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "description": [],
                 "source": {
@@ -890,29 +850,18 @@
             "label": "pluginSetup",
             "signature": [
               "(setupDeps: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalSetup",
-                "text": "ReportingInternalSetup"
-              },
+              "ReportingInternalSetup",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.pluginSetup.$1",
                 "type": "Object",
                 "label": "setupDeps",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportingInternalSetup",
-                    "text": "ReportingInternalSetup"
-                  }
+                  "ReportingInternalSetup"
                 ],
                 "description": [],
                 "source": {
@@ -934,29 +883,18 @@
             "label": "pluginStart",
             "signature": [
               "(startDeps: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalStart",
-                "text": "ReportingInternalStart"
-              },
+              "ReportingInternalStart",
               ") => Promise<void>"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.pluginStart.$1",
                 "type": "Object",
                 "label": "startDeps",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportingInternalStart",
-                    "text": "ReportingInternalStart"
-                  }
+                  "ReportingInternalStart"
                 ],
                 "description": [],
                 "source": {
@@ -1038,6 +976,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.setConfig.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -1111,13 +1050,7 @@
             "label": "getPluginStartDeps",
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalStart",
-                "text": "ReportingInternalStart"
-              },
+              "ReportingInternalStart",
               ">"
             ],
             "description": [],
@@ -1135,13 +1068,7 @@
             "label": "getExportTypesRegistry",
             "signature": [
               "() => ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ExportTypesRegistry",
-                "text": "ExportTypesRegistry"
-              }
+              "ExportTypesRegistry"
             ],
             "description": [],
             "children": [],
@@ -1158,21 +1085,9 @@
             "label": "scheduleTask",
             "signature": [
               "(report: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportTaskParams",
-                "text": "ReportTaskParams"
-              },
+              "ReportTaskParams",
               "<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.BasePayload",
-                "text": "BasePayload"
-              },
+              "BasePayload",
               ">) => Promise<",
               {
                 "pluginId": "taskManager",
@@ -1186,25 +1101,14 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.scheduleTask.$1",
                 "type": "Object",
                 "label": "report",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportTaskParams",
-                    "text": "ReportTaskParams"
-                  },
+                  "ReportTaskParams",
                   "<",
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.BasePayload",
-                    "text": "BasePayload"
-                  },
+                  "BasePayload",
                   ">"
                 ],
                 "description": [],
@@ -1227,13 +1131,7 @@
             "label": "getStore",
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingStore",
-                "text": "ReportingStore"
-              },
+              "ReportingStore",
               ">"
             ],
             "description": [],
@@ -1251,13 +1149,7 @@
             "label": "getLicenseInfo",
             "signature": [
               "() => Promise<Record<string, ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LicenseCheckResult",
-                "text": "LicenseCheckResult"
-              },
+              "LicenseCheckResult",
               ">>"
             ],
             "description": [],
@@ -1275,13 +1167,7 @@
             "label": "getScreenshotsObservable",
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ScreenshotsObservableFn",
-                "text": "ScreenshotsObservableFn"
-              },
+              "ScreenshotsObservableFn",
               ">"
             ],
             "description": [],
@@ -1299,13 +1185,7 @@
             "label": "getPluginSetupDeps",
             "signature": [
               "() => ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalSetup",
-                "text": "ReportingInternalSetup"
-              }
+              "ReportingInternalSetup"
             ],
             "description": [],
             "children": [],
@@ -1352,7 +1232,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1365,6 +1245,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getUiSettingsServiceFactory.$1",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -1377,7 +1258,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "description": [],
                 "source": {
@@ -1407,18 +1288,13 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
+              "LevelLogger",
               ") => string | undefined"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getSpaceId.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1439,17 +1315,12 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getSpaceId.$2",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
+                  "LevelLogger"
                 ],
                 "description": [],
                 "source": {
@@ -1471,13 +1342,7 @@
             "label": "getFakeRequest",
             "signature": [
               "(baseRequest: object, spaceId: string | undefined, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
+              "LevelLogger",
               ") => ",
               {
                 "pluginId": "core",
@@ -1491,6 +1356,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getFakeRequest.$1",
                 "type": "Uncategorized",
                 "label": "baseRequest",
                 "isRequired": true,
@@ -1504,6 +1370,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getFakeRequest.$2",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": false,
@@ -1517,17 +1384,12 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getFakeRequest.$3",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
+                  "LevelLogger"
                 ],
                 "description": [],
                 "source": {
@@ -1557,13 +1419,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
+              "LevelLogger",
               ") => Promise<",
               {
                 "pluginId": "core",
@@ -1577,6 +1433,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getUiSettingsClient.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1597,17 +1454,12 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getUiSettingsClient.$2",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
+                  "LevelLogger"
                 ],
                 "description": [],
                 "source": {
@@ -1681,6 +1533,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.trackReport.$1",
                 "type": "string",
                 "label": "reportId",
                 "isRequired": true,
@@ -1711,6 +1564,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.untrackReport.$1",
                 "type": "string",
                 "label": "reportId",
                 "isRequired": true,
@@ -1805,6 +1659,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -1816,9 +1671,9 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "description": [],
                 "source": {
@@ -1860,6 +1715,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1880,6 +1736,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingPlugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -1932,6 +1789,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1951,6 +1809,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingPlugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -1999,9 +1858,9 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
           "ByteSizeValue",
-          "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+          "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "description": [],
         "tags": [],
@@ -2148,13 +2007,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorSet",
-                "text": "CollectorSet"
-              },
+              "CollectorSet",
               ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
             ]
           }
@@ -2254,6 +2107,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.CancellationToken.on.$1",
                 "type": "Object",
                 "label": "callback",
                 "isRequired": true,
@@ -2335,6 +2189,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Poller.Unnamed.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,

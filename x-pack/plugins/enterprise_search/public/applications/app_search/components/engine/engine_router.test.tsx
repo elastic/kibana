@@ -22,6 +22,7 @@ import { CurationsRouter } from '../curations';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
 
@@ -98,6 +99,13 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders a synonyms view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineSynonyms: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(Synonyms)).toHaveLength(1);
   });
 
   it('renders a curations view', () => {

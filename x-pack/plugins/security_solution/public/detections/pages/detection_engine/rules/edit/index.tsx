@@ -343,6 +343,7 @@ const EditRulePageComponent: FC = () => {
                 href: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
                 pageId: SecurityPageName.detections,
+                dataTestSubj: 'ruleEditBackToRuleDetails',
               }}
               isLoading={isLoading}
               title={i18n.PAGE_TITLE}
