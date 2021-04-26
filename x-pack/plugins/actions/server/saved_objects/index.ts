@@ -31,23 +31,11 @@ export function setupSavedObjects(
       getTitle(obj) {
         return `Connector: [${obj.attributes.name}]`;
       },
-      onExport(ctx, objs) {
-        return objs.map((obj) => {
-          return {
-            ...obj,
-            attributes: {
-              ...obj.attributes,
-              isMissingSecrets: false,
-            },
-          };
-        });
-      },
       onImport(objs) {
         return {
           warnings: [
             {
               type: 'action_required',
-              // message: `${objs.length} Connectors have been imported but need to be enabled`,
               message: i18n.translate('xpack.actions.savedObjects.onImportText', {
                 defaultMessage:
                   '{objsLength} {objsLength, plural, one {Connector} other {Connectors}} have been imported but need to be enabled',
