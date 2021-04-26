@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { getDiscoverUrlState, TransformListAction, TransformListRow } from '../../../../common';
+
+import {
+  DiscoverUrlGeneratorState,
+  DISCOVER_APP_URL_GENERATOR,
+} from '../../../../../../../../../src/plugins/discover/public';
+
+import { TransformListAction, TransformListRow } from '../../../../common';
 
 import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
@@ -25,6 +31,8 @@ export const useDiscoverAction = (forceDisable: boolean) => {
   const appDeps = useAppDependencies();
   const savedObjectsClient = appDeps.savedObjects.client;
   const indexPatterns = appDeps.data.indexPatterns;
+  const { getUrlGenerator } = appDeps.share.urlGenerators;
+  const isDiscoverAvailable = !!appDeps.application.capabilities.discover?.show;
 
   const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
 
@@ -40,18 +48,30 @@ export const useDiscoverAction = (forceDisable: boolean) => {
   }, [indexPatterns, loadIndexPatterns, savedObjectsClient]);
 
   const clickHandler = useCallback(
-    (item: TransformListRow) => {
+    async (item: TransformListRow) => {
+      let discoverUrlGenerator;
+      try {
+        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+      } catch (error) {
+        // ignore error thrown when url generator is not available
+        return;
+      }
+
       const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
       const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
-      const path = `#/?${getDiscoverUrlState(indexPatternId)}`;
+      const state: DiscoverUrlGeneratorState = {
+        indexPatternId,
+      };
+      const path = await discoverUrlGenerator.createUrl(state);
       appDeps.application.navigateToApp('discover', { path });
     },
-    [appDeps.application, getIndexPatternIdByTitle]
+    [appDeps.application, getIndexPatternIdByTitle, getUrlGenerator]
   );
 
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => <DiscoverActionName items={[item]} />,
+      available: () => isDiscoverAvailable,
       enabled: (item: TransformListRow) => {
         const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
         const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
@@ -68,7 +88,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',
     }),
-    [forceDisable, indexPatternsLoaded, clickHandler, getIndexPatternIdByTitle]
+    [forceDisable, indexPatternsLoaded, isDiscoverAvailable, clickHandler, getIndexPatternIdByTitle]
   );
 
   return { action };
