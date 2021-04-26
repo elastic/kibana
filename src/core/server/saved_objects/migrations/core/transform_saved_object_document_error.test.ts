@@ -23,7 +23,7 @@ describe('TransformSavedObjectDocumentError', () => {
     expect(err.namespace).toEqual('namespace');
     expect(err.stack).not.toBeNull();
   });
-  it('is constructs an special error message', () => {
+  it('constructs an special error message', () => {
     const originalError = new Error('Dang diggity!');
     const err = new TransformSavedObjectDocumentError(
       'id',

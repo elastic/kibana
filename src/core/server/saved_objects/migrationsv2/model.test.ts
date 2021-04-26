@@ -777,6 +777,8 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
         tempIndexMappings: { properties: {} },
         lastHitSortValue: undefined,
+        corruptDocumentIds: [],
+        transformErrors: [],
       };
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_INDEX if the index has outdated documents to reindex', () => {
@@ -832,35 +834,49 @@ describe('migrations v2 model', () => {
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        corruptDocumentIds: [],
+        transformErrors: [],
       };
+      const processedDocs = ([
+        {
+          _id: 'a:b',
+          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        },
+      ] as unknown[]) as SavedObjectsRawDoc[];
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right(
-          'bulk_index_succeeded'
-        );
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+          processedDocs,
+        });
         const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left target_index_had_write_block', () => {
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+          processedDocs,
+        });
+        const testState = {
+          ...state,
+          corruptDocumentIds: ['a:b'],
+          transformErrors: [],
+        };
+        const newState = model(testState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.corruptDocumentIds.length).toEqual(1);
+        expect(newState.transformErrors.length).toEqual(0);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
-          type: 'target_index_had_write_block',
+          type: 'documents_transform_failed',
+          corruptDocumentIds: ['a:b'],
+          transformErrors: [],
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left index_not_found_exception for temp index', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
-          type: 'index_not_found_exception',
-          index: state.tempIndex,
-        });
-        const newState = model(state, res) as ReindexSourceToTempRead;
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.corruptDocumentIds.length).toEqual(1);
+        expect(newState.transformErrors.length).toEqual(0);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
