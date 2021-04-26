@@ -5692,7 +5692,6 @@
     "xpack.apm.transactionsTable.nameColumnLabel": "名称",
     "xpack.apm.transactionsTable.notFoundLabel": "未找到任何事务。",
     "xpack.apm.transactionsTable.throughputColumnLabel": "吞吐量",
-    "xpack.apm.transactionTypeSelectLabel": "类型",
     "xpack.apm.tutorial.apmServer.title": "APM Server",
     "xpack.apm.tutorial.elasticCloud.textPre": "要启用 APM Server，请前往 [Elastic Cloud 控制台](https://cloud.elastic.co/deployments?q={cloudId}) 并在部署设置中启用 APM。启用后，请刷新此页面。",
     "xpack.apm.tutorial.elasticCloudInstructions.title": "APM 代理",
