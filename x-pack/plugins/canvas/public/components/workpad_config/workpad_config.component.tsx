@@ -75,9 +75,9 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
   `;
 
   return (
-    <div css={styles}>
+    <div>
       <div className="canvasLayout__sidebarHeaderWorkpad">
-        <EuiTitle size="xs">
+        <EuiTitle size="xs" css={styles}>
           <h4>{strings.getTitle()}</h4>
         </EuiTitle>
       </div>
@@ -157,6 +157,7 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
               <span>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
+          css={{ color: 'coral' }}
         >
           <div className="canvasSidebar__accordionContent">
             <EuiTextArea

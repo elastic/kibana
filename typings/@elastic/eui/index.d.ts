@@ -15,3 +15,12 @@ declare module '@elastic/eui/lib/services' {
 declare module '@elastic/eui/lib/services/format' {
   export const dateFormatAliases: any;
 }
+
+// TODO: Remove when EUI includes `emotion`
+declare module '@elastic/eui' {
+  declare module 'react' {
+    interface Attributes {
+      css?: any;
+    }
+  }
+}
