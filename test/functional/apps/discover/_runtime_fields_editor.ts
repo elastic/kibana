@@ -43,13 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    after(async () => {
-      await esArchiver.unload('logstash_functional');
-    });
-
     it('allows adding custom label to existing fields', async function () {
-      const uuid = uuidv4();
-      const customLabel = `megabytes${uuid}`;
+      const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
