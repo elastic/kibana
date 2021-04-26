@@ -25,6 +25,7 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type Buckets = Array<{
   key: string;
@@ -61,7 +62,7 @@ export const useMatrixHistogram = ({
   UseMatrixHistogramArgs,
   (to: string, from: string) => void
 ] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -99,6 +100,7 @@ export const useMatrixHistogram = ({
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
   });
+  const { addError, addWarning } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -142,14 +144,13 @@ export const useMatrixHistogram = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addError(msg, {
+              addError(msg, {
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
               searchSubscription$.current.unsubscribe();
@@ -161,7 +162,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, notifications.toasts]
+    [data.search, errorMessage, addError, addWarning]
   );
 
   useEffect(() => {

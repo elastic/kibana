@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
-import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
-import { AggConfigs, AggTypesRegistryStart } from '../../';
+import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
-
-jest.mock('./legacy', () => ({
-  fetchSoon: jest.fn().mockResolvedValue({}),
-}));
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -89,10 +84,6 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
-      legacy: {
-        callMsearch: jest.fn(),
-        loadingCount$: new BehaviorSubject(0),
-      },
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -418,10 +409,16 @@ describe('SearchSource', () => {
             docvalueFields: [],
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fields', ['hello', 'foo']);
-
+        searchSource.setField('fields', [
+          'hello',
+          'foo-bar',
+          'foo--bar',
+          'fooo',
+          'somethingfoo',
+          'xxfxxoxxo',
+        ]);
         const request = searchSource.getSearchRequestBody();
-        expect(request.fields).toEqual(['hello']);
+        expect(request.fields).toEqual(['hello', 'fooo', 'somethingfoo', 'xxfxxoxxo']);
       });
 
       test('request all fields from index pattern except the ones specified with source filters', async () => {
@@ -863,7 +860,7 @@ describe('SearchSource', () => {
   });
 
   describe('fetch$', () => {
-    describe('#legacy fetch()', () => {
+    describe('#legacy COURIER_BATCH_SEARCHES', () => {
       beforeEach(() => {
         searchSourceDependencies = {
           ...searchSourceDependencies,
@@ -873,11 +870,22 @@ describe('SearchSource', () => {
         };
       });
 
-      test('should call msearch', async () => {
+      test('should override to use sync search if not set', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = {};
         await searchSource.fetch$(options).toPromise();
-        expect(fetchSoon).toBeCalledTimes(1);
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
+      });
+
+      test('should not override strategy if set ', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = { strategy: 'banana' };
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe('banana');
       });
     });
 

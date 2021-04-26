@@ -538,6 +538,41 @@ describe('state_helpers', () => {
         );
       });
     });
+
+    it('should not carry over a label if shouldResetLabel is set', () => {
+      expect(
+        insertNewColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Date histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+              },
+            },
+          },
+          columnId: 'col2',
+          indexPattern,
+          op: 'terms',
+          field: indexPattern.fields[2],
+          visualizationGroups: [],
+          shouldResetLabel: true,
+        }).columns.col2
+      ).toEqual(
+        expect.objectContaining({
+          label: 'Top values of bytes',
+        })
+      );
+    });
   });
 
   describe('replaceColumn', () => {
@@ -779,76 +814,109 @@ describe('state_helpers', () => {
       );
     });
 
-    it('should carry over label on field switch when customLabel flag is set', () => {
-      expect(
-        replaceColumn({
-          layer: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'My custom label',
-                customLabel: true,
-                dataType: 'date',
-                isBucketed: true,
+    describe('labels', () => {
+      it('should carry over label on field switch when customLabel flag on previousColumn is set', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'My custom label',
+                  customLabel: true,
+                  dataType: 'date',
+                  isBucketed: true,
 
-                // Private
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                params: {
-                  interval: 'h',
+                  // Private
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  params: {
+                    interval: 'h',
+                  },
                 },
               },
             },
-          },
-          indexPattern,
-          columnId: 'col1',
-          op: 'date_histogram',
-          field: indexPattern.fields[1],
-          visualizationGroups: [],
-        }).columns.col1
-      ).toEqual(
-        expect.objectContaining({
-          label: 'My custom label',
-          customLabel: true,
-        })
-      );
-    });
+            indexPattern,
+            columnId: 'col1',
+            op: 'date_histogram',
+            field: indexPattern.fields[1],
+            visualizationGroups: [],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            label: 'My custom label',
+            customLabel: true,
+          })
+        );
+      });
 
-    it('should carry over label on operation switch when customLabel flag is set', () => {
-      expect(
-        replaceColumn({
-          layer: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'My custom label',
-                customLabel: true,
-                dataType: 'date',
-                isBucketed: true,
+      it('should carry over label on operation switch when customLabel flag on previousColumn is set', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'My custom label',
+                  customLabel: true,
+                  dataType: 'date',
+                  isBucketed: true,
 
-                // Private
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                params: {
-                  interval: 'h',
+                  // Private
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  params: {
+                    interval: 'h',
+                  },
                 },
               },
             },
-          },
-          indexPattern,
-          columnId: 'col1',
-          op: 'terms',
-          field: indexPattern.fields[0],
-          visualizationGroups: [],
-        }).columns.col1
-      ).toEqual(
-        expect.objectContaining({
-          label: 'My custom label',
-          customLabel: true,
-        })
-      );
+            indexPattern,
+            columnId: 'col1',
+            op: 'terms',
+            field: indexPattern.fields[0],
+            visualizationGroups: [],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            label: 'My custom label',
+            customLabel: true,
+          })
+        );
+      });
+
+      it('should not carry over a label if shouldResetLabel is set', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'Top values of source',
+                  dataType: 'string',
+                  isBucketed: true,
+                  operationType: 'terms',
+                  sourceField: 'source',
+                  params: {
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: true,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
+      });
     });
 
     it('should execute adjustments for other columns', () => {

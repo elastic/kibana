@@ -102,16 +102,17 @@ ItemDetailsAction.displayName = 'ItemDetailsAction';
 
 export type ItemDetailsCardProps = PropsWithChildren<{
   'data-test-subj'?: string;
+  className?: string;
 }>;
 export const ItemDetailsCard = memo<ItemDetailsCardProps>(
-  ({ children, 'data-test-subj': dataTestSubj }) => {
+  ({ children, 'data-test-subj': dataTestSubj, className }) => {
     const childElements = useMemo(
       () => groupChildrenByType(children, [ItemDetailsPropertySummary, ItemDetailsAction]),
       [children]
     );
 
     return (
-      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
+      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className}>
         <EuiFlexGroup direction="row">
           <SummarySection grow={2}>
             <EuiDescriptionList compressed type="column">

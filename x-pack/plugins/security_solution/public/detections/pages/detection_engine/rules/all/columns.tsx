@@ -80,9 +80,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0], history);
+      }
     },
   },
   {

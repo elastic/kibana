@@ -30,6 +30,7 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkTopNFlowQuery';
 
@@ -69,7 +70,7 @@ export const useNetworkTopNFlow = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTarget)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -114,6 +115,7 @@ export const useNetworkTopNFlow = ({
     refetch: refetch.current,
     totalCount: -1,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkTopNFlowSearch = useCallback(
     (request: NetworkTopNFlowRequestOptions | null) => {
@@ -145,16 +147,14 @@ export const useNetworkTopNFlow = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_TOP_N_FLOW);
+                addWarning(i18n.ERROR_NETWORK_TOP_N_FLOW);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_TOP_N_FLOW,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -165,7 +165,7 @@ export const useNetworkTopNFlow = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

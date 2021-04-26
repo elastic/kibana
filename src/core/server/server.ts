@@ -247,6 +247,7 @@ export class Server {
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
+      exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
     this.coreStart = {
@@ -271,10 +272,10 @@ export class Server {
     this.log.debug('stopping server');
 
     await this.legacy.stop();
+    await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
-    await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();

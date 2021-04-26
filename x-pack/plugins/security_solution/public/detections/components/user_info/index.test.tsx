@@ -37,22 +37,21 @@ describe('useUserInfo', () => {
       });
       await waitForNextUpdate();
 
-      expect(result).toEqual({
-        current: {
-          canUserCRUD: null,
-          hasEncryptionKey: null,
-          hasIndexManage: null,
-          hasIndexMaintenance: null,
-          hasIndexWrite: null,
-          hasIndexUpdateDelete: null,
-          isAuthenticated: null,
-          isSignalIndexExists: null,
-          loading: true,
-          signalIndexName: null,
-          signalIndexMappingOutdated: null,
-        },
-        error: undefined,
+      expect(result.all).toHaveLength(1);
+      expect(result.current).toEqual({
+        canUserCRUD: null,
+        hasEncryptionKey: null,
+        hasIndexManage: null,
+        hasIndexMaintenance: null,
+        hasIndexWrite: null,
+        hasIndexUpdateDelete: null,
+        isAuthenticated: null,
+        isSignalIndexExists: null,
+        loading: true,
+        signalIndexName: null,
+        signalIndexMappingOutdated: null,
       });
+      expect(result.error).toBeUndefined();
     });
   });
 

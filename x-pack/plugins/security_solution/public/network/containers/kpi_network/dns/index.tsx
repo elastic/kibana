@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -54,7 +55,7 @@ export const useNetworkKpiDns = ({
   skip = false,
   startDate,
 }: UseNetworkKpiDns): [boolean, NetworkKpiDnsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -75,6 +76,7 @@ export const useNetworkKpiDns = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkKpiDnsSearch = useCallback(
     (request: NetworkKpiDnsRequestOptions | null) => {
@@ -104,16 +106,14 @@ export const useNetworkKpiDns = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_DNS);
+                addWarning(i18n.ERROR_NETWORK_KPI_DNS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_KPI_DNS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -124,7 +124,7 @@ export const useNetworkKpiDns = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
