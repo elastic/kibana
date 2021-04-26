@@ -119,5 +119,5 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
-  'labs:presentation:unifiedToolbar': boolean;
+  'labs:presentation:timeToPresent': boolean;
 }

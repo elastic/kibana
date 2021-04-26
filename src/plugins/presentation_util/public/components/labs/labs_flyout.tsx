@@ -10,6 +10,8 @@ import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiTitle,
+  EuiSpacer,
+  EuiText,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -124,7 +126,7 @@ export const LabsFlyout = (props: Props) => {
   return (
     <EuiOverlayMask onClick={() => onClose()} headerZindexLocation="below">
       <EuiFlyout onClose={onClose} hideCloseButton={true}>
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -135,6 +137,10 @@ export const LabsFlyout = (props: Props) => {
               </EuiFlexGroup>
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>{strings.getDescriptionMessage()}</p>
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <ProjectList {...{ projects, solutions, onStatusChange }} />

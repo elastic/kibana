@@ -83,6 +83,11 @@ export const LabsStrings = {
         i18n.translate('presentationUtil.labs.components.titleLabel', {
           defaultMessage: 'Lab projects',
         }),
+      getDescriptionMessage: () =>
+        i18n.translate('presentationUtil.labs.components.descriptionMessage', {
+          defaultMessage:
+            'Lab projects are features and functionality that are in-progress or experimental in nature.  They can be enabled and disabled locally for your browser or tab, or in Kibana.',
+        }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {
           defaultMessage: 'Reset to defaults',
