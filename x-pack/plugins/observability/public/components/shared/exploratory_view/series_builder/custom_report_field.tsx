@@ -39,7 +39,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
           value: fd,
           inputDisplay: label,
         }))}
-        valueOfSelected={reportDefinitions?.[field] || defaultValue || options?.[0].field}
+        valueOfSelected={reportDefinitions?.[field][0] || defaultValue || options?.[0].field}
         onChange={(value) => onChange(value)}
       />
     </div>
