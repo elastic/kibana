@@ -45,7 +45,7 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = (formatter) => (value) => formatter(value);
+const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
   activeCursor$.next(cursor);
@@ -91,7 +91,7 @@ export const TimeSeries = ({
       interval,
       domainBounds?.domainStart,
       domainBounds?.domainEnd,
-      tooltipFormatter
+      xAxisFormatter
     );
   }
 
