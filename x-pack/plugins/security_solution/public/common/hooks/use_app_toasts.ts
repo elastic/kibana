@@ -169,7 +169,7 @@ export const unknownToErrorStack = (error: unknown): Error => {
 };
 
 /**
- * Stringifies the error. However, since Errors can string into empty objects this will
+ * Stringifies the error. However, since Errors can JSON.stringify into empty objects this will
  * use a replacer to push those as enumerable properties so we can stringify them.
  * @param error The error to get a string representation of
  * @returns The string representation of the error
