@@ -44,7 +44,7 @@ import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_m
 import { compose } from './lib/compose/kibana';
 import { customAlertType } from './lib/detection_engine/reference_rules/custom';
 import { eqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { referenceRuleAlertType } from './lib/detection_engine/reference_rules/reference_rule';
+import { thresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -292,6 +292,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
     this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
       name: 'security-solution',
+      // fieldMap: ecsFieldMap,
       fieldMap: {
         ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
       },
@@ -300,7 +301,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Register reference rule types via rule-registry
     this.setupPlugins.ruleRegistry.registerType(customAlertType);
     this.setupPlugins.ruleRegistry.registerType(eqlAlertType);
-    this.setupPlugins.ruleRegistry.registerType(referenceRuleAlertType);
+    this.setupPlugins.ruleRegistry.registerType(thresholdAlertType);
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
