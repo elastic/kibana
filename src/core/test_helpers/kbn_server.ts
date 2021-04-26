@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
   // @ts-expect-error https://github.com/elastic/kibana/issues/95679
@@ -140,7 +140,7 @@ export interface TestElasticsearchServer {
   start: (esArgs: string[], esEnvVars: Record<string, string>) => Promise<void>;
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
-  getClient: () => Client;
+  getClient: () => KibanaClient;
   getCallCluster: () => LegacyAPICaller;
   getUrl: () => string;
 }
