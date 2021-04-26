@@ -18,7 +18,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
-import { SavedObjectsMigrationLogger, TransformSavedObjectDocumentError } from '.';
+import { TransformSavedObjectDocumentError } from '.';
 
 export interface DocumentsTransformFailed {
   type: string;
@@ -63,8 +63,7 @@ export class CorruptSavedObjectError extends Error {
 export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
-  rawDocs: SavedObjectsRawDoc[],
-  log: SavedObjectsMigrationLogger
+  rawDocs: SavedObjectsRawDoc[]
 ): Promise<SavedObjectsRawDoc[]> {
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];

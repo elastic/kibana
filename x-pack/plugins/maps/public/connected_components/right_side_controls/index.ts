@@ -6,15 +6,15 @@
  */
 
 import { connect } from 'react-redux';
-import { WidgetOverlay } from './widget_overlay';
-
+import { RightSideControls } from './right_side_controls';
 import { getMapSettings } from '../../selectors/map_selectors';
+import { MapStoreState } from '../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     settings: getMapSettings(state),
   };
 }
 
-const connectedWidgetOverlay = connect(mapStateToProps, null)(WidgetOverlay);
-export { connectedWidgetOverlay as WidgetOverlay };
+const connected = connect(mapStateToProps, {})(RightSideControls);
+export { connected as RightSideControls };

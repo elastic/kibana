@@ -36,7 +36,6 @@ import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { runResilientMigrator } from '../../migrationsv2';
 import { migrateRawDocsNonThrowing } from '../core/migrate_raw_docs';
-import { MigrationLogger } from '../core/migration_logger';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
