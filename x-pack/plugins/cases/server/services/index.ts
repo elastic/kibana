@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationContainer } from '@elastic/elasticsearch/api/types';
 import {
   KibanaRequest,
   Logger,
@@ -111,6 +112,10 @@ interface FindSubCasesStatusStats {
 
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
+}
+
+interface GetCaseIdsByAlertIdArgs extends ClientArgs {
+  alertId: string;
 }
 
 interface PostCaseArgs extends ClientArgs {
@@ -220,6 +225,7 @@ export interface CaseServiceSetup {
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
+  getCaseIdsByAlertId(args: GetCaseIdsByAlertIdArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
@@ -897,6 +903,64 @@ export class CaseService implements CaseServiceSetup {
       this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
       throw error;
     }
+  }
+
+  public async getCaseIdsByAlertId({
+    client,
+    alertId
+  }: GetCaseIdsByAlertIdArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+
+
+    //TRY THAT
+    let caseIdsAggs: Record<string, AggregationContainer> = {};
+    try {
+      caseIdsAggs = {
+        "references": {
+          nested: {
+            path: "references"
+          },
+          aggregations: {
+            caseIds: {
+              terms: {
+                field: "references.id"
+              }
+            }
+          }
+        }
+      };
+      const aggsResponse = await client.find({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        fields: [],
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: caseIdsAggs,
+        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
+      });
+      console.log('aggs', JSON.stringify(aggsResponse.aggregations, null, 2));
+    } catch { }
+
+
+
+
+
+    // get the total number of comments that are in ES then we'll grab them all in one go
+    const stats = await client.find({
+      type: CASE_COMMENT_SAVED_OBJECT,
+      fields: [],
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
+    });
+
+    return client.find({
+      type: CASE_COMMENT_SAVED_OBJECT,
+      page: 1,
+      perPage: stats.total,
+      sortField: defaultSortField,
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
+    });
   }
 
   /**
