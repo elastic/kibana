@@ -60,11 +60,6 @@ include::./tab-widgets/apm-app-reader/widget.asciidoc[]
 TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
 Add the privileges under the **Data streams** tab.
 
-If your APM data is being sent to APM Server, you're using classic APM indices.
-
-If your APM data is ingested into `apm-*` indices, you're using classic APM indices.
-If you're
-
 . Assign the `read-apm` role created in the previous step, and the following built-in roles to
 any APM reader users:
 +
