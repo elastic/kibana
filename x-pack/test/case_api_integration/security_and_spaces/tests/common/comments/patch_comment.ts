@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id: 'id',
             name: 'name',
           },
+          owner: 'securitySolutionFixture',
         })
         .expect(400);
 
@@ -173,7 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: patchedCase.comments![0].version,
           comment: newComment,
           type: CommentType.user,
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
       });
 
@@ -203,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id: 'id',
             name: 'name',
           },
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
       });
 
@@ -250,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 404,
       });
@@ -265,7 +266,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 404,
       });
@@ -292,7 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id: 'id',
             name: 'name',
           },
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 400,
       });
@@ -336,7 +337,7 @@ export default ({ getService }: FtrProviderContext): void => {
             comment: 'a comment',
             type: CommentType.user,
             [attribute]: attribute,
-            owner: 'securitySolution',
+            owner: 'securitySolutionFixture',
           },
           expectedHttpCode: 400,
         });
@@ -399,7 +400,7 @@ export default ({ getService }: FtrProviderContext): void => {
               id: 'id',
               name: 'name',
             },
-            owner: 'securitySolution',
+            owner: 'securitySolutionFixture',
             [attribute]: attribute,
           },
           expectedHttpCode: 400,
@@ -424,7 +425,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: 'version-mismatch',
           type: CommentType.user,
           comment: newComment,
-          owner: 'securitySolution',
+          owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 409,
       });
@@ -455,7 +456,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: type as AlertComment,
               alertId,
               index,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
               rule: postCommentAlertReq.rule,
             },
             expectedHttpCode: 400,
@@ -476,7 +477,7 @@ export default ({ getService }: FtrProviderContext): void => {
               ...postCommentAlertReq,
               alertId,
               index,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
               type: type as AlertComment,
             },
           });
@@ -490,7 +491,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: type as AlertComment,
               alertId,
               index,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
               rule: postCommentAlertReq.rule,
             },
           });

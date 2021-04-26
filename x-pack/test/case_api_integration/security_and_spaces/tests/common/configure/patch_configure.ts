@@ -78,13 +78,16 @@ export default ({ getService }: FtrProviderContext): void => {
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(supertest);
 
+      // the update request doesn't accept the owner field
+      const { owner, ...reqWithoutOwner } = getConfigurationRequest({
+        id: connector.id,
+        name: connector.name,
+        type: connector.connector_type_id as ConnectorTypes,
+        fields: null,
+      });
+
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
-        ...getConfigurationRequest({
-          id: connector.id,
-          name: connector.name,
-          type: connector.connector_type_id as ConnectorTypes,
-          fields: null,
-        }),
+        ...reqWithoutOwner,
         version: configuration.version,
       });
 
@@ -135,13 +138,16 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       );
 
+      // the update request doesn't accept the owner field
+      const { owner, ...rest } = getConfigurationRequest({
+        id: connector.id,
+        name: 'New name',
+        type: connector.connector_type_id as ConnectorTypes,
+        fields: null,
+      });
+
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
-        ...getConfigurationRequest({
-          id: connector.id,
-          name: 'New name',
-          type: connector.connector_type_id as ConnectorTypes,
-          fields: null,
-        }),
+        ...rest,
         version: configuration.version,
       });
 

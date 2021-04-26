@@ -76,6 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
         pushed_at: null,
         pushed_by: null,
         updated_by: null,
+        owner: 'securitySolutionFixture',
       });
     });
 
@@ -158,6 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_at: null,
           pushed_by: null,
           updated_by: null,
+          owner: 'securitySolutionFixture',
         });
       });
 

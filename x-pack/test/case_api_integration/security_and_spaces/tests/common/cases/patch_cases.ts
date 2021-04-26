@@ -487,7 +487,7 @@ export default ({ getService }: FtrProviderContext): void => {
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -506,7 +506,7 @@ export default ({ getService }: FtrProviderContext): void => {
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -630,7 +630,7 @@ export default ({ getService }: FtrProviderContext): void => {
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -642,7 +642,7 @@ export default ({ getService }: FtrProviderContext): void => {
               index: signalsIndex2,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -745,7 +745,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -800,7 +800,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -850,7 +850,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               type: CommentType.alert,
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -911,7 +911,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              owner: 'securitySolution',
+              owner: 'securitySolutionFixture',
             },
           });
 

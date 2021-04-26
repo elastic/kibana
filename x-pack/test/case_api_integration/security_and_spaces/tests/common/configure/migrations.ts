@@ -30,9 +30,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(body).key('connector');
-      expect(body).not.key('connector_id');
-      expect(body.connector).to.eql({
+      expect(body.length).to.be(1);
+      expect(body[0]).key('connector');
+      expect(body[0]).not.key('connector_id');
+      expect(body[0].connector).to.eql({
         id: 'connector-1',
         name: 'Connector 1',
         type: '.none',

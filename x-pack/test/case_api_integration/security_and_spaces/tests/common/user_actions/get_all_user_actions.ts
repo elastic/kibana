@@ -293,12 +293,17 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await supertest.patch(`${CASES_URL}/${postedCase.id}/comments`).set('kbn-xsrf', 'true').send({
-        id: patchedCase.comments[0].id,
-        version: patchedCase.comments[0].version,
-        comment: newComment,
-        type: CommentType.user,
-      });
+      await supertest
+        .patch(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          id: patchedCase.comments[0].id,
+          version: patchedCase.comments[0].version,
+          comment: newComment,
+          type: CommentType.user,
+          owner: 'securitySolutionFixture',
+        })
+        .expect(200);
 
       const { body } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/user_actions`)
@@ -313,6 +318,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(JSON.parse(body[2].new_value)).to.eql({
         comment: newComment,
         type: CommentType.user,
+        owner: 'securitySolutionFixture',
       });
     });
   });

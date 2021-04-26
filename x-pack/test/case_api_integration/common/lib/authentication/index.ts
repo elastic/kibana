@@ -54,18 +54,30 @@ const createUsersAndRoles = async (getService: CommonFtrProviderContext['getServ
 export const deleteSpaces = async (getService: CommonFtrProviderContext['getService']) => {
   const spacesService = getService('spaces');
   for (const space of spaces) {
-    await spacesService.delete(space.id);
+    try {
+      await spacesService.delete(space.id);
+    } catch (error) {
+      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
+    }
   }
 };
 const deleteUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
   const security = getService('security');
 
   for (const user of users) {
-    await security.user.delete(user.username);
+    try {
+      await security.user.delete(user.username);
+    } catch (error) {
+      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
+    }
   }
 
   for (const role of roles) {
-    await security.role.delete(role.name);
+    try {
+      await security.role.delete(role.name);
+    } catch (error) {
+      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
+    }
   }
 };
 

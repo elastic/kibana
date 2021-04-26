@@ -184,13 +184,22 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
-          await getAllComments({
+        for (const scenario of [
+          { user: noKibanaPrivileges, returnCode: 403 },
+          { user: obsOnly, returnCode: 200 },
+          { user: obsOnlyRead, returnCode: 200 },
+        ]) {
+          const comments = await getAllComments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
-            auth: { user, space: 'space1' },
-            expectedHttpCode: 403,
+            auth: { user: scenario.user, space: 'space1' },
+            expectedHttpCode: scenario.returnCode,
           });
+
+          // only check the length if we get a 200 in response
+          if (scenario.returnCode === 200) {
+            expect(comments.length).to.be(0);
+          }
         }
       });
 

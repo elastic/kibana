@@ -269,7 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead]) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT delete a comment`, async () => {
@@ -303,6 +303,38 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      it('should not delete a comment with no kibana privileges', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const commentResp = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await deleteComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          commentId: commentResp.comments![0].id,
+          auth: { user: noKibanaPrivileges, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+
+        await deleteAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: { user: noKibanaPrivileges, space: 'space1' },
+          // the find in the delete all will return no results
+          expectedHttpCode: 404,
+        });
+      });
 
       it('should NOT delete a comment in a space with where the user does not have permissions', async () => {
         const postedCase = await createCase(
