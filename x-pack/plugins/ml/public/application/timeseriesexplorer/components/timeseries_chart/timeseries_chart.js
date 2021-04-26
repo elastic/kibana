@@ -572,7 +572,6 @@ class TimeseriesChartIntl extends Component {
       showAnnotations,
       showForecast,
       showModelBounds,
-
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
@@ -641,7 +640,7 @@ class TimeseriesChartIntl extends Component {
       let yMax = 0;
 
       let combinedData = data;
-      if (focusForecastData !== undefined && focusForecastData.length > 0) {
+      if (showForecast && focusForecastData !== undefined && focusForecastData.length > 0) {
         combinedData = data.concat(focusForecastData);
       }
 
