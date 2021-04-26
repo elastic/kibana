@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiPageHeader, EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -67,7 +67,6 @@ export const RelevanceTuningLayout: React.FC = ({ children }) => {
       {pageHeader()}
       <FlashMessages />
       <RelevanceTuningCallouts />
-      <EuiSpacer />
       {children}
     </>
   );

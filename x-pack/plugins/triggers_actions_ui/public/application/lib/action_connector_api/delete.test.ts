@@ -14,7 +14,7 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('deleteActions', () => {
   test('should call delete API per action', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2', '/'];
 
     const result = await deleteActions({ ids, http });
     expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
@@ -27,7 +27,7 @@ describe('deleteActions', () => {
           "/api/actions/connector/2",
         ],
         Array [
-          "/api/actions/connector/3",
+          "/api/actions/connector/%2F",
         ],
       ]
     `);
