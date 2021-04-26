@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from './index_pattern';
-
-export interface PatternCache {
-  get: (id: string) => Promise<IndexPattern> | undefined;
-  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
+export interface PatternCache<T> {
+  get: (id: string) => Promise<T> | undefined;
+  set: (id: string, value: Promise<T>) => Promise<T>;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
-export function createIndexPatternCache(): PatternCache {
+export function createIndexPatternCache<T>(): PatternCache<T> {
   const vals: Record<string, any> = {};
-  const cache: PatternCache = {
+  const cache: PatternCache<T> = {
     get: (id: string) => {
       return vals[id];
     },

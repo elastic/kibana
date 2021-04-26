@@ -251,6 +251,7 @@ export const indexPatterns = {
 export {
   IndexPatternsContract,
   IndexPattern,
+  ResolvedIndexPattern,
   IIndexPatternFieldList,
   IndexPatternField,
 } from './index_patterns';

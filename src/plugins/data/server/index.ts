@@ -147,6 +147,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  ResolvedIndexPattern,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,

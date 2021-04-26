@@ -14,7 +14,10 @@ import {
   SavedObject,
 } from '../../common/index_patterns';
 
-type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
+type SOClient = Pick<
+  SavedObjectsClient,
+  'find' | 'get' | 'resolve' | 'update' | 'create' | 'delete'
+>;
 
 const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
   ({
@@ -35,6 +38,10 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   async get<T = unknown>(type: string, id: string) {
     const response = await this.savedObjectClient.get<T>(type, id);
     return simpleSavedObjectToSavedObject<T>(response);
+  }
+  async resolve<T = unknown>(type: string, id: string) {
+    const { savedObject, ...otherFields } = await this.savedObjectClient.resolve<T>(type, id);
+    return { ...otherFields, saved_object: simpleSavedObjectToSavedObject<T>(savedObject) };
   }
   async update(
     type: string,

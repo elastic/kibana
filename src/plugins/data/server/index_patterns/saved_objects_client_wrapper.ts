@@ -25,6 +25,9 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
   async get<T = unknown>(type: string, id: string) {
     return await this.savedObjectClient.get<T>(type, id);
   }
+  async resolve<T = unknown>(type: string, id: string) {
+    return await this.savedObjectClient.resolve<T>(type, id);
+  }
   async update(
     type: string,
     id: string,

@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientCommon } from '../..';
 
-import { createIndexPatternCache } from '.';
-import type { RuntimeField } from '../types';
+import { PatternCache, createIndexPatternCache } from './_pattern_cache';
+import type { ResolvedSavedObjectOutcome, RuntimeField } from '../types';
 import { IndexPattern } from './index_pattern';
 import {
   createEnsureDefaultIndexPattern,
@@ -54,6 +54,12 @@ interface IndexPatternsServiceDeps {
   onRedirectNoIndexPattern?: () => void;
 }
 
+export interface ResolvedIndexPattern {
+  indexPattern: IndexPattern;
+  outcome: ResolvedSavedObjectOutcome;
+  aliasTargetId?: string;
+}
+
 export class IndexPatternsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
@@ -62,7 +68,8 @@ export class IndexPatternsService {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
-  private indexPatternCache: ReturnType<typeof createIndexPatternCache>;
+  private indexPatternCache: PatternCache<IndexPattern>;
+  private resolvedIndexPatternCache: PatternCache<ResolvedIndexPattern>;
 
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
@@ -87,6 +94,7 @@ export class IndexPatternsService {
     );
 
     this.indexPatternCache = createIndexPatternCache();
+    this.resolvedIndexPatternCache = createIndexPatternCache();
   }
 
   /**
@@ -390,7 +398,23 @@ export class IndexPatternsService {
       savedObjectType,
       id
     );
+    return this.savedObjectToIndexPattern(savedObject);
+  };
 
+  private resolveSavedObjectAndInit = async (id: string): Promise<ResolvedIndexPattern> => {
+    const resolveResult = await this.savedObjectsClient.resolve<IndexPatternAttributes>(
+      savedObjectType,
+      id
+    );
+    return {
+      indexPattern: await this.savedObjectToIndexPattern(resolveResult.saved_object),
+      outcome: resolveResult.outcome,
+      aliasTargetId: resolveResult.aliasTargetId,
+    };
+  };
+
+  private savedObjectToIndexPattern = async (savedObject: SavedObject<IndexPatternAttributes>) => {
+    const { id } = savedObject;
     if (!savedObject.version) {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
@@ -466,6 +490,24 @@ export class IndexPatternsService {
     const indexPatternPromise =
       this.indexPatternCache.get(id) ||
       this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      this.indexPatternCache.clear(id);
+    });
+
+    return indexPatternPromise;
+  };
+
+  /**
+   * Resolve an index pattern by id. Cache optimized
+   * @param id
+   */
+
+  resolve = async (id: string): Promise<ResolvedIndexPattern> => {
+    const indexPatternPromise =
+      this.resolvedIndexPatternCache.get(id) ||
+      this.resolvedIndexPatternCache.set(id, this.resolveSavedObjectAndInit(id));
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {

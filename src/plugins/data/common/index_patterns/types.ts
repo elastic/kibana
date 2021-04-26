@@ -101,6 +101,7 @@ export interface SavedObjectsClientCommonFindArgs {
 export interface SavedObjectsClientCommon {
   find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
   get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSavedObject<T>>;
   update: (
     type: string,
     id: string,
@@ -249,4 +250,12 @@ export interface IndexPatternSpec {
 
 export interface SourceFilter {
   value: string;
+}
+
+export type ResolvedSavedObjectOutcome = 'exactMatch' | 'aliasMatch' | 'conflict';
+export interface ResolvedSavedObject<T = unknown> {
+  // TODO: refactor types and use SavedObjectsResolveResponse instead
+  saved_object: SavedObject<T>;
+  outcome: ResolvedSavedObjectOutcome;
+  aliasTargetId?: string;
 }

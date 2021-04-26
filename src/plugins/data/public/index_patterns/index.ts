@@ -22,6 +22,7 @@ export {
   IndexPatternsService,
   IndexPatternsContract,
   IndexPattern,
+  ResolvedIndexPattern,
   IndexPatternsApiClient,
 } from './index_patterns';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
