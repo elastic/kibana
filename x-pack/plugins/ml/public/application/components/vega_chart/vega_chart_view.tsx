@@ -12,9 +12,7 @@ import type { TopLevelSpec } from 'vega-lite';
 
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { getVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
-
-type Await<T> = T extends PromiseLike<infer U> ? U : T;
+import type { GetVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
@@ -23,10 +21,13 @@ export interface VegaChartViewProps {
 export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
-  const [vega, setVega] = useState<Await<ReturnType<typeof getVegaSharedImports>>>();
+  const [vega, setVega] = useState<GetVegaSharedImports>();
 
   useEffect(() => {
     async function initializeVega() {
+      const { getVegaSharedImports } = await import(
+        '../../../../../../../src/plugins/vis_type_vega/public'
+      );
       setVega(await getVegaSharedImports());
     }
 

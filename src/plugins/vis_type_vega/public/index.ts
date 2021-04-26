@@ -20,3 +20,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export const getVegaSharedImports = async () => {
   return await import('./shared');
 };
+
+type Await<T> = T extends PromiseLike<infer U> ? U : T;
+export type GetVegaSharedImports = Await<ReturnType<typeof getVegaSharedImports>>;
