@@ -191,7 +191,7 @@ services:
 [[elastic-maps-server-data]]
 ==== Data
 
-{hosted-ems} hosts vector layer boundaries and vector tile basemaps for the entire planet. Boundaries include world countries, global administrative regions, and specific country regions. A basemap up to zoom level 8 is bundled in the Docker image. This basemap is sufficient for maps and dashboards at country level, but if you want to present maps with higher detail follow the instructions of the front-page to download the appropriate basemap. The most detailed basemap at zoom level 14 is good for street level maps, and takes around 90GB of disk space.
+{hosted-ems} hosts vector layer boundaries and vector tile basemaps for the entire planet. Boundaries include world countries, global administrative regions, and specific country regions. Basemaps up to zoom level 8 are bundled in the Docker image. These basemaps are sufficient for maps and dashboards at country level. But, if you want to present maps with higher detail, follow the instructions of the front-page to download and configure the appropriate basemaps database. The most detailed basemaps at zoom level 14 are good for street level maps but require ~90GB of disk space.
 
 
 [role="screenshot"]
