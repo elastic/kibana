@@ -61,7 +61,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items }) => {
     disabledTransformMessage = i18n.translate(
       'xpack.transform.transformList.discoverTransformBulkToolTip',
       {
-        defaultMessage: 'Links to discover are not supported as a bulk action.',
+        defaultMessage: 'Links to Discover are not supported as a bulk action.',
       }
     );
   } else {
