@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const instances = getService('monitoringKibanaInstances');
   const kibanaClusterSummaryStatus = getService('monitoringKibanaSummaryStatus');
 
-  describe('Kibana instances listing mb', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/98190
+  describe.skip('Kibana instances listing mb', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
