@@ -13,7 +13,7 @@ import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
-  return async function fetchUsageStats(): Promise<UsageStats | undefined> {
+  return async function fetchUsageStats(): Promise<Partial<UsageStats> | undefined> {
     const uiSettingsClient = getUiSettingsClient();
     if (!uiSettingsClient) {
       return;
@@ -22,7 +22,7 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
     const userProvided = await uiSettingsClient.getUserProvided();
     const modifiedEntries = Object.entries(userProvided)
       .filter(([key]) => key !== 'buildNum')
-      .reduce((obj: any, [key, { userValue }]) => {
+      .reduce((obj: Record<string, unknown>, [key, { userValue }]) => {
         const sensitive = uiSettingsClient.isSensitive(key);
         obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
@@ -35,7 +35,7 @@ export function registerManagementUsageCollector(
   usageCollection: UsageCollectionSetup,
   getUiSettingsClient: () => IUiSettingsClient | undefined
 ) {
-  const collector = usageCollection.makeUsageCollector<UsageStats | undefined>({
+  const collector = usageCollection.makeUsageCollector<Partial<UsageStats> | undefined>({
     type: 'stack_management',
     isReady: () => typeof getUiSettingsClient() !== 'undefined',
     fetch: createCollectorFetch(getUiSettingsClient),
