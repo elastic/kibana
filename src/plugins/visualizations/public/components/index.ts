@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { VisualizationContainer } from './visualization_container';
+import { lazy } from 'react';
+
+export const VisualizationContainer = lazy(() => import('./visualization_container'));

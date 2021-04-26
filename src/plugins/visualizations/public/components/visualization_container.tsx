@@ -13,7 +13,7 @@ import { VisualizationNoResults } from './visualization_noresults';
 import { VisualizationError } from './visualization_error';
 import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
-interface VisualizationContainerProps {
+export interface VisualizationContainerProps {
   'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
@@ -52,3 +52,6 @@ export const VisualizationContainer = ({
     </div>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default VisualizationContainer;

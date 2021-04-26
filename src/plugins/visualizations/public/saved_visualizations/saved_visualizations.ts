@@ -10,7 +10,7 @@ import { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/p
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass, SavedVisServices } from './_saved_vis';
-import { TypesStart } from '../vis_types';
+import type { TypesStart } from '../vis_types';
 
 export interface SavedVisServicesWithVisualizations extends SavedVisServices {
   visualizationTypes: TypesStart;
