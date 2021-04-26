@@ -27,20 +27,23 @@ export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Prop
     <PromptPage
       buildNumber={buildNumber}
       basePath={basePath}
-      title={i18n.translate('xpack.security.unauthorized.pageTitle', {
+      title={i18n.translate('xpack.security.unauthenticated.pageTitle', {
         defaultMessage: 'You could not log in.',
       })}
       body={
         <p>
           <FormattedMessage
-            id="xpack.security.unauthorized.pageDescription"
+            id="xpack.security.unauthenticated.errorDescription"
             defaultMessage="You could not log in. Please try again."
           />
         </p>
       }
       actions={[
         <EuiButton color="primary" fill href={originalURL} data-test-subj="logInButton">
-          <FormattedMessage id="xpack.security.unauthorized.login" defaultMessage="Log in" />
+          <FormattedMessage
+            id="xpack.security.unauthenticated.loginButtonLabel"
+            defaultMessage="Log in"
+          />
         </EuiButton>,
       ]}
     />

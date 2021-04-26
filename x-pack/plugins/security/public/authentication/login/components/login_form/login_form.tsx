@@ -204,7 +204,7 @@ export class LoginForm extends Component<Props, State> {
         >
           <FormattedMessage
             id="xpack.security.loginPage.loginSelectorLinkText"
-            defaultMessage="See more login options"
+            defaultMessage="More login options"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -478,8 +478,8 @@ export class LoginForm extends Component<Props, State> {
       const message =
         (error as IHttpFetchError).response?.status === 401
           ? i18n.translate(
-              'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
-              { defaultMessage: 'Invalid username or password. Please try again.' }
+              'xpack.security.login.basicLoginForm.usernameOrPasswordIsIncorrectErrorMessage',
+              { defaultMessage: 'Username or password is incorrect. Please try again.' }
             )
           : i18n.translate('xpack.security.login.basicLoginForm.unknownErrorMessage', {
               defaultMessage: 'Oops! Error. Try again.',

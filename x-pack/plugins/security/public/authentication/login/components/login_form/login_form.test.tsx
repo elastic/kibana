@@ -152,7 +152,7 @@ describe('LoginForm', () => {
     });
 
     expect(wrapper.find(EuiCallOut).props().title).toEqual(
-      `Invalid username or password. Please try again.`
+      `Username or password is incorrect. Please try again.`
     );
   });
 

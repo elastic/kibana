@@ -407,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.headers.refresh).to.be(
-          `0;url=/logout?msg=UNAUTHORIZED&next=%2F`
+          `0;url=/logout?msg=UNAUTHENTICATED&next=%2F`
         );
       });
 
@@ -424,7 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.headers.refresh).to.be(
-          `0;url=/login?msg=UNAUTHORIZED&next=%2F`
+          `0;url=/login?msg=UNAUTHENTICATED&next=%2F`
         );
       });
 
@@ -695,7 +695,7 @@ export default function ({ getService }: FtrProviderContext) {
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.headers.refresh).to.be(
-          `0;url=/logout?msg=UNAUTHORIZED&next=%2F`
+          `0;url=/logout?msg=UNAUTHENTICATED&next=%2F`
         );
       });
 
@@ -709,7 +709,7 @@ export default function ({ getService }: FtrProviderContext) {
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.headers.refresh).to.be(
-          `0;url=/login?msg=UNAUTHORIZED&next=%2F`
+          `0;url=/login?msg=UNAUTHENTICATED&next=%2F`
         );
       });
 

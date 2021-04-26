@@ -6,8 +6,9 @@
  */
 
 jest.mock('./authenticator');
-jest.mock('./can_redirect_request');
 jest.mock('./unauthenticated_page');
+
+import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import Boom from '@hapi/boom';
 
@@ -65,7 +66,6 @@ describe('AuthenticationService', () => {
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
   };
-  let mockCanRedirectRequest: jest.Mock;
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
@@ -82,7 +82,6 @@ describe('AuthenticationService', () => {
       license: licenseMock.create(),
       buildNumber: 100500,
     };
-    mockCanRedirectRequest = jest.requireMock('./can_redirect_request').canRedirectRequest;
     mockCanRedirectRequest.mockReturnValue(false);
 
     const coreStart = coreMock.createStart();
@@ -443,7 +442,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -468,7 +467,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/logout?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -495,7 +494,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2F',
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -541,7 +540,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -566,7 +565,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/logout?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -593,7 +592,7 @@ describe('AuthenticationService', () => {
           headers: {
             'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
-              '0;url=/mock-server-basepath/login?msg=UNAUTHORIZED&next=%2Fmock-server-basepath%2F',
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });

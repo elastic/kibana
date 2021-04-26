@@ -56,10 +56,10 @@ const messageMap = new Map([
     },
   ],
   [
-    'UNAUTHORIZED',
+    'UNAUTHENTICATED',
     {
       type: LoginFormMessageType.Danger,
-      content: i18n.translate('xpack.security.login.loginFailedDescription', {
+      content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
         defaultMessage: 'You could not log in. Please try again.',
       }),
     },

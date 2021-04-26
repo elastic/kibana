@@ -194,7 +194,7 @@ export class AuthenticationService {
           Refresh: `0;url=${http.basePath.prepend(
             `${
               needsToLogout ? '/logout' : '/login'
-            }?msg=UNAUTHORIZED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
               originalURL
             )}`
           )}`,
