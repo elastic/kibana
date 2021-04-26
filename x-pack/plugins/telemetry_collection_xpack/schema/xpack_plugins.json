@@ -1894,9 +1894,6 @@
       "properties": {
         "exploreDataInChartActionEnabled": {
           "type": "boolean"
-        },
-        "exploreDataInContextMenuEnabled": {
-          "type": "boolean"
         }
       }
     },
