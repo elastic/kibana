@@ -443,7 +443,7 @@
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
     "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
-    "@kbn/expect": "link:packages/kbn-expect",
+    "@kbn/expect": "link:bazel-bin/packages/kbn-expect/npm_module",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
