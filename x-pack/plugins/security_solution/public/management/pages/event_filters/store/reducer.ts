@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { parse } from 'querystring';
+import { matchPath } from 'react-router-dom';
 import { ImmutableReducer } from '../../../../common/store';
-import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
+import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
+import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../../common/constants';
+import { extractEventFiltetrsPageLocation } from '../../../common/routing';
 
 import {
   EventFiltersInitForm,
@@ -24,6 +30,15 @@ type CaseReducer<T extends AppAction> = (
   state: Immutable<EventFiltersListPageState>,
   action: Immutable<T>
 ) => Immutable<EventFiltersListPageState>;
+
+const isEventFIltersPageLocation = (location: Immutable<AppLocation>) => {
+  return (
+    matchPath(location.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
+      exact: true,
+    }) !== null
+  );
+};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
@@ -77,6 +92,15 @@ const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state
   };
 };
 
+const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
+  if (isEventFIltersPageLocation(action.payload)) {
+    const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
+    return { ...state, location };
+  } else {
+    return initialEventFiltersPageState();
+  }
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -90,6 +114,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersFormStateChanged(state, action);
     case 'eventFiltersCreateSuccess':
       return eventFiltersCreateSuccess(state, action);
+    case 'userChangedUrl':
+      return userChangedUrl(state, action);
   }
 
   return state;

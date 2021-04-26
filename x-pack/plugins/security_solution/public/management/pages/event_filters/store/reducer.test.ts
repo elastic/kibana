@@ -109,4 +109,21 @@ describe('reducer', () => {
       expect(result.entries[0]!.meta).not.toBeUndefined();
     });
   });
+  describe('UserChangedUrl', () => {
+    it('receives a url change with show=create', () => {
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'userChangedUrl',
+        payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        location: {
+          ...initialState.location,
+          id: undefined,
+          show: 'create',
+        },
+      });
+    });
+  });
 });

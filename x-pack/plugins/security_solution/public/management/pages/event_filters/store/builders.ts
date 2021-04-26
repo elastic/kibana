@@ -16,4 +16,9 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasOSError: false,
     submissionResourceState: { type: 'UninitialisedResourceState' },
   },
+  location: {
+    page_index: 0,
+    page_size: 10,
+    filter: '',
+  },
 });

@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
-import { isCreationSuccessful, getFormEntry, getCreationError } from '../store/selector';
+import {
+  isCreationSuccessful,
+  getFormEntry,
+  getCreationError,
+  getCurrentLocation,
+} from '../store/selector';
 
 import { useToasts } from '../../../../common/lib/kibana';
 import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
+import { getEventFiltersListPath } from '../../../common/routing';
 
 import {
   MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE as EVENT_FILTER_NS,
@@ -42,3 +49,19 @@ export const useEventFiltersNotification = () => {
     toasts.addDanger(getCreationErrorMessage(creationError));
   }
 };
+
+export type NavigationCallback = (
+  ...args: Parameters<Parameters<typeof useCallback>[0]>
+) => Partial<EventFiltersPageLocation>;
+
+export function useEventFiltersNavigateCallback(callback: NavigationCallback) {
+  const location = useEventFiltersSelector(getCurrentLocation);
+  const history = useHistory();
+
+  return useCallback(
+    (...args) => history.push(getEventFiltersListPath({ ...location, ...callback(...args) })),
+    // TODO: needs more investigation, but if callback is in dependencies list memoization will never happen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [history, location]
+  );
+}

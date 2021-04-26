@@ -7,6 +7,15 @@
 
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
+
+export interface EventFiltersPageLocation {
+  page_index: number;
+  page_size: number;
+  show?: 'create' | 'edit';
+  /** Used for editing. The ID of the selected event filter */
+  id?: string;
+  filter: string;
+}
 export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
   form: {
@@ -16,4 +25,5 @@ export interface EventFiltersListPageState {
     hasOSError: boolean;
     submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
   };
+  location: EventFiltersPageLocation;
 }

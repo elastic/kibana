@@ -6,9 +6,10 @@
  */
 
 import { initialEventFiltersPageState } from './builders';
-import { getFormEntry, getFormHasError } from './selector';
+import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
+import { EventFiltersPageLocation } from '../state';
 
 const initialState = initialEventFiltersPageState();
 
@@ -87,6 +88,21 @@ describe('selectors', () => {
         },
       };
       expect(getFormHasError(state)).toBeFalsy();
+    });
+  });
+  describe('getCurrentLocation()', () => {
+    it('returns current locations', () => {
+      const expectedLocation: EventFiltersPageLocation = {
+        show: 'create',
+        page_index: 1,
+        page_size: 20,
+        filter: 'filter',
+      };
+      const state = {
+        ...initialState,
+        location: expectedLocation,
+      };
+      expect(getCurrentLocation(state)).toBe(expectedLocation);
     });
   });
 });
