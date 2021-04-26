@@ -37,7 +37,7 @@ export function setupSavedObjects(
             ...obj,
             attributes: {
               ...obj.attributes,
-              enabledAfterImport: false,
+              isMissingSecrets: false,
             },
           };
         });

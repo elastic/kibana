@@ -92,7 +92,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -124,7 +124,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -164,7 +164,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -202,7 +202,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -254,7 +254,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         config: {},
       },
       references: [],
@@ -279,7 +279,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
-      enabledAfterImport: true,
+      isMissingSecrets: true,
       config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -289,7 +289,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
-          "enabledAfterImport": true,
+          "isMissingSecrets": true,
           "name": "my name",
           "secrets": Object {},
         },
@@ -354,7 +354,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         config: {
           a: true,
           b: true,
@@ -381,7 +381,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
-      enabledAfterImport: true,
+      isMissingSecrets: true,
       config: {
         a: true,
         b: true,
@@ -399,7 +399,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
-          "enabledAfterImport": true,
+          "isMissingSecrets": true,
           "name": "my name",
           "secrets": Object {},
         },
@@ -459,7 +459,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         config: {},
       },
       references: [],
@@ -493,7 +493,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         config: {},
       },
       references: [],
@@ -530,7 +530,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -579,7 +579,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -642,7 +642,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -668,7 +668,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           config: {},
         },
         references: [],
@@ -837,7 +837,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
-              enabledAfterImport: true,
+              isMissingSecrets: true,
               config: {
                 foo: 'bar',
               },
@@ -898,7 +898,7 @@ describe('getAll()', () => {
           type: 'type',
           attributes: {
             name: 'test',
-            enabledAfterImport: true,
+            isMissingSecrets: true,
             config: {
               foo: 'bar',
             },
@@ -950,7 +950,7 @@ describe('getAll()', () => {
         config: {
           foo: 'bar',
         },
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         referencedByCount: 6,
       },
       {
@@ -978,7 +978,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
-              enabledAfterImport: true,
+              isMissingSecrets: true,
             },
             references: [],
           },
@@ -1050,7 +1050,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
-              enabledAfterImport: true,
+              isMissingSecrets: true,
             },
             references: [],
           },
@@ -1109,7 +1109,7 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
-            enabledAfterImport: true,
+            isMissingSecrets: true,
           },
           references: [],
         },
@@ -1165,7 +1165,7 @@ describe('getBulk()', () => {
           foo: 'bar',
         },
         id: '1',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         isPreconfigured: false,
         name: 'test',
       },
@@ -1254,7 +1254,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
       },
       references: [],
     });
@@ -1263,7 +1263,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1344,7 +1344,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
       },
       references: [],
     });
@@ -1353,7 +1353,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1372,7 +1372,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
-      enabledAfterImport: true,
+      isMissingSecrets: true,
       name: 'my name',
       config: {},
     });
@@ -1383,7 +1383,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
-          "enabledAfterImport": true,
+          "isMissingSecrets": true,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1403,7 +1403,7 @@ describe('update()', () => {
     `);
   });
 
-  test('updates an action with enabledAfterImport "false" (set faalse as the import result), to enabledAfterImport', async () => {
+  test('updates an action with isMissingSecrets "false" (set faalse as the import result), to isMissingSecrets', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -1415,7 +1415,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: false,
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1424,7 +1424,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1443,7 +1443,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
-      enabledAfterImport: true,
+      isMissingSecrets: true,
       name: 'my name',
       config: {},
     });
@@ -1454,7 +1454,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
-          "enabledAfterImport": true,
+          "isMissingSecrets": true,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1521,7 +1521,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         name: 'my name',
         config: {
           a: true,
@@ -1548,7 +1548,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
-      enabledAfterImport: true,
+      isMissingSecrets: true,
       name: 'my name',
       config: {
         a: true,
@@ -1567,7 +1567,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
-          "enabledAfterImport": true,
+          "isMissingSecrets": true,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1603,7 +1603,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        enabledAfterImport: true,
+        isMissingSecrets: true,
         name: 'my name',
         config: {},
         secrets: {},

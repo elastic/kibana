@@ -51,6 +51,6 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
-  "enabledAfterImport": true
+  "is_missing_secrets": true
 }
 --------------------------------------------------

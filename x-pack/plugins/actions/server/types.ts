@@ -63,7 +63,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   id: string;
   actionTypeId: string;
   name: string;
-  enabledAfterImport?: boolean;
+  isMissingSecrets?: boolean;
   config?: Config;
   isPreconfigured: boolean;
 }
@@ -119,7 +119,7 @@ export interface ActionType<
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
-  enabledAfterImport: boolean;
+  isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }

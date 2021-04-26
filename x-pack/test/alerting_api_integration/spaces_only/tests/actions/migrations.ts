@@ -56,13 +56,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseNoAuth.body.config.hasAuth).to.eql(false);
     });
 
-    it('7.14.0 migrates connectors to have `enabledAfterImport` property', async () => {
-      const responseWithEnabledAfterImport = await supertest.get(
+    it('7.14.0 migrates connectors to have `isMissingSecrets` property', async () => {
+      const responseWithisMissingSecrets = await supertest.get(
         `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
       );
 
-      expect(responseWithEnabledAfterImport.status).to.eql(200);
-      expect(responseWithEnabledAfterImport.body.enabledAfterImport).to.eql(true);
+      expect(responseWithisMissingSecrets.status).to.eql(200);
+      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(true);
     });
   });
 }

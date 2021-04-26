@@ -120,15 +120,15 @@ describe('7.14.0', () => {
     );
   });
 
-  test('add enabledAfterImport property for actions', () => {
+  test('add isMissingSecrets property for actions', () => {
     const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
-    const action = getMockData({ enabledAfterImport: undefined });
+    const action = getMockData({ isMissingSecrets: undefined });
     const migratedAction = migration714(action, context);
     expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
-        enabledAfterImport: true,
+        isMissingSecrets: true,
       },
     });
   });
@@ -137,7 +137,7 @@ describe('7.14.0', () => {
 function getMockDataForWebhook(
   overwrites: Record<string, unknown> = {},
   hasUserAndPassword: boolean
-): SavedObjectUnsanitizedDoc<Omit<RawAction, 'enabledAfterImport'>> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   const secrets = hasUserAndPassword
     ? { user: 'test', password: '123' }
     : { user: '', password: '' };
@@ -156,7 +156,7 @@ function getMockDataForWebhook(
 
 function getMockDataForEmail(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<Omit<RawAction, 'enabledAfterImport'>> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
     attributes: {
       name: 'abc',
@@ -172,7 +172,7 @@ function getMockDataForEmail(
 
 function getCasesMockData(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<Omit<RawAction, 'enabledAfterImport'>> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
     attributes: {
       name: 'abc',
@@ -188,7 +188,7 @@ function getCasesMockData(
 
 function getMockData(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<Omit<RawAction, 'enabledAfterImport'>> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
     attributes: {
       name: 'abc',

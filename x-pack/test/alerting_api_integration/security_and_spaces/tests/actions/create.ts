@@ -59,7 +59,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: response.body.id,
                 is_preconfigured: false,
-                enabled_after_import: true,
+                is_missing_secrets: true,
                 name: 'My action',
                 connector_type_id: 'test.index-record',
                 config: {

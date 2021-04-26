@@ -40,7 +40,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
-          enabled_after_import: true,
+          is_missing_secrets: true,
           connector_type_id: 'test.index-record',
           name: 'My action',
           config: {
@@ -110,7 +110,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             actionTypeId: 'test.index-record',
-            enabledAfterImport: true,
+            isMissingSecrets: true,
             name: 'My action',
             config: {
               unencrypted: `This value shouldn't get encrypted`,

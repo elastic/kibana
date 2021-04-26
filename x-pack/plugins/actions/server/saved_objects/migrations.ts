@@ -43,7 +43,7 @@ export function getMigrations(
 
   const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
-    pipeMigrations(addEnabledAfterImportField)
+    pipeMigrations(addisMissingSecretsField)
   );
 
   return {
@@ -133,14 +133,14 @@ const addHasAuthConfigurationObject = (
   };
 };
 
-const addEnabledAfterImportField = (
+const addisMissingSecretsField = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      enabledAfterImport: true,
+      isMissingSecrets: true,
     },
   };
 };

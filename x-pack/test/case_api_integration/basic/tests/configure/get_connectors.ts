@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           referencedByCount: 0,
         },
         {
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           referencedByCount: 0,
         },
         {
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
             apiUrl: 'http://some.non.existent.com',
           },
           isPreconfigured: false,
-          enabledAfterImport: true,
+          isMissingSecrets: true,
           referencedByCount: 0,
         },
       ]);

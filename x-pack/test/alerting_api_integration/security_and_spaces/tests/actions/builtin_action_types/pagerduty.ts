@@ -64,7 +64,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
-        enabled_after_import: true,
+        is_missing_secrets: true,
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
@@ -81,7 +81,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
-        enabled_after_import: true,
+        is_missing_secrets: true,
         config: {
           apiUrl: pagerdutySimulatorURL,
         },

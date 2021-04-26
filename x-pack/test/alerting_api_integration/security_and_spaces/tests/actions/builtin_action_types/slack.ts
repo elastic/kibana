@@ -59,7 +59,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
-        enabled_after_import: true,
+        is_missing_secrets: true,
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},
@@ -74,7 +74,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
-        enabled_after_import: true,
+        is_missing_secrets: true,
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},

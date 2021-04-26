@@ -13,12 +13,12 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 
 const rewriteBodyRes: RewriteResponseCase<FindActionResult[]> = (results) => {
   return results.map(
-    ({ actionTypeId, isPreconfigured, referencedByCount, enabledAfterImport, ...res }) => ({
+    ({ actionTypeId, isPreconfigured, referencedByCount, isMissingSecrets, ...res }) => ({
       ...res,
       connector_type_id: actionTypeId,
       is_preconfigured: isPreconfigured,
       referenced_by_count: referencedByCount,
-      enabled_after_import: enabledAfterImport,
+      is_missing_secrets: isMissingSecrets,
     })
   );
 };

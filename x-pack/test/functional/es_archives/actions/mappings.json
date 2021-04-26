@@ -87,7 +87,7 @@
             "actionTypeId": {
               "type": "keyword"
             },
-            "enabledAfterImport": {
+            "isMissingSecrets": {
               "type": "boolean"
             },
             "config": {

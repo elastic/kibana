@@ -29,13 +29,13 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions['action']> = ({
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
-  enabledAfterImport,
+  isMissingSecrets,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
-  enabled_after_import: enabledAfterImport,
+  is_missing_secrets: isMissingSecrets,
 });
 
 export const createActionRoute = (
