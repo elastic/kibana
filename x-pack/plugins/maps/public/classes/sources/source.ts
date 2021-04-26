@@ -98,7 +98,7 @@ export class AbstractSource implements ISource {
     return '';
   }
 
-  getAttributionProvider() {
+  getAttributionProvider(): (() => Promise<Attribution[]>) | null {
     return null;
   }
 
