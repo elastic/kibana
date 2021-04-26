@@ -290,7 +290,7 @@ export const toStringArray = (value: unknown): string[] => {
     }, []);
   } else if (value == null) {
     return [];
-  } else if (!Array.isArray(value) && typeof value === 'object') {
+  } else if (typeof value === 'object') {
     try {
       return [JSON.stringify(value)];
     } catch {

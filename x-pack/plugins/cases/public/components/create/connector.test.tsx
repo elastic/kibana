@@ -150,12 +150,9 @@ describe('Connector', () => {
       </MockHookWrapperComponent>
     );
 
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
-      wrapper.update();
-    });
+    expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
     await waitFor(() => {
       wrapper.update();

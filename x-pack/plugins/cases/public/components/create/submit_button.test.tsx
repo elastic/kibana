@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { useForm, Form } from '../../common/shared_imports';
 import { SubmitCaseButton } from './submit_button';
@@ -29,7 +29,7 @@ describe('SubmitCaseButton', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('it renders', async () => {
@@ -48,11 +48,7 @@ describe('SubmitCaseButton', () => {
         <SubmitCaseButton />
       </MockHookWrapperComponent>
     );
-
-    await act(async () => {
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    });
-
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
@@ -63,12 +59,12 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    await waitFor(() => {
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isDisabled')
-      ).toBeTruthy();
-    });
+      ).toBeTruthy()
+    );
   });
 
   it('it is loading when submitting', async () => {
@@ -78,11 +74,11 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    await waitFor(() => {
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isLoading')
-      ).toBeTruthy();
-    });
+      ).toBeTruthy()
+    );
   });
 });
