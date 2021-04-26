@@ -116,7 +116,6 @@ export function registerRepositoriesRoutes({
         snapshot: '_all',
       });
 
-      // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
       const { responses: snapshotResponses } = response.body;
 
       if (repositoryByName[name]) {

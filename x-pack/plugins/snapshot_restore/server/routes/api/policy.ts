@@ -205,6 +205,7 @@ export function registerPolicyRoutes({
           name: '*',
           expand_wildcards: 'all',
         });
+        // @ts-expect-error Type 'ResolveIndexAliasItem[]' is not comparable to type 'IndexAndAliasFromEs[]'.
         const resolvedIndicesResponse = response.body as ResolveIndexResponseFromES;
 
         const body: PolicyIndicesResponse = {
