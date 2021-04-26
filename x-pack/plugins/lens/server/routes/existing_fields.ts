@@ -201,7 +201,6 @@ async function fetchIndexPatternStats({
         _source: false,
         runtime_mappings: runtimeFields.reduce((acc, field) => {
           if (!field.runtimeField) return acc;
-          // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
           acc[field.name] = field.runtimeField;
           return acc;
         }, {} as Record<string, estypes.RuntimeField>),
