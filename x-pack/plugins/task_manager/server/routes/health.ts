@@ -108,9 +108,18 @@ export function healthRoute(
   return serviceStatus$;
 }
 
+/**
+ * We enforce a `meta` of `never` because this meta gets duplicated into *every dependant plugin*, and
+ * this will then get logged out when logging is set to Verbose.
+ * We used to pass in the the entire MonitoredHealth into this `meta` field, but this means that the
+ * whole MonitoredHealth JSON (which can be quite big) was duplicated dozens of times and when we
+ * try to view logs in Discover, it fails to render as this JSON was often dozens of levels deep.
+ */
+type TaskManagerServiceStatus = ServiceStatus<never>;
+
 export function withServiceStatus(
   monitoredHealth: MonitoredHealth
-): [MonitoredHealth, ServiceStatus] {
+): [MonitoredHealth, TaskManagerServiceStatus] {
   const level =
     monitoredHealth.status === HealthStatus.OK
       ? ServiceStatusLevels.available
@@ -122,7 +131,6 @@ export function withServiceStatus(
     {
       level,
       summary: LEVEL_SUMMARY[level.toString()],
-      meta: monitoredHealth,
     },
   ];
 }
