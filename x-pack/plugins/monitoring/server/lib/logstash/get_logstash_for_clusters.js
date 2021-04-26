@@ -44,14 +44,14 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
   const config = req.server.config();
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.cluster_uuid;
+    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
     const params = {
       index: lsIndexPattern,
       size: 0,
       ignoreUnavailable: true,
       body: {
         query: createQuery({
-          type: 'logstash_stats',
+          types: ['stats', 'logstash_stats'],
           start,
           end,
           clusterUuid,
@@ -148,6 +148,31 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
               },
             },
           },
+          pipelines_nested_mb: {
+            nested: {
+              path: 'logstash.node.stats.pipelines',
+            },
+            aggs: {
+              pipelines: {
+                sum_bucket: {
+                  buckets_path: 'queue_types>num_pipelines',
+                },
+              },
+              queue_types: {
+                terms: {
+                  field: 'logstash.node.stats.pipelines.queue.type',
+                  size: config.get('monitoring.ui.max_bucket_size'),
+                },
+                aggs: {
+                  num_pipelines: {
+                    cardinality: {
+                      field: 'logstash.node.stats.pipelines.id',
+                    },
+                  },
+                },
+              },
+            },
+          },
           events_in_total: {
             sum_bucket: {
               buckets_path: 'logstash_uuids>events_in_total_per_node',
@@ -199,6 +224,11 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
         maxUptime = get(aggregations, 'max_uptime.value');
       }
 
+      let types = get(aggregations, 'pipelines_nested_mb.queue_types.buckets', []);
+      if (!types || types.length === 0) {
+        types = get(aggregations, 'pipelines_nested.queue_types.buckets', []);
+      }
+
       return {
         clusterUuid,
         stats: {
@@ -208,8 +238,10 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
           avg_memory: memory,
           avg_memory_used: memoryUsed,
           max_uptime: maxUptime,
-          pipeline_count: get(aggregations, 'pipelines_nested.pipelines.value', 0),
-          queue_types: getQueueTypes(get(aggregations, 'pipelines_nested.queue_types.buckets', [])),
+          pipeline_count:
+            get(aggregations, 'pipelines_nested_mb.pipelines.value') ||
+            get(aggregations, 'pipelines_nested.pipelines.value', 0),
+          queue_types: getQueueTypes(types),
           versions: logstashVersions.map((versionBucket) => versionBucket.key),
         },
       };

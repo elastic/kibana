@@ -71,49 +71,6 @@ describe('synonyms routes', () => {
         path: '/as/engines/:engineName/synonyms/collection',
       });
     });
-
-    describe('validates', () => {
-      it('with synonyms', () => {
-        const request = {
-          body: {
-            synonyms: ['a', 'b', 'c'],
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('empty synonyms array', () => {
-        const request = {
-          body: {
-            queries: [],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('only one synonym', () => {
-        const request = {
-          body: {
-            queries: ['a'],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('empty synonym strings', () => {
-        const request = {
-          body: {
-            queries: ['', '', ''],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('missing synonyms', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-    });
   });
 
   describe('PUT /api/app_search/engines/{engineName}/synonyms/{synonymId}', () => {
@@ -135,49 +92,6 @@ describe('synonyms routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/synonyms/:synonymId',
-      });
-    });
-
-    describe('validates', () => {
-      it('with synonyms', () => {
-        const request = {
-          body: {
-            synonyms: ['a', 'b', 'c'],
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('empty synonyms array', () => {
-        const request = {
-          body: {
-            queries: [],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('only one synonym', () => {
-        const request = {
-          body: {
-            queries: ['a'],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('empty synonym strings', () => {
-        const request = {
-          body: {
-            queries: ['', '', ''],
-          },
-        };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('missing synonyms', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
       });
     });
   });
