@@ -18,8 +18,8 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { AppLogic } from '../../app_logic';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 
+import { DocumentCreationButton } from './components';
 import { DOCUMENTS_TITLE } from './constants';
-import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {

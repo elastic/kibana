@@ -146,13 +146,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async toggleSwitch(testSubject: string) {
       const switchBtn = await testSubjects.find(testSubject);
-      const valueBefore = await switchBtn.getAttribute('aria-checked');
       await switchBtn.click();
-      await retry.try(async () => {
-        const switchBtnAfter = await testSubjects.find(testSubject);
-        const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
-        expect(valueAfter).not.to.eql(valueBefore);
-      });
     },
     async clickCreateAlertButton() {
       const createBtn = await find.byCssSelector(
@@ -194,9 +188,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       switchName: string,
       shouldBeCheckedAsString: string
     ) {
-      await retry.try(async () => {
+      await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
         await testSubjects.click('collapsedItemActions');
+
         const switchControl = await testSubjects.find(switchName);
         const isChecked = await switchControl.getAttribute('aria-checked');
         expect(isChecked).to.eql(shouldBeCheckedAsString);
