@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import { DataPublicPluginStart, esQuery } from '../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';
 
@@ -67,6 +67,7 @@ interface LogStreamContentProps {
   startTimestamp: number;
   endTimestamp: number;
   query?: string | Query | BuiltEsQuery;
+  filters?: Filter[];
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
@@ -87,6 +88,7 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   startTimestamp,
   endTimestamp,
   query,
+  filters,
   center,
   highlight,
   columns,
@@ -120,16 +122,12 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   });
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
-    if (query == null) {
-      return undefined;
-    } else if (typeof query === 'string') {
-      return esQuery.buildEsQuery(derivedIndexPattern, { language: 'kuery', query }, []);
-    } else if ('language' in query && 'query' in query) {
-      return esQuery.buildEsQuery(derivedIndexPattern, query, []);
+    if (typeof query === 'object' && 'bool' in query) {
+      return mergeBoolQueries(query, esQuery.buildEsQuery(derivedIndexPattern, [], filters ?? []));
     } else {
-      return query;
+      return esQuery.buildEsQuery(derivedIndexPattern, coerceToQueries(query), filters ?? []);
     }
-  }, [derivedIndexPattern, query]);
+  }, [derivedIndexPattern, filters, query]);
 
   // Internal state
   const {
@@ -247,6 +245,27 @@ function convertLogColumnDefinitionToLogSourceColumnDefinition(
     }
   });
 }
+
+const mergeBoolQueries = (firstQuery: BuiltEsQuery, secondQuery: BuiltEsQuery): BuiltEsQuery => ({
+  bool: {
+    must: [...firstQuery.bool.must, ...secondQuery.bool.must],
+    filter: [...firstQuery.bool.filter, ...secondQuery.bool.filter],
+    should: [...firstQuery.bool.should, ...secondQuery.bool.should],
+    must_not: [...firstQuery.bool.must_not, ...secondQuery.bool.must_not],
+  },
+});
+
+const coerceToQueries = (value: undefined | string | Query): Query[] => {
+  if (value == null) {
+    return [];
+  } else if (typeof value === 'string') {
+    return [{ language: 'kuery', query: value }];
+  } else if ('language' in value && 'query' in value) {
+    return [value];
+  }
+
+  return [];
+};
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

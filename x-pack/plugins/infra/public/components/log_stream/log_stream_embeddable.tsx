@@ -85,6 +85,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
               endTimestamp={endTimestamp}
               height="100%"
               query={this.input.query}
+              filters={this.input.filters}
             />
           </div>
         </EuiThemeProvider>
