@@ -16,6 +16,9 @@ export const computeMappingId = ({
   id: string;
   suffix: string;
 }): string => {
+  // TODO: This causes issues if above 65 character limit. We should limit the prefix
+  // and anything else on the incoming routes to avoid this causing an issue. We should still
+  // throw here in case I change the prefix or other names and cause issues.
   const computedId = computeTransformId({ id, prefix, suffix });
   return `.${computedId}`;
 };

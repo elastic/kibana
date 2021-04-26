@@ -11,7 +11,6 @@ export const getTransformExists = async (
   esClient: ElasticsearchClient,
   id: string
 ): Promise<boolean> => {
-  // TODO: Type this getTransform rather than letting count stay as "any"
   try {
     const {
       body: { count },

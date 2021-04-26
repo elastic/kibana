@@ -58,6 +58,7 @@ export const postTransforms = (router: IRouter): void => {
         modules: ModuleNames[];
         auto_start: boolean;
         indices: string[];
+        // We can blow up at 65 character+ for transform id. We need to validate the prefix + transform jobs and return an error
         prefix: string;
         query: object;
         suffix: string;
