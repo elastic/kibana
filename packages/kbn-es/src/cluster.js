@@ -11,6 +11,7 @@ const util = require('util');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
+const { pipeline } = require('stream');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const {
@@ -24,8 +25,12 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, REPO_ROOT } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
+const archiver = require('archiver');
+const uuidV4 = require('uuid/v4');
+
+const asyncPipeline = util.promisify(pipeline);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -256,6 +261,7 @@ exports.Cluster = class Cluster {
       esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
     }
 
+    const uuid = uuidV4();
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
       filter: SettingsFilter.NonSecureOnly,
     }).reduce(
@@ -264,6 +270,7 @@ exports.Cluster = class Cluster {
     );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
+    this._log.debug('cluster uuid', uuid);
 
     options.esEnvVars = options.esEnvVars || {};
 
@@ -320,7 +327,24 @@ exports.Cluster = class Cluster {
 
     // observe the exit code of the process and reflect in _outcome promies
     const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
-    this._outcome = exitCode.then((code) => {
+    this._outcome = exitCode.then(async (code) => {
+      if (process.env.CI) {
+        const archiveDir = path.resolve(REPO_ROOT, 'target/es-log-bundles');
+        const archivePath = path.resolve(archiveDir, `${uuid}.zip`);
+        this._log.debug('archiving logs from es to', archivePath);
+
+        fs.mkdirSync(archiveDir, { recursive: true });
+
+        const logz = archiver('zip', {
+          zlib: {
+            level: 9,
+          },
+        });
+
+        logz.directory(path.resolve(installPath, 'logs'));
+        await asyncPipeline(logz, fs.createWriteStream(archivePath));
+      }
+
       if (this._stopCalled) {
         return;
       }

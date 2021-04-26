@@ -202,7 +202,7 @@ def withGcsArtifactUpload(workerName, closure) {
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
     'x-pack/test/functional/failure_debug/html/*.html',
     '.es/**/*.hprof',
-    '.es/**/gc.log',
+    'target/es-log-bundles/**/*',
   ]
 
   withEnv([
