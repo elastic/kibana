@@ -66,7 +66,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+        `"(language:kuery,query:'FILTER_FIELD:FILTER_VALUE')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -86,7 +86,7 @@ describe('LinkToLogsPage component', () => {
 
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
-      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(language:kuery,query:'')"`);
       expect(searchParams.get('logPosition')).toEqual(null);
     });
   });
@@ -106,7 +106,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+        `"(language:kuery,query:'FILTER_FIELD:FILTER_VALUE')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -126,7 +126,7 @@ describe('LinkToLogsPage component', () => {
 
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
-      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(language:kuery,query:'')"`);
       expect(searchParams.get('logPosition')).toEqual(null);
     });
   });
@@ -146,7 +146,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'HOST_FIELD: HOST_NAME',kind:kuery)"`
+        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -167,7 +167,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(HOST_FIELD: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(HOST_FIELD: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -188,7 +188,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'HOST_FIELD: HOST_NAME',kind:kuery)"`
+        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -223,7 +223,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'CONTAINER_FIELD: CONTAINER_ID',kind:kuery)"`
+        `"(language:kuery,query:'CONTAINER_FIELD: CONTAINER_ID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -244,7 +244,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(CONTAINER_FIELD: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(CONTAINER_FIELD: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -281,7 +281,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'POD_FIELD: POD_UID',kind:kuery)"`
+        `"(language:kuery,query:'POD_FIELD: POD_UID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -300,7 +300,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(POD_FIELD: POD_UID) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(POD_FIELD: POD_UID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
