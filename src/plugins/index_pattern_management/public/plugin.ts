@@ -18,6 +18,8 @@ import {
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import type { SpacesOssPluginStart } from '../../spaces_oss/public';
+import { IPM_APP_ID, legacyPatternsPath, newAppPath } from './constants';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -27,6 +29,7 @@ export interface IndexPatternManagementSetupDependencies {
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  spacesOss: SpacesOssPluginStart;
 }
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
@@ -36,8 +39,6 @@ export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
   defaultMessage: 'Index Patterns',
 });
-
-const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
   implements
@@ -60,9 +61,6 @@ export class IndexPatternManagementPlugin
     if (!kibanaSection) {
       throw new Error('`kibana` management section not found.');
     }
-
-    const newAppPath = `management/kibana/${IPM_APP_ID}`;
-    const legacyPatternsPath = 'management/kibana/index_patterns';
 
     urlForwarding.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
     urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {

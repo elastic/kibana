@@ -21,14 +21,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
+import { ResolvedIndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IPM_APP_ID } from '../../constants';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
-  indexPattern: IndexPattern;
+  resolvedIndexPattern: ResolvedIndexPattern;
 }
 
 const mappingAPILink = i18n.translate(
@@ -55,14 +56,18 @@ const confirmModalOptionsDelete = {
 };
 
 export const EditIndexPattern = withRouter(
-  ({ indexPattern, history, location }: EditIndexPatternProps) => {
+  ({ resolvedIndexPattern, history, location }: EditIndexPatternProps) => {
+    const { indexPattern } = resolvedIndexPattern;
     const {
       uiSettings,
       indexPatternManagementStart,
       overlays,
       chrome,
+      http,
       data,
+      spacesOss,
     } = useKibana<IndexPatternManagmentContext>().services;
+    const { basePath } = http;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -144,6 +149,46 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
+
+    useEffect(() => {
+      if (resolvedIndexPattern.outcome === 'aliasMatch' && spacesOss.isSpacesAvailable) {
+        // This index pattern has been resolved from a legacy URL, we should redirect the user to the new URL and display a toast.
+        const path = basePath.prepend(
+          `kibana/${IPM_APP_ID}/patterns/${indexPattern.id}${window.location.hash}`
+        );
+        const objectNoun = 'index pattern'; // TODO: i18n
+        spacesOss.ui.redirectLegacyUrl(path, objectNoun);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const getLegacyUrlConflictCallout = () => {
+      if (
+        resolvedIndexPattern.outcome === 'conflict' &&
+        resolvedIndexPattern.aliasTargetId &&
+        spacesOss.isSpacesAvailable
+      ) {
+        // We have resolved to one index pattern, but there is another one with a legacy URL associated with this page. We should display a
+        // callout with a warning for the user, and provide a way for them to navigate to the other index pattern.
+        const otherObjectId = resolvedIndexPattern.aliasTargetId;
+        const otherObjectPath = basePath.prepend(
+          `kibana/${IPM_APP_ID}/patterns/${otherObjectId}${window.location.hash}`
+        );
+        return (
+          <>
+            <EuiSpacer />
+            {spacesOss.ui.components.getLegacyUrlConflict({
+              objectNoun: 'index pattern', // TODO: i18n
+              currentObjectId: indexPattern.id!,
+              otherObjectId,
+              otherObjectPath,
+            })}
+          </>
+        );
+      }
+      return null;
+    };
+
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
@@ -185,6 +230,7 @@ export const EditIndexPattern = withRouter(
               />{' '}
             </p>
           </EuiText>
+          {getLegacyUrlConflictCallout()}
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />

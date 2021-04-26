@@ -12,7 +12,8 @@ import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migration
 export const indexPatternSavedObjectType: SavedObjectsType = {
   name: 'index-pattern',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'indexPatternApp',
     defaultSearchField: 'title',

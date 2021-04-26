@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { IndexPattern } from '../../../../../plugins/data/public';
+import { ResolvedIndexPattern } from '../../../../../plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -17,17 +17,17 @@ import { EditIndexPattern } from '../edit_index_pattern';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
   const { data, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const [resolvedIndexPattern, setResolvedIndexPattern] = useState<ResolvedIndexPattern>();
 
   useEffect(() => {
-    data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
-      setIndexPattern(ip);
-      setBreadcrumbs(getEditBreadcrumbs(ip));
+    data.indexPatterns.resolve(props.match.params.id).then((ip: ResolvedIndexPattern) => {
+      setResolvedIndexPattern(ip);
+      setBreadcrumbs(getEditBreadcrumbs(ip.indexPattern));
     });
   }, [data.indexPatterns, props.match.params.id, setBreadcrumbs]);
 
-  if (indexPattern) {
-    return <EditIndexPattern indexPattern={indexPattern} />;
+  if (resolvedIndexPattern) {
+    return <EditIndexPattern resolvedIndexPattern={resolvedIndexPattern} />;
   } else {
     return <></>;
   }

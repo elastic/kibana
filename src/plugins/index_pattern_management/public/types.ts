@@ -20,6 +20,7 @@ import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import type { SpacesOssPluginStart } from '../../spaces_oss/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
@@ -31,6 +32,7 @@ export interface IndexPatternManagmentContext {
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  spacesOss: SpacesOssPluginStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
