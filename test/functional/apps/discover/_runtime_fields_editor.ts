@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import uuidv4 from 'uuid/v4';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
