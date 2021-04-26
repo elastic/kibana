@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         uiCapabilitiesPath: schema.string(),
       }),
       namespaceType: schema.string(),
+      hiddenType: schema.boolean(),
     }),
   });
   const invalidRelationSchema = schema.object({
