@@ -55,6 +55,11 @@ describe('useSwimlaneInputResolver', () => {
               points: [],
             })
           ),
+          getSwimlaneBucketInterval: jest.fn(() => {
+            return {
+              asSeconds: jest.fn(() => 900),
+            };
+          }),
         },
         anomalyDetectorService: {
           getJobs$: jest.fn((jobId: string[]) => {

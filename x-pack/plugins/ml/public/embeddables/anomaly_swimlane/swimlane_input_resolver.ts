@@ -12,6 +12,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   map,
+  shareReplay,
   skipWhile,
   startWith,
   switchMap,
@@ -68,7 +69,9 @@ export function useSwimlaneInputResolver(
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
   const selectedJobs$ = useMemo(() => {
-    return getJobsObservable(embeddableInput, anomalyDetectorService, setError);
+    return getJobsObservable(embeddableInput, anomalyDetectorService, setError).pipe(
+      shareReplay(1)
+    );
   }, []);
 
   const bucketInterval$ = useMemo(() => {
