@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -12,6 +13,9 @@ import * as rt from 'io-ts';
 import { isObject } from 'lodash/fp';
 
 type ErrorFactory = (message: string) => Error;
+
+export const OmitProp = <O extends rt.Props, K extends keyof O>(o: O, k: K): Omit<O, K> =>
+  omit(o, k);
 
 export const formatErrors = (errors: rt.Errors): string[] => {
   const err = errors.map((error) => {

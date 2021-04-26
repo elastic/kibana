@@ -15,20 +15,12 @@ export interface UserActionGet {
 }
 
 export interface UserActionsSubClient {
-  getAll(args: UserActionGet): Promise<CaseUserActionsResponse>;
+  getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
 }
 
-export const createUserActionsSubClient = (args: CasesClientArgs): UserActionsSubClient => {
-  const { savedObjectsClient, userActionService, logger } = args;
-
+export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
-    getAll: (params: UserActionGet) =>
-      get({
-        ...params,
-        savedObjectsClient,
-        userActionService,
-        logger,
-      }),
+    getAll: (params: UserActionGet) => get(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

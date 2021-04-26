@@ -6,23 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '../../../../actions/server';
 
 import { GetFieldsResponse } from '../../../common/api';
 import { createDefaultMapping, formatFields } from './utils';
+import { CasesClientArgs } from '..';
 
 interface ConfigurationGetFields {
   connectorId: string;
   connectorType: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
 }
 
-export const getFields = async ({
-  actionsClient,
-  connectorType,
-  connectorId,
-}: ConfigurationGetFields): Promise<GetFieldsResponse> => {
+export const getFields = async (
+  { connectorType, connectorId }: ConfigurationGetFields,
+  clientArgs: CasesClientArgs
+): Promise<GetFieldsResponse> => {
+  const { actionsClient } = clientArgs;
   const results = await actionsClient.execute({
     actionId: connectorId,
     params: {

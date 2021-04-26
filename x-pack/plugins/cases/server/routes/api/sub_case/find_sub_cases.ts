@@ -12,15 +12,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { FindQueryParamsRt, throwErrors, excess } from '../../../../../common/api';
-import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { SubCasesFindRequestRt, throwErrors } from '../../../../common/api';
+import { RouteDeps } from '../types';
+import { escapeHatch, wrapError } from '../utils';
+import { SUB_CASES_URL } from '../../../../common/constants';
 
-export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
+export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
-      path: `${CASE_COMMENTS_URL}/_find`,
+      path: `${SUB_CASES_URL}/_find`,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -30,21 +30,21 @@ export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const query = pipe(
-          excess(FindQueryParamsRt).decode(request.query),
+        const queryParams = pipe(
+          SubCasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const client = await context.cases.getCasesClient();
         return response.ok({
-          body: await client.attachments.find({
+          body: await client.subCases.find({
             caseID: request.params.case_id,
-            queryParams: query,
+            queryParams,
           }),
         });
       } catch (error) {
         logger.error(
-          `Failed to find comments in route case id: ${request.params.case_id}: ${error}`
+          `Failed to find sub cases in route case id: ${request.params.case_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

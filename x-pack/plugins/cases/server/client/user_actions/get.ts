@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import {
   SUB_CASE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
-import { CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common';
+import { CasesClientArgs } from '..';
 
 interface GetParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionService;
   caseId: string;
   subCaseId?: string;
-  logger: Logger;
 }
 
-export const get = async ({
-  savedObjectsClient,
-  userActionService,
-  caseId,
-  subCaseId,
-  logger,
-}: GetParams): Promise<CaseUserActionsResponse> => {
+export const get = async (
+  { caseId, subCaseId }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<CaseUserActionsResponse> => {
+  const { savedObjectsClient, userActionService, logger } = clientArgs;
+
   try {
     checkEnabledCaseConnectorOrThrow(subCaseId);
 

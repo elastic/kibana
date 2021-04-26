@@ -7,18 +7,25 @@
 
 import { Logger, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
 
-import { ConnectorMappings, SavedObjectFindOptions } from '../../../common/api';
+import { ConnectorMappings } from '../../../common/api';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
+import { SavedObjectFindOptionsKueryNode } from '../../common';
 
 interface ClientArgs {
   soClient: SavedObjectsClientContract;
 }
 interface FindConnectorMappingsArgs extends ClientArgs {
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface PostConnectorMappingsArgs extends ClientArgs {
   attributes: ConnectorMappings;
+  references: SavedObjectReference[];
+}
+
+interface UpdateConnectorMappingsArgs extends ClientArgs {
+  mappingId: string;
+  attributes: Partial<ConnectorMappings>;
   references: SavedObjectReference[];
 }
 
@@ -50,6 +57,28 @@ export class ConnectorMappingsService {
       );
     } catch (error) {
       this.log.error(`Error on POST a new connector mappings: ${error}`);
+      throw error;
+    }
+  }
+
+  public async update({
+    soClient,
+    mappingId,
+    attributes,
+    references,
+  }: UpdateConnectorMappingsArgs) {
+    try {
+      this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
+      return await soClient.update<ConnectorMappings>(
+        CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+        mappingId,
+        attributes,
+        {
+          references,
+        }
+      );
+    } catch (error) {
+      this.log.error(`Error on UPDATE connector mappings ${mappingId}: ${error}`);
       throw error;
     }
   }

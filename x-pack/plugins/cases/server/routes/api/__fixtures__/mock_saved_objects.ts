@@ -477,6 +477,7 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: 'securitySolution',
     },
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
@@ -490,6 +491,7 @@ export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
     id: 'mock-mappings-1',
     attributes: {
       mappings: mappings[ConnectorTypes.jira],
+      owner: 'securitySolution',
     },
     references: [],
   },

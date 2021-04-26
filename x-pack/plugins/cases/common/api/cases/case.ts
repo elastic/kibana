@@ -176,6 +176,12 @@ export const ExternalServiceResponseRt = rt.intersection([
   }),
 ]);
 
+export const AllTagsFindRequestRt = rt.partial({
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
+export const AllReportersFindRequestRt = AllTagsFindRequestRt;
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 /**
  * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
@@ -198,3 +204,6 @@ export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: 
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
   connector?: ESCaseConnector;
 };
+
+export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
+export type AllReportersFindRequest = AllTagsFindRequest;

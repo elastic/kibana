@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
 import { AlertInfo } from '../../common';
-import { AlertServiceContract } from '../../services';
 import { CasesClientGetAlertsResponse } from './types';
+import { CasesClientArgs } from '..';
 
 interface GetParams {
-  alertsService: AlertServiceContract;
   alertsInfo: AlertInfo[];
-  scopedClusterClient: ElasticsearchClient;
-  logger: Logger;
 }
 
-export const get = async ({
-  alertsService,
-  alertsInfo,
-  scopedClusterClient,
-  logger,
-}: GetParams): Promise<CasesClientGetAlertsResponse> => {
+export const get = async (
+  { alertsInfo }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<CasesClientGetAlertsResponse> => {
+  const { alertsService, scopedClusterClient, logger } = clientArgs;
   if (alertsInfo.length === 0) {
     return [];
   }

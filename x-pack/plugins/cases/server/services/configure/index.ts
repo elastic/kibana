@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'kibana/server';
 
-import { ESCasesConfigureAttributes, SavedObjectFindOptions } from '../../../common/api';
+import { SavedObjectFindOptionsKueryNode } from '../../common';
+import { ESCasesConfigureAttributes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
@@ -15,43 +17,44 @@ interface ClientArgs {
 }
 
 interface GetCaseConfigureArgs extends ClientArgs {
-  caseConfigureId: string;
+  configurationId: string;
 }
 interface FindCaseConfigureArgs extends ClientArgs {
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface PostCaseConfigureArgs extends ClientArgs {
   attributes: ESCasesConfigureAttributes;
+  id: string;
 }
 
 interface PatchCaseConfigureArgs extends ClientArgs {
-  caseConfigureId: string;
+  configurationId: string;
   updatedAttributes: Partial<ESCasesConfigureAttributes>;
 }
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
-  public async delete({ soClient, caseConfigureId }: GetCaseConfigureArgs) {
+  public async delete({ soClient, configurationId }: GetCaseConfigureArgs) {
     try {
-      this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
-      return await soClient.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
+      this.log.debug(`Attempting to DELETE case configure ${configurationId}`);
+      return await soClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId);
     } catch (error) {
-      this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
+      this.log.debug(`Error on DELETE case configure ${configurationId}: ${error}`);
       throw error;
     }
   }
 
-  public async get({ soClient, caseConfigureId }: GetCaseConfigureArgs) {
+  public async get({ soClient, configurationId }: GetCaseConfigureArgs) {
     try {
-      this.log.debug(`Attempting to GET case configuration ${caseConfigureId}`);
+      this.log.debug(`Attempting to GET case configuration ${configurationId}`);
       return await soClient.get<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
-        caseConfigureId
+        configurationId
       );
     } catch (error) {
-      this.log.debug(`Error on GET case configuration ${caseConfigureId}: ${error}`);
+      this.log.debug(`Error on GET case configuration ${configurationId}: ${error}`);
       throw error;
     }
   }
@@ -60,7 +63,10 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to find all case configuration`);
       return await soClient.find<ESCasesConfigureAttributes>({
-        ...options,
+        ...cloneDeep(options),
+        // Get the latest configuration
+        sortField: 'created_at',
+        sortOrder: 'desc',
         type: CASE_CONFIGURE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -69,30 +75,34 @@ export class CaseConfigureService {
     }
   }
 
-  public async post({ soClient, attributes }: PostCaseConfigureArgs) {
+  public async post({ soClient, attributes, id }: PostCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      return await soClient.create<ESCasesConfigureAttributes>(CASE_CONFIGURE_SAVED_OBJECT, {
-        ...attributes,
-      });
+      return await soClient.create<ESCasesConfigureAttributes>(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        {
+          ...attributes,
+        },
+        { id }
+      );
     } catch (error) {
       this.log.debug(`Error on POST a new case configuration: ${error}`);
       throw error;
     }
   }
 
-  public async patch({ soClient, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) {
+  public async patch({ soClient, configurationId, updatedAttributes }: PatchCaseConfigureArgs) {
     try {
-      this.log.debug(`Attempting to UPDATE case configuration ${caseConfigureId}`);
+      this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       return await soClient.update<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
-        caseConfigureId,
+        configurationId,
         {
           ...updatedAttributes,
         }
       );
     } catch (error) {
-      this.log.debug(`Error on UPDATE case configuration ${caseConfigureId}: ${error}`);
+      this.log.debug(`Error on UPDATE case configuration ${configurationId}: ${error}`);
       throw error;
     }
   }

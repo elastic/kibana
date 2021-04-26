@@ -5,52 +5,46 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CommentPatchRequestRt, throwErrors } from '../../../../../common/api';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
-export function initPatchCommentApi({ router, logger }: RouteDeps) {
-  router.patch(
+import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
+import { RouteDeps } from '../types';
+import { escapeHatch, wrapError } from '../utils';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
+
+export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
+  router.get(
     {
-      path: CASE_COMMENTS_URL,
+      path: `${CASE_COMMENTS_URL}/_find`,
       validate: {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-        body: escapeHatch,
+        query: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
         const query = pipe(
-          CommentPatchRequestRt.decode(request.body),
+          excess(FindQueryParamsRt).decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const client = await context.cases.getCasesClient();
-
         return response.ok({
-          body: await client.attachments.update({
+          body: await client.attachments.find({
             caseID: request.params.case_id,
-            subCaseID: request.query?.subCaseId,
-            updateRequest: query,
+            queryParams: query,
           }),
         });
       } catch (error) {
         logger.error(
-          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+          `Failed to find comments in route case id: ${request.params.case_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

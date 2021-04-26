@@ -18,7 +18,6 @@ import {
 } from '../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
-  createCaseAsUser,
   deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
@@ -236,47 +235,56 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('rbac', () => {
       it('User: security solution only - should create a case', async () => {
-        const theCase = await createCaseAsUser({
+        const theCase = await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
-        });
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
         expect(theCase.owner).to.eql('securitySolutionFixture');
       });
 
       it('User: security solution only - should NOT create a case of different owner', async () => {
-        await createCaseAsUser({
+        await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'observabilityFixture',
-          expectedHttpCode: 403,
-        });
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          403,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
       });
 
       for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
-          await createCaseAsUser({
+          await createCase(
             supertestWithoutAuth,
-            user,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-            expectedHttpCode: 403,
-          });
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            403,
+            {
+              user,
+              space: 'space1',
+            }
+          );
         });
       }
 
       it('should NOT create a case in a space with no permissions', async () => {
-        await createCaseAsUser({
+        await createCase(
           supertestWithoutAuth,
-          user: secOnly,
-          space: 'space2',
-          owner: 'securitySolutionFixture',
-          expectedHttpCode: 403,
-        });
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          403,
+          {
+            user: secOnly,
+            space: 'space2',
+          }
+        );
       });
     });
   });

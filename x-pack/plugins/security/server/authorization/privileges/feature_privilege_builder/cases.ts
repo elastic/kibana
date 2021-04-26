@@ -18,6 +18,9 @@ const readOperations: string[] = [
   'getComment',
   'getAllComments',
   'findComments',
+  'getTags',
+  'getReporters',
+  'findConfigurations',
 ];
 const writeOperations: string[] = [
   'createCase',
@@ -27,6 +30,8 @@ const writeOperations: string[] = [
   'deleteAllComments',
   'deleteComment',
   'updateComment',
+  'createConfiguration',
+  'updateConfiguration',
 ];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 

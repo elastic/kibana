@@ -5,7 +5,11 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
+import { SavedObjectsFindResponse, SavedObjectsUtils } from '../../../../../../src/core/server';
 import { SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
   CaseConfigureResponseRt,
@@ -13,13 +17,22 @@ import {
   CasesConfigureRequest,
   CasesConfigureResponse,
   ConnectorMappingsAttributes,
+  excess,
+  GetConfigureFindRequest,
+  GetConfigureFindRequestRt,
   GetFieldsResponse,
+  throwErrors,
+  CasesConfigurationsResponse,
+  CaseConfigurationsResponseRt,
+  CasesConfigurePatchRt,
+  ConnectorMappings,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';
+import { EventOutcome } from '../../../../security/server';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
@@ -28,32 +41,44 @@ import { getMappings } from './get_mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
-
-interface ConfigurationGetFields {
-  connectorId: string;
-  connectorType: string;
-}
-
-interface ConfigurationGetMappings {
-  connectorId: string;
-  connectorType: string;
-}
+import { Operations } from '../../authorization';
+import {
+  combineAuthorizedAndOwnerFilter,
+  createAuditMsg,
+  ensureAuthorized,
+  getAuthorizationFilter,
+} from '../utils';
+import {
+  ConfigurationGetFields,
+  MappingsArgs,
+  CreateMappingsArgs,
+  UpdateMappingsArgs,
+} from './types';
+import { createMappings } from './create_mappings';
+import { updateMappings } from './update_mappings';
 
 /**
  * Defines the internal helper functions.
  */
 export interface InternalConfigureSubClient {
-  getFields(args: ConfigurationGetFields): Promise<GetFieldsResponse>;
-  getMappings(args: ConfigurationGetMappings): Promise<ConnectorMappingsAttributes[]>;
+  getFields(params: ConfigurationGetFields): Promise<GetFieldsResponse>;
+  getMappings(
+    params: MappingsArgs
+  ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
+  createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
+  updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
 }
 
 /**
  * This is the public API for interacting with the connector configuration for cases.
  */
 export interface ConfigureSubClient {
-  get(): Promise<CasesConfigureResponse | {}>;
+  get(params: GetConfigureFindRequest): Promise<CasesConfigureResponse | {}>;
   getConnectors(): Promise<FindActionResult[]>;
-  update(configurations: CasesConfigurePatch): Promise<CasesConfigureResponse>;
+  update(
+    configurationId: string,
+    configurations: CasesConfigurePatch
+  ): Promise<CasesConfigureResponse>;
   create(configuration: CasesConfigureRequest): Promise<CasesConfigureResponse>;
 }
 
@@ -62,21 +87,16 @@ export interface ConfigureSubClient {
  * configurations.
  */
 export const createInternalConfigurationSubClient = (
-  args: CasesClientArgs,
+  clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): InternalConfigureSubClient => {
-  const { savedObjectsClient, connectorMappingsService, logger, actionsClient } = args;
-
   const configureSubClient: InternalConfigureSubClient = {
-    getFields: (fields: ConfigurationGetFields) => getFields({ ...fields, actionsClient }),
-    getMappings: (params: ConfigurationGetMappings) =>
-      getMappings({
-        ...params,
-        savedObjectsClient,
-        connectorMappingsService,
-        casesClientInternal,
-        logger,
-      }),
+    getFields: (params: ConfigurationGetFields) => getFields(params, clientArgs),
+    getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
+    createMappings: (params: CreateMappingsArgs) =>
+      createMappings(params, clientArgs, casesClientInternal),
+    updateMappings: (params: UpdateMappingsArgs) =>
+      updateMappings(params, clientArgs, casesClientInternal),
   };
 
   return Object.freeze(configureSubClient);
@@ -87,50 +107,97 @@ export const createConfigurationSubClient = (
   casesInternalClient: CasesClientInternal
 ): ConfigureSubClient => {
   return Object.freeze({
-    get: () => get(clientArgs, casesInternalClient),
+    get: (params: GetConfigureFindRequest) => get(params, clientArgs, casesInternalClient),
     getConnectors: () => getConnectors(clientArgs),
-    update: (configuration: CasesConfigurePatch) =>
-      update(configuration, clientArgs, casesInternalClient),
+    update: (configurationId: string, configuration: CasesConfigurePatch) =>
+      update(configurationId, configuration, clientArgs, casesInternalClient),
     create: (configuration: CasesConfigureRequest) =>
       create(configuration, clientArgs, casesInternalClient),
   });
 };
 
 async function get(
+  params: GetConfigureFindRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigureResponse | {}> {
-  const { savedObjectsClient: soClient, caseConfigureService, logger } = clientArgs;
+): Promise<CasesConfigurationsResponse> {
+  const {
+    savedObjectsClient: soClient,
+    caseConfigureService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
   try {
+    const queryParams = pipe(
+      excess(GetConfigureFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      operation: Operations.findConfigurations,
+      auditLogger,
+    });
+
+    const filter = combineAuthorizedAndOwnerFilter(
+      queryParams.owner,
+      authorizationFilter,
+      Operations.findConfigurations.savedObjectType
+    );
+
     let error: string | null = null;
+    const myCaseConfigure = await caseConfigureService.find({
+      soClient,
+      options: { filter },
+    });
 
-    const myCaseConfigure = await caseConfigureService.find({ soClient });
+    ensureSavedObjectsAreAuthorized(
+      myCaseConfigure.saved_objects.map((configuration) => ({
+        id: configuration.id,
+        owner: configuration.attributes.owner,
+      }))
+    );
 
-    const { connector, ...caseConfigureWithoutConnector } = myCaseConfigure.saved_objects[0]
-      ?.attributes ?? { connector: null };
-    let mappings: ConnectorMappingsAttributes[] = [];
-    if (connector != null) {
-      try {
-        mappings = await casesClientInternal.configuration.getMappings({
-          connectorId: connector.id,
-          connectorType: connector.type,
-        });
-      } catch (e) {
-        error = e.isBoom
-          ? e.output.payload.message
-          : `Error connecting to ${connector.name} instance`;
-      }
-    }
+    logSuccessfulAuthorization();
 
-    return myCaseConfigure.saved_objects.length > 0
-      ? CaseConfigureResponseRt.encode({
+    const configurations = await Promise.all(
+      myCaseConfigure.saved_objects.map(async (configuration) => {
+        const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
+          connector: null,
+        };
+
+        let mappings: SavedObjectsFindResponse<ConnectorMappings>['saved_objects'] = [];
+
+        if (connector != null) {
+          try {
+            mappings = await casesClientInternal.configuration.getMappings({
+              connectorId: connector.id,
+              connectorType: connector.type,
+            });
+          } catch (e) {
+            error = e.isBoom
+              ? e.output.payload.message
+              : `Failed to retrieve mapping for ${connector.name}`;
+          }
+        }
+
+        return {
           ...caseConfigureWithoutConnector,
           connector: transformESConnectorToCaseConnector(connector),
-          mappings,
-          version: myCaseConfigure.saved_objects[0].version ?? '',
+          mappings: mappings.length > 0 ? mappings[0].attributes.mappings : [],
+          version: configuration.version ?? '',
           error,
-        })
-      : {};
+          id: configuration.id,
+        };
+      })
+    );
+
+    return CaseConfigurationsResponseRt.encode(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -162,63 +229,124 @@ async function getConnectors({
 }
 
 async function update(
-  configurations: CasesConfigurePatch,
+  configurationId: string,
+  req: CasesConfigurePatch,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { caseConfigureService, logger, savedObjectsClient: soClient, user } = clientArgs;
+  const {
+    caseConfigureService,
+    logger,
+    savedObjectsClient: soClient,
+    user,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
-    let error = null;
+    const request = pipe(
+      CasesConfigurePatchRt.decode(req),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
 
-    const myCaseConfigure = await caseConfigureService.find({ soClient });
-    const { version, connector, ...queryWithoutVersion } = configurations;
-    if (myCaseConfigure.saved_objects.length === 0) {
-      throw Boom.conflict(
-        'You can not patch this configuration since you did not created first with a post.'
-      );
-    }
+    const { version, ...queryWithoutVersion } = request;
 
-    if (version !== myCaseConfigure.saved_objects[0].version) {
+    /**
+     * Excess function does not supports union or intersection types.
+     * For that reason we need to check manually for excess properties
+     * in the partial attributes.
+     *
+     * The owner attribute should not be allowed.
+     */
+    pipe(
+      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const configuration = await caseConfigureService.get({
+      soClient,
+      configurationId,
+    });
+
+    await ensureAuthorized({
+      operation: Operations.updateConfiguration,
+      owners: [configuration.attributes.owner],
+      authorization,
+      auditLogger,
+      savedObjectIDs: [configuration.id],
+    });
+
+    // log that we're attempting to update a configuration
+    auditLogger?.log(
+      createAuditMsg({
+        operation: Operations.updateConfiguration,
+        outcome: EventOutcome.UNKNOWN,
+        savedObjectID: configuration.id,
+      })
+    );
+
+    if (version !== configuration.version) {
       throw Boom.conflict(
         'This configuration has been updated. Please refresh before saving additional updates.'
       );
     }
 
+    let error = null;
     const updateDate = new Date().toISOString();
-
     let mappings: ConnectorMappingsAttributes[] = [];
-    if (connector != null) {
-      try {
-        mappings = await casesClientInternal.configuration.getMappings({
-          connectorId: connector.id,
-          connectorType: connector.type,
-        });
-      } catch (e) {
-        error = e.isBoom
-          ? e.output.payload.message
-          : `Error connecting to ${connector.name} instance`;
+    const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
+
+    try {
+      const resMappings = await casesClientInternal.configuration.getMappings({
+        connectorId: connector != null ? connector.id : configuration.attributes.connector.id,
+        connectorType: connector != null ? connector.type : configuration.attributes.connector.type,
+      });
+      mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
+
+      if (connector != null) {
+        if (resMappings.length !== 0) {
+          mappings = await casesClientInternal.configuration.updateMappings({
+            connectorId: connector.id,
+            connectorType: connector.type,
+            mappingId: resMappings[0].id,
+          });
+        } else {
+          mappings = await casesClientInternal.configuration.createMappings({
+            connectorId: connector.id,
+            connectorType: connector.type,
+            owner: configuration.attributes.owner,
+          });
+        }
       }
+    } catch (e) {
+      error = e.isBoom
+        ? e.output.payload.message
+        : `Error connecting to ${
+            connector != null ? connector.name : configuration.attributes.connector.name
+          } instance`;
     }
+
     const patch = await caseConfigureService.patch({
       soClient,
-      caseConfigureId: myCaseConfigure.saved_objects[0].id,
+      configurationId: configuration.id,
       updatedAttributes: {
-        ...queryWithoutVersion,
+        ...queryWithoutVersionAndConnector,
         ...(connector != null ? { connector: transformCaseConnectorToEsConnector(connector) } : {}),
         updated_at: updateDate,
         updated_by: user,
       },
     });
+
     return CaseConfigureResponseRt.encode({
-      ...myCaseConfigure.saved_objects[0].attributes,
+      ...configuration.attributes,
       ...patch.attributes,
       connector: transformESConnectorToCaseConnector(
-        patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
+        patch.attributes.connector ?? configuration.attributes.connector
       ),
       mappings,
       version: patch.version ?? '',
       error,
+      id: patch.id,
     });
   } catch (error) {
     throw createCaseError({
@@ -234,31 +362,94 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { savedObjectsClient: soClient, caseConfigureService, logger, user } = clientArgs;
+  const {
+    savedObjectsClient: soClient,
+    caseConfigureService,
+    logger,
+    user,
+    authorization,
+    auditLogger,
+  } = clientArgs;
   try {
     let error = null;
 
-    const myCaseConfigure = await caseConfigureService.find({ soClient });
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      /**
+       * The operation is createConfiguration because the procedure is part of
+       * the create route. The user should have all
+       * permissions to delete the results.
+       */
+      operation: Operations.createConfiguration,
+      auditLogger,
+    });
+
+    const filter = combineAuthorizedAndOwnerFilter(
+      configuration.owner,
+      authorizationFilter,
+      Operations.createConfiguration.savedObjectType
+    );
+
+    const myCaseConfigure = await caseConfigureService.find({
+      soClient,
+      options: { filter },
+    });
+
+    ensureSavedObjectsAreAuthorized(
+      myCaseConfigure.saved_objects.map((conf) => ({
+        id: conf.id,
+        owner: conf.attributes.owner,
+      }))
+    );
+
+    logSuccessfulAuthorization();
+
     if (myCaseConfigure.saved_objects.length > 0) {
       await Promise.all(
         myCaseConfigure.saved_objects.map((cc) =>
-          caseConfigureService.delete({ soClient, caseConfigureId: cc.id })
+          caseConfigureService.delete({ soClient, configurationId: cc.id })
         )
       );
     }
 
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await ensureAuthorized({
+      operation: Operations.createConfiguration,
+      owners: [configuration.owner],
+      authorization,
+      auditLogger,
+      savedObjectIDs: [savedObjectID],
+    });
+
+    // log that we're attempting to create a configuration
+    auditLogger?.log(
+      createAuditMsg({
+        operation: Operations.createConfiguration,
+        outcome: EventOutcome.UNKNOWN,
+        savedObjectID,
+      })
+    );
+
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];
+
     try {
-      mappings = await casesClientInternal.configuration.getMappings({
+      mappings = await casesClientInternal.configuration.createMappings({
         connectorId: configuration.connector.id,
         connectorType: configuration.connector.type,
+        owner: configuration.owner,
       });
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
         : `Error connecting to ${configuration.connector.name} instance`;
     }
+
     const post = await caseConfigureService.post({
       soClient,
       attributes: {
@@ -269,6 +460,7 @@ async function create(
         updated_at: null,
         updated_by: null,
       },
+      id: savedObjectID,
     });
 
     return CaseConfigureResponseRt.encode({
@@ -278,6 +470,7 @@ async function create(
       mappings,
       version: post.version ?? '',
       error,
+      id: post.id,
     });
   } catch (error) {
     throw createCaseError({

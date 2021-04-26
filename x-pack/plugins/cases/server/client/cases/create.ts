@@ -9,13 +9,8 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import {
-  SavedObjectsClientContract,
-  Logger,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '../../../../../../src/core/server';
 
 import {
   throwErrors,
@@ -25,51 +20,41 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
-  User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { createAuditMsg, ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 
-import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
-import { Authorization } from '../../authorization/authorization';
 import { Operations } from '../../authorization';
-import { AuditLogger, EventOutcome } from '../../../../security/server';
+import { EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   flattenCaseSavedObject,
   transformCaseConnectorToEsConnector,
   transformNewCase,
 } from '../../common';
-
-interface CreateCaseArgs {
-  caseConfigureService: CaseConfigureService;
-  caseService: CaseService;
-  user: User;
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionService;
-  theCase: CasePostRequest;
-  logger: Logger;
-  auth: PublicMethodsOf<Authorization>;
-  auditLogger?: AuditLogger;
-}
+import { CasesClientArgs } from '..';
 
 /**
  * Creates a new case.
  */
-export const create = async ({
-  savedObjectsClient,
-  caseService,
-  caseConfigureService,
-  userActionService,
-  user,
-  theCase,
-  logger,
-  auth,
-  auditLogger,
-}: CreateCaseArgs): Promise<CaseResponse> => {
+export const create = async (
+  data: CasePostRequest,
+  clientArgs: CasesClientArgs
+): Promise<CaseResponse> => {
+  const {
+    savedObjectsClient,
+    caseService,
+    caseConfigureService,
+    userActionService,
+    user,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
+
   // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
+  const { type = CaseType.individual, ...nonTypeCaseFields } = data;
 
   if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
     throw Boom.badRequest(

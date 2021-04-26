@@ -13,7 +13,12 @@ import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../../common/lib/mock';
+import {
+  postCaseReq,
+  postCommentUserReq,
+  findCasesResp,
+  getPostCaseRequest,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createSubCase,
@@ -21,9 +26,7 @@ import {
   CreateSubCaseResp,
   createCaseAction,
   deleteCaseAction,
-  createCaseAsUser,
   ensureSavedObjectIsAuthorized,
-  findCasesAsUser,
   findCases,
   createCase,
   updateCase,
@@ -61,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return empty response', async () => {
-        const cases = await findCases(supertest);
+        const cases = await findCases({ supertest });
         expect(cases).to.eql(findCasesResp);
       });
 
@@ -70,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const b = await createCase(supertest, postCaseReq);
         const c = await createCase(supertest, postCaseReq);
 
-        const cases = await findCases(supertest);
+        const cases = await findCases({ supertest });
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -83,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('filters by tags', async () => {
         await createCase(supertest, postCaseReq);
         const postedCase = await createCase(supertest, { ...postCaseReq, tags: ['unique'] });
-        const cases = await findCases(supertest, { tags: ['unique'] });
+        const cases = await findCases({ supertest, query: { tags: ['unique'] } });
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -106,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        const cases = await findCases(supertest, { status: CaseStatuses.closed });
+        const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -120,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('filters by reporters', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const cases = await findCases(supertest, { reporters: 'elastic' });
+        const cases = await findCases({ supertest, query: { reporters: 'elastic' } });
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -141,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentUserReq,
         });
 
-        const cases = await findCases(supertest);
+        const cases = await findCases({ supertest });
         expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
@@ -181,14 +184,14 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        const cases = await findCases(supertest);
+        const cases = await findCases({ supertest });
         expect(cases.count_open_cases).to.eql(1);
         expect(cases.count_closed_cases).to.eql(1);
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
       it('unhappy path - 400s when bad query supplied', async () => {
-        await findCases(supertest, { perPage: true }, 400);
+        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
@@ -237,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
         it('correctly counts stats without using a filter', async () => {
-          const cases = await findCases(supertest);
+          const cases = await findCases({ supertest });
 
           expect(cases.total).to.eql(3);
           expect(cases.count_closed_cases).to.eql(1);
@@ -246,7 +249,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('correctly counts stats with a filter for open cases', async () => {
-          const cases = await findCases(supertest, { status: CaseStatuses.open });
+          const cases = await findCases({ supertest, query: { status: CaseStatuses.open } });
 
           expect(cases.cases.length).to.eql(1);
 
@@ -262,7 +265,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('correctly counts stats with a filter for individual cases', async () => {
-          const cases = await findCases(supertest, { type: CaseType.individual });
+          const cases = await findCases({ supertest, query: { type: CaseType.individual } });
 
           expect(cases.total).to.eql(2);
           expect(cases.count_closed_cases).to.eql(1);
@@ -274,7 +277,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // this will force the first sub case attached to the collection to be closed
           // so we'll have one closed sub case and one open sub case
           await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases(supertest, { type: CaseType.collection });
+          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
 
           expect(cases.total).to.eql(1);
           expect(cases.cases[0].subCases?.length).to.eql(2);
@@ -287,9 +290,12 @@ export default ({ getService }: FtrProviderContext): void => {
           // this will force the first sub case attached to the collection to be closed
           // so we'll have one closed sub case and one open sub case
           await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases(supertest, {
-            type: CaseType.collection,
-            status: CaseStatuses.open,
+          const cases = await findCases({
+            supertest,
+            query: {
+              type: CaseType.collection,
+              status: CaseStatuses.open,
+            },
           });
 
           expect(cases.total).to.eql(1);
@@ -309,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const cases = await findCases(supertest, { type: CaseType.collection });
+          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
 
           // it should include the collection without sub cases because we did not pass in a filter on status
           expect(cases.total).to.eql(3);
@@ -328,7 +334,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const cases = await findCases(supertest, { tags: ['defacement'] });
+          const cases = await findCases({ supertest, query: { tags: ['defacement'] } });
 
           // it should include the collection without sub cases because we did not pass in a filter on status
           expect(cases.total).to.eql(3);
@@ -338,7 +344,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does not return collections without sub cases matching the requested status', async () => {
-          const cases = await findCases(supertest, { status: CaseStatuses.closed });
+          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
 
           expect(cases.cases.length).to.eql(1);
           // it should not include the collection that has a sub case as in-progress
@@ -361,7 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const cases = await findCases(supertest, { status: CaseStatuses.closed });
+          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
 
           expect(cases.cases.length).to.eql(1);
 
@@ -422,9 +428,12 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       it('returns the correct total when perPage is less than the total', async () => {
-        const cases = await findCases(supertest, {
-          page: 1,
-          perPage: 5,
+        const cases = await findCases({
+          supertest,
+          query: {
+            page: 1,
+            perPage: 5,
+          },
         });
 
         expect(cases.cases.length).to.eql(5);
@@ -437,9 +446,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns the correct total when perPage is greater than the total', async () => {
-        const cases = await findCases(supertest, {
-          page: 1,
-          perPage: 11,
+        const cases = await findCases({
+          supertest,
+          query: {
+            page: 1,
+            perPage: 11,
+          },
         });
 
         expect(cases.total).to.eql(10);
@@ -452,9 +464,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns the correct total when perPage is equal to the total', async () => {
-        const cases = await findCases(supertest, {
-          page: 1,
-          perPage: 10,
+        const cases = await findCases({
+          supertest,
+          query: {
+            page: 1,
+            perPage: 10,
+          },
         });
 
         expect(cases.total).to.eql(10);
@@ -468,9 +483,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the second page of results', async () => {
         const perPage = 5;
-        const cases = await findCases(supertest, {
-          page: 2,
-          perPage,
+        const cases = await findCases({
+          supertest,
+          query: {
+            page: 2,
+            perPage,
+          },
         });
 
         expect(cases.total).to.eql(10);
@@ -496,9 +514,12 @@ export default ({ getService }: FtrProviderContext): void => {
         // it's less than or equal here because the page starts at 1, so page 5 is a valid page number
         // and should have case titles 9, and 10
         for (let currentPage = 1; currentPage <= total / perPage; currentPage++) {
-          const cases = await findCases(supertest, {
-            page: currentPage,
-            perPage,
+          const cases = await findCases({
+            supertest,
+            query: {
+              page: currentPage,
+              perPage,
+            },
           });
 
           expect(cases.total).to.eql(total);
@@ -522,10 +543,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves the last three cases', async () => {
-        const cases = await findCases(supertest, {
-          // this should skip the first 7 cases and only return the last 3
-          page: 2,
-          perPage: 7,
+        const cases = await findCases({
+          supertest,
+          query: {
+            // this should skip the first 7 cases and only return the last 3
+            page: 2,
+            perPage: 7,
+          },
         });
 
         expect(cases.total).to.eql(10);
@@ -546,19 +570,25 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases', async () => {
         await Promise.all([
           // Create case owned by the security solution user
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: secOnly,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-          }),
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: secOnly,
+              space: 'space1',
+            }
+          ),
           // Create case owned by the observability user
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: obsOnly,
-            space: 'space1',
-            owner: 'observabilityFixture',
-          }),
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: obsOnly,
+              space: 'space1',
+            }
+          ),
         ]);
 
         for (const scenario of [
@@ -580,10 +610,12 @@ export default ({ getService }: FtrProviderContext): void => {
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
         ]) {
-          const res = await findCasesAsUser({
-            supertestWithoutAuth,
-            user: scenario.user,
-            space: 'space1',
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            auth: {
+              user: scenario.user,
+              space: 'space1',
+            },
           });
 
           ensureSavedObjectIsAuthorized(res.cases, scenario.numberOfExpectedCases, scenario.owners);
@@ -598,18 +630,23 @@ export default ({ getService }: FtrProviderContext): void => {
           scenario.space
         } - should NOT read a case`, async () => {
           // super user creates a case at the appropriate space
-          await createCaseAsUser({
+          await createCase(
             supertestWithoutAuth,
-            user: superUser,
-            space: scenario.space,
-            owner: 'securitySolutionFixture',
-          });
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: scenario.space,
+            }
+          );
 
           // user should not be able to read cases at the appropriate space
-          await findCasesAsUser({
-            supertestWithoutAuth,
-            user: scenario.user,
-            space: scenario.space,
+          await findCases({
+            supertest: supertestWithoutAuth,
+            auth: {
+              user: scenario.user,
+              space: scenario.space,
+            },
             expectedHttpCode: 403,
           });
         });
@@ -618,26 +655,37 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
         await Promise.all([
           // super user creates a case with owner securitySolutionFixture
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: superUser,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-          }),
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
           // super user creates a case with owner observabilityFixture
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: superUser,
-            space: 'space1',
-            owner: 'observabilityFixture',
-          }),
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
         ]);
 
-        const res = await findCasesAsUser({
-          supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields=owner',
+        const res = await findCases({
+          supertest: supertestWithoutAuth,
+          query: {
+            search: 'securitySolutionFixture observabilityFixture',
+            searchFields: 'owner',
+          },
+          auth: {
+            user: secOnly,
+            space: 'space1',
+          },
         });
 
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
@@ -681,25 +729,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respect the owner filter when having permissions', async () => {
         await Promise.all([
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: obsSec,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-          }),
-          createCaseAsUser({
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
+          createCase(
             supertestWithoutAuth,
-            user: obsSec,
-            space: 'space1',
-            owner: 'observabilityFixture',
-          }),
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
         ]);
 
-        const res = await findCasesAsUser({
-          supertestWithoutAuth,
-          user: obsSec,
-          space: 'space1',
-          appendToUrl: 'owner=securitySolutionFixture',
+        const res = await findCases({
+          supertest: supertestWithoutAuth,
+          query: {
+            owner: 'securitySolutionFixture',
+            searchFields: 'owner',
+          },
+          auth: {
+            user: obsSec,
+            space: 'space1',
+          },
         });
 
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
@@ -707,26 +766,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         await Promise.all([
-          createCaseAsUser({
+          createCase(
             supertestWithoutAuth,
-            user: obsSec,
-            space: 'space1',
-            owner: 'securitySolutionFixture',
-          }),
-          createCaseAsUser({
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
+          createCase(
             supertestWithoutAuth,
-            user: obsSec,
-            space: 'space1',
-            owner: 'observabilityFixture',
-          }),
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: obsSec,
+              space: 'space1',
+            }
+          ),
         ]);
 
         // User with permissions only to security solution request cases from observability
-        const res = await findCasesAsUser({
-          supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          appendToUrl: 'owner=securitySolutionFixture&owner=observabilityFixture',
+        const res = await findCases({
+          supertest: supertestWithoutAuth,
+          query: {
+            owner: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          auth: {
+            user: secOnly,
+            space: 'space1',
+          },
         });
 
         // Only security solution cases are being returned

@@ -15,7 +15,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  Logger,
 } from 'kibana/server';
 
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
@@ -35,12 +34,11 @@ import {
   CasesPatchRequest,
   AssociationType,
   CommentAttributes,
-  User,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
 
-import { CaseService, CaseUserActionService } from '../../services';
+import { CaseService } from '../../services';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -56,6 +54,7 @@ import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
 import { CasesClientInternal } from '../client_internal';
+import { CasesClientArgs } from '..';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -338,25 +337,12 @@ async function updateAlerts({
   await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
 }
 
-interface UpdateArgs {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseService;
-  userActionService: CaseUserActionService;
-  user: User;
-  casesClientInternal: CasesClientInternal;
-  cases: CasesPatchRequest;
-  logger: Logger;
-}
-
-export const update = async ({
-  savedObjectsClient,
-  caseService,
-  userActionService,
-  user,
-  casesClientInternal,
-  cases,
-  logger,
-}: UpdateArgs): Promise<CasesResponse> => {
+export const update = async (
+  cases: CasesPatchRequest,
+  clientArgs: CasesClientArgs,
+  casesClientInternal: CasesClientInternal
+): Promise<CasesResponse> => {
+  const { savedObjectsClient, caseService, userActionService, user, logger } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)

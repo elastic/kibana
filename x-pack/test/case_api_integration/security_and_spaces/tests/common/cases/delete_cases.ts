@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import { defaultUser, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -22,12 +22,26 @@ import {
   deleteCases,
   createComment,
   getComment,
+  getAllUserAction,
+  removeServerGeneratedPropertiesFromUserAction,
+  getCase,
 } from '../../../../common/lib/utils';
 import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import { CaseResponse } from '../../../../../../plugins/cases/common/api';
+import {
+  secOnly,
+  secOnlyRead,
+  globalRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
+  obsOnly,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const es = getService('es');
 
@@ -67,6 +81,33 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         commentId: patchedCase.comments![0].id,
         expectedHttpCode: 404,
+      });
+    });
+
+    it('should create a user action when creating a case', async () => {
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+      await deleteCases({ supertest, caseIDs: [postedCase.id] });
+      const userActions = await getAllUserAction(supertest, postedCase.id);
+      const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
+
+      expect(creationUserAction).to.eql({
+        action_field: [
+          'description',
+          'status',
+          'tags',
+          'title',
+          'connector',
+          'settings',
+          'owner',
+          'comment',
+        ],
+        action: 'delete',
+        action_by: defaultUser,
+        old_value: null,
+        new_value: null,
+        case_id: `${postedCase.id}`,
+        comment_id: null,
+        sub_case_id: '',
       });
     });
 
@@ -121,6 +162,137 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteCases({ supertest, caseIDs: [caseInfo.id] });
 
         await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(404);
+      });
+    });
+
+    describe('rbac', () => {
+      it('User: security solution only - should delete a case', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+
+        await deleteCases({
+          supertest,
+          caseIDs: [postedCase.id],
+          expectedHttpCode: 204,
+          auth: { user: secOnly, space: 'space1' },
+        });
+      });
+
+      it('User: security solution only - should NOT delete a case of different owner', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [postedCase.id],
+          expectedHttpCode: 403,
+          auth: { user: obsOnly, space: 'space1' },
+        });
+      });
+
+      it('should get an error if the user has not permissions to all requested cases', async () => {
+        const caseSec = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+
+        const caseObs = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200,
+          {
+            user: obsOnly,
+            space: 'space1',
+          }
+        );
+
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [caseSec.id, caseObs.id],
+          expectedHttpCode: 403,
+          auth: { user: obsOnly, space: 'space1' },
+        });
+
+        // Cases should have not been deleted.
+        await getCase({
+          supertest: supertestWithoutAuth,
+          caseId: caseSec.id,
+          expectedHttpCode: 200,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await getCase({
+          supertest: supertestWithoutAuth,
+          caseId: caseObs.id,
+          expectedHttpCode: 200,
+          auth: { user: superUser, space: 'space1' },
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [postedCase.id],
+            expectedHttpCode: 403,
+            auth: { user, space: 'space1' },
+          });
+        });
+      }
+
+      it('should NOT delete a case in a space with no permissions', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        /**
+         * We expect a 404 because the bulkGet inside the delete
+         * route should return a 404 when requesting a case from
+         * a different space.
+         * */
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [postedCase.id],
+          expectedHttpCode: 404,
+          auth: { user: secOnly, space: 'space1' },
+        });
       });
     });
   });

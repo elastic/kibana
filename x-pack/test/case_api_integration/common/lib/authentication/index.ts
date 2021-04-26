@@ -6,10 +6,16 @@
  */
 
 import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
-import { Role, User } from './types';
+import { Role, User, UserInfo } from './types';
 import { users } from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';
+
+export const getUserInfo = (user: User): UserInfo => ({
+  username: user.username,
+  full_name: user.username.replace('_', ' '),
+  email: `${user.username}@elastic.co`,
+});
 
 export const createSpaces = async (getService: CommonFtrProviderContext['getService']) => {
   const spacesService = getService('spaces');
@@ -25,12 +31,14 @@ const createUsersAndRoles = async (getService: CommonFtrProviderContext['getServ
     return await security.role.create(name, privileges);
   };
 
-  const createUser = async ({ username, password, roles: userRoles }: User) => {
-    return await security.user.create(username, {
-      password,
-      roles: userRoles,
-      full_name: username.replace('_', ' '),
-      email: `${username}@elastic.co`,
+  const createUser = async (user: User) => {
+    const userInfo = getUserInfo(user);
+
+    return await security.user.create(user.username, {
+      password: user.password,
+      roles: user.roles,
+      full_name: userInfo.full_name,
+      email: userInfo.email,
     });
   };
 

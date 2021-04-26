@@ -23,12 +23,18 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 // TODO: we need to have an operation per entity route so I think we need to create a bunch like
 //  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
+
+// if you add a value here you'll likely also need to make changes here:
+// x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
   GetComment = 'getComment',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
+  GetTags = 'getTags',
+  GetReporters = 'getReporters',
+  FindConfigurations = 'findConfigurations',
 }
 
 // TODO: comments
@@ -40,6 +46,8 @@ export enum WriteOperations {
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
   UpdateComment = 'updateComment',
+  CreateConfiguration = 'createConfiguration',
+  UpdateConfiguration = 'updateConfiguration',
 }
 
 /**
