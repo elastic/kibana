@@ -24,7 +24,7 @@ describe('loadActionTypes', () => {
   test('should call get types API', async () => {
     const resolvedValue: ActionType[] = [
       {
-        id: 'test',
+        id: 'te/st',
         name: 'Test',
         enabled: true,
         enabledInConfig: true,
@@ -67,7 +67,7 @@ describe('createActionConnector', () => {
       config: {},
       secrets: {},
     };
-    const resolvedValue: ActionConnector = { ...connector, id: '123' };
+    const resolvedValue: ActionConnector = { ...connector, id: '12/3' };
     http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await createActionConnector({ http, connector });
@@ -85,7 +85,7 @@ describe('createActionConnector', () => {
 
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
-    const id = '123';
+    const id = '12/3';
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
@@ -100,7 +100,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/action/123",
+        "/api/actions/action/12%2F3",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -111,7 +111,7 @@ describe('updateActionConnector', () => {
 
 describe('deleteActions', () => {
   test('should call delete API per action', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2/', '3'];
 
     const result = await deleteActions({ ids, http });
     expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
@@ -121,7 +121,7 @@ describe('deleteActions', () => {
           "/api/actions/action/1",
         ],
         Array [
-          "/api/actions/action/2",
+          "/api/actions/action/2%2F",
         ],
         Array [
           "/api/actions/action/3",
@@ -133,7 +133,7 @@ describe('deleteActions', () => {
 
 describe('executeAction', () => {
   test('should call execute API', async () => {
-    const id = '123';
+    const id = '12/3';
     const params = {
       stringParams: 'someString',
       numericParams: 123,
@@ -151,7 +151,7 @@ describe('executeAction', () => {
     });
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/action/123/_execute",
+        "/api/actions/action/12%2F3/_execute",
         Object {
           "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
         },
