@@ -8190,8 +8190,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短 URL",
     "xpack.features.savedObjectsManagementFeatureName": "已保存对象管理",
     "xpack.features.visualizeFeatureName": "Visualize 库",
-    "xpack.fileUpload.httpService.fetchError": "执行提取时出错：{error}",
-    "xpack.fileUpload.httpService.noUrl": "未提供 URL",
     "xpack.fileUpload.indexSettings.enterIndexTypeLabel": "索引类型",
     "xpack.fileUpload.jsonUploadAndParse.dataIndexingError": "数据索引错误",
     "xpack.fileUpload.jsonUploadAndParse.indexPatternError": "索引模式错误",

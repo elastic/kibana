@@ -8117,8 +8117,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短い URL",
     "xpack.features.savedObjectsManagementFeatureName": "保存されたオブジェクトの管理",
     "xpack.features.visualizeFeatureName": "Visualizeライブラリ",
-    "xpack.fileUpload.httpService.fetchError": "フェッチ実行エラー：{error}",
-    "xpack.fileUpload.httpService.noUrl": "URLが指定されていません",
     "xpack.fileUpload.indexSettings.enterIndexTypeLabel": "インデックスタイプ",
     "xpack.fileUpload.jsonUploadAndParse.dataIndexingError": "データインデックスエラー",
     "xpack.fileUpload.jsonUploadAndParse.indexPatternError": "インデックスパターンエラー",
