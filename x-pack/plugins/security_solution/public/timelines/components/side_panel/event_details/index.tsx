@@ -70,7 +70,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  // TODO undo this before pushing
   const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
@@ -140,7 +139,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isEndpointAlert && isHostIsolationPanelOpen === false && (
+      {isHostIsolationPanelOpen && isEndpointAlert && isHostIsolationPanelOpen === false && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
