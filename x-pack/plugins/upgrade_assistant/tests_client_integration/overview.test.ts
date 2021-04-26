@@ -47,24 +47,21 @@ describe('Overview page', () => {
 
   describe('Deprecation logging', () => {
     test('toggles deprecation logging', async () => {
-      const { form, find, component } = testBed;
+      const { find, actions } = testBed;
 
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({ isEnabled: false });
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-      expect(find('deprecationLoggingFormRow').find('.euiSwitch__label').text()).toContain(
-        'Enable deprecation logging'
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
       );
 
-      await act(async () => {
-        form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
-      });
-
-      component.update();
+      await actions.clickDeprecationToggle();
 
       const latestRequest = server.requests[server.requests.length - 1];
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Enable deprecation logging'
+      );
     });
 
     test('handles network error when updating logging state', async () => {
@@ -74,20 +71,20 @@ describe('Overview page', () => {
         message: 'Internal server error',
       };
 
-      const { form, find, component, exists } = testBed;
+      const { actions, find, exists } = testBed;
 
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
 
-      await act(async () => {
-        form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
-      });
-
-      component.update();
+      await actions.clickDeprecationToggle();
 
       // Logging state should not change since there was an error
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
       expect(exists('updateLoggingError')).toBe(true);
     });
 
@@ -104,11 +101,13 @@ describe('Overview page', () => {
         testBed = await setupOverviewPage();
       });
 
-      const { component, exists } = testBed;
+      const { component, exists, find } = testBed;
 
       component.update();
 
-      expect(exists('upgradeAssistantDeprecationToggle')).toBe(false);
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Deprecation logging unavailable'
+      );
       expect(exists('fetchLoggingError')).toBe(true);
     });
   });

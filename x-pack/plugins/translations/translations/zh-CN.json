@@ -22736,7 +22736,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.loadingLabel": "正在加载……",
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.pausedLabel": "已暂停",
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.reindexLabel": "重新索引",
-    "xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel": "开启",
     "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "您没有足够的权限重新索引“{indexName}”。",
     "xpack.upgradeAssistant.tabs.incompleteCallout.calloutBody.breackingChangesDocButtonLabel": "弃用内容和重大更改",
     "xpack.upgradeAssistant.tabs.incompleteCallout.calloutBody.calloutDetail": "Elasticsearch {nextEsVersion} 中的 {breakingChangesDocButton} 完整列表将在最终的 {currentEsVersion} 次要版本中提供。完成列表后，此警告将消失。",

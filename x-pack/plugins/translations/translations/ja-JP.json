@@ -22379,7 +22379,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.loadingLabel": "読み込み中…",
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.pausedLabel": "一時停止中",
     "xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.reindexLabel": "再インデックス",
-    "xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel": "オン",
     "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "「{indexName}」に再インデックスするための権限が不十分です。",
     "xpack.upgradeAssistant.tabs.incompleteCallout.calloutBody.breackingChangesDocButtonLabel": "廃止と互換性を破る変更",
     "xpack.upgradeAssistant.tabs.incompleteCallout.calloutBody.calloutDetail": "Elasticsearch {nextEsVersion} の {breakingChangesDocButton} の完全なリストは、最終の {currentEsVersion} マイナーリリースで確認できます。この警告は、リストがすべて解決されると消えます。",

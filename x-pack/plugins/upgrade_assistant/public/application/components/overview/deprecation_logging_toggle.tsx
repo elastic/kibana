@@ -7,88 +7,116 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { EuiSwitch, EuiLink, EuiFormRow, EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
+  EuiTextColor,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { ResponseError } from '../../lib/api';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.fetchErrorMessage',
+    'xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorMessage',
     {
-      defaultMessage: 'Could not load logging state',
+      defaultMessage: 'Could not retrieve logging information.',
     }
   ),
   reloadButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.reloadButtonLabel',
+    'xpack.upgradeAssistant.overview.deprecationLogs.reloadButtonLabel',
     {
-      defaultMessage: 'Reload',
-    }
-  ),
-  toggleLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
-    {
-      defaultMessage: 'Enable deprecation logging',
+      defaultMessage: 'Try again',
     }
   ),
   updateErrorMessage: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.updateErrorMessage',
+    'xpack.upgradeAssistant.overview.deprecationLogs.updateErrorMessage',
     {
-      defaultMessage: 'Could not update logging state',
+      defaultMessage: 'Could not update logging state.',
     }
   ),
   enabledMessage: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledToastMessage',
+    'xpack.upgradeAssistant.overview.deprecationLogs.enabledToastMessage',
     {
       defaultMessage: 'Log deprecated actions.',
     }
   ),
   disabledMessage: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledToastMessage',
+    'xpack.upgradeAssistant.overview.deprecationLogs.disabledToastMessage',
     {
       defaultMessage: 'Do not log deprecated actions.',
     }
   ),
-  loadingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.loadingLabel',
+  fetchButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogging.loadingLabel',
     {
-      defaultMessage: 'Loading logging state…',
+      defaultMessage: 'Retrieving logging state',
     }
   ),
-  updatingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.updatingLabel',
+  enablingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.enablingButtonLabel',
     {
-      defaultMessage: 'Updating logging state…',
+      defaultMessage: 'Enabling deprecation logging',
     }
   ),
-  getDeprecationLoggingLabel: (href: string) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Log deprecated actions. {learnMore}"
-      values={{
-        learnMore: (
-          <EuiLink href={href} target="_blank">
-            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
-              defaultMessage: 'Learn more.',
-            })}
-          </EuiLink>
-        ),
-      }}
-    />
+  disablingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.disablingButtonLabel',
+    {
+      defaultMessage: 'Disabling deprecation logging',
+    }
+  ),
+  enableButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.enableButtonLabel',
+    {
+      defaultMessage: 'Enable deprecation logging',
+    }
+  ),
+  disableButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.disableButtonLabel',
+    {
+      defaultMessage: 'Disable deprecation logging',
+    }
+  ),
+  fetchErrorButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorButtonLabel',
+    {
+      defaultMessage: 'Deprecation logging unavailable',
+    }
   ),
 };
 
 export const DeprecationLoggingToggle: React.FunctionComponent = () => {
-  const { api, notifications, docLinks } = useAppContext();
+  const { api, notifications } = useAppContext();
 
-  const { data, error, isLoading, resendRequest } = api.useLoadDeprecationLogging();
+  const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
   const [isEnabled, setIsEnabled] = useState<boolean | undefined>(undefined);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<ResponseError | undefined>(undefined);
+
+  const getButtonLabel = () => {
+    if (isLoading) {
+      return i18nTexts.fetchButtonLabel;
+    }
+
+    if (isUpdating) {
+      return isEnabled ? i18nTexts.disablingButtonLabel : i18nTexts.enablingButtonLabel;
+    }
+
+    if (fetchError) {
+      return i18nTexts.fetchErrorButtonLabel;
+    }
+
+    if (isEnabled) {
+      return i18nTexts.disableButtonLabel;
+    }
+
+    return i18nTexts.enableButtonLabel;
+  };
 
   useEffect(() => {
     if (isLoading === false && data) {
@@ -120,61 +148,42 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
     }
   };
 
-  if (isLoading || isUpdating) {
-    return (
-      <SectionLoading inline>
-        {isUpdating ? i18nTexts.updatingLabel : i18nTexts.loadingLabel}
-      </SectionLoading>
-    );
-  }
-
-  if (error) {
-    return (
-      <EuiCallOut
-        size="s"
-        title={i18nTexts.fetchErrorMessage}
-        iconType="alert"
-        color="danger"
-        data-test-subj="fetchLoggingError"
-      >
-        <EuiButton size="s" iconType="refresh" color="danger" onClick={resendRequest}>
-          {i18nTexts.reloadButtonLabel}
-        </EuiButton>
-      </EuiCallOut>
-    );
-  }
-
-  if (typeof isEnabled !== 'undefined') {
-    return (
-      <>
-        {updateError && (
-          <>
-            <EuiCallOut
-              data-test-subj="updateLoggingError"
-              size="s"
-              title={i18nTexts.updateErrorMessage}
-              iconType="alert"
-              color="danger"
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <EuiFormRow
-          helpText={i18nTexts.getDeprecationLoggingLabel(
-            docLinks.links.elasticsearch.deprecationLogging
-          )}
-          data-test-subj="deprecationLoggingFormRow"
+  return (
+    <EuiFlexGroup alignItems="baseline">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="upgradeAssistantDeprecationToggle"
+          isLoading={isLoading || isUpdating}
+          onClick={toggleLogging}
+          color={isEnabled ? 'text' : 'primary'}
+          disabled={Boolean(fetchError)}
         >
-          <EuiSwitch
-            data-test-subj="upgradeAssistantDeprecationToggle"
-            label={i18nTexts.toggleLabel}
-            checked={isEnabled as boolean}
-            onChange={toggleLogging}
-          />
-        </EuiFormRow>
-      </>
-    );
-  }
+          {getButtonLabel()}
+        </EuiButton>
+      </EuiFlexItem>
 
-  return null;
+      {fetchError && (
+        <EuiFlexItem>
+          <EuiText>
+            <p data-test-subj="fetchLoggingError">
+              <EuiTextColor color="danger">{i18nTexts.fetchErrorMessage}</EuiTextColor>{' '}
+              <EuiButtonEmpty iconType="refresh" onClick={resendRequest}>
+                {i18nTexts.reloadButtonLabel}
+              </EuiButtonEmpty>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+
+      {updateError && (
+        <EuiFlexItem>
+          <EuiText>
+            <p data-test-subj="updateLoggingError">
+              <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 };
