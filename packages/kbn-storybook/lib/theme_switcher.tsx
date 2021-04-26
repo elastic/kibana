@@ -13,7 +13,7 @@ import { Link } from '@storybook/components/dist/tooltip/TooltipLinkList';
 
 const defaultTheme = 'v8.light';
 
-export function ThemeSwitcher(props: any) {
+export function ThemeSwitcher() {
   const [globals, updateGlobals] = useGlobals();
   const selectedTheme = globals.euiTheme;
 

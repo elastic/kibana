@@ -467,6 +467,7 @@
     "@storybook/addon-knobs": "^6.1.20",
     "@storybook/addon-storyshots": "^6.1.20",
     "@storybook/addons": "^6.1.20",
+    "@storybook/api": "^6.1.20",
     "@storybook/components": "^6.1.20",
     "@storybook/core": "^6.1.20",
     "@storybook/core-events": "^6.1.20",
