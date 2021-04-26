@@ -246,6 +246,7 @@ export interface IndexPatternSpec {
   runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
 
 export interface SourceFilter {

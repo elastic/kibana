@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { IndexPatternTag } from '../service/list/config';
+
 export interface IndexPatternCreationOption {
   text: string;
   description?: string;
@@ -16,6 +18,7 @@ export interface IndexPatternTableItem {
   id: string;
   title: string;
   default: boolean;
-  tag?: string[];
+  tags?: IndexPatternTag[];
+  namespaces: string[];
   sort: string;
 }

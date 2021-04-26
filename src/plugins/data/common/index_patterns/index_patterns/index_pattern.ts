@@ -71,6 +71,8 @@ export class IndexPattern implements IIndexPattern {
    * SavedObject version
    */
   public version: string | undefined;
+  /** SavedObject namespaces */
+  public namespaces: string[];
   public sourceFilters?: SourceFilter[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
@@ -109,6 +111,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
+    this.namespaces = spec.namespaces || [];
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
@@ -209,6 +212,7 @@ export class IndexPattern implements IIndexPattern {
     return {
       id: this.id,
       version: this.version,
+      namespaces: this.namespaces,
 
       title: this.title,
       timeFieldName: this.timeFieldName,

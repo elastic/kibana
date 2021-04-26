@@ -365,6 +365,7 @@ export class IndexPatternsService {
         fieldAttrs,
         allowNoIndex,
       },
+      namespaces,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -390,6 +391,7 @@ export class IndexPatternsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      namespaces,
     };
   };
 
@@ -486,9 +488,10 @@ export class IndexPatternsService {
    * @param id
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string, options: { forceRefresh?: boolean } = {}): Promise<IndexPattern> => {
+    const { forceRefresh } = options;
     const indexPatternPromise =
-      this.indexPatternCache.get(id) ||
+      (!forceRefresh && this.indexPatternCache.get(id)) ||
       this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
 
     // don't cache failed requests
