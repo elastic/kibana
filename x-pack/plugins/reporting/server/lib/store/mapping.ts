@@ -63,4 +63,4 @@ export const mapping = {
       content: { type: 'object', enabled: false },
     },
   },
-};
+} as const;

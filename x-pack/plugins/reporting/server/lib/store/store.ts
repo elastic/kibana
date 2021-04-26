@@ -83,7 +83,11 @@ export class ReportingStore {
     };
 
     try {
-      await client.indices.create({ index: indexName, body });
+      await client.indices.create({
+        index: indexName,
+        // @ts-expect-error @elastic/elasticsearch types don't support nested mappings
+        body,
+      });
 
       return true;
     } catch (error) {
