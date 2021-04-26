@@ -15,7 +15,7 @@ import {
   Entry,
   EntryMatch,
   EntryMatchAny,
-  EntriesMatchWildcardCaseless,
+  EntryMatchWildcard,
   EntryExists,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -93,7 +93,7 @@ export interface EmptyNestedEntry {
   type: OperatorTypeEnum.NESTED;
   entries: Array<
     | (EntryMatch & { id?: string })
-    | (EntriesMatchWildcardCaseless & { id?: string })
+    | (EntryMatchWildcard & { id?: string })
     | (EntryMatchAny & { id?: string })
     | (EntryExists & { id?: string })
   >;
@@ -110,7 +110,7 @@ export type BuilderEntryNested = Omit<EntryNested, 'entries'> & {
   id?: string;
   entries: Array<
     | (EntryMatch & { id?: string })
-    | (EntriesMatchWildcardCaseless & { id?: string })
+    | (EntryMatchWildcard & { id?: string })
     | (EntryMatchAny & { id?: string })
     | (EntryExists & { id?: string })
   >;

@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '../../shared_imports';
 import { operator } from '../common/schemas';
 
-export const entriesMatchWildcardCaseless = t.exact(
+export const entriesMatchWildcard = t.exact(
   t.type({
     field: NonEmptyString,
     operator,
@@ -18,4 +18,4 @@ export const entriesMatchWildcardCaseless = t.exact(
     value: NonEmptyString,
   })
 );
-export type EntriesMatchWildcardCaseless = t.TypeOf<typeof entriesMatchWildcardCaseless>;
+export type EntryMatchWildcard = t.TypeOf<typeof entriesMatchWildcard>;

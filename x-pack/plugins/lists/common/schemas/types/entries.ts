@@ -12,7 +12,7 @@ import { entriesMatch } from './entry_match';
 import { entriesExists } from './entry_exists';
 import { entriesList } from './entry_list';
 import { entriesNested } from './entry_nested';
-import { entriesMatchWildcardCaseless } from './entry_match_wildcard_caseless';
+import { entriesMatchWildcard } from './entry_match_wildcard';
 
 export const entry = t.union([
   entriesMatch,
@@ -20,7 +20,7 @@ export const entry = t.union([
   entriesList,
   entriesExists,
   entriesNested,
-  entriesMatchWildcardCaseless,
+  entriesMatchWildcard,
 ]);
 export type Entry = t.TypeOf<typeof entry>;
 
@@ -31,7 +31,7 @@ export const entriesArray = t.array(
     entriesList,
     entriesExists,
     entriesNested,
-    entriesMatchWildcardCaseless,
+    entriesMatchWildcard,
   ])
 );
 export type EntriesArray = t.TypeOf<typeof entriesArray>;

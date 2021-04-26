@@ -12,7 +12,7 @@ import {
   Entry,
   EntriesArray,
   EntryMatch,
-  EntriesMatchWildcardCaseless,
+  EntryMatchWildcard,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
@@ -185,10 +185,7 @@ export const createEntryMatch = (field: string, value: string): EntryMatch => {
   return { field, value, type: 'match', operator: OPERATOR_VALUE };
 };
 
-export const createEntryMatchWildcardCaseless = (
-  field: string,
-  value: string
-): EntriesMatchWildcardCaseless => {
+export const createEntryMatchWildcard = (field: string, value: string): EntryMatchWildcard => {
   return { field, value, type: 'wildcard', operator: OPERATOR_VALUE };
 };
 
@@ -220,7 +217,7 @@ export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): E
       conditionEntry.field === ConditionEntryField.PATH &&
       conditionEntry.type === 'wildcard'
     ) {
-      return createEntryMatchWildcardCaseless(`process.executable.caseless`, conditionEntry.value);
+      return createEntryMatchWildcard(`process.executable.caseless`, conditionEntry.value);
     } else {
       return createEntryMatch(`process.executable.caseless`, conditionEntry.value);
     }
