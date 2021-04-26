@@ -1,0 +1,10 @@
+.mapAttributionControl {
+  @include mapOverlayIsTextOnly;
+  @include euiTextBreakWord;
+  pointer-events: all;
+  padding-left: $euiSizeM;
+}
+
+.mapAttributionControl__fullScreen {
+  margin-left: $euiSizeXXL * 4;
+}
