@@ -42,6 +42,7 @@ import {
   EffectedPolicySelection,
   EffectedPolicySelectProps,
 } from './effected_policy_select';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -212,14 +213,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       >
     >({});
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const notifyOfChange = useCallback(
       (updatedFormValues: TrustedAppFormState['item']) => {
