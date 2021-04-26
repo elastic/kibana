@@ -11,6 +11,7 @@ import './timeseries_visualization.scss';
 import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IUiSettingsClient } from 'src/core/public';
@@ -32,6 +33,8 @@ import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../common/panel_types';
+
+const JANUARY_MOMENT_CONFIG = { M: 0, d: 1 };
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -131,6 +134,7 @@ function TimeseriesVisualization({
     !model.time_range_mode || model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE;
   const shouldDisplayLastValueIndicator =
     isLastValueMode && !model.hide_last_value_indicator && model.type !== PANEL_TYPES.TIMESERIES;
+  const fixedOffset = moment(JANUARY_MOMENT_CONFIG).utcOffset();
 
   if (VisComponent) {
     return (
@@ -145,6 +149,7 @@ function TimeseriesVisualization({
               )}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
+              fixedOffset={fixedOffset}
             />
           </EuiFlexItem>
         )}
@@ -158,6 +163,7 @@ function TimeseriesVisualization({
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}
+            fixedOffset={fixedOffset}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

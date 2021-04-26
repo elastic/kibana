@@ -8,7 +8,7 @@
 
 import { KibanaContext } from '../../data/public';
 
-import { getTimezone, validateInterval } from './application';
+import { getTimezone, validateInterval, getIgnoredDstTimeRange } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
 import { TimeseriesVisParams } from './types';
@@ -38,7 +38,8 @@ export const metricsRequestHandler = async ({
   if (visParams && visParams.id && !visParams.isModelInvalid) {
     const maxBuckets = config.get<number>(MAX_BUCKETS_SETTING);
 
-    validateInterval(parsedTimeRange, visParams, maxBuckets);
+    const actualTimeRange = getIgnoredDstTimeRange(parsedTimeRange, visParams, timezone);
+    validateInterval(actualTimeRange, visParams, maxBuckets);
 
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
@@ -52,10 +53,7 @@ export const metricsRequestHandler = async ({
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
-          timerange: {
-            timezone,
-            ...parsedTimeRange,
-          },
+          timerange: actualTimeRange,
           query: input?.query,
           filters: input?.filters,
           panels: [visParams],

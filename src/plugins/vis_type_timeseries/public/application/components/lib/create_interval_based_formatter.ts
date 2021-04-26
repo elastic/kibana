@@ -20,9 +20,12 @@ function getFormat(interval: number, rules: string[][] = []) {
 export function createIntervalBasedFormatter(
   interval: number,
   rules: string[][],
-  dateFormat: string
+  dateFormat: string,
+  fixedOffset: number
 ) {
   return (val: moment.MomentInput): string => {
-    return moment(val).format(getFormat(interval, rules) ?? dateFormat);
+    return moment(val)
+      .utcOffset(fixedOffset)
+      .format(getFormat(interval, rules) ?? dateFormat);
   };
 }

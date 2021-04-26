@@ -38,7 +38,8 @@ class TimeseriesVisualization extends Component {
     const formatter = createIntervalBasedFormatter(
       interval,
       this.scaledDataFormat,
-      this.dateFormat
+      this.dateFormat,
+      this.props.fixedOffset
     );
     return formatter(val);
   };

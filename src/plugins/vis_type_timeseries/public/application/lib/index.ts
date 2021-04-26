@@ -9,3 +9,4 @@
 // @ts-ignore
 export { validateInterval } from './validate_interval';
 export { getTimezone } from './get_timezone';
+export { getIgnoredDstTimeRange } from './get_ignored_dst_timerange';

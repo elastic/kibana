@@ -57,4 +57,5 @@ export interface TimeseriesVisProps {
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
   palettesService: PaletteRegistry;
+  fixedOffset?: number;
 }
