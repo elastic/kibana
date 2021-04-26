@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { APP_WRAPPER_CLASS } from './app_wrapper_class';
+/**
+ * The class name for top level *and* nested application wrappers to ensure proper layout
+ * @public
+ */
+export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
