@@ -100,7 +100,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${encodeURIComponent(alertId)}/alert_instance/${encodeURIComponent(alertInstanceId)}/_mute`)
+      .post(
+        `/api/alerts/alert/${encodeURIComponent(alertId)}/alert_instance/${encodeURIComponent(
+          alertInstanceId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
