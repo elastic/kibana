@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { SavedObjectsTypeMappingDefinition } from 'src/core/server';
 import { set } from '@elastic/safer-lodash-set';
 import { FieldMap } from '../../../common';
-import { Mappings } from '../types';
 
-export function mappingFromFieldMap(fieldMap: FieldMap): Mappings {
+export function mappingFromFieldMap(fieldMap: FieldMap): SavedObjectsTypeMappingDefinition {
   const mappings = {
     dynamic: 'strict' as const,
     properties: {},

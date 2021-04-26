@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export interface Mappings {
-  dynamic: 'strict' | boolean;
-  properties: Record<string, { type: string } | Mappings>;
-}
-
 enum ILMPolicyPhase {
   hot = 'hot',
   delete = 'delete',

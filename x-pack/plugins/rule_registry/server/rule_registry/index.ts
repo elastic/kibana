@@ -137,6 +137,7 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
         name: indexAliasName,
         body: {
           index_patterns: [`${indexAliasName}-*`],
+          // @ts-expect-error @elastic/elasticsearch types don't support nested mappings
           mappings,
         },
         create: false,
@@ -186,6 +187,7 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
 
         await esClient.indices.putMapping({
           index: indexAliasName,
+          // @ts-expect-error @elastic/elasticsearch types don't support nested mappings
           body: mappings,
         });
       }
