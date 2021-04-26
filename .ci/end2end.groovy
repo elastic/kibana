@@ -18,6 +18,7 @@ pipeline {
     KBN_OPTIMIZER_THEMES = 'v7light'
     GITHUB_CHECK_APM_UI = 'end2end-for-apm-ui'
     GITHUB_CHECK_UPTIME_UI = 'end2end-for-uptime-ui'
+    GCS_UPLOAD_PREFIX = 'prefix' // forced to set the variable even though it's not required in this pipeline (https://github.com/elastic/kibana/pull/52449)
   }
   options {
     timeout(time: 1, unit: 'HOURS')
