@@ -6,10 +6,14 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { FileDataVisualizerStartDependencies } from './plugin';
+import { FileDataVisualizerStartDependencies, FileDataVisualizerSetupDependencies } from './plugin';
 
 let coreStart: CoreStart;
 let pluginsStart: FileDataVisualizerStartDependencies;
+let pluginsSetup: FileDataVisualizerSetupDependencies;
+export function setSetupServices(plugins: FileDataVisualizerSetupDependencies) {
+  pluginsSetup = plugins;
+}
 export function setStartServices(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
@@ -17,3 +21,4 @@ export function setStartServices(core: CoreStart, plugins: FileDataVisualizerSta
 
 export const getCoreStart = () => coreStart;
 export const getPluginsStart = () => pluginsStart;
+export const getPluginsSetup = () => pluginsSetup;
