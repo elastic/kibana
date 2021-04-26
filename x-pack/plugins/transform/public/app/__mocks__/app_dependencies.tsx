@@ -12,6 +12,8 @@ import type { ScopedHistory } from 'kibana/public';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
+import { SharePluginStart } from '../../../../../../src/plugins/share/public';
+
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import type { AppDependencies } from '../app_dependencies';
@@ -39,6 +41,7 @@ const appDependencies: AppDependencies = {
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
+  share: ({ urlGenerators: { getUrlGenerator: jest.fn() } } as unknown) as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
 };
 
