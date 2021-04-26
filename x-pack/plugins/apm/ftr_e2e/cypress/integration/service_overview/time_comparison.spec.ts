@@ -4,6 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import url from 'url';
+import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
+const { start, end } = archives_metadata['apm_8.0.0'];
+
+const baseUrl = url.format({
+  pathname: '/app/apm/services/opbeans-java/overview',
+  query: { rangeFrom: start, rangeTo: end },
+});
+
 const apisToIntercept = [
   {
     endpoint: '/api/apm/services/opbeans-java/transactions/charts/latency',
@@ -35,9 +44,7 @@ const apisToIntercept = [
 
 describe('Service overview: Time Comparison', () => {
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
-    cy.visit('/app/apm/services/opbeans-java/overview');
+    cy.visit(baseUrl);
     cy.url().should('include', 'comparisonEnabled=true&comparisonType=day');
   });
 
@@ -45,9 +52,7 @@ describe('Service overview: Time Comparison', () => {
     apisToIntercept.map(({ endpoint, as }) => {
       cy.intercept('GET', endpoint).as(as);
     });
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
-    cy.visit('/app/apm/services/opbeans-java/overview');
+    cy.visit(baseUrl);
     cy.contains('opbeans-java');
 
     // Comparison is enabled by default
@@ -76,9 +81,7 @@ describe('Service overview: Time Comparison', () => {
     apisToIntercept.map(({ endpoint, as }) => {
       cy.intercept('GET', endpoint).as(as);
     });
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
-    cy.visit('/app/apm/services/opbeans-java/overview');
+    cy.visit(baseUrl);
     cy.contains('opbeans-java');
 
     // When the page loads it fetches all APIs with comparison type day
@@ -102,9 +105,7 @@ describe('Service overview: Time Comparison', () => {
   });
 
   it('changes comparison type when a new time range is selected', () => {
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
-    cy.visit('/app/apm/services/opbeans-java/overview');
+    cy.visit(baseUrl);
     cy.contains('opbeans-java');
     cy.contains('Day before');
     cy.visit(
