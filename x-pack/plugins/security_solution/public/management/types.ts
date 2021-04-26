@@ -32,6 +32,7 @@ export enum AdministrationSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
   trustedApps = 'trusted_apps',
+  eventFilters = 'event_filters',
 }
 
 /**

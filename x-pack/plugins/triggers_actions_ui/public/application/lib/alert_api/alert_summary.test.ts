@@ -18,7 +18,7 @@ describe('loadAlertInstanceSummary', () => {
       consumer: 'alerts',
       enabled: true,
       errorMessages: [],
-      id: 'test',
+      id: 'te/st',
       lastRun: '2021-04-01T22:18:27.609Z',
       muteAll: false,
       name: 'test',
@@ -35,7 +35,7 @@ describe('loadAlertInstanceSummary', () => {
       consumer: 'alerts',
       enabled: true,
       error_messages: [],
-      id: 'test',
+      id: 'te/st',
       last_run: '2021-04-01T22:18:27.609Z',
       mute_all: false,
       name: 'test',
@@ -47,11 +47,11 @@ describe('loadAlertInstanceSummary', () => {
       throttle: null,
     });
 
-    const result = await loadAlertInstanceSummary({ http, alertId: 'test' });
+    const result = await loadAlertInstanceSummary({ http, alertId: 'te/st' });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/alerting/rule/test/_alert_summary",
+        "/internal/alerting/rule/te%2Fst/_alert_summary",
       ]
     `);
   });
