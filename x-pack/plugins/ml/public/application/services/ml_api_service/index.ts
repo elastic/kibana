@@ -361,13 +361,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getNotificationSettings() {
-      return httpService.http<any>({
-        path: `${basePath()}/notification_settings`,
-        method: 'GET',
-      });
-    },
-
     checkIndexExists({ index }: { index: string }) {
       const body = JSON.stringify({ index });
 
