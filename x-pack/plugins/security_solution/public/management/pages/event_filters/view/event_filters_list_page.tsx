@@ -41,6 +41,7 @@ export const EventFiltersListPage = memo(() => {
       })}
     >
       {/* <PaginatedContent />*/}
+      {/* TODO: Display this only when list is empty (there are no endpoint events) */}
       <Empty onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
       {showFlyout ? <EventFiltersFlyout onCancel={handleFlyoutClose} /> : null}
     </AdministrationListPage>

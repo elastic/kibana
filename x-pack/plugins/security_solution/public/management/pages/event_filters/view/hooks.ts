@@ -60,8 +60,6 @@ export function useEventFiltersNavigateCallback(callback: NavigationCallback) {
 
   return useCallback(
     (...args) => history.push(getEventFiltersListPath({ ...location, ...callback(...args) })),
-    // TODO: needs more investigation, but if callback is in dependencies list memoization will never happen
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [history, location]
+    [callback, history, location]
   );
 }

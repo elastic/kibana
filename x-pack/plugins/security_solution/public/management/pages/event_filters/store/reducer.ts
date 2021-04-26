@@ -31,7 +31,7 @@ type CaseReducer<T extends AppAction> = (
   action: Immutable<T>
 ) => Immutable<EventFiltersListPageState>;
 
-const isEventFIltersPageLocation = (location: Immutable<AppLocation>) => {
+const isEventFiltersPageLocation = (location: Immutable<AppLocation>) => {
   return (
     matchPath(location.pathname ?? '', {
       path: MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -93,7 +93,7 @@ const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state
 };
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
-  if (isEventFIltersPageLocation(action.payload)) {
+  if (isEventFiltersPageLocation(action.payload)) {
     const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
     return { ...state, location };
   } else {
