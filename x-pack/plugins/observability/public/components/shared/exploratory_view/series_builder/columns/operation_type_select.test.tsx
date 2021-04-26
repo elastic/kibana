@@ -52,6 +52,7 @@ describe('OperationTypeSelect', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: 'median',
+      dataType: 'ux',
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
@@ -59,6 +60,7 @@ describe('OperationTypeSelect', function () {
     fireEvent.click(screen.getByText('95th Percentile'));
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: '95th',
+      dataType: 'ux',
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });

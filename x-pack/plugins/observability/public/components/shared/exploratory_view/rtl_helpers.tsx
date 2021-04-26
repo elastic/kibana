@@ -268,6 +268,7 @@ export const mockUrlStorage = ({
   const mockDataSeries = data || {
     'performance-distribution': {
       reportType: 'pld',
+      dataType: 'ux',
       breakdown: breakdown || 'user_agent.name',
       time: { from: 'now-15m', to: 'now' },
       ...(filters ? { filters } : {}),
