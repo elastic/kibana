@@ -6,8 +6,15 @@
  */
 
 import React, { memo } from 'react';
+import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const EmptyPrompt = styled(EuiEmptyPrompt)`
+  ${({ theme }) => css`
+    max-width: ${theme.eui.euiBreakpoints.m};
+  `}
+`;
 
 export const Empty = memo<{
   onAdd: () => void;
@@ -15,7 +22,7 @@ export const Empty = memo<{
   isAddDisabled?: boolean;
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
-    <EuiEmptyPrompt
+    <EmptyPrompt
       data-test-subj="eventFiltersEmpty"
       iconType="plusInCircle"
       title={

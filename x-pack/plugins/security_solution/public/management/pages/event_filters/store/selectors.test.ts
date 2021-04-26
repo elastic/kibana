@@ -10,6 +10,7 @@ import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 import { EventFiltersPageLocation } from '../state';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 const initialState = initialEventFiltersPageState();
 
@@ -94,8 +95,8 @@ describe('selectors', () => {
     it('returns current locations', () => {
       const expectedLocation: EventFiltersPageLocation = {
         show: 'create',
-        page_index: 1,
-        page_size: 20,
+        page_index: MANAGEMENT_DEFAULT_PAGE,
+        page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
         filter: 'filter',
       };
       const state = {

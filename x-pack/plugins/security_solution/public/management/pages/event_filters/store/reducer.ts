@@ -97,7 +97,7 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
     const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
     return { ...state, location };
   } else {
-    return initialEventFiltersPageState();
+    return state;
   }
 };
 
