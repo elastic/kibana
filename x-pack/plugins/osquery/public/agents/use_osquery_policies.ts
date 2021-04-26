@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
 import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
@@ -13,7 +14,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 export const useOsqueryPolicies = () => {
   const { http } = useKibana().services;
 
-  const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies } = useQuery(
+  const { isLoading: osqueryPoliciesLoading, data } = useQuery(
     ['osqueryPolicies'],
     () =>
       http.get(packagePolicyRouteService.getListPath(), {
@@ -21,8 +22,11 @@ export const useOsqueryPolicies = () => {
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         },
       }),
-    { select: (data) => data.items.map((p: { policy_id: string }) => p.policy_id) }
+    {
+      select: (response) =>
+        uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+    }
   );
-
+  const osqueryPolicies = data ?? [];
   return { osqueryPoliciesLoading, osqueryPolicies };
 };
