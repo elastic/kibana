@@ -3,10 +3,19 @@
   "license": {},
   "elasticsearch": {
     "cluster_stats": {
-      "indices": {},
+      "indices": {
+        "docs": {},
+        "shards": {},
+        "store": {}
+      },
       "nodes": {
-        "count": {},
-        "jvm": {}
+        "count": {
+          "total": {}
+        },
+        "fs": {},
+        "jvm": {
+          "mem": {}
+        }
       }
     },
     "logs": {
