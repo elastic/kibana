@@ -88,12 +88,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleNewCaseClick = useCallback(() => {
     handlePopoverClose();
-
-    dispatch(showTimeline({ id: TimelineId.active, show: false }));
-
     navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
       path: getCreateCaseUrl(),
-    }).then(() =>
+    }).then(() => {
       dispatch(
         setInsertTimeline({
           graphEventId,
@@ -101,8 +98,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
         })
-      )
-    );
+      );
+      dispatch(showTimeline({ id: TimelineId.active, show: false }));
+    });
   }, [
     dispatch,
     graphEventId,

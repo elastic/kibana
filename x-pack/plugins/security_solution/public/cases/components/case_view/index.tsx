@@ -110,15 +110,17 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
 };
 
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
-  const [caseTitle, setCaseTitle] = useState<string | null>(null);
+  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
+    caseTitle: undefined,
+  });
 
   const onCaseDataSuccess = useCallback(
     (data: Case) => {
-      if (!caseTitle || caseTitle !== data.title) {
-        setCaseTitle(data.title);
+      if (spyState.caseTitle === undefined) {
+        setSpyState({ caseTitle: data.title });
       }
     },
-    [caseTitle]
+    [spyState.caseTitle]
   );
 
   const {
@@ -200,7 +202,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       })
     );
   }, [dispatch]);
-
   return (
     <>
       {casesUi.getCaseView({
@@ -247,7 +248,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         useFetchAlertData,
         userCanCrud,
       })}
-      {caseTitle && <SpyRoute state={{ caseTitle }} pageName={SecurityPageName.case} />}
+      <SpyRoute state={spyState} pageName={SecurityPageName.case} />
     </>
   );
 });
