@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{date event.from}}',to:'{{date event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
 
+      await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
         destinationURLTemplate: urlTemplate,
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('urlDrilldownOpenInNewTab');
 
       await dashboardDrilldownsManage.saveChanges();
-      await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
+      await dashboardDrilldownsManage.closeFlyout();
 
       // check that drilldown notification badge is shown
       expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(2);

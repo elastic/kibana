@@ -9,7 +9,7 @@
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { pick } from '@kbn/std';
+import { pick, getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -75,6 +75,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -107,6 +108,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
       },
     };
+  }
+
+  public getExposedPluginConfigsToUsage() {
+    return this.pluginConfigUsageDescriptors;
   }
 
   public async setup(deps: PluginsServiceSetupDeps) {
@@ -211,6 +216,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
                 configDescriptor.deprecations
               );
             }
+            if (configDescriptor.exposeToUsage) {
+              this.pluginConfigUsageDescriptors.set(
+                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+                getFlattenedObject(configDescriptor.exposeToUsage)
+              );
+            }
             this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
           }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
@@ -222,6 +233,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
               requiredBundles: plugin.requiredBundles,
+              version: plugin.manifest.version,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });

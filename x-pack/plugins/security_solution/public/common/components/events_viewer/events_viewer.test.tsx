@@ -26,7 +26,13 @@ import { KqlMode } from '../../../timelines/store/timeline/model';
 import { SortDirection } from '../../../timelines/components/timeline/body/sort';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+
+jest.mock('../../hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
@@ -99,6 +105,8 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
+  renderCellValue: DefaultCellRenderer,
+  rowRenderers: defaultRowRenderers,
   start: from,
   sort: [
     {
@@ -118,6 +126,8 @@ describe('EventsViewer', () => {
     defaultModel: eventsDefaultModel,
     end: to,
     id: TimelineId.test,
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     start: from,
     scopeId: SourcererScopeName.timeline,
   };
@@ -129,6 +139,7 @@ describe('EventsViewer', () => {
   });
 
   describe('event details', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
     beforeEach(() => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });

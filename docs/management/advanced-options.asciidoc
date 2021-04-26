@@ -119,8 +119,12 @@ When date histograms use the `auto` interval, Kibana attempts to generate this
 number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
-Date histograms are not generated with more bars than the value of this property,
-scaling values when necessary.
+To improve performance, limits the density of date and number histograms across {kib}
+using a test query. When the test query contains too many buckets,
+the interval between buckets increases. This setting applies separately
+to each histogram aggregation, and does not apply to other types of aggregations.
+To find the maximum value of this setting, divide the {es} `search.max_buckets`
+value by the maximum number of aggregations in each visualization.
 
 [[history-limit]]`history:limit`::
 In fields that have history, such as query inputs, show this many recent values.
@@ -134,9 +138,7 @@ Fields that exist outside of `_source`. Kibana merges these fields into the
 document when displaying it.
 
 [[metrics-maxbuckets]]`metrics:max_buckets`::
-The maximum numbers of buckets that a single data source can return. This might
-arise when the user selects a short interval (for example, 1s) for a long time
-period (1 year).
+Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
 Allows a wildcard (*) as the first character in a query clause. Only applies
@@ -319,20 +321,19 @@ https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown
 
 [[notifications-lifetime-banner]]`notifications:lifetime:banner`::
 The duration, in milliseconds, for banner notification displays. The default
-value is 3000000. Set this field to `Infinity` to disable banner notifications.
+value is 3000000.
 
 [[notificatios-lifetime-error]]`notifications:lifetime:error`::
 The duration, in milliseconds, for error notification displays. The default
-value is 300000. Set this field to `Infinity` to disable error notifications.
+value is 300000.
 
 [[notifications-lifetime-info]]`notifications:lifetime:info`::
 The duration, in milliseconds, for information notification displays. The
-default value is 5000. Set this field to `Infinity` to disable information
-notifications.
+default value is 5000.
 
 [[notifications-lifetime-warning]]`notifications:lifetime:warning`::
 The duration, in milliseconds, for warning notification displays. The default
-value is 10000. Set this field to `Infinity` to disable warning notifications.
+value is 10000.
 
 
 [float]

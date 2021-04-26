@@ -65,11 +65,14 @@ import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details
 import {
   changeRowsPerPageTo300,
   duplicateFirstRule,
+  duplicateSelectedRules,
   duplicateRuleFromMenu,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
+  selectNumberOfRules,
+  checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, reload } from '../../tasks/common';
@@ -99,7 +102,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { waitForKibana } from '../../tasks/edit_rule';
+import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
@@ -502,7 +505,7 @@ describe('indicator match', () => {
         {
           line: 3,
           text:
-            '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
+            '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
         },
         { line: 2, text: '  }' },
       ];
@@ -564,16 +567,26 @@ describe('indicator match', () => {
       it('Allows the rule to be duplicated from the table', () => {
         waitForKibana();
         duplicateFirstRule();
-        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
+        goBackToRuleDetails();
+        goBackToAllRulesTable();
+        checkDuplicatedRule();
+      });
+
+      it("Allows the rule to be duplicated from the table's bulk actions", () => {
+        waitForKibana();
+        selectNumberOfRules(1);
+        duplicateSelectedRules();
+        checkDuplicatedRule();
       });
 
       it('Allows the rule to be duplicated from the edit screen', () => {
         waitForKibana();
         goToRuleDetails();
         duplicateRuleFromMenu();
+        goBackToRuleDetails();
         goBackToAllRulesTable();
         reload();
-        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
+        checkDuplicatedRule();
       });
     });
   });

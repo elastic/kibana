@@ -78,7 +78,7 @@ const createPlugin = (
     manifest: {
       id,
       version,
-      configPath: `${configPath}${disabled ? '-disabled' : ''}`,
+      configPath: disabled ? configPath.concat('-disabled') : configPath,
       kibanaVersion,
       requiredPlugins,
       requiredBundles,
@@ -374,7 +374,6 @@ describe('PluginsService', () => {
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
-
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith(
         {
@@ -472,6 +471,88 @@ describe('PluginsService', () => {
 
       expect(pluginPaths).toEqual(['/plugin-A-path', '/plugin-B-path']);
     });
+
+    it('ppopulates pluginConfigUsageDescriptors with plugins exposeToUsage property', async () => {
+      const pluginA = createPlugin('plugin-with-expose-usage', {
+        path: 'plugin-with-expose-usage',
+        configPath: 'pathA',
+      });
+
+      jest.doMock(
+        join('plugin-with-expose-usage', 'server'),
+        () => ({
+          config: {
+            exposeToUsage: {
+              test: true,
+              nested: {
+                prop: true,
+              },
+            },
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      const pluginB = createPlugin('plugin-with-array-configPath', {
+        path: 'plugin-with-array-configPath',
+        configPath: ['plugin', 'pathB'],
+      });
+
+      jest.doMock(
+        join('plugin-with-array-configPath', 'server'),
+        () => ({
+          config: {
+            exposeToUsage: {
+              test: true,
+            },
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      jest.doMock(
+        join('plugin-without-expose', 'server'),
+        () => ({
+          config: {
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      const pluginC = createPlugin('plugin-without-expose', {
+        path: 'plugin-without-expose',
+        configPath: 'pathC',
+      });
+
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([pluginA, pluginB, pluginC]),
+      });
+
+      await pluginsService.discover({ environment: environmentSetup });
+
+      // eslint-disable-next-line dot-notation
+      expect(pluginsService['pluginConfigUsageDescriptors']).toMatchInlineSnapshot(`
+        Map {
+          "pathA" => Object {
+            "nested.prop": true,
+            "test": true,
+          },
+          "plugin.pathB" => Object {
+            "test": true,
+          },
+        }
+      `);
+    });
   });
 
   describe('#generateUiPluginsConfigs()', () => {
@@ -562,12 +643,12 @@ describe('PluginsService', () => {
         plugin$: from([
           createPlugin('plugin-1', {
             path: 'path-1',
-            version: 'some-version',
+            version: 'version-1',
             configPath: 'plugin1',
           }),
           createPlugin('plugin-2', {
             path: 'path-2',
-            version: 'some-version',
+            version: 'version-2',
             configPath: 'plugin2',
           }),
         ]),
@@ -577,7 +658,7 @@ describe('PluginsService', () => {
     });
 
     describe('uiPlugins.internal', () => {
-      it('includes disabled plugins', async () => {
+      it('contains internal properties for plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
         const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
@@ -586,14 +667,22 @@ describe('PluginsService', () => {
               "publicAssetsDir": <absolute path>/path-1/public/assets,
               "publicTargetDir": <absolute path>/path-1/target/public,
               "requiredBundles": Array [],
+              "version": "version-1",
             },
             "plugin-2" => Object {
               "publicAssetsDir": <absolute path>/path-2/public/assets,
               "publicTargetDir": <absolute path>/path-2/target/public,
               "requiredBundles": Array [],
+              "version": "version-2",
             },
           }
         `);
+      });
+
+      it('includes disabled plugins', async () => {
+        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
+        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+        expect([...uiPlugins.internal.keys()].sort()).toEqual(['plugin-1', 'plugin-2']);
       });
     });
 
@@ -613,6 +702,20 @@ describe('PluginsService', () => {
         expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
         expect(initialized).toBe(false);
       });
+    });
+  });
+
+  describe('#getExposedPluginConfigsToUsage', () => {
+    it('returns pluginConfigUsageDescriptors', () => {
+      // eslint-disable-next-line dot-notation
+      pluginsService['pluginConfigUsageDescriptors'].set('test', { enabled: true });
+      expect(pluginsService.getExposedPluginConfigsToUsage()).toMatchInlineSnapshot(`
+        Map {
+          "test" => Object {
+            "enabled": true,
+          },
+        }
+      `);
     });
   });
 

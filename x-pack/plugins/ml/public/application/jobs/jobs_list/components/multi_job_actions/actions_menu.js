@@ -159,7 +159,7 @@ class MultiJobActionsMenuUI extends Component {
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
-            defaultMessage="Create alert"
+            defaultMessage="Create alert rule"
           />
         </EuiContextMenuItem>
       );

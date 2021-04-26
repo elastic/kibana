@@ -82,7 +82,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
-  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   REGIONMAP_FILE = 'REGIONMAP_FILE',
@@ -300,3 +300,7 @@ export type FieldFormatter = (value: RawValue) => string | number;
 export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
+
+export const emsWorldLayerId = 'world_countries';
+export const emsRegionLayerId = 'administrative_regions_lvl2';
+export const emsUsaZipLayerId = 'usa_zip_codes';

@@ -1,0 +1,18 @@
+.quickButtonGroup {
+  .quickButtonGroup__button {
+    background-color: $euiColorEmptyShade;
+  }
+
+  // Temporary fix for two tone icons to make them monochrome
+  .quickButtonGroup__button--dark {
+    .euiIcon path {
+      fill: $euiColorGhost;
+    }
+  }
+  // Temporary fix for two tone icons to make them monochrome
+  .quickButtonGroup__button--light {
+    .euiIcon path {
+      fill: $euiColorInk;
+    }
+  }
+}

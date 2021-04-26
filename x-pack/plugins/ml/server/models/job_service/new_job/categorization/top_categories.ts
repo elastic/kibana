@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { CategoryId, Category } from '../../../../../common/types/categories';
 import type { MlClient } from '../../../../lib/ml_client';
 
 export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
-    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+    const { body } = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
         size: 0,
         body: {
@@ -35,12 +36,11 @@ export function topCategoriesProvider(mlClient: MlClient) {
       },
       []
     );
-    // @ts-ignore total is an object here
-    return body?.hits?.total?.value ?? 0;
+    return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+    const { body } = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
         size: 0,
         body: {
@@ -81,7 +81,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
     const catCounts: Array<{
       id: CategoryId;
       count: number;
-      // @ts-expect-error
+      // @ts-expect-error incorrect search response type
     }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
@@ -126,7 +126,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
       []
     );
 
-    // @ts-expect-error
+    // @ts-expect-error incorrect search response type
     return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }
 

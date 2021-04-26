@@ -9,28 +9,28 @@ import React, { useState } from 'react';
 
 import { useDebounce } from 'react-use';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
-
-export interface FieldValueSuggestionsProps {
-  value?: string;
-  label: string;
-  indexPattern: IIndexPattern;
-  sourceField: string;
-  onChange: (val?: string) => void;
-}
+import { FieldValueSuggestionsProps } from './types';
 
 export function FieldValueSuggestions({
+  fullWidth,
   sourceField,
   label,
   indexPattern,
   value,
+  filters,
+  button,
+  time,
+  width,
+  forceOpen,
+  anchorPosition,
+  singleSelection,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField });
+  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
 
   useDebounce(
     () => {
@@ -42,12 +42,18 @@ export function FieldValueSuggestions({
 
   return (
     <FieldValueSelection
+      fullWidth={fullWidth}
+      singleSelection={singleSelection}
       values={values as string[]}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
       value={value}
+      button={button}
+      forceOpen={forceOpen}
+      anchorPosition={anchorPosition}
+      width={width}
     />
   );
 }

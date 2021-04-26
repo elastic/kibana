@@ -9,12 +9,7 @@ import { useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { fetchStatuses } from './constants';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  IndexPattern,
-  ISearchSource,
-} from '../../kibana_services';
+import { IndexPattern, ISearchSource } from '../../kibana_services';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { DiscoverServices } from '../../build_services';
@@ -48,28 +43,6 @@ export function useDocuments({
   const [documents, setDocuments] = useState<ElasticSearchHit[]>([]);
   const inspectorAdapters = useRef({ requests: new RequestAdapter() });
 
-  const logInspectorRequest = useCallback(
-    ({ searchSessionId = undefined }: { searchSessionId: string | undefined }) => {
-      inspectorAdapters.current.requests.reset();
-      const title = i18n.translate('discover.inspectorRequestDataTitle', {
-        defaultMessage: 'data',
-      });
-      const description = i18n.translate('discover.inspectorRequestDescription', {
-        defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-      });
-      const inspectorRequest = inspectorAdapters.current.requests.start(title, {
-        description,
-        searchSessionId,
-      });
-      inspectorRequest.stats(getRequestInspectorStats(volatileSearchSource));
-      volatileSearchSource.getSearchRequestBody().then((body: any) => {
-        inspectorRequest.json(body);
-      });
-      return inspectorRequest;
-    },
-    [volatileSearchSource]
-  );
-
   const fetch = useCallback(
     (abortController: AbortController, searchSessionId: string) => {
       setFetchCounter(fetchCounter + 1);
@@ -90,16 +63,20 @@ export function useDocuments({
       });
       setFetchStatus(fetchStatuses.LOADING);
 
-      const inspectorRequest = logInspectorRequest({ searchSessionId });
       return volatileSearchSource
-        .fetch({
+        .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
+          inspector: {
+            adapter: inspectorAdapters.current.requests,
+            title: i18n.translate('discover.inspectorRequestDataTitle', {
+              defaultMessage: 'data',
+            }),
+            description: '',
+          },
         })
+        .toPromise()
         .then((resp) => {
-          inspectorRequest
-            .stats(getResponseInspectorStats(resp, volatileSearchSource))
-            .ok({ json: resp });
           setDocuments(resp.hits.hits as ElasticSearchHit[]);
           setFetchStatus(fetchStatuses.COMPLETE);
         })
@@ -114,7 +91,6 @@ export function useDocuments({
     [
       fetchCounter,
       indexPattern,
-      logInspectorRequest,
       services,
       showUnmappedFields,
       stateContainer.appStateContainer,
@@ -129,5 +105,8 @@ export function useDocuments({
     rows: documents,
     inspectorAdapters: inspectorAdapters.current,
     fetch,
+    reset: () => {
+      setDocuments([]);
+    },
   };
 }

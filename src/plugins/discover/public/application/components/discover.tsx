@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -45,6 +45,7 @@ import { UseSavedSearch } from './use_fetch';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { getResultState } from '../helpers/get_result_state';
 import { AppState, GetStateReturn } from '../angular/discover_state';
+import { InspectorSession } from '../../../../inspector/public';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -72,6 +73,7 @@ export function Discover({
   const { trackUiMetric, capabilities, indexPatterns, data } = services;
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -95,16 +97,7 @@ export function Discover({
     [useNewFieldsApi]
   );
 
-  const {
-    chart$,
-    hits$,
-    refetch$,
-    fetchStatus,
-    fetchError,
-    fetchCounter,
-    rows,
-    inspectorAdapters,
-  } = useSavedSearch;
+  const { chart$, hits$, refetch$, fetchStatus, fetchError, fetchCounter, rows } = useSavedSearch;
   const resultState = useMemo(() => getResultState(fetchStatus, rows), [fetchStatus, rows]);
 
   const updateQuery = useCallback(
@@ -134,10 +127,20 @@ export function Discover({
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-    services.inspector.open(inspectorAdapters, {
+    const session = services.inspector.open(useSavedSearch.inspectorAdapters, {
       title: savedSearch.title,
     });
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, services.inspector]);
+    setInspectorSession(session);
+  }, [setExpandedDoc, useSavedSearch.inspectorAdapters, savedSearch, services.inspector]);
+
+  useEffect(() => {
+    return () => {
+      if (inspectorSession) {
+        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+        inspectorSession.close();
+      }
+    };
+  }, [inspectorSession]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
@@ -192,6 +195,10 @@ export function Discover({
     [stateContainer, state]
   );
 
+  const onEditRuntimeField = () => {
+    useSavedSearch.reset();
+  };
+
   const columns = useMemo(() => {
     if (!state.columns) {
       return [];
@@ -237,6 +244,7 @@ export function Discover({
                 trackUiMetric={trackUiMetric}
                 unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
+                onEditRuntimeField={onEditRuntimeField}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>

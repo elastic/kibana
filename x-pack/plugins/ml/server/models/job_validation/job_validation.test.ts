@@ -8,13 +8,15 @@
 import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
-import { HITS_TOTAL_RELATION } from '../../../common/types/es_client';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../common/types/es_client';
 import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
   search: () =>
-    Promise.resolve({ body: { hits: { total: { value: 1, relation: HITS_TOTAL_RELATION.EQ } } } }),
+    Promise.resolve({
+      body: { hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } } },
+    }),
 };
 
 const mlClusterClient = ({
@@ -159,7 +161,7 @@ describe('ML - validateJob', () => {
       function: '',
     });
     payload.job.analysis_config.detectors.push({
-      // @ts-expect-error
+      // @ts-expect-error incorrect type on purpose for test
       function: undefined,
     });
 

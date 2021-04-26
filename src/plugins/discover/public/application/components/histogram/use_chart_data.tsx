@@ -76,7 +76,7 @@ export function useChartData({
 
       subject.next({ state: 'loading' });
 
-      fetch(searchSource, abortController, chartAggConfigs!, data, searchSessionId).then(
+      return fetch(searchSource, abortController, chartAggConfigs!, data, searchSessionId).then(
         (result: any) => {
           subject.next({ state: 'complete', data: result, bucketInterval: newInterval });
         }

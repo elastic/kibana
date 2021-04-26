@@ -30,6 +30,7 @@ export interface UseSavedSearch {
   inspectorAdapters: { requests: RequestAdapter };
   refetch$: Subject<unknown>;
   rows: ElasticSearchHit[];
+  reset: () => void;
 }
 export const useFetch = ({
   services,
@@ -83,7 +84,15 @@ export const useFetch = ({
     savedSearch,
   });
 
-  const { fetchStatus, fetchError, fetchCounter, rows, inspectorAdapters, fetch } = useDocuments({
+  const {
+    fetchStatus,
+    fetchError,
+    fetchCounter,
+    rows,
+    inspectorAdapters,
+    fetch,
+    reset,
+  } = useDocuments({
     services,
     indexPattern,
     useNewFieldsApi,
@@ -163,5 +172,9 @@ export const useFetch = ({
     fetchCounter,
     rows,
     inspectorAdapters,
+    reset: () => {
+      reset();
+      refetch$.next();
+    },
   };
 };

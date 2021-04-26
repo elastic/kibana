@@ -53,6 +53,7 @@ describe('search settings routes', () => {
     boosts,
     result_fields: resultFields,
     search_fields: searchFields,
+    precision: 2,
   };
 
   beforeEach(() => {
@@ -106,18 +107,6 @@ describe('search settings routes', () => {
         path: '/as/engines/:engineName/search_settings',
       });
     });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: searchSettings };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-    });
   });
 
   describe('POST /api/app_search/engines/{name}/search_settings/reset', () => {
@@ -165,23 +154,6 @@ describe('search settings routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/search_settings_search',
-      });
-    });
-
-    describe('validates body', () => {
-      it('correctly', () => {
-        const request = {
-          body: {
-            boosts,
-            search_fields: searchFields,
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
       });
     });
 

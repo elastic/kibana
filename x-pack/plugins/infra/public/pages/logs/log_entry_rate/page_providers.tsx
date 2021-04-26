@@ -14,29 +14,31 @@ import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceId, sourceConfiguration } = useLogSourceContext();
+  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
   const { space } = useActiveKibanaSpace();
 
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
   // React concurrent mode and Suspense in order to handle that more gracefully.
-  if (sourceConfiguration?.configuration.logAlias == null || space == null) {
+  if (!resolvedSourceConfiguration || space == null) {
     return null;
   }
 
   return (
     <LogFlyout.Provider>
       <LogEntryRateModuleProvider
-        indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+        indexPattern={resolvedSourceConfiguration.indices ?? ''}
         sourceId={sourceId}
         spaceId={space.id}
-        timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+        timestampField={resolvedSourceConfiguration.timestampField ?? ''}
+        runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
       >
         <LogEntryCategoriesModuleProvider
-          indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+          indexPattern={resolvedSourceConfiguration.indices ?? ''}
           sourceId={sourceId}
           spaceId={space.id}
-          timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+          timestampField={resolvedSourceConfiguration.timestampField ?? ''}
+          runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
         >
           <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
         </LogEntryCategoriesModuleProvider>

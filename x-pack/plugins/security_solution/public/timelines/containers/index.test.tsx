@@ -27,6 +27,11 @@ const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
 const mockSearch = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {
@@ -159,7 +164,7 @@ describe('useTimelineEvents', () => {
           loadPage: result.current[1].loadPage,
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
-          totalCount: 31,
+          totalCount: 32,
           updatedAt: result.current[1].updatedAt,
         },
       ]);
@@ -202,10 +207,53 @@ describe('useTimelineEvents', () => {
           loadPage: result.current[1].loadPage,
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
-          totalCount: 31,
+          totalCount: 32,
           updatedAt: result.current[1].updatedAt,
         },
       ]);
+    });
+  });
+
+  test('Correlation pagination is calling search strategy when switching page', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate, rerender } = renderHook<
+        UseTimelineEventsProps,
+        [boolean, TimelineArgs]
+      >((args) => useTimelineEvents(args), {
+        initialProps: {
+          ...props,
+          language: 'eql',
+          eqlOptions: {
+            eventCategoryField: 'category',
+            tiebreakerField: '',
+            timestampField: '@timestamp',
+            query: 'find it EQL',
+            size: 100,
+          },
+        },
+      });
+
+      // useEffect on params request
+      await waitForNextUpdate();
+      rerender({
+        ...props,
+        startDate,
+        endDate,
+        language: 'eql',
+        eqlOptions: {
+          eventCategoryField: 'category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: 'find it EQL',
+          size: 100,
+        },
+      });
+      // useEffect on params request
+      await waitForNextUpdate();
+      mockSearch.mockReset();
+      result.current[1].loadPage(4);
+      await waitForNextUpdate();
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 });

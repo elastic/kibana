@@ -33,6 +33,7 @@ describe('SourceLogic', () => {
     flashAPIErrors,
     setSuccessMessage,
     setQueuedSuccessMessage,
+    setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
@@ -204,6 +205,19 @@ describe('SourceLogic', () => {
 
         expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
       });
+
+      it('renders error messages passed in success response from server', async () => {
+        const errors = ['ERROR'];
+        const promise = Promise.resolve({
+          ...contentSource,
+          errors,
+        });
+        http.get.mockReturnValue(promise);
+        SourceLogic.actions.initializeSource(contentSource.id);
+        await promise;
+
+        expect(setErrorMessage).toHaveBeenCalledWith(errors);
+      });
     });
 
     describe('initializeFederatedSummary', () => {
@@ -214,7 +228,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/123/federated_summary'
+          '/api/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);

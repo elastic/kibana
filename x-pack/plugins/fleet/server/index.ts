@@ -9,11 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import {
-  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
-  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
-  AGENT_POLLING_REQUEST_TIMEOUT_MS,
-} from '../common';
+import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
 
 import { FleetPlugin } from './plugin';
 
@@ -38,6 +34,13 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
+    unused('agents.kibana'),
+    unused('agents.maxConcurrentConnections'),
+    unused('agents.agentPolicyRolloutRateLimitIntervalMs'),
+    unused('agents.agentPolicyRolloutRateLimitRequestPerInterval'),
+    unused('agents.pollingRequestTimeout'),
+    unused('agents.tlsCheckDisabled'),
+    unused('agents.fleetServerEnabled'),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -45,22 +48,6 @@ export const config: PluginConfigDescriptor = {
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-      fleetServerEnabled: schema.boolean({ defaultValue: false }),
-      tlsCheckDisabled: schema.boolean({ defaultValue: false }),
-      pollingRequestTimeout: schema.number({
-        defaultValue: AGENT_POLLING_REQUEST_TIMEOUT_MS,
-        min: 5000,
-      }),
-      maxConcurrentConnections: schema.number({ defaultValue: 0 }),
-      kibana: schema.object({
-        host: schema.maybe(
-          schema.oneOf([
-            schema.uri({ scheme: ['http', 'https'] }),
-            schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
-          ])
-        ),
-        ca_sha256: schema.maybe(schema.string()),
-      }),
       elasticsearch: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
@@ -70,13 +57,9 @@ export const config: PluginConfigDescriptor = {
           hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
         })
       ),
-      agentPolicyRolloutRateLimitIntervalMs: schema.number({
-        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
-      }),
-      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
-        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
-      }),
     }),
+    packages: PreconfiguredPackagesSchema,
+    agentPolicies: PreconfiguredAgentPoliciesSchema,
   }),
 };
 

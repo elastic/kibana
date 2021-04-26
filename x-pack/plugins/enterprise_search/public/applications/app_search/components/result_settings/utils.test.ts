@@ -9,12 +9,12 @@ import { SchemaTypes } from '../../../shared/types';
 
 import {
   areFieldsAtDefaultSettings,
-  areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllFields,
   resetAllFields,
   splitResultFields,
+  areFieldsEmpty,
 } from './utils';
 
 describe('clearAllFields', () => {
@@ -146,14 +146,16 @@ describe('splitResultFields', () => {
 });
 
 describe('areFieldsEmpty', () => {
-  it('should return true if all fields are empty objects', () => {
+  it('should return true if all fields are empty or have all properties disabled', () => {
     expect(
       areFieldsEmpty({
         foo: {},
-        bar: {},
+        bar: { raw: false, snippet: false },
+        baz: { raw: false },
       })
     ).toBe(true);
   });
+
   it('should return false otherwise', () => {
     expect(
       areFieldsEmpty({

@@ -80,10 +80,12 @@ export async function mountApp({
     embeddable: embeddableStart,
     kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
+    visualizations,
   } = pluginsStart;
 
   const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
   const activeSpaceId = spacesApi && (await spacesApi.activeSpace$.pipe(first()).toPromise())?.id;
+  let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
   const dashboardServices: DashboardAppServices = {
     navigation,
@@ -122,6 +124,7 @@ export async function mountApp({
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
+    visualizations,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
@@ -149,9 +152,6 @@ export async function mountApp({
   const getDashboardEmbedSettings = (
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
-    if (!routeParams.embed) {
-      return undefined;
-    }
     return {
       forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
       forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
@@ -162,11 +162,13 @@ export async function mountApp({
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
     const routeParams = parse(routeProps.history.location.search);
-    const embedSettings = getDashboardEmbedSettings(routeParams);
+    if (routeParams.embed && !globalEmbedSettings) {
+      globalEmbedSettings = getDashboardEmbedSettings(routeParams);
+    }
     return (
       <DashboardApp
         history={routeProps.history}
-        embedSettings={embedSettings}
+        embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
       />
