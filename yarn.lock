@@ -1550,7 +1550,7 @@
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
-"@elastic/safer-lodash-set@link:packages/elastic-safer-lodash-set":
+"@elastic/safer-lodash-set@link:bazel-bin/packages/elastic-safer-lodash-set/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2585,7 +2585,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-code-parser@link:packages/kbn-babel-code-parser":
+"@kbn/babel-code-parser@link:bazel-bin/packages/kbn-babel-code-parser/npm_module":
   version "0.0.0"
   uid ""
 
