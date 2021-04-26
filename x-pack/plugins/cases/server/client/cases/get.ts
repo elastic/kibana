@@ -5,35 +5,50 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
-import { CaseResponseRt, CaseResponse, ESCaseAttributes, User, UsersRt } from '../../../common/api';
-import { CaseService } from '../../services';
+import { SavedObject } from 'kibana/server';
+import {
+  CaseResponseRt,
+  CaseResponse,
+  ESCaseAttributes,
+  User,
+  UsersRt,
+  AllTagsFindRequest,
+  AllTagsFindRequestRt,
+  excess,
+  throwErrors,
+  AllReportersFindRequestRt,
+  AllReportersFindRequest,
+} from '../../../common/api';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
+import { Operations } from '../../authorization';
+import {
+  combineAuthorizedAndOwnerFilter,
+  ensureAuthorized,
+  getAuthorizationFilter,
+} from '../utils';
 
 interface GetParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseService;
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
-  logger: Logger;
 }
 
 /**
  * Retrieves a case and optionally its comments and sub case comments.
  */
-export const get = async ({
-  savedObjectsClient,
-  caseService,
-  id,
-  logger,
-  includeComments = false,
-  includeSubCaseComments = false,
-}: GetParams): Promise<CaseResponse> => {
+export const get = async (
+  { id, includeComments, includeSubCaseComments }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<CaseResponse> => {
+  const { savedObjectsClient, caseService, logger, authorization: auth, auditLogger } = clientArgs;
+
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
       throw Boom.badRequest(
@@ -62,6 +77,14 @@ export const get = async ({
       });
     }
 
+    await ensureAuthorized({
+      operation: Operations.getCase,
+      owners: [theCase.attributes.owner],
+      authorization: auth,
+      auditLogger,
+      savedObjectIDs: [theCase.id],
+    });
+
     if (!includeComments) {
       return CaseResponseRt.encode(
         flattenCaseSavedObject({
@@ -70,6 +93,7 @@ export const get = async ({
         })
       );
     }
+
     const theComments = await caseService.getAllCaseComments({
       soClient: savedObjectsClient,
       id,
@@ -97,15 +121,61 @@ export const get = async ({
 /**
  * Retrieves the tags from all the cases.
  */
-export async function getTags({
-  savedObjectsClient: soClient,
-  caseService,
-  logger,
-}: CasesClientArgs): Promise<string[]> {
+
+export async function getTags(
+  params: AllTagsFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
+
   try {
-    return await caseService.getTags({
-      soClient,
+    const queryParams = pipe(
+      excess(AllTagsFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization: auth,
+      operation: Operations.findCases,
+      auditLogger,
     });
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const cases = await caseService.getTags({
+      soClient,
+      filter,
+    });
+
+    const tags = new Set<string>();
+    const mappedCases: Array<{
+      owner: string;
+      id: string;
+    }> = [];
+
+    // Gather all necessary information in one pass
+    cases.saved_objects.forEach((theCase) => {
+      theCase.attributes.tags.forEach((tag) => tags.add(tag));
+      mappedCases.push({
+        id: theCase.id,
+        owner: theCase.attributes.owner,
+      });
+    });
+
+    ensureSavedObjectsAreAuthorized(mappedCases);
+    logSuccessfulAuthorization();
+
+    return [...tags.values()];
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -114,16 +184,64 @@ export async function getTags({
 /**
  * Retrieves the reporters from all the cases.
  */
-export async function getReporters({
-  savedObjectsClient: soClient,
-  caseService,
-  logger,
-}: CasesClientArgs): Promise<User[]> {
+export async function getReporters(
+  params: AllReportersFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<User[]> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
+
   try {
-    const reporters = await caseService.getReporters({
-      soClient,
+    const queryParams = pipe(
+      excess(AllReportersFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization: auth,
+      operation: Operations.getReporters,
+      auditLogger,
     });
-    return UsersRt.encode(reporters);
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const cases = await caseService.getReporters({
+      soClient,
+      filter,
+    });
+
+    const reporters = new Map<string, User>();
+    const mappedCases: Array<{
+      owner: string;
+      id: string;
+    }> = [];
+
+    // Gather all necessary information in one pass
+    cases.saved_objects.forEach((theCase) => {
+      const user = theCase.attributes.created_by;
+      if (user.username != null) {
+        reporters.set(user.username, user);
+      }
+
+      mappedCases.push({
+        id: theCase.id,
+        owner: theCase.attributes.owner,
+      });
+    });
+
+    ensureSavedObjectsAreAuthorized(mappedCases);
+    logSuccessfulAuthorization();
+
+    return UsersRt.encode([...reporters.values()]);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }

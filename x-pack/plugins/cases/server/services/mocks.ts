@@ -71,7 +71,11 @@ export const createConfigureServiceMock = (): CaseConfigureServiceMock => {
 };
 
 export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => {
-  const service: PublicMethodsOf<ConnectorMappingsService> = { find: jest.fn(), post: jest.fn() };
+  const service: PublicMethodsOf<ConnectorMappingsService> = {
+    find: jest.fn(),
+    post: jest.fn(),
+    update: jest.fn(),
+  };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return (service as unknown) as ConnectorMappingsServiceMock;

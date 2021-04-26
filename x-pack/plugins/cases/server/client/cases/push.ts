@@ -8,13 +8,11 @@
 import Boom from '@hapi/boom';
 import {
   SavedObjectsBulkUpdateResponse,
-  SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-  Logger,
   SavedObjectsFindResponse,
   SavedObject,
 } from 'kibana/server';
-import { ActionResult, ActionsClient } from '../../../../actions/server';
+import { ActionResult } from '../../../../actions/server';
 
 import {
   ActionConnector,
@@ -25,22 +23,15 @@ import {
   ESCaseAttributes,
   CommentAttributes,
   CaseUserActionsResponse,
-  User,
   ESCasesConfigureAttributes,
   CaseType,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import {
-  CaseConfigureService,
-  CaseService,
-  CaseUserActionService,
-  AttachmentService,
-} from '../../services';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { CasesClient, CasesClientInternal } from '..';
+import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -59,34 +50,27 @@ function shouldCloseByPush(
 }
 
 interface PushParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseService;
-  caseConfigureService: CaseConfigureService;
-  userActionService: CaseUserActionService;
-  attachmentService: AttachmentService;
-  user: User;
   caseId: string;
   connectorId: string;
-  casesClient: CasesClient;
-  casesClientInternal: CasesClientInternal;
-  actionsClient: ActionsClient;
-  logger: Logger;
 }
 
-export const push = async ({
-  savedObjectsClient,
-  attachmentService,
-  caseService,
-  caseConfigureService,
-  userActionService,
-  casesClient,
-  casesClientInternal,
-  actionsClient,
-  connectorId,
-  caseId,
-  user,
-  logger,
-}: PushParams): Promise<CaseResponse> => {
+export const push = async (
+  { connectorId, caseId }: PushParams,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient,
+  casesClientInternal: CasesClientInternal
+): Promise<CaseResponse> => {
+  const {
+    savedObjectsClient,
+    attachmentService,
+    caseService,
+    caseConfigureService,
+    userActionService,
+    actionsClient,
+    user,
+    logger,
+  } = clientArgs;
+
   /* Start of push to external service */
   let theCase: CaseResponse;
   let connector: ActionResult;
@@ -136,6 +120,10 @@ export const push = async ({
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
     });
+
+    if (connectorMappings.length === 0) {
+      throw new Error('Connector mapping has not been created');
+    }
   } catch (e) {
     const message = `Error getting mapping for connector with id ${connector.id}: ${e.message}`;
     throw createCaseError({ message, error: e, logger });
@@ -147,7 +135,7 @@ export const push = async ({
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings: connectorMappings,
+      mappings: connectorMappings[0].attributes.mappings,
       alerts,
     });
   } catch (e) {

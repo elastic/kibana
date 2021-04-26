@@ -7,21 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { RouteDeps } from '../types';
+import { wrapError } from '../utils';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
-  router.get(
+export function initDeleteCommentApi({ router, logger }: RouteDeps) {
+  router.delete(
     {
-      path: CASE_COMMENTS_URL,
+      path: CASE_COMMENT_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
+          comment_id: schema.string(),
         }),
         query: schema.maybe(
           schema.object({
-            includeSubCaseComments: schema.maybe(schema.boolean()),
             subCaseId: schema.maybe(schema.string()),
           })
         ),
@@ -30,17 +30,16 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
     async (context, request, response) => {
       try {
         const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          body: await client.attachments.getAll({
-            caseID: request.params.case_id,
-            includeSubCaseComments: request.query?.includeSubCaseComments,
-            subCaseID: request.query?.subCaseId,
-          }),
+        await client.attachments.delete({
+          attachmentID: request.params.comment_id,
+          subCaseID: request.query?.subCaseId,
+          caseID: request.params.case_id,
         });
+
+        return response.noContent();
       } catch (error) {
         logger.error(
-          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseId}: ${error}`
+          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }

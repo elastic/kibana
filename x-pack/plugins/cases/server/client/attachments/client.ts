@@ -26,7 +26,7 @@ interface AttachmentsAdd {
 }
 
 export interface AttachmentsSubClient {
-  add(args: AttachmentsAdd): Promise<CaseResponse>;
+  add(params: AttachmentsAdd): Promise<CaseResponse>;
   deleteAll(deleteAllArgs: DeleteAllArgs): Promise<void>;
   delete(deleteArgs: DeleteArgs): Promise<void>;
   find(findArgs: FindArgs): Promise<CommentsResponse>;
@@ -36,23 +36,17 @@ export interface AttachmentsSubClient {
 }
 
 export const createAttachmentsSubClient = (
-  args: CasesClientArgs,
+  clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: ({ caseId, comment }: AttachmentsAdd) =>
-      addComment({
-        ...args,
-        casesClientInternal,
-        caseId,
-        comment,
-      }),
-    deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, args),
-    delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, args),
-    find: (findArgs: FindArgs) => find(findArgs, args),
-    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, args),
-    get: (getArgs: GetArgs) => get(getArgs, args),
-    update: (updateArgs: UpdateArgs) => update(updateArgs, args),
+    add: (params: AttachmentsAdd) => addComment(params, clientArgs, casesClientInternal),
+    deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
+    delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
+    find: (findArgs: FindArgs) => find(findArgs, clientArgs),
+    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
+    get: (getArgs: GetArgs) => get(getArgs, clientArgs),
+    update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

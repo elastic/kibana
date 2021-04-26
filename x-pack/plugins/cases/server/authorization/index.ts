@@ -6,7 +6,7 @@
  */
 
 import { EventType } from '../../../security/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -66,6 +66,22 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [WriteOperations.CreateConfiguration]: {
+    type: EventType.CREATION,
+    name: WriteOperations.CreateConfiguration,
+    action: 'create-configuration',
+    verbs: createVerbs,
+    docType: 'case configuration',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateConfiguration]: {
+    type: EventType.CHANGE,
+    name: WriteOperations.UpdateConfiguration,
+    action: 'update-configuration',
+    verbs: updateVerbs,
+    docType: 'case configuration',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
   [ReadOperations.GetCase]: {
     type: EventType.ACCESS,
     name: ReadOperations.GetCase,
@@ -81,5 +97,29 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetTags]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetCase,
+    action: 'get-tags',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetReporters]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetReporters,
+    action: 'get-reporters',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindConfigurations]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.FindConfigurations,
+    action: 'find-configurations',
+    verbs: accessVerbs,
+    docType: 'case configurations',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
 };

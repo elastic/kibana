@@ -14,6 +14,8 @@ import {
   CasesFindRequest,
   CasesFindResponse,
   User,
+  AllTagsFindRequest,
+  AllReportersFindRequest,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -41,91 +43,33 @@ interface CasePush {
  * The public API for interacting with cases.
  */
 export interface CasesSubClient {
-  create(theCase: CasePostRequest): Promise<CaseResponse>;
-  find(args: CasesFindRequest): Promise<CasesFindResponse>;
-  get(args: CaseGet): Promise<CaseResponse>;
+  create(data: CasePostRequest): Promise<CaseResponse>;
+  find(params: CasesFindRequest): Promise<CasesFindResponse>;
+  get(params: CaseGet): Promise<CaseResponse>;
   push(args: CasePush): Promise<CaseResponse>;
-  update(args: CasesPatchRequest): Promise<CasesResponse>;
+  update(cases: CasesPatchRequest): Promise<CasesResponse>;
   delete(ids: string[]): Promise<void>;
-  getTags(): Promise<string[]>;
-  getReporters(): Promise<User[]>;
+  getTags(params: AllTagsFindRequest): Promise<string[]>;
+  getReporters(params: AllReportersFindRequest): Promise<User[]>;
 }
 
 /**
  * Creates the interface for CRUD on cases objects.
  */
 export const createCasesSubClient = (
-  args: CasesClientArgs,
+  clientArgs: CasesClientArgs,
   casesClient: CasesClient,
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
-  const {
-    attachmentService,
-    caseConfigureService,
-    caseService,
-    user,
-    savedObjectsClient,
-    userActionService,
-    logger,
-    authorization,
-    auditLogger,
-  } = args;
-
   const casesSubClient: CasesSubClient = {
-    create: (theCase: CasePostRequest) =>
-      create({
-        savedObjectsClient,
-        caseService,
-        caseConfigureService,
-        userActionService,
-        user,
-        theCase,
-        logger,
-        auth: authorization,
-        auditLogger,
-      }),
-    find: (options: CasesFindRequest) =>
-      find({
-        savedObjectsClient,
-        caseService,
-        logger,
-        auth: authorization,
-        options,
-        auditLogger,
-      }),
-    get: (params: CaseGet) =>
-      get({
-        ...params,
-        caseService,
-        savedObjectsClient,
-        logger,
-      }),
-    push: (params: CasePush) =>
-      push({
-        ...params,
-        attachmentService,
-        savedObjectsClient,
-        caseService,
-        userActionService,
-        user,
-        casesClient,
-        casesClientInternal,
-        caseConfigureService,
-        logger,
-      }),
-    update: (cases: CasesPatchRequest) =>
-      update({
-        savedObjectsClient,
-        caseService,
-        userActionService,
-        user,
-        cases,
-        casesClientInternal,
-        logger,
-      }),
-    delete: (ids: string[]) => deleteCases(ids, args),
-    getTags: () => getTags(args),
-    getReporters: () => getReporters(args),
+    create: (data: CasePostRequest) => create(data, clientArgs),
+    find: (params: CasesFindRequest) => find(params, clientArgs),
+    get: (params: CaseGet) => get(params, clientArgs),
+    push: (params: CasePush) => push(params, clientArgs, casesClient, casesClientInternal),
+    update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
+    delete: (ids: string[]) => deleteCases(ids, clientArgs),
+    getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
+    getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

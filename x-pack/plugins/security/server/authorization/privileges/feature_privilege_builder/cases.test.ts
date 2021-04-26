@@ -72,6 +72,9 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:observability/getCase",
             "cases:1.0.0-zeta1:observability/findCases",
+            "cases:1.0.0-zeta1:observability/getTags",
+            "cases:1.0.0-zeta1:observability/getReporters",
+            "cases:1.0.0-zeta1:observability/findConfigurations",
           ]
         `);
       });
@@ -107,9 +110,14 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getTags",
+            "cases:1.0.0-zeta1:security/getReporters",
+            "cases:1.0.0-zeta1:security/findConfigurations",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createConfiguration",
+            "cases:1.0.0-zeta1:security/updateConfiguration",
           ]
         `);
       });
@@ -146,11 +154,19 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getTags",
+            "cases:1.0.0-zeta1:security/getReporters",
+            "cases:1.0.0-zeta1:security/findConfigurations",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createConfiguration",
+            "cases:1.0.0-zeta1:security/updateConfiguration",
             "cases:1.0.0-zeta1:obs/getCase",
             "cases:1.0.0-zeta1:obs/findCases",
+            "cases:1.0.0-zeta1:obs/getTags",
+            "cases:1.0.0-zeta1:obs/getReporters",
+            "cases:1.0.0-zeta1:obs/findConfigurations",
           ]
         `);
       });
@@ -187,18 +203,34 @@ describe(`cases`, () => {
           Array [
             "cases:1.0.0-zeta1:security/getCase",
             "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/getTags",
+            "cases:1.0.0-zeta1:security/getReporters",
+            "cases:1.0.0-zeta1:security/findConfigurations",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:security/createConfiguration",
+            "cases:1.0.0-zeta1:security/updateConfiguration",
             "cases:1.0.0-zeta1:other-security/getCase",
             "cases:1.0.0-zeta1:other-security/findCases",
+            "cases:1.0.0-zeta1:other-security/getTags",
+            "cases:1.0.0-zeta1:other-security/getReporters",
+            "cases:1.0.0-zeta1:other-security/findConfigurations",
             "cases:1.0.0-zeta1:other-security/createCase",
             "cases:1.0.0-zeta1:other-security/deleteCase",
             "cases:1.0.0-zeta1:other-security/updateCase",
+            "cases:1.0.0-zeta1:other-security/createConfiguration",
+            "cases:1.0.0-zeta1:other-security/updateConfiguration",
             "cases:1.0.0-zeta1:obs/getCase",
             "cases:1.0.0-zeta1:obs/findCases",
+            "cases:1.0.0-zeta1:obs/getTags",
+            "cases:1.0.0-zeta1:obs/getReporters",
+            "cases:1.0.0-zeta1:obs/findConfigurations",
             "cases:1.0.0-zeta1:other-obs/getCase",
             "cases:1.0.0-zeta1:other-obs/findCases",
+            "cases:1.0.0-zeta1:other-obs/getTags",
+            "cases:1.0.0-zeta1:other-obs/getReporters",
+            "cases:1.0.0-zeta1:other-obs/findConfigurations",
           ]
         `);
       });

@@ -47,8 +47,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { readReporters } from './read_reporters';
-import { readTags } from './read_tags';
 import { ClientArgs } from '..';
 
 interface PushedArgs {
@@ -171,6 +169,16 @@ interface CasesMapWithPageInfo {
 }
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
+
+interface GetTagsArgs {
+  soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
+interface GetReportersArgs {
+  soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
 
 const transformNewSubCase = ({
   createdAt,
@@ -906,19 +914,54 @@ export class CaseService {
     }
   }
 
-  public async getReporters({ soClient }: ClientArgs) {
+  public async getReporters({
+    soClient,
+    filter,
+  }: GetReportersArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      return await readReporters({ soClient });
+      const firstReporters = await soClient.find({
+        type: CASE_SAVED_OBJECT,
+        fields: ['created_by', 'owner'],
+        page: 1,
+        perPage: 1,
+        filter: cloneDeep(filter),
+      });
+
+      return await soClient.find<ESCaseAttributes>({
+        type: CASE_SAVED_OBJECT,
+        fields: ['created_by', 'owner'],
+        page: 1,
+        perPage: firstReporters.total,
+        filter: cloneDeep(filter),
+      });
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
       throw error;
     }
   }
-  public async getTags({ soClient }: ClientArgs) {
+
+  public async getTags({
+    soClient,
+    filter,
+  }: GetTagsArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      return await readTags({ soClient });
+      const firstTags = await soClient.find({
+        type: CASE_SAVED_OBJECT,
+        fields: ['tags', 'owner'],
+        page: 1,
+        perPage: 1,
+        filter: cloneDeep(filter),
+      });
+
+      return await soClient.find<ESCaseAttributes>({
+        type: CASE_SAVED_OBJECT,
+        fields: ['tags', 'owner'],
+        page: 1,
+        perPage: firstTags.total,
+        filter: cloneDeep(filter),
+      });
     } catch (error) {
       this.log.error(`Error on GET cases: ${error}`);
       throw error;

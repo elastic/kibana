@@ -116,6 +116,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
 ];
 
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
+  id: '123',
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   connector: {
@@ -129,6 +130,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
   mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
+  owner: 'securitySolution',
   version: 'WzHJ12',
 };
 
@@ -139,10 +141,12 @@ export const caseConfigurationMock: CasesConfigureRequest = {
     type: ConnectorTypes.jira,
     fields: null,
   },
+  owner: 'securitySolution',
   closure_type: 'close-by-user',
 };
 
 export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
+  id: '123',
   createdAt: '2020-04-06T13:03:18.657Z',
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   connector: {
@@ -157,4 +161,5 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
+  owner: 'securitySolution',
 };

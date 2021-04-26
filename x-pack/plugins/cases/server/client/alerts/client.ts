@@ -34,24 +34,10 @@ export interface AlertSubClient {
   updateStatus(args: AlertUpdateStatus): Promise<void>;
 }
 
-export const createAlertsSubClient = (args: CasesClientArgs): AlertSubClient => {
-  const { alertsService, scopedClusterClient, logger } = args;
-
+export const createAlertsSubClient = (clientArgs: CasesClientArgs): AlertSubClient => {
   const alertsSubClient: AlertSubClient = {
-    get: (params: AlertGet) =>
-      get({
-        ...params,
-        alertsService,
-        scopedClusterClient,
-        logger,
-      }),
-    updateStatus: (params: AlertUpdateStatus) =>
-      updateStatus({
-        ...params,
-        alertsService,
-        scopedClusterClient,
-        logger,
-      }),
+    get: (params: AlertGet) => get(params, clientArgs),
+    updateStatus: (params: AlertUpdateStatus) => updateStatus(params, clientArgs),
   };
 
   return Object.freeze(alertsSubClient);
