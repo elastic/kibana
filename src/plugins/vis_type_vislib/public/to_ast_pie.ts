@@ -25,11 +25,10 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     },
   };
 
-  const configStr = JSON.stringify(visConfig);
   const visTypePie = buildExpressionFunction<VisTypeVislibPieExpressionFunctionDefinition>(
     vislibPieName,
     {
-      visConfig: configStr,
+      visConfig: JSON.stringify(visConfig),
     }
   );
 
