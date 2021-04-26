@@ -334,7 +334,7 @@ const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl 
               fill
               isLoading={false}
               type="submit"
-              href={deploymentUrl}
+              href={`${deploymentUrl}/edit`}
               target="_blank"
             >
               <FormattedMessage
