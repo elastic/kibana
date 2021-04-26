@@ -10,11 +10,11 @@ and can also serve as a foundation for building visualizations.
 image::discover/images/saved-search.png[Example of Discover's save search option]
 
 
-A saved search stores the query text, filters, time range, and
+A saved search stores the query text, filters, and
 current view of *Discover*&mdash;the columns selected in the document table,
 the sort order, and the index pattern.
 Saved searches are different from a <<save-load-delete-query,saved queries>>, which store
-just the query and are available in any app with a query bar.
+only the query, filters, and time filter, and are available in any app with a query bar.
 
 
 [role="xpack"]
