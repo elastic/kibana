@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbstractSource, Attribution, ISource } from '../source';
+import { AbstractSource, ISource } from '../source';
 
 export interface ITMSSource extends ISource {
   getUrlTemplate(): Promise<string>;
