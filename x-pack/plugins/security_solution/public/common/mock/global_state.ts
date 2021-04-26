@@ -34,7 +34,6 @@ import { mockIndexPattern } from './index_pattern';
 
 export const mockGlobalState: State = {
   app: {
-    },
     notesById: {},
     errors: [
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
