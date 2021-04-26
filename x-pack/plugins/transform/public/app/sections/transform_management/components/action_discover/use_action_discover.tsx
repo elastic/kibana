@@ -68,27 +68,31 @@ export const useDiscoverAction = (forceDisable: boolean) => {
     [appDeps.application, getIndexPatternIdByTitle, getUrlGenerator]
   );
 
+  const indexPatternExists = useCallback(
+    (item: TransformListRow) => {
+      const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
+      const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+      return indexPatternId !== undefined;
+    },
+    [getIndexPatternIdByTitle]
+  );
+
   const action: TransformListAction = useMemo(
     () => ({
-      name: (item: TransformListRow) => <DiscoverActionName items={[item]} />,
-      available: () => isDiscoverAvailable,
-      enabled: (item: TransformListRow) => {
-        const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
-        const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
-
-        const indexPatternExists = indexPatternId !== undefined;
-
-        return (
-          indexPatternsLoaded && !isDiscoverActionDisabled([item], forceDisable, indexPatternExists)
-        );
+      name: (item: TransformListRow) => {
+        return <DiscoverActionName items={[item]} indexPatternExists={indexPatternExists(item)} />;
       },
+      available: () => isDiscoverAvailable,
+      enabled: (item: TransformListRow) =>
+        indexPatternsLoaded &&
+        !isDiscoverActionDisabled([item], forceDisable, indexPatternExists(item)),
       description: discoverActionNameText,
       icon: 'visTable',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',
     }),
-    [forceDisable, indexPatternsLoaded, isDiscoverAvailable, clickHandler, getIndexPatternIdByTitle]
+    [forceDisable, indexPatternExists, indexPatternsLoaded, isDiscoverAvailable, clickHandler]
   );
 
   return { action };

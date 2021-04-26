@@ -42,9 +42,10 @@ export const isDiscoverActionDisabled = (
 };
 
 export interface DiscoverActionNameProps {
+  indexPatternExists: boolean;
   items: TransformListRow[];
 }
-export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items }) => {
+export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ indexPatternExists, items }) => {
   const isBulkAction = items.length > 1;
 
   const item = items[0];
@@ -64,7 +65,14 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items }) => {
         defaultMessage: 'Links to Discover are not supported as a bulk action.',
       }
     );
-  } else {
+  } else if (!indexPatternExists) {
+    disabledTransformMessage = i18n.translate(
+      'xpack.transform.transformList.discoverTransformNoIndexPatternToolTip',
+      {
+        defaultMessage: `A Kibana index pattern is required for the destination index to be viewable in Discover`,
+      }
+    );
+  } else if (transformNeverStarted) {
     disabledTransformMessage = i18n.translate(
       'xpack.transform.transformList.discoverTransformToolTip',
       {
@@ -73,7 +81,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ items }) => {
     );
   }
 
-  if (transformNeverStarted) {
+  if (typeof disabledTransformMessage !== 'undefined') {
     return (
       <EuiToolTip position="top" content={disabledTransformMessage}>
         <span data-test-subj="transformDiscoverActionNameText disabled">
