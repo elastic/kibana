@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
@@ -176,10 +177,12 @@ class AgentPolicyService {
           },
         };
       } catch (e) {
-        return {
-          created: true,
-          policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
-        };
+        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          return {
+            created: true,
+            policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+          };
+        } else throw e;
       }
     }
 
