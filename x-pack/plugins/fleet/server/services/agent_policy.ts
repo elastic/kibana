@@ -13,7 +13,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
