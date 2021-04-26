@@ -89,6 +89,7 @@ function createRoot() {
 }
 
 // skip as we allow id rewriting logic starting from v8.0
+// CI FAILURE: https://github.com/elastic/kibana/issues/98351
 describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
