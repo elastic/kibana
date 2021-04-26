@@ -50,14 +50,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows adding custom label to existing fields', async function () {
       const uuid = uuidv4();
       const customLabel = `megabytes${uuid}`;
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
       expect((await PageObjects.discover.getAllFieldNames()).includes(customLabel)).to.be(true);
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
 
     it('allows creation of a new field', async function () {
