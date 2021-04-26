@@ -12,6 +12,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   map,
+  pluck,
   shareReplay,
   skipWhile,
   startWith,
@@ -43,7 +44,7 @@ import { getJobsObservable } from '../common/get_jobs_observable';
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 export function useSwimlaneInputResolver(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
+  embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
@@ -69,14 +70,21 @@ export function useSwimlaneInputResolver(
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
   const selectedJobs$ = useMemo(() => {
-    return getJobsObservable(embeddableInput, anomalyDetectorService, setError).pipe(
+    return getJobsObservable(embeddableInput$, anomalyDetectorService, setError).pipe(
       shareReplay(1)
     );
   }, []);
 
   const bucketInterval$ = useMemo(() => {
-    return combineLatest([selectedJobs$, chartWidth$]).pipe(
+    return combineLatest([
+      selectedJobs$,
+      chartWidth$,
+      embeddableInput$.pipe(pluck('timeRange')),
+    ]).pipe(
       skipWhile(([jobs, width]) => !Array.isArray(jobs) || !width),
+      tap(([, , timeRange]) => {
+        anomalyTimelineService.setTimeRange(timeRange);
+      }),
       map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width)),
       distinctUntilChanged((prev, curr) => {
         return prev.asSeconds() === curr.asSeconds();
@@ -99,7 +107,7 @@ export function useSwimlaneInputResolver(
   useEffect(() => {
     const subscription = combineLatest([
       selectedJobs$,
-      embeddableInput,
+      embeddableInput$,
       bucketInterval$,
       fromPage$,
       perPage$.pipe(
@@ -124,13 +132,10 @@ export function useSwimlaneInputResolver(
             viewBy,
             swimlaneType: swimlaneTypeInput,
             perPage: perPageInput,
-            timeRange,
             filters,
             query,
             viewMode,
           } = input;
-
-          anomalyTimelineService.setTimeRange(timeRange);
 
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);
