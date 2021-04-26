@@ -12,7 +12,6 @@ import {
   ConditionEntryField,
   NewTrustedApp,
   OperatingSystem,
-  OperatorEntryField,
   TrustedApp,
   UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
@@ -80,13 +79,7 @@ describe('mapping', () => {
           description: 'Linux Trusted App',
           effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
-          entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              '/bin/malware'
-            ),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware')],
         },
         createExceptionListItemOptions({
           name: 'linux trusted app',
@@ -95,7 +88,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               '/bin/malware'
             ),
           ],
@@ -110,13 +103,7 @@ describe('mapping', () => {
           description: 'MacOS Trusted App',
           effectScope: { type: 'global' },
           os: OperatingSystem.MAC,
-          entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              '/bin/malware'
-            ),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware')],
         },
         createExceptionListItemOptions({
           name: 'macos trusted app',
@@ -125,7 +112,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               '/bin/malware'
             ),
           ],
@@ -141,11 +128,7 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
           entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              'C:\\Program Files\\Malware'
-            ),
+            createConditionEntry(ConditionEntryField.PATH, 'match', 'C:\\Program Files\\Malware'),
           ],
         },
         createExceptionListItemOptions({
@@ -155,7 +138,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               'C:\\Program Files\\Malware'
             ),
           ],
@@ -170,13 +153,7 @@ describe('mapping', () => {
           description: 'Signed Trusted App',
           effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
-          entries: [
-            createConditionEntry(
-              ConditionEntryField.SIGNER,
-              OperatorEntryField.included,
-              'Microsoft Windows'
-            ),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.SIGNER, 'match', 'Microsoft Windows')],
         },
         createExceptionListItemOptions({
           name: 'Signed trusted app',
@@ -184,8 +161,8 @@ describe('mapping', () => {
           osTypes: ['windows'],
           entries: [
             createEntryNested('process.Ext.code_signature', [
-              createEntryMatch('trusted', OperatorEntryField.included, 'true'),
-              createEntryMatch('subject_name', OperatorEntryField.included, 'Microsoft Windows'),
+              createEntryMatch('trusted', 'true'),
+              createEntryMatch('subject_name', 'Microsoft Windows'),
             ]),
           ],
         })
@@ -202,7 +179,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               '1234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -214,7 +191,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.md5',
-              OperatorEntryField.included,
+
               '1234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -232,7 +209,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               'f635da961234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -244,7 +221,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.sha1',
-              OperatorEntryField.included,
+
               'f635da961234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -262,7 +239,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               'f635da96124659af249ddf3e40864e9fb234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -274,7 +251,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.sha256',
-              OperatorEntryField.included,
+
               'f635da96124659af249ddf3e40864e9fb234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -292,7 +269,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               '1234234659Af249ddf3e40864E9FB241'
             ),
           ],
@@ -304,7 +281,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.md5',
-              OperatorEntryField.included,
+
               '1234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -330,7 +307,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               '/bin/malware'
             ),
           ],
@@ -346,13 +323,7 @@ describe('mapping', () => {
           updated_at: '11/11/2011T11:11:11.111',
           updated_by: 'admin',
           os: OperatingSystem.LINUX,
-          entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              '/bin/malware'
-            ),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware')],
         }
       );
     });
@@ -369,7 +340,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               '/bin/malware'
             ),
           ],
@@ -385,13 +356,7 @@ describe('mapping', () => {
           updated_at: '11/11/2011T11:11:11.111',
           updated_by: 'admin',
           os: OperatingSystem.MAC,
-          entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              '/bin/malware'
-            ),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware')],
         }
       );
     });
@@ -408,7 +373,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.executable.caseless',
-              OperatorEntryField.included,
+
               'C:\\Program Files\\Malware'
             ),
           ],
@@ -425,11 +390,7 @@ describe('mapping', () => {
           updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [
-            createConditionEntry(
-              ConditionEntryField.PATH,
-              OperatorEntryField.included,
-              'C:\\Program Files\\Malware'
-            ),
+            createConditionEntry(ConditionEntryField.PATH, 'match', 'C:\\Program Files\\Malware'),
           ],
         }
       );
@@ -446,8 +407,8 @@ describe('mapping', () => {
           os_types: ['windows'],
           entries: [
             createEntryNested('process.Ext.code_signature', [
-              createEntryMatch('trusted', OperatorEntryField.included, 'true'),
-              createEntryMatch('subject_name', OperatorEntryField.included, 'Microsoft Windows'),
+              createEntryMatch('trusted', 'true'),
+              createEntryMatch('subject_name', 'Microsoft Windows'),
             ]),
           ],
         }),
@@ -463,11 +424,7 @@ describe('mapping', () => {
           updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [
-            createConditionEntry(
-              ConditionEntryField.SIGNER,
-              OperatorEntryField.included,
-              'Microsoft Windows'
-            ),
+            createConditionEntry(ConditionEntryField.SIGNER, 'nested', 'Microsoft Windows'),
           ],
         }
       );
@@ -485,7 +442,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.md5',
-              OperatorEntryField.included,
+
               '1234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -504,7 +461,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               '1234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -524,7 +481,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.sha1',
-              OperatorEntryField.included,
+
               'f635da961234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -543,7 +500,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               'f635da961234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -563,7 +520,7 @@ describe('mapping', () => {
           entries: [
             createEntryMatch(
               'process.hash.sha256',
-              OperatorEntryField.included,
+
               'f635da96124659af249ddf3e40864e9fb234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -582,7 +539,7 @@ describe('mapping', () => {
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
-              OperatorEntryField.included,
+              'match',
               'f635da96124659af249ddf3e40864e9fb234234659af249ddf3e40864e9fb241'
             ),
           ],
@@ -598,13 +555,7 @@ describe('mapping', () => {
         description: 'Linux Trusted App',
         effectScope: { type: 'global' },
         os: OperatingSystem.LINUX,
-        entries: [
-          createConditionEntry(
-            ConditionEntryField.PATH,
-            OperatorEntryField.included,
-            '/bin/malware'
-          ),
-        ],
+        entries: [createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware')],
         version: 'abc',
       };
 
