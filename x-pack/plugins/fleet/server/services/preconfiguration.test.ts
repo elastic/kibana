@@ -7,6 +7,8 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
@@ -60,7 +62,7 @@ function getPutPreconfiguredPackagesMock() {
   });
   soClient.get.mockImplementation(async (type, id) => {
     const attributes = mockConfiguredPolicies.get(id);
-    if (!attributes) throw new Error();
+    if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     return {
       id: `mocked-${id}`,
       attributes,
