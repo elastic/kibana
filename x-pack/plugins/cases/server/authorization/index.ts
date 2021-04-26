@@ -79,7 +79,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     name: WriteOperations.UpdateConfiguration,
     action: 'update-configuration',
     verbs: updateVerbs,
-    docType: 'case-configuration',
+    docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [ReadOperations.GetCase]: {

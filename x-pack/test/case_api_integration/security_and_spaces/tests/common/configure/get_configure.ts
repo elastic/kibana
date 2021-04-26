@@ -59,7 +59,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    // TODO: Decide what to do with no configuration (no owner)
     it('should return an empty find body correctly if no configuration is loaded', async () => {
       const configuration = await getConfiguration({ supertest });
       expect(configuration).to.eql([]);
@@ -200,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
-        } - should NOT read a case`, async () => {
+        } - should NOT read a case configuration`, async () => {
           // super user creates a configuration at the appropriate space
           await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, {
             user: superUser,

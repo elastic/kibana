@@ -17,7 +17,6 @@ const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-b
 const CasesConfigureBasicRt = rt.type({
   connector: CaseConnectorRt,
   closure_type: ClosureTypeRT,
-  // TODO: should a user be able to update the owner?
   owner: rt.string,
 });
 

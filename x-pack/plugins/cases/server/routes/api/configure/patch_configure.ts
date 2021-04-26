@@ -14,6 +14,7 @@ import {
   CaseConfigureRequestParamsRt,
   throwErrors,
   CasesConfigurePatch,
+  excess,
 } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { wrapError, escapeHatch } from '../utils';
@@ -31,7 +32,7 @@ export function initPatchCaseConfigure({ router, logger }: RouteDeps) {
     async (context, request, response) => {
       try {
         const params = pipe(
-          CaseConfigureRequestParamsRt.decode(request.params),
+          excess(CaseConfigureRequestParamsRt).decode(request.params),
           fold(throwErrors(Boom.badRequest), identity)
         );
 

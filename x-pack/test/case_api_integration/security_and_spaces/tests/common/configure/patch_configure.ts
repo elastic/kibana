@@ -239,6 +239,17 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('should not allow excess attributes', async () => {
+      const configuration = await createConfiguration(supertest);
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        // @ts-expect-error
+        { notExist: 'not-exist', version: configuration.version },
+        400
+      );
+    });
+
     describe('rbac', () => {
       it('User: security solution only - should update a configuration', async () => {
         const configuration = await createConfiguration(

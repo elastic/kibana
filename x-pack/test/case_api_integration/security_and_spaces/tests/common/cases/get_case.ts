@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should not get a case', async () => {
+      it('should not get a case when the user does not have access to owner', async () => {
         const newCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
