@@ -127,10 +127,8 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async selectCreateFileBeatConfig() {
-      await testSubjects.existOrFail('fileDataVisFilebeatConfigLink');
-      const panel = await testSubjects.find('fileDataVisFilebeatConfigLink');
-      const button = await panel.findByCssSelector('.euiCard__titleButton');
-      await button.click();
+      await testSubjects.scrollIntoView('fileDataVisFilebeatConfigLink');
+      await testSubjects.click('fileDataVisFilebeatConfigLink');
       await testSubjects.existOrFail('fileDataVisFilebeatConfigPanel');
     },
   };
