@@ -15463,7 +15463,6 @@
     "xpack.monitoring.cluster.overview.apmPanel.lastEventDescription": "{timeOfLastEvent}前",
     "xpack.monitoring.cluster.overview.apmPanel.lastEventLabel": "最后事件",
     "xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel": "内存利用率",
-    "xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel": "APM 服务器概览",
     "xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel": "APM 服务器概览",
     "xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel": "已处理事件",
     "xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel": "APM 服务器：{apmsTotal}",
