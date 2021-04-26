@@ -92,9 +92,11 @@ const createActions = (testBed: TestBed<TestSubject>) => {
           jsonContent: JSON.stringify(options),
         });
       });
+      component.update();
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
       });
+      component.update();
     },
 
     removeProcessor(processorSelector: string) {
