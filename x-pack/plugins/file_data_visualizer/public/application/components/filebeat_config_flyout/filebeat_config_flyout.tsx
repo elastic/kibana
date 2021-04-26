@@ -104,7 +104,7 @@ const Contents: FC<{
   username: string | null;
 }> = ({ value, index, username }) => {
   return (
-    <EuiFlexItem>
+    <EuiFlexItem data-test-subj="fileDataVisFilebeatConfigPanel">
       <EuiTitle size="s">
         <h5>
           <FormattedMessage
