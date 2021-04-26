@@ -62,7 +62,9 @@ yarn kbn watch-bazel
 === List of Already Migrated Packages to Bazel
 
 - @elastic/datemath
+- @elastic/safer-lodash-set
 - @kbn/apm-utils
+- @kbn/babel-code-parser
 - @kbn/babel-preset
 - @kbn/config-schema
 - @kbn/std
