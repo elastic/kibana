@@ -86,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
