@@ -8,15 +8,16 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { UserActionPropertyActions } from './user_action_property_actions';
-
+const onEdit = jest.fn();
+const onQuote = jest.fn();
 const props = {
   id: 'property-actions-id',
   editLabel: 'edit',
   quoteLabel: 'quote',
   disabled: false,
   isLoading: false,
-  onEdit: jest.fn(),
-  onQuote: jest.fn(),
+  onEdit,
+  onQuote,
 };
 
 describe('UserActionPropertyActions ', () => {
@@ -24,6 +25,10 @@ describe('UserActionPropertyActions ', () => {
 
   beforeAll(() => {
     wrapper = mount(<UserActionPropertyActions {...props} />);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('it renders', async () => {
@@ -38,6 +43,18 @@ describe('UserActionPropertyActions ', () => {
     wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('[data-test-subj="property-actions-pencil"]').exists();
     wrapper.find('[data-test-subj="property-actions-quote"]').exists();
+  });
+
+  it('quote click calls onQuote', async () => {
+    wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper.find('[data-test-subj="property-actions-quote"]').first().simulate('click');
+    expect(onQuote).toHaveBeenCalledWith(props.id);
+  });
+
+  it('pencil click calls onEdit', async () => {
+    wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper.find('[data-test-subj="property-actions-pencil"]').first().simulate('click');
+    expect(onEdit).toHaveBeenCalledWith(props.id);
   });
 
   it('it shows the spinner when loading', async () => {

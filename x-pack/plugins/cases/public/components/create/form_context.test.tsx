@@ -105,8 +105,7 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
 
-  beforeEach(() => {
-    jest.resetAllMocks();
+  beforeAll(() => {
     postCase.mockResolvedValue({
       id: sampleId,
       ...sampleData,
@@ -125,6 +124,9 @@ describe('Create case', () => {
       tags: sampleTags,
       fetchTags,
     }));
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('Step 1 - Case Fields', () => {

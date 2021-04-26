@@ -48,7 +48,7 @@ const sampleData: CommentRequest = {
 
 describe('AddComment ', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     usePostCommentMock.mockImplementation(() => defaultPostComment);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
@@ -62,20 +62,15 @@ describe('AddComment ', () => {
       </TestProviders>
     );
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="add-comment"] textarea`)
-        .first()
-        .simulate('change', { target: { value: sampleData.comment } });
-    });
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: sampleData.comment } });
 
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    await act(async () => {
-      wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
-    });
-
+    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
       expect(postComment).toBeCalledWith({
@@ -130,12 +125,10 @@ describe('AddComment ', () => {
       </TestProviders>
     );
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="add-comment"] textarea`)
-        .first()
-        .simulate('change', { target: { value: sampleData.comment } });
-    });
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: sampleData.comment } });
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
