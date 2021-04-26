@@ -18,8 +18,8 @@ export { OS_TITLES } from '../../../common/translations';
 
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
-    'Add a trusted application to improve performance or alleviate conflicts with other applications ' +
-    'running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
+    'your hosts. Trusted applications are applied to hosts running the Endpoint Security integration on their agents.',
 });
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
