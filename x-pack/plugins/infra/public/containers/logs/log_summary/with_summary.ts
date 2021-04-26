@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-
 import { RendererFunction } from '../../../utils/typed_react';
-import { LogSummaryBuckets, useLogSummary } from './log_summary';
 import { LogFilterState } from '../log_filter';
 import { LogPositionState } from '../log_position';
 import { useLogSourceContext } from '../log_source';
+import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 

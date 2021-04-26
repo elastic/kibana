@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import { useSubscription } from '../../../utils/use_observable';
 import { LogSourceConfigurationProperties } from '../log_source';
@@ -254,15 +254,6 @@ export function useLogStream({
     isLoadingMore,
     isReloading,
   };
-}
-
-function getEsQueryFromQueryObject(query: Query) {
-  switch (query.language) {
-    case 'kuery':
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
-    case 'lucene':
-      return esQuery.luceneStringToDsl(query.query as string);
-  }
 }
 
 export const [LogStreamProvider, useLogStreamContext] = createContainer(useLogStream);
