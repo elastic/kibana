@@ -69,7 +69,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
     },
     last_level: {
       types: ['boolean'],
-      help: i18n.translate('visualizations.function.pieLabels.values.help', {
+      help: i18n.translate('visualizations.function.pieLabels.lastLevel.help', {
         defaultMessage: 'Show top level labels only',
       }),
       default: true,
