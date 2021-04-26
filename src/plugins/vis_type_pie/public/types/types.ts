@@ -9,6 +9,10 @@
 import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { DatatableColumn, SerializedFieldFormat } from '../../../expressions/public';
+import {
+  ExpressionValueVisDimension,
+  ExpressionValuePieLabels,
+} from '../../../visualizations/public';
 import { PaletteOutput, ChartsPluginSetup } from '../../../charts/public';
 
 export interface Dimension {
@@ -26,24 +30,37 @@ export interface Dimensions {
   splitColumn?: Dimension[];
 }
 
-export interface PieVisParams {
-  type: 'pie';
+interface PieCommonParams {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Position;
   nestedLegend: boolean;
   distinctColors: boolean;
-  dimensions: Dimensions;
   isDonut: boolean;
+}
+
+export interface LabelsParams {
+  show: boolean;
+  last_level: boolean;
+  position: LabelPositions;
+  values: boolean;
+  truncate: number | null;
+  valuesFormat: ValueFormats;
+}
+
+export interface PieVisParams extends PieCommonParams {
+  dimensions: Dimensions;
+  labels: LabelsParams;
   palette: PaletteOutput;
-  labels: {
-    show: boolean;
-    last_level: boolean;
-    position: LabelPositions;
-    values: boolean;
-    truncate: number | null;
-    valuesFormat: ValueFormats;
-  };
+}
+
+export interface PieVisConfig extends PieCommonParams {
+  buckets?: ExpressionValueVisDimension[];
+  metric: ExpressionValueVisDimension;
+  splitColumn?: ExpressionValueVisDimension[];
+  splitRow?: ExpressionValueVisDimension[];
+  labels: ExpressionValuePieLabels;
+  palette: string;
 }
 
 export interface BucketColumns extends DatatableColumn {

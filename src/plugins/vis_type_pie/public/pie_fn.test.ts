@@ -17,7 +17,6 @@ describe('interpreter/functions#pie', () => {
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
-    type: 'pie',
     addTooltip: true,
     addLegend: true,
     legendPosition: 'right',
@@ -28,20 +27,17 @@ describe('interpreter/functions#pie', () => {
     labels: {
       show: false,
       values: true,
-      last_level: true,
       position: 'default',
       valuesFormat: 'percent',
       truncate: 100,
     },
-    dimensions: {
-      metric: {
-        accessor: 0,
-        format: {
-          id: 'number',
-        },
-        params: {},
-        aggType: 'count',
+    metric: {
+      accessor: 0,
+      format: {
+        id: 'number',
       },
+      params: {},
+      aggType: 'count',
     },
   };
 
@@ -50,7 +46,7 @@ describe('interpreter/functions#pie', () => {
   });
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = await fn(context, visConfig);
     expect(actual).toMatchSnapshot();
   });
 });

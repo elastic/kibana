@@ -82,9 +82,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="distinctColors"
               value={stateParams.distinctColors}
-              setValue={(paramName, value) => {
-                setValue(paramName, value);
-              }}
+              setValue={setValue}
               data-test-subj="visTypePiedistinctColorsSwitch"
             />
             <SwitchOption

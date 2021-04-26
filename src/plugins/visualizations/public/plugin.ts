@@ -46,6 +46,7 @@ import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
+import { pieLabels as pieLabelsExpressionFunction } from './expression_functions/pie_labels';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import {
   Setup as InspectorSetup,
@@ -133,6 +134,7 @@ export class VisualizationsPlugin
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
+    expressions.registerFunction(pieLabelsExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 

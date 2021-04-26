@@ -12,7 +12,9 @@ Object {
     "visConfig": Object {
       "addLegend": true,
       "addTooltip": true,
+      "buckets": undefined,
       "dimensions": Object {
+        "buckets": undefined,
         "metric": Object {
           "accessor": 0,
           "aggType": "count",
@@ -21,11 +23,12 @@ Object {
           },
           "params": Object {},
         },
+        "splitColumn": undefined,
+        "splitRow": undefined,
       },
       "distinctColors": false,
       "isDonut": true,
       "labels": Object {
-        "last_level": true,
         "position": "default",
         "show": false,
         "truncate": 100,
@@ -33,9 +36,21 @@ Object {
         "valuesFormat": "percent",
       },
       "legendPosition": "right",
+      "metric": Object {
+        "accessor": 0,
+        "aggType": "count",
+        "format": Object {
+          "id": "number",
+        },
+        "params": Object {},
+      },
       "nestedLegend": true,
-      "palette": "kibana_palette",
-      "type": "pie",
+      "palette": Object {
+        "name": "kibana_palette",
+        "type": "palette",
+      },
+      "splitColumn": undefined,
+      "splitRow": undefined,
     },
     "visData": Object {
       "columns": Array [

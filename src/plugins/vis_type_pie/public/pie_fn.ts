@@ -8,13 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { PieVisParams } from './types';
+import { PieVisParams, PieVisConfig } from './types';
 
 export const vislibPieName = 'pie_vis';
-
-interface Arguments {
-  visConfig: string;
-}
 
 export interface RenderValue {
   visData: Datatable;
@@ -26,7 +22,7 @@ export interface RenderValue {
 export type VisTypePieExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof vislibPieName,
   Datatable,
-  Arguments,
+  PieVisConfig,
   Render<RenderValue>
 >;
 
@@ -38,14 +34,103 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
     defaultMessage: 'Pie visualization',
   }),
   args: {
-    visConfig: {
+    metric: {
+      types: ['vis_dimension'],
+      help: i18n.translate('visTypePie.function.args.metricHelpText', {
+        defaultMessage: 'Metric dimensions config',
+      }),
+      required: true,
+    },
+    buckets: {
+      types: ['vis_dimension'],
+      help: i18n.translate('visTypePie.function.args.bucketsHelpText', {
+        defaultMessage: 'Buckets dimensions config',
+      }),
+      multi: true,
+    },
+    splitColumn: {
+      types: ['vis_dimension'],
+      help: i18n.translate('visTypePie.function.args.splitColumnHelpText', {
+        defaultMessage: 'Split by column dimension config',
+      }),
+      multi: true,
+    },
+    splitRow: {
+      types: ['vis_dimension'],
+      help: i18n.translate('visTypePie.function.args.splitRowHelpText', {
+        defaultMessage: 'Split by row dimension config',
+      }),
+      multi: true,
+    },
+    addTooltip: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.addTooltipHelpText', {
+        defaultMessage: 'Show tooltip on slice hover',
+      }),
+      default: true,
+    },
+    addLegend: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.addLegendHelpText', {
+        defaultMessage: 'Show legend chart legend',
+      }),
+    },
+    legendPosition: {
       types: ['string'],
-      default: '"{}"',
-      help: 'vislib pie vis config',
+      help: i18n.translate('visTypePie.function.args.legendPositionHelpText', {
+        defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
+      }),
+    },
+    nestedLegend: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.nestedLegendHelpText', {
+        defaultMessage: 'Show a more detailed legend',
+      }),
+      default: false,
+    },
+    distinctColors: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.distinctColorsHelpText', {
+        defaultMessage:
+          'Maps different color per slice. Slices with the same value have the same color',
+      }),
+      default: false,
+    },
+    isDonut: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.isDonutHelpText', {
+        defaultMessage: 'Displays the pie chart as donut',
+      }),
+      default: false,
+    },
+    palette: {
+      types: ['string'],
+      help: i18n.translate('visTypePie.function.args.paletteHelpText', {
+        defaultMessage: 'Defines the chart palette name',
+      }),
+      default: 'default',
+    },
+    labels: {
+      types: ['pie_labels'],
+      help: i18n.translate('visTypePie.function.args.labelsHelpText', {
+        defaultMessage: 'Pie labels config',
+      }),
     },
   },
   fn(context, args, handlers) {
-    const visConfig = JSON.parse(args.visConfig) as PieVisParams;
+    const visConfig = {
+      ...args,
+      palette: {
+        type: 'palette',
+        name: args.palette,
+      },
+      dimensions: {
+        metric: args.metric,
+        buckets: args.buckets,
+        splitColumn: args.splitColumn,
+        splitRow: args.splitRow,
+      },
+    } as PieVisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', context);
