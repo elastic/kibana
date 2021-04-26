@@ -180,13 +180,13 @@ export function calculateModelMemoryLimitProvider(
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (allowMMLGreaterThanMax === false) {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
       if (maxModelMemoryLimit !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const maxBytes = numeral(maxModelMemoryLimit).value();
         if (mmlBytes > maxBytes) {
-          // @ts-expect-error
+          // @ts-expect-error numeral missing value
           modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
           mmlCappedAtMax = true;
         }
@@ -195,10 +195,10 @@ export function calculateModelMemoryLimitProvider(
       // if we've not already capped the estimated mml at the hard max server setting
       // ensure that the estimated mml isn't greater than the effective max mml
       if (mmlCappedAtMax === false && effectiveMaxModelMemoryLimit !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
         if (mmlBytes > effectiveMaxMmlBytes) {
-          // @ts-expect-error
+          // @ts-expect-error numeral missing value
           modelMemoryLimit = `${Math.floor(effectiveMaxMmlBytes / numeral('1MB').value())}MB`;
         }
       }

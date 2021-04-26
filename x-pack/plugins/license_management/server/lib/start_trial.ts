@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../licensing/server';
-import { CallAsCurrentUser } from '../types';
+import { IScopedClusterClient } from 'src/core/server';
+import { LicensingPluginStart } from '../../../licensing/server';
 
-export async function canStartTrial(callAsCurrentUser: CallAsCurrentUser) {
-  const options = {
-    method: 'GET',
-    path: '/_license/trial_status',
-  };
+export async function canStartTrial(client: IScopedClusterClient) {
   try {
-    const response = await callAsCurrentUser('transport.request', options);
+    const { body: response } = await client.asCurrentUser.license.getTrialStatus();
     return response.eligible_to_start_trial;
   } catch (error) {
     return error.body;
@@ -22,17 +18,15 @@ export async function canStartTrial(callAsCurrentUser: CallAsCurrentUser) {
 }
 
 interface StartTrialArg {
-  callAsCurrentUser: CallAsCurrentUser;
-  licensing: LicensingPluginSetup;
+  client: IScopedClusterClient;
+  licensing: LicensingPluginStart;
 }
 
-export async function startTrial({ callAsCurrentUser, licensing }: StartTrialArg) {
-  const options = {
-    method: 'POST',
-    path: '/_license/start_trial?acknowledge=true',
-  };
+export async function startTrial({ client, licensing }: StartTrialArg) {
   try {
-    const response = await callAsCurrentUser('transport.request', options);
+    const { body: response } = await client.asCurrentUser.license.postStartTrial({
+      acknowledge: true,
+    });
     const { trial_was_started: trialWasStarted } = response;
 
     if (trialWasStarted) {

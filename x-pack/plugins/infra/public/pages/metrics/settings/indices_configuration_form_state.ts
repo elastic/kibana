@@ -6,12 +6,11 @@
  */
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
-
 import {
   createInputFieldProps,
   createInputRangeFieldProps,
   validateInputFieldNotEmpty,
-} from '../../../components/source_configuration/input_fields';
+} from './input_fields';
 
 interface FormState {
   name: string;

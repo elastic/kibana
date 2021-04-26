@@ -40,7 +40,13 @@ export const MaxIndexSizeField: FunctionComponent = () => {
           componentProps={{
             euiFieldProps: {
               'data-test-subj': 'hot-selectedMaxSizeStored',
-              prepend: <EuiIconTip type="alert" content={i18nTexts.deprecationMessage} />,
+              prepend: (
+                <EuiIconTip
+                  type="alert"
+                  aria-label={i18nTexts.deprecationMessage}
+                  content={i18nTexts.deprecationMessage}
+                />
+              ),
               min: 1,
             },
           }}
