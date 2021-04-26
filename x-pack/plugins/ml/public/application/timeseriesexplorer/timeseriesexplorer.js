@@ -34,8 +34,6 @@ import {
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
-
-import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -151,6 +149,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
+    toastNotificationService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -390,6 +389,13 @@ export class TimeSeriesExplorer extends React.Component {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
+  displayErrorToastMessages = (error, title) => {
+    console.log('displayErrorToastMessages', error, title);
+    if (this.props.toastNotificationService) {
+      this.props.toastNotificationService.displayErrorToast(error, title);
+    }
+  };
+
   loadSingleMetricData = (fullRefresh = true) => {
     const {
       autoZoomDuration,
@@ -558,10 +564,12 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.contextChartData = fullRangeChartData;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting metric data from elasticsearch:',
-              resp
+          .catch((err) => {
+            this.displayErrorToastMessages(
+              err,
+              i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
+                defaultMessage: 'Error getting metric data',
+              })
             );
           });
 
@@ -581,10 +589,12 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.swimlaneData = fullRangeRecordScoreData;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting bucket anomaly scores from elasticsearch:',
-              resp
+          .catch((err) => {
+            this.displayErrorToastMessages(
+              err,
+              i18n.translate('xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage', {
+                defaultMessage: 'Error getting bucket anomaly scores',
+              })
             );
           });
 
@@ -601,10 +611,12 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.chartDetails = resp.results;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting entity counts from elasticsearch:',
-              resp
+          .catch((err) => {
+            this.displayErrorToastMessages(
+              err,
+              i18n.translate('xpack.ml.timeSeriesExplorer.entityCountsErrorMessage', {
+                defaultMessage: 'Error getting entity counts',
+              })
             );
           });
 
@@ -633,10 +645,13 @@ export class TimeSeriesExplorer extends React.Component {
               stateUpdate.contextForecastData = processForecastResults(resp.results);
               finish(counter);
             })
-            .catch((resp) => {
-              console.log(
-                `Time series explorer - error loading data for forecast ID ${selectedForecastId}`,
-                resp
+            .catch((err) => {
+              this.displayErrorToastMessages(
+                err,
+                i18n.translate('xpack.ml.timeSeriesExplorer.forecastDataErrorMessage', {
+                  defaultMessage: 'Error loading forecast data for forecast ID {forecastId}',
+                  values: { forecastId: selectedForecastId },
+                })
               );
             });
         }
@@ -695,8 +710,10 @@ export class TimeSeriesExplorer extends React.Component {
           },
         }
       );
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(warningText);
+      if (this.props.toastNotificationService) {
+        this.props.toastNotificationService.displayWarningToast(warningText);
+      }
+
       detectorIndex = detectors[0].index;
     }
 
@@ -716,16 +733,17 @@ export class TimeSeriesExplorer extends React.Component {
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;
     if (invalidTimeRangeError) {
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(
-        i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
-          defaultMessage:
-            'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
-          values: {
-            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
-          },
-        })
-      );
+      if (this.props.toastNotificationService) {
+        this.props.toastNotificationService.displayWarningToast(
+          i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+            defaultMessage:
+              'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
+            values: {
+              field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+            },
+          })
+        );
+      }
     }
 
     // Required to redraw the time series chart when the container is resized.
@@ -853,7 +871,8 @@ export class TimeSeriesExplorer extends React.Component {
     if (
       previousProps === undefined ||
       !isEqual(previousProps.bounds, this.props.bounds) ||
-      !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
+      (!isEqual(previousProps.lastRefresh, this.props.lastRefresh) &&
+        previousProps.lastRefresh !== 0) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
