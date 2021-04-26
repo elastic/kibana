@@ -137,7 +137,7 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      if (!indexStats || !indexStats.primaries) {
+      if (!indexStats || !indexStats.primaries || !sourceNode) {
         continue;
       }
 
