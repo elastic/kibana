@@ -8,10 +8,18 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
-import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 
-export function ViewControl({ mouseCoordinates, zoom }) {
+export interface Props {
+  mouseCoordinates?: {
+    lat: number;
+    lon: number;
+  };
+  zoom: number;
+}
+
+export function MouseCoordinatesControl({ mouseCoordinates, zoom }: Props) {
   let latLon;
   if (mouseCoordinates) {
     latLon = (

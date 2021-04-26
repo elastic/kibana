@@ -36,6 +36,8 @@ export async function loadAlertInstanceSummary({
   http: HttpSetup;
   alertId: string;
 }): Promise<AlertInstanceSummary> {
-  const res = await http.get(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}/_alert_summary`);
+  const res = await http.get(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}/_alert_summary`
+  );
   return rewriteBodyRes(res);
 }
