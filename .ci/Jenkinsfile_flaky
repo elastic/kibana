@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-env.ES_SNAPSHOT_MANIFEST = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/archives/20210422-215233_39eb12a9724/manifest.json'
+env.ES_SNAPSHOT_MANIFEST = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/archives/20210426-164451_1c5272cc726/manifest.json'
 
 def TASK_PARAM = params.TASK ?: params.CI_GROUP
 
