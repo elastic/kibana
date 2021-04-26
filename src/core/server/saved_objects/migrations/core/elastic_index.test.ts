@@ -40,7 +40,7 @@ describe('ElasticIndex', () => {
         return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
-            mappings: { dynamic: 'strict', properties: { a: 'b' } },
+            mappings: { dynamic: 'strict', properties: { a: 'b' } as any },
             settings: {},
           },
         } as estypes.GetIndexResponse);
@@ -175,7 +175,7 @@ describe('ElasticIndex', () => {
           dynamic: 'strict' as const,
           properties: { foo: { type: 'keyword' } },
         },
-      };
+      } as const;
 
       await Index.convertToAlias(
         client,

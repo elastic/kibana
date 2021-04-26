@@ -25,7 +25,7 @@ const mockMappings = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -67,7 +67,7 @@ const mockMappings = {
       },
     },
   },
-};
+} as const;
 
 describe('validateAndConvertAggregations', () => {
   it('validates a simple aggregations', () => {

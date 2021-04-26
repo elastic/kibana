@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 /**
  * Describe a saved object type mapping.
  *
@@ -120,18 +121,17 @@ export interface IndexMappingMeta {
  *
  * @public
  */
-export interface SavedObjectsCoreFieldMapping {
-  type: string;
-  null_value?: number | boolean | string;
-  index?: boolean;
-  doc_values?: boolean;
-  fields?: {
-    [subfield: string]: {
-      type: string;
-      ignore_above?: number;
-    };
-  };
-}
+export type SavedObjectsCoreFieldMapping = estypes.Property & {
+  /**
+   * The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings.
+   *
+   * Note: To limit the number of mapping fields Saved Object types should
+   * *never* use `dynamic: true`.
+   */
+  dynamic?: false | 'strict';
+};
 
 /**
  * See {@link SavedObjectsFieldMapping} for documentation.
@@ -150,6 +150,6 @@ export interface SavedObjectsComplexFieldMapping {
   dynamic?: false | 'strict';
   enabled?: boolean;
   doc_values?: boolean;
-  type?: string;
+  type?: estypes.Property['type'];
   properties: SavedObjectsMappingProperties;
 }

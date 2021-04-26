@@ -362,7 +362,11 @@ const mockV2MigrationOptions = () => {
     )
   );
   options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      acknowledged: true,
+      shards_acknowledged: true,
+      indices: [],
+    })
   );
   options.client.reindex.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({

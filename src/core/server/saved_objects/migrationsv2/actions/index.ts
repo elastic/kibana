@@ -305,7 +305,7 @@ export const cloneIndex = (
 };
 
 interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason: string; index: string }>;
+  error: Option.Option<{ type: string; reason: string; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
@@ -367,7 +367,6 @@ const waitForTask = (
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
-        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
@@ -523,7 +522,7 @@ export const waitForReindexTask = flow(
         if (res.error.value.type === 'index_not_found_exception') {
           return TaskEither.left({
             type: 'index_not_found_exception' as const,
-            index: res.error.value.index,
+            index: res.error.value.index!,
           });
         } else {
           throw new Error('Reindex failed with the following error:\n' + JSON.stringify(res.error));
@@ -720,6 +719,7 @@ export const createIndex = (
           // started
           timeout: DEFAULT_TIMEOUT,
           body: {
+            // @ts-expect-error @elastic-elasticsearch types don't support nested properties
             mappings,
             aliases: aliasesObject,
             settings: {
@@ -813,6 +813,7 @@ export const updateAndPickupMappings = (
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
+        // @ts-expect-error @elastic-elasticsearch types don't support nested properties
         body: mappings,
       })
       .then((res) => {

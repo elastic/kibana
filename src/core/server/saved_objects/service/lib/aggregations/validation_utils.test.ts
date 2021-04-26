@@ -28,7 +28,7 @@ const mockMappings: IndexMapping = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -70,7 +70,7 @@ const mockMappings: IndexMapping = {
       },
     },
   },
-};
+} as const;
 
 describe('isRootLevelAttribute', () => {
   it('returns true when referring to a path to a valid root level field', () => {
