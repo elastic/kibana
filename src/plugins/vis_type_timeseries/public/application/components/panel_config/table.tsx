@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
@@ -28,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -246,18 +246,20 @@ export class TablePanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
-                  <FormattedMessage
-                    id="visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
