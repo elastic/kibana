@@ -6,23 +6,26 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallow } from 'enzyme';
+import { ILayer } from '../../../classes/layers/layer';
 
-import { AttributionControl } from './view';
+import { AttributionControl } from './attribution_control';
 
 describe('AttributionControl', () => {
   test('is rendered', async () => {
-    const mockLayer1 = {
+    const mockLayer1 = ({
       getAttributions: async () => {
         return [{ url: '', label: 'attribution with no link' }];
       },
-    };
-    const mockLayer2 = {
+    } as unknown) as ILayer;
+    const mockLayer2 = ({
       getAttributions: async () => {
         return [{ url: 'https://coolmaps.com', label: 'attribution with link' }];
       },
-    };
-    const component = shallowWithIntl(<AttributionControl layerList={[mockLayer1, mockLayer2]} />);
+    } as unknown) as ILayer;
+    const component = shallow(
+      <AttributionControl layerList={[mockLayer1, mockLayer2]} isFullScreen={true} />
+    );
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
