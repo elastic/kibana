@@ -10,9 +10,13 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Transforms } from '../modules/types';
 import type { Logger } from '../../../../../src/core/server';
 
-import { computeMappingId, computeTransformId, getTransformExists } from './utils';
-import { logTransformError } from './utils/log_transform_error';
-import { logTransformDebug } from './utils/log_transform_debug';
+import {
+  computeMappingId,
+  computeTransformId,
+  getTransformExists,
+  logTransformDebug,
+  logTransformError,
+} from './utils';
 
 interface CreateTransformOptions {
   esClient: ElasticsearchClient;
@@ -49,8 +53,6 @@ export const installTransforms = async ({
   sync,
 }: CreateTransformOptions): Promise<void> => {
   for (const transform of transforms) {
-    // If the user doesn't define an explicit mapping in the module then use the default
-    // of the transform id as the mapping index.
     const destIndex = transform?.dest?.index ?? transform.id;
     const computedMappingIndex = computeMappingId({ id: destIndex, prefix, suffix });
     const { id, ...transformNoId } = {

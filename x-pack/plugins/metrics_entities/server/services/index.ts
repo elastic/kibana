@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export * from './delete_transforms';
 export * from './get_transforms';
+export * from './install_mappings';
+export * from './install_transforms';
 export * from './metrics_entities_client';
 export * from './post_transforms';
+export * from './uninstall_mappings';
+export * from './uninstall_transforms';

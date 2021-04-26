@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './delete_transforms';
 export * from './get_transforms';
 export * from './post_transforms';

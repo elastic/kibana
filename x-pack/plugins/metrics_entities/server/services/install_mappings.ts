@@ -10,10 +10,13 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Mappings } from '../modules/types';
 import type { Logger } from '../../../../../src/core/server';
 
-import { computeMappingId } from './utils';
-import { getIndexExists } from './utils/get_index_exists';
-import { logMappingDebug } from './utils/log_mapping_debug';
-import { logMappingError } from './utils/log_mapping_error';
+import {
+  computeMappingId,
+  getIndexExists,
+  logMappingDebug,
+  logMappingError,
+  logMappingInfo,
+} from './utils';
 
 interface CreateMappingOptions {
   esClient: ElasticsearchClient;
@@ -49,7 +52,7 @@ export const installMappings = async ({
     };
     if (!exists) {
       try {
-        logMappingDebug({ id: mappingId, logger, message: 'does not exist, creating the mapping' });
+        logMappingInfo({ id: mappingId, logger, message: 'does not exist, creating the mapping' });
         await esClient.indices.create({
           body: computedBody,
           index: mappingId,

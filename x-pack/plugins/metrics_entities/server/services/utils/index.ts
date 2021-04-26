@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+export * from './compute_mapping_index';
+export * from './compute_transform_id';
 export * from './get_index_exists';
 export * from './get_transform_exists';
-export * from './compute_transform_id';
-export * from './compute_mapping_index';
+export * from './log_mapping_debug';
+export * from './log_mapping_error';
+export * from './log_mapping_info';
+export * from './log_transform_debug';
+export * from './log_transform_error';
