@@ -16,7 +16,7 @@ interface SourceNode {
   uuid: string;
 }
 type TopHitType = ElasticsearchResponseHit & {
-  _source: { index_stats: Partial<ElasticsearchIndexStats>; source_node: SourceNode };
+  _source: { index_stats?: Partial<ElasticsearchIndexStats>; source_node?: SourceNode };
 };
 
 const memoizedIndexPatterns = (globPatterns: string) => {
