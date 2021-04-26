@@ -109,13 +109,15 @@ describe('AllCasesGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    filterStatus: CaseStatuses.open,
-    showActions: true,
-    handleIsLoading: jest.fn(),
     caseDetailsNavigation: {
       href: jest.fn(),
       onClick: jest.fn(),
     },
+    dispatchUpdateCaseProperty: jest.fn,
+    filterStatus: CaseStatuses.open,
+    handleIsLoading: jest.fn(),
+    isLoadingCases: [],
+    showActions: true,
   };
 
   beforeEach(() => {
@@ -354,6 +356,8 @@ describe('AllCasesGeneric', () => {
     );
     const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
       useCasesColumns({
+        dispatchUpdateCaseProperty: jest.fn,
+        isLoadingCases: [],
         filterStatus: CaseStatuses.open,
         handleIsLoading: jest.fn(),
         showActions: false,

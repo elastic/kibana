@@ -137,9 +137,10 @@ export interface UseGetCases extends UseGetCasesState {
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
+const empty = {};
 export const useGetCases = (
-  initialQueryParams: Partial<QueryParams> = {},
-  initialFilterOptions: Partial<FilterOptions> = {}
+  initialQueryParams: Partial<QueryParams> = empty,
+  initialFilterOptions: Partial<FilterOptions> = empty
 ): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,

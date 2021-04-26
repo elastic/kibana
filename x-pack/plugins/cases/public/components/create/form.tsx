@@ -17,6 +17,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
+import { ActionConnector } from '../../../common';
 
 interface ContainerProps {
   big?: boolean;
@@ -36,12 +37,19 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface Props {
+  connectors?: ActionConnector[];
   hideConnectorServiceNowSir?: boolean;
+  isLoadingConnectors?: boolean;
   withSteps?: boolean;
 }
-
+const empty: ActionConnector[] = [];
 export const CreateCaseForm: React.FC<Props> = React.memo(
-  ({ hideConnectorServiceNowSir = false, withSteps = true }) => {
+  ({
+    connectors = empty,
+    isLoadingConnectors = false,
+    hideConnectorServiceNowSir = false,
+    withSteps = true,
+  }) => {
     const { isSubmitting } = useFormContext();
 
     const firstStep = useMemo(
@@ -80,13 +88,15 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
         children: (
           <Container>
             <Connector
+              connectors={connectors}
               hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+              isLoadingConnectors={isLoadingConnectors}
               isLoading={isSubmitting}
             />
           </Container>
         ),
       }),
-      [hideConnectorServiceNowSir, isSubmitting]
+      [connectors, hideConnectorServiceNowSir, isLoadingConnectors, isSubmitting]
     );
 
     const allSteps = useMemo(() => [firstStep, secondStep, thirdStep], [

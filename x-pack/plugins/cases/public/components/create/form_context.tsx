@@ -33,6 +33,7 @@ const initialCaseValue: FormProps = {
 interface Props {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   caseType?: CaseType;
+  children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
 }
@@ -44,7 +45,7 @@ export const FormContext: React.FC<Props> = ({
   hideConnectorServiceNowSir,
   onSuccess,
 }) => {
-  const { connectors } = useConnectors();
+  const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
   const { pushCaseToExternalService } = usePostPushToService();
@@ -114,7 +115,16 @@ export const FormContext: React.FC<Props> = ({
   // Set the selected connector to the configuration connector
   useEffect(() => setFieldValue('connectorId', connectorId), [connectorId, setFieldValue]);
 
-  return <Form form={form}>{children}</Form>;
+  const childrenWithExtraProp = useMemo(
+    () =>
+      children != null
+        ? React.Children.map(children, (child: React.ReactElement) =>
+            React.cloneElement(child, { connectors, isLoadingConnectors })
+          )
+        : null,
+    [children, connectors, isLoadingConnectors]
+  );
+  return <Form form={form}>{childrenWithExtraProp}</Form>;
 };
 
 FormContext.displayName = 'FormContext';

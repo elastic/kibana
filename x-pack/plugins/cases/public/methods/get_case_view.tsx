@@ -9,11 +9,9 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CaseViewProps } from '../components/case_view';
 
-export const getCaseViewLazy = (props: CaseViewProps) => {
-  const CaseViewLazy = lazy(() => import('../components/case_view'));
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <CaseViewLazy {...props} />
-    </Suspense>
-  );
-};
+const CaseViewLazy = lazy(() => import('../components/case_view'));
+export const getCaseViewLazy = (props: CaseViewProps) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CaseViewLazy {...props} />
+  </Suspense>
+);

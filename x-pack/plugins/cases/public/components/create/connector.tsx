@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ConnectorTypes } from '../../../common';
 import { UseField, useFormData, FieldHook, useFormContext } from '../../common/shared_imports';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { ActionConnector } from '../../../common';
@@ -18,7 +17,9 @@ import { getConnectorById } from '../configure_cases/utils';
 import { FormProps } from './schema';
 
 interface Props {
+  connectors: ActionConnector[];
   isLoading: boolean;
+  isLoadingConnectors: boolean;
   hideConnectorServiceNowSir?: boolean;
 }
 
@@ -55,16 +56,17 @@ const ConnectorFields = ({
   );
 };
 
-const ConnectorComponent: React.FC<Props> = ({ hideConnectorServiceNowSir = false, isLoading }) => {
+const ConnectorComponent: React.FC<Props> = ({
+  connectors,
+  hideConnectorServiceNowSir = false,
+  isLoading,
+  isLoadingConnectors,
+}) => {
   const { getFields } = useFormContext();
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
-  const handleConnectorChange = useCallback(
-    (newConnector) => {
-      const { fields } = getFields();
-      fields.setValue(null);
-    },
-    [getFields]
-  );
+  const handleConnectorChange = useCallback(() => {
+    const { fields } = getFields();
+    fields.setValue(null);
+  }, [getFields]);
 
   return (
     <EuiFlexGroup>

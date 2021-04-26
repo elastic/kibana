@@ -13,7 +13,6 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
@@ -30,12 +29,11 @@ jest.mock('../../common/lib/kibana', () => {
     }),
   };
 });
-jest.mock('../../containers/configure/use_connectors');
+
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
 
-const useConnectorsMock = useConnectors as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
@@ -53,6 +51,12 @@ const useGetSeverityResponse = {
 const useGetChoicesResponse = {
   isLoading: false,
   choices,
+};
+
+const defaultProps = {
+  connectors: connectorsMock,
+  isLoading: false,
+  isLoadingConnectors: false,
 };
 
 describe('Connector', () => {
@@ -74,7 +78,6 @@ describe('Connector', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
@@ -83,7 +86,7 @@ describe('Connector', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Connector isLoading={false} />
+        <Connector {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
@@ -102,36 +105,26 @@ describe('Connector', () => {
     });
   });
 
-  it('it is loading when fetching connectors', async () => {
-    useConnectorsMock.mockReturnValue({ loading: true, connectors: connectorsMock });
+  it('it is disabled and loading when isLoadingConnectors=true', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Connector isLoading={false} />
+        <Connector {...{ ...defaultProps, isLoadingConnectors: true }} />
       </MockHookWrapperComponent>
     );
 
     expect(
       wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
     ).toEqual(true);
-  });
-
-  it('it is disabled when fetching connectors', async () => {
-    useConnectorsMock.mockReturnValue({ loading: true, connectors: connectorsMock });
-    const wrapper = mount(
-      <MockHookWrapperComponent>
-        <Connector isLoading={false} />
-      </MockHookWrapperComponent>
-    );
 
     expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')).toEqual(
       true
     );
   });
 
-  it('it is disabled and loading when passing loading as true', async () => {
+  it('it is disabled and loading when isLoading=true', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Connector isLoading={true} />
+        <Connector {...{ ...defaultProps, isLoading: true }} />
       </MockHookWrapperComponent>
     );
 
@@ -146,7 +139,7 @@ describe('Connector', () => {
   it(`it should change connector`, async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Connector isLoading={false} />
+        <Connector {...defaultProps} />
       </MockHookWrapperComponent>
     );
 

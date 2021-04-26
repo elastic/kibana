@@ -20,8 +20,13 @@ export interface UseConnectorsResponse {
 
 export const useConnectors = (): UseConnectorsResponse => {
   const toasts = useToasts();
-  const [loading, setLoading] = useState(true);
-  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
+  const [state, setState] = useState<{
+    loading: boolean;
+    connectors: ActionConnector[];
+  }>({
+    loading: true,
+    connectors: [],
+  });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -30,13 +35,17 @@ export const useConnectors = (): UseConnectorsResponse => {
       isCancelledRef.current = false;
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
-
-      setLoading(true);
+      setState({
+        ...state,
+        loading: true,
+      });
       const res = await fetchConnectors({ signal: abortCtrlRef.current.signal });
 
       if (!isCancelledRef.current) {
-        setLoading(false);
-        setConnectors(res);
+        setState({
+          loading: false,
+          connectors: res,
+        });
       }
     } catch (error) {
       if (!isCancelledRef.current) {
@@ -46,9 +55,10 @@ export const useConnectors = (): UseConnectorsResponse => {
             { title: i18n.ERROR_TITLE }
           );
         }
-
-        setLoading(false);
-        setConnectors([]);
+        setState({
+          loading: false,
+          connectors: [],
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,8 +74,8 @@ export const useConnectors = (): UseConnectorsResponse => {
   }, []);
 
   return {
-    loading,
-    connectors,
+    loading: state.loading,
+    connectors: state.connectors,
     refetchConnectors,
   };
 };

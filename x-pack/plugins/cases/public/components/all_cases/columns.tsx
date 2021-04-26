@@ -29,7 +29,7 @@ import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
-import { UpdateCase, useGetCases } from '../../containers/use_get_cases';
+import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 
@@ -55,19 +55,22 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 export interface GetCasesColumn {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
+  dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
+  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   showActions: boolean;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
+  dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
+  isLoadingCases,
   refreshCases,
   showActions,
 }: GetCasesColumn): CasesColumns[] => {
-  const { loading: isLoadingCases, dispatchUpdateCaseProperty } = useGetCases();
   // Delete case
   const {
     dispatchResetIsDeleted,

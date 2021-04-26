@@ -81,6 +81,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     const { actionLicense } = useGetActionLicense();
     const {
       data,
+      dispatchUpdateCaseProperty,
       filterOptions,
       loading,
       queryParams,
@@ -90,6 +91,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setQueryParams,
       setSelectedCases,
     } = useGetCases();
+
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
 
@@ -180,9 +182,11 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
+      dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
-      refreshCases,
       handleIsLoading,
+      isLoadingCases: loading,
+      refreshCases,
       showActions,
     });
 
