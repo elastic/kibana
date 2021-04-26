@@ -712,7 +712,12 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
-  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
+  updatedColumnOrder = reorderByGroups(
+    visualizationGroups,
+    targetGroup,
+    updatedColumnOrder,
+    addedColumnId
+  );
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
@@ -749,16 +754,24 @@ export function reorderByGroups(
     });
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
-      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+      const groupIndex = orderedVisualizationGroups.findIndex(
         (group) =>
           (columnId === addedColumnId && group.groupId === targetGroup) ||
           group.accessors.some((acc) => acc.columnId === columnId)
       );
+      if (groupIndex !== -1) {
+        columnGroupIndex[columnId] = groupIndex;
+      } else {
+        // referenced columns won't show up in visualization groups - put them in the back of the list. This will work as they are always metrics
+        columnGroupIndex[columnId] = updatedColumnOrder.length;
+      }
     });
 
-    updatedColumnOrder.sort((a, b) => {
+    return [...updatedColumnOrder].sort((a, b) => {
       return columnGroupIndex[a] - columnGroupIndex[b];
     });
+  } else {
+    return updatedColumnOrder;
   }
 }
 

@@ -1150,6 +1150,83 @@ describe('IndexPatternDimensionEditorPanel', () => {
           });
         });
 
+        it('respects groups on moving operations if some columns are not listed in groups', () => {
+          // config:
+          // a: col1,
+          // b: col2, col3
+          // c: col4
+          // col5, col6 not in visualization groups
+          // dragging col3 onto col1 in group a
+          onDrop({
+            ...defaultProps,
+            columnId: 'col1',
+            droppedItem: draggingCol3,
+            state: {
+              ...testState,
+              layers: {
+                first: {
+                  ...testState.layers.first,
+                  columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+                  columns: {
+                    ...testState.layers.first.columns,
+                    col5: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                    },
+                    col6: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                    },
+                  },
+                },
+              },
+            },
+            groupId: 'a',
+            dimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'move_compatible',
+          });
+
+          expect(setState).toBeCalledTimes(1);
+          expect(setState).toHaveBeenCalledWith({
+            ...testState,
+            layers: {
+              first: {
+                ...testState.layers.first,
+                columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
+                columns: {
+                  col1: testState.layers.first.columns.col3,
+                  col2: testState.layers.first.columns.col2,
+                  col4: testState.layers.first.columns.col4,
+                  col5: {
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  },
+                  col6: {
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  },
+                },
+              },
+            },
+          });
+        });
+
         it('respects groups on duplicating operations between compatible groups with overwrite', () => {
           // config:
           // a: col1,
