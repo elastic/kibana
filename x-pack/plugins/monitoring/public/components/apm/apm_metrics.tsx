@@ -35,7 +35,12 @@ interface Props {
   metrics: { [key: string]: unknown };
   seriesToShow: unknown[];
   title: string;
-  summary?: { version: string };
+  summary: {
+    version: string;
+    config: {
+      container: boolean;
+    };
+  };
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {
@@ -70,11 +75,18 @@ const getHeading = (isFleetTypeMetric: boolean) => {
   return titles;
 };
 
-export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }: Props) => {
-  const topSeries = [metrics.apm_cpu, metrics.apm_memory, metrics.apm_os_load];
-  const versions = props.summary?.version ? [props.summary?.version] : stats.versions;
+export const ApmMetrics = ({ stats, metrics, seriesToShow, title, summary, ...props }: Props) => {
+  if (!metrics) {
+    return null;
+  }
+
+  const versions = summary?.version ? [summary?.version] : stats.versions;
   const isFleetTypeMetric = checkAgentTypeMetric(versions);
   const titles = getHeading(isFleetTypeMetric);
+
+  const topSeries = [metrics.apm_cpu, metrics.apm_os_load];
+  const { config } = summary || stats;
+  topSeries.push(config.container ? metrics.apm_memory_cgroup : metrics.apm_memory);
 
   return (
     <EuiPage>

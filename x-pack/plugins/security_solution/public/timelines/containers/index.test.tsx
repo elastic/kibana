@@ -27,6 +27,11 @@ const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
 const mockSearch = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {

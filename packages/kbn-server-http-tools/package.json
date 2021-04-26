@@ -11,8 +11,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/crypto": "link:../kbn-crypto",
-    "@kbn/std": "link:../kbn-std"
+    "@kbn/crypto": "link:../kbn-crypto"
   },
   "devDependencies": {
     "@kbn/utility-types": "link:../kbn-utility-types"
