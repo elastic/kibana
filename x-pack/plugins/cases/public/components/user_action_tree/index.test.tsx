@@ -77,7 +77,7 @@ describe(`UserActionTree`, () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
 
     expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
       defaultProps.data.createdBy.fullName
@@ -114,8 +114,8 @@ describe(`UserActionTree`, () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
@@ -141,8 +141,8 @@ describe(`UserActionTree`, () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
   });
   it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
@@ -163,7 +163,7 @@ describe(`UserActionTree`, () => {
         .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
         .first()
         .hasClass('outlined')
-    ).toBeFalsy();
+    ).toEqual(false);
 
     wrapper
       .find(
@@ -178,7 +178,7 @@ describe(`UserActionTree`, () => {
           .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
           .first()
           .hasClass('outlined')
-      ).toBeTruthy();
+      ).toEqual(true);
     });
   });
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
@@ -223,7 +223,7 @@ describe(`UserActionTree`, () => {
             `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
           )
           .exists()
-      ).toBeFalsy();
+      ).toEqual(false);
     });
   });
 
@@ -271,7 +271,7 @@ describe(`UserActionTree`, () => {
             `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
           )
           .exists()
-      ).toBeFalsy();
+      ).toEqual(false);
       expect(patchComment).toBeCalledWith({
         commentUpdate: sampleData.content,
         caseId: 'case-id',
@@ -316,7 +316,7 @@ describe(`UserActionTree`, () => {
             `[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`
           )
           .exists()
-      ).toBeFalsy();
+      ).toEqual(false);
       expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
     });
   });
@@ -376,6 +376,6 @@ describe(`UserActionTree`, () => {
         .find(`[data-test-subj="comment-create-action-${commentId}"]`)
         .first()
         .hasClass('outlined')
-    ).toBeTruthy();
+    ).toEqual(true);
   });
 });

@@ -11,11 +11,10 @@ import { Router, mockHistory } from '../__mock__/router';
 import { UserActionMarkdown } from './user_action_markdown';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
-// import * as timelineHelpers from '../../../timelines/components/open_timeline/helpers';
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
-const hyperlink = `[hyperlink](http://boo.com)`;
+const hyperlink = `[hyperlink](http://elastic.co)`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
