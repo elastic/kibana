@@ -6,20 +6,17 @@
  */
 
 import { connect } from 'react-redux';
-import { AttributionControl } from './view';
+import { AttributionControl } from './attribution_control';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { getIsFullScreen } from '../../../selectors/ui_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     layerList: getLayerList(state),
     isFullScreen: getIsFullScreen(state),
   };
 }
 
-function mapDispatchToProps() {
-  return {};
-}
-
-const connectedViewControl = connect(mapStateToProps, mapDispatchToProps)(AttributionControl);
-export { connectedViewControl as AttributionControl };
+const connected = connect(mapStateToProps, {})(AttributionControl);
+export { connected as AttributionControl };
