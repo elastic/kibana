@@ -7,7 +7,12 @@
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
-import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import {
+  DatasourcePublicAPI,
+  Operation,
+  Datasource,
+  VisualizationDimensionGroupConfig,
+} from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -1113,6 +1118,186 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
         { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
         { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(2);
+    });
+
+    it('should detect when the visualization config goes out of sync with the datasource one', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(undefined);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+
+      const groups = {
+        first: [
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+      };
+      expect(indexPatternDatasource.getErrorMessages(state, groups)).toEqual([
+        {
+          longMessage: '"MyGroup" contains an incomplete configuration',
+          shortMessage: 'Configuration error',
+        },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(1);
+    });
+
+    it('should detect when the visualization config goes out of sync with the datasource one - multiple cases', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(undefined);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+
+      const groups = {
+        first: [
+          {
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
+            groupLabel: 'MyGroup',
+          },
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyOtherGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+      };
+      expect(indexPatternDatasource.getErrorMessages(state, groups)).toEqual([
+        {
+          longMessage: '"MyGroup" contains multiple incomplete configurations',
+          shortMessage: 'Configuration error',
+        },
+        {
+          longMessage: '"MyOtherGroup" contains an incomplete configuration',
+          shortMessage: 'Configuration error',
+        },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(1);
+    });
+
+    it('should detect when the visualization config goes out of sync with the datasource one - multiple layers', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(undefined);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+
+      const groups = {
+        first: [
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+        second: [
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyOtherGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+      };
+      expect(indexPatternDatasource.getErrorMessages(state, groups)).toEqual([
+        {
+          longMessage: 'Layer 1 error: "MyGroup" contains an incomplete configuration',
+          shortMessage: 'Layer 1 error: Configuration error',
+        },
+        {
+          longMessage: 'Layer 2 error: "MyOtherGroup" contains an incomplete configuration',
+          shortMessage: 'Layer 2 error: Configuration error',
+        },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reconcyle data and sync error correctly by layers', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+
+      const groups = {
+        first: [
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+        second: [
+          {
+            accessors: [{ columnId: 'a' }],
+            groupLabel: 'MyOtherGroup',
+          },
+        ] as VisualizationDimensionGroupConfig[],
+      };
+      expect(indexPatternDatasource.getErrorMessages(state, groups)).toEqual([
+        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
+        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
+        {
+          longMessage: 'Layer 1 error: "MyGroup" contains an incomplete configuration',
+          shortMessage: 'Layer 1 error: Configuration error',
+        },
+        {
+          longMessage: 'Layer 2 error: "MyOtherGroup" contains an incomplete configuration',
+          shortMessage: 'Layer 2 error: Configuration error',
+        },
       ]);
       expect(getErrorMessages).toHaveBeenCalledTimes(2);
     });
