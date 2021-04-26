@@ -6,15 +6,16 @@
  */
 
 import { connect } from 'react-redux';
-import { ViewControl } from './view_control';
+import { MouseCoordinatesControl } from './mouse_coordinates_control';
 import { getMouseCoordinates, getMapZoom } from '../../../selectors/map_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     mouseCoordinates: getMouseCoordinates(state),
     zoom: getMapZoom(state),
   };
 }
 
-const connectedViewControl = connect(mapStateToProps, null)(ViewControl);
-export { connectedViewControl as ViewControl };
+const connected = connect(mapStateToProps, {})(MouseCoordinatesControl);
+export { connected as MouseCoordinatesControl };
