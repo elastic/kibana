@@ -16,6 +16,6 @@
     "utils/**/*",
     "index.ts",
     // TODO: Remove when EUI includes `emotion`
-    "../../typings/@elastic/eui/*",
+    "../../typings/react.d.ts",
   ]
 }
