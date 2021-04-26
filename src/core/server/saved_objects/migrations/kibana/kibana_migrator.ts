@@ -53,6 +53,7 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 export interface KibanaMigratorStatus {
   status: MigrationStatus;
   result?: MigrationResult[];
+  waitingIndex?: string;
 }
 
 /**
@@ -68,7 +69,7 @@ export class KibanaMigrator {
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
-    status: 'waiting',
+    status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
   private migrationsRetryDelay?: number;
@@ -206,6 +207,7 @@ export class KibanaMigrator {
           kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
+          setStatus: (status) => this.status$.next(status),
           pollInterval: this.soMigrationsConfig.pollInterval,
           scrollDuration: this.soMigrationsConfig.scrollDuration,
           serializer: this.serializer,

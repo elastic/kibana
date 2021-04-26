@@ -41,6 +41,8 @@ export class IndexMigrator {
 
       pollInterval: context.pollInterval,
 
+      setStatus: context.setStatus,
+
       async isMigrated() {
         return !(await requiresMigration(context));
       },

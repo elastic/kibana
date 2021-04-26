@@ -138,6 +138,40 @@ test('log listening address after started when configured with BasePath and rewr
   `);
 });
 
+test('does not allow router registration after server is listening', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouter } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouter(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouter(router2)).toThrowErrorMatchingInlineSnapshot(
+    `"Routers can be registered only when HTTP server is stopped."`
+  );
+});
+
+test('allows router registration after server is listening via `registerRouterAfterListening`', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouterAfterListening } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router2)).not.toThrowError();
+});
+
 test('valid params', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
