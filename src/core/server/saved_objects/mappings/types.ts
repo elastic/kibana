@@ -150,6 +150,6 @@ export interface SavedObjectsComplexFieldMapping {
   dynamic?: false | 'strict';
   enabled?: boolean;
   doc_values?: boolean;
-  type?: estypes.Property['type'];
+  type?: string;
   properties: SavedObjectsMappingProperties;
 }
