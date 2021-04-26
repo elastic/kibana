@@ -17,10 +17,8 @@ declare module '@elastic/eui/lib/services/format' {
 }
 
 // TODO: Remove when EUI includes `emotion`
-declare module '@elastic/eui' {
-  declare module 'react' {
-    interface Attributes {
-      css?: any;
-    }
+declare module 'react' {
+  interface Attributes {
+    css?: any;
   }
 }
