@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 import path from 'path';
@@ -47,74 +46,6 @@ async function waitForDocker() {
   }
 }
 
-async function waitForES() {
-  let isEsUp = false;
-
-  log('Waiting for elasticsearch');
-  while (!isEsUp) {
-    try {
-      log(chalk.yellow('retrying after 5 seconds'));
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      const status = execSync('curl http://elastic:changeme@localhost:9220/_cluster/health', {
-        encoding: 'utf8',
-        stdio: 'pipe',
-      });
-      if (status.includes('"status":"green"')) {
-        isEsUp = true;
-
-        log(chalk.greenBright('Elasticsearch is up !!'));
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-}
-
-async function waitForHeartbeatData() {
-  log(chalk.yellowBright('Waiting for heartbeat to start sending data to ES '));
-  let status = false;
-
-  while (!status) {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const { data } = await axios.post(
-        'http://elastic:changeme@localhost:9220/heartbeat-*/_search',
-        {
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'summary',
-                  },
-                },
-              ],
-            },
-          },
-        }
-      );
-
-      // we want some data in uptime app
-      status = data?.hits.total.value >= 2;
-
-      if (status) {
-        log(chalk.bold.greenBright('Heartbeat is up and running, found data !!'));
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-}
-
-function changePassword() {
-  const esUrl =
-    'http://elastic:changeme@localhost:9220/_security/user/kibana_system/_password?pretty';
-  execSync(
-    `curl -X POST "${esUrl}" -H 'Content-Type: application/json' -d'{ "password" : "changeme"}'`,
-    { encoding: 'utf8', stdio: 'pipe' }
-  );
-}
-
 export async function runTests({}: FtrProviderContext) {
   await new Promise(() => {});
 }
@@ -127,11 +58,6 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   }
 
   await waitForDocker();
-  await waitForES();
-
-  changePassword();
-
-  await waitForHeartbeatData();
 
   log(chalk.bgGreen(chalk.black('Starting kibana server')));
 

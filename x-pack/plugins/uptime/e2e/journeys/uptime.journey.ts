@@ -11,11 +11,24 @@ export const byTestId = (testId: string) => {
   return `[data-test-subj=${testId}]`;
 };
 
-journey('uptime', async ({ page }) => {
+journey('uptime', ({ page }) => {
   async function refreshUptimeApp() {
     while (!(await page.$('div.euiBasicTable'))) {
       await page.click('[data-test-subj=superDatePickerApplyTimeButton]');
       await page.waitForTimeout(5 * 1000);
+    }
+  }
+
+  async function waitForKibanaToLoad() {
+    let isStillLoading = true;
+
+    while (isStillLoading) {
+      const welcomeMessage = await page.$('text="Welcome to Elastic"');
+      isStillLoading = welcomeMessage === null;
+      if (isStillLoading) {
+        await page.reload();
+        await page.waitForTimeout(10 * 1000);
+      }
     }
   }
 
@@ -33,20 +46,16 @@ journey('uptime', async ({ page }) => {
     await page.goto('http://localhost:5620/app/uptime?dateRangeStart=now-2y&dateRangeEnd=now', {
       waitUntil: 'networkidle',
     });
-    await page.waitForSelector(byTestId('kbnLoadingMessage'), {
-      timeout: 60 * 2000,
-    });
+    await waitForKibanaToLoad();
   });
 
   step('Login into kibana', async () => {
-    await waitForLoadingToFinish();
     await page.fill('[data-test-subj=loginUsername]', 'elastic', {
       timeout: 60 * 1000,
     });
     await page.fill('[data-test-subj=loginPassword]', 'changeme');
 
     await page.click('[data-test-subj=loginSubmit]');
-    await page.waitForTimeout(60 * 1000);
   });
 
   step('dismiss synthetics notice', async () => {
