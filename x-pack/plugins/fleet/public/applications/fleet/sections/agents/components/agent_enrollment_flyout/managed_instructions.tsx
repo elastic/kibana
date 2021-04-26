@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,12 @@ import {
   useFleetStatus,
 } from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
-import { FleetServerRequirementPage } from '../../agent_requirements_page';
+import {
+  FleetServerRequirementPage,
+  ServiceTokenStep,
+  FleetServerCommandStep,
+  useFleetServerInstructions,
+} from '../../agent_requirements_page';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
@@ -58,23 +63,55 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const fleetStatus = useFleetStatus();
 
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+  const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
   const settings = useGetSettings();
-  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+  const fleetServerInstructions = useFleetServerInstructions();
 
-  const steps: EuiContainedStepProps[] = [
-    DownloadStep(),
-    AgentPolicySelectionStep({ agentPolicies, setSelectedAPIKeyId }),
-    {
-      title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
-        defaultMessage: 'Enroll and start the Elastic Agent',
+  const steps = useMemo(() => {
+    const {
+      serviceToken,
+      getServiceToken,
+      isLoadingServiceToken,
+      installCommand,
+      platform,
+      setPlatform,
+    } = fleetServerInstructions;
+    const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+    const baseSteps: EuiContainedStepProps[] = [
+      DownloadStep(),
+      AgentPolicySelectionStep({
+        agentPolicies,
+        setSelectedAPIKeyId,
+        setIsFleetServerPolicySelected,
       }),
-      children: apiKey.data && (
-        <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
-      ),
-    },
-  ];
+    ];
+    if (isFleetServerPolicySelected) {
+      baseSteps.push(
+        ...[
+          ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
+          FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+        ]
+      );
+    } else {
+      baseSteps.push({
+        title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
+          defaultMessage: 'Enroll and start the Elastic Agent',
+        }),
+        children: apiKey.data && (
+          <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
+        ),
+      });
+    }
+    return baseSteps;
+  }, [
+    agentPolicies,
+    apiKey.data,
+    isFleetServerPolicySelected,
+    settings.data?.item?.fleet_server_hosts,
+    fleetServerInstructions,
+  ]);
 
   return (
     <>

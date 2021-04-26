@@ -272,7 +272,7 @@ exports.Cluster = class Cluster {
     // especially because we currently run many instances of ES on the same machine during CI
     options.esEnvVars.ES_JAVA_OPTS =
       (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
-      '-Xms1g -Xmx1g';
+      '-Xms2g -Xmx2g';
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,

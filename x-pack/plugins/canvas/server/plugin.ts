@@ -10,8 +10,9 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { ReportingSetup } from '../../reporting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
@@ -25,6 +26,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   bfetch: BfetchServerSetup;
+  reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -40,34 +42,7 @@ export class CanvasPlugin implements Plugin {
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
 
-    plugins.features.registerKibanaFeature({
-      id: 'canvas',
-      name: 'Canvas',
-      order: 300,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      app: ['canvas', 'kibana'],
-      catalogue: ['canvas'],
-      privileges: {
-        all: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: ['canvas-workpad', 'canvas-element'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show'],
-        },
-        read: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
     const canvasRouter = coreSetup.http.createRouter();
 

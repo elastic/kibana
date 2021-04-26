@@ -288,7 +288,7 @@ export class DataRecognizer {
       body: searchBody,
     });
 
-    // @ts-expect-error fix search response
+    // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
 
@@ -1181,13 +1181,13 @@ export class DataRecognizer {
       return;
     }
 
-    // @ts-expect-error
+    // @ts-expect-error numeral missing value
     const maxBytes: number = numeral(maxMml.toUpperCase()).value();
 
     for (const job of moduleConfig.jobs) {
       const mml = job.config?.analysis_limits?.model_memory_limit;
       if (mml !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const mmlBytes: number = numeral(mml.toUpperCase()).value();
         if (mmlBytes > maxBytes) {
           // if the job's mml is over the max,
@@ -1306,7 +1306,7 @@ export class DataRecognizer {
       const job = jobs.find((j) => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
-        // @ts-expect-error
+        // @ts-expect-error missing job_id
         delete jobSpecificOverride.job_id;
         merge(job.config, jobSpecificOverride);
         processArrayValues(job.config, jobSpecificOverride);
