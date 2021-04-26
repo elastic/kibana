@@ -9,15 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
