@@ -93,14 +93,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .get(`/api/alerts/alert/${encodeURIComponent(alertId)}/_instance_summary`)
       .expect(200);
     return summary;
   }
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .post(
+        `/api/alerts/alert/${encodeURIComponent(alertId)}/alert_instance/${encodeURIComponent(
+          alertInstanceId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
@@ -640,17 +644,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the muted inactive alert instances', async () => {
         // mute an alert instance that doesn't exist
-        await muteAlertInstance(alert.id, 'eu-east');
+        await muteAlertInstance(alert.id, 'eu/east');
 
         // refresh to see alert
         await browser.refresh();
 
         const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(
-          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu/east')
         ).to.eql([
           {
-            instance: 'eu-east',
+            instance: 'eu/east',
             status: 'OK',
             start: '',
             duration: '',
@@ -693,14 +697,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive instance', async () => {
-        log.debug(`Ensuring eu-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+        log.debug(`Ensuring eu/east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu/east', true);
 
-        log.debug(`Unmuting eu-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Unmuting eu/east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu/east');
 
-        log.debug(`Ensuring eu-east is removed from list`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+        log.debug(`Ensuring eu/east is removed from list`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu/east', false);
       });
     });
 

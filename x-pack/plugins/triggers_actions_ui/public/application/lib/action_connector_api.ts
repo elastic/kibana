@@ -39,7 +39,7 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  return await http.put(`${BASE_ACTION_API_PATH}/action/${id}`, {
+  return await http.put(`${BASE_ACTION_API_PATH}/action/${encodeURIComponent(id)}`, {
     body: JSON.stringify({
       name: connector.name,
       config: connector.config,
@@ -57,7 +57,9 @@ export async function deleteActions({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/action/${id}`))).then(
+  await Promise.all(
+    ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/action/${encodeURIComponent(id)}`))
+  ).then(
     function (fulfilled) {
       successes.push(...fulfilled);
     },
@@ -77,7 +79,7 @@ export async function executeAction({
   http: HttpSetup;
   params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<unknown>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {
+  return http.post(`${BASE_ACTION_API_PATH}/action/${encodeURIComponent(id)}/_execute`, {
     body: JSON.stringify({ params }),
   });
 }

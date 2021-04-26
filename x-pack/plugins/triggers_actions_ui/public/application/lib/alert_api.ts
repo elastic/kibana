@@ -246,7 +246,9 @@ export async function muteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_mute`);
+  await http.post(
+    `${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${encodeURIComponent(instanceId)}/_mute`
+  );
 }
 
 export async function unmuteAlertInstance({
@@ -258,7 +260,9 @@ export async function unmuteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_unmute`);
+  await http.post(
+    `${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${encodeURIComponent(instanceId)}/_unmute`
+  );
 }
 
 export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {

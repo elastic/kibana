@@ -664,12 +664,12 @@ describe('disableAlert', () => {
 
 describe('muteAlertInstance', () => {
   test('should call mute instance alert API', async () => {
-    const result = await muteAlertInstance({ http, id: '1', instanceId: '123' });
+    const result = await muteAlertInstance({ http, id: '1', instanceId: '12/3' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerts/alert/1/alert_instance/123/_mute",
+          "/api/alerts/alert/1/alert_instance/12%2F3/_mute",
         ],
       ]
     `);
@@ -678,12 +678,12 @@ describe('muteAlertInstance', () => {
 
 describe('unmuteAlertInstance', () => {
   test('should call mute instance alert API', async () => {
-    const result = await unmuteAlertInstance({ http, id: '1', instanceId: '123' });
+    const result = await unmuteAlertInstance({ http, id: '1', instanceId: '1/23' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerts/alert/1/alert_instance/123/_unmute",
+          "/api/alerts/alert/1/alert_instance/1%2F23/_unmute",
         ],
       ]
     `);
