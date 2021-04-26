@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
@@ -46,7 +47,14 @@ export function setupSavedObjects(
           warnings: [
             {
               type: 'action_required',
-              message: `${objs.length} Connectors have been imported but need to be enabled`,
+              // message: `${objs.length} Connectors have been imported but need to be enabled`,
+              message: i18n.translate('xpack.actions.savedObjects.onImportText', {
+                defaultMessage:
+                  '{objsLength} {objsLength, plural, one {Connector} other {Connectors}} have been imported but need to be enabled',
+                values: {
+                  objsLength: objs.length,
+                },
+              }),
               actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
             },
           ],

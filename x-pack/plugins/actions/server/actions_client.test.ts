@@ -1403,6 +1403,70 @@ describe('update()', () => {
     `);
   });
 
+  test('updates an action with enabledAfterImport "false" (set faalse as the import result), to enabledAfterImport', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        enabledAfterImport: false,
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        enabledAfterImport: true,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      enabledAfterImport: true,
+      name: 'my name',
+      config: {},
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "enabledAfterImport": true,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
+      ]
+    `);
+  });
+
   test('validates config', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
