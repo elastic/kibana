@@ -12,21 +12,16 @@ A timeslider is a UX component that allows users to intuitively navigate through
 
 This RFC proposes adding a timeslider control to the Maps application. 
 
-It proposes a two phased for roll-out in the Maps application.
-- arbitrary time-range selection with stepped navigation
-- data histogram preview and playback
-
-The design proposal focuses on the first phase.
+It proposes a two phased for roll-out in the Maps application. The detailed design proposal focuses on the first phase.
 
 Since the a timeslider UX is relevant for other Kibana apps, the implementation should be portable. We propose to implement the control as a React-component 
 without implicit dependencies on Kibana-state or Maps-state.
 
-The RFC details the integration of this control in Maps, with some specific consideration to how timeslider affects data-refresh in the context of Maps.
+The RFC details the integration of this control in Maps. It includes specific consideration to how timeslider affects data-refresh in the context of Maps.
 
-This RFC also outlines a possible integration  of this Timeslider-React component with an Embeddable, and the introduction of a new piece of embeeddable-state `TimesSlice`.
+This RFC also outlines a possible integration  of this Timeslider-React component with an Embeddable, and the introduction of a new piece of embeddable-state `TimesSlice`.
 
 This RFC does not address how this component should _behave_ in apps other than the Maps-app.
-
 
 # 2. Detailed design
 
@@ -74,8 +69,8 @@ export type Timeslice = {
 
 export interface TimeSliderProps {
   onTimesliceChanged: (timeslice: Timeslice) => void;
-  timerange: Timerange; // TimeRange The start and end time of the entire time-range. TimeRange is defined in 
-  timeslice?: Timeslice; // The currently displayed timeslice. Needs to be set after onTimesliceChange to be reflected back in UX
+  timerange: Timerange; // TimeRange The start and end time of the entire time-range. TimeRange is defined in `data/common` 
+  timeslice?: Timeslice; // The currently displayed timeslice. Needs to be set after onTimesliceChange to be reflected back in UX. If ommitted, the control selects the first timeslice.
 }
 ```
 
@@ -85,7 +80,7 @@ Any change to `timeslice`, either by dragging the handles of the timeslider, or 
 
 Since the initial use is inside Maps, the initial location of this React-component is inside the Maps plugin, `x-pack/plugins/maps/public/timeslider`.
 
-Nonetheless, this UX-component should be easily "copy-pastable" to another location. See 
+Nonetheless, this UX-component should be easily "copy-pastable" to another location.
 
 ### 2.2.2 Internals
 
