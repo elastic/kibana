@@ -19,7 +19,10 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
 
       const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
 
-      expect(actualDiscoverQueryHits).to.be(expectedDiscoverQueryHits);
+      expect(actualDiscoverQueryHits).to.eql(
+        expectedDiscoverQueryHits,
+        `Discover query hits should be ${expectedDiscoverQueryHits}, got ${actualDiscoverQueryHits}`
+      );
     },
 
     async assertNoResults(expectedDestinationIndex: string) {
@@ -27,7 +30,10 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       const actualIndexPatternSwitchLinkText = await (
         await testSubjects.find('indexPattern-switch-link')
       ).getVisibleText();
-      expect(actualIndexPatternSwitchLinkText).to.be(expectedDestinationIndex);
+      expect(actualIndexPatternSwitchLinkText).to.eql(
+        expectedDestinationIndex,
+        `Destination index should be ${expectedDestinationIndex}, got ${expectedDestinationIndex}`
+      );
 
       await testSubjects.existOrFail('discoverNoResults');
     },
