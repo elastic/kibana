@@ -21,7 +21,8 @@ export const EventFiltersListPage = memo(() => {
         />
       }
       subtitle={i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
-        defaultMessage: 'Something here about Event Filtering....',
+        defaultMessage:
+          'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch. Event filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their Agents.',
       })}
     >
       {/* <PaginatedContent />*/}
