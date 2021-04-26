@@ -9,12 +9,13 @@ import uuid from 'uuid';
 
 import { OsType } from '../../../../../lists/common/schemas';
 import {
+  Entry,
   EntriesArray,
   EntryMatch,
+  EntriesMatchWildcardCaseless,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
-  Operator,
 } from '../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import {
@@ -27,7 +28,6 @@ import {
   EffectScope,
   NewTrustedApp,
   OperatingSystem,
-  OperatorEntryField,
   TrustedApp,
   UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
@@ -48,17 +48,18 @@ const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
 };
 
 const POLICY_REFERENCE_PREFIX = 'policy:';
+const OPERATOR_VALUE = 'included';
 
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
   return list.filter((item: T | undefined): item is T => item !== undefined);
 };
 
-export const createConditionEntry = <T extends ConditionEntryField, O extends OperatorEntryField>(
+export const createConditionEntry = <T extends ConditionEntryField>(
   field: T,
-  operator: O,
+  type: Entry['type'],
   value: string
 ): ConditionEntry<T> => {
-  return { field, value, type: 'match', operator };
+  return { field, value, type, operator: OPERATOR_VALUE };
 };
 
 export const tagsToEffectScope = (tags: string[]): EffectScope => {
@@ -76,46 +77,26 @@ export const tagsToEffectScope = (tags: string[]): EffectScope => {
   }
 };
 
-type TrustedAppsEntriesArray = Omit<EntriesArray, 'operator'> & {
-  operator: Operator | 'wildcard_caseless';
-};
-
-export const entriesToConditionEntriesMap = (
-  entries: TrustedAppsEntriesArray
-): ConditionEntriesMap => {
+export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
   return entries.reduce((result, entry) => {
     if (entry.field.startsWith('process.hash') && entry.type === 'match') {
       return {
         ...result,
         [ConditionEntryField.HASH]: createConditionEntry(
           ConditionEntryField.HASH,
-          OperatorEntryField.included,
+          entry.type,
           entry.value
         ),
       };
     } else if (
       entry.field === 'process.executable.caseless' &&
-      entry.type === 'match' &&
-      entry.operator === OperatorEntryField.wildcard_caseless
+      (entry.type === 'match' || entry.type === 'wildcard')
     ) {
       return {
         ...result,
         [ConditionEntryField.PATH]: createConditionEntry(
           ConditionEntryField.PATH,
-          OperatorEntryField.wildcard_caseless,
-          entry.value
-        ),
-      };
-    } else if (
-      entry.field === 'process.executable.caseless' &&
-      entry.type === 'match' &&
-      entry.operator === OperatorEntryField.included
-    ) {
-      return {
-        ...result,
-        [ConditionEntryField.PATH]: createConditionEntry(
-          ConditionEntryField.PATH,
-          OperatorEntryField.included,
+          entry.type,
           entry.value
         ),
       };
@@ -129,7 +110,7 @@ export const entriesToConditionEntriesMap = (
           ...result,
           [ConditionEntryField.SIGNER]: createConditionEntry(
             ConditionEntryField.SIGNER,
-            OperatorEntryField.included,
+            entry.type,
             subjectNameCondition.value
           ),
         };
@@ -200,12 +181,15 @@ const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
   }
 };
 
-export const createEntryMatch = (
+export const createEntryMatch = (field: string, value: string): EntryMatch => {
+  return { field, value, type: 'match', operator: OPERATOR_VALUE };
+};
+
+export const createEntryMatchWildcardCaseless = (
   field: string,
-  operator: OperatorEntryField,
   value: string
-): EntryMatch => {
-  return { field, value, type: 'match', operator };
+): EntriesMatchWildcardCaseless => {
+  return { field, value, type: 'wildcard', operator: OPERATOR_VALUE };
 };
 
 export const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNested => {
@@ -225,29 +209,20 @@ export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): E
     if (conditionEntry.field === ConditionEntryField.HASH) {
       return createEntryMatch(
         `process.hash.${hashType(conditionEntry.value)}`,
-        OperatorEntryField.included,
         conditionEntry.value.toLowerCase()
       );
     } else if (conditionEntry.field === ConditionEntryField.SIGNER) {
       return createEntryNested(`process.Ext.code_signature`, [
-        createEntryMatch('trusted', OperatorEntryField.included, 'true'),
-        createEntryMatch('subject_name', OperatorEntryField.included, conditionEntry.value),
+        createEntryMatch('trusted', 'true'),
+        createEntryMatch('subject_name', conditionEntry.value),
       ]);
     } else if (
       conditionEntry.field === ConditionEntryField.PATH &&
-      conditionEntry.operator === OperatorEntryField.wildcard_caseless
+      conditionEntry.type === 'wildcard'
     ) {
-      return createEntryMatch(
-        `process.executable.caseless`,
-        OperatorEntryField.wildcard_caseless,
-        conditionEntry.value
-      );
+      return createEntryMatchWildcardCaseless(`process.executable.caseless`, conditionEntry.value);
     } else {
-      return createEntryMatch(
-        `process.executable.caseless`,
-        OperatorEntryField.included,
-        conditionEntry.value
-      );
+      return createEntryMatch(`process.executable.caseless`, conditionEntry.value);
     }
   });
 };

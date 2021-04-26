@@ -20,7 +20,7 @@ import {
 import {
   ConditionEntry,
   ConditionEntryField,
-  OperatorEntryField,
+  OperatorFieldIds,
   OperatingSystem,
 } from '../../../../../../../common/endpoint/types';
 
@@ -79,10 +79,10 @@ const InputItem = styled.div`
   vertical-align: baseline;
 `;
 
-const operatorOptions = (Object.keys(OperatorEntryField) as OperatorEntryField[]).map((value) => ({
+const operatorOptions = (Object.keys(OperatorFieldIds) as OperatorFieldIds[]).map((value) => ({
   dropdownDisplay: OPERATOR_TITLES[value],
   inputDisplay: OPERATOR_TITLES[value],
-  value,
+  value: value === 'matches' ? 'wildcard' : 'match',
 }));
 
 export const ConditionEntryInput = memo<ConditionEntryInputProps>(
@@ -144,7 +144,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleOperatorUpdate = useCallback(
-      (newOperator) => onChange({ ...entry, operator: newOperator }, entry),
+      (newOperator) => onChange({ ...entry, type: newOperator }, entry),
       [entry, onChange]
     );
 
@@ -174,13 +174,13 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               <EuiSuperSelect
                 options={operatorOptions}
                 onChange={handleOperatorUpdate}
-                valueOfSelected={entry.operator}
+                valueOfSelected={entry.type}
                 data-test-subj={getTestId('operator')}
               />
             ) : (
               <EuiFieldText
                 name="operator"
-                value={OPERATOR_TITLES.included}
+                value={OPERATOR_TITLES.is}
                 data-test-subj={getTestId('operator')}
                 readOnly
               />

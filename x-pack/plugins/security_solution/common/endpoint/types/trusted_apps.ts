@@ -7,6 +7,8 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { ApplicationStart } from 'kibana/public';
+
+import { Entry } from '../../../../lists/common/schemas/types/entries';
 import {
   DeleteTrustedAppsRequestSchema,
   GetOneTrustedAppRequestSchema,
@@ -69,14 +71,15 @@ export enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
-export enum OperatorEntryField {
-  included = 'included',
-  wildcard_caseless = 'wildcard_caseless',
+export enum OperatorFieldIds {
+  is = 'is',
+  matches = 'matches',
 }
+
 export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
-  type: 'match';
-  operator: keyof typeof OperatorEntryField;
+  type: Entry['type'];
+  operator: 'included';
   value: string;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem, OperatorEntryField } from '../types';
+import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -29,17 +29,13 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-const ConditionEntryTypeSchema = schema.literal('match');
-// when field === PATH -> operator in ('included', 'wildcard_caseless') else operator === 'included'
-const ConditionEntryOperatorSchema = schema.conditional(
+const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
   ConditionEntryField.PATH,
-  schema.oneOf([
-    schema.literal(OperatorEntryField.included),
-    schema.literal(OperatorEntryField.wildcard_caseless),
-  ]),
-  schema.literal(OperatorEntryField.included)
+  schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
+  schema.literal('match')
 );
+const ConditionEntryOperatorSchema = schema.literal('included' as ConditionEntry['operator']);
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS

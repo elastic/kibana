@@ -11,7 +11,7 @@ import {
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
   ConditionEntryField,
-  OperatorEntryField,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export { OS_TITLES } from '../../../common/translations';
@@ -52,19 +52,13 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
   ),
 };
 
-export const OPERATOR_TITLES: { [K in OperatorEntryField]: string } = {
-  [OperatorEntryField.included]: i18n.translate(
-    'xpack.securitySolution.trustedapps.card.operator.is',
-    {
-      defaultMessage: 'is',
-    }
-  ),
-  [OperatorEntryField.wildcard_caseless]: i18n.translate(
-    'xpack.securitySolution.trustedapps.card.operator.matches',
-    {
-      defaultMessage: 'matches',
-    }
-  ),
+export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
+  is: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
+    defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
+    defaultMessage: 'matches',
+  }),
 };
 
 export const PROPERTY_TITLES: Readonly<
