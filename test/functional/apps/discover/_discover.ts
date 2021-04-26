@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(27);
+        expect(Math.round(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table to contain the right search result', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);

@@ -30,7 +30,7 @@ import {
   ENGINE_SYNONYMS_PATH,
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
-  // ENGINE_SEARCH_UI_PATH,
+  ENGINE_SEARCH_UI_PATH,
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
@@ -40,6 +40,7 @@ import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SearchUI } from '../search_ui';
 import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from './';
@@ -56,7 +57,7 @@ export const EngineRouter: React.FC = () => {
       canManageEngineSynonyms,
       canManageEngineCurations,
       canManageEngineResultSettings,
-      // canManageEngineSearchUi,
+      canManageEngineSearchUi,
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
@@ -120,6 +121,11 @@ export const EngineRouter: React.FC = () => {
       {canViewEngineApiLogs && (
         <Route path={ENGINE_API_LOGS_PATH}>
           <ApiLogs />
+        </Route>
+      )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
         </Route>
       )}
       <Route>
