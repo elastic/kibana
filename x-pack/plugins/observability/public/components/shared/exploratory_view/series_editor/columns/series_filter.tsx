@@ -117,7 +117,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
           button={button}
           isOpen={isPopoverVisible}
           closePopover={closePopover}
-          anchorPosition="leftCenter"
+          anchorPosition={isNew ? 'leftCenter' : 'rightCenter'}
         >
           {!selectedField ? mainPanel : childPanel}
         </EuiPopover>
