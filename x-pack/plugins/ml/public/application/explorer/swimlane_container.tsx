@@ -378,7 +378,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             minInterval: swimlaneData.interval * 1000,
           }
         : undefined,
-    [swimlaneData.earliest, swimlaneData.latest, swimlaneData.interval]
+    [swimlaneData]
   );
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
