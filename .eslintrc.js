@@ -1402,6 +1402,24 @@ module.exports = {
       },
     },
 
+    /**
+     * Do not allow `any`
+     */
+    {
+      files: [
+        'packages/kbn-analytics/**',
+        // 'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        // 'src/plugins/usage_collection/**',
+        // 'src/plugins/telemetry/**',
+        // 'src/plugins/telemetry_collection_manager/**',
+        // 'src/plugins/telemetry_management_section/**',
+        // 'x-pack/plugins/telemetry_collection_xpack/**',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
     {
       files: [
         // core-team owned code
