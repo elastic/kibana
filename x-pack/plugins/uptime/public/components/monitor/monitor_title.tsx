@@ -112,7 +112,7 @@ export const MonitorPageTitle: React.FC = () => {
         </EuiFlexItem>
         {isBrowser && (
           <EuiFlexItem grow={false}>
-            <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" external>
+            <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
               <FormattedMessage
                 id="xpack.uptime.monitorDetails.title.disclaimer.link"
                 defaultMessage="See more"
