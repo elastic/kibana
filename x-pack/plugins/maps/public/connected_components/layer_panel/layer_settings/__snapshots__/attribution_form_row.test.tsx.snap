@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render add form row when attribution not provided 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="columnCompressed"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Attribution"
+  labelType="label"
+>
+  <AttributionPopover
+    label=""
+    onChange={[Function]}
+    popoverButtonIcon="plusInCircleFilled"
+    popoverButtonLabel="Add"
+    url=""
+  />
+</EuiFormRow>
+`;
+
+exports[`Should render edit form row when attribution not provided 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="columnCompressed"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Attribution"
+  labelType="label"
+>
+  <div>
+    <EuiLink
+      color="text"
+      href="url1"
+      target="_blank"
+    >
+      label1
+    </EuiLink>
+    <EuiFlexGrid>
+      <EuiFlexItem
+        grow={false}
+      >
+        <AttributionPopover
+          label="label1"
+          onChange={[Function]}
+          popoverButtonIcon="pencil"
+          popoverButtonLabel="Edit"
+          url="url1"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          iconType="trash"
+          onClick={[Function]}
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="Clear"
+            id="xpack.maps.attribution.clearBtnLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGrid>
+  </div>
+</EuiFormRow>
+`;
+
+exports[`Should render null when layer source has attribution provider 1`] = `""`;
