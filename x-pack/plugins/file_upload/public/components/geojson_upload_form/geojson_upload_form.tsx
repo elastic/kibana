@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { GeoJsonFilePicker, OnFileSelectParameters } from './geojson_file_picker';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
-import { validateIndexName, checkIndexPatternValid } from '../../util/indexing_service';
+import { validateIndexName } from '../../util/indexing_service';
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {

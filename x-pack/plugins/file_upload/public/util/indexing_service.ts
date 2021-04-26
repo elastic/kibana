@@ -42,6 +42,15 @@ export function checkIndexPatternValid(name: string) {
 }
 
 export const validateIndexName = async (indexName: string) => {
+  if (!checkIndexPatternValid(indexName)) {
+    return i18n.translate(
+      'xpack.fileUpload.util.indexingService.indexNameContainsIllegalCharactersErrorMessage',
+      {
+        defaultMessage: 'Index name contains illegal characters.',
+      }
+    );
+  }
+
   const indexNames = await getExistingIndexNames();
   const indexPatternNames = await getIndexPatternService().getTitles();
   let indexNameError;
@@ -57,13 +66,6 @@ export const validateIndexName = async (indexName: string) => {
       'xpack.fileUpload.util.indexingService.indexPatternAlreadyExistsErrorMessage',
       {
         defaultMessage: 'Index pattern already exists.',
-      }
-    );
-  } else if (!checkIndexPatternValid(indexName)) {
-    indexNameError = i18n.translate(
-      'xpack.fileUpload.util.indexingService.indexNameContainsIllegalCharactersErrorMessage',
-      {
-        defaultMessage: 'Index name contains illegal characters.',
       }
     );
   }
