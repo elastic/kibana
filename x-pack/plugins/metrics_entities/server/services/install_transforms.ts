@@ -16,6 +16,7 @@ import {
   getTransformExists,
   logTransformDebug,
   logTransformError,
+  logTransformInfo,
 } from './utils';
 
 interface CreateTransformOptions {
@@ -74,7 +75,7 @@ export const installTransforms = async ({
     const exists = await getTransformExists(esClient, computedName);
     if (!exists) {
       try {
-        logTransformDebug({
+        logTransformInfo({
           id: computedName,
           logger,
           message: 'does not exist, creating the transform',
@@ -86,7 +87,7 @@ export const installTransforms = async ({
         });
 
         if (autoStart) {
-          logTransformDebug({
+          logTransformInfo({
             id: computedName,
             logger,
             message: 'is being auto started',
@@ -95,7 +96,7 @@ export const installTransforms = async ({
             transform_id: computedName,
           });
         } else {
-          logTransformDebug({
+          logTransformInfo({
             id: computedName,
             logger,
             message: 'is not being auto started',

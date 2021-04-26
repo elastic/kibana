@@ -14,3 +14,4 @@ export * from './log_mapping_error';
 export * from './log_mapping_info';
 export * from './log_transform_debug';
 export * from './log_transform_error';
+export * from './log_transform_info';
