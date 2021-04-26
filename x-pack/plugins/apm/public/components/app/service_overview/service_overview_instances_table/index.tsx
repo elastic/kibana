@@ -133,7 +133,7 @@ export function ServiceOverviewInstancesTable({
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'All instances',
+              defaultMessage: 'Instances',
             })}
           </h2>
         </EuiTitle>

@@ -13,7 +13,7 @@ import { UiSettingsParams } from 'kibana/server';
 
 import { MAX_BUCKETS_SETTING } from '../common/constants';
 
-export const uiSettings: Record<string, UiSettingsParams> = {
+export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [MAX_BUCKETS_SETTING]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.maxBucketsTitle', {
       defaultMessage: 'TSVB buckets limit',
@@ -25,4 +25,4 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     schema: schema.number(),
   },
-};
+});
