@@ -10,10 +10,8 @@ import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonFilePicker, OnFileSelectParameters } from './geojson_file_picker';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-// @ts-expect-error
-import { checkIndexPatternValid } from '../../../../../../../x-pack/plugins/file_upload/public/util/indexing_service';
 import { IndexNameForm } from './index_name_form';
-import { validateIndexName } from '../../util/indexing_service';
+import { validateIndexName, checkIndexPatternValid } from '../../util/indexing_service';
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {

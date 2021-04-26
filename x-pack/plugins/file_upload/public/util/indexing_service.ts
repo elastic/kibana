@@ -7,15 +7,21 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { http as httpService } from './http_service';
-import { getIndexPatternService } from '../kibana_services';
+import { getIndexPatternService, getHttp } from '../kibana_services';
 
 export const getExistingIndexNames = _.debounce(
   async () => {
-    const indexes = await httpService({
-      url: `/api/index_management/indices`,
-      method: 'GET',
-    });
+    let indexes;
+    try {
+      indexes = await getHttp().fetch({
+        path: `/api/index_management/indices`,
+        method: 'GET',
+      });
+    } catch (e) {
+      // Log to console. Further diagnostics can be made in network request
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
     return indexes ? indexes.map(({ name }: { name: string }) => name) : [];
   },
   10000,
@@ -38,13 +44,19 @@ export function checkIndexPatternValid(name: string) {
 export const validateIndexName = async (indexName: string) => {
   const indexNames = await getExistingIndexNames();
   const indexPatternNames = await getIndexPatternService().getTitles();
-  const indexNamesAndPatterns = [...indexNames, ...indexPatternNames];
   let indexNameError;
-  if (indexNamesAndPatterns.includes(indexName)) {
+  if (indexNames.includes(indexName)) {
     indexNameError = i18n.translate(
       'xpack.fileUpload.util.indexingService.indexNameAlreadyExistsErrorMessage',
       {
         defaultMessage: 'Index name already exists.',
+      }
+    );
+  } else if (indexPatternNames.includes(indexName)) {
+    indexNameError = i18n.translate(
+      'xpack.fileUpload.util.indexingService.indexPatternAlreadyExistsErrorMessage',
+      {
+        defaultMessage: 'Index pattern already exists.',
       }
     );
   } else if (!checkIndexPatternValid(indexName)) {
