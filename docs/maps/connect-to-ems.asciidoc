@@ -91,7 +91,7 @@ endif::[]
  | Specifies the port used by the backend server. Default: *`8080`*. <<server-port,Equivalent {kib} setting>>. 
 
 | `basePath`
- | Specify a path to mount the server as if you are running behind a proxy. This setting cannot end in a slash (`/`). <<server-basePath,Equivalent {kib} setting>>. 
+ | Specify a path at which to mount the server if you are running behind a proxy. This setting cannot end in a slash (`/`). <<server-basePath,Equivalent {kib} setting>>. 
 
 | `ui`
  | Controls the display of the status page and the layer preview. *Default: `true`*
