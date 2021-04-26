@@ -89,6 +89,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
           <EuiContextMenuItem
             key="manage"
             icon="indexSettings"
+            data-test-subj="indexPattern-manage-field"
             onClick={() => {
               setIsAddIndexPatternFieldPopoverOpen(false);
               core.application.navigateToApp('management', {

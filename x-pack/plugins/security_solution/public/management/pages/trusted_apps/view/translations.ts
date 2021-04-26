@@ -150,10 +150,6 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
   }
 );
 
-export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
-  defaultMessage: 'No items found',
-});
-
 export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
   [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',

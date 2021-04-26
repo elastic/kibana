@@ -55,8 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await button.click();
   };
 
-  // Flaky: https://github.com/elastic/kibana/issues/68400
-  describe.skip('saved objects edition page', () => {
+  describe('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load('saved_objects_management/edit_saved_object');
     });
