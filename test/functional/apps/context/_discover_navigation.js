@@ -35,7 +35,10 @@ export default function ({ getService, getPageObjects }) {
   describe('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
