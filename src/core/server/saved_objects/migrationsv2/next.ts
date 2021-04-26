@@ -33,6 +33,8 @@ import type {
   SetTempWriteBlock,
   WaitForYellowSourceState,
   TransformRawDocs,
+  TransformedDocumentsBulkIndex,
+  ReindexSourceToTempIndexBulk,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -75,10 +77,17 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.closePit(client, state.sourceIndexPitId),
     REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
       Actions.transformDocs(
-        client,
+        // client,
         transformRawDocs,
-        state.outdatedDocuments,
+        state.outdatedDocuments
+        // state.tempIndex,
+        // false
+      ),
+    REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
+      Actions.bulkOverwriteTransformedDocuments(
+        client,
         state.tempIndex,
+        state.transformedDocs,
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
@@ -113,10 +122,25 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       // The alternative is to use a search_after with either a tie_breaker
       // field or using a Point In Time as a cursor to go through all documents.
       Actions.transformDocs(
-        client,
+        // client,
         transformRawDocs,
-        state.outdatedDocuments,
+        state.outdatedDocuments
+        // state.targetIndex,
+        // 'wait_for'
+      ),
+    TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: TransformedDocumentsBulkIndex) =>
+      // Wait for a refresh to happen before returning. This ensures that when
+      // this Kibana instance searches for outdated documents, it won't find
+      // documents that were already transformed by itself or another Kibana
+      // instance. However, this causes each OUTDATED_DOCUMENTS_SEARCH ->
+      // OUTDATED_DOCUMENTS_TRANSFORM cycle to take 1s so when batches are
+      // small performance will become a lot worse.
+      // The alternative is to use a search_after with either a tie_breaker
+      // field or using a Point In Time as a cursor to go through all documents.
+      Actions.bulkOverwriteTransformedDocuments(
+        client,
         state.targetIndex,
+        state.transformedDocs,
         'wait_for'
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>

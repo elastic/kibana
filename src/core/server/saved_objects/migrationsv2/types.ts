@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
@@ -13,6 +14,10 @@ import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 import { TransformErrorObjects } from '../migrations/core';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../migrations/core/migrate_raw_docs';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -169,6 +174,8 @@ export interface ReindexSourceToTempRead extends PostInitState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -179,6 +186,15 @@ export interface ReindexSourceToTempClosePit extends PostInitState {
 export interface ReindexSourceToTempIndex extends PostInitState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
   readonly outdatedDocuments: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+}
+
+export interface ReindexSourceToTempIndexBulk extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
+  readonly transformedDocs: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
 }
@@ -327,6 +343,7 @@ export type State =
   | ReindexSourceToTempRead
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndex
+  | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -349,4 +366,6 @@ export type AllControlStates = State['controlState'];
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
 
-export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
+export type TransformRawDocs = (
+  rawDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
