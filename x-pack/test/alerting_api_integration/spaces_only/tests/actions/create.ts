@@ -80,7 +80,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: false,
           name: 'My action',
           actionTypeId: 'test.index-record',
-          isMissingSecrets: true,
+          isMissingSecrets: false,
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },

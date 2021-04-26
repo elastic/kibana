@@ -39,7 +39,7 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
-      isMissingSecrets: true,
+      isMissingSecrets: false,
     };
 
     const createApiResult = {
@@ -102,7 +102,7 @@ describe('createActionRoute', () => {
       name: 'My name',
       actionTypeId: 'abc',
       // "is_missing_secrets": true,
-      isMissingSecrets: true,
+      isMissingSecrets: false,
       config: { foo: true },
       isPreconfigured: false,
     });
@@ -142,7 +142,7 @@ describe('createActionRoute', () => {
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
-      isMissingSecrets: true,
+      isMissingSecrets: false,
       isPreconfigured: false,
     });
 

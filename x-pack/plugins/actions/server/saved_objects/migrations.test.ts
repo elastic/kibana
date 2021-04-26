@@ -128,7 +128,7 @@ describe('7.14.0', () => {
       ...action,
       attributes: {
         ...action.attributes,
-        isMissingSecrets: true,
+        isMissingSecrets: false,
       },
     });
   });

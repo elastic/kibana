@@ -194,7 +194,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             actionTypeId: 'test.index-record',
-            isMissingSecrets: true,
+            isMissingSecrets: false,
             name: 'My action updated',
             config: {
               unencrypted: `This value shouldn't get encrypted`,

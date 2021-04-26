@@ -155,7 +155,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
-        isMissingSecrets: true,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -230,7 +230,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
-        isMissingSecrets: true,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },

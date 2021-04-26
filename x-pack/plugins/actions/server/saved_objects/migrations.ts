@@ -140,7 +140,7 @@ const addisMissingSecretsField = (
     ...doc,
     attributes: {
       ...doc.attributes,
-      isMissingSecrets: true,
+      isMissingSecrets: false,
     },
   };
 };
