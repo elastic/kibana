@@ -167,9 +167,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    let resp;
     try {
-      resp = await searchSource
+      const { rawResponse: resp } = await searchSource
         .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
@@ -182,6 +181,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           },
         })
         .toPromise();
+      return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
@@ -194,8 +194,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         })
       );
     }
-
-    return resp;
   }
 
   async makeSearchSource(

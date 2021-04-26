@@ -325,7 +325,7 @@ export class SearchEmbeddable
 
     try {
       // Make the request
-      const resp = await searchSource
+      const { rawResponse: resp } = await searchSource
         .fetch$({
           abortSignal: this.abortController.signal,
           sessionId: searchSessionId,

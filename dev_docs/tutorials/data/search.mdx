@@ -355,7 +355,7 @@ export class SearchEmbeddable
       this.updateOutput({ loading: true, error: undefined });
 
       // Make the request, wait for the final result
-      const resp = await searchSource.fetch$({
+      const {rawResponse: resp} = await searchSource.fetch$({
         sessionId: searchSessionId,
       }).toPromise();
 

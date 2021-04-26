@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
+protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "legacyHitsTotal" | "sessionId" | "isStored" | "isRestore">;
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions,
 
 <b>Returns:</b>
 
-`Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">`
+`Pick<ISearchOptions, "strategy" | "legacyHitsTotal" | "sessionId" | "isStored" | "isRestore">`
 

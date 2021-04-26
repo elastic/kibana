@@ -233,7 +233,7 @@ export const SearchExamplesApp = ({
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const res = await searchSource.fetch$().toPromise();
+      const { rawResponse: res } = await searchSource.fetch$().toPromise();
       setResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
