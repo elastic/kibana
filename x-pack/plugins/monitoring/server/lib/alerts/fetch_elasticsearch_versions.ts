@@ -6,7 +6,7 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
@@ -60,8 +60,9 @@ export async function fetchElasticsearchVersions(
     },
   };
 
-  const { body: response } = await esClient.search<ElasticsearchSource>(params);
-  return response.hits.hits.map((hit) => {
+  const result = await esClient.search<ElasticsearchSource>(params);
+  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  return (response.hits?.hits ?? []).map((hit) => {
     const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
     return {
       versions,

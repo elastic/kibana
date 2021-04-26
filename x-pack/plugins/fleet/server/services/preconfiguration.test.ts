@@ -71,15 +71,8 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  ensureInstalledPackage({
-    pkgName,
-    pkgVersion,
-    force,
-  }: {
-    pkgName: string;
-    pkgVersion: string;
-    force?: boolean;
-  }) {
+  installPackage({ pkgkey, force }: { pkgkey: string; force?: boolean }) {
+    const [pkgName, pkgVersion] = pkgkey.split('-');
     const installedPackage = mockInstalledPackages.get(pkgName);
     if (installedPackage) {
       if (installedPackage.version === pkgVersion) return installedPackage;
@@ -87,7 +80,14 @@ jest.mock('./epm/packages/install', () => ({
 
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
+
     return packageInstallation;
+  },
+  ensurePackagesCompletedInstall() {
+    return [];
+  },
+  isPackageVersionOrLaterInstalled() {
+    return false;
   },
 }));
 
@@ -114,6 +114,20 @@ jest.mock('./package_policy', () => ({
         ...newPackagePolicy,
       };
     },
+  },
+}));
+
+jest.mock('./app_context', () => ({
+  appContextService: {
+    getLogger: () =>
+      new Proxy(
+        {},
+        {
+          get() {
+            return jest.fn();
+          },
+        }
+      ),
   },
 }));
 
