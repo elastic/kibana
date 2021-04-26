@@ -52,7 +52,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <DiscoverActionName items={[item]} />
+        <DiscoverActionName items={[item]} indexPatternExists={true} />
       </IntlProvider>
     );
 
@@ -72,7 +72,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
     itemCopy.stats.checkpointing.last.checkpoint = 0;
     render(
       <IntlProvider locale="en">
-        <DiscoverActionName items={[itemCopy]} />
+        <DiscoverActionName items={[itemCopy]} indexPatternExists={false} />
       </IntlProvider>
     );
 
