@@ -6,7 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { CASE_COMMENT_SAVED_OBJECT, ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 import {
   AllCommentsResponse,
@@ -30,7 +30,6 @@ import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import {
-  combineAuthorizedAndOwnerFilter,
   combineFilters,
   ensureAuthorized,
   getAuthorizationFilter,
@@ -48,7 +47,6 @@ export interface GetAllArgs {
   caseID: string;
   includeSubCaseComments?: boolean;
   subCaseID?: string;
-  owner?: string | string[];
 }
 
 export interface GetArgs {
@@ -92,15 +90,7 @@ export async function find(
     const fields = includeFieldsRequiredForAuthentication(queryWithoutFilter.fields);
 
     // combine any passed in filter property and the filter for the appropriate owner
-    const combinedFilter = combineFilters([
-      stringToKueryNode(filter),
-      combineAuthorizedAndOwnerFilter(
-        // TODO: remove this
-        queryParams?.owner,
-        authorizationFilter,
-        CASE_COMMENT_SAVED_OBJECT
-      ),
-    ]);
+    const combinedFilter = combineFilters([stringToKueryNode(filter), authorizationFilter]);
 
     const args = queryParams
       ? {
@@ -198,7 +188,7 @@ export async function get(
  * collections. If the entity is a sub case, pass in the subCaseID.
  */
 export async function getAll(
-  { caseID, includeSubCaseComments, subCaseID, owner }: GetAllArgs,
+  { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
   const {
@@ -222,7 +212,7 @@ export async function getAll(
     }
 
     const {
-      filter: authFilter,
+      filter,
       ensureSavedObjectsAreAuthorized,
       logSuccessfulAuthorization,
     } = await getAuthorizationFilter({
@@ -230,9 +220,6 @@ export async function getAll(
       auditLogger,
       operation: Operations.getAllComments,
     });
-
-    // TODO: remove this
-    const filter = combineAuthorizedAndOwnerFilter(owner, authFilter, CASE_COMMENT_SAVED_OBJECT);
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({

@@ -474,5 +474,36 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
     });
+
+    describe('rbac', () => {
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('should update a comment that the user has permissions for', async () => {
+        it('should patch a comment', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          const patchedCase = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+          });
+
+          const newComment = 'Well I decided to update my comment. So what? Deal with it.';
+          const updatedCase = await updateComment(supertest, postedCase.id, {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+            comment: newComment,
+            type: CommentType.user,
+            owner: 'securitySolution',
+          });
+
+          const userComment = updatedCase.comments![0] as AttributesTypeUser;
+          expect(userComment.comment).to.eql(newComment);
+          expect(userComment.type).to.eql(CommentType.user);
+          expect(updatedCase.updated_by).to.eql(defaultUser);
+        });
+      });
+    });
   });
 };

@@ -737,18 +737,15 @@ export const getAllComments = async ({
   caseId,
   expectedHttpCode = 200,
   auth = { user: superUser },
-  query = {},
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
   auth?: { user: User; space?: string };
   expectedHttpCode?: number;
-  query?: Record<string, unknown> | string;
 }): Promise<AllCommentsResponse> => {
   const { body: comments } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
-    .query(query)
     .expect(expectedHttpCode);
 
   return comments;

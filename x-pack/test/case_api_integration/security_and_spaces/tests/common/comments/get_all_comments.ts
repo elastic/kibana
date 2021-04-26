@@ -162,20 +162,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
-          let comments = await getAllComments({
+          const comments = await getAllComments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             auth: { user, space: 'space1' },
-          });
-
-          expect(comments.length).to.eql(2);
-
-          // should retrieve the same number using the owner query param
-          comments = await getAllComments({
-            supertest: supertestWithoutAuth,
-            caseId: caseInfo.id,
-            auth: { user, space: 'space1' },
-            query: { owner: 'securitySolutionFixture' },
           });
 
           expect(comments.length).to.eql(2);
@@ -208,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('should NOT get a case in a space with no permissions', async () => {
+      it('should NOT get a comment in a space with no permissions', async () => {
         const caseInfo = await createCaseAsUser({
           supertestWithoutAuth,
           user: superUser,

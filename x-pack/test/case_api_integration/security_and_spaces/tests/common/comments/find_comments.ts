@@ -305,7 +305,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should return no comments when trying to exploit RBAC through the search query parameter', async () => {
+      it('should not return any comments when trying to exploit RBAC through the search query parameter', async () => {
         const obsCase = await createCaseAsUser({
           supertestWithoutAuth,
           user: superUser,
@@ -327,9 +327,6 @@ export default ({ getService }: FtrProviderContext): void => {
               obsCase.id
             }/comments/_find?search=securitySolutionFixture+observabilityFixture`
           )
-          // passing owner twice here because if you only place a single value it won't be treated as an array
-          // and it will fail the query parameter validation
-          .query({ searchFields: ['owner', 'owner'] })
           .auth(secOnly.username, secOnly.password)
           .expect(200);
 
@@ -387,64 +384,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should NOT allow to pass a non supported query parameter', async () => {
         await supertest.get(`${CASES_URL}/id/comments/_find?notExists=papa`).expect(400);
-      });
-
-      it('should respect the owner filter when having permissions', async () => {
-        const obsCase = await createCaseAsUser({
-          supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?owner=observabilityFixture`
-          )
-          .auth(obsOnly.username, obsOnly.password)
-          .expect(200);
-
-        // shouldn't find any comments since they were created under the observability ownership
-        ensureSavedObjectIsAuthorized(res.comments, 1, ['observabilityFixture']);
-      });
-
-      it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
-        const obsCase = await createCaseAsUser({
-          supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?owner=observabilityFixture`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .expect(200);
-
-        // shouldn't find any comments since they were created under the observability ownership
-        ensureSavedObjectIsAuthorized(res.comments, 0, ['observabilityFixture']);
+        await supertest.get(`${CASES_URL}/id/comments/_find?owner=papa`).expect(400);
       });
     });
   });
