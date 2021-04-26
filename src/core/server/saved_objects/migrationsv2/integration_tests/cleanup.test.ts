@@ -53,7 +53,7 @@ function createRoot() {
   );
 }
 
-describe('migration v2', () => {
+describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
