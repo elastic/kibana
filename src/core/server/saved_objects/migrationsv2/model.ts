@@ -227,7 +227,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: source,
+          sourceIndex: Option.some(source) as Option.Some<string>,
           sourceIndexMappings: indices[source].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
@@ -303,7 +303,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    // If the write block is sucessfully in place
+    // If the write block is successfully in place
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
     } else if (Either.isLeft(res)) {
@@ -431,14 +431,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'SET_SOURCE_WRITE_BLOCK',
-        sourceIndex: Option.some(source) as Option.Some<string>,
+        sourceIndex: source,
         targetIndex: target,
         targetIndexMappings: disableUnknownTypeMappingFields(
           stateP.targetIndexMappings,
           stateP.sourceIndexMappings
         ),
         versionIndexReadyActions: Option.some<AliasAction[]>([
-          { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
+          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
           { add: { index: target, alias: stateP.currentAlias } },
           { add: { index: target, alias: stateP.versionAlias } },
           { remove_index: { index: stateP.tempIndex } },
@@ -466,32 +466,61 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP' };
+      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
       // left responses to handle here.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK',
-        reindexSourceToTargetTaskId: res.right.taskId,
+        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+        sourceIndexPitId: res.right.pitId,
+        lastHitSortValue: undefined,
       };
     } else {
-      // Since this is a background task, the request should always succeed,
-      // errors only show up in the returned task.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_READ') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      if (res.right.outdatedDocuments.length > 0) {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+          outdatedDocuments: res.right.outdatedDocuments,
+          lastHitSortValue: res.right.lastHitSortValue,
+        };
+      }
+      return {
+        ...stateP,
+        controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const { sourceIndexPitId, ...state } = stateP;
+      return {
+        ...state,
+        controlState: 'SET_TEMP_WRITE_BLOCK',
+        sourceIndex: stateP.sourceIndex as Option.Some<string>,
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'SET_TEMP_WRITE_BLOCK',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
       };
     } else {
       const left = res.left;
@@ -510,28 +539,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we know another instance already completed these.
         return {
           ...stateP,
-          controlState: 'SET_TEMP_WRITE_BLOCK',
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
         };
-      } else if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
-        // After waiting for the specificed timeout, the task has not yet
-        // completed. Retry this step to see if the task has completed after an
-        // exponential delay. We will basically keep polling forever until the
-        // Elasticeasrch task succeeds or fails.
-        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
-      } else if (
-        isLeftTypeof(left, 'index_not_found_exception') ||
-        isLeftTypeof(left, 'incompatible_mapping_exception')
-      ) {
-        // Don't handle the following errors as the migration algorithm should
-        // never cause them to occur:
-        // - incompatible_mapping_exception the temp index has `dynamic: false`
-        //   mappings
-        // - index_not_found_exception for the source index, we will never
-        //   delete the source index
-        throwBadResponse(stateP, left as never);
-      } else {
-        throwBadResponse(stateP, left);
       }
+      // should never happen
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -609,7 +621,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
       };
     } else {
-      throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -647,10 +659,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
-        // After waiting for the specificed timeout, the task has not yet
+        // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
         // exponential delay. We will basically keep polling forever until the
-        // Elasticeasrch task succeeds or fails.
+        // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else {
         throwBadResponse(stateP, left);

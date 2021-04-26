@@ -11,7 +11,6 @@ import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
@@ -24,8 +23,7 @@ describe('migrateRawDocs', () => {
       [
         { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
-      ],
-      createSavedObjectsMigrationLoggerMock()
+      ]
     );
 
     expect(result).toEqual([
@@ -59,7 +57,6 @@ describe('migrateRawDocs', () => {
   });
 
   test('throws when encountering a corrupt saved object document', async () => {
-    const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
@@ -69,8 +66,7 @@ describe('migrateRawDocs', () => {
       [
         { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
-      ],
-      logger
+      ]
     );
 
     expect(result).rejects.toMatchInlineSnapshot(
@@ -88,8 +84,7 @@ describe('migrateRawDocs', () => {
     const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
-      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
-      createSavedObjectsMigrationLoggerMock()
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }]
     );
 
     expect(result).toEqual([
@@ -119,12 +114,9 @@ describe('migrateRawDocs', () => {
       throw new Error('error during transform');
     });
     await expect(
-      migrateRawDocs(
-        new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-        transform,
-        [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
-        createSavedObjectsMigrationLoggerMock()
-      )
+      migrateRawDocs(new SavedObjectsSerializer(new SavedObjectTypeRegistry()), transform, [
+        { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
+      ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error during transform"`);
   });
 });

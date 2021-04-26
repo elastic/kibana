@@ -57,7 +57,7 @@ export const getSplitByTermsColor = ({
         }
       : seriesPalette.params;
 
-  const outputColor = palettesRegistry?.get(paletteName).getCategoricalColor(
+  const outputColor = palettesRegistry?.get(paletteName || 'default').getCategoricalColor(
     [
       {
         name: seriesName || emptyLabel,
