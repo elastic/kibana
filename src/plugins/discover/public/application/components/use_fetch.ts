@@ -7,7 +7,7 @@
  */
 import { useMemo, useEffect, useRef, useCallback } from 'react';
 import { merge, Subject, Observable } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../build_services';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
@@ -19,6 +19,7 @@ import { useDocuments } from './use_documents';
 import { GetStateReturn } from '../angular/discover_state';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
+import { fetchStatuses } from './constants';
 
 export interface UseSavedSearch {
   chart$: ChartSubject;
@@ -56,23 +57,10 @@ export const useFetch = ({
   const abortControllerRef = useRef<AbortController | undefined>();
   const { data, filterManager, timefilter } = services;
   const refetch$ = useMemo(() => new Subject(), []);
+  // handler emitted by `timefilter.getAutoRefreshFetch$()`
+  // to notify when data completed loading and to start a new autorefresh loop
+  const autoRefreshDoneCb = useRef<undefined | any>(undefined);
 
-  const fetch$ = useMemo(() => {
-    return merge(
-      refetch$,
-      filterManager.getFetches$(),
-      timefilter.getFetch$(),
-      timefilter.getAutoRefreshFetch$(),
-      data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$
-    ).pipe(debounceTime(100));
-  }, [
-    refetch$,
-    filterManager,
-    timefilter,
-    data.query.queryString,
-    searchSessionManager.newSearchSessionIdFromURL$,
-  ]);
   const { fetch$: chart$, fetch: fetchChart } = useChartData({
     data,
     interval: state.interval!,
@@ -102,18 +90,46 @@ export const useFetch = ({
     shouldSearchOnPageLoad,
   });
 
+  const fetch$ = useMemo(() => {
+    return merge(
+      refetch$,
+      filterManager.getFetches$(),
+      timefilter.getFetch$(),
+      timefilter.getAutoRefreshFetch$().pipe(
+        tap((done) => {
+          autoRefreshDoneCb.current = done;
+        }),
+        filter(() => fetchStatus !== fetchStatuses.LOADING)
+      ),
+      data.query.queryString.getUpdates$(),
+      searchSessionManager.newSearchSessionIdFromURL$
+    ).pipe(debounceTime(100));
+  }, [
+    refetch$,
+    filterManager,
+    timefilter,
+    data.query.queryString,
+    searchSessionManager.newSearchSessionIdFromURL$,
+    fetchStatus,
+  ]);
+
   const fetchAll = useCallback(() => {
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
+    const requests: Array<Promise<any>> = [];
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
-    fetch(abortControllerRef.current, searchSessionId);
+    requests.push(fetch(abortControllerRef.current, searchSessionId));
 
     if (indexPattern.timeFieldName && !state.hideChart) {
-      fetchChart(abortControllerRef.current, searchSessionId);
+      requests.push(fetchChart(abortControllerRef.current, searchSessionId));
     }
 
-    fetchHits(abortControllerRef.current, searchSessionId);
+    requests.push(fetchHits(abortControllerRef.current, searchSessionId));
+    Promise.all(requests).finally(() => {
+      autoRefreshDoneCb.current?.();
+      autoRefreshDoneCb.current = undefined;
+    });
   }, [
     fetch,
     fetchChart,

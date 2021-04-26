@@ -30,21 +30,22 @@ export function useTotalHits({
       searchSource.setField('size', 0);
       subject.next({ state: 'loading' });
 
-      return searchSource
-        .fetch$({
-          abortSignal: abortController.signal,
-          sessionId: searchSessionId,
-        })
-        .subscribe({
-          next: (result) => {
-            subject.next({ state: 'success', total: result.hits.total as number });
-            return result.hits.total;
-          },
-          error: (error) => {
-            if (error instanceof Error && error.name === 'AbortError') return;
-            return error;
-          },
-        });
+      const searchSourceFetch$ = searchSource.fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+      });
+
+      searchSourceFetch$.subscribe({
+        next: (result) => {
+          subject.next({ state: 'success', total: result.hits.total as number });
+          return result.hits.total;
+        },
+        error: (error) => {
+          if (error instanceof Error && error.name === 'AbortError') return;
+          return error;
+        },
+      });
+      return searchSourceFetch$.toPromise();
     },
     [data, savedSearch.searchSource, subject]
   );

@@ -49,7 +49,7 @@ export function useDocuments({
       setFetchError(undefined);
 
       if (!validateTimeRange(services.timefilter.getTime(), services.toastNotifications)) {
-        return;
+        return Promise.reject();
       }
 
       const { sort } = stateContainer.appStateContainer.getState();
