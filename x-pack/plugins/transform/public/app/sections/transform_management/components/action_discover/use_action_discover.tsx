@@ -83,7 +83,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
         );
       },
       description: discoverActionNameText,
-      icon: 'discoverApp',
+      icon: 'visTable',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',
