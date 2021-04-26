@@ -56,7 +56,9 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntry);
 
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
+    // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
+    const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
