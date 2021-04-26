@@ -67,7 +67,7 @@ import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
-const DEFAULT_MINIMUM_CONVERT_VERSION = '7.13.0';
+const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];

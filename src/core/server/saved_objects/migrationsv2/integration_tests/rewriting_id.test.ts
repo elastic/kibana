@@ -147,7 +147,7 @@ describe('migration v2', () => {
       hidden: false,
       mappings: { properties: { name: { type: 'text' } } },
       namespaceType: 'multiple',
-      convertToMultiNamespaceTypeVersion: '7.13.0',
+      convertToMultiNamespaceTypeVersion: '8.0.0',
     });
 
     coreSetup.savedObjects.registerType({
@@ -155,7 +155,7 @@ describe('migration v2', () => {
       hidden: false,
       mappings: { properties: { nomnom: { type: 'integer' } } },
       namespaceType: 'multiple-isolated',
-      convertToMultiNamespaceTypeVersion: '7.13.0',
+      convertToMultiNamespaceTypeVersion: '8.0.0',
     });
 
     const coreStart = await root.start();
@@ -176,7 +176,7 @@ describe('migration v2', () => {
           foo: { name: 'Foo 1 default' },
           references: [],
           namespaces: ['default'],
-          migrationVersion: { foo: '7.13.0' },
+          migrationVersion: { foo: '8.0.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -186,7 +186,7 @@ describe('migration v2', () => {
           references: [],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { foo: '7.13.0' },
+          migrationVersion: { foo: '8.0.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -208,7 +208,7 @@ describe('migration v2', () => {
           bar: { nomnom: 1 },
           references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
           namespaces: ['default'],
-          migrationVersion: { bar: '7.13.0' },
+          migrationVersion: { bar: '8.0.0' },
           coreMigrationVersion: pkg.version,
         },
         {
@@ -218,7 +218,7 @@ describe('migration v2', () => {
           references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { bar: '7.13.0' },
+          migrationVersion: { bar: '8.0.0' },
           coreMigrationVersion: pkg.version,
         },
         {
