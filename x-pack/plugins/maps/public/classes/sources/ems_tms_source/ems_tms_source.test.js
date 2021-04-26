@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../meta', () => {
+jest.mock('../../../util', () => {
   return {
     getEmsTmsServices: () => {
       class MockTMSService {

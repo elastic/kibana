@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 export const registerStopRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.post(
     {
@@ -27,23 +27,21 @@ export const registerStopRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
         const { jobIds } = request.body;
         // For our API integration tests we need to wait for the jobs to be stopped
         // in order to be able to delete them sequentially.
         const { waitForCompletion } = request.query;
         const stopRollupJob = (id: string) =>
-          context.rollup!.client.callAsCurrentUser('rollup.stopJob', {
+          clusterClient.asCurrentUser.rollup.stopJob({
             id,
-            waitForCompletion: waitForCompletion === 'true',
+            wait_for_completion: waitForCompletion === 'true',
           });
         const data = await Promise.all(jobIds.map(stopRollupJob)).then(() => ({ success: true }));
         return response.ok({ body: data });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );

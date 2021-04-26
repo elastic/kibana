@@ -21,7 +21,7 @@ export const Settings: React.FC = () => {
     <>
       <SetPageChrome trail={[SETTINGS_TITLE]} />
       <EuiPageHeader pageTitle={SETTINGS_TITLE} />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <FlashMessages />
           <LogRetentionConfirmationModal />

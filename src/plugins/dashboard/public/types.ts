@@ -33,6 +33,7 @@ import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
+import { VisualizationsStart } from '../../visualizations/public';
 
 export { SavedDashboardPanel };
 
@@ -173,6 +174,7 @@ export interface DashboardAppServices {
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
+  visualizations: VisualizationsStart;
   indexPatterns: IndexPatternsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;

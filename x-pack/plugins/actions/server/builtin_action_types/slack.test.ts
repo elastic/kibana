@@ -195,6 +195,8 @@ describe('execute()', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
@@ -208,6 +210,106 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
+    );
+  });
+
+  test('ensure proxy bypass will bypass when expected', async () => {
+    mockedLogger.debug.mockReset();
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: new Set(['example.com']),
+      proxyOnlyHosts: undefined,
+    });
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
+    );
+  });
+
+  test('ensure proxy bypass will not bypass when expected', async () => {
+    mockedLogger.debug.mockReset();
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: new Set(['not-example.com']),
+      proxyOnlyHosts: undefined,
+    });
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
+    );
+  });
+
+  test('ensure proxy only will proxy when expected', async () => {
+    mockedLogger.debug.mockReset();
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: new Set(['example.com']),
+    });
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
+    );
+  });
+
+  test('ensure proxy only will not proxy when expected', async () => {
+    mockedLogger.debug.mockReset();
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: new Set(['not-example.com']),
+    });
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
     );
   });

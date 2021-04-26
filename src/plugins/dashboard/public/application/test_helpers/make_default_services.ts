@@ -56,12 +56,13 @@ export function makeDefaultServices(): DashboardAppServices {
     saveQuery: true,
     createShortUrl: true,
     hideWriteControls: false,
+    storeSearchSession: true,
     mapsCapabilities: { save: true },
     visualizeCapabilities: { save: true },
-    storeSearchSession: true,
   };
 
   return {
+    visualizations: visualizationsPluginMock.createStartContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     initializerContext: {} as PluginInitializerContext,

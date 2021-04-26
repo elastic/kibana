@@ -23,6 +23,7 @@ import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
+import { isRuntimeMappings } from '../../../common/shared_imports';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
@@ -86,6 +87,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setColumnCharts,
+    setCcsWarning,
     setErrorMessage,
     setRowCount,
     setRowCountRelation,
@@ -120,8 +122,7 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(typeof combinedRuntimeMappings === 'object' &&
-        Object.keys(combinedRuntimeMappings).length > 0
+        ...(isRuntimeMappings(combinedRuntimeMappings)
           ? { runtime_mappings: combinedRuntimeMappings }
           : {}),
       },
@@ -134,8 +135,12 @@ export const useIndexData = (
       return;
     }
 
+    const isCrossClusterSearch = indexPattern.title.includes(':');
+    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
+    setCcsWarning(isCrossClusterSearch && isMissingFields);
     setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
     setRowCountRelation(
       typeof resp.hits.total === 'number'
@@ -189,7 +194,12 @@ export const useIndexData = (
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartsVisible, indexPattern.title, JSON.stringify([query, dataGrid.visibleColumns])]);
+  }, [
+    chartsVisible,
+    indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
+  ]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
 

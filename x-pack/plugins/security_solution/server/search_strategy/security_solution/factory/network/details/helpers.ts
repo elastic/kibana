@@ -13,7 +13,7 @@ import {
   NetworkDetailsHostHit,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
   const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);

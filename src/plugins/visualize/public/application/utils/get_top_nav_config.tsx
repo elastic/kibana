@@ -18,7 +18,10 @@ import {
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
-import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
 
 import {
@@ -51,6 +54,8 @@ interface TopNavConfigParams {
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
 }
+
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize) return false;
@@ -420,40 +425,47 @@ export const getTopNavConfig = (
               const useByRefFlow =
                 !!originatingApp || !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
-              const saveModal = useByRefFlow ? (
-                <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis || { title: '' }}
-                  onSave={onSave}
-                  options={tagOptions}
-                  getAppNameFromId={stateTransfer.getAppNameFromId}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                  originatingApp={originatingApp}
-                  returnToOriginSwitchLabel={
-                    originatingApp && embeddableId
-                      ? i18n.translate('visualize.topNavMenu.updatePanel', {
-                          defaultMessage: 'Update panel on {originatingAppName}',
-                          values: {
-                            originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
-                          },
-                        })
-                      : undefined
-                  }
-                />
-              ) : (
-                <SavedObjectSaveModalDashboard
-                  documentInfo={{
-                    id: visualizeCapabilities.save ? savedVis?.id : undefined,
-                    title: savedVis?.title || '',
-                    description: savedVis?.description || '',
-                  }}
-                  canSaveByReference={Boolean(visualizeCapabilities.save)}
-                  onSave={onSave}
-                  tagOptions={tagOptions}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                />
-              );
+              let saveModal;
+
+              if (useByRefFlow) {
+                saveModal = (
+                  <SavedObjectSaveModalOrigin
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    options={tagOptions}
+                    getAppNameFromId={stateTransfer.getAppNameFromId}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    originatingApp={originatingApp}
+                    returnToOriginSwitchLabel={
+                      originatingApp && embeddableId
+                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                            defaultMessage: 'Update panel on {originatingAppName}',
+                            values: {
+                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                            },
+                          })
+                        : undefined
+                    }
+                  />
+                );
+              } else {
+                saveModal = (
+                  <SavedObjectSaveModalDashboard
+                    documentInfo={{
+                      id: visualizeCapabilities.save ? savedVis?.id : undefined,
+                      title: savedVis?.title || '',
+                      description: savedVis?.description || '',
+                    }}
+                    canSaveByReference={Boolean(visualizeCapabilities.save)}
+                    onSave={onSave}
+                    tagOptions={tagOptions}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                  />
+                );
+              }
+
               showSaveModal(
                 saveModal,
                 I18nContext,

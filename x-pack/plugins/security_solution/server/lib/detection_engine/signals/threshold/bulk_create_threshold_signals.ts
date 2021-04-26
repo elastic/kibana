@@ -7,20 +7,19 @@
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger } from '../../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { BaseHit, RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { RuleTypeParams, RefreshTypes } from '../../types';
+import { RefreshTypes } from '../../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from '../single_bulk_create';
 import {
   calculateThresholdSignalUuid,
@@ -33,29 +32,20 @@ import type {
   SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
+  AlertAttributes,
 } from '../types';
+import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 interface BulkCreateThresholdSignalsParams {
-  actions: RuleAlertAction[];
   someResult: SignalSearchResponse;
-  ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   id: string;
   filter: unknown;
   signalsIndex: string;
-  timestampOverride: TimestampOverrideOrUndefined;
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
   refresh: RefreshTypes;
-  tags: string[];
-  throttle: string;
   startedAt: Date;
   from: Date;
   thresholdSignalHistory: ThresholdSignalHistory;
@@ -249,8 +239,8 @@ export const transformThresholdResultsToEcs = (
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
+  const ruleParams = params.ruleSO.attributes.params;
   const thresholdResults = params.someResult;
-  const threshold = params.ruleParams.threshold!;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
@@ -258,12 +248,9 @@ export const bulkCreateThresholdSignals = async (
     params.from,
     params.filter,
     params.logger,
-    {
-      ...threshold,
-      field: normalizeThresholdField(threshold.field),
-    },
-    params.ruleParams.ruleId,
-    params.timestampOverride,
+    ruleParams.threshold,
+    ruleParams.ruleId,
+    ruleParams.timestampOverride,
     params.thresholdSignalHistory
   );
   const buildRuleMessage = params.buildRuleMessage;

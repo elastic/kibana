@@ -385,7 +385,7 @@ export const emptyScreenStrings = {
     }),
   getEmptyWidgetTitle: () =>
     i18n.translate('dashboard.emptyWidget.addPanelTitle', {
-      defaultMessage: 'Add your first panel',
+      defaultMessage: 'Add your first visualization',
     }),
   getEmptyWidgetDescription: () =>
     i18n.translate('dashboard.emptyWidget.addPanelDescription', {
@@ -450,3 +450,8 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Discard changes',
     }),
 };
+
+export const getCreateVisualizationButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+    defaultMessage: 'Create visualization',
+  });

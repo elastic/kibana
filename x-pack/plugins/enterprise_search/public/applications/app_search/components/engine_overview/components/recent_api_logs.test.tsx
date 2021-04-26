@@ -13,6 +13,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { ApiLogsTable } from '../../api_logs';
+
 import { RecentApiLogs } from './recent_api_logs';
 
 describe('RecentApiLogs', () => {
@@ -31,7 +33,7 @@ describe('RecentApiLogs', () => {
 
   it('renders the recent API logs table', () => {
     expect(wrapper.prop('title')).toEqual(<h2>Recent API events</h2>);
-    // TODO: expect(wrapper.find(ApiLogsTable)).toHaveLength(1)
+    expect(wrapper.find(ApiLogsTable)).toHaveLength(1);
   });
 
   it('calls fetchApiLogs on page load and starts pollForApiLogs', () => {

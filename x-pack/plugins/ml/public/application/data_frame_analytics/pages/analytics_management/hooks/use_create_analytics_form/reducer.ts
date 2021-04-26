@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
@@ -470,7 +470,11 @@ export function reducer(state: State, action: Action): State {
       let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
-        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
+        const runtimeMappingsChanged =
+          state.form.runtimeMappings &&
+          resultJobConfig.source.runtime_mappings &&
+          !isEqual(state.form.runtimeMappings, resultJobConfig.source.runtime_mappings);
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig) || runtimeMappingsChanged;
       } catch (e) {
         return {
           ...state,

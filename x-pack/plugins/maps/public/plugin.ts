@@ -47,8 +47,13 @@ import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/e
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
-import { MapsStartApi } from './api';
-import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
+import {
+  createLayerDescriptors,
+  registerLayerWizard,
+  registerSource,
+  MapsStartApi,
+  suggestEMSTermJoinConfig,
+} from './api';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -177,6 +182,7 @@ export class MapsPlugin
       createLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      suggestEMSTermJoinConfig,
     };
   }
 }

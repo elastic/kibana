@@ -6,7 +6,15 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { AllowedHosts, EnabledActionTypes } from './actions_config';
+import { Logger } from '../../../../src/core/server';
+
+export enum AllowedHosts {
+  Any = '*',
+}
+
+export enum EnabledActionTypes {
+  Any = '*',
+}
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -29,6 +37,7 @@ export const configSchema = schema.object({
       defaultValue: [AllowedHosts.Any],
     }
   ),
+  preconfiguredAlertHistoryEsIndex: schema.boolean({ defaultValue: false }),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
     defaultValue: {},
     validate: validatePreconfigured,
@@ -36,10 +45,39 @@ export const configSchema = schema.object({
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
+  proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
+  proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
+  responseTimeout: schema.duration({ defaultValue: '60s' }),
+  cleanupFailedExecutionsTask: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    cleanupInterval: schema.duration({ defaultValue: '5m' }),
+    idleInterval: schema.duration({ defaultValue: '1h' }),
+    pageSize: schema.number({ defaultValue: 100 }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
+
+// It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
+// simultaneous usage in the config validator directly, but there's no good way to express
+// this relationship in the cloud config constraints, so we're doing it "live".
+export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig): ActionsConfig {
+  const proxyBypassHosts = originalConfig.proxyBypassHosts;
+  const proxyOnlyHosts = originalConfig.proxyOnlyHosts;
+
+  if (proxyBypassHosts && proxyOnlyHosts) {
+    logger.warn(
+      'The confgurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.'
+    );
+    const tmp: Record<string, unknown> = originalConfig;
+    delete tmp.proxyOnlyHosts;
+    return tmp as ActionsConfig;
+  }
+
+  return originalConfig;
+}
 
 const invalidActionIds = new Set(['', '__proto__', 'constructor']);
 

@@ -24,9 +24,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { extractErrorMessage } from '../../../../common';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { stringHash } from '../../../../common/util/string_utils';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
+import { getCombinedRuntimeMappings } from '../../components/data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
@@ -84,6 +88,8 @@ export interface ScatterplotMatrixProps {
   color?: string;
   legendType?: LegendType;
   searchQuery?: ResultsSearchQuery;
+  runtimeMappings?: RuntimeMappings;
+  indexPattern?: IndexPattern;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -93,6 +99,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   color,
   legendType,
   searchQuery,
+  runtimeMappings,
+  indexPattern,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -100,7 +108,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
 
-  // used to give the use the option to customize the fields used for the matrix axes
+  // used to give the user the option to customize the fields used for the matrix axes
   const [fields, setFields] = useState<string[]>([]);
 
   useEffect(() => {
@@ -157,7 +165,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   useEffect(() => {
     if (fields.length === 0) {
-      setSplom(undefined);
+      setSplom({ columns: [], items: [], messages: [] });
       setIsLoading(false);
       return;
     }
@@ -185,6 +193,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : searchQuery;
 
+        const combinedRuntimeMappings =
+          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+
         const resp: estypes.SearchResponse = await esSearch({
           index,
           body: {
@@ -193,6 +204,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             query,
             from: 0,
             size: fetchSize,
+            ...(isRuntimeMappings(combinedRuntimeMappings)
+              ? { runtime_mappings: combinedRuntimeMappings }
+              : {}),
           },
         });
 
@@ -317,6 +331,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSelect
+                  data-test-subj="mlScatterplotMatrixSampleSizeSelect"
                   compressed
                   options={sampleSizeOptions}
                   value={fetchSize}
@@ -341,6 +356,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSwitch
+                  data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}

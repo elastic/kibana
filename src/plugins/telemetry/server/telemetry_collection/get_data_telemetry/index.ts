@@ -7,10 +7,5 @@
  */
 
 export { DATA_TELEMETRY_ID } from './constants';
-
-export {
-  getDataTelemetry,
-  buildDataTelemetryPayload,
-  DataTelemetryPayload,
-  DataTelemetryIndex,
-} from './get_data_telemetry';
+export { getDataTelemetry, buildDataTelemetryPayload } from './get_data_telemetry';
+export type { DataTelemetryPayload, DataTelemetryIndex } from './get_data_telemetry';

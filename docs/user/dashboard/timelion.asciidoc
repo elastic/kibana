@@ -33,6 +33,40 @@ If the value of your parameter contains spaces or commas you have to put the val
 
 .es(q='some query', index=logstash-*)
 
+[float]
+[[customize-data-series-y-axis]]
+===== .yaxis() function
+
+{kib} supports many y-axis scales and ranges for your data series.
+
+The `.yaxis()` function supports the following parameters:
+
+* *yaxis* &mdash; The numbered y-axis to plot the series on. For example, use `.yaxis(2)` to display a second y-axis.
+* *min* &mdash; The minimum value for the y-axis range.
+* *max* &mdash; The maximum value for the y-axis range.
+* *position* &mdash; The location of the units. Values include `left` or `right`.  
+* *label* &mdash; The label for the axis.  
+* *color* &mdash; The color of the axis label.
+* *units* &mdash; The function to use for formatting the y-axis labels. Values include `bits`, `bits/s`, `bytes`, `bytes/s`, `currency(:ISO 4217 currency code)`, `percent`, and `custom(:prefix:suffix)`.
+* *tickDecimals* &mdash; The tick decimal precision.
+
+Example:
+
+[source,text]
+----------------------------------
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric='avg:bytes')
+  .label('Average Bytes for request')
+  .title('Memory consumption over time in bytes').yaxis(1,units=bytes,position=left), <1>
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric=avg:machine.ram)
+  .label('Average Machine RAM amount').yaxis(2,units=bytes,position=right) <2>
+----------------------------------
+
+<1> `.yaxis(1,units=bytes,position=left)` &mdash; Specifies the first y-axis for the first data series, and changes the units on the left.
+<2> `.yaxis(2,units=bytes,position=left)` &mdash; Specifies the second y-axis for the second data series, and changes the units on the right.
 
 [float]
 ==== Tutorial: Create visualizations with Timelion 

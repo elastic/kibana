@@ -9,6 +9,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 import { getOr } from 'lodash/fp';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
@@ -16,20 +17,19 @@ import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { getColumnRenderer } from '../renderers/get_column_renderer';
 
+import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
 
 interface Props {
   _id: string;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   hasRowRenderers: boolean;
   notesCount: number;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   tabType?: TimelineTabs;
   timelineId: string;
 }
@@ -82,11 +82,11 @@ export const DataDrivenColumns = React.memo<Props>(
     _id,
     ariaRowindex,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     hasRowRenderers,
     notesCount,
+    renderCellValue,
     tabType,
     timelineId,
   }) => (
@@ -105,18 +105,16 @@ export const DataDrivenColumns = React.memo<Props>(
               <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
                 <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: i + 2 })}</p>
               </EuiScreenReaderOnly>
-              {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-                columnName: header.id,
-                eventId: _id,
-                field: header,
-                linkValues: getOr([], header.linkField ?? '', ecsData),
-                timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
-                truncate: true,
-                values: getMappedNonEcsValue({
-                  data,
-                  fieldName: header.id,
-                }),
-              })}
+              <StatefulCell
+                ariaRowindex={ariaRowindex}
+                data={data}
+                header={header}
+                eventId={_id}
+                linkValues={getOr([], header.linkField ?? '', ecsData)}
+                renderCellValue={renderCellValue}
+                tabType={tabType}
+                timelineId={timelineId}
+              />
             </>
           </EventsTdContent>
           {hasRowRenderers ? (

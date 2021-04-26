@@ -14,6 +14,8 @@ import {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
@@ -73,12 +75,12 @@ export const getCasesColumns = (
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
-            <>
-              {caseDetailsLinkComponent}
-              <Spacer>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>{caseDetailsLinkComponent}</EuiFlexItem>
+              <EuiFlexItem>
                 <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
-              </Spacer>
-            </>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }
         return getEmptyTagValue();
@@ -132,7 +134,6 @@ export const getCasesColumns = (
       align: RIGHT_ALIGNMENT,
       field: 'totalAlerts',
       name: ALERTS,
-      sortable: true,
       render: (totalAlerts: Case['totalAlerts']) =>
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
@@ -142,29 +143,13 @@ export const getCasesColumns = (
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
       name: i18n.COMMENTS,
-      sortable: true,
       render: (totalComment: Case['totalComment']) =>
         totalComment != null
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
           : getEmptyTagValue(),
     },
-    filterStatus === CaseStatuses.open
+    filterStatus === CaseStatuses.closed
       ? {
-          field: 'createdAt',
-          name: i18n.OPENED_ON,
-          sortable: true,
-          render: (createdAt: Case['createdAt']) => {
-            if (createdAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-createdAt`}>
-                  <FormattedRelativePreferenceDate value={createdAt} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
-        }
-      : {
           field: 'closedAt',
           name: i18n.CLOSED_ON,
           sortable: true,
@@ -173,6 +158,21 @@ export const getCasesColumns = (
               return (
                 <span data-test-subj={`case-table-column-closedAt`}>
                   <FormattedRelativePreferenceDate value={closedAt} />
+                </span>
+              );
+            }
+            return getEmptyTagValue();
+          },
+        }
+      : {
+          field: 'createdAt',
+          name: i18n.OPENED_ON,
+          sortable: true,
+          render: (createdAt: Case['createdAt']) => {
+            if (createdAt != null) {
+              return (
+                <span data-test-subj={`case-table-column-createdAt`}>
+                  <FormattedRelativePreferenceDate value={createdAt} />
                 </span>
               );
             }

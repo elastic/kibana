@@ -7,7 +7,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -21,7 +23,6 @@ import {
   getPinOnClick,
   InvestigateInResolverAction,
 } from '../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
@@ -38,7 +39,6 @@ interface Props {
   actionsColumnWidth: number;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -51,6 +51,7 @@ interface Props {
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   onRuleChange?: () => void;
   hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
@@ -69,7 +70,6 @@ export const EventColumnView = React.memo<Props>(
     actionsColumnWidth,
     ariaRowindex,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     eventIdToNoteIds,
@@ -84,6 +84,7 @@ export const EventColumnView = React.memo<Props>(
     refetch,
     hasRowRenderers,
     onRuleChange,
+    renderCellValue,
     selectedEventIds,
     showCheckboxes,
     showNotes,
@@ -95,6 +96,8 @@ export const EventColumnView = React.memo<Props>(
     const timelineType = useShallowEqualSelector(
       (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
     );
+
+    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
 
     // Each action button shall announce itself to screen readers via an `aria-label`
     // in the following format:
@@ -183,7 +186,7 @@ export const EventColumnView = React.memo<Props>(
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal'}
+          disabled={eventType !== 'signal' && (!isEventFilteringEnabled || eventType !== 'raw')}
           refetch={refetch}
           onRuleChange={onRuleChange}
         />,
@@ -205,6 +208,7 @@ export const EventColumnView = React.memo<Props>(
         timelineId,
         timelineType,
         toggleShowNotes,
+        isEventFilteringEnabled,
       ]
     );
 
@@ -227,11 +231,11 @@ export const EventColumnView = React.memo<Props>(
           _id={id}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
           hasRowRenderers={hasRowRenderers}
           notesCount={notesCount}
+          renderCellValue={renderCellValue}
           tabType={tabType}
           timelineId={timelineId}
         />

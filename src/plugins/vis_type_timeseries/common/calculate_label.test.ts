@@ -8,6 +8,7 @@
 
 import { calculateLabel } from './calculate_label';
 import type { MetricsItemsSchema } from './types';
+import { SanitizedFieldType } from './types';
 
 describe('calculateLabel(metric, metrics)', () => {
   test('returns the metric.alias if set', () => {
@@ -81,5 +82,27 @@ describe('calculateLabel(metric, metrics)', () => {
     const label = calculateLabel(metric, metrics);
 
     expect(label).toEqual('Derivative of Outbound Traffic');
+  });
+
+  test('should throw an error if field not found', () => {
+    const metric = ({ id: 2, type: 'max', field: 3 } as unknown) as MetricsItemsSchema;
+    const metrics = ([
+      { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
+      metric,
+    ] as unknown) as MetricsItemsSchema[];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+
+    expect(() => calculateLabel(metric, metrics, fields)).toThrowError('Field "3" not found');
+  });
+
+  test('should not throw an error if field not found (isThrowErrorOnFieldNotFound is false)', () => {
+    const metric = ({ id: 2, type: 'max', field: 3 } as unknown) as MetricsItemsSchema;
+    const metrics = ([
+      { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
+      metric,
+    ] as unknown) as MetricsItemsSchema[];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+
+    expect(calculateLabel(metric, metrics, fields, false)).toBe('Max of 3');
   });
 });

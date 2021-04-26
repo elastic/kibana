@@ -9,13 +9,8 @@ import React, { useMemo } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableRowCellCheckbox,
-  EuiCheckbox,
-} from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiTableRowCellCheckbox, EuiCheckbox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '../result_settings_logic';
 import { FieldResultSetting } from '../types';
@@ -41,7 +36,7 @@ export const TextFieldsBody: React.FC = () => {
   }, [textResultFields]);
 
   return (
-    <EuiTableBody>
+    <>
       {resultSettingsArray.map(([fieldName, fieldSettings]) => (
         <EuiTableRow key={fieldName}>
           <EuiTableRowCell data-test-subj="ResultSettingFieldName">
@@ -49,6 +44,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawAriaLabel',
+                { defaultMessage: 'Toggle raw field' }
+              )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
               checked={!!fieldSettings.raw}
@@ -69,6 +68,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetAriaLabel',
+                { defaultMessage: 'Toggle text snippet' }
+              )}
               data-test-subj="ResultSettingSnippetTextBox"
               id={`${fieldName}-snippet}`}
               checked={!!fieldSettings.snippet}
@@ -79,6 +82,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCellCheckbox>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetFallbackAriaLabel',
+                { defaultMessage: 'Toggle snippet fallback' }
+              )}
               data-test-subj="ResultSettingFallbackTextBox"
               id={`${fieldName}-snippetFallback}`}
               checked={fieldSettings.snippetFallback}
@@ -100,6 +107,6 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
         </EuiTableRow>
       ))}
-    </EuiTableBody>
+    </>
   );
 };

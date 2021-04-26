@@ -5,19 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import React, { ReactNode, useContext } from 'react';
+import {
+  EuiComboBox,
+  EuiComboBoxProps,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 import type { SanitizedFieldType, IndexPatternValue } from '../../../../common/types';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 // @ts-ignore
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
+import { PanelModelContext } from '../../contexts/panel_model_context';
+import { USE_KIBANA_INDEXES_KEY } from '../../../../common/constants';
 
 interface FieldSelectProps {
+  label: string | ReactNode;
   type: string;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: IndexPatternValue;
@@ -45,6 +52,7 @@ const sortByLabel = (a: EuiComboBoxOptionOption<string>, b: EuiComboBoxOptionOpt
 };
 
 export function FieldSelect({
+  label,
   type,
   fields,
   indexPattern = '',
@@ -56,11 +64,10 @@ export function FieldSelect({
   uiRestrictions,
   'data-test-subj': dataTestSubj = 'metricsIndexPatternFieldsSelect',
 }: FieldSelectProps) {
-  if (type === METRIC_TYPES.COUNT) {
-    return null;
-  }
+  const panelModel = useContext(PanelModelContext);
+  const htmlId = htmlIdGenerator();
 
-  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
+  let selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
   let newPlaceholder = placeholder;
   const fieldsSelector = getIndexPatternKey(indexPattern);
 
@@ -112,19 +119,43 @@ export function FieldSelect({
     }
   });
 
-  if (value && !selectedOptions.length) {
-    onChange([]);
+  let isInvalid;
+
+  if (Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY])) {
+    isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
+
+    if (value && !selectedOptions.length) {
+      selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
+    }
+  } else {
+    if (value && !selectedOptions.length) {
+      onChange([]);
+    }
   }
 
   return (
-    <EuiComboBox
-      data-test-subj={dataTestSubj}
-      placeholder={newPlaceholder}
-      isDisabled={disabled}
-      options={groupedOptions}
-      selectedOptions={selectedOptions}
-      onChange={onChange}
-      singleSelection={{ asPlainText: true }}
-    />
+    <EuiFormRow
+      id={htmlId('timeField')}
+      label={label}
+      isInvalid={isInvalid}
+      error={i18n.translate('visTypeTimeseries.fieldSelect.fieldIsNotValid', {
+        defaultMessage:
+          'The "{fieldParameter}" field is not valid for use with the current index. Please select a new field.',
+        values: {
+          fieldParameter: value,
+        },
+      })}
+    >
+      <EuiComboBox
+        data-test-subj={dataTestSubj}
+        placeholder={newPlaceholder}
+        isDisabled={disabled}
+        options={groupedOptions}
+        selectedOptions={selectedOptions}
+        onChange={onChange}
+        singleSelection={{ asPlainText: true }}
+        isInvalid={isInvalid}
+      />
+    </EuiFormRow>
   );
 }

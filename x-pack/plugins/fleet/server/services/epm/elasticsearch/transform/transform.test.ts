@@ -19,7 +19,7 @@ jest.mock('./common', () => {
 });
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import type { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
 import { ElasticsearchAssetType } from '../../../../types';

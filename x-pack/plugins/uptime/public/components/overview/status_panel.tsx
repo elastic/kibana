@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { PingHistogram } from '../monitor';
-import { Snapshot } from './snapshot/snapshot_container';
+import { SnapshotComponent } from './snapshot';
 
 const STATUS_CHART_HEIGHT = '160px';
 
@@ -16,7 +16,7 @@ export const StatusPanel = ({}) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
-        <Snapshot height={STATUS_CHART_HEIGHT} />
+        <SnapshotComponent height={STATUS_CHART_HEIGHT} />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         <PingHistogram height={STATUS_CHART_HEIGHT} isResponsive={true} />

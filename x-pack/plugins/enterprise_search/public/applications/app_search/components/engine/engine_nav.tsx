@@ -211,8 +211,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineSynonyms && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SYNONYMS_PATH))}
+          to={generateEnginePath(ENGINE_SYNONYMS_PATH)}
           data-test-subj="EngineSynonymsLink"
         >
           {SYNONYMS_TITLE}
@@ -237,8 +236,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineSearchUi && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SEARCH_UI_PATH))}
+          to={generateEnginePath(ENGINE_SEARCH_UI_PATH)}
           data-test-subj="EngineSearchUILink"
         >
           {SEARCH_UI_TITLE}

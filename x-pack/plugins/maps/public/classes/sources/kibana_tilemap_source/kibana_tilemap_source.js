@@ -6,7 +6,7 @@
  */
 
 import { AbstractTMSSource } from '../tms_source';
-import { getKibanaTileMap } from '../../../meta';
+import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';

@@ -305,6 +305,9 @@ export const updateGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
+      ...(graphEventId === '' && id === TimelineId.active
+        ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
+        : {}),
     },
   };
 };

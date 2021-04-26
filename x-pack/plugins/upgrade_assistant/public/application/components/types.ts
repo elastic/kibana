@@ -15,9 +15,9 @@ export interface UpgradeAssistantTabProps {
   checkupData?: UpgradeAssistantStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => void;
-  loadingError: ResponseError | null;
+  error: ResponseError | null;
   isLoading: boolean;
-  setSelectedTabIndex: (tabIndex: number) => void;
+  navigateToOverviewPage: () => void;
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
@@ -35,6 +35,7 @@ export enum LoadingState {
 export enum LevelFilterOption {
   all = 'all',
   critical = 'critical',
+  warning = 'warning',
 }
 
 export enum GroupByOption {
@@ -47,3 +48,5 @@ export enum TelemetryState {
   Running,
   Complete,
 }
+
+export type EsTabs = 'cluster' | 'indices';

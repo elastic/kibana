@@ -291,6 +291,7 @@ describe('execute()', () => {
           "ensureHostnameAllowed": [MockFunction],
           "ensureUriAllowed": [MockFunction],
           "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
           "isActionTypeEnabled": [MockFunction],
           "isHostnameAllowed": [MockFunction],
           "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
@@ -329,6 +330,33 @@ describe('execute()', () => {
     `);
   });
 
+  test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
+    const config: ActionTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      hasAuth: true,
+    };
+    requestMock.mockReset();
+    requestMock.mockRejectedValueOnce({
+      tag: 'err',
+      isAxiosError: true,
+      message: 'maxContentLength size of 1000000 exceeded',
+    });
+    await actionType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { user: 'abc', password: '123' },
+      params: { body: 'some data' },
+    });
+    expect(mockedLogger.error).toBeCalledWith(
+      'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
+    );
+  });
+
   test('execute without username/password sends request without basic auth', async () => {
     const config: ActionTypeConfigType = {
       url: 'https://abc.def/my-webhook',
@@ -355,6 +383,7 @@ describe('execute()', () => {
           "ensureHostnameAllowed": [MockFunction],
           "ensureUriAllowed": [MockFunction],
           "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
           "isActionTypeEnabled": [MockFunction],
           "isHostnameAllowed": [MockFunction],
           "isRejectUnauthorizedCertificatesEnabled": [MockFunction],

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   TimelineExpandedDetailType,
@@ -23,7 +24,6 @@ import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/mod
 import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
@@ -45,7 +45,6 @@ interface Props {
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
@@ -56,6 +55,7 @@ interface Props {
   refetch: inputsModel.Refetch;
   ariaRowindex: number;
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -77,7 +77,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   browserFields,
   containerRef,
   columnHeaders,
-  columnRenderers,
   event,
   eventIdToNoteIds,
   isEventViewer = false,
@@ -86,8 +85,9 @@ const StatefulEventComponent: React.FC<Props> = ({
   loadingEventIds,
   onRowSelected,
   refetch,
-  onRuleChange,
+  renderCellValue,
   rowRenderers,
+  onRuleChange,
   ariaRowindex,
   selectedEventIds,
   showCheckboxes,
@@ -259,7 +259,6 @@ const StatefulEventComponent: React.FC<Props> = ({
           actionsColumnWidth={actionsColumnWidth}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={event.data}
           ecsData={event.ecs}
           eventIdToNoteIds={eventIdToNoteIds}
@@ -273,6 +272,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           onRowSelected={onRowSelected}
           onUnPinEvent={onUnPinEvent}
           refetch={refetch}
+          renderCellValue={renderCellValue}
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}

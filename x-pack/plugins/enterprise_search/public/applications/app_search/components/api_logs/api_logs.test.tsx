@@ -7,15 +7,18 @@
 
 import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
 import '../../../__mocks__/shallow_useeffect.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
+
+import { ApiLogsTable, NewApiEventsPrompt } from './components';
 
 import { ApiLogs } from './';
 
@@ -30,18 +33,17 @@ describe('ApiLogs', () => {
     pollForApiLogs: jest.fn(),
   };
 
-  let wrapper: ShallowWrapper;
-
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
-    wrapper = shallow(<ApiLogs engineBreadcrumb={['some engine']} />);
   });
 
   it('renders', () => {
+    const wrapper = shallow(<ApiLogs />);
     expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('API Logs');
-    // TODO: Check for ApiLogsTable + NewApiEventsPrompt when those get added
+    expect(wrapper.find(ApiLogsTable)).toHaveLength(1);
+    expect(wrapper.find(NewApiEventsPrompt)).toHaveLength(1);
 
     expect(wrapper.find(LogRetentionCallout).prop('type')).toEqual('api');
     expect(wrapper.find(LogRetentionTooltip).prop('type')).toEqual('api');
@@ -49,13 +51,14 @@ describe('ApiLogs', () => {
 
   it('renders a loading screen', () => {
     setMockValues({ ...values, dataLoading: true, apiLogs: [] });
-    rerender(wrapper);
+    const wrapper = shallow(<ApiLogs />);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   describe('effects', () => {
     it('calls a manual fetchApiLogs on page load and pagination', () => {
+      const wrapper = shallow(<ApiLogs />);
       expect(actions.fetchApiLogs).toHaveBeenCalledTimes(1);
 
       setMockValues({ ...values, meta: { page: { current: 2 } } });
@@ -65,6 +68,7 @@ describe('ApiLogs', () => {
     });
 
     it('starts pollForApiLogs on page load', () => {
+      shallow(<ApiLogs />);
       expect(actions.pollForApiLogs).toHaveBeenCalledTimes(1);
     });
   });

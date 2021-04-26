@@ -7,6 +7,8 @@
 
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Observable, of } from 'rxjs';
+import { map as mapObservable } from 'rxjs/operators';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -29,7 +31,6 @@ import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
 import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
   ExplorerChartsData,
@@ -37,6 +38,8 @@ import {
 } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -156,12 +159,13 @@ export class AnomalyExplorerChartsService {
     const halfPoints = Math.ceil(plotPoints / 2);
     const bounds = timeFilter.getActiveBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
+    const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
     let chartRange: ChartRange = {
       min: boundsMin
         ? Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin)
         : midpointMs - halfPoints * minBucketSpanMs,
-      max: bounds?.max
-        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf())
+      max: boundsMax
+        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, boundsMax)
         : midpointMs + halfPoints * minBucketSpanMs,
     };
 
@@ -207,15 +211,21 @@ export class AnomalyExplorerChartsService {
     }
 
     // Elasticsearch aggregation returns points at start of bucket,
-    // so align the min to the length of the longest bucket.
+    // so align the min to the length of the longest bucket,
+    // and use the start of the latest selected bucket in the check
+    // for too many selected buckets, respecting the max bounds set in the view.
     chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
     if (boundsMin !== undefined && chartRange.min < boundsMin) {
       chartRange.min = chartRange.min + maxBucketSpanMs;
     }
 
+    const selectedLatestBucketStart = boundsMax
+      ? Math.floor(Math.min(selectedLatestMs, boundsMax) / maxBucketSpanMs) * maxBucketSpanMs
+      : Math.floor(selectedLatestMs / maxBucketSpanMs) * maxBucketSpanMs;
+
     if (
-      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) &&
-      chartRange.max - chartRange.min < selectedLatestMs - selectedEarliestMs
+      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestBucketStart) &&
+      chartRange.max - chartRange.min < selectedLatestBucketStart - selectedEarliestMs
     ) {
       tooManyBuckets = true;
     }
@@ -370,15 +380,53 @@ export class AnomalyExplorerChartsService {
       // Getting only necessary job config and datafeed config without the stats
       jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
     );
-    const combinedJobs = combinedResults
+    return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
       .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
-    return combinedJobs;
+  }
+
+  public loadDataForCharts$(
+    jobIds: string[],
+    earliestMs: number,
+    latestMs: number,
+    influencers: EntityField[] = [],
+    selectedCells: AppStateSelectedCells | undefined,
+    influencersFilterQuery: InfluencersFilterQuery
+  ): Observable<RecordForInfluencer[]> {
+    if (
+      selectedCells === undefined &&
+      influencers.length === 0 &&
+      influencersFilterQuery === undefined
+    ) {
+      of([]);
+    }
+
+    return this.mlResultsService
+      .getRecordsForInfluencer$(
+        jobIds,
+        influencers,
+        0,
+        earliestMs,
+        latestMs,
+        500,
+        influencersFilterQuery
+      )
+      .pipe(
+        mapObservable((resp): RecordForInfluencer[] => {
+          if (
+            (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
+            influencersFilterQuery !== undefined
+          ) {
+            return resp.records;
+          }
+
+          return [] as RecordForInfluencer[];
+        })
+      );
   }
 
   public async getAnomalyData(
-    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -486,9 +534,6 @@ export class AnomalyExplorerChartsService {
       data.errorMessages = errorMessages;
     }
 
-    if (explorerService) {
-      explorerService.setCharts({ ...data });
-    }
     if (seriesConfigs.length === 0) {
       return data;
     }
@@ -711,9 +756,11 @@ export class AnomalyExplorerChartsService {
       //    plus anomalyScore for points with anomaly markers.
       let chartData: ChartPoint[] = [];
       if (metricData !== undefined) {
-        if (eventDistribution.length > 0 && records.length > 0) {
+        if (records.length > 0) {
           const filterField = records[0].by_field_value || records[0].over_field_value;
-          chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
+          if (eventDistribution.length > 0) {
+            chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
+          }
           map(metricData, (value, time) => {
             // The filtering for rare/event_distribution charts needs to be handled
             // differently because of how the source data is structured.
@@ -848,9 +895,6 @@ export class AnomalyExplorerChartsService {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
         }
-        if (explorerService) {
-          explorerService.setCharts({ ...data });
-        }
         return Promise.resolve(data);
       })
       .catch((error) => {
@@ -860,7 +904,7 @@ export class AnomalyExplorerChartsService {
   }
 
   public processRecordsForDisplay(
-    jobRecords: Record<string, CombinedJob>,
+    combinedJobRecords: Record<string, CombinedJob>,
     anomalyRecords: RecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
@@ -875,7 +919,7 @@ export class AnomalyExplorerChartsService {
       // Check if we can plot a chart for this record, depending on whether the source data
       // is chartable, and if model plot is enabled for the job.
 
-      const job = jobRecords[record.job_id];
+      const job = combinedJobRecords[record.job_id];
 
       // if we already know this job has datafeed aggregations we cannot support
       // no need to do more checks

@@ -9,7 +9,7 @@ import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { ManageMLJobComponent } from './manage_ml_job';
 import * as redux from 'react-redux';
-import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 const core = coreMock.createStart();

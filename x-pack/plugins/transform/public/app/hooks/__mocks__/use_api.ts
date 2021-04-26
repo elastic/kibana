@@ -136,9 +136,20 @@ const apiFactory = () => ({
     return Promise.resolve([]);
   },
   async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
+    const hits = [];
+
+    // simulate a cross cluster search result
+    // against a cluster that doesn't support fields
+    if (payload.index.includes(':')) {
+      hits.push({
+        _id: 'the-doc',
+        _index: 'the-index',
+      });
+    }
+
     return Promise.resolve({
       hits: {
-        hits: [],
+        hits,
         total: {
           value: 0,
           relation: 'eq',

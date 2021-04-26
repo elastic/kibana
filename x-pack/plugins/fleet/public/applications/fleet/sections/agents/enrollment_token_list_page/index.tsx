@@ -242,8 +242,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '70px',
       render: (_: any, apiKey: EnrollmentAPIKey) => {
+        const agentPolicy = agentPolicies.find((c) => c.id === apiKey.policy_id);
+        const canUnenroll = apiKey.active && !agentPolicy?.is_managed;
         return (
-          apiKey.active && (
+          canUnenroll && (
             <DeleteButton
               apiKey={apiKey}
               refresh={() => enrollmentAPIKeysRequest.resendRequest()}

@@ -1,0 +1,46 @@
+.projectListItem {
+  position: relative;
+  background: $euiColorEmptyShade;
+  padding: $euiSizeL;
+  min-width: 500px;
+
+  &--isOverridden:before {
+    position: absolute;
+    top: $euiSizeL;
+    left: 4px;
+    bottom: $euiSizeL;
+    width: 4px;
+    background: $euiColorPrimary;
+    content: '';
+  }
+
+  .euiSwitch__label {
+    width: 100%;
+  }
+}
+
+.projectListItem + .projectListItem:after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: $euiColorLightShade;
+  content: '';
+}
+
+.euiFlyout .projectListItem {
+  padding: $euiSizeL $euiSizeXS;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &--isOverridden:before {
+    left: -12px;
+  }
+
+  &--isOverridden:first-child:before {
+    top: 0;
+  }
+}

@@ -138,6 +138,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.BoolFormat.textConvert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -299,7 +300,7 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 20
             },
             "signature": [
@@ -319,7 +320,7 @@
             "label": "title",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 21
             }
           },
@@ -330,7 +331,7 @@
             "label": "fieldType",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 24
             },
             "signature": [
@@ -356,7 +357,7 @@
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 26
             }
           },
@@ -370,6 +371,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ColorFormat.findColorRuleForVal.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -378,7 +380,7 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.ts",
+                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                   "lineNumber": 33
                 }
               }
@@ -386,7 +388,7 @@
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 33
             }
           },
@@ -395,6 +397,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ColorFormat.htmlConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -403,7 +406,7 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.ts",
+                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                   "lineNumber": 52
                 }
               }
@@ -414,7 +417,7 @@
             "description": [],
             "label": "htmlConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 52
             },
             "tags": [],
@@ -422,7 +425,7 @@
           }
         ],
         "source": {
-          "path": "src/plugins/data/common/field_formats/converters/color.ts",
+          "path": "src/plugins/data/common/field_formats/converters/color.tsx",
           "lineNumber": 19
         },
         "initialIsOpen": false
@@ -578,6 +581,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.DurationFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -678,13 +682,7 @@
               "lineNumber": 52
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvert",
-                "text": "FieldFormatConvert"
-              },
+              "FieldFormatConvert",
               " | undefined"
             ]
           },
@@ -702,13 +700,7 @@
               "lineNumber": 60
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeConvert",
-                "text": "HtmlContextTypeConvert"
-              },
+              "HtmlContextTypeConvert",
               " | undefined"
             ]
           },
@@ -726,13 +718,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.TextContextTypeConvert",
-                "text": "TextContextTypeConvert"
-              },
+              "TextContextTypeConvert",
               " | undefined"
             ]
           },
@@ -812,17 +798,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.Unnamed.$1",
                 "type": "Object",
                 "label": "_params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.IFieldFormatMetaParams",
-                    "text": "IFieldFormatMetaParams"
-                  }
+                  "IFieldFormatMetaParams"
                 ],
                 "description": [],
                 "source": {
@@ -831,6 +812,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.Unnamed.$2",
                 "type": "Function",
                 "label": "getConfig",
                 "isRequired": false,
@@ -872,13 +854,7 @@
                 "text": "FieldFormatsContentType"
               },
               ", options?: Record<string, any> | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
+              "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
             "description": [
@@ -886,6 +862,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.convert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -899,6 +876,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.convert.$2",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -920,18 +898,13 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.convert.$3",
                 "type": "CompoundType",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
                   "Record<string, any> | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
+                  "HtmlContextTypeOptions",
                   " | undefined"
                 ],
                 "description": [],
@@ -967,19 +940,14 @@
                 "text": "FieldFormatsContentType"
               },
               ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvertFunction",
-                "text": "FieldFormatConvertFunction"
-              }
+              "FieldFormatConvertFunction"
             ],
             "description": [
               "\nGet a convert function that is bound to a specific contentType"
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.getConverterFor.$1",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -1046,6 +1014,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.param.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1131,17 +1100,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.from.$1",
                 "type": "Function",
                 "label": "convertFn",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatConvertFunction",
-                    "text": "FieldFormatConvertFunction"
-                  }
+                  "FieldFormatConvertFunction"
                 ],
                 "description": [],
                 "source": {
@@ -1163,13 +1127,7 @@
             "label": "setupContentType",
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvert",
-                "text": "FieldFormatConvert"
-              }
+              "FieldFormatConvert"
             ],
             "description": [],
             "children": [],
@@ -1198,6 +1156,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.isInstanceOfFieldFormat.$1",
                 "type": "Any",
                 "label": "fieldFormat",
                 "isRequired": true,
@@ -1263,6 +1222,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatNotFoundError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -1276,6 +1236,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatNotFoundError.Unnamed.$2",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1322,13 +1283,7 @@
             },
             "signature": [
               "Map<string, ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               ">"
             ]
           },
@@ -1382,6 +1337,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.deserialize.$1",
                 "type": "Object",
                 "label": "mapping",
                 "isRequired": false,
@@ -1443,18 +1399,13 @@
                 "text": "GetConfigFn"
               },
               ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               "[]) => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.init.$1",
                 "type": "Function",
                 "label": "getConfig",
                 "isRequired": true,
@@ -1474,6 +1425,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.init.$2",
                 "type": "Object",
                 "label": "metaParamsOptions",
                 "isRequired": true,
@@ -1487,17 +1439,12 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.init.$3",
                 "type": "Array",
                 "label": "defaultFieldConverters",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatInstanceType",
-                    "text": "FieldFormatInstanceType"
-                  },
+                  "FieldFormatInstanceType",
                   "[]"
                 ],
                 "description": [],
@@ -1519,6 +1466,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultConfig.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1538,6 +1486,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultConfig.$2",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1602,6 +1551,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getType.$1",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1617,13 +1567,7 @@
             ],
             "signature": [
               "(formatId: string) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               " | undefined"
             ],
             "description": [
@@ -1644,6 +1588,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getTypeWithoutMetaParams.$1",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1659,13 +1604,7 @@
             ],
             "signature": [
               "(formatId: string) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               " | undefined"
             ],
             "description": [],
@@ -1682,6 +1621,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultType.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1701,6 +1641,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultType.$2",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1739,13 +1680,7 @@
                 "text": "ES_FIELD_TYPES"
               },
               "[] | undefined) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               " | undefined"
             ],
             "description": [
@@ -1766,6 +1701,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getTypeNameByEsTypes.$1",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1823,6 +1759,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultTypeName.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1842,6 +1779,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultTypeName.$2",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1940,6 +1878,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1959,6 +1898,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.$2",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1979,6 +1919,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.$3",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -2059,6 +2000,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstanceCacheResolver.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -2078,6 +2020,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstanceCacheResolver.$2",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": true,
@@ -2121,13 +2064,7 @@
                 "text": "KBN_FIELD_TYPES"
               },
               ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               "[]"
             ],
             "description": [
@@ -2135,6 +2072,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getByFieldType.$1",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -2215,6 +2153,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.parseDefaultTypeMap.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -2241,29 +2180,18 @@
             "label": "register",
             "signature": [
               "(fieldFormats: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatInstanceType",
-                "text": "FieldFormatInstanceType"
-              },
+              "FieldFormatInstanceType",
               "[]) => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.register.$1",
                 "type": "Array",
                 "label": "fieldFormats",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatInstanceType",
-                    "text": "FieldFormatInstanceType"
-                  },
+                  "FieldFormatInstanceType",
                   "[]"
                 ],
                 "description": [],
@@ -2425,6 +2353,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.HistogramFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2537,6 +2466,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.IpFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2779,6 +2709,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.PercentFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2891,6 +2822,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.RelativeDateFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2954,8 +2886,8 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 45
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 39
             },
             "signature": [
               {
@@ -2974,8 +2906,8 @@
             "label": "title",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 46
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 40
             }
           },
           {
@@ -2985,8 +2917,8 @@
             "label": "fieldType",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 47
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -3003,6 +2935,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.SourceFormat.textConvert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3011,8 +2944,8 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 49
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 43
                 }
               }
             ],
@@ -3022,8 +2955,8 @@
             "description": [],
             "label": "textConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 49
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 43
             },
             "tags": [],
             "returnComment": []
@@ -3033,6 +2966,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.SourceFormat.htmlConvert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3041,55 +2975,44 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 51
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 45
                 }
               },
               {
+                "id": "def-common.SourceFormat.htmlConvert.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
+                  "HtmlContextTypeOptions",
                   " | undefined"
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 51
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 45
                 }
               }
             ],
             "signature": [
               "(value: any, options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
+              "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
             "description": [],
             "label": "htmlConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 51
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 45
             },
             "tags": [],
             "returnComment": []
           }
         ],
         "source": {
-          "path": "src/plugins/data/common/field_formats/converters/source.ts",
-          "lineNumber": 44
+          "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+          "lineNumber": 38
         },
         "initialIsOpen": false
       },
@@ -3190,6 +3113,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.StaticLookupFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3333,6 +3257,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.StringFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3445,6 +3370,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.TruncateFormat.textConvert.$1",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3577,17 +3503,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.UrlFormat.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.IFieldFormatMetaParams",
-                    "text": "IFieldFormatMetaParams"
-                  }
+                  "IFieldFormatMetaParams"
                 ],
                 "description": [],
                 "source": {
@@ -3624,6 +3545,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.UrlFormat.textConvert.$1",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3654,6 +3576,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.UrlFormat.htmlConvert.$1",
                 "type": "Any",
                 "label": "rawValue",
                 "isRequired": true,
@@ -3667,17 +3590,12 @@
                 }
               },
               {
+                "id": "def-common.UrlFormat.htmlConvert.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
+                  "HtmlContextTypeOptions",
                   " | undefined"
                 ],
                 "description": [],
@@ -3689,13 +3607,7 @@
             ],
             "signature": [
               "(rawValue: any, options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
+              "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
             "description": [],
@@ -3726,6 +3638,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getHighlightRequest.$1",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -3739,6 +3652,7 @@
             }
           },
           {
+            "id": "def-common.getHighlightRequest.$2",
             "type": "boolean",
             "label": "shouldHighlight",
             "isRequired": true,

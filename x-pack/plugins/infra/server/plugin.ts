@@ -31,19 +31,19 @@ import { LogEntriesService } from './services/log_entries';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
+import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    query: schema.object({
-      partitionSize: schema.number({ defaultValue: 75 }),
-      partitionFactor: schema.number({ defaultValue: 1.2 }),
+    inventory: schema.object({
+      compositeSize: schema.number({ defaultValue: 2000 }),
     }),
     sources: schema.maybe(
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()),
+            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
             metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
@@ -124,7 +124,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       sources,
       sourceStatus,
       ...domainLibs,
-      getLogQueryFields: createGetLogQueryFields(sources),
+      getLogQueryFields: createGetLogQueryFields(sources, framework),
+      handleEsError,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

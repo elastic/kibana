@@ -163,7 +163,7 @@ const StandardSiblingAggUi = (props) => {
 StandardSiblingAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

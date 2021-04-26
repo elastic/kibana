@@ -83,6 +83,7 @@ export async function mountApp({
     embeddable: embeddableStart,
     kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
+    visualizations,
   } = pluginsStart;
 
   const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
@@ -127,6 +128,7 @@ export async function mountApp({
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
+    visualizations,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

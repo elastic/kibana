@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.project.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -38,6 +38,7 @@
     { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../reporting/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" }

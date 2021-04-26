@@ -122,7 +122,7 @@ export function DiscoverGridFlyout({
                 iconType="document"
                 flush="left"
                 href={services.addBasePath(
-                  `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
                     hit._id as string
                   )}`
                 )}
@@ -178,15 +178,29 @@ export function DiscoverGridFlyout({
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {
               onFilter(mapping, value, mode);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastFilterAdded', {
+                  defaultMessage: `Filter was added`,
+                })
+              );
             }}
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+                  defaultMessage: `Column '{columnName}' was removed`,
+                  values: { columnName },
+                })
+              );
             }}
             onAddColumn={(columnName: string) => {
               onAddColumn(columnName);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastColumnAdded', {
+                  defaultMessage: `Column '{columnName}' was added`,
+                  values: { columnName },
+                })
+              );
             }}
           />
         </EuiFlyoutBody>

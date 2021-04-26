@@ -13,7 +13,7 @@ import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
 import { EndpointOverview } from './index';
-import { HostPolicyResponseActionStatus } from '../../../../graphql/types';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 
 describe('EndpointOverview Component', () => {
   test('it renders with endpoint data', () => {

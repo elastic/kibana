@@ -6,7 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-telemetry-tools/src"
+    "sourceRoot": "../../../../packages/kbn-telemetry-tools/src",
+    "isolatedModules": true
   },
   "include": [
     "src/**/*",

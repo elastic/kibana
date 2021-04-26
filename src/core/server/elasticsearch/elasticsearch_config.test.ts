@@ -12,29 +12,17 @@ import {
   mockReadPkcs12Truststore,
 } from './elasticsearch_config.test.mocks';
 
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { ElasticsearchConfig, config } from './elasticsearch_config';
+import { getDeprecationsFor } from '../config/test_utils';
 
 const CONFIG_PATH = 'elasticsearch';
 
-const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = config.deprecations!(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const _config: any = {};
-  _config[CONFIG_PATH] = settings;
-  const migrated = applyDeprecations(
-    _config,
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: CONFIG_PATH,
-    })),
-    () => ({ message }) => deprecationMessages.push(message)
-  );
-  return {
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) =>
+  getDeprecationsFor({
+    provider: config.deprecations!,
+    settings,
+    path: CONFIG_PATH,
+  });
 
 test('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));

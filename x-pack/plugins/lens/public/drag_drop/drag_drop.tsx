@@ -45,6 +45,16 @@ interface BaseProps {
    */
   onDrop?: DropHandler;
   /**
+   * The event handler that fires when this element is dragged.
+   */
+  onDragStart?: (
+    target?: DroppableEvent['currentTarget'] | KeyboardEvent<HTMLButtonElement>['currentTarget']
+  ) => void;
+  /**
+   * The event handler that fires when the dragging of this element ends.
+   */
+  onDragEnd?: () => void;
+  /**
    * The value associated with this item.
    */
   value: DragDropIdentifier;
@@ -116,10 +126,6 @@ interface DragInnerProps extends BaseProps {
     activeDropTarget: DragContextState['activeDropTarget'];
     dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
   };
-  onDragStart?: (
-    target?: DroppableEvent['currentTarget'] | KeyboardEvent<HTMLButtonElement>['currentTarget']
-  ) => void;
-  onDragEnd?: () => void;
   extraKeyboardHandler?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   ariaDescribedBy?: string;
 }

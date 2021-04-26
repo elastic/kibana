@@ -15,8 +15,8 @@ import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
-import { getPluginApi } from '../get_plugin_api';
 import { groupPluginApi } from '../utils';
+import { getPluginApiMap } from '../get_plugin_api_map';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -87,8 +87,9 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 
-  doc = getPluginApi(project, plugins[0], plugins, log);
+  const { pluginApiMap } = getPluginApiMap(project, plugins, log);
 
+  doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
 });
@@ -137,7 +138,12 @@ describe('functions', () => {
   it('function referencing missing type has link removed', () => {
     const fn = doc.client.find((c) => c.label === 'fnWithNonExportedRef');
     expect(linkCount(fn?.signature!)).toBe(0);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children!.length).toBe(1);
+    expect(fn?.children![0].signature).toBeDefined();
+    expect(linkCount(fn?.children![0].signature!)).toBe(0);
   });
+
   it('arrow function is exported correctly', () => {
     const fn = doc.client.find((c) => c.label === 'arrowFn');
     // Using the same data as the not an arrow function so this is refactored.
@@ -217,6 +223,13 @@ describe('objects', () => {
 });
 
 describe('Misc types', () => {
+  it('Type referencing not exported type has the link removed', () => {
+    const api = doc.client.find((c) => c.label === 'IRefANotExportedType');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+  });
+
   it('Explicitly typed array is returned with the correct type', () => {
     const aStrArray = doc.client.find((c) => c.label === 'aStrArray');
     expect(aStrArray).toBeDefined();

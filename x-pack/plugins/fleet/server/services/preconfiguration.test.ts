@@ -10,7 +10,11 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+
+jest.mock('./agent_policy_update');
 
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
@@ -27,30 +31,31 @@ const mockDefaultOutput: Output = {
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
-    const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
-    if (attributes) {
-      return {
-        saved_objects: [
-          {
-            id: `mocked-${attributes.preconfiguration_id}`,
-            attributes,
-            type: type as string,
-            score: 1,
-            references: [],
-          },
-        ],
-        total: 1,
-        page: 1,
-        per_page: 1,
-      };
-    } else {
-      return {
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 0,
-      };
+    if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
+      const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
+      if (attributes) {
+        return {
+          saved_objects: [
+            {
+              id: `mocked-${attributes.preconfiguration_id}`,
+              attributes,
+              type: type as string,
+              score: 1,
+              references: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+      }
     }
+    return {
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+    };
   });
   soClient.create.mockImplementation(async (type, policy) => {
     const attributes = policy as AgentPolicy;
@@ -66,13 +71,23 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  ensureInstalledPackage({ pkgName, pkgVersion }: { pkgName: string; pkgVersion: string }) {
+  installPackage({ pkgkey, force }: { pkgkey: string; force?: boolean }) {
+    const [pkgName, pkgVersion] = pkgkey.split('-');
     const installedPackage = mockInstalledPackages.get(pkgName);
-    if (installedPackage) return installedPackage;
+    if (installedPackage) {
+      if (installedPackage.version === pkgVersion) return installedPackage;
+    }
 
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
+
     return packageInstallation;
+  },
+  ensurePackagesCompletedInstall() {
+    return [];
+  },
+  isPackageVersionOrLaterInstalled() {
+    return false;
   },
 }));
 
@@ -102,9 +117,17 @@ jest.mock('./package_policy', () => ({
   },
 }));
 
-jest.mock('./agents/setup', () => ({
-  isAgentsSetup() {
-    return false;
+jest.mock('./app_context', () => ({
+  appContextService: {
+    getLogger: () =>
+      new Proxy(
+        {},
+        {
+          get() {
+            return jest.fn();
+          },
+        }
+      ),
   },
 }));
 
@@ -138,12 +161,12 @@ describe('policy preconfiguration', () => {
       soClient,
       esClient,
       [],
-      [{ name: 'test-package', version: '3.0.0' }],
+      [{ name: 'test_package', version: '3.0.0' }],
       mockDefaultOutput
     );
 
     expect(policies.length).toBe(0);
-    expect(packages).toEqual(expect.arrayContaining(['test-package:3.0.0']));
+    expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
   });
 
   it('should install packages and configure agent policies successfully', async () => {
@@ -160,19 +183,19 @@ describe('policy preconfiguration', () => {
           id: 'test-id',
           package_policies: [
             {
-              package: { name: 'test-package' },
+              package: { name: 'test_package' },
               name: 'Test package',
             },
           ],
         },
       ] as PreconfiguredAgentPolicy[],
-      [{ name: 'test-package', version: '3.0.0' }],
+      [{ name: 'test_package', version: '3.0.0' }],
       mockDefaultOutput
     );
 
     expect(policies.length).toEqual(1);
     expect(policies[0].id).toBe('mocked-test-id');
-    expect(packages).toEqual(expect.arrayContaining(['test-package:3.0.0']));
+    expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
   });
 
   it('should throw an error when trying to install duplicate packages', async () => {
@@ -185,13 +208,13 @@ describe('policy preconfiguration', () => {
         esClient,
         [],
         [
-          { name: 'test-package', version: '3.0.0' },
-          { name: 'test-package', version: '2.0.0' },
+          { name: 'test_package', version: '3.0.0' },
+          { name: 'test_package', version: '2.0.0' },
         ],
         mockDefaultOutput
       )
     ).rejects.toThrow(
-      'Duplicate packages specified in configuration: test-package:3.0.0, test-package:2.0.0'
+      'Duplicate packages specified in configuration: test_package-3.0.0, test_package-2.0.0'
     );
   });
 

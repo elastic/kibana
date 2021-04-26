@@ -8,6 +8,9 @@
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { HistogramCharts } from '../../services/transform/wizard';
+
 import {
   GroupByEntry,
   isLatestTransformTestData,
@@ -44,22 +47,22 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Only testing that histogram charts are available for runtime fields here
-    const histogramCharts = [
+    const histogramCharts: HistogramCharts = [
       {
         chartAvailable: true,
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { key: '#000000', value: 48 },
-          { key: '#54B399', value: 41 },
+          { color: '#000000', percentage: 48 },
+          { color: '#54B399', percentage: 41 },
         ],
       },
       {
         chartAvailable: true,
         id: 'rt_responsetime_x_2',
         colorStats: [
-          { key: '#54B399', value: 5 },
-          { key: '#000000', value: 95 },
+          { color: '#54B399', percentage: 5 },
+          { color: '#000000', percentage: 95 },
         ],
       },
     ];

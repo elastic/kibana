@@ -16,7 +16,7 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
@@ -86,7 +86,7 @@ export const TimeSeries = ({
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured
-  const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+  const classes = classNames(getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -100,7 +100,7 @@ export const TimeSeries = ({
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
   };
 
   const getSeriesColor = useCallback(
@@ -149,6 +149,7 @@ export const TimeSeries = ({
         tooltip={{
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
@@ -162,7 +163,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}

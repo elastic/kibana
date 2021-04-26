@@ -6,8 +6,8 @@
  */
 
 import { LogicMounter, mockHttpValues } from '../../../__mocks__';
-
 import { mockOverviewValues } from './__mocks__';
+
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {

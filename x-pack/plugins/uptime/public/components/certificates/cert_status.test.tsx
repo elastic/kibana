@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithRouter, shallowWithRouter } from '../../lib/helper/enzyme_helpers';
+import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertStatus } from './cert_status';
 import * as redux from 'react-redux';
 import moment from 'moment';

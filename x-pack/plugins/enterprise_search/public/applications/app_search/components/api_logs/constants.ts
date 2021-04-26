@@ -19,10 +19,11 @@ export const RECENT_API_EVENTS = i18n.translate(
 
 export const POLLING_DURATION = 5000;
 
-export const POLLING_ERROR_MESSAGE = i18n.translate(
+export const POLLING_ERROR_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.apiLogs.pollingErrorMessage',
-  {
-    defaultMessage:
-      'Could not automatically refresh API logs data. Please check your connection or manually refresh the page.',
-  }
+  { defaultMessage: 'Could not refresh API log data' }
+);
+export const POLLING_ERROR_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.apiLogs.pollingErrorDescription',
+  { defaultMessage: 'Please check your connection or manually reload the page.' }
 );

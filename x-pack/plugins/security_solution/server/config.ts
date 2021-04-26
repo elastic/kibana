@@ -32,7 +32,7 @@ export const configSchema = schema.object({
    *
    * @example
    * xpack.securitySolution.enableExperimental:
-   *   - fleetServerEnabled
+   *   - someCrazyFeature
    *   - trustedAppsByPolicyEnabled
    */
   enableExperimental: schema.arrayOf(schema.string(), {

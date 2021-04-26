@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import '../../index.scss';
+import '../../_index.scss';
 export * from '../../embeddable/map_embeddable';
 export * from '../../kibana_services';
 export { renderApp } from '../../render_app';
@@ -16,3 +16,4 @@ export { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_m
 export { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 export { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
 export { createLayerDescriptor as createESSearchSourceLayerDescriptor } from '../../classes/sources/es_search_source';
+export { suggestEMSTermJoinConfig } from '../../ems_autosuggest';

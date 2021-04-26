@@ -276,7 +276,7 @@ describe('AddSourceLogic', () => {
         const addSourceProps = { sourceIndex: 1, reAuthenticate: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReAuthenticateStep);
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
       });
     });
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common/mocks';
+import { createMockContext } from '../../../../expressions/common';
 import { functionWrapper } from './utils';
 import { existsFilterFunction } from './exists_filter';
 

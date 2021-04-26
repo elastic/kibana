@@ -10,8 +10,8 @@ import {
   mountWithRouter,
   renderWithRouter,
   shallowWithRouter,
-} from '../../../lib/helper/enzyme_helpers';
-import { MountWithReduxProvider } from '../../../lib/helper/helper_with_redux';
+  MountWithReduxProvider,
+} from '../../../lib';
 import { createMemoryHistory } from 'history';
 import { StatusFilter } from './status_filter';
 import { FilterStatusButton } from './filter_status_button';

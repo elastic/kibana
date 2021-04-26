@@ -96,7 +96,7 @@ export const FlyoutBody: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiPanel hasShadow={false} paddingSize="s" className="eui-textBreakAll">
+      <EuiPanel hasBorder paddingSize="s" className="eui-textBreakAll">
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiBadge color="primary">POST</EuiBadge>

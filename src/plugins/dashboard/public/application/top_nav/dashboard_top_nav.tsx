@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
+import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
-import { PanelToolbar } from './panel_toolbar';
+import { EditorMenu } from './editor_menu';
 import { SavedQuery } from '../../services/data';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
@@ -21,10 +23,15 @@ import { getTopNavConfig } from './get_top_nav_config';
 import { OverlayRef } from '../../../../../core/public';
 import { useKibana } from '../../services/kibana_react';
 import { showOptionsPopover } from './show_options_popover';
-import { unsavedChangesBadge } from '../../dashboard_strings';
+import { DashboardConstants } from '../../dashboard_constants';
+import { TopNavMenuProps } from '../../../../navigation/public';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
+import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
+import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import {
   setFullScreenMode,
   setHidePanelTitles,
@@ -36,16 +43,14 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
+
 import {
-  EmbeddableFactoryNotFoundError,
-  EmbeddableInput,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
-  ViewMode,
-} from '../../services/embeddable';
-import { DashboardConstants } from '../../dashboard_constants';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { TopNavMenuProps } from '../../../../navigation/public';
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+} from '../../../../presentation_util/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -96,6 +101,8 @@ export function DashboardTopNav({
     embeddable,
     navigation,
     uiSettings,
+    visualizations,
+    usageCollection,
     initializerContext,
     savedObjectsTagging,
     setHeaderActionMenu,
@@ -112,6 +119,16 @@ export function DashboardTopNav({
 
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
+
+  const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
+  const quickButtonVisTypes = ['markdown', 'maps'];
+  const stateTransferService = embeddable.getStateTransfer();
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  const trackUiMetric = usageCollection?.reportUiCounter.bind(
+    usageCollection,
+    DashboardConstants.DASHBOARDS_ID
+  );
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -154,14 +171,37 @@ export function DashboardTopNav({
     uiSettings,
   ]);
 
-  const createNew = useCallback(async () => {
-    const type = 'visualization';
-    const factory = embeddable.getEmbeddableFactory(type);
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-    await factory.create({} as EmbeddableInput, dashboardAppState.dashboardContainer);
-  }, [dashboardAppState.dashboardContainer, embeddable]);
+  const createNewVisType = useCallback(
+    (visType?: BaseVisType | VisTypeAlias) => () => {
+      let path = '';
+      let appId = '';
+
+      if (visType) {
+        if (trackUiMetric) {
+          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+        }
+
+        if ('aliasPath' in visType) {
+          appId = visType.aliasApp;
+          path = visType.aliasPath;
+        } else {
+          appId = 'visualize';
+          path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        }
+      } else {
+        appId = 'visualize';
+        path = '#/create?';
+      }
+
+      stateTransferService.navigateToEditor(appId, {
+        path,
+        state: {
+          originatingApp: DashboardConstants.DASHBOARDS_ID,
+        },
+      });
+    },
+    [trackUiMetric, stateTransferService]
+  );
 
   const clearAddPanel = useCallback(() => {
     if (state.addPanelOverlay) {
@@ -482,11 +522,74 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
+
+  const getVisTypeQuickButton = (visTypeName: string) => {
+    const visType =
+      visualizations.get(visTypeName) ||
+      visualizations.getAliases().find(({ name }) => name === visTypeName);
+
+    if (visType) {
+      if ('aliasPath' in visType) {
+        const { name, icon, title } = visType as VisTypeAlias;
+
+        return {
+          iconType: icon,
+          createType: title,
+          onClick: createNewVisType(visType as VisTypeAlias),
+          'data-test-subj': `dashboardQuickButton${name}`,
+          isDarkModeEnabled: IS_DARK_THEME,
+        };
+      } else {
+        const { name, icon, title, titleInWizard } = visType as BaseVisType;
+
+        return {
+          iconType: icon,
+          createType: titleInWizard || title,
+          onClick: createNewVisType(visType as BaseVisType),
+          'data-test-subj': `dashboardQuickButton${name}`,
+          isDarkModeEnabled: IS_DARK_THEME,
+        };
+      }
+    }
+
+    return;
+  };
+
+  const quickButtons = quickButtonVisTypes
+    .map(getVisTypeQuickButton)
+    .filter((button) => button) as QuickButtonProps[];
+
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {dashboardAppState.getLatestDashboardState().viewMode !== ViewMode.VIEW ? (
-        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+      <EuiHorizontalRule margin="none" />
+      {dashboardState.viewMode !== ViewMode.VIEW ? (
+        <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
+          {{
+            primaryActionButton: (
+              <PrimaryActionButton
+                isDarkModeEnabled={IS_DARK_THEME}
+                label={getCreateVisualizationButtonTitle()}
+                onClick={createNewVisType(lensAlias)}
+                iconType="lensApp"
+                data-test-subj="dashboardAddNewPanelButton"
+              />
+            ),
+            quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+            addFromLibraryButton: (
+              <AddFromLibraryButton
+                onClick={addFromLibrary}
+                data-test-subj="dashboardAddPanelButton"
+              />
+            ),
+            extraButtons: [
+              <EditorMenu
+                createNewVisType={createNewVisType}
+                dashboardContainer={dashboardAppState.dashboardContainer}
+              />,
+            ],
+          }}
+        </SolutionToolbar>
       ) : null}
     </>
   );

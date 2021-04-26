@@ -8,14 +8,19 @@ exports[`Should render cancel button when drawing 1`] = `
     <EuiPopover
       anchorPosition="leftUp"
       button={
-        <EuiButtonIcon
-          aria-label="Tools"
+        <EuiPanel
           className="mapToolbarOverlay__button"
-          color="text"
-          iconType="wrench"
-          onClick={[Function]}
-          title="Tools"
-        />
+          paddingSize="none"
+        >
+          <EuiButtonIcon
+            aria-label="Tools"
+            color="text"
+            iconType="wrench"
+            onClick={[Function]}
+            size="s"
+            title="Tools"
+          />
+        </EuiPanel>
       }
       closePopover={[Function]}
       display="inlineBlock"
@@ -134,14 +139,19 @@ exports[`renders 1`] = `
 <EuiPopover
   anchorPosition="leftUp"
   button={
-    <EuiButtonIcon
-      aria-label="Tools"
+    <EuiPanel
       className="mapToolbarOverlay__button"
-      color="text"
-      iconType="wrench"
-      onClick={[Function]}
-      title="Tools"
-    />
+      paddingSize="none"
+    >
+      <EuiButtonIcon
+        aria-label="Tools"
+        color="text"
+        iconType="wrench"
+        onClick={[Function]}
+        size="s"
+        title="Tools"
+      />
+    </EuiPanel>
   }
   closePopover={[Function]}
   display="inlineBlock"

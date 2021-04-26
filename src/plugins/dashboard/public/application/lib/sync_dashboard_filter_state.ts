@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { merge } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import { setQuery } from '../state';
 import { DashboardBuildContext } from '../../types';
@@ -20,6 +20,7 @@ import {
   esFilters,
   Filter,
   Query,
+  waitUntilNextSessionCompletes$,
 } from '../../services/data';
 import { cleanFiltersForSerialize } from '.';
 
@@ -42,7 +43,7 @@ export const syncDashboardFilterState = ({
   dispatchDashboardStateChange,
 }: SyncDashboardFilterStateProps) => {
   const {
-    data: { query: queryService },
+    data: { query: queryService, search },
   } = services;
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
@@ -103,7 +104,16 @@ export const syncDashboardFilterState = ({
 
   const forceRefreshSubscription = timefilterService
     .getAutoRefreshFetch$()
-    .subscribe(() => $triggerDashboardRefresh.next({ force: true }));
+    .pipe(
+      tap(() => {
+        $triggerDashboardRefresh.next({ force: true });
+      }),
+      switchMap((done) =>
+        // best way on a dashboard to estimate that panels are updated is to rely on search session service state
+        waitUntilNextSessionCompletes$(search.session).pipe(finalize(done))
+      )
+    )
+    .subscribe();
 
   const stopSyncingDashboardFilterState = () => {
     filterManagerSubscription.unsubscribe();

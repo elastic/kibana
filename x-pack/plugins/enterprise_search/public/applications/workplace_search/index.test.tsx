@@ -57,11 +57,13 @@ describe('WorkplaceSearchConfigured', () => {
     setMockActions({ initializeAppData, setContext });
   });
 
-  it('renders layout and header actions', () => {
+  it('renders layout, chrome, and header actions', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
     expect(wrapper.find(Layout).first().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(OverviewMVP)).toHaveLength(1);
+
+    expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
   });
 

@@ -41,6 +41,7 @@ import {
   OsTypeArray,
   EntriesArray,
   osType,
+  ExceptionListType,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -48,6 +49,30 @@ import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
+import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
+import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+
+export const filterIndexPatterns = (
+  patterns: IIndexPattern,
+  type: ExceptionListType
+): IIndexPattern => {
+  switch (type) {
+    case 'endpoint':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) => exceptionableEndpointFields.includes(name)),
+      };
+    case 'endpoint_events':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) =>
+          exceptionableEndpointEventFields.includes(name)
+        ),
+      };
+    default:
+      return patterns;
+  }
+};
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
   return entries.map((singleEntry) => {
