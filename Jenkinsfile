@@ -11,26 +11,14 @@ parallel([
   },
   node2: {
     node('linux && immutable') {
-      try {
-        input "Waiting"
-      } catch (ex) {
-
-      }
+      input "Start cloning"
       print kibanaCheckout()
     }
   },
-  node3: {
-    node('linux && immutable') {
-      sleep 30
-      print kibanaCheckout()
-    }
-  },
-  node4: {
-    node('linux && immutable') {
-      sleep 120
-      print kibanaCheckout()
-    }
-  },
+  switchCommit: {
+    input "Switch commit"
+    env.KIBANA_GIT_COMMIT = '36d469dfd5b41dacf8c6dad330cb8cea118ada9f'
+  }
 ])
 
 // test
