@@ -15,13 +15,12 @@ import {
   ScaleType,
   Settings,
   SettingsSpec,
-  TooltipValue,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { isEmpty } from 'lodash';
+import { isEmpty, keyBy } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -91,6 +90,11 @@ const formatYLong = (t: number) => {
   );
 };
 
+const NO_SAMPLES_AVAILABLE_LABEL = i18n.translate(
+  'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSamplesAvailable',
+  { defaultMessage: '(No samples available)' }
+);
+
 interface Props {
   distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
@@ -133,15 +137,23 @@ export function TransactionDistribution({
   const xMax = d3.max(buckets, (d) => d.x0) || 0;
   const timeFormatter = getDurationFormatter(xMax);
 
+  const distributionMap = keyBy(distribution?.buckets, 'key');
+  const bucketsMap = keyBy(buckets, 'x0');
+
   const tooltipProps: SettingsSpec['tooltip'] = {
-    headerFormatter: (tooltip: TooltipValue) => {
-      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
+    headerFormatter: (tooltip) => {
+      const datum = tooltip.datum as typeof buckets[0];
+      const selectedDistribution = distributionMap[datum?.x0];
+      const noSampleAvailable = isEmpty(selectedDistribution?.samples)
+        ? NO_SAMPLES_AVAILABLE_LABEL
+        : '';
+      const serie = bucketsMap[tooltip.value];
       if (serie) {
         const xFormatted = timeFormatter(serie.x);
         const x0Formatted = timeFormatter(serie.x0);
-        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit} ${noSampleAvailable}`;
       }
-      return `${timeFormatter(tooltip.value)}`;
+      return `${timeFormatter(tooltip.value)} ${noSampleAvailable}`;
     },
   };
 
