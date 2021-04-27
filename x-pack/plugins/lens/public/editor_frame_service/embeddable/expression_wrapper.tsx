@@ -38,6 +38,7 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
+  onRuntimeError: () => void;
 }
 
 interface VisualizationErrorProps {
@@ -106,6 +107,7 @@ export function ExpressionWrapper({
   className,
   errors,
   canEdit,
+  onRuntimeError,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -123,20 +125,23 @@ export function ExpressionWrapper({
             onData$={onData$}
             renderMode={renderMode}
             syncColors={syncColors}
-            renderError={(errorMessage, error) => (
-              <div data-test-subj="expression-renderer-error">
-                <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-                  <EuiFlexItem>
-                    <EuiIcon type="alert" color="danger" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
-                      <EuiText size="s">{message}</EuiText>
-                    ))}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            )}
+            renderError={(errorMessage, error) => {
+              onRuntimeError();
+              return (
+                <div data-test-subj="expression-renderer-error">
+                  <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+                    <EuiFlexItem>
+                      <EuiIcon type="alert" color="danger" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
+                        <EuiText size="s">{message}</EuiText>
+                      ))}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              );
+            }}
             onEvent={handleEvent}
             hasCompatibleActions={hasCompatibleActions}
           />
