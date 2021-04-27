@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
           pivotAdvancedEditorValue: {
@@ -214,6 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
           ],
+          discoverQueryHits: '7,270',
         },
       } as PivotTransformTestData,
       {
@@ -251,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: false,
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -297,6 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
+          discoverQueryHits: '10',
         },
       } as PivotTransformTestData,
       {
@@ -320,6 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
             column: 0,
@@ -344,6 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
               'July 12th 2019, 23:31:12',
             ],
           },
+          discoverQueryHits: '10',
         },
       } as LatestTransformTestData,
     ];
@@ -538,6 +544,26 @@ export default function ({ getService }: FtrProviderContext) {
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
           });
+        });
+
+        it('navigates to discover and displays results of the destination index', async () => {
+          await transform.testExecution.logTestStep('should show the actions popover');
+          await transform.table.assertTransformRowActions(testData.transformId, false);
+
+          await transform.testExecution.logTestStep('should navigate to discover');
+          await transform.table.clickTransformRowAction('Discover');
+
+          if (testData.discoverAdjustSuperDatePicker) {
+            await transform.discover.assertNoResults(testData.destinationIndex);
+            await transform.testExecution.logTestStep(
+              'should switch quick select lookback to years'
+            );
+            await transform.discover.assertSuperDatePickerToggleQuickMenuButtonExists();
+            await transform.discover.openSuperDatePicker();
+            await transform.discover.quickSelectYears();
+          }
+
+          await transform.discover.assertDiscoverQueryHits(testData.expected.discoverQueryHits);
         });
       });
     }
