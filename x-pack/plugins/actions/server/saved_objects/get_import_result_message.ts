@@ -15,10 +15,12 @@ export function getImportResultMessage(connectors: Array<SavedObject<RawAction>>
   );
   return i18n.translate('xpack.actions.savedObjects.onImportText', {
     defaultMessage:
-      '{connectorsLength} {connectorsLength, plural, one {Connector} other {Connectors}} have been imported. {connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {Connector} other {Connectors}} with the secrets need to be updated.',
+      '{connectorsLength} {connectorsLength, plural, one {connector has} other {connectors have}} been imported. {connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {connector has} other {connectors have}} secrets that require updates.',
     values: {
       connectorsLength: connectors.length,
       connectorsWithSecretsLength: connectorsWithSecrets.length,
     },
   });
 }
+
+export const GO_TO_CONNECTORS_BUTTON_LABLE = 'Go to connectors';
