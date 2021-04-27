@@ -252,7 +252,10 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['action.destructive_requires_name=true'].concat(options.esArgs || []);
+    const esArgs = [
+      'action.destructive_requires_name=true',
+      'logger.org.elasticsearch.ingest.geoip=DEBUG',
+    ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
