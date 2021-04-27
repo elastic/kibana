@@ -266,6 +266,7 @@ describe('#start(installPath)', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "ingest.geoip.downloader.enabled=false",
           ],
           undefined,
           Object {
@@ -344,6 +345,7 @@ describe('#run()', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "ingest.geoip.downloader.enabled=false",
           ],
           undefined,
           Object {
