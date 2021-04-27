@@ -604,6 +604,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             gutterSize="s"
             alignItems="center"
             className="lnsInnerIndexPatternDataPanel__header"
+            responsive={false}
           >
             <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
