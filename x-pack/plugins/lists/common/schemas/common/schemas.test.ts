@@ -53,15 +53,6 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should validate for "wildcard_caseless"', () => {
-      const payload = 'wildcard_caseless';
-      const decoded = operator.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
     test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if operator is updated, you
