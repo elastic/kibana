@@ -37,6 +37,10 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         agentSelection
       );
 
+      if (!selectedAgents.length) {
+        throw new Error('No agents found for selection, aborting.')
+      }
+
       const action = {
         action_id: uuid.v4(),
         '@timestamp': moment().toISOString(),
@@ -45,10 +49,9 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         input_type: 'osquery',
         agents: selectedAgents,
         data: {
+          id: uuid.v4(),
           // @ts-expect-error update validation
-          id: request.body.query.id ?? uuid.v4(),
-          // @ts-expect-error update validation
-          query: request.body.query.query,
+          query: request.body.query,
         },
       };
       const actionResponse = await esClient.index<{}, {}>({

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { PackagePolicyInputStream } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
-import { idFieldValidation } from './validations';
+import { idFieldValidation, intervalFieldValidation, queryFieldValidation } from './validations';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
@@ -72,6 +72,7 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
         label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
           defaultMessage: 'Query',
         }),
+        validations: [{ validator: queryFieldValidation }],
       },
       interval: {
         type: FIELD_TYPES.NUMBER,
@@ -81,6 +82,7 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
             defaultMessage: 'Interval (s)',
           }
         ),
+        validations: [{ validator: intervalFieldValidation }],
       },
     },
   });
