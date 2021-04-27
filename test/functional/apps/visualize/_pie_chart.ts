@@ -403,7 +403,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await inspector.close();
       });
 
-      it('should correctly filter on legend miaou', async () => {
+      it('should correctly filter on legend', async () => {
         const expectedTableData = [
           '0',
           'CN',
