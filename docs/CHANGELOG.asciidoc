@@ -57,11 +57,26 @@ Review important information about the {kib} 7.12.x releases.
 For information about the {kib} 7.12.1 release, review the following information.
 
 [float]
+[[security-update-7.12.1]]
+=== Security update
+
+A denial of service vulnerability was found in the {kib} webhook actions due to a lack of timeout or a limit on the request size. 
+An attacker with permissions to create webhook actions could drain the {kib} host connection pool, making {kib} unavailable for all other users.
+
+Thank you Dominic Couture for finding this issue.
+
+*Affected versions* +
+Affected versions include {kib} 7.12.0 and earlier.
+
+*Solution* +
+If you are using {kib} webhook actions, upgrade to 7.12.1.
+
+[float]
 [[breaking-changes-7.12.1]]
 === Breaking changes
 
 Breaking changes can prevent your application from optimal operation and performance.
-Before you upgrade, review the <<breaking-changes-7.12.0,breaking changes>>, then mitigate the impact to your application.
+Before you upgrade, review the <<breaking-changes-7.12.0,7.12.0 breaking changes>>, then mitigate the impact to your application.
 
 [float]
 [[enhancement-v7.12.1]]
