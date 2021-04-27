@@ -6,6 +6,7 @@
  */
 
 import type { IUiSettingsClient } from 'kibana/public';
+import { partition } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -57,14 +58,26 @@ function getExpressionForLayer(
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
-  if (columnEntries.length) {
+  const [referenceEntries, esAggEntries] = partition(
+    columnEntries,
+    ([, col]) =>
+      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+  );
+
+  if (referenceEntries.length || esAggEntries.length) {
     const aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
-    columnEntries.forEach(([colId, col]) => {
+    referenceEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
-      } else {
+      }
+    });
+
+    esAggEntries.forEach(([colId, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input !== 'fullReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
@@ -109,8 +122,8 @@ function getExpressionForLayer(
       // Return early if there are no aggs, for example if the user has an empty formula
       return null;
     }
-    const idMap = aggColumnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${aggColumnEntries.length === 1 ? 0 : index}-${colId}`;
+    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${index}-${colId}`;
       return {
         ...currentIdMap,
         [esAggsId]: {

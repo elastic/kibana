@@ -765,7 +765,12 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
-  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
+  updatedColumnOrder = reorderByGroups(
+    visualizationGroups,
+    targetGroup,
+    updatedColumnOrder,
+    addedColumnId
+  );
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
@@ -802,16 +807,24 @@ export function reorderByGroups(
     });
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
-      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+      const groupIndex = orderedVisualizationGroups.findIndex(
         (group) =>
           (columnId === addedColumnId && group.groupId === targetGroup) ||
           group.accessors.some((acc) => acc.columnId === columnId)
       );
+      if (groupIndex !== -1) {
+        columnGroupIndex[columnId] = groupIndex;
+      } else {
+        // referenced columns won't show up in visualization groups - put them in the back of the list. This will work as they are always metrics
+        columnGroupIndex[columnId] = updatedColumnOrder.length;
+      }
     });
 
-    updatedColumnOrder.sort((a, b) => {
+    return [...updatedColumnOrder].sort((a, b) => {
       return columnGroupIndex[a] - columnGroupIndex[b];
     });
+  } else {
+    return updatedColumnOrder;
   }
 }
 
@@ -952,18 +965,19 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [direct, referenceBased] = _.partition(
-    entries,
-    ([, col]) =>
-      operationDefinitionMap[col.operationType].input !== 'fullReference' &&
-      operationDefinitionMap[col.operationType].input !== 'managedReference'
-  );
-  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
+  // If a reference has another reference as input, put it last in sort order
+  entries.sort(([idA, a], [idB, b]) => {
+    if ('references' in a && a.references.includes(idB)) {
+      return 1;
+    }
+    if ('references' in b && b.references.includes(idA)) {
+      return -1;
+    }
+    return 0;
+  });
+  const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
 
-  return aggregations
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id))
-    .concat(topologicalSort(referenceBased));
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 // Splits existing columnOrder into the three categories
