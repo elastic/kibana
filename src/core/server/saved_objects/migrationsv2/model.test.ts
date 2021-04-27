@@ -34,6 +34,7 @@ import type {
   SetTempWriteBlock,
   WaitForYellowSourceState,
   TransformedDocumentsBulkIndex,
+  ReindexSourceToTempIndexBulk,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -803,6 +804,23 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
         expect(newState.sourceIndexPitId).toBe('pit_id');
       });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
+        const testState: ReindexSourceToTempRead = {
+          ...state,
+          corruptDocumentIds: ['a:b'],
+          transformErrors: [],
+        };
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments: [],
+          lastHitSortValue: undefined,
+        });
+        const newState = model(testState, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Migrations failed. Reason: The following saved object documents are corrupt: a:b . To allow migrations to proceed, please delete these documents."`
+        );
+      });
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT', () => {
@@ -861,7 +879,7 @@ describe('migrations v2 model', () => {
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
         };
-        const newState = model(testState, res);
+        const newState = model(testState, res) as ReindexSourceToTempIndex;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.corruptDocumentIds.length).toEqual(1);
         expect(newState.transformErrors.length).toEqual(0);
@@ -879,6 +897,38 @@ describe('migrations v2 model', () => {
         expect(newState.transformErrors.length).toEqual(0);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
+      const transformedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+      const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
+        transformedDocs,
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexPitId: 'pit_id',
+        targetIndex: '.kibana_7.11.0_001',
+        lastHitSortValue: undefined,
+      };
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.right(
+          'bulk_index_succeeded'
+        );
+        const newState = model(reindexSourceToTempIndexBulkState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'random transform documents bulk error',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
 

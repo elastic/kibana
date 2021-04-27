@@ -507,7 +507,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // if documents couldn't be transformed or there were transformation errors we fail the migration
           const corruptDocumentIdReason =
             stateP.corruptDocumentIds.length > 0
-              ? `The following corrupt saved object documents: ${stateP.corruptDocumentIds.join(
+              ? `The following saved object documents are corrupt: ${stateP.corruptDocumentIds.join(
                   ','
                 )}`
               : '';
@@ -521,7 +521,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason: ${corruptDocumentIdReason} ${transformErrorsReason}. TO allow migrations to proceed, please delete these documents.`,
+            reason: `Migrations failed. Reason: ${corruptDocumentIdReason} ${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
