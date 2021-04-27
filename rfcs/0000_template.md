@@ -68,15 +68,18 @@ Why should we *not* do this? Please consider:
 
 There are tradeoffs to choosing any path. Attempt to identify them here.
 
+
 # Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
+
 
 # Adoption strategy
 
 If we implement this proposal, how will existing Kibana developers adopt it? Is
 this a breaking change? Can we write a codemod? Should we coordinate with
 other projects or libraries?
+
 
 # How we teach this
 
@@ -88,6 +91,7 @@ re-organized or altered? Does it change how Kibana is taught to new developers
 at any level?
 
 How should this feature be taught to existing Kibana developers?
+
 
 # Unresolved questions
 
