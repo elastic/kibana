@@ -174,23 +174,6 @@ describe('get_export_by_object_ids', () => {
       expect(exports).toEqual(expected);
     });
 
-    test('it returns error when readRules throws error', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
-        throw new Error('Test error');
-      });
-      const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(alertsClient, objects);
-      const expected: RulesErrors = {
-        exportedCount: 0,
-        missingRules: [{ rule_id: objects[0].rule_id }],
-        rules: [],
-      };
-      expect(exports).toEqual(expected);
-    });
-
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
       const alertsClient = alertsClientMock.create();
       const result = getAlertMock(getQueryRuleParams());
