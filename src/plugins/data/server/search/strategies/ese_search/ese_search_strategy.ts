@@ -50,10 +50,12 @@ export const enhancedEsSearchStrategyProvider = (
 
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
-    options: IAsyncSearchOptions,
+    { callAsInternalUser, ...options }: IAsyncSearchOptions,
     { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
   ) {
-    const client = esClient.asCurrentUser.asyncSearch;
+    const client = callAsInternalUser
+      ? esClient.asInternalUser.asyncSearch
+      : esClient.asCurrentUser.asyncSearch;
 
     const search = async () => {
       const params = id

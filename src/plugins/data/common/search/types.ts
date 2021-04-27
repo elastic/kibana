@@ -129,6 +129,11 @@ export interface ISearchOptions {
    * Inspector integration options
    */
   inspector?: IInspectorInfo;
+
+  /**
+   * Inspector integration options
+   */
+  callAsInternalUser?: boolean;
 }
 
 /**

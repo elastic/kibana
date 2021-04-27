@@ -45,6 +45,9 @@ describe('ES search strategy', () => {
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
   const mockDeleteCaller = jest.fn();
+  const mockGetCallerAsInternal = jest.fn();
+  const mockSubmitCallerAsInternal = jest.fn();
+  const mockDeleteCallerAsInternal = jest.fn();
   const mockLogger: any = {
     debug: () => {},
   };
@@ -58,6 +61,14 @@ describe('ES search strategy', () => {
           get: mockGetCaller,
           submit: mockSubmitCaller,
           delete: mockDeleteCaller,
+        },
+        transport: { request: mockApiCaller },
+      },
+      asInternalUser: {
+        asyncSearch: {
+          get: mockGetCallerAsInternal,
+          submit: mockSubmitCallerAsInternal,
+          delete: mockDeleteCallerAsInternal,
         },
         transport: { request: mockApiCaller },
       },
@@ -79,6 +90,9 @@ describe('ES search strategy', () => {
     mockGetCaller.mockClear();
     mockSubmitCaller.mockClear();
     mockDeleteCaller.mockClear();
+    mockGetCallerAsInternal.mockClear();
+    mockSubmitCallerAsInternal.mockClear();
+    mockDeleteCallerAsInternal.mockClear();
   });
 
   it('returns a strategy with `search and `cancel`', async () => {
@@ -154,6 +168,20 @@ describe('ES search strategy', () => {
         const { method, path } = mockApiCaller.mock.calls[0][0];
         expect(method).toBe('POST');
         expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+      });
+
+      it('uses internal Kibana user client when options.callAsInternalUser is true', async () => {
+        mockSubmitCallerAsInternal.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'foo-*', body: {} };
+        const esSearch = await enhancedEsSearchStrategyProvider(mockLegacyConfig$, mockLogger);
+
+        await esSearch.search({ params }, { callAsInternalUser: true }, mockDeps).toPromise();
+
+        expect(mockSubmitCallerAsInternal).toBeCalled();
+        const request = mockSubmitCallerAsInternal.mock.calls[0][0];
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).toHaveProperty('keep_alive');
       });
     });
 
