@@ -22,6 +22,8 @@ export function getCustomAgents(
   logger: Logger,
   url: string
 ): GetCustomAgentsResponse {
+  // the default for rejectUnauthorized is the global setting, which can
+  // be overridden (below) with a custom host setting
   const defaultAgents = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({
@@ -29,6 +31,8 @@ export function getCustomAgents(
     }),
   };
 
+  // Get the current proxy settings, and custom host settings for this URL.
+  // If there are neither of these, return the default agents
   const proxySettings = configurationUtilities.getProxySettings();
   const customHostSettings = configurationUtilities.getCustomHostSettings(url);
   if (!proxySettings && !customHostSettings) {
@@ -47,15 +51,19 @@ export function getCustomAgents(
     }
 
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
+    // This is where the global rejectUnauthorized is overridden by a custom host
     if (tlsSettings.rejectUnauthorized !== undefined) {
       agentOptions.rejectUnauthorized = tlsSettings.rejectUnauthorized;
     }
   }
 
+  // if there weren't any proxy settings, return the currently calculated agents
   if (!proxySettings) {
     return defaultAgents;
   }
 
+  // there is a proxy in use, but it's possible we won't use it via custom host
+  // proxyOnlyHosts and proxyBypassHosts
   let targetUrl: URL;
   try {
     targetUrl = new URL(url);
@@ -78,6 +86,7 @@ export function getCustomAgents(
       return defaultAgents;
     }
   }
+
   logger.debug(`Creating proxy agents for proxy: ${proxySettings.proxyUrl}`);
   let proxyUrl: URL;
   try {
@@ -87,6 +96,9 @@ export function getCustomAgents(
     return defaultAgents;
   }
 
+  // At this point, we are going to use a proxy, so we need new agents.
+  // We will though, copy over the calculated tls options from above, into
+  // the https agent.
   const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
   const httpsAgent = (new HttpsProxyAgent({
     host: proxyUrl.hostname,

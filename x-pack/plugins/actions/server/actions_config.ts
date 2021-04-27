@@ -142,6 +142,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
+    // returns the global rejectUnauthorized setting
     isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {

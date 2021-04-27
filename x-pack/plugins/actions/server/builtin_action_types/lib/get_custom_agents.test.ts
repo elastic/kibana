@@ -22,6 +22,10 @@ const nonMatchingUrl = `https://${targetHost}m/foo/bar/baz`;
 describe('getCustomAgents', () => {
   const configurationUtilities = actionsConfigMock.create();
 
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('get agents for valid proxy URL', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
@@ -141,5 +145,83 @@ describe('getCustomAgents', () => {
 
     expect(httpsAgent?.options.ca).toBe('ca data here');
     expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
+  });
+
+  test('handles overriding global rejectUnauthorized false', () => {
+    configurationUtilities.isRejectUnauthorizedCertificatesEnabled.mockReturnValue(false);
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: true,
+      },
+    });
+
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpAgent instanceof HttpProxyAgent).toBeFalsy();
+    expect(httpsAgent instanceof HttpsAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeFalsy();
+    expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
+  });
+
+  test('handles overriding global rejectUnauthorized true', () => {
+    configurationUtilities.isRejectUnauthorizedCertificatesEnabled.mockReturnValue(true);
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpAgent instanceof HttpProxyAgent).toBeFalsy();
+    expect(httpsAgent instanceof HttpsAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeFalsy();
+    expect(httpsAgent?.options.rejectUnauthorized).toBeFalsy();
+  });
+
+  test('handles overriding global rejectUnauthorized false with a proxy', () => {
+    configurationUtilities.isRejectUnauthorizedCertificatesEnabled.mockReturnValue(false);
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: true,
+      },
+    });
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      // note: this setting doesn't come into play, it's for the connection to
+      // the proxy, not the target url
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
+  });
+
+  test('handles overriding global rejectUnauthorized true with a proxy', () => {
+    configurationUtilities.isRejectUnauthorizedCertificatesEnabled.mockReturnValue(true);
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      // note: this setting doesn't come into play, it's for the connection to
+      // the proxy, not the target url
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    expect(httpsAgent?.options.rejectUnauthorized).toBeFalsy();
   });
 });
