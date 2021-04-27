@@ -334,11 +334,12 @@ def buildXpack(maxWorkers = '', uploadArtifacts = false) {
 
 def downloadDefaultBuildArtifacts() {
   withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-  kibanaPipeline.bash("""
-    cd ..
-    gsutil -q -m cp '${getBuildArtifactBucket()}/kibana-default.tar.gz' ./
-    gsutil -q -m cp '${getBuildArtifactBucket()}/kibana-default-plugins.tar.gz' ./
-  """, "Download Default Build artifacts from GCS")
+    kibanaPipeline.bash("""
+      cd ..
+      gsutil -q -m cp '${getBuildArtifactBucket()}/kibana-default.tar.gz' ./
+      gsutil -q -m cp '${getBuildArtifactBucket()}/kibana-default-plugins.tar.gz' ./
+    """, "Download Default Build artifacts from GCS")
+  }
 }
 
 def runErrorReporter() {
