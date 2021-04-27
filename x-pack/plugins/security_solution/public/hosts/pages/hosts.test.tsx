@@ -12,7 +12,6 @@ import { Router } from 'react-router-dom';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import '../../common/mock/match_media';
 import {
-  apolloClientObservable,
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
@@ -144,13 +143,7 @@ describe('Hosts - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

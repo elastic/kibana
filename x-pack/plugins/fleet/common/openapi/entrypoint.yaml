@@ -22,20 +22,12 @@ paths:
     $ref: paths/agent_status.yaml
   /agents:
     $ref: paths/agents.yaml
-  '/agents/{agentId}/acks':
-    $ref: 'paths/agents@{agent_id}@acks.yaml'
-  '/agents/{agentId}/checkin':
-    $ref: 'paths/agents@{agent_id}@checkin.yaml'
-  '/agents/{agentId}/events':
-    $ref: 'paths/agents@{agent_id}@events.yaml'
   '/agents/{agentId}/unenroll':
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
   '/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
   /agents/bulk_upgrade:
     $ref: paths/agents@bulk_upgrade.yaml
-  /agents/enroll:
-    $ref: paths/agents@enroll.yaml
   /agents/setup:
     $ref: paths/agents@setup.yaml
   /enrollment-api-keys:

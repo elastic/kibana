@@ -627,7 +627,7 @@ export class DataVisualizer {
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
-    // Combine runtime mappings from the index pattern as well as the datafeed
+    // Combine runtime fields from the index pattern as well as the datafeed
     const combinedRuntimeMappings: RuntimeMappings = {
       ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
       ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
@@ -674,7 +674,7 @@ export class DataVisualizer {
     });
 
     const aggregations = body.aggregations;
-    // @ts-expect-error fix search response
+    // @ts-expect-error incorrect search response type
     const totalCount = body.hits.total.value;
     const stats = {
       totalCount,
@@ -762,7 +762,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
-    // @ts-expect-error fix search response
+    // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
 
@@ -1249,7 +1249,7 @@ export class DataVisualizer {
       fieldName: field,
       examples: [] as any[],
     };
-    // @ts-expect-error fix search response
+    // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {

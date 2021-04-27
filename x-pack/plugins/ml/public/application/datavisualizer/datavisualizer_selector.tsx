@@ -56,7 +56,7 @@ export const DatavisualizerSelector: FC = () => {
       licenseManagement,
       http: { basePath },
       docLinks,
-      fileUpload,
+      fileDataVisualizer,
     },
   } = useMlKibana();
 
@@ -68,12 +68,12 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  if (fileUpload === undefined) {
+  if (fileDataVisualizer === undefined) {
     // eslint-disable-next-line no-console
-    console.error('File upload plugin not available');
+    console.error('File data visualizer plugin not available');
     return null;
   }
-  const maxFileSize = fileUpload.getMaxBytesFormatted();
+  const maxFileSize = fileDataVisualizer.getMaxBytesFormatted();
 
   return (
     <Fragment>

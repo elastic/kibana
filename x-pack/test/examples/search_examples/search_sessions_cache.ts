@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   async function getExecutedAt() {
     const toast = await toasts.getToastElement(1);
@@ -26,11 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return text;
   }
 
-  describe.skip('Search session client side cache', () => {
+  describe('Search session client side cache', () => {
     const appId = 'searchExamples';
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
+      await comboBox.set('indexPatternSelector', 'logstash-*');
+      await comboBox.set('searchBucketField', 'extension.raw');
+      await comboBox.set('searchMetricField', 'phpmemory');
     });
 
     it('should cache responses by search session id', async () => {

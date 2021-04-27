@@ -33,7 +33,7 @@ export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props)
     case 'uptime-duration':
       return getMonitorDurationConfig({ seriesId });
     case 'uptime-pings':
-      return getMonitorPingsConfig({ seriesId });
+      return getMonitorPingsConfig({ seriesId, indexPattern });
     case 'service-latency':
       return getServiceLatencyLensConfig({ seriesId, indexPattern });
     case 'service-throughput':

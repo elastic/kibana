@@ -195,7 +195,7 @@ export const SearchExamplesApp = ({
       });
   };
 
-  const doSearchSourceSearch = async () => {
+  const doSearchSourceSearch = async (otherBucket: boolean) => {
     if (!indexPattern) return;
 
     const query = data.query.queryString.getQuery();
@@ -221,7 +221,7 @@ export const SearchExamplesApp = ({
         aggDef.push({
           type: 'terms',
           schema: 'split',
-          params: { field: selectedBucketField.name, size: 2, otherBucket: true },
+          params: { field: selectedBucketField.name, size: 2, otherBucket },
         });
       }
       if (selectedNumericField) {
@@ -280,8 +280,8 @@ export const SearchExamplesApp = ({
     }
   };
 
-  const onSearchSourceClickHandler = () => {
-    doSearchSourceSearch();
+  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
+    doSearchSourceSearch(withOtherBucket);
   };
 
   const reqTabs = [
@@ -367,6 +367,7 @@ export const SearchExamplesApp = ({
                   setIndexPattern(newIndexPattern);
                 }}
                 isClearable={false}
+                data-test-subj="indexPatternSelector"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -449,7 +450,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={onSearchSourceClickHandler}
+                  onClick={() => onSearchSourceClickHandler(true)}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -462,6 +463,23 @@ export const SearchExamplesApp = ({
                   <FormattedMessage
                     id="searchExamples.buttonText"
                     defaultMessage="Bucket and metrics aggregations with other bucket."
+                  />
+                </EuiText>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => onSearchSourceClickHandler(false)}
+                  iconType="play"
+                  data-test-subj="searchSourceWithoutOther"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchSource.buttonText"
+                    defaultMessage="Request from high-level client (data.search.searchSource)"
+                  />
+                </EuiButtonEmpty>
+                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                  <FormattedMessage
+                    id="searchExamples.buttonText"
+                    defaultMessage="Bucket and metrics aggregations without other bucket."
                   />
                 </EuiText>
               </EuiText>

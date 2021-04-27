@@ -8,12 +8,10 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -31,23 +29,11 @@ describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -75,21 +61,19 @@ describe('NetworkTopNFlow Table Component', () => {
   describe('Sorting', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkDnsTable
-              data={mockData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-              id="dns"
-              isInspect={false}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-              totalCount={mockData.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <NetworkDnsTable
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
+            id="dns"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
+            type={networkModel.NetworkType.page}
+          />
+        </TestProviders>
       );
 
       expect(store.getState().network.page.queries!.dns.sort).toEqual({

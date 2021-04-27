@@ -37,7 +37,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: logger.get('root'),
       alertingPluginSetupContract: plugins.alerting,
-      writeEnabled: config.writeEnabled,
+      writeEnabled: config.unsafe.write.enabled,
     });
 
     return rootRegistry;

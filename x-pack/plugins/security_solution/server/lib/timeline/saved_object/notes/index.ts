@@ -6,8 +6,14 @@
  */
 
 import { FrameworkRequest } from '../../../framework';
-import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../../../graphql/types';
-import { SavedNote, NoteSavedObject } from '../../../../../common/types/timeline/note';
+import {
+  SavedNote,
+  NoteSavedObject,
+  PageInfoNote,
+  SortNote,
+  ResponseNotes,
+  ResponseNote,
+} from '../../../../../common/types/timeline/note';
 
 export * from './saved_object';
 export interface Notes {

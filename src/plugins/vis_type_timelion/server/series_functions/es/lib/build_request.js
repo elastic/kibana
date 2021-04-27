@@ -48,17 +48,17 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function (clause) {
-    clause = clause.split(':');
-    if (clause[0] && clause[1]) {
-      const termsAgg = buildAggBody(clause[0], scriptedFields);
-      termsAgg.size = parseInt(clause[1], 10);
-      aggCursor[clause[0]] = {
+  (config.split || []).forEach((clause) => {
+    const [field, arg] = clause.split(/:(\d+$)/);
+    if (field && arg) {
+      const termsAgg = buildAggBody(field, scriptedFields);
+      termsAgg.size = parseInt(arg, 10);
+      aggCursor[field] = {
         meta: { type: 'split' },
         terms: termsAgg,
         aggs: {},
       };
-      aggCursor = aggCursor[clause[0]].aggs;
+      aggCursor = aggCursor[field].aggs;
     } else {
       throw new Error('`split` requires field:limit');
     }

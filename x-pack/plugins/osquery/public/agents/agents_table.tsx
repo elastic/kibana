@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiComboBox, EuiHealth, EuiHighlight } from '@elastic/eui';
+import { find } from 'lodash/fp';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
 
 import { useDebounce } from 'react-use';
 import { useAllAgents } from './use_all_agents';
@@ -38,7 +39,7 @@ interface AgentsTableProps {
 const perPage = 10;
 const DEBOUNCE_DELAY = 100; // ms
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
@@ -67,13 +68,34 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
+  const defaultValueInitialized = useRef(false);
+
+  useEffect(() => {
+    if (agentSelection && !defaultValueInitialized.current && options.length) {
+      if (agentSelection.policiesSelected) {
+        const policyOptions = find(['label', 'Policy'], options);
+
+        if (policyOptions) {
+          const defaultOptions = policyOptions.options?.filter((option) =>
+            agentSelection.policiesSelected.includes(option.label)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+          }
+          defaultValueInitialized.current = true;
+        }
+      }
+    }
+  }, [agentSelection, options]);
 
   useEffect(() => {
     // update the groups when groups or agents have changed
     grouper.setTotalAgents(totalNumAgents);
     grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
     grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents!);
     const newOptions = grouper.generateOptions();
     setOptions(newOptions);
   }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
@@ -112,7 +134,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.online ? 'success' : 'danger'}>
+      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
         <span className={contentClassName}>
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
@@ -134,8 +156,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
 
   return (
     <div>
-      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
-      &nbsp;
       <EuiComboBox
         placeholder={SELECT_AGENT_LABEL}
         isLoading={modifyingSearch || groupsLoading || agentsLoading}
@@ -147,6 +167,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         onChange={onSelection}
         renderOption={renderOption}
       />
+      <EuiSpacer size="xs" />
+      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
     </div>
   );
 };

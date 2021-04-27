@@ -74,6 +74,9 @@ export interface App<HistoryLocationState = unknown> {
 }
 
 // @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
+
+// @public
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
@@ -490,6 +493,9 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly canvas: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;

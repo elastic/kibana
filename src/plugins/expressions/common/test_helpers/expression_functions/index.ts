@@ -12,6 +12,7 @@ import { error } from './error';
 import { introspectContext } from './introspect_context';
 import { mult } from './mult';
 import { sleep } from './sleep';
+import { sum } from './sum';
 import { AnyExpressionFunctionDefinition } from '../../expression_functions';
 
 export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
@@ -21,4 +22,5 @@ export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
   introspectContext,
   mult,
   sleep,
+  sum,
 ];

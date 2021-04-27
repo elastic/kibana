@@ -14,6 +14,7 @@ const createSetup = (): jest.Mocked<PluginSetupContract> => {
     getFeaturesUICapabilities: jest.fn(),
     registerKibanaFeature: jest.fn(),
     registerElasticsearchFeature: jest.fn(),
+    enableReportingUiCapabilities: jest.fn(),
   };
 };
 
