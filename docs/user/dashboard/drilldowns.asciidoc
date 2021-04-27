@@ -138,7 +138,7 @@ The following panels support dashboard and URL drilldowns.
 
 | TSVB
 ^| X
-^|
+^| X
 
 | Tag Cloud
 ^| X
