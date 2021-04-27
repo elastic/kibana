@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '../../elasticsearch';
 import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { State } from './types';
+import { State, MigrationLogLevel } from './types';
 
 interface StateLogMeta extends LogMeta {
   kibana: {
@@ -50,13 +50,14 @@ const logStateTransition = (
 ) => {
   if (newState.logs.length > oldState.logs.length) {
     newState.logs.slice(oldState.logs.length).forEach((log) => {
-      const getLogger = (level: keyof Logger) => {
+      const doLog = (level: MigrationLogLevel, message: string) => {
         if (level === 'error') {
-          return logger[level] as Logger['error'];
+          logger.error(message);
+        } else {
+          logger[level](message);
         }
-        return logger[level] as Logger['info'];
       };
-      getLogger(log.level)(logMessagePrefix + log.message);
+      doLog(log.level, logMessagePrefix + log.message);
     });
   }
 
