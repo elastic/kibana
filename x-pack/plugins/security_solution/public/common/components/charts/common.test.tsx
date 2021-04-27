@@ -158,6 +158,7 @@ describe('checkIfAllValuesAreZero', () => {
     });
   });
 
+  // eslint-disable-next-line jest/no-identical-title
   describe.each(mockValidDataSets)('with data [%o]', (data) => {
     let result: boolean;
     beforeAll(() => {
