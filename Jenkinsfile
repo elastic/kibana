@@ -11,12 +11,23 @@ parallel([
   },
   node2: {
     node('linux && immutable') {
+      try {
+        input "Waiting"
+      } catch (ex) {
+
+      }
       print kibanaCheckout()
     }
   },
   node3: {
     node('linux && immutable') {
-      sleep 10
+      sleep 30
+      print kibanaCheckout()
+    }
+  },
+  node4: {
+    node('linux && immutable') {
+      sleep 120
       print kibanaCheckout()
     }
   },
