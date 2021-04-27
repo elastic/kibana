@@ -19,7 +19,6 @@ export const entry = t.union([
   entriesMatchAny,
   entriesList,
   entriesExists,
-  entriesNested,
   entriesMatchWildcard,
 ]);
 export type Entry = t.TypeOf<typeof entry>;

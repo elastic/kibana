@@ -8,7 +8,6 @@
 import { TypeOf } from '@kbn/config-schema';
 import { ApplicationStart } from 'kibana/public';
 
-import { Entry } from '../../../../lists/common/schemas/types/entries';
 import {
   DeleteTrustedAppsRequestSchema,
   GetOneTrustedAppRequestSchema,
@@ -76,9 +75,10 @@ export enum OperatorFieldIds {
   matches = 'matches',
 }
 
+export type TrustedAppEntryTypes = 'match' | 'wildcard';
 export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
-  type: Entry['type'];
+  type: TrustedAppEntryTypes;
   operator: 'included';
   value: string;
 }

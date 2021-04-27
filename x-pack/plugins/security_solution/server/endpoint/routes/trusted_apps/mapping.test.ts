@@ -423,9 +423,7 @@ describe('mapping', () => {
           updated_at: '11/11/2011T11:11:11.111',
           updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
-          entries: [
-            createConditionEntry(ConditionEntryField.SIGNER, 'nested', 'Microsoft Windows'),
-          ],
+          entries: [createConditionEntry(ConditionEntryField.SIGNER, 'match', 'Microsoft Windows')],
         }
       );
     });

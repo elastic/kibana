@@ -9,7 +9,6 @@ import uuid from 'uuid';
 
 import { OsType } from '../../../../../lists/common/schemas';
 import {
-  Entry,
   EntriesArray,
   EntryMatch,
   EntryMatchWildcard,
@@ -30,6 +29,7 @@ import {
   OperatingSystem,
   TrustedApp,
   UpdateTrustedApp,
+  TrustedAppEntryTypes,
 } from '../../../../common/endpoint/types';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
@@ -56,7 +56,7 @@ const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
 
 export const createConditionEntry = <T extends ConditionEntryField>(
   field: T,
-  type: Entry['type'],
+  type: TrustedAppEntryTypes,
   value: string
 ): ConditionEntry<T> => {
   return { field, value, type, operator: OPERATOR_VALUE };
@@ -110,7 +110,7 @@ export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEn
           ...result,
           [ConditionEntryField.SIGNER]: createConditionEntry(
             ConditionEntryField.SIGNER,
-            entry.type,
+            subjectNameCondition.type,
             subjectNameCondition.value
           ),
         };
