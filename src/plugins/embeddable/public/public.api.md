@@ -160,7 +160,7 @@ export abstract class Container<TChildInput extends Partial<EmbeddableInput> = {
     // (undocumented)
     addNewEmbeddable<EEI extends EmbeddableInput = EmbeddableInput, EEO extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>>(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable>;
     // (undocumented)
-    protected readonly children: {
+    readonly children: {
         [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
     };
     // (undocumented)

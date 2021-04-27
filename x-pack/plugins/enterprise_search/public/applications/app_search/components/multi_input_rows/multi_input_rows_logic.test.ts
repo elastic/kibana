@@ -22,6 +22,7 @@ describe('MultiInputRowsLogic', () => {
   };
   const DEFAULT_VALUES = {
     values: MOCK_VALUES,
+    addedNewRow: false,
     hasEmptyValues: false,
     hasOnlyOneValue: false,
   };
@@ -48,11 +49,12 @@ describe('MultiInputRowsLogic', () => {
     });
 
     describe('addValue', () => {
-      it('appends an empty string to the values array', () => {
+      it('appends an empty string to the values array & sets addedNewRow to true', () => {
         logic.actions.addValue();
 
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
+          addedNewRow: true,
           hasEmptyValues: true,
           values: ['a', 'b', 'c', ''],
         });

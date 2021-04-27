@@ -69,20 +69,6 @@ export interface IVectorSource extends ISource {
   getTimesliceMaskFieldName(): Promise<string | null>;
 }
 
-export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }>;
-  getMinZoom(): number;
-  getMaxZoom(): number;
-  getLayerName(): string;
-}
-
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getFieldNames(): string[] {
     return [];

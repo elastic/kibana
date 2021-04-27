@@ -14,7 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
-import { DocumentCreationButton } from './document_creation_button';
+import { DocumentCreationButton } from './components';
 import { SearchExperience } from './search_experience';
 
 import { Documents } from '.';

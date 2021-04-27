@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.status).to.be('active');
       });
 
       it('sets given is_managed value', async () => {
@@ -140,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
+          status: 'active',
           description: 'Test',
           is_managed: false,
           namespace: 'default',
@@ -242,6 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { id, updated_at, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
+          status: 'active',
           name: 'Updated name',
           description: 'Updated description',
           namespace: 'default',

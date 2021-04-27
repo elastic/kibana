@@ -27,6 +27,7 @@ interface ColumnChange {
   field?: IndexPatternField;
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
+  shouldResetLabel?: boolean;
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -46,6 +47,7 @@ export function insertNewColumn({
   indexPattern,
   visualizationGroups,
   targetGroup,
+  shouldResetLabel,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -208,16 +210,12 @@ export function insertNewColumn({
       },
     };
   }
+
+  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
-    addOperationFn(
-      layer,
-      operationDefinition.buildColumn({ ...baseOptions, layer, field }),
-      columnId,
-      visualizationGroups,
-      targetGroup
-    ),
+    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup),
     indexPattern
   );
 }
@@ -229,6 +227,7 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  shouldResetLabel,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -366,9 +365,11 @@ export function replaceColumn({
         },
       };
     }
-    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-    newColumn = copyCustomLabel(newColumn, previousColumn);
 
+    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    if (!shouldResetLabel) {
+      newColumn = copyCustomLabel(newColumn, previousColumn);
+    }
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
@@ -385,10 +386,10 @@ export function replaceColumn({
     previousColumn.sourceField !== field.name
   ) {
     // Same operation, new field
-    const newColumn = copyCustomLabel(
-      operationDefinition.onFieldChange(previousColumn, field),
-      previousColumn
-    );
+    let newColumn = operationDefinition.onFieldChange(previousColumn, field);
+    if (!shouldResetLabel) {
+      newColumn = copyCustomLabel(newColumn, previousColumn);
+    }
 
     const newLayer = resetIncomplete(
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
@@ -671,11 +672,14 @@ function applyReferenceTransition({
   );
 }
 
-function copyCustomLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
+function copyCustomLabel(
+  newColumn: IndexPatternColumn,
+  previousOptions: { customLabel?: boolean; label: string }
+) {
   const adjustedColumn = { ...newColumn };
-  if (previousColumn.customLabel) {
+  if (previousOptions.customLabel) {
     adjustedColumn.customLabel = true;
-    adjustedColumn.label = previousColumn.label;
+    adjustedColumn.label = previousOptions.label;
   }
   return adjustedColumn;
 }
@@ -708,7 +712,12 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
-  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
+  updatedColumnOrder = reorderByGroups(
+    visualizationGroups,
+    targetGroup,
+    updatedColumnOrder,
+    addedColumnId
+  );
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
@@ -745,16 +754,24 @@ export function reorderByGroups(
     });
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
-      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+      const groupIndex = orderedVisualizationGroups.findIndex(
         (group) =>
           (columnId === addedColumnId && group.groupId === targetGroup) ||
           group.accessors.some((acc) => acc.columnId === columnId)
       );
+      if (groupIndex !== -1) {
+        columnGroupIndex[columnId] = groupIndex;
+      } else {
+        // referenced columns won't show up in visualization groups - put them in the back of the list. This will work as they are always metrics
+        columnGroupIndex[columnId] = updatedColumnOrder.length;
+      }
     });
 
-    updatedColumnOrder.sort((a, b) => {
+    return [...updatedColumnOrder].sort((a, b) => {
       return columnGroupIndex[a] - columnGroupIndex[b];
     });
+  } else {
+    return updatedColumnOrder;
   }
 }
 
@@ -895,12 +912,8 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [direct, referenceBased] = _.partition(
-    entries,
-    ([, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
-  );
   // If a reference has another reference as input, put it last in sort order
-  referenceBased.sort(([idA, a], [idB, b]) => {
+  entries.sort(([idA, a], [idB, b]) => {
     if ('references' in a && a.references.includes(idB)) {
       return 1;
     }
@@ -909,12 +922,9 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
     return 0;
   });
-  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
 
-  return aggregations
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id))
-    .concat(referenceBased.map(([id]) => id));
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 // Splits existing columnOrder into the three categories

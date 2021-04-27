@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { IndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/common';
+import { ObjectEntries } from '../utility_types';
 import {
-  LogSourceConfigurationProperties,
   LogSourceColumnConfiguration,
+  LogSourceConfigurationProperties,
 } from './log_source_configuration';
-import { IndexPatternsContract, IndexPattern } from '../../../../../src/plugins/data/common';
 
 export interface ResolvedLogSourceConfiguration {
   name: string;
@@ -19,6 +21,7 @@ export interface ResolvedLogSourceConfiguration {
   tiebreakerField: string;
   messageField: string[];
   fields: IndexPattern['fields'];
+  runtimeMappings: estypes.RuntimeFields;
   columns: LogSourceColumnConfiguration[];
 }
 
@@ -52,6 +55,7 @@ const resolveLegacyReference = async (
     tiebreakerField: sourceConfiguration.fields.tiebreaker,
     messageField: sourceConfiguration.fields.message,
     fields,
+    runtimeMappings: {},
     columns: sourceConfiguration.logColumns,
     name: sourceConfiguration.name,
     description: sourceConfiguration.description,
@@ -76,8 +80,36 @@ const resolveKibanaIndexPatternReference = async (
     tiebreakerField: '_doc',
     messageField: ['message'],
     fields: indexPattern.fields,
+    runtimeMappings: resolveRuntimeMappings(indexPattern),
     columns: sourceConfiguration.logColumns,
     name: sourceConfiguration.name,
     description: sourceConfiguration.description,
   };
+};
+
+// this might take other sources of runtime fields into account in the future
+const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.RuntimeFields => {
+  const { runtimeFields } = indexPattern.getComputedFields();
+
+  const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
+    typeof runtimeFields
+  >).reduce<estypes.RuntimeFields>(
+    (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
+      ...accumulatedMappings,
+      [runtimeFieldName]: {
+        type: runtimeFieldSpec.type,
+        ...(runtimeFieldSpec.script != null
+          ? {
+              script: {
+                lang: 'painless', // required in the es types
+                source: runtimeFieldSpec.script.source,
+              },
+            }
+          : {}),
+      },
+    }),
+    {}
+  );
+
+  return runtimeMappingsFromIndexPattern;
 };

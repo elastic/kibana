@@ -10,10 +10,13 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
+import * as i18n from './translations';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -33,7 +36,6 @@ import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../networ
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
-import * as i18n from './translations';
 import { LineClamp } from '../line_clamp';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
@@ -166,7 +168,8 @@ const AlertSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   eventId: string;
   timelineId: string;
-}> = ({ browserFields, data, eventId, timelineId }) => {
+  title?: string;
+}> = ({ browserFields, data, eventId, timelineId, title }) => {
   const summaryRows = useMemo(() => getSummaryRows({ browserFields, data, eventId, timelineId }), [
     browserFields,
     data,
@@ -184,7 +187,8 @@ const AlertSummaryViewComponent: React.FC<{
 
   return (
     <>
-      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} />
+      <EuiSpacer size="l" />
+      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
       {maybeRule?.note && (
         <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>

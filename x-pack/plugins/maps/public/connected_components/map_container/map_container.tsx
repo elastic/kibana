@@ -14,8 +14,7 @@ import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MBMap } from '../mb_map';
-// @ts-expect-error
-import { WidgetOverlay } from '../widget_overlay';
+import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 // @ts-expect-error
@@ -264,8 +263,12 @@ export class MapContainer extends Component<Props, State> {
               getActionContext={getActionContext}
             />
           )}
+<<<<<<< HEAD
           <WidgetOverlay />
           <Timeslider />
+=======
+          <RightSideControls />
+>>>>>>> 31660419eafdd8c74c68123745fc699e7ee8cf2e
         </EuiFlexItem>
 
         <EuiFlexItem

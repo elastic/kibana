@@ -33,7 +33,8 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe('Open timeline', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/97544
+describe.skip('Open timeline', () => {
   let timelineId: string | null = null;
   before(() => {
     cleanKibana();

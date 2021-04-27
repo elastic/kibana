@@ -111,8 +111,6 @@ export const LOOK_BACK_TIME_TYPE =
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
-export const MACHINE_LEARNING_DROPDOWN_ITEM = '.euiFilterSelectItem';
-
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';

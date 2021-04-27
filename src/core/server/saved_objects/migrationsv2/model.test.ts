@@ -17,7 +17,10 @@ import type {
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacyDeleteState,
-  ReindexSourceToTempState,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndex,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   OutdatedDocumentsSearch,
@@ -25,7 +28,6 @@ import type {
   MarkVersionIndexReady,
   BaseState,
   CreateReindexTempState,
-  ReindexSourceToTempWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
   CloneTempToSource,
@@ -299,14 +301,12 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(initState, res) as FatalState;
+        const newState = model(initState, res) as WaitForYellowSourceState;
 
-        expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_7.invalid.0_001',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
       });
+
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -330,15 +330,14 @@ describe('migrations v2 model', () => {
             },
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_7.11.0_001',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_7.11.0_001');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_3': {
@@ -349,12 +348,10 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(initState, res);
+        const newState = model(initState, res) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: '.kibana_3',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('.kibana_3');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -420,12 +417,10 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.11.0_001',
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: 'my-saved-objects_3',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('my-saved-objects_3');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -449,12 +444,11 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.12.0_001',
           },
           res
-        );
+        ) as WaitForYellowSourceState;
 
-        expect(newState).toMatchObject({
-          controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: 'my-saved-objects_7.11.0',
-        });
+        expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.sourceIndex.value).toBe('my-saved-objects_7.11.0');
+
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -662,7 +656,7 @@ describe('migrations v2 model', () => {
       const waitForYellowSourceState: WaitForYellowSourceState = {
         ...baseState,
         controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: '.kibana_3',
+        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
         sourceIndexMappings: mappingsWithUnknownType,
       };
 
@@ -734,7 +728,7 @@ describe('migrations v2 model', () => {
       });
     });
     describe('CREATE_REINDEX_TEMP', () => {
-      const createReindexTargetState: CreateReindexTempState = {
+      const state: CreateReindexTempState = {
         ...baseState,
         controlState: 'CREATE_REINDEX_TEMP',
         versionIndexReadyActions: Option.none,
@@ -742,80 +736,134 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
         tempIndexMappings: { properties: {} },
       };
-      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP if action succeeds', () => {
+      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
-        const newState = model(createReindexTargetState, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP');
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('REINDEX_SOURCE_TO_TEMP', () => {
-      const reindexSourceToTargetState: ReindexSourceToTempState = {
+
+    describe('REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
+      const state: ReindexSourceToTempOpenPit = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TEMP',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
       };
-      test('REINDEX_SOURCE_TO_TEMP -> REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP'> = Either.right({
-          taskId: 'reindex-task-id',
+      it('REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ if action succeeds', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_OPEN_PIT'> = Either.right({
+          pitId: 'pit_id',
         });
-        const newState = model(reindexSourceToTargetState, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.sourceIndexPitId).toBe('pit_id');
+        expect(newState.lastHitSortValue).toBe(undefined);
       });
     });
-    describe('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK', () => {
-      const state: ReindexSourceToTempWaitForTaskState = {
+
+    describe('REINDEX_SOURCE_TO_TEMP_READ', () => {
+      const state: ReindexSourceToTempRead = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
-        reindexSourceToTargetTaskId: 'reindex-task-id',
+        tempIndexMappings: { properties: {} },
+        lastHitSortValue: undefined,
       };
-      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is right', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.right(
-          'reindex_succeeded'
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_INDEX if the index has outdated documents to reindex', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+        });
+        const newState = model(state, res) as ReindexSourceToTempIndex;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_INDEX');
+        expect(newState.outdatedDocuments).toBe(outdatedDocuments);
+        expect(newState.lastHitSortValue).toBe(lastHitSortValue);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments: [],
+          lastHitSortValue: undefined,
+        });
+        const newState = model(state, res) as ReindexSourceToTempClosePit;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+        expect(newState.sourceIndexPitId).toBe('pit_id');
+      });
+    });
+
+    describe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT', () => {
+      const state: ReindexSourceToTempClosePit = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexPitId: 'pit_id',
+        targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
+      };
+
+      it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+        const newState = model(state, res) as ReindexSourceToTempIndex;
+        expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
+        expect(newState.sourceIndex).toEqual(state.sourceIndex);
+      });
+    });
+
+    describe('REINDEX_SOURCE_TO_TEMP_INDEX', () => {
+      const state: ReindexSourceToTempIndex = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+        outdatedDocuments: [],
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexPitId: 'pit_id',
+        targetIndex: '.kibana_7.11.0_001',
+        lastHitSortValue: undefined,
+      };
+
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right(
+          'bulk_index_succeeded'
         );
         const newState = model(state, res);
-        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is left target_index_had_write_block', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left target_index_had_write_block', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
           type: 'target_index_had_write_block',
         });
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is left index_not_found_exception', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+
+      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left index_not_found_exception for temp index', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
           type: 'index_not_found_exception',
-          index: '.kibana_7.11.0_reindex_temp',
+          index: state.tempIndex,
         });
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
-      });
-      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
-          message: '[timeout_exception] Timeout waiting for ...',
-          type: 'wait_for_task_completion_timeout',
-        });
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK');
-        expect(newState.retryCount).toEqual(1);
-        expect(newState.retryDelay).toEqual(2000);
       });
     });
+
     describe('SET_TEMP_WRITE_BLOCK', () => {
       const state: SetTempWriteBlock = {
         ...baseState,

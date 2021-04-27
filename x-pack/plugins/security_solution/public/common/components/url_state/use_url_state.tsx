@@ -10,7 +10,6 @@ import { useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
   getQueryStringFromLocation,
@@ -70,7 +69,6 @@ export const useUrlStateHooks = ({
   urlState,
 }: UrlStateContainerPropTypes) => {
   const [isInitializing, setIsInitializing] = useState(true);
-  const apolloClient = useApolloClient();
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const prevProps = usePrevious({ pathName, pageName, urlState });
 
@@ -161,7 +159,6 @@ export const useUrlStateHooks = ({
     });
 
     setInitialStateFromUrl({
-      apolloClient,
       detailName,
       filterManager,
       indexPattern,

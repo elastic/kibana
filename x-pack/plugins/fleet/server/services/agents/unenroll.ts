@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
-import { AgentUnenrollmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -28,7 +28,7 @@ async function unenrollAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new AgentUnenrollmentError(
+    throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
   }

@@ -35,7 +35,7 @@ const alertsListRoute = createObservabilityServerRoute({
     });
 
     if (!ruleRegistryClient) {
-      throw Boom.failedDependency();
+      throw Boom.failedDependency('xpack.ruleRegistry.unsafe.write.enabled is set to false');
     }
 
     const {
