@@ -8,7 +8,6 @@
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { HOST_ISOLATION_FAILURE } from './translations';
-import { isSecurityAppError } from '../../../../common/utils/api';
 import { createHostIsolation } from './api';
 
 interface HostIsolationStatus {
