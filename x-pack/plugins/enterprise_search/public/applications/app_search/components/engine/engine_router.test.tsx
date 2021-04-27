@@ -22,6 +22,7 @@ import { CurationsRouter } from '../curations';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
@@ -134,5 +135,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(ApiLogs)).toHaveLength(1);
+  });
+
+  it('renders a source engines view', () => {
+    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SourceEngines)).toHaveLength(1);
   });
 });
