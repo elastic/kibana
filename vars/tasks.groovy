@@ -49,6 +49,20 @@ def xpackCiGroups() {
   tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
 }
 
+def xpackCiGroupDocker() {
+  task {
+    workers.ci(name: 'xpack-cigroups-docker', size: 'm', ramDisk: true) {
+      kibanaPipeline.downloadDefaultBuildArtifacts()
+      kibanaPipeline.bash("""
+        mkdir -p ../kibana-build-xpack
+        tar -xzf ../kibana-default.tar.gz -C "../kibana-build-xpack" --strip=1
+        tar -xzf ../kibana-default-plugins.tar.gz
+      """, "Extract Default Build artifacts")
+      kibanaPipeline.xpackCiGroupProcess('Docker', true)
+    }
+  }
+}
+
 def functionalOss(Map params = [:]) {
   def config = params ?: [
     serverIntegration: true,
@@ -100,10 +114,11 @@ def functionalXpack(Map params = [:]) {
   ]
 
   task {
-    kibanaPipeline.buildXpack(10)
+    kibanaPipeline.buildXpack(10, true)
 
     if (config.ciGroups) {
       xpackCiGroups()
+      xpackCiGroupDocker()
     }
 
     if (config.firefox) {
