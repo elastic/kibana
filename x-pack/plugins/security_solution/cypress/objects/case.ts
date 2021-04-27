@@ -13,6 +13,7 @@ export interface TestCase {
   description: string;
   timeline: CompleteTimeline;
   reporter: string;
+  owner: string;
 }
 
 export interface Connector {
@@ -45,6 +46,7 @@ export const case1: TestCase = {
   description: 'This is the case description',
   timeline,
   reporter: 'elastic',
+  owner: 'securitySolution',
 };
 
 export const serviceNowConnector: Connector = {

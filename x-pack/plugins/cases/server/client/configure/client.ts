@@ -32,7 +32,6 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';
-import { EventOutcome } from '../../../../security/server';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
@@ -41,7 +40,7 @@ import { getMappings } from './get_mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
-import { Operations } from '../../authorization';
+import { ECS_OUTCOMES, Operations } from '../../authorization';
 import {
   combineAuthorizedAndOwnerFilter,
   createAuditMsg,
@@ -280,7 +279,7 @@ async function update(
     auditLogger?.log(
       createAuditMsg({
         operation: Operations.updateConfiguration,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: ECS_OUTCOMES.unknown,
         savedObjectID: configuration.id,
       })
     );
@@ -430,7 +429,7 @@ async function create(
     auditLogger?.log(
       createAuditMsg({
         operation: Operations.createConfiguration,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: ECS_OUTCOMES.unknown,
         savedObjectID,
       })
     );

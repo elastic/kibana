@@ -25,8 +25,7 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { createAuditMsg, ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 
 import { createCaseError } from '../../common/error';
-import { Operations } from '../../authorization';
-import { EventOutcome } from '../../../../security/server';
+import { ECS_OUTCOMES, Operations } from '../../authorization';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   flattenCaseSavedObject,
@@ -86,7 +85,7 @@ export const create = async (
     auditLogger?.log(
       createAuditMsg({
         operation: Operations.createCase,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: ECS_OUTCOMES.unknown,
         savedObjectID,
       })
     );

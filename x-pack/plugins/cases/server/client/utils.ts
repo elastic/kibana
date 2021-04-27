@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { EcsEventOutcome, SavedObjectsFindResponse } from 'kibana/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -29,7 +29,7 @@ import {
   AlertCommentRequestRt,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
-import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
+import { AuditEvent } from '../../../security/server';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
@@ -37,7 +37,7 @@ import {
   isCommentRequestTypeUser,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
-import { Authorization, OperationDetails } from '../authorization';
+import { Authorization, DATABASE_CATEGORY, ECS_OUTCOMES, OperationDetails } from '../authorization';
 import { AuditLogger } from '../../../security/server';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
@@ -573,7 +573,7 @@ export function createAuditMsg({
 }: {
   operation: OperationDetails;
   savedObjectID?: string;
-  outcome?: EventOutcome;
+  outcome?: EcsEventOutcome;
   error?: Error;
 }): AuditEvent {
   const doc =
@@ -582,7 +582,7 @@ export function createAuditMsg({
       : `a ${operation.docType}`;
   const message = error
     ? `Failed attempt to ${operation.verbs.present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
+    : outcome === ECS_OUTCOMES.unknown
     ? `User is ${operation.verbs.progressive} ${doc}`
     : `User has ${operation.verbs.past} ${doc}`;
 
@@ -590,9 +590,9 @@ export function createAuditMsg({
     message,
     event: {
       action: operation.action,
-      category: EventCategory.DATABASE,
-      type: operation.type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+      category: DATABASE_CATEGORY,
+      type: [operation.type],
+      outcome: outcome ?? (error ? ECS_OUTCOMES.failure : ECS_OUTCOMES.success),
     },
     ...(savedObjectID != null && {
       kibana: {

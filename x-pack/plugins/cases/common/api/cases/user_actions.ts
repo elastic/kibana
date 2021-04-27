@@ -22,6 +22,7 @@ const UserActionFieldTypeRt = rt.union([
   rt.literal('status'),
   rt.literal('settings'),
   rt.literal('sub_case'),
+  rt.literal('owner'),
 ]);
 const UserActionFieldRt = rt.array(UserActionFieldTypeRt);
 const UserActionRt = rt.union([

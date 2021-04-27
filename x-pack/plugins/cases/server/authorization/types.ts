@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { EcsEventType, KibanaRequest } from 'kibana/server';
 import { KueryNode } from 'src/plugins/data/common';
-import { EventType } from '../../../security/server';
 import { Space } from '../../../spaces/server';
 
 /**
@@ -21,11 +20,12 @@ export interface Verbs {
 
 export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
-// TODO: we need to have an operation per entity route so I think we need to create a bunch like
-//  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
-
-// if you add a value here you'll likely also need to make changes here:
-// x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+/**
+ * Read operations for the cases APIs.
+ *
+ * NOTE: If you add a value here you'll likely also need to make changes here:
+ * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ */
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
@@ -37,7 +37,12 @@ export enum ReadOperations {
   FindConfigurations = 'findConfigurations',
 }
 
-// TODO: comments
+/**
+ * Write operations for the cases APIs.
+ *
+ * NOTE: If you add a value here you'll likely also need to make changes here:
+ * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ */
 export enum WriteOperations {
   CreateCase = 'createCase',
   DeleteCase = 'deleteCase',
@@ -54,7 +59,7 @@ export enum WriteOperations {
  * Defines the structure for a case API route.
  */
 export interface OperationDetails {
-  type: EventType;
+  type: EcsEventType;
   name: ReadOperations | WriteOperations;
   action: string;
   verbs: Verbs;

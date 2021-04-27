@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventType } from '../../../security/server';
+import { EcsEventCategory, EcsEventOutcome, EcsEventType } from 'kibana/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
@@ -41,13 +41,34 @@ const deleteVerbs: Verbs = {
   past: 'deleted',
 };
 
+const eventTypes: Record<string, EcsEventType> = {
+  creation: 'creation',
+  deletion: 'deletion',
+  change: 'change',
+  access: 'access',
+};
+
+/**
+ * Database constant for ECS category for use for audit logging.
+ */
+export const DATABASE_CATEGORY: EcsEventCategory[] = ['database'];
+
+/**
+ * ECS Outcomes for audit logging.
+ */
+export const ECS_OUTCOMES: Record<string, EcsEventOutcome> = {
+  failure: 'failure',
+  success: 'success',
+  unknown: 'unknown',
+};
+
 /**
  * Definition of all APIs within the cases backend.
  */
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   // case operations
   [WriteOperations.CreateCase]: {
-    type: EventType.CREATION,
+    type: eventTypes.creation,
     name: WriteOperations.CreateCase,
     action: 'create-case',
     verbs: createVerbs,
@@ -55,7 +76,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.DeleteCase]: {
-    type: EventType.DELETION,
+    type: eventTypes.deletion,
     name: WriteOperations.DeleteCase,
     action: 'delete-case',
     verbs: deleteVerbs,
@@ -63,7 +84,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateCase]: {
-    type: EventType.CHANGE,
+    type: eventTypes.change,
     name: WriteOperations.UpdateCase,
     action: 'update-case',
     verbs: updateVerbs,
@@ -71,7 +92,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.CreateConfiguration]: {
-    type: EventType.CREATION,
+    type: eventTypes.creation,
     name: WriteOperations.CreateConfiguration,
     action: 'create-configuration',
     verbs: createVerbs,
@@ -79,7 +100,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateConfiguration]: {
-    type: EventType.CHANGE,
+    type: eventTypes.change,
     name: WriteOperations.UpdateConfiguration,
     action: 'update-configuration',
     verbs: updateVerbs,
@@ -87,7 +108,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [ReadOperations.FindConfigurations]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.FindConfigurations,
     action: 'find-configurations',
     verbs: accessVerbs,
@@ -95,7 +116,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [ReadOperations.GetCase]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.GetCase,
     action: 'get-case',
     verbs: accessVerbs,
@@ -103,7 +124,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.FindCases]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.FindCases,
     action: 'find-cases',
     verbs: accessVerbs,
@@ -111,7 +132,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetTags]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.GetCase,
     action: 'get-tags',
     verbs: accessVerbs,
@@ -119,7 +140,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetReporters]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.GetReporters,
     action: 'get-reporters',
     verbs: accessVerbs,
@@ -128,7 +149,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   // comments operations
   [WriteOperations.CreateComment]: {
-    type: EventType.CREATION,
+    type: eventTypes.creation,
     name: WriteOperations.CreateComment,
     action: 'create-comment',
     verbs: createVerbs,
@@ -136,7 +157,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [WriteOperations.DeleteAllComments]: {
-    type: EventType.DELETION,
+    type: eventTypes.deletion,
     name: WriteOperations.DeleteAllComments,
     action: 'delete-all-comments',
     verbs: deleteVerbs,
@@ -144,7 +165,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [WriteOperations.DeleteComment]: {
-    type: EventType.DELETION,
+    type: eventTypes.deletion,
     name: WriteOperations.DeleteComment,
     action: 'delete-comment',
     verbs: deleteVerbs,
@@ -152,7 +173,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [WriteOperations.UpdateComment]: {
-    type: EventType.CHANGE,
+    type: eventTypes.change,
     name: WriteOperations.UpdateComment,
     action: 'update-comments',
     verbs: updateVerbs,
@@ -160,7 +181,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [ReadOperations.GetComment]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.GetComment,
     action: 'get-comment',
     verbs: accessVerbs,
@@ -168,7 +189,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [ReadOperations.GetAllComments]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.GetAllComments,
     action: 'get-all-comment',
     verbs: accessVerbs,
@@ -176,7 +197,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   [ReadOperations.FindComments]: {
-    type: EventType.ACCESS,
+    type: eventTypes.access,
     name: ReadOperations.FindComments,
     action: 'find-comments',
     verbs: accessVerbs,
