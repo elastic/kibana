@@ -139,7 +139,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isHostIsolationPanelOpen && isEndpointAlert && isHostIsolationPanelOpen === false && (
+      {isHostIsolationEnabled && isEndpointAlert && isHostIsolationPanelOpen === false && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
