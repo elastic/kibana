@@ -17,6 +17,11 @@ describe('SearchUILogic', () => {
     validFields: [],
     validSortFields: [],
     validFacetFields: [],
+    titleField: '',
+    urlField: '',
+    facetFields: [],
+    sortFields: [],
+    activeField: '',
   };
 
   const { mount } = new LogicMounter(SearchUILogic);
@@ -52,6 +57,61 @@ describe('SearchUILogic', () => {
           validFields: ['foo'],
           validSortFields: ['bar'],
           validFacetFields: ['baz'],
+        });
+      });
+    });
+
+    describe('titleFieldChanged', () => {
+      it('sets the titleField value', () => {
+        expectAction(() => {
+          SearchUILogic.actions.titleFieldChanged('foo');
+        }).toChangeState({
+          from: { titleField: '' },
+          to: { titleField: 'foo' },
+        });
+      });
+    });
+
+    describe('URLFieldChanged', () => {
+      it('sets the urlField value', () => {
+        expectAction(() => {
+          SearchUILogic.actions.URLFieldChanged('foo');
+        }).toChangeState({
+          from: { urlField: '' },
+          to: { urlField: 'foo' },
+        });
+      });
+    });
+
+    describe('facetFieldsChanged', () => {
+      it('sets the facetFields value', () => {
+        expectAction(() => {
+          SearchUILogic.actions.facetFieldsChanged(['foo']);
+        }).toChangeState({
+          from: { facetFields: [] },
+          to: { facetFields: ['foo'] },
+        });
+      });
+    });
+
+    describe('sortFieldsChanged', () => {
+      it('sets the sortFields value', () => {
+        expectAction(() => {
+          SearchUILogic.actions.sortFieldsChanged(['foo']);
+        }).toChangeState({
+          from: { sortFields: [] },
+          to: { sortFields: ['foo'] },
+        });
+      });
+    });
+
+    describe('activeFieldChanged', () => {
+      it('sets the activeField value', () => {
+        expectAction(() => {
+          SearchUILogic.actions.activeFieldChanged('foo');
+        }).toChangeState({
+          from: { activeField: '' },
+          to: { activeField: 'foo' },
         });
       });
     });

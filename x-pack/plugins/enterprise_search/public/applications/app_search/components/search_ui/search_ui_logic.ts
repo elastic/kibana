@@ -14,6 +14,11 @@ interface InitialFieldValues {
 }
 interface SearchUIActions {
   dataInitialized(initialFieldValues: InitialFieldValues): InitialFieldValues;
+  titleFieldChanged(titleField: string): { titleField: string };
+  URLFieldChanged(urlField: string): { urlField: string };
+  facetFieldsChanged(facetFields: string[]): { facetFields: string[] };
+  sortFieldsChanged(sortFields: string[]): { sortFields: string[] };
+  activeFieldChanged(activeField: string): { activeField: string };
 }
 
 interface SearchUIValues {
@@ -21,12 +26,22 @@ interface SearchUIValues {
   validFields: string[];
   validSortFields: string[];
   validFacetFields: string[];
+  titleField: string;
+  urlField: string;
+  facetFields: string[];
+  sortFields: string[];
+  activeField: string;
 }
 
 export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>({
   path: ['enterprise_search', 'app_search', 'search_ui_logic'],
   actions: () => ({
     dataInitialized: (initialFieldValues) => initialFieldValues,
+    titleFieldChanged: (titleField) => ({ titleField }),
+    URLFieldChanged: (urlField) => ({ urlField }),
+    facetFieldsChanged: (facetFields) => ({ facetFields }),
+    sortFieldsChanged: (sortFields) => ({ sortFields }),
+    activeFieldChanged: (activeField) => ({ activeField }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -38,5 +53,10 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     validFields: [[], { dataInitialized: (_, { validFields }) => validFields }],
     validSortFields: [[], { dataInitialized: (_, { validSortFields }) => validSortFields }],
     validFacetFields: [[], { dataInitialized: (_, { validFacetFields }) => validFacetFields }],
+    titleField: ['', { titleFieldChanged: (_, { titleField }) => titleField }],
+    urlField: ['', { URLFieldChanged: (_, { urlField }) => urlField }],
+    facetFields: [[], { facetFieldsChanged: (_, { facetFields }) => facetFields }],
+    sortFields: [[], { sortFieldsChanged: (_, { sortFields }) => sortFields }],
+    activeField: ['', { activeFieldChanged: (_, { activeField }) => activeField }],
   }),
 });
