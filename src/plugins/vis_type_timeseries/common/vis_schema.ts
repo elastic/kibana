@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { TypeOptions } from '@kbn/config-schema/target/types/types';
+import { TypeOptions } from '@kbn/config-schema/target/types';
 
 const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
 const stringOptional = schema.maybe(schema.string());

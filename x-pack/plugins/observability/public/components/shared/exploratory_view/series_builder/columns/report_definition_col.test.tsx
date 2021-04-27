@@ -8,12 +8,20 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { mockIndexPattern, mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
+import {
+  mockAppIndexPattern,
+  mockIndexPattern,
+  mockUrlStorage,
+  mockUseValuesList,
+  render,
+} from '../../rtl_helpers';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { ReportDefinitionCol } from './report_definition_col';
 import { SERVICE_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Series Builder ReportDefinitionCol', function () {
+  mockAppIndexPattern();
+
   const dataViewSeries = getDefaultConfigs({
     reportType: 'pld',
     indexPattern: mockIndexPattern,
@@ -23,7 +31,7 @@ describe('Series Builder ReportDefinitionCol', function () {
   const { setSeries } = mockUrlStorage({
     data: {
       'performance-dist': {
-        dataType: 'rum',
+        dataType: 'ux',
         reportType: 'pld',
         time: { from: 'now-30d', to: 'now' },
         reportDefinitions: { [SERVICE_NAME]: 'elastic-co' },
@@ -54,8 +62,8 @@ describe('Series Builder ReportDefinitionCol', function () {
     fireEvent.click(removeBtn);
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
-      dataType: 'rum',
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
+      dataType: 'ux',
       reportDefinitions: {},
       reportType: 'pld',
       time: { from: 'now-30d', to: 'now' },

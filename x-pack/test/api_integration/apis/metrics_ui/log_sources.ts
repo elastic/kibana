@@ -36,7 +36,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(origin).to.be('fallback');
         expect(configuration.name).to.be('Default');
-        expect(configuration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.logIndices).to.eql({
+          type: 'index_name',
+          indexName: 'logs-*,filebeat-*,kibana_sample_data_logs*',
+        });
         expect(configuration.fields.timestamp).to.be('@timestamp');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.logColumns[0]).to.have.key('timestampColumn');
@@ -51,7 +54,10 @@ export default function ({ getService }: FtrProviderContext) {
           .createUpdateLogSourceConfigurationAgent('default', {
             name: 'NAME',
             description: 'DESCRIPTION',
-            logAlias: 'filebeat-**',
+            logIndices: {
+              type: 'index_pattern',
+              indexPatternId: 'kip-id',
+            },
             fields: {
               tiebreaker: 'TIEBREAKER',
               timestamp: 'TIMESTAMP',
@@ -73,7 +79,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(configuration.name).to.be('NAME');
         expect(origin).to.be('stored');
-        expect(configuration.logAlias).to.be('filebeat-**');
+        expect(configuration.logIndices).to.eql({
+          type: 'index_pattern',
+          indexPatternId: 'kip-id',
+        });
         expect(configuration.fields.timestamp).to.be('TIMESTAMP');
         expect(configuration.fields.tiebreaker).to.be('TIEBREAKER');
         expect(configuration.logColumns).to.have.length(1);
@@ -98,7 +107,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(configuration.name).to.be('Default');
         expect(origin).to.be('stored');
-        expect(configuration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.logIndices).eql({
+          type: 'index_name',
+          indexName: 'logs-*,filebeat-*,kibana_sample_data_logs*',
+        });
         expect(configuration.fields.timestamp).to.be('@timestamp');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.logColumns).to.have.length(3);
@@ -126,7 +138,10 @@ export default function ({ getService }: FtrProviderContext) {
           .createUpdateLogSourceConfigurationAgent('default', {
             name: 'NAME',
             description: 'DESCRIPTION',
-            logAlias: 'filebeat-**',
+            logIndices: {
+              type: 'index_pattern',
+              indexPatternId: 'kip-id',
+            },
             fields: {
               tiebreaker: 'TIEBREAKER',
               timestamp: 'TIMESTAMP',
@@ -147,7 +162,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(configuration.name).to.be('NAME');
         expect(origin).to.be('stored');
-        expect(configuration.logAlias).to.be('filebeat-**');
+        expect(configuration.logIndices).to.eql({
+          type: 'index_pattern',
+          indexPatternId: 'kip-id',
+        });
         expect(configuration.fields.timestamp).to.be('TIMESTAMP');
         expect(configuration.fields.tiebreaker).to.be('TIEBREAKER');
         expect(configuration.logColumns).to.have.length(1);
@@ -167,7 +185,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(configuration.name).to.be('NAME');
         expect(origin).to.be('stored');
-        expect(configuration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.logIndices).to.eql({
+          type: 'index_name',
+          indexName: 'logs-*,filebeat-*,kibana_sample_data_logs*',
+        });
         expect(configuration.fields.timestamp).to.be('@timestamp');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.logColumns).to.have.length(3);

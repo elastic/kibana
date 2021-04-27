@@ -55,7 +55,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./ping_histogram'));
       loadTestFile(require.resolve('./ping_list'));
       loadTestFile(require.resolve('./monitor_duration'));
-      loadTestFile(require.resolve('./doc_count'));
+      loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
     });
   });

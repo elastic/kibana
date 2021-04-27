@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { pickWithPatterns } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -15,9 +14,13 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { uiSettings } from './ui_settings';
-import { ecsFieldMap } from '../../rule_registry/server';
+import { registerRoutes } from './routes/register_routes';
+import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
+import { observabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
+export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -48,17 +51,27 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
+    const observabilityRuleRegistry = plugins.ruleRegistry.create({
+      ...observabilityRuleRegistrySettings,
+      fieldMap: observabilityRuleFieldMap,
+    });
+
+    registerRoutes({
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+      ruleRegistry: observabilityRuleRegistry,
+      logger: this.initContext.logger.get(),
+      repository: getGlobalObservabilityServerRouteRepository(),
+    });
+
     return {
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
-      ruleRegistry: plugins.ruleRegistry.create({
-        name: 'observability',
-        fieldMap: {
-          ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
-        },
-      }),
+      ruleRegistry: observabilityRuleRegistry,
     };
   }
 

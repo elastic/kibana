@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { FleetStart } from '../../fleet/public';
 import { CoreStart } from '../../../../src/core/public';
@@ -24,8 +25,9 @@ export interface AppPluginStartDependencies {
 }
 
 export interface StartPlugins {
+  discover: DiscoverStart;
   data: DataPublicPluginStart;
-  fleet?: FleetStart;
+  fleet: FleetStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 

@@ -19,6 +19,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -60,9 +61,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
-        // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-        kibana_urls: { type: 'keyword' },
-        kibana_ca_sha256: { type: 'keyword' },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
@@ -178,7 +177,7 @@ const getSavedObjectTypes = (
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
-        preconfiguration_id: { type: 'keyword' },
+        is_preconfigured: { type: 'keyword' },
       },
     },
     migrations: {
@@ -355,6 +354,19 @@ const getSavedObjectTypes = (
         media_type: { type: 'keyword' },
         data_utf8: { type: 'text', index: false },
         data_base64: { type: 'binary' },
+      },
+    },
+  },
+  [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
+    name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        id: { type: 'keyword' },
       },
     },
   },

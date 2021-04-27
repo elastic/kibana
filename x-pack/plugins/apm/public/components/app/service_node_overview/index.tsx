@@ -8,8 +8,10 @@ import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../common/service_nodes';
 import {
   asDynamicBytes,
   asInteger,
@@ -83,7 +85,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
         const { displayedName, tooltip } =
           name === SERVICE_NODE_NAME_MISSING
             ? {
-                displayedName: UNIDENTIFIED_SERVICE_NODES_LABEL,
+                displayedName: getServiceNodeName(name),
                 tooltip: i18n.translate(
                   'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
                   {

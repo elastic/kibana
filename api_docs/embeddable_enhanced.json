@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isEnhancedEmbeddable.$1",
             "type": "Uncategorized",
             "label": "maybeEnhancedEmbeddable",
             "isRequired": true,

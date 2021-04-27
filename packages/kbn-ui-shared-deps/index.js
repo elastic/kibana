@@ -60,5 +60,6 @@ exports.externals = {
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  'rison-node': '__kbnSharedDeps__.RisonNode',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

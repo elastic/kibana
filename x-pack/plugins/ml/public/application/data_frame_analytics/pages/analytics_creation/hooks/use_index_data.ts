@@ -15,6 +15,7 @@ import { IndexPattern } from '../../../../../../../../../src/plugins/data/public
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
+import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -49,6 +50,41 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   });
 }
 
+function getInitialColumns(indexPattern: IndexPattern) {
+  const { fields } = newJobCapsServiceAnalytics;
+  const columns = fields.map((field: any) => {
+    const schema =
+      getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
+
+    return {
+      id: field.name,
+      schema,
+      isExpandable: schema !== 'boolean',
+      isRuntimeFieldColumn: false,
+    };
+  });
+
+  // Add runtime fields defined in index pattern to columns
+  if (indexPattern) {
+    const computedFields = indexPattern?.getComputedFields();
+
+    if (isRuntimeMappings(computedFields.runtimeFields)) {
+      Object.keys(computedFields.runtimeFields).forEach((runtimeField) => {
+        const schema = getDataGridSchemaFromESFieldType(
+          computedFields.runtimeFields[runtimeField].type
+        );
+        columns.push({
+          id: runtimeField,
+          schema,
+          isExpandable: schema !== 'boolean',
+          isRuntimeFieldColumn: true,
+        });
+      });
+    }
+  }
+  return columns;
+}
+
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: Record<string, any> | undefined,
@@ -58,23 +94,7 @@ export const useIndexData = (
   const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
     indexPattern,
   ]);
-
-  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([
-    ...indexPatternFields.map((id) => {
-      const field = indexPattern.fields.getByName(id);
-      const isRuntimeFieldColumn = field?.runtimeField !== undefined;
-      const schema = isRuntimeFieldColumn
-        ? getDataGridSchemaFromESFieldType(field?.type as estypes.RuntimeField['type'])
-        : getDataGridSchemaFromKibanaFieldType(field);
-      return {
-        id,
-        schema,
-        isExpandable: schema !== 'boolean',
-        isRuntimeFieldColumn,
-      };
-    }),
-  ]);
-
+  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>(getInitialColumns(indexPattern));
   const dataGrid = useDataGrid(columns);
 
   const {
@@ -131,18 +151,7 @@ export const useIndexData = (
           ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
         ]);
       } else {
-        setColumns([
-          ...indexPatternFields.map((id) => {
-            const field = indexPattern.fields.getByName(id);
-            const schema = getDataGridSchemaFromKibanaFieldType(field);
-            return {
-              id,
-              schema,
-              isExpandable: schema !== 'boolean',
-              isRuntimeFieldColumn: field?.runtimeField !== undefined,
-            };
-          }),
-        ]);
+        setColumns(getInitialColumns(indexPattern));
       }
       setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
       setRowCountRelation(

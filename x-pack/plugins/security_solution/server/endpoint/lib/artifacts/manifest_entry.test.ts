@@ -49,7 +49,7 @@ describe('manifest_entry', () => {
 
     test('Correct url is returned', () => {
       expect(manifestEntry.getUrl()).toEqual(
-        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
+        '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
       );
     });
 
@@ -66,7 +66,7 @@ describe('manifest_entry', () => {
         decoded_size: 432,
         encoded_size: 147,
         relative_url:
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
       });
     });
   });

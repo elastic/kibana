@@ -456,19 +456,27 @@ export function XYChart({
 
     const table = data.tables[layer.layerId];
 
+    const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
+    const currentXFormatter =
+      layer.xAccessor && layersAlreadyFormatted[layer.xAccessor] && xColumn
+        ? formatFactory(xColumn.meta.params)
+        : xAxisFormatter;
+
+    const rowIndex = table.rows.findIndex((row) => {
+      if (layer.xAccessor) {
+        if (layersAlreadyFormatted[layer.xAccessor]) {
+          // stringify the value to compare with the chart value
+          return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+        }
+        return row[layer.xAccessor] === xyGeometry.x;
+      }
+    });
+
     const points = [
       {
-        row: table.rows.findIndex((row) => {
-          if (layer.xAccessor) {
-            if (layersAlreadyFormatted[layer.xAccessor]) {
-              // stringify the value to compare with the chart value
-              return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
-            }
-            return row[layer.xAccessor] === xyGeometry.x;
-          }
-        }),
+        row: rowIndex,
         column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-        value: xyGeometry.x,
+        value: layer.xAccessor ? table.rows[rowIndex][layer.xAccessor] : xyGeometry.x,
       },
     ];
 
@@ -626,7 +634,11 @@ export function XYChart({
               const newRow = { ...row };
               for (const column of table.columns) {
                 const record = newRow[column.id];
-                if (record && !isPrimitive(record)) {
+                if (
+                  record &&
+                  // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
+                  (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
+                ) {
                   newRow[column.id] = formatFactory(column.meta.params).convert(record);
                 }
               }

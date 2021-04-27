@@ -56,7 +56,6 @@ describe('<EditPolicy /> error indicators', () => {
     const { actions } = testBed;
 
     // 0. No validation issues
-    expect(actions.hasGlobalErrorCallout()).toBe(false);
     expect(actions.hot.hasErrorIndicator()).toBe(false);
     expect(actions.warm.hasErrorIndicator()).toBe(false);
     expect(actions.cold.hasErrorIndicator()).toBe(false);
@@ -65,7 +64,6 @@ describe('<EditPolicy /> error indicators', () => {
     await actions.hot.toggleForceMerge(true);
     await actions.hot.setForcemergeSegmentsCount('-22');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(true);
     expect(actions.warm.hasErrorIndicator()).toBe(false);
     expect(actions.cold.hasErrorIndicator()).toBe(false);
@@ -75,7 +73,6 @@ describe('<EditPolicy /> error indicators', () => {
     await actions.warm.toggleForceMerge(true);
     await actions.warm.setForcemergeSegmentsCount('-22');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(true);
     expect(actions.warm.hasErrorIndicator()).toBe(true);
     expect(actions.cold.hasErrorIndicator()).toBe(false);
@@ -84,7 +81,6 @@ describe('<EditPolicy /> error indicators', () => {
     await actions.cold.enable(true);
     await actions.cold.setReplicas('-33');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(true);
     expect(actions.warm.hasErrorIndicator()).toBe(true);
     expect(actions.cold.hasErrorIndicator()).toBe(true);
@@ -92,7 +88,6 @@ describe('<EditPolicy /> error indicators', () => {
     // 4. Fix validation issue in hot
     await actions.hot.setForcemergeSegmentsCount('1');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(false);
     expect(actions.warm.hasErrorIndicator()).toBe(true);
     expect(actions.cold.hasErrorIndicator()).toBe(true);
@@ -100,7 +95,6 @@ describe('<EditPolicy /> error indicators', () => {
     // 5. Fix validation issue in warm
     await actions.warm.setForcemergeSegmentsCount('1');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(false);
     expect(actions.warm.hasErrorIndicator()).toBe(false);
     expect(actions.cold.hasErrorIndicator()).toBe(true);
@@ -108,13 +102,12 @@ describe('<EditPolicy /> error indicators', () => {
     // 6. Fix validation issue in cold
     await actions.cold.setReplicas('1');
     runTimers();
-    expect(actions.hasGlobalErrorCallout()).toBe(false);
     expect(actions.hot.hasErrorIndicator()).toBe(false);
     expect(actions.warm.hasErrorIndicator()).toBe(false);
     expect(actions.cold.hasErrorIndicator()).toBe(false);
   });
 
-  test('global error callout should show if there are any form errors', async () => {
+  test('global error callout should show, after clicking the "Save" button, if there are any form errors', async () => {
     const { actions } = testBed;
 
     expect(actions.hasGlobalErrorCallout()).toBe(false);
@@ -125,6 +118,7 @@ describe('<EditPolicy /> error indicators', () => {
     await actions.saveAsNewPolicy(true);
     await actions.setPolicyName('');
     runTimers();
+    await actions.savePolicy();
 
     expect(actions.hasGlobalErrorCallout()).toBe(true);
     expect(actions.hot.hasErrorIndicator()).toBe(false);
@@ -136,6 +130,7 @@ describe('<EditPolicy /> error indicators', () => {
     const { actions } = testBed;
 
     await actions.cold.enable(true);
+    await actions.cold.setMinAgeValue('7');
     // introduce validation error
     await actions.cold.setSearchableSnapshot('');
     runTimers();

@@ -20,6 +20,7 @@ import {
   executionStatusFromError,
   alertExecutionStatusToRaw,
   ErrorWithReason,
+  ElasticsearchError,
 } from '../lib';
 import {
   RawAlert,
@@ -49,6 +50,7 @@ import {
   WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { getEsErrorMessage } from '../lib/errors';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -480,7 +482,7 @@ export class TaskRunner<
     const executionStatus: AlertExecutionStatus = map(
       state,
       (alertTaskState: AlertTaskState) => executionStatusFromState(alertTaskState),
-      (err: Error) => executionStatusFromError(err)
+      (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
     // set the executionStatus date to same as event, if it's set
@@ -530,7 +532,7 @@ export class TaskRunner<
     }
 
     return {
-      state: map<AlertTaskState, Error, AlertTaskState>(
+      state: map<AlertTaskState, ElasticsearchError, AlertTaskState>(
         state,
         (stateUpdates: AlertTaskState) => {
           return {
@@ -538,8 +540,10 @@ export class TaskRunner<
             previousStartedAt: startedAt,
           };
         },
-        (err: Error) => {
-          const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
+        (err: ElasticsearchError) => {
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${getEsErrorMessage(
+            err
+          )}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {

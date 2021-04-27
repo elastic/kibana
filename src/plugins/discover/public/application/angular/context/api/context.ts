@@ -87,7 +87,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
         useNewFieldsApi
       );
 
-      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
+      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
 
       const hits = await fetchHitsInInterval(
         searchSource,

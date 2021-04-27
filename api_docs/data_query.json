@@ -19,6 +19,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FilterManager.Unnamed.$1",
                 "type": "Object",
                 "label": "uiSettings",
                 "isRequired": true,
@@ -123,13 +124,7 @@
             "label": "getPartitionedFilters",
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.PartitionedFilters",
-                "text": "PartitionedFilters"
-              }
+              "PartitionedFilters"
             ],
             "description": [],
             "children": [],
@@ -202,6 +197,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FilterManager.addFilters.$1",
                 "type": "CompoundType",
                 "label": "filters",
                 "isRequired": true,
@@ -230,6 +226,7 @@
                 }
               },
               {
+                "id": "def-public.FilterManager.addFilters.$2",
                 "type": "boolean",
                 "label": "pinFilterStatus",
                 "isRequired": true,
@@ -268,6 +265,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FilterManager.setFilters.$1",
                 "type": "Array",
                 "label": "newFilters",
                 "isRequired": true,
@@ -288,6 +286,7 @@
                 }
               },
               {
+                "id": "def-public.FilterManager.setFilters.$2",
                 "type": "boolean",
                 "label": "pinFilterStatus",
                 "isRequired": true,
@@ -328,6 +327,7 @@
             ],
             "children": [
               {
+                "id": "def-public.FilterManager.setGlobalFilters.$1",
                 "type": "Array",
                 "label": "newGlobalFilters",
                 "isRequired": true,
@@ -375,6 +375,7 @@
             ],
             "children": [
               {
+                "id": "def-public.FilterManager.setAppFilters.$1",
                 "type": "Array",
                 "label": "newAppFilters",
                 "isRequired": true,
@@ -420,6 +421,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FilterManager.removeFilter.$1",
                 "type": "Object",
                 "label": "filter",
                 "isRequired": true,
@@ -480,6 +482,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FilterManager.setFiltersStore.$1",
                 "type": "Array",
                 "label": "filters",
                 "isRequired": true,
@@ -500,6 +503,7 @@
                 }
               },
               {
+                "id": "def-public.FilterManager.setFiltersStore.$2",
                 "type": "Enum",
                 "label": "store",
                 "isRequired": true,
@@ -519,6 +523,7 @@
                 }
               },
               {
+                "id": "def-public.FilterManager.setFiltersStore.$3",
                 "type": "boolean",
                 "label": "shouldOverrideStore",
                 "isRequired": true,
@@ -563,6 +568,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TimeHistory.Unnamed.$1",
                 "type": "Object",
                 "label": "storage",
                 "isRequired": true,
@@ -608,6 +614,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TimeHistory.add.$1",
                 "type": "Object",
                 "label": "time",
                 "isRequired": true,
@@ -672,6 +679,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.connectToQueryState.$1",
             "type": "Object",
             "label": "{\n    timefilter: { timefilter },\n    filterManager,\n    queryString,\n    state$,\n  }",
             "isRequired": true,
@@ -693,13 +701,7 @@
                 "text": "FilterManager"
               },
               "; queryString: Pick<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.QueryStringManager",
-                "text": "QueryStringManager"
-              },
+              "QueryStringManager",
               ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: ",
               {
                 "pluginId": "data",
@@ -718,6 +720,7 @@
             }
           },
           {
+            "id": "def-public.connectToQueryState.$2",
             "type": "Object",
             "label": "stateContainer",
             "isRequired": true,
@@ -738,7 +741,7 @@
             }
           },
           {
-            "id": "def-public.connectToQueryState.syncConfig",
+            "id": "def-public.connectToQueryState.$3.syncConfig",
             "type": "Object",
             "label": "syncConfig",
             "tags": [],
@@ -746,7 +749,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.connectToQueryState.syncConfig.time",
+                "id": "def-public.connectToQueryState.$3.syncConfig.time",
                 "type": "CompoundType",
                 "label": "time",
                 "description": [],
@@ -760,7 +763,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.connectToQueryState.syncConfig.refreshInterval",
+                "id": "def-public.connectToQueryState.$3.syncConfig.refreshInterval",
                 "type": "CompoundType",
                 "label": "refreshInterval",
                 "description": [],
@@ -774,7 +777,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.connectToQueryState.syncConfig.filters",
+                "id": "def-public.connectToQueryState.$3.syncConfig.filters",
                 "type": "CompoundType",
                 "label": "filters",
                 "description": [],
@@ -796,7 +799,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.connectToQueryState.syncConfig.query",
+                "id": "def-public.connectToQueryState.$3.syncConfig.query",
                 "type": "CompoundType",
                 "label": "query",
                 "description": [],
@@ -868,6 +871,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createSavedQueryService.$1",
             "type": "Object",
             "label": "savedObjectsClient",
             "isRequired": true,
@@ -880,7 +884,7 @@
                 "section": "def-public.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
             ],
             "description": [],
             "source": {
@@ -898,7 +902,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">) => ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">) => ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -931,17 +935,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getDefaultQuery.$1",
             "type": "CompoundType",
             "label": "language",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.QueryLanguage",
-                "text": "QueryLanguage"
-              }
+              "QueryLanguage"
             ],
             "description": [],
             "source": {
@@ -963,6 +962,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.syncQueryStateWithUrl.$1",
             "type": "Object",
             "label": "query",
             "isRequired": true,
@@ -984,13 +984,7 @@
                 "text": "FilterManager"
               },
               "; queryString: Pick<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.QueryStringManager",
-                "text": "QueryStringManager"
-              },
+              "QueryStringManager",
               ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: ",
               {
                 "pluginId": "data",
@@ -1009,6 +1003,7 @@
             }
           },
           {
+            "id": "def-public.syncQueryStateWithUrl.$2",
             "type": "Object",
             "label": "kbnUrlStateStorage",
             "isRequired": true,
@@ -1253,13 +1248,7 @@
               "lineNumber": 17
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.SavedQueryAttributes",
-                "text": "SavedQueryAttributes"
-              }
+              "SavedQueryAttributes"
             ]
           }
         ],
@@ -1288,13 +1277,7 @@
             },
             "signature": [
               "(attributes: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.SavedQueryAttributes",
-                "text": "SavedQueryAttributes"
-              },
+              "SavedQueryAttributes",
               ", config?: { overwrite: boolean; } | undefined) => Promise<",
               {
                 "pluginId": "data",
@@ -1411,6 +1394,21 @@
     "enums": [],
     "misc": [
       {
+        "id": "def-public.AutoRefreshDoneFn",
+        "type": "Type",
+        "label": "AutoRefreshDoneFn",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "() => void"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.InputTimeRange",
         "type": "Type",
         "label": "InputTimeRange",
@@ -1503,7 +1501,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
-          "lineNumber": 240
+          "lineNumber": 242
         },
         "signature": [
           "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
@@ -1514,7 +1512,7 @@
           "Observable",
           "<unknown>; getAutoRefreshFetch$: () => ",
           "Observable",
-          "<unknown>; getFetch$: () => ",
+          "<AutoRefreshDoneFn>; getFetch$: () => ",
           "Observable"
         ],
         "initialIsOpen": false
@@ -1573,6 +1571,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.calculateBounds.$1",
             "type": "Object",
             "label": "timeRange",
             "isRequired": true,
@@ -1592,6 +1591,7 @@
             }
           },
           {
+            "id": "def-common.calculateBounds.$2",
             "type": "Object",
             "label": "options",
             "isRequired": true,
@@ -1618,6 +1618,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.compareFilters.$1",
             "type": "CompoundType",
             "label": "first",
             "isRequired": true,
@@ -1646,6 +1647,7 @@
             }
           },
           {
+            "id": "def-common.compareFilters.$2",
             "type": "CompoundType",
             "label": "second",
             "isRequired": true,
@@ -1674,6 +1676,7 @@
             }
           },
           {
+            "id": "def-common.compareFilters.$3",
             "type": "Object",
             "label": "comparatorOptions",
             "isRequired": true,
@@ -1754,6 +1757,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.dedupFilters.$1",
             "type": "Array",
             "label": "existingFilters",
             "isRequired": true,
@@ -1774,6 +1778,7 @@
             }
           },
           {
+            "id": "def-common.dedupFilters.$2",
             "type": "Array",
             "label": "filters",
             "isRequired": true,
@@ -1794,6 +1799,7 @@
             }
           },
           {
+            "id": "def-common.dedupFilters.$3",
             "type": "Object",
             "label": "comparatorOptions",
             "isRequired": true,
@@ -1887,6 +1893,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getAbsoluteTimeRange.$1",
             "type": "Object",
             "label": "timeRange",
             "isRequired": true,
@@ -1906,7 +1913,7 @@
             }
           },
           {
-            "id": "def-common.getAbsoluteTimeRange.{-forceNow }",
+            "id": "def-common.getAbsoluteTimeRange.$2.forceNow",
             "type": "Object",
             "label": "{ forceNow }",
             "tags": [],
@@ -1914,7 +1921,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.getAbsoluteTimeRange.{-forceNow }.forceNow",
+                "id": "def-common.getAbsoluteTimeRange.$2.forceNow.forceNow",
                 "type": "Object",
                 "label": "forceNow",
                 "description": [],
@@ -1975,6 +1982,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getTime.$1",
             "type": "Object",
             "label": "indexPattern",
             "isRequired": false,
@@ -1995,6 +2003,7 @@
             }
           },
           {
+            "id": "def-common.getTime.$2",
             "type": "Object",
             "label": "timeRange",
             "isRequired": true,
@@ -2014,7 +2023,7 @@
             }
           },
           {
-            "id": "def-common.getTime.options",
+            "id": "def-common.getTime.$3.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -2022,7 +2031,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.getTime.options.forceNow",
+                "id": "def-common.getTime.$3.options.forceNow",
                 "type": "Object",
                 "label": "forceNow",
                 "description": [],
@@ -2036,7 +2045,7 @@
               },
               {
                 "tags": [],
-                "id": "def-common.getTime.options.fieldName",
+                "id": "def-common.getTime.$3.options.fieldName",
                 "type": "string",
                 "label": "fieldName",
                 "description": [],
@@ -2068,6 +2077,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isQuery.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -2106,6 +2116,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isTimeRange.$1",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -2144,6 +2155,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.uniqFilters.$1",
             "type": "Array",
             "label": "filters",
             "isRequired": true,
@@ -2164,6 +2176,7 @@
             }
           },
           {
+            "id": "def-common.uniqFilters.$2",
             "type": "Any",
             "label": "comparatorOptions",
             "isRequired": true,

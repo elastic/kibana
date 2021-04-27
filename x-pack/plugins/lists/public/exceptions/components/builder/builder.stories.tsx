@@ -13,16 +13,14 @@
 
 import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { HttpStart } from 'kibana/public';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   fields,
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -35,10 +33,6 @@ import {
   OnChangeProps,
 } from './exception_items_renderer';
 
-const mockTheme = getMockTheme({
-  darkMode: false,
-  eui: euiLightVars,
-});
 const mockHttpService: HttpStart = ({
   addLoadingCountSource: (): void => {},
   anonymousPaths: {
@@ -76,7 +70,7 @@ const mockAutocompleteService = ({
     }),
 } as unknown) as AutocompleteStart;
 
-addDecorator((storyFn) => <ThemeProvider theme={mockTheme}>{storyFn()}</ThemeProvider>);
+addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
 
 export default {
   argTypes: {

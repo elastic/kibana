@@ -32,7 +32,7 @@ describe('Alerts timeline', () => {
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(newRule);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
 
     // Then we login as read-only user to test.
     login(ROLES.reader);

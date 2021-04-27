@@ -10,10 +10,97 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "id": "def-server.isVisSeriesData",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-server.isVisSeriesData.$1",
+            "type": "CompoundType",
+            "label": "data",
+            "isRequired": true,
+            "signature": [
+              "TimeseriesVisData"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_type_timeseries/common/types.ts",
+              "lineNumber": 74
+            }
+          }
+        ],
+        "signature": [
+          "(data: ",
+          "TimeseriesVisData",
+          ") => data is ",
+          "SeriesData"
+        ],
+        "description": [],
+        "label": "isVisSeriesData",
+        "source": {
+          "path": "src/plugins/vis_type_timeseries/common/types.ts",
+          "lineNumber": 74
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.isVisTableData",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-server.isVisTableData.$1",
+            "type": "CompoundType",
+            "label": "data",
+            "isRequired": true,
+            "signature": [
+              "TimeseriesVisData"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_type_timeseries/common/types.ts",
+              "lineNumber": 71
+            }
+          }
+        ],
+        "signature": [
+          "(data: ",
+          "TimeseriesVisData",
+          ") => data is TableData"
+        ],
+        "description": [],
+        "label": "isVisTableData",
+        "source": {
+          "path": "src/plugins/vis_type_timeseries/common/types.ts",
+          "lineNumber": 71
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "id": "def-server.TimeseriesVisData",
+        "type": "Type",
+        "label": "TimeseriesVisData",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/vis_type_timeseries/common/types.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "SeriesData",
+          " | TableData"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "id": "def-server.VisTypeTimeseriesSetup",
@@ -30,17 +117,11 @@
           "description": [],
           "source": {
             "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-            "lineNumber": 53
+            "lineNumber": 55
           },
           "signature": [
             "(requestContext: ",
-            {
-              "pluginId": "data",
-              "scope": "server",
-              "docId": "kibDataSearchPluginApi",
-              "section": "def-server.DataRequestHandlerContext",
-              "text": "DataRequestHandlerContext"
-            },
+            "DataRequestHandlerContext",
             ", fakeRequest: ",
             {
               "pluginId": "core",
@@ -50,20 +131,14 @@
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>, options: any) => Promise<",
-            {
-              "pluginId": "visTypeTimeseries",
-              "scope": "common",
-              "docId": "kibVisTypeTimeseriesPluginApi",
-              "section": "def-common.TimeseriesVisData",
-              "text": "TimeseriesVisData"
-            },
+            "TimeseriesVisData",
             ">"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-        "lineNumber": 52
+        "lineNumber": 54
       },
       "lifecycle": "setup",
       "initialIsOpen": true

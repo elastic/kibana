@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   AlertServiceContract,

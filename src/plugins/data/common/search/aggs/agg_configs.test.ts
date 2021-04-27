@@ -342,8 +342,8 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true);
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
 
@@ -412,8 +412,8 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true)['2'];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
       expect(Object.keys(topLevelDsl.aggs)).toContain('1-bucket');

@@ -17,7 +17,8 @@ export const createGetLogEntryQuery = (
   logEntryIndex: string,
   logEntryId: string,
   timestampField: string,
-  tiebreakerField: string
+  tiebreakerField: string,
+  runtimeMappings?: estypes.RuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
   terminate_after: 1,
@@ -32,6 +33,7 @@ export const createGetLogEntryQuery = (
     },
     // @ts-expect-error @elastic/elasticsearch doesn't declare body.fields on AsyncSearchSubmitRequest
     fields: ['*'],
+    runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,
   },

@@ -3,6 +3,16 @@
 filegroup(
   name = "build",
   srcs = [
-      "//packages/elastic-datemath:build"
+      "//packages/elastic-datemath:build",
+      "//packages/elastic-safer-lodash-set:build",
+      "//packages/kbn-apm-utils:build",
+      "//packages/kbn-babel-code-parser:build",
+      "//packages/kbn-babel-preset:build",
+      "//packages/kbn-config-schema:build",
+      "//packages/kbn-expect:build",
+      "//packages/kbn-std:build",
+      "//packages/kbn-tinymath:build",
+      "//packages/kbn-utility-types:build",
+      "//packages/kbn-utils:build",
   ],
 )

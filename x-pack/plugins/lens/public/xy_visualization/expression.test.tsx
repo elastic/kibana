@@ -822,6 +822,59 @@ describe('xy_expression', () => {
       });
     });
 
+    test('returns correct original data for ordinal x axis with special formatter', () => {
+      const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'a',
+        splitAccessors: {},
+        seriesKeys: ['a'],
+      };
+
+      const { args, data } = sampleArgs();
+
+      convertSpy.mockImplementation((x) => (typeof x === 'string' ? x.toUpperCase() : x));
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 3,
+            row: 1,
+            table: data.tables.first,
+            value: 'Bar',
+          },
+        ],
+      });
+    });
+
     test('onElementClick is not triggering event on noInteractivity mode', () => {
       const { args, data } = sampleArgs();
 

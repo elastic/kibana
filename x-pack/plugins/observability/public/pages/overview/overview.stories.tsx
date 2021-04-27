@@ -23,12 +23,13 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
+import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
-  unregisterDataHandler({ appName: 'uptime' });
+  unregisterDataHandler({ appName: 'synthetics' });
 }
 
 const withCore = makeDecorator({
@@ -44,6 +45,7 @@ const withCore = makeDecorator({
             appMountParameters: ({
               setHeaderActionMenu: () => {},
             } as unknown) as AppMountParameters,
+            config: { unsafe: { alertingExperience: { enabled: true } } },
             core: options as CoreStart,
             plugins: ({
               data: {
@@ -52,6 +54,7 @@ const withCore = makeDecorator({
                 },
               },
             } as unknown) as ObservabilityPublicPluginsStart,
+            observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
           }}
         >
           <EuiThemeProvider>
@@ -185,9 +188,9 @@ storiesOf('app/Overview', module)
       hasData: async () => false,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return <OverviewPage routeParams={{ query: {} }} />;
@@ -297,9 +300,9 @@ storiesOf('app/Overview', module)
       hasData: async () => true,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return (
@@ -329,9 +332,9 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
 
       return (
@@ -363,9 +366,9 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
       return (
         <OverviewPage
@@ -394,9 +397,9 @@ storiesOf('app/Overview', module)
       hasData: async () => true,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: async () => emptyUptimeResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return (
@@ -432,11 +435,11 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: async () => {
           throw new Error('Error fetching Uptime data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
       return (
         <OverviewPage
@@ -454,7 +457,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -462,7 +465,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -470,15 +473,15 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -497,7 +500,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
@@ -505,7 +508,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
@@ -513,15 +516,15 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },

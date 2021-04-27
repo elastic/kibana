@@ -14,6 +14,7 @@ import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
+  ES_SEARCH_STRATEGY,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
@@ -113,20 +114,14 @@ export class SearchInterceptor {
     }
   }
 
-  /**
-   * @internal
-   * @throws `AbortError` | `ErrorLike`
-   */
-  protected runSearch(
-    request: IKibanaSearchRequest,
-    options?: ISearchOptions
-  ): Promise<IKibanaSearchResponse> {
-    const { abortSignal, sessionId, ...requestOptions } = options || {};
+  protected getSerializableOptions(options?: ISearchOptions) {
+    const { sessionId, ...requestOptions } = options || {};
+
+    const serializableOptions: ISearchOptionsSerializable = {};
     const combined = {
       ...requestOptions,
       ...this.deps.session.getSearchOptions(sessionId),
     };
-    const serializableOptions: ISearchOptionsSerializable = {};
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
@@ -135,10 +130,22 @@ export class SearchInterceptor {
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
     if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
 
+    return serializableOptions;
+  }
+
+  /**
+   * @internal
+   * @throws `AbortError` | `ErrorLike`
+   */
+  protected runSearch(
+    request: IKibanaSearchRequest,
+    options?: ISearchOptions
+  ): Promise<IKibanaSearchResponse> {
+    const { abortSignal } = options || {};
     return this.batchedFetch(
       {
         request,
-        options: serializableOptions,
+        options: this.getSerializableOptions(options),
       },
       abortSignal
     );
@@ -183,6 +190,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: ISearchOptions = {}
   ): Observable<IKibanaSearchResponse> {
+    options = {
+      strategy: ES_SEARCH_STRATEGY,
+      ...options,
+    };
+
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
       if (options.abortSignal?.aborted) {
