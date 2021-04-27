@@ -36,8 +36,9 @@ module.exports = {
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: 2018,
+        requireConfigFile: false,
         babelOptions: {
-          configFile: require.resolve('@kbn/babel-preset/node_preset'),
+          presets: ['@kbn/babel-preset/node_preset']
         },
       },
 
