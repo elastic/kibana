@@ -12,9 +12,11 @@ import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
 import { render } from '@testing-library/react';
+import type { DocLinksStart } from 'src/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
+  const docLinks = {} as DocLinksStart['links'];
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
@@ -45,6 +47,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
+          docLinks={docLinks}
         />
       )
     ).toMatchSnapshot();
@@ -78,6 +81,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
+          docLinks={docLinks}
         />
       </React.Suspense>
     );
@@ -93,6 +97,7 @@ describe('TelemetryManagementSectionComponent', () => {
             enableSaving={true}
             toasts={coreStart.notifications.toasts}
             isSecurityExampleEnabled={isSecurityExampleEnabled}
+            docLinks={docLinks}
           />
         </React.Suspense>
       );
@@ -130,6 +135,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -177,6 +183,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -215,6 +222,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -254,6 +262,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -293,6 +302,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
 
@@ -332,6 +342,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -382,6 +393,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
+          docLinks={docLinks}
         />
       ).html()
     ).toMatchSnapshot();
