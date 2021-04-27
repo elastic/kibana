@@ -130,6 +130,7 @@ export interface TestBed<T = string> {
      * @param value The value to set
      */
     setComboBoxValue: (comboBoxTestSubject: T, value: string) => void;
+    setSearchBarValue: (searchBarTestSubject: T, value: string) => void;
     /**
      * Get a list of the form error messages that are visible in the DOM.
      */

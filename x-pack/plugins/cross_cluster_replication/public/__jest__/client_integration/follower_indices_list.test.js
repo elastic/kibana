@@ -108,9 +108,8 @@ describe('<FollowerIndicesList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('followerIndexSearch'), 'unique');
+    test('search works', () => {
+      form.setSearchBarValue('followerIndexSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('followerIndexListTable');
       expect(tableCellsValues.length).toBe(1);
     });

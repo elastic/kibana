@@ -64,10 +64,10 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('when there are multiple pages of remote clusters', () => {
-    let find;
     let table;
     let actions;
     let component;
+    let form;
 
     const remoteClusters = [
       {
@@ -87,7 +87,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ find, table, actions, component } = setup());
+        ({ table, actions, component, form } = setup());
       });
 
       component.update();
@@ -103,9 +103,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('search works', () => {
-      const input = find('remoteClusterSearch');
-      input.instance().value = 'unique';
-      input.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+      form.setSearchBarValue('remoteClusterSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
       expect(tableCellsValues.length).toBe(1);
     });

@@ -98,9 +98,8 @@ describe('<AutoFollowPatternList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('autoFollowPatternSearch'), 'unique');
+    test('search works', () => {
+      form.setSearchBarValue('autoFollowPatternSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
       expect(tableCellsValues.length).toBe(1);
     });

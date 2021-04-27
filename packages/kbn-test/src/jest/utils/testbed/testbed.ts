@@ -251,6 +251,14 @@ export const registerTestBed = <T extends string = string>(
         component.update();
       };
 
+      const setSearchBarValue: TestBed<T>['form']['setSearchBarValue'] = (testSubject, value) => {
+        const searchBar = find(testSubject);
+        if (!searchBar.length) {
+          throw new Error(`"${testSubject}" was not found.`);
+        }
+        searchBar.simulate('keyup', { key: 'Enter', target: { value } });
+      };
+
       const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = (
         wrapper?: T | ReactWrapper
       ) => {
@@ -330,6 +338,7 @@ export const registerTestBed = <T extends string = string>(
           selectCheckBox,
           toggleEuiSwitch,
           setComboBoxValue,
+          setSearchBarValue,
           getErrorsMessages,
         },
         router: {
