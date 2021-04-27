@@ -8,7 +8,7 @@ parallel([
     node('linux && immutable') {
       print kibanaCheckout()
     }
-  }
+  },
   node2: {
     node('linux && immutable') {
       sleep 60
