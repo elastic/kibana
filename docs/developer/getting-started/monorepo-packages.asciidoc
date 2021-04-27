@@ -63,6 +63,7 @@ yarn kbn watch-bazel
 
 - @elastic/datemath
 - @elastic/safer-lodash-set
+- @kbn/apm-config-loader
 - @kbn/apm-utils
 - @kbn/babel-code-parser
 - @kbn/babel-preset
