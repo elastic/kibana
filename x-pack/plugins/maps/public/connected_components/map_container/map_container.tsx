@@ -263,12 +263,10 @@ export class MapContainer extends Component<Props, State> {
               getActionContext={getActionContext}
             />
           )}
-<<<<<<< HEAD
-          <WidgetOverlay />
+
           <Timeslider />
-=======
+
           <RightSideControls />
->>>>>>> 31660419eafdd8c74c68123745fc699e7ee8cf2e
         </EuiFlexItem>
 
         <EuiFlexItem
