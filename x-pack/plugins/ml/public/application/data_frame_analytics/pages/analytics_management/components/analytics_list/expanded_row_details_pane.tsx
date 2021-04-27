@@ -56,6 +56,7 @@ export const Section: FC<SectionProps> = ({ section }) => {
         tableCaption={section.title}
         tableLayout="auto"
         className="mlExpandedRowDetailsSection"
+        data-test-subj={`${section.dataTestSubj}-table`}
       />
     </div>
   );

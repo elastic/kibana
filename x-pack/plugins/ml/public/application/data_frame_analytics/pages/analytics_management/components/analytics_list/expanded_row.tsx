@@ -266,7 +266,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           }),
         ],
         position: 'right',
-        dataTestSubj: 'mlAnalyticsTableRowDetailsSection analysis-stats',
+        dataTestSubj: 'mlAnalyticsTableRowDetailsSection analysisStats',
       }
     : undefined;
 
