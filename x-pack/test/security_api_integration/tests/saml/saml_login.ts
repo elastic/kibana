@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
     });
 
@@ -364,11 +364,11 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
       });
 
-      it('should redirect to home page if session cookie is not provided', async () => {
+      it('should redirect to `logged_out` page if session cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
 
       it('should reject AJAX requests', async () => {

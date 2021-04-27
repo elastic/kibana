@@ -1784,13 +1784,13 @@ describe('Authenticator', () => {
       );
     });
 
-    it('returns `notHandled` if session does not exist.', async () => {
+    it('redirects to login form if session does not exist.', async () => {
       const request = httpServerMock.createKibanaRequest();
       mockOptions.session.get.mockResolvedValue(null);
       mockBasicAuthenticationProvider.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
@@ -1847,12 +1847,12 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
-    it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
+    it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();

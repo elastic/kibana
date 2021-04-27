@@ -468,7 +468,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Tries to initiate SAML authentication handshake. If the request already includes user URL hash fragment, we will
+   * Tries to initiate OIDC authentication handshake. If the request already includes user URL hash fragment, we will
    * initiate handshake right away, otherwise we'll redirect user to a dedicated page where we capture URL hash fragment
    * first and only then initiate SAML handshake.
    * @param request Request instance.

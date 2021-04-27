@@ -28,13 +28,13 @@ export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Prop
       buildNumber={buildNumber}
       basePath={basePath}
       title={i18n.translate('xpack.security.unauthenticated.pageTitle', {
-        defaultMessage: 'You could not log in.',
+        defaultMessage: "We couldn't log you in",
       })}
       body={
         <p>
           <FormattedMessage
             id="xpack.security.unauthenticated.errorDescription"
-            defaultMessage="You could not log in. Please try again."
+            defaultMessage="We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
           />
         </p>
       }

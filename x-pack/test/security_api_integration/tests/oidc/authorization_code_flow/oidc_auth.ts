@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should fail if state is not matching', async () => {
@@ -191,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
 
       it('should redirect to the OPs endsession endpoint to complete logout', async () => {

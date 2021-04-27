@@ -430,7 +430,9 @@ export class Authenticator {
       }
     }
 
-    return DeauthenticationResult.notHandled();
+    // If none of the configured providers could perform a logout, we should redirect user to the
+    // default logout location.
+    return DeauthenticationResult.redirectTo(this.getLoggedOutURL(request));
   }
 
   /**
@@ -791,9 +793,13 @@ export class Authenticator {
   /**
    * Creates a logged out URL for the specified request and provider.
    * @param request Request that initiated logout.
-   * @param providerType Type of the provider that handles logout.
+   * @param providerType Type of the provider that handles logout. If not specified, then the first
+   * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(request: KibanaRequest, providerType: string) {
+  private getLoggedOutURL(
+    request: KibanaRequest,
+    providerType: string = this.options.config.authc.sortedProviders[0].type
+  ) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();

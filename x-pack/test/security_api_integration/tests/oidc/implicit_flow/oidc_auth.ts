@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should fail if state is not matching', async () => {
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-        expect(unauthenticatedResponse.text).to.contain('You could not log in');
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {

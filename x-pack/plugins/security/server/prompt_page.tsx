@@ -35,7 +35,7 @@ interface Props {
   buildNumber: number;
   basePath: IBasePath;
   scriptPaths?: string[];
-  title: string;
+  title: ReactNode;
   body: ReactNode;
   actions: ReactNode;
 }
@@ -60,7 +60,7 @@ export function PromptPage({
   return (
     <html lang={i18n.getLocale()}>
       <head>
-        <title>{title}</title>
+        <title>Elastic</title>
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}

@@ -60,7 +60,8 @@ const messageMap = new Map([
     {
       type: LoginFormMessageType.Danger,
       content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
-        defaultMessage: 'You could not log in. Please try again.',
+        defaultMessage:
+          "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
       }),
     },
   ],
