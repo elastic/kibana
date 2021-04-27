@@ -11,9 +11,5 @@
   },
   "dependencies": {
     "@kbn/logging": "link:../kbn-logging"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }
