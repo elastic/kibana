@@ -143,6 +143,15 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       if (isPopulatedObject(aggs)) {
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
+          // We current don't support aggregations that reference other nested aggregations
+          // e.g. aggregation that reference another nested term aggregation
+          if (
+            Object.keys(aggs[aggBucketsName]).some(
+              (key) => key !== 'date_histogram' && key !== 'aggs' && key !== 'aggregations'
+            )
+          ) {
+            return false;
+          }
           // if fieldName is an aggregated field under nested terms using bucket_script
           const aggregations =
             getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
