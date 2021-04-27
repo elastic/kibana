@@ -160,7 +160,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       );
     }
 
-    public async assertJowRowActionsMenuButtonEnabled(analyticsId: string, expectedValue: boolean) {
+    public async assertJobRowActionsMenuButtonEnabled(analyticsId: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.rowSelector(analyticsId, 'euiCollapsedItemActionsButton')
       );
@@ -258,6 +258,127 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await this.ensureJobActionsMenuOpen(analyticsId);
       await testSubjects.click(`mlAnalyticsJobCloneButton`);
       await testSubjects.existOrFail('mlAnalyticsCreationContainer');
+    }
+
+    public detailsSelector(jobId: string, subSelector?: string) {
+      const row = `mlAnalyticsTableRowDetails-${jobId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
+    }
+
+    public async assertRowDetailsTabExist(jobId: string, tabId: string) {
+      const selector = `~mlAnalyticsTableRowDetailsTab > ~${tabId} > ${jobId}`;
+      await testSubjects.existOrFail(selector);
+    }
+
+    public async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
+      await this.ensureDetailsOpen(jobId);
+      try {
+        return await block();
+      } finally {
+        await this.ensureDetailsClosed(jobId);
+      }
+    }
+
+    public async ensureDetailsOpen(jobId: string) {
+      await retry.tryForTime(10000, async () => {
+        if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
+          await testSubjects.click(this.rowSelector(jobId, 'mlAnalyticsTableRowDetailsToggle'));
+          await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
+        }
+      });
+    }
+
+    public async ensureDetailsClosed(jobId: string) {
+      await retry.tryForTime(10000, async () => {
+        if (await testSubjects.exists(this.detailsSelector(jobId))) {
+          await testSubjects.click(this.rowSelector(jobId, 'mlAnalyticsTableRowDetailsToggle'));
+          await testSubjects.missingOrFail(this.detailsSelector(jobId), { timeout: 1000 });
+        }
+      });
+    }
+
+    public async assertRowDetailsTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
+      await retry.tryForTime(10000, async () => {
+        const allTabs = await testSubjects.findAll(`~${tabTypeSubject}`, 3);
+        expect(allTabs).to.have.length(
+          areaSubjects.length,
+          `Expected number of '${tabTypeSubject}' to be '${areaSubjects.length}' (got '${allTabs.length}')`
+        );
+        for (const areaSubj of areaSubjects) {
+          await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`, { timeout: 1000 });
+        }
+      });
+    }
+
+    public async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(tabSubject);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected Analytics details tab '${tabSubject}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async ensureDetailsTabOpen(jobId: string, tabSubject: string) {
+      const tabSelector = `~mlAnalyticsTableRowDetailsTab&~${tabSubject}&~${jobId}`;
+      const tabContentSelector = `~mlAnalyticsTableRowDetailsTabContent&~${tabSubject}&~${jobId}`;
+
+      await retry.tryForTime(10000, async () => {
+        if (!(await testSubjects.exists(tabContentSelector))) {
+          await testSubjects.click(tabSelector);
+          await testSubjects.existOrFail(tabContentSelector, { timeout: 1000 });
+        }
+      });
+    }
+
+    public async assertDetailsSectionExists(jobId: string, sectionSubject: string) {
+      const subSelector = `~mlAnalyticsTableRowDetailsSection&~${sectionSubject}`;
+      const selector = this.detailsSelector(jobId, subSelector);
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.existOrFail(selector, { timeout: 1000 });
+      });
+    }
+
+    public async assertJobDetailsTabContent(jobId: string) {
+      const tabSubject = 'job-details';
+      await this.ensureDetailsTabOpen(jobId, tabSubject);
+
+      await this.assertDetailsSectionExists(jobId, 'state');
+      await this.assertDetailsSectionExists(jobId, 'progress');
+    }
+
+    public async assertJobStatsTabContent(jobId: string) {
+      const tabSubject = 'job-stats';
+      await this.ensureDetailsTabOpen(jobId, tabSubject);
+      await this.assertDetailsSectionExists(jobId, 'stats');
+    }
+    public async assertJsonTabContent(jobId: string) {
+      const tabSubject = 'json';
+      await this.ensureDetailsTabOpen(jobId, tabSubject);
+      await testSubjects.existOrFail(this.detailsSelector(jobId, 'mlAnalyticsDetailsJsonPreview'));
+    }
+    public async assertJobMessagesTabContent(jobId: string) {
+      const tabSubject = 'job-messages';
+      await this.ensureDetailsTabOpen(jobId, tabSubject);
+      await testSubjects.existOrFail(
+        this.detailsSelector(jobId, 'mlAnalyticsDetailsJobMessagesTable')
+      );
+    }
+
+    public async assertAnalyticsRowDetails(jobId: string) {
+      return await this.withDetailsOpen(jobId, async () => {
+        await this.assertRowDetailsTabsExist('mlAnalyticsTableRowDetailsTab', [
+          'job-details',
+          'job-stats',
+          'json',
+          'job-messages',
+        ]);
+        await this.assertJobDetailsTabContent(jobId);
+        await this.assertJobStatsTabContent(jobId);
+        await this.assertJsonTabContent(jobId);
+        await this.assertJobMessagesTabContent(jobId);
+      });
     }
   })();
 }

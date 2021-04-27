@@ -230,6 +230,8 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(testData.jobId);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {
