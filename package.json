@@ -106,7 +106,7 @@
     "@elastic/numeral": "^2.5.0",
     "@elastic/react-search-ui": "^1.5.1",
     "@elastic/request-crypto": "1.1.4",
-    "@elastic/safer-lodash-set": "link:packages/elastic-safer-lodash-set",
+    "@elastic/safer-lodash-set": "link:bazel-bin/packages/elastic-safer-lodash-set/npm_module",
     "@elastic/search-ui-app-search-connector": "^1.5.0",
     "@elastic/ui-ace": "0.2.3",
     "@hapi/boom": "^9.1.1",
