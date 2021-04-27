@@ -32,10 +32,13 @@ What are the goals of this project? How will we know if it was successful?
 What are we doing to achieve those goals and solve the problem?
 
 
-# Public API Changes
+# Who is affected and how
 
-For folks that don't care about implementation details, give them the proposed
-API changes here. Code snippets showing example usage are encouraged.
+Use this section to hone in on who will be affected and how. For example:
+
+- Are consumers of a specific plugin affected because of a public API change?
+- Will all Kibana Contributors be affected because of a change that may affect
+  the development experience?
 
 
 # Detailed design
