@@ -125,5 +125,11 @@ export function MachineLearningDataVisualizerFileBasedProvider(
         await testSubjects.existOrFail('mlFileImportSuccessCallout');
       });
     },
+
+    async selectCreateFilebeatConfig() {
+      await testSubjects.scrollIntoView('fileDataVisFilebeatConfigLink');
+      await testSubjects.click('fileDataVisFilebeatConfigLink');
+      await testSubjects.existOrFail('fileDataVisFilebeatConfigPanel');
+    },
   };
 }
