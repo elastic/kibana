@@ -101,7 +101,6 @@ describe('createActionRoute', () => {
       id: '1',
       name: 'My name',
       actionTypeId: 'abc',
-      // "is_missing_secrets": true,
       isMissingSecrets: false,
       config: { foo: true },
       isPreconfigured: false,

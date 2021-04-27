@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
-import { i18n } from '@kbn/i18n';
+import { SavedObject, SavedObjectsServiceSetup } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
+import { RawAction } from '../types';
+import { getImportResultMessage } from './get_import_result_message';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
 export const ALERT_SAVED_OBJECT_TYPE = 'alert';
@@ -31,18 +32,12 @@ export function setupSavedObjects(
       getTitle(obj) {
         return `Connector: [${obj.attributes.name}]`;
       },
-      onImport(objs) {
+      onImport(connectors) {
         return {
           warnings: [
             {
               type: 'action_required',
-              message: i18n.translate('xpack.actions.savedObjects.onImportText', {
-                defaultMessage:
-                  '{objsLength} {objsLength, plural, one {Connector} other {Connectors}} have been imported but need to be enabled',
-                values: {
-                  objsLength: objs.length,
-                },
-              }),
+              message: getImportResultMessage(connectors as Array<SavedObject<RawAction>>),
               actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
             },
           ],

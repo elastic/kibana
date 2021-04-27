@@ -82,7 +82,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
-          is_missing_secrets: true,
+          is_missing_secrets: false,
           config: {
             apiUrl: servicenowSimulatorURL,
           },
@@ -97,7 +97,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
-          is_missing_secrets: true,
+          is_missing_secrets: false,
           config: {
             apiUrl: servicenowSimulatorURL,
           },

@@ -40,7 +40,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
-          is_missing_secrets: true,
+          is_missing_secrets: false,
           connector_type_id: 'test.index-record',
           name: 'My action',
           config: {

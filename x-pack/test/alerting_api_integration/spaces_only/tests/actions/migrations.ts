@@ -62,7 +62,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
 
       expect(responseWithisMissingSecrets.status).to.eql(200);
-      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(true);
+      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
     });
   });
 }
