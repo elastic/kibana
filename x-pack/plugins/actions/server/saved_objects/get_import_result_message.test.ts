@@ -48,8 +48,6 @@ describe('getImportResultMessage', () => {
     const message = getImportResultMessage(
       (savedObjectConnectors as unknown) as Array<SavedObject<RawAction>>
     );
-    expect(message).toBe(
-      '2 Connectors have been imported. 1 Connector with the secrets need to be updated.'
-    );
+    expect(message).toBe('1 connector has secrets that require updates.');
   });
 });

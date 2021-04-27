@@ -15,7 +15,7 @@ export function getImportResultMessage(connectors: Array<SavedObject<RawAction>>
   );
   return i18n.translate('xpack.actions.savedObjects.onImportText', {
     defaultMessage:
-      '{connectorsLength} {connectorsLength, plural, one {connector has} other {connectors have}} been imported. {connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {connector has} other {connectors have}} secrets that require updates.',
+      '{connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {connector has} other {connectors have}} secrets that require updates.',
     values: {
       connectorsLength: connectors.length,
       connectorsWithSecretsLength: connectorsWithSecrets.length,
