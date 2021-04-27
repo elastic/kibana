@@ -27,7 +27,7 @@ export interface KibanaUsageStats {
     };
   };
 
-  [plugin: string]: unknown;
+  [plugin: string]: Record<string, unknown>;
 }
 
 export function handleKibanaStats(
