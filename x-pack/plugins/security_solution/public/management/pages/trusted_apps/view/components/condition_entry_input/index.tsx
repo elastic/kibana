@@ -191,6 +191,17 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
+              placeholder={
+                entry.field === ConditionEntryField.PATH
+                  ? entry.type === 'wildcard'
+                    ? os === OperatingSystem.WINDOWS
+                      ? `C:\\sample\\**\\*`
+                      : `/opt/**/*`
+                    : os === OperatingSystem.WINDOWS
+                    ? `C:\\sample\\path.exe`
+                    : `/opt/bin/`
+                  : undefined
+              }
               fullWidth
               required
               onChange={handleValueUpdate}
