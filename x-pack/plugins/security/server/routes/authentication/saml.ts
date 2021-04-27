@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../';
-import { SAMLLogin } from '../../authentication';
-import { SAMLAuthenticationProvider } from '../../authentication/providers';
+import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes required for SAML authentication.
@@ -32,7 +32,11 @@ export function defineSAMLRoutes({
             { unknowns: 'ignore' }
           ),
         },
-        options: { authRequired: false, xsrfRequired: false },
+        options: {
+          authRequired: false,
+          xsrfRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        },
       },
       async (context, request, response) => {
         if (path === '/api/security/v1/saml') {
