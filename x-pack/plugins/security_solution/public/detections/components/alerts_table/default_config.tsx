@@ -11,6 +11,7 @@ import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { columns } from '../../configurations/security_solution_detections/columns';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -93,6 +94,7 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
 
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
+  columns,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
 };
