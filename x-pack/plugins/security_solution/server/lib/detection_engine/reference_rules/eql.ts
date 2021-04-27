@@ -11,13 +11,19 @@ import v4 from 'uuid/v4';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
+import {
+  DefaultFieldMap,
+  OutputOfFieldMap,
+  createPersistenceRuleTypeFactory,
+} from '../../../../../rule_registry/server';
 import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { SecurityRuleRegistry } from '../../../plugin';
 import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 
 const createSecurityEQLRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
+
+type AlertType = OutputOfFieldMap<DefaultFieldMap>;
 
 export const eqlAlertType = createSecurityEQLRuleType({
   id: EQL_ALERT_TYPE_ID,
@@ -64,11 +70,6 @@ export const eqlAlertType = createSecurityEQLRuleType({
       request
     )) as ApiResponse<EqlSignalSearchResponse>;
 
-    type ValueFromArrayType<T> = T extends Array<infer U> ? U : T;
-    type ValueFromPromiseType<T> = T extends Promise<infer U> ? U : T;
-    type AlertListType = ValueFromPromiseType<ReturnType<typeof findAlerts>>;
-    type AlertType = ValueFromArrayType<AlertListType>;
-
     const buildSignalFromEvent = (event: BaseSignalHit): AlertType => {
       return {
         ...event,
@@ -79,9 +80,9 @@ export const eqlAlertType = createSecurityEQLRuleType({
       };
     };
 
-    let alerts: AlertListType = [];
+    let alerts: AlertType[] = [];
     if (response.hits.sequences !== undefined) {
-      alerts = response.hits.sequences.reduce((allAlerts: AlertListType, sequence) => {
+      alerts = response.hits.sequences.reduce((allAlerts: AlertType[], sequence) => {
         let previousAlertUuid: string | undefined;
         return {
           ...allAlerts,
