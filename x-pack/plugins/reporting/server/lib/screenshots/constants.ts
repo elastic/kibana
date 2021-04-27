@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const DEFAULT_PAGELOAD_SELECTOR = '.application';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
+export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_GETBROWSERDIMENSIONS = 'GetBrowserDimensions';

@@ -9,6 +9,7 @@ filegroup(
       "//packages/kbn-babel-code-parser:build",
       "//packages/kbn-babel-preset:build",
       "//packages/kbn-config-schema:build",
+      "//packages/kbn-expect:build",
       "//packages/kbn-std:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-utility-types:build",
