@@ -197,7 +197,7 @@ services:
 [role="screenshot"]
 image::images/elastic-maps-server-basemaps.png[Basemaps download options]
 
-TIP: The available basemaps and boundaries can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co
+TIP: The available basemaps and boundaries can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co.
 
 
 [float]
