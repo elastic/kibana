@@ -32,6 +32,7 @@ export const essqlSearchStrategyProvider = (
               query,
               // @ts-expect-error `params` missing from `QuerySqlRequest` type
               params,
+              field_multi_value_leniency: true,
               time_zone: timezone,
               fetch_size: count,
               client_id: 'canvas',
