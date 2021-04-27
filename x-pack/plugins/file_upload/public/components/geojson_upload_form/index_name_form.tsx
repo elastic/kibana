@@ -42,8 +42,8 @@ export class IndexNameForm extends Component<Props> {
     if (!this._isMounted || indexName !== this.props.indexName) {
       return;
     }
-    this.props.onIndexNameChange(indexName, indexNameError);
     this.props.onIndexNameValidationEnd();
+    this.props.onIndexNameChange(indexName, indexNameError);
   }, 500);
 
   render() {
