@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
-import { CoreSetup, UnmountCallback } from 'src/core/public';
+import { UnmountCallback } from 'src/core/public';
 import { DocLinksStart } from 'kibana/public';
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
@@ -41,7 +41,6 @@ export async function mountApp({
   docLinks,
   history,
   getUrlForApp,
-  coreSetup,
 }: {
   element: Element;
   setBreadcrumbs: SetBreadcrumbs;
@@ -49,7 +48,6 @@ export async function mountApp({
   docLinks: DocLinksStart;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  coreSetup: CoreSetup;
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
