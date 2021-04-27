@@ -85,6 +85,7 @@ import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/times
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
+import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error/timeseriesexplorer_chart_data_error';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -129,6 +130,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomTo: undefined,
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
+    chartDataError: undefined,
   };
 }
 
@@ -389,10 +391,11 @@ export class TimeSeriesExplorer extends React.Component {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
-  displayErrorToastMessages = (error, title) => {
+  displayErrorToastMessages = (error, errorMsg) => {
     if (this.props.toastNotificationService) {
-      this.props.toastNotificationService.displayErrorToast(error, title);
+      this.props.toastNotificationService.displayErrorToast(error, errorMsg);
     }
+    this.setState({ loading: false, chartDataError: errorMsg });
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
@@ -564,12 +567,10 @@ export class TimeSeriesExplorer extends React.Component {
             finish(counter);
           })
           .catch((err) => {
-            this.displayErrorToastMessages(
-              err,
-              i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
-                defaultMessage: 'Error getting metric data',
-              })
-            );
+            const errorMsg = i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
+              defaultMessage: 'Error getting metric data',
+            });
+            this.displayErrorToastMessages(err, errorMsg);
           });
 
         // Query 2 - load max record score at same granularity as context chart
@@ -589,12 +590,14 @@ export class TimeSeriesExplorer extends React.Component {
             finish(counter);
           })
           .catch((err) => {
-            this.displayErrorToastMessages(
-              err,
-              i18n.translate('xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage', {
+            const errorMsg = i18n.translate(
+              'xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage',
+              {
                 defaultMessage: 'Error getting bucket anomaly scores',
-              })
+              }
             );
+
+            this.displayErrorToastMessages(err, errorMsg);
           });
 
         // Query 3 - load details on the chart used in the chart title (charting function and entity(s)).
@@ -956,6 +959,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
+      chartDataError,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -1059,10 +1063,15 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
+        {loading === false && chartDataError !== undefined && (
+          <TimeseriesexplorerChartDataError errorMsg={chartDataError} />
+        )}
+
         {arePartitioningFieldsProvided &&
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
-          hasResults === false && (
+          hasResults === false &&
+          chartDataError === undefined && (
             <TimeseriesexplorerNoChartData
               dataNotChartable={dataNotChartable}
               entities={entityControls}
@@ -1167,6 +1176,7 @@ export class TimeSeriesExplorer extends React.Component {
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
+
                 <TimeSeriesChartWithTooltips
                   chartProps={chartProps}
                   contextAggregationInterval={contextAggregationInterval}
