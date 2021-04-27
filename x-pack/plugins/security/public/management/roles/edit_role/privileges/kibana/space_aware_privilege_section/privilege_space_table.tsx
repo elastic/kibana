@@ -171,9 +171,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         field: 'privileges',
         name: 'Privileges',
         render: (privileges: TableRow['privileges'], record: TableRow) => {
-          const hasReservedPrivileges = privileges.reserved.length > 0;
-          const hasBasePrivileges = privileges.base.length > 0;
-          if (hasReservedPrivileges && !hasBasePrivileges) {
+          if (privileges.reserved.length > 0) {
             return (
               <PrivilegeDisplay
                 privilege={privileges.reserved}
