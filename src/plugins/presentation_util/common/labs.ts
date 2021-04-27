@@ -36,6 +36,7 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
   [USE_DATA_SERVICE]: {
     id: USE_DATA_SERVICE,
     isActive: true,
+    isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
     name: i18n.translate('presentationUtil.experiments.enableUseDataServiceExperimentName', {
       defaultMessage: 'Use data service',
