@@ -23,6 +23,7 @@ import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SearchUI } from '../search_ui';
+import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
@@ -142,5 +143,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SearchUI)).toHaveLength(1);
+  });
+
+  it('renders a source engines view', () => {
+    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SourceEngines)).toHaveLength(1);
   });
 });
