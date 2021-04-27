@@ -28,7 +28,7 @@ describe('DataTypesCol', function () {
 
     render(<DataTypesCol seriesId={seriesId} />);
 
-    fireEvent.click(screen.getByText(/user experience\(rum\)/i));
+    fireEvent.click(screen.getByText(/user experience \(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, { dataType: 'ux' });
