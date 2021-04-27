@@ -184,6 +184,27 @@ export const FleetServerCommandStep = ({
         >
           <CommandCode>{installCommand}</CommandCode>
         </EuiCodeBlock>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.enrollmentInstructions.troubleshootingText"
+            defaultMessage="If you are having trouble connecting, see our {link}."
+            values={{
+              link: (
+                <EuiLink
+                  target="_blank"
+                  external
+                  href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                    defaultMessage="troubleshooting guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </>
     ) : null,
   };
