@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from 'kibana/public';
 import { DeprecationInfo } from '../../../../../common/types';
 import { validateRegExpString } from '../../../lib/utils';
 import { GroupByOption, LevelFilterOption } from '../../types';

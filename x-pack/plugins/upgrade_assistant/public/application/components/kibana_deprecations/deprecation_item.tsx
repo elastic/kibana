@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from 'kibana/public';
 import { DeprecationHealth } from '../shared';
 import { LEVEL_MAP } from '../constants';
 import { StepsModalContent } from './steps_modal';

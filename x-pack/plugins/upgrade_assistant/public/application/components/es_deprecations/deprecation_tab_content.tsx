@@ -45,8 +45,8 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
     // Change everything to lower case for a case-insensitive comparison
     conditions.push((dep) => {
       try {
-        const searchReg = new RegExp(search.toLowerCase());
-        return Boolean(dep.message.toLowerCase().match(searchReg));
+        const searchReg = new RegExp(search, 'i');
+        return searchReg.test(dep.message);
       } catch (e) {
         // ignore any regexp errors.
         return true;
@@ -59,10 +59,9 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
 };
 
 /**
- * Collection of calculated fields based on props, extracted for reuse in
- * `render` and `getDerivedStateFromProps`.
+ * Collection of calculated fields based on props
  */
-const CalcFields = {
+const calcFields = {
   filteredDeprecations(props: {
     deprecations: EnrichedDeprecationInfo[];
     currentFilter: LevelFilterOption;
@@ -78,7 +77,7 @@ const CalcFields = {
     search: string;
     currentGroupBy: GroupByOption;
   }) {
-    return groupBy(CalcFields.filteredDeprecations(props), props.currentGroupBy);
+    return groupBy(calcFields.filteredDeprecations(props), props.currentGroupBy);
   },
 
   numPages(props: {
@@ -87,7 +86,7 @@ const CalcFields = {
     search: string;
     currentGroupBy: GroupByOption;
   }) {
-    return Math.ceil(Object.keys(CalcFields.groups(props)).length / DEPRECATIONS_PER_PAGE);
+    return Math.ceil(Object.keys(calcFields.groups(props)).length / DEPRECATIONS_PER_PAGE);
   },
 };
 
@@ -126,7 +125,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
 
   useEffect(() => {
     if (deprecations) {
-      const pageCount = CalcFields.numPages({
+      const pageCount = calcFields.numPages({
         deprecations,
         currentFilter,
         search,
@@ -159,15 +158,15 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
     const deprecationLevelsCount = Object.keys(levelGroups).reduce((counts, level) => {
       counts[level] = levelGroups[level].length;
       return counts;
-    }, {} as { [level: string]: number });
+    }, {} as Record<string, number>);
 
-    const filteredDeprecations = CalcFields.filteredDeprecations({
+    const filteredDeprecations = calcFields.filteredDeprecations({
       deprecations,
       currentFilter,
       search,
     });
 
-    const groups = CalcFields.groups({
+    const groups = calcFields.groups({
       deprecations,
       currentFilter,
       search,
@@ -229,7 +228,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
               <EuiSpacer />
 
               <DeprecationPagination
-                pageCount={CalcFields.numPages({
+                pageCount={calcFields.numPages({
                   deprecations,
                   currentFilter,
                   search,

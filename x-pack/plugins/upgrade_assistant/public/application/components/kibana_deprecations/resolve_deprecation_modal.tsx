@@ -9,7 +9,7 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from 'kibana/public';
 
 interface Props {
   closeModal: () => void;

@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { groupBy } from 'lodash';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from 'kibana/public';
 
 import { LevelFilterOption } from '../types';
 import { SearchBar, DeprecationListBar, DeprecationPagination } from '../shared';
@@ -33,13 +33,13 @@ const getFilteredDeprecations = (
 ) => {
   return deprecations
     .filter((deprecation) => {
-      return level === 'all' ? true : deprecation.level === level;
+      return level === 'all' || deprecation.level === level;
     })
     .filter((filteredDep) => {
       if (search.length > 0) {
         try {
-          const searchReg = new RegExp(search.toLowerCase());
-          return Boolean(filteredDep.message.toLowerCase().match(searchReg));
+          const searchReg = new RegExp(search, 'i');
+          return searchReg.test(filteredDep.message);
         } catch (e) {
           // ignore any regexp errors
           return true;
