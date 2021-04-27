@@ -26,7 +26,7 @@ export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps
       },
     ],
     hasOperationType: true,
-    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags', 'monitor.name', 'monitor.id'],
+    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
     breakdowns: [
       'observer.geo.name',
       'monitor.name',

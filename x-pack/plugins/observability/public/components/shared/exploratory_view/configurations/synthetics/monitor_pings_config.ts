@@ -32,7 +32,7 @@ export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): 
     ],
     yTitle: 'Pings',
     hasOperationType: false,
-    defaultFilters: ['observer.geo.name', 'monitor.type', 'monitor.name', 'monitor.id'],
+    defaultFilters: ['observer.geo.name', 'monitor.type', 'tags'],
     breakdowns: ['observer.geo.name', 'monitor.type'],
     filters: [...buildExistsFilter('summary.up', indexPattern)],
     palette: { type: 'palette', name: 'status' },
