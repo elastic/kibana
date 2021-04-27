@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
+      await setup('monitoring/singlecluster_three_nodes_shard_relocation', {
         from: 'Oct 5, 2017 @ 19:34:48.000',
         to: 'Oct 5, 2017 @ 20:35:12.000',
       });
