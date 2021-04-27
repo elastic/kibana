@@ -12,10 +12,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiPageHeader } from '@elastic/eui';
+
 import { EnginesOverviewHeader } from './';
 
 describe('EnginesOverviewHeader', () => {
   const wrapper = shallow(<EnginesOverviewHeader />)
+    .find(EuiPageHeader)
     .dive()
     .children()
     .dive();

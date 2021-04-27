@@ -94,7 +94,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
+                "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse",
                 "type": "Object",
                 "label": "{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "tags": [],
@@ -102,7 +102,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.type",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.type",
                     "type": "string",
                     "label": "type",
                     "description": [],
@@ -116,7 +116,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.name",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.name",
                     "type": "string",
                     "label": "name",
                     "description": [],
@@ -130,7 +130,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.showSystemIndices",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.showSystemIndices",
                     "type": "CompoundType",
                     "label": "showSystemIndices",
                     "description": [],
@@ -144,7 +144,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.httpClient",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.httpClient",
                     "type": "CompoundType",
                     "label": "httpClient",
                     "description": [],
@@ -158,7 +158,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.isBeta",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.isBeta",
                     "type": "CompoundType",
                     "label": "isBeta",
                     "description": [],
@@ -190,13 +190,7 @@
             "label": "getIndexPatternCreationOption",
             "signature": [
               "(urlHandler: ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.UrlHandler",
-                "text": "UrlHandler"
-              },
+              "UrlHandler",
               ") => ",
               {
                 "pluginId": "indexPatternManagement",
@@ -209,17 +203,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.getIndexPatternCreationOption.$1",
                 "type": "Function",
                 "label": "urlHandler",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "indexPatternManagement",
-                    "scope": "public",
-                    "docId": "kibIndexPatternManagementPluginApi",
-                    "section": "def-public.UrlHandler",
-                    "text": "UrlHandler"
-                  }
+                  "UrlHandler"
                 ],
                 "description": [],
                 "source": {
@@ -309,6 +298,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.getIndexTags.$1",
                 "type": "string",
                 "label": "indexName",
                 "isRequired": true,
@@ -335,29 +325,18 @@
             "label": "checkIndicesForErrors",
             "signature": [
               "(indices: ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.MatchedItem",
-                "text": "MatchedItem"
-              },
+              "MatchedItem",
               "[]) => undefined"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.checkIndicesForErrors.$1",
                 "type": "Array",
                 "label": "indices",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "indexPatternManagement",
-                    "scope": "public",
-                    "docId": "kibIndexPatternManagementPluginApi",
-                    "section": "def-public.MatchedItem",
-                    "text": "MatchedItem"
-                  },
+                  "MatchedItem",
                   "[]"
                 ],
                 "description": [],
@@ -480,18 +459,13 @@
                 "text": "IIndexPattern"
               },
               ">, isDefault: boolean) => ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.IndexPatternTag",
-                "text": "IndexPatternTag"
-              },
+              "IndexPatternTag",
               "[]"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.$1",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -528,6 +502,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.$2",
                 "type": "boolean",
                 "label": "isDefault",
                 "isRequired": true,
@@ -574,6 +549,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -593,6 +569,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.$2",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -637,6 +614,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.areScriptedFieldsEnabled.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,

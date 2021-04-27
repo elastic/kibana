@@ -10,10 +10,7 @@
     "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
-    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
-    "@kbn/config-schema": "link:../kbn-config-schema",
-    "@kbn/logging": "link:../kbn-logging",
-    "@kbn/std": "link:../kbn-std"
+    "@kbn/logging": "link:../kbn-logging"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",

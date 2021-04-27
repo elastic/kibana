@@ -27,6 +27,7 @@ import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { RecordForInfluencer } from './results_service';
+import { isRuntimeMappings } from '../../../../common';
 
 interface ResultResponse {
   success: boolean;
@@ -140,9 +141,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           },
         },
         size: 0,
-        _source: {
-          excludes: [],
-        },
+        _source: false,
         aggs: {
           byTime: {
             date_histogram: {
@@ -152,6 +151,9 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
             },
           },
         },
+        ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
+          ? { runtime_mappings: datafeedConfig?.runtime_mappings }
+          : {}),
       };
 
       if (shouldCriteria.length > 0) {

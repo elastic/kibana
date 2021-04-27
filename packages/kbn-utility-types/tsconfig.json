@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
+    "incremental": true,
     "outDir": "./target",
-    "declarationDir": "./target",
     "stripInternal": true,
     "declaration": true,
     "declarationMap": true,
+    "rootDir": "./",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-utility-types",
     "types": [
@@ -17,6 +17,6 @@
   "include": [
     "index.ts",
     "jest/**/*",
-    "test-d/**/*"
+    "tsd_tests/**/*"
   ]
 }

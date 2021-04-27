@@ -99,17 +99,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getTagsCapabilities.$1",
             "type": "Object",
             "label": "capabilities",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "description": [],
             "source": {
@@ -145,6 +140,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagColor.$1",
             "type": "string",
             "label": "color",
             "isRequired": true,
@@ -176,6 +172,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagDescription.$1",
             "type": "string",
             "label": "description",
             "isRequired": true,
@@ -207,6 +204,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagName.$1",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -249,17 +247,17 @@
             "signature": [
               "(attributes: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
               ") => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -268,14 +266,15 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.create.$1",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.TagAttributes",
                     "text": "TagAttributes"
                   }
@@ -301,9 +300,9 @@
             "signature": [
               "(id: string) => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -312,6 +311,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -339,17 +339,17 @@
             "signature": [
               "(options?: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.GetAllTagsOptions",
                 "text": "GetAllTagsOptions"
               },
               " | undefined) => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -358,14 +358,15 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.getAll.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.GetAllTagsOptions",
                     "text": "GetAllTagsOptions"
                   },
@@ -395,6 +396,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.delete.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -422,17 +424,17 @@
             "signature": [
               "(id: string, attributes: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
               ") => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -441,6 +443,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.update.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -454,14 +457,15 @@
                 }
               },
               {
+                "id": "def-common.ITagsClient.update.$2",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.TagAttributes",
                     "text": "TagAttributes"
                   }

@@ -20,6 +20,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createSavedSearchesLoader.$1",
             "type": "Object",
             "label": "{ savedObjectsClient, savedObjects }",
             "isRequired": true,
@@ -449,13 +450,7 @@
               "lineNumber": 20
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[]"
             ]
           },
@@ -470,13 +465,7 @@
               "lineNumber": 21
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverGridSettings",
-                "text": "DiscoverGridSettings"
-              }
+              "DiscoverGridSettings"
             ]
           },
           {
@@ -739,13 +728,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[] | undefined"
             ]
           }
@@ -812,21 +795,9 @@
           },
           "signature": [
             "{ addDocView(docViewRaw: ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInput",
-              "text": "DocViewInput"
-            },
+            "DocViewInput",
             " | ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInputFn",
-              "text": "DocViewInputFn"
-            },
+            "DocViewInputFn",
             "): void; }"
           ]
         }

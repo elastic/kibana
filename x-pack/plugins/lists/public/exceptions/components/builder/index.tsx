@@ -7,4 +7,4 @@
 
 export { BuilderEntryItem } from './entry_renderer';
 export { BuilderExceptionListItemComponent } from './exception_item_renderer';
-export { ExceptionBuilderComponent } from './exception_items_renderer';
+export { ExceptionBuilderComponent, OnChangeProps } from './exception_items_renderer';

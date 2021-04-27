@@ -16,6 +16,12 @@ export function FieldEditorProvider({ getService }: FtrProviderContext) {
     public async setName(name: string) {
       await testSubjects.setValue('nameField > input', name);
     }
+    public async enableCustomLabel() {
+      await testSubjects.setEuiSwitch('customLabelRow > toggle', 'check');
+    }
+    public async setCustomLabel(name: string) {
+      await testSubjects.setValue('customLabelRow > input', name);
+    }
     public async enableValue() {
       await testSubjects.setEuiSwitch('valueRow > toggle', 'check');
     }

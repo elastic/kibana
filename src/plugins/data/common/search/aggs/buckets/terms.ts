@@ -101,25 +101,21 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        const requestResponder = inspectorRequestAdapter?.start(
-          i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-            defaultMessage: 'Other bucket',
-          }),
-          {
-            description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
-              defaultMessage:
-                'This request counts the number of documents that fall ' +
-                'outside the criterion of the data buckets.',
-            }),
-            searchSessionId,
-          }
-        );
-
         const response = await nestedSearchSource
           .fetch$({
             abortSignal,
             sessionId: searchSessionId,
-            requestResponder,
+            inspector: {
+              adapter: inspectorRequestAdapter,
+              title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+                defaultMessage: 'Other bucket',
+              }),
+              description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
+                defaultMessage:
+                  'This request counts the number of documents that fall ' +
+                  'outside the criterion of the data buckets.',
+              }),
+            },
           })
           .toPromise();
 

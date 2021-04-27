@@ -23,6 +23,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceColor.$1",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -72,6 +73,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceImageUrl.$1",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -121,6 +123,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceInitials.$1",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -391,6 +394,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.addSpaceIdToPath.$1",
             "type": "string",
             "label": "basePath",
             "isRequired": true,
@@ -404,6 +408,7 @@
             }
           },
           {
+            "id": "def-server.addSpaceIdToPath.$2",
             "type": "string",
             "label": "spaceId",
             "isRequired": true,
@@ -417,6 +422,7 @@
             }
           },
           {
+            "id": "def-server.addSpaceIdToPath.$3",
             "type": "string",
             "label": "requestedPath",
             "isRequired": true,
@@ -682,6 +688,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.getSpaceId.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -723,6 +730,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.spaceIdToNamespace.$1",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": true,
@@ -757,6 +765,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.namespaceToSpaceId.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -815,13 +824,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Pick<",
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesClient",
-                "text": "SpacesClient"
-              },
+              "SpacesClient",
               ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">"
             ]
           },
@@ -845,6 +848,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.getSpaceId.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -892,6 +896,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.isInDefaultSpace.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -947,6 +952,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.getActiveSpace.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -986,6 +992,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.spaceIdToNamespace.$1",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": true,
@@ -1018,6 +1025,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.namespaceToSpaceId.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -1119,21 +1127,9 @@
           },
           "signature": [
             "{ setClientRepositoryFactory: (factory: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientRepositoryFactory",
-              "text": "SpacesClientRepositoryFactory"
-            },
+            "SpacesClientRepositoryFactory",
             ") => void; registerClientWrapper: (wrapper: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientWrapper",
-              "text": "SpacesClientWrapper"
-            },
+            "SpacesClientWrapper",
             ") => void; }"
           ]
         }
@@ -1194,6 +1190,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.addSpaceIdToPath.$1",
             "type": "string",
             "label": "basePath",
             "isRequired": true,
@@ -1207,6 +1204,7 @@
             }
           },
           {
+            "id": "def-common.addSpaceIdToPath.$2",
             "type": "string",
             "label": "spaceId",
             "isRequired": true,
@@ -1220,6 +1218,7 @@
             }
           },
           {
+            "id": "def-common.addSpaceIdToPath.$3",
             "type": "string",
             "label": "requestedPath",
             "isRequired": true,
@@ -1251,6 +1250,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSpaceIdFromPath.$1",
             "type": "CompoundType",
             "label": "requestBasePath",
             "isRequired": false,
@@ -1264,6 +1264,7 @@
             }
           },
           {
+            "id": "def-common.getSpaceIdFromPath.$2",
             "type": "CompoundType",
             "label": "serverBasePath",
             "isRequired": false,
@@ -1305,6 +1306,7 @@
         ],
         "children": [
           {
+            "id": "def-common.isReservedSpace.$1",
             "type": "CompoundType",
             "label": "space",
             "isRequired": false,

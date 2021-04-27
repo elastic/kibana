@@ -6,20 +6,22 @@ exports[`FilterBar renders 1`] = `
 >
   <EuiFilterGroup>
     <EuiFilterButton
+      data-test-subj="criticalLevelFilter"
       hasActiveFilters={false}
-      key="all"
-      numFilters={2}
-      onClick={[Function]}
-    >
-      all
-    </EuiFilterButton>
-    <EuiFilterButton
-      hasActiveFilters={true}
       key="critical"
       numFilters={2}
       onClick={[Function]}
+      withNext={true}
     >
       critical
+    </EuiFilterButton>
+    <EuiFilterButton
+      data-test-subj="warningLevelFilter"
+      hasActiveFilters={false}
+      key="warning"
+      onClick={[Function]}
+    >
+      warning
     </EuiFilterButton>
   </EuiFilterGroup>
 </EuiFlexItem>

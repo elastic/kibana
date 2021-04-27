@@ -7,6 +7,7 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
@@ -89,6 +90,11 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be available in the upgraded index.
+   */
+  readonly unusedTypesQuery: Option.Option<estypes.QueryContainer>;
 }
 
 export type InitState = BaseState & {
@@ -123,6 +129,13 @@ export type FatalState = BaseState & {
   readonly reason: string;
 };
 
+export interface WaitForYellowSourceState extends BaseState {
+  /** Wait for the source index to be yellow before requesting it. */
+  readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
@@ -145,21 +158,29 @@ export type CreateReindexTempState = PostInitState & {
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexSourceToTempState = PostInitState & {
-  /** Reindex documents from the source index into the target index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
+export interface ReindexSourceToTempOpenPit extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
   readonly sourceIndex: Option.Some<string>;
-};
+}
 
-export type ReindexSourceToTempWaitForTaskState = PostInitState & {
-  /**
-   * Wait until reindexing documents from the source index into the target
-   * index has completed
-   */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK';
-  readonly sourceIndex: Option.Some<string>;
-  readonly reindexSourceToTargetTaskId: string;
-};
+export interface ReindexSourceToTempRead extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
+
+export interface ReindexSourceToTempClosePit extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
+  readonly sourceIndexPitId: string;
+}
+
+export interface ReindexSourceToTempIndex extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
 
 export type SetTempWriteBlock = PostInitState & {
   /**
@@ -285,11 +306,14 @@ export type State =
   | FatalState
   | InitState
   | DoneState
+  | WaitForYellowSourceState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempState
-  | ReindexSourceToTempWaitForTaskState
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndex
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -310,3 +334,5 @@ export type AllControlStates = State['controlState'];
  * 'FATAL' and 'DONE').
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
+
+export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;

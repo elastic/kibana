@@ -42,7 +42,9 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
     <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
       {NAV.GROUPS}
     </SideNavLink>
-    <SideNavLink to={ROLE_MAPPINGS_PATH}>{NAV.ROLE_MAPPINGS}</SideNavLink>
+    <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
+      {NAV.ROLE_MAPPINGS}
+    </SideNavLink>
     <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
     <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
       {NAV.SETTINGS}

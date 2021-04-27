@@ -6,9 +6,7 @@
 
 import { $Values } from '@kbn/utility-types';
 import { Adapters } from 'src/plugins/inspector/common';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { Assign } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/server';
@@ -26,12 +24,14 @@ import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
 import { estypes } from '@elastic/elasticsearch';
+import { EventEmitter } from 'events';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_formats/utils';
+import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { IScopedClusterClient } from 'src/core/server';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -56,6 +56,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestHandlerContext } from 'src/core/server';
+import * as Rx from 'rxjs';
 import { SavedObject } from 'kibana/server';
 import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -65,6 +66,7 @@ import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
+import { ShardsResponse } from 'elasticsearch';
 import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -276,6 +278,34 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
     allowedAggs: string[];
     // (undocumented)
     makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
+}
+
+// Warning: (ae-missing-release-tag) "AsyncSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AsyncSearchResponse<T = unknown> {
+    // (undocumented)
+    expiration_time_in_millis: number;
+    // (undocumented)
+    id?: string;
+    // (undocumented)
+    is_partial: boolean;
+    // (undocumented)
+    is_running: boolean;
+    // (undocumented)
+    response: estypes.SearchResponse<T>;
+    // (undocumented)
+    start_time_in_millis: number;
+}
+
+// Warning: (ae-missing-release-tag) "AsyncSearchStatusResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'response'> {
+    // (undocumented)
+    completion_status: number;
+    // (undocumented)
+    _shards: ShardsResponse;
 }
 
 // Warning: (ae-missing-release-tag) "BUCKET_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -998,13 +1028,11 @@ export interface IScopedSearchClient extends ISearchClient {
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
     indexPattern?: IndexPattern;
+    // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
+    inspector?: IInspectorInfo;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "RequestResponder" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    requestResponder?: RequestResponder;
     sessionId?: string;
     strategy?: string;
 }
@@ -1354,6 +1382,7 @@ export class SearchSessionService implements ISearchSessionService {
         extend: () => Promise<never>;
         cancel: () => Promise<never>;
         delete: () => Promise<never>;
+        getConfig: () => null;
     };
 }
 
@@ -1511,18 +1540,18 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:101:26 - (ae-forgotten-export) The symbol "HistogramFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:128:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:128:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:241:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:241:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:243:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:244:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:253:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:254:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:255:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:259:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:260:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:264:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:267:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:268:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:243:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:243:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:245:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:246:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:255:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:256:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:257:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:261:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:262:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:266:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:269:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:270:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:114:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 

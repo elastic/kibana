@@ -23,6 +23,7 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
+import type { CloudSetup } from '../../cloud/public';
 import { PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
@@ -61,6 +62,7 @@ export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface FleetStartDeps {
@@ -69,6 +71,7 @@ export interface FleetStartDeps {
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
+  cloud?: CloudSetup;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -110,6 +113,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
+          cloud: deps.cloud,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);

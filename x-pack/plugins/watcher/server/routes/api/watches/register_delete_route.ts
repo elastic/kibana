@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
@@ -42,15 +41,15 @@ function deleteWatches(dataClient: ILegacyScopedClusterClient, watchIds: string[
   });
 }
 
-export function registerDeleteRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerDeleteRoute({ router, license }: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/watches/delete',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
       return response.ok({ body: { results } });
     })

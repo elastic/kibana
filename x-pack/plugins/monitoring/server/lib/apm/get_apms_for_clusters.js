@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { ApmMetric } from '../metrics';
@@ -12,7 +13,7 @@ import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_sta
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(clusterUuid, response) {
-  const { apmTotal, totalEvents, memRss, memTotal } = apmAggResponseHandler(response);
+  const { apmTotal, totalEvents, memRss, memTotal, versions } = apmAggResponseHandler(response);
 
   // combine stats
   const stats = {
@@ -22,6 +23,7 @@ export function handleResponse(clusterUuid, response) {
     apms: {
       total: apmTotal,
     },
+    versions,
   };
 
   return {
@@ -40,7 +42,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const clusterUuid = cluster.cluster_uuid;
+      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
       const params = {
         index: apmIndexPattern,
         size: 0,

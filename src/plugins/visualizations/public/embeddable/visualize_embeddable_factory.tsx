@@ -58,7 +58,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard' | 'savedObjectsClient'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
   >;
 }
 
@@ -113,7 +113,7 @@ export class VisualizeEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('visualizations.displayName', {
-      defaultMessage: 'visualization',
+      defaultMessage: 'Visualization',
     });
   }
 

@@ -160,7 +160,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const permissionField = (
     <>
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
         <EuiTitle size="xs">
           <h3>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
@@ -272,12 +272,12 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-          <EuiPanel paddingSize="none">
-            <EuiPanel hasShadow={false} paddingSize="l">
+          <EuiPanel paddingSize="none" hasShadow={false} color="subdued">
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
               {header}
             </EuiPanel>
             <EuiHorizontalRule margin="xs" />
-            <EuiPanel hasShadow={false} paddingSize="l">
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
               <SourceFeatures features={features} name={name} objTypes={objTypes} />
             </EuiPanel>
           </EuiPanel>

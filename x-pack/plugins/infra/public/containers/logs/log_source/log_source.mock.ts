@@ -20,19 +20,24 @@ export const createUninitializedUseLogSourceMock: CreateUseLogSource = ({
   },
   hasFailedLoadingSource: false,
   hasFailedLoadingSourceStatus: false,
+  hasFailedResolvingSourceConfiguration: false,
   initialize: jest.fn(),
   isLoading: false,
   isLoadingSourceConfiguration: false,
   isLoadingSourceStatus: false,
+  isResolvingSourceConfiguration: false,
   isUninitialized: true,
   loadSource: jest.fn(),
   loadSourceConfiguration: jest.fn(),
   loadSourceFailureMessage: undefined,
+  resolveSourceFailureMessage: undefined,
   loadSourceStatus: jest.fn(),
   sourceConfiguration: undefined,
   sourceId,
   sourceStatus: undefined,
   updateSourceConfiguration: jest.fn(),
+  resolvedSourceConfiguration: undefined,
+  loadResolveLogSourceConfiguration: jest.fn(),
 });
 
 export const createLoadingUseLogSourceMock: CreateUseLogSource = ({
@@ -42,6 +47,7 @@ export const createLoadingUseLogSourceMock: CreateUseLogSource = ({
   isLoading: true,
   isLoadingSourceConfiguration: true,
   isLoadingSourceStatus: true,
+  isResolvingSourceConfiguration: true,
 });
 
 export const createLoadedUseLogSourceMock: CreateUseLogSource = ({
@@ -60,7 +66,10 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
   origin: 'stored',
   configuration: {
     description: `description for ${sourceId}`,
-    logAlias: 'LOG_INDICES',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'some-id',
+    },
     logColumns: [],
     fields: {
       container: 'CONTAINER_FIELD',
@@ -68,12 +77,12 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
       pod: 'POD_FIELD',
       tiebreaker: 'TIEBREAKER_FIELD',
       timestamp: 'TIMESTAMP_FIELD',
+      message: ['MESSAGE_FIELD'],
     },
     name: sourceId,
   },
 });
 
 export const createAvailableSourceStatus = (logIndexFields = []): LogSourceStatus => ({
-  logIndexFields,
   logIndexStatus: 'available',
 });

@@ -104,6 +104,7 @@ export const routes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
+        kuery: t.string,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
       }),

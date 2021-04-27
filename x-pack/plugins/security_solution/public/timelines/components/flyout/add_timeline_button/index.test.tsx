@@ -35,7 +35,8 @@ jest.mock('../../../../common/components/inspect', () => ({
   InspectButtonContainer: jest.fn(({ children }) => <div>{children}</div>),
 }));
 
-describe('AddTimelineButton', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/96691
+describe.skip('AddTimelineButton', () => {
   let wrapper: ReactWrapper;
   const props = {
     timelineId: TimelineId.active,

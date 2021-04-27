@@ -66,7 +66,7 @@ export const BootstrapCommand: ICommand = {
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
     }
 
-    await runBazel(['build', '//packages:build'], runOffline);
+    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {

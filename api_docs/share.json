@@ -52,6 +52,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.KibanaURL.Unnamed.$1",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -138,17 +139,12 @@
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorsSetup",
-                "text": "UrlGeneratorsSetup"
-              }
+              "UrlGeneratorsSetup"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorsService.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -190,17 +186,12 @@
                 "text": "CoreStart"
               },
               ") => ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorsStart",
-                "text": "UrlGeneratorsStart"
-              }
+              "UrlGeneratorsStart"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorsService.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -272,6 +263,7 @@
         ],
         "children": [
           {
+            "id": "def-public.downloadFileAs.$1",
             "type": "string",
             "label": "filename",
             "isRequired": true,
@@ -287,6 +279,7 @@
             }
           },
           {
+            "id": "def-public.downloadFileAs.$2",
             "type": "CompoundType",
             "label": "payload",
             "isRequired": true,
@@ -338,6 +331,7 @@
         ],
         "children": [
           {
+            "id": "def-public.downloadMultipleAs.$1",
             "type": "Object",
             "label": "files",
             "isRequired": true,
@@ -471,13 +465,7 @@
             },
             "signature": [
               "((anonymousUserCapabilities: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ") => boolean) | undefined"
             ]
           }
@@ -722,13 +710,7 @@
               "lineNumber": 91
             },
             "signature": [
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlParamExtension",
-                "text": "UrlParamExtension"
-              },
+              "UrlParamExtension",
               "[] | undefined"
             ]
           }
@@ -788,6 +770,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorContract.createUrl.$1",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": true,
@@ -860,6 +843,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorContract.migrate.$1",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": true,

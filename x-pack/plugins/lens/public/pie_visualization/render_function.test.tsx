@@ -217,7 +217,16 @@ describe('PieVisualization component', () => {
       const component = shallow(<PieComponent args={{ ...args }} {...defaultArgs} />);
       component.find(Settings).first().prop('onElementClick')!([
         [
-          [{ groupByRollup: 6, value: 6, depth: 1, path: [], sortIndex: 1 }],
+          [
+            {
+              groupByRollup: 6,
+              value: 6,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
           {} as SeriesIdentifier,
         ],
       ]);

@@ -84,6 +84,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -104,6 +105,7 @@
                 }
               },
               {
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -363,6 +365,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFields.$1",
             "type": "Object",
             "label": "http",
             "isRequired": true,
@@ -382,6 +385,7 @@
             }
           },
           {
+            "id": "def-public.getFields.$2",
             "type": "Array",
             "label": "indexes",
             "isRequired": true,
@@ -421,6 +425,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getIndexOptions.$1",
             "type": "Object",
             "label": "http",
             "isRequired": true,
@@ -440,6 +445,7 @@
             }
           },
           {
+            "id": "def-public.getIndexOptions.$2",
             "type": "string",
             "label": "pattern",
             "isRequired": true,
@@ -453,6 +459,7 @@
             }
           },
           {
+            "id": "def-public.getIndexOptions.$3",
             "type": "Array",
             "label": "indexPatternsParam",
             "isRequired": true,
@@ -567,6 +574,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getTimeFieldOptions.$1",
             "type": "Array",
             "label": "fields",
             "isRequired": true,
@@ -598,6 +606,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getTimeOptions.$1",
             "type": "number",
             "label": "unitSize",
             "isRequired": true,
@@ -650,6 +659,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getTimeUnitLabel.$1",
             "type": "Enum",
             "label": "timeUnit",
             "isRequired": true,
@@ -669,6 +679,7 @@
             }
           },
           {
+            "id": "def-public.getTimeUnitLabel.$2",
             "type": "string",
             "label": "timeValue",
             "isRequired": true,
@@ -733,7 +744,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.loadActionTypes.{-http }",
+            "id": "def-public.loadActionTypes.$1.http",
             "type": "Object",
             "label": "{ http }",
             "tags": [],
@@ -741,7 +752,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.loadActionTypes.{-http }.http",
+                "id": "def-public.loadActionTypes.$1.http.http",
                 "type": "Object",
                 "label": "http",
                 "description": [],
@@ -1039,13 +1050,7 @@
               "lineNumber": 47
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ]
           }
         ],
@@ -1080,7 +1085,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 222
+              "lineNumber": 234
             }
           },
           {
@@ -1091,7 +1096,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 223
+              "lineNumber": 235
             }
           },
           {
@@ -1102,7 +1107,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 224
+              "lineNumber": 236
             }
           },
           {
@@ -1113,7 +1118,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 225
+              "lineNumber": 237
             },
             "signature": [
               "string | ((docLinks: ",
@@ -1135,7 +1140,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 226
+              "lineNumber": 238
             },
             "signature": [
               "(alertParams: Params) => ",
@@ -1156,7 +1161,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 227
+              "lineNumber": 239
             },
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<",
@@ -1178,7 +1183,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 230
+              "lineNumber": 242
             }
           },
           {
@@ -1189,7 +1194,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 231
+              "lineNumber": 243
             },
             "signature": [
               "string | undefined"
@@ -1198,7 +1203,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 221
+          "lineNumber": 233
         },
         "initialIsOpen": false
       },
@@ -1227,7 +1232,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 204
+              "lineNumber": 216
             },
             "signature": [
               "Params"
@@ -1241,7 +1246,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 205
+              "lineNumber": 217
             }
           },
           {
@@ -1252,7 +1257,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 206
+              "lineNumber": 218
             }
           },
           {
@@ -1263,7 +1268,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 207
+              "lineNumber": 219
             },
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
@@ -1277,7 +1282,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 208
+              "lineNumber": 220
             },
             "signature": [
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
@@ -1291,10 +1296,10 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 209
+              "lineNumber": 221
             },
             "signature": [
-              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
+              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1302,7 +1307,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
             ]
           },
           {
@@ -1313,7 +1318,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 213
+              "lineNumber": 225
             },
             "signature": [
               {
@@ -1333,7 +1338,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 214
+              "lineNumber": 226
             }
           },
           {
@@ -1344,7 +1349,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 215
+              "lineNumber": 227
             },
             "signature": [
               {
@@ -1365,7 +1370,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 216
+              "lineNumber": 228
             },
             "signature": [
               "MetaData | undefined"
@@ -1379,7 +1384,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 217
+              "lineNumber": 229
             },
             "signature": [
               {
@@ -1399,7 +1404,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 218
+              "lineNumber": 230
             },
             "signature": [
               {
@@ -1414,7 +1419,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 199
+          "lineNumber": 211
         },
         "initialIsOpen": false
       },
@@ -1541,7 +1546,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 235
+              "lineNumber": 247
             },
             "signature": [
               "any"
@@ -1550,7 +1555,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 234
+          "lineNumber": 246
         },
         "initialIsOpen": false
       },
@@ -1748,21 +1753,9 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.TypeRegistry",
-                "text": "TypeRegistry"
-              },
+              "TypeRegistry",
               "<",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
+              "ActionTypeModel",
               "<unknown, unknown, any>>, \"get\" | \"register\" | \"list\" | \"has\">"
             ]
           },
@@ -1778,13 +1771,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.TypeRegistry",
-                "text": "TypeRegistry"
-              },
+              "TypeRegistry",
               "<",
               {
                 "pluginId": "triggersActionsUi",
@@ -1874,7 +1861,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 116
+              "lineNumber": 128
             },
             "signature": [
               "Record<string, any>"
@@ -1883,7 +1870,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 115
+          "lineNumber": 127
         },
         "initialIsOpen": false
       }
@@ -1909,7 +1896,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 67
+          "lineNumber": 79
         },
         "initialIsOpen": false
       },
@@ -1947,7 +1934,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 148
+          "lineNumber": 160
         },
         "signature": [
           "PreConfiguredActionConnector",
@@ -1995,7 +1982,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 52
+          "lineNumber": 64
         },
         "signature": [
           "{ get: (id: string) => ActionTypeModel<ActionConnector, ActionParams, any>; register: (objectType: ActionTypeModel<ActionConnector, ActionParams, any>) => void; list: () => ActionTypeModel<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; }"
@@ -2010,7 +1997,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 166
+          "lineNumber": 178
         },
         "signature": [
           "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
@@ -2025,10 +2012,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 34
+          "lineNumber": 40
         },
         "signature": [
-          "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
+          "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: AlertAction[]; tags: string[]; muteAll: boolean; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2071,7 +2058,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 56
+          "lineNumber": 68
         },
         "signature": [
           "{ get: (id: string) => AlertTypeModel<Record<string, unknown>>; register: (objectType: AlertTypeModel<Record<string, unknown>>) => void; list: () => AlertTypeModel<Record<string, unknown>>[]; has: (id: string) => boolean; }"
@@ -2505,13 +2492,13 @@
         "tags": [],
         "children": [
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN]",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2522,7 +2509,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2542,7 +2529,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2560,13 +2547,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS]",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].text",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2577,7 +2564,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].value",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2597,7 +2584,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2615,13 +2602,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN]",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2632,7 +2619,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2652,7 +2639,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2670,13 +2657,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS]",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].text",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2687,7 +2674,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].value",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2707,7 +2694,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2725,13 +2712,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN]",
+            "id": "def-public.builtInComparators.COMPARATORS.BETWEEN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2742,7 +2729,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2762,7 +2749,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2983,21 +2970,9 @@
             "lineNumber": 42
           },
           "signature": [
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.TypeRegistry",
-              "text": "TypeRegistry"
-            },
+            "TypeRegistry",
             "<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ActionTypeModel",
-              "text": "ActionTypeModel"
-            },
+            "ActionTypeModel",
             "<any, any, any>>"
           ]
         },
@@ -3012,13 +2987,7 @@
             "lineNumber": 43
           },
           "signature": [
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.TypeRegistry",
-              "text": "TypeRegistry"
-            },
+            "TypeRegistry",
             "<",
             {
               "pluginId": "triggersActionsUi",
@@ -3056,21 +3025,9 @@
             "lineNumber": 47
           },
           "signature": [
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.TypeRegistry",
-              "text": "TypeRegistry"
-            },
+            "TypeRegistry",
             "<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ActionTypeModel",
-              "text": "ActionTypeModel"
-            },
+            "ActionTypeModel",
             "<any, any, any>>"
           ]
         },
@@ -3085,13 +3042,7 @@
             "lineNumber": 48
           },
           "signature": [
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.TypeRegistry",
-              "text": "TypeRegistry"
-            },
+            "TypeRegistry",
             "<",
             {
               "pluginId": "triggersActionsUi",
@@ -3115,21 +3066,9 @@
           },
           "signature": [
             "(props: Pick<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ConnectorAddFlyoutProps",
-              "text": "ConnectorAddFlyoutProps"
-            },
+            "ConnectorAddFlyoutProps",
             ", \"onClose\" | \"consumer\" | \"actionTypes\" | \"onTestConnector\" | \"reloadConnectors\">) => React.ReactElement<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ConnectorAddFlyoutProps",
-              "text": "ConnectorAddFlyoutProps"
-            },
+            "ConnectorAddFlyoutProps",
             ", string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ]
         },
@@ -3145,21 +3084,9 @@
           },
           "signature": [
             "(props: Pick<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ConnectorEditFlyoutProps",
-              "text": "ConnectorEditFlyoutProps"
-            },
+            "ConnectorEditFlyoutProps",
             ", \"onClose\" | \"consumer\" | \"reloadConnectors\" | \"initialConnector\" | \"tab\">) => React.ReactElement<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.ConnectorEditFlyoutProps",
-              "text": "ConnectorEditFlyoutProps"
-            },
+            "ConnectorEditFlyoutProps",
             ", string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ]
         },
@@ -3175,21 +3102,9 @@
           },
           "signature": [
             "(props: Pick<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.AlertAddProps",
-              "text": "AlertAddProps"
-            },
+            "AlertAddProps",
             "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"alertTypeId\" | \"consumer\" | \"canChangeTrigger\" | \"initialValues\" | \"reloadAlerts\">) => React.ReactElement<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.AlertAddProps",
-              "text": "AlertAddProps"
-            },
+            "AlertAddProps",
             "<Record<string, any>>, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ]
         },
@@ -3205,21 +3120,9 @@
           },
           "signature": [
             "(props: Pick<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.AlertEditProps",
-              "text": "AlertEditProps"
-            },
+            "AlertEditProps",
             "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"reloadAlerts\" | \"initialAlert\">) => React.ReactElement<",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "public",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-public.AlertEditProps",
-              "text": "AlertEditProps"
-            },
+            "AlertEditProps",
             "<Record<string, any>>, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ]
         }
@@ -3245,6 +3148,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.validateCoreQueryBody.$1",
             "type": "Unknown",
             "label": "anyParams",
             "isRequired": true,
@@ -3276,6 +3180,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.validateTimeWindowUnits.$1",
             "type": "string",
             "label": "timeWindowUnit",
             "isRequired": true,
@@ -3565,13 +3470,7 @@
           },
           "signature": [
             "{ timeSeriesQuery: typeof ",
-            {
-              "pluginId": "triggersActionsUi",
-              "scope": "server",
-              "docId": "kibTriggersActionsUiPluginApi",
-              "section": "def-server.timeSeriesQuery",
-              "text": "timeSeriesQuery"
-            },
+            "timeSeriesQuery",
             "; }"
           ]
         }

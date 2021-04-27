@@ -9,6 +9,7 @@ import React from 'react';
 import { mockUrlStorage, mockUseHasData, render } from '../rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { SeriesDatePicker } from './index';
+import { DEFAULT_TIME } from '../configurations/constants';
 
 describe('SeriesDatePicker', function () {
   it('should render properly', function () {
@@ -40,7 +41,7 @@ describe('SeriesDatePicker', function () {
     expect(setSeries1).toHaveBeenCalledWith('uptime-pings-histogram', {
       breakdown: 'monitor.status',
       reportType: 'upp',
-      time: { from: 'now-5h', to: 'now' },
+      time: DEFAULT_TIME,
     });
   });
 

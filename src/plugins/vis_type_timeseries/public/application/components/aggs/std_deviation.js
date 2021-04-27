@@ -107,24 +107,20 @@ const StandardDeviationAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.stdDeviation.fieldLabel"
                 defaultMessage="Field"
               />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={RESTRICT_FIELDS}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={RESTRICT_FIELDS}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow

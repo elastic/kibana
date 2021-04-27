@@ -220,14 +220,15 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     /**
      * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
-     * @param { displayed: boolean }
+
      */
-    public async expectToolbarPaginationDisplayed({ displayed = true }) {
-      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
-      if (displayed) {
-        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
-      } else {
-        await Promise.all(subjects.map(async (subj) => await testSubjects.missingOrFail(subj)));
+    public async expectToolbarPaginationDisplayed() {
+      const subjects = ['pagination-button-previous', 'pagination-button-next'];
+
+      await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
+      const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
+      if (!paginationListExists) {
+        throw new Error(`expected discover data grid pagination list to exist`);
       }
     }
 

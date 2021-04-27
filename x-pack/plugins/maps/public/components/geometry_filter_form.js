@@ -73,26 +73,26 @@ export class GeometryFilterForm extends Component {
       geometryLabel: this.state.geometryLabel,
       indexPatternId: this.state.selectedField.indexPatternId,
       geoFieldName: this.state.selectedField.geoFieldName,
-      geoFieldType: this.state.selectedField.geoFieldType,
       relation: this.state.relation,
     });
   };
 
   _renderRelationInput() {
     // relationship only used when filtering geo_shape fields
-    if (
-      !this.state.selectedField ||
-      this.state.selectedField.geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT
-    ) {
+    if (!this.state.selectedField) {
       return null;
     }
 
-    const spatialRelations = this.props.isFilterGeometryClosed
-      ? Object.values(ES_SPATIAL_RELATIONS)
-      : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
-          // can not filter by within relation when filtering geometry is not closed
-          return relation !== ES_SPATIAL_RELATIONS.WITHIN;
-        });
+    const spatialRelations =
+      this.props.isFilterGeometryClosed &&
+      this.state.selectedField.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT
+        ? Object.values(ES_SPATIAL_RELATIONS)
+        : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
+            // - cannot filter by "within"-relation when filtering geometry is not closed
+            // - do not distinguish between intersects/within for filtering for points since they are equivalent
+            return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+          });
+
     const options = spatialRelations.map((relation) => {
       return {
         value: relation,

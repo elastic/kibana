@@ -105,6 +105,7 @@
     { "path": "./x-pack/plugins/infra/tsconfig.json" },
     { "path": "./x-pack/plugins/ingest_pipelines/tsconfig.json" },
     { "path": "./x-pack/plugins/lens/tsconfig.json" },
+    { "path": "./x-pack/plugins/license_api_guard/tsconfig.json" },
     { "path": "./x-pack/plugins/license_management/tsconfig.json" },
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/logstash/tsconfig.json" },
