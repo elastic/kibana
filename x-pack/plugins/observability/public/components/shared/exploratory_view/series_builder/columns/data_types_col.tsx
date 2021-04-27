@@ -30,7 +30,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     if (!dataType) {
       removeSeries(seriesId);
     } else {
-      setSeries(seriesId, { dataType } as any);
+      setSeries(seriesId || `${dataType}-series`, { dataType } as any);
     }
   };
 
