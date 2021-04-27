@@ -18,9 +18,9 @@ import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiAuthenticationsQuery } from './query.hosts_kpi_authentications.dsl';
 import {
   formatAuthenticationsHistogramData,
-  formatAuthenticationsHistogramDataSummary,
+  formatAuthenticationsHistogramDataEntities,
 } from './helpers';
-import { buildHostsKpiAuthenticationsQuerySummary } from './query.hosts_kpi_authentications_summary.dsl';
+import { buildHostsKpiAuthenticationsQueryEntities } from './query.hosts_kpi_authentications_entities.dsl';
 
 export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
   buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
@@ -67,15 +67,15 @@ export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.kp
   },
 };
 
-export const hostsKpiAuthenticationsSummary: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
+export const hostsKpiAuthenticationsEntities: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
   buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
-    buildHostsKpiAuthenticationsQuerySummary(options),
+    buildHostsKpiAuthenticationsQueryEntities(options),
   parse: async (
     options: HostsKpiAuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiAuthenticationsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostsKpiAuthenticationsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildHostsKpiAuthenticationsQueryEntities(options))],
     };
 
     const authenticationsSuccessHistogram = getOr(
@@ -97,7 +97,7 @@ export const hostsKpiAuthenticationsSummary: SecuritySolutionFactory<HostsKpiQue
         'aggregations.authentication_success.value',
         response.rawResponse
       ),
-      authenticationsSuccessHistogram: formatAuthenticationsHistogramDataSummary(
+      authenticationsSuccessHistogram: formatAuthenticationsHistogramDataEntities(
         authenticationsSuccessHistogram
       ),
       authenticationsFailure: getOr(
@@ -105,7 +105,7 @@ export const hostsKpiAuthenticationsSummary: SecuritySolutionFactory<HostsKpiQue
         'aggregations.authentication_failure.value',
         response.rawResponse
       ),
-      authenticationsFailureHistogram: formatAuthenticationsHistogramDataSummary(
+      authenticationsFailureHistogram: formatAuthenticationsHistogramDataEntities(
         authenticationsFailureHistogram
       ),
     };

@@ -17,7 +17,7 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiUniqueIpsQuery } from './query.hosts_kpi_unique_ips.dsl';
 import { formatGeneralHistogramData } from '../common';
-import { buildHostsKpiUniqueIpsQuerySummary } from './query.hosts_kpi_unique_ips_summary.dsl';
+import { buildHostsKpiUniqueIpsQueryEntities } from './query.hosts_kpi_unique_ips_entities.dsl';
 
 export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
   buildDsl: (options: HostsKpiUniqueIpsRequestOptions) => buildHostsKpiUniqueIpsQuery(options),
@@ -56,15 +56,15 @@ export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqu
   },
 };
 
-export const hostsKpiUniqueIpsSummary: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
+export const hostsKpiUniqueIpsEntities: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
   buildDsl: (options: HostsKpiUniqueIpsRequestOptions) =>
-    buildHostsKpiUniqueIpsQuerySummary(options),
+    buildHostsKpiUniqueIpsQueryEntities(options),
   parse: async (
     options: HostsKpiUniqueIpsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiUniqueIpsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostsKpiUniqueIpsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildHostsKpiUniqueIpsQueryEntities(options))],
     };
 
     const uniqueSourceIpsHistogram = getOr(

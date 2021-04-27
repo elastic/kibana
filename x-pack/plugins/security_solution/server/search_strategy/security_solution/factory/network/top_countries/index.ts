@@ -22,7 +22,7 @@ import { SecuritySolutionFactory } from '../../types';
 
 import { getTopCountriesEdges } from './helpers';
 import { buildTopCountriesQuery } from './query.top_countries_network.dsl';
-import { buildTopCountriesQuerySummary } from './query.top_countries_network_summary.dsl';
+import { buildTopCountriesQueryEntities } from './query.top_countries_network_entities.dsl';
 
 export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCountries> = {
   buildDsl: (options: NetworkTopCountriesRequestOptions) => {
@@ -62,12 +62,12 @@ export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCoun
   },
 };
 
-export const networkTopCountriesSummary: SecuritySolutionFactory<NetworkQueries.topCountries> = {
+export const networkTopCountriesEntities: SecuritySolutionFactory<NetworkQueries.topCountries> = {
   buildDsl: (options: NetworkTopCountriesRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-    return buildTopCountriesQuerySummary(options);
+    return buildTopCountriesQueryEntities(options);
   },
   parse: async (
     options: NetworkTopCountriesRequestOptions,
@@ -82,7 +82,7 @@ export const networkTopCountriesSummary: SecuritySolutionFactory<NetworkQueries.
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkTopCountriesEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
-      dsl: [inspectStringifyObject(buildTopCountriesQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildTopCountriesQueryEntities(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

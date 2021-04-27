@@ -7,7 +7,7 @@
 
 import {
   MatrixHistogramQuery,
-  MatrixHistogramQuerySummary,
+  MatrixHistogramQueryEntities,
   MatrixHistogramType,
 } from '../../../common/search_strategy';
 import { createIndicesFromPrefix } from './create_indices_from_prefix';
@@ -27,8 +27,8 @@ export const getTransformChangesForMatrixHistogram: GetTransformChanges = ({
               prefix: settings.prefix,
               transformIndices: ['user_met'],
             }),
-            factoryQueryType: MatrixHistogramQuerySummary,
-            histogramType: MatrixHistogramType.authenticationsSummary,
+            factoryQueryType: MatrixHistogramQueryEntities,
+            histogramType: MatrixHistogramType.authenticationsEntities,
           };
         }
         default: {

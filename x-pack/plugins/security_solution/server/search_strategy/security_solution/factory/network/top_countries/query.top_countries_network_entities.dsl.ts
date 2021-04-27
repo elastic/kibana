@@ -24,7 +24,7 @@ const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   },
 });
 
-export const buildTopCountriesQuerySummary = ({
+export const buildTopCountriesQueryEntities = ({
   defaultIndex,
   filterQuery,
   flowTarget,

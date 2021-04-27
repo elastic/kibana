@@ -16,7 +16,7 @@ import {
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
-export const buildHostsQuerySummary = ({
+export const buildHostsQueryEntities = ({
   defaultIndex,
   docValueFields,
   filterQuery,

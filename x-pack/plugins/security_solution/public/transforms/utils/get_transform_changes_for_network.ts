@@ -20,7 +20,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['src_iso_ent', 'dest_iso_ent'],
         }),
-        factoryQueryType: NetworkQueries.topCountriesSummary,
+        factoryQueryType: NetworkQueries.topCountriesEntities,
       };
     }
     case NetworkQueries.topNFlow: {
@@ -29,7 +29,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
-        factoryQueryType: NetworkQueries.topNFlowSummary,
+        factoryQueryType: NetworkQueries.topNFlowEntities,
       };
     }
     case NetworkKpiQueries.dns: {
@@ -38,7 +38,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['ip_met'],
         }),
-        factoryQueryType: NetworkKpiQueries.dnsSummary,
+        factoryQueryType: NetworkKpiQueries.dnsEntities,
       };
     }
     case NetworkKpiQueries.networkEvents: {
@@ -47,7 +47,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['ip_met'],
         }),
-        factoryQueryType: NetworkKpiQueries.networkEventsSummary,
+        factoryQueryType: NetworkKpiQueries.networkEventsEntities,
       };
     }
     case NetworkKpiQueries.tlsHandshakes: {
@@ -56,7 +56,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['ip_met'],
         }),
-        factoryQueryType: NetworkKpiQueries.tlsHandshakesSummary,
+        factoryQueryType: NetworkKpiQueries.tlsHandshakesEntities,
       };
     }
     case NetworkKpiQueries.uniquePrivateIps: {
@@ -65,7 +65,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
-        factoryQueryType: NetworkKpiQueries.uniquePrivateIpsSummary,
+        factoryQueryType: NetworkKpiQueries.uniquePrivateIpsEntities,
       };
     }
     default: {

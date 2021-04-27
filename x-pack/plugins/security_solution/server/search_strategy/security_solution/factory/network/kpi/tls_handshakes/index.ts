@@ -14,7 +14,7 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
-import { buildTlsHandshakeQuerySummary } from './query.network_kpi_tls_handshakes_summary.dsl';
+import { buildTlsHandshakeQueryEntities } from './query.network_kpi_tls_handshakes_entities.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
   buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) => buildTlsHandshakeQuery(options),
@@ -35,15 +35,15 @@ export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.
   },
 };
 
-export const networkKpiTlsHandshakesSummary: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
+export const networkKpiTlsHandshakesEntities: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
   buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) =>
-    buildTlsHandshakeQuerySummary(options),
+    buildTlsHandshakeQueryEntities(options),
   parse: async (
     options: NetworkKpiTlsHandshakesRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiTlsHandshakesStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildTlsHandshakeQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildTlsHandshakeQueryEntities(options))],
     };
 
     return {

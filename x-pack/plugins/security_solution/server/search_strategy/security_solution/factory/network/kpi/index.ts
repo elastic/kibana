@@ -11,13 +11,13 @@ import {
 } from '../../../../../../common/search_strategy/security_solution';
 
 import { SecuritySolutionFactory } from '../../types';
-import { networkKpiDns, networkKpiDnsSummary } from './dns';
-import { networkKpiNetworkEvents, networkKpiNetworkEventsSummary } from './network_events';
-import { networkKpiTlsHandshakes, networkKpiTlsHandshakesSummary } from './tls_handshakes';
+import { networkKpiDns, networkKpiDnsEntities } from './dns';
+import { networkKpiNetworkEvents, networkKpiNetworkEventsEntities } from './network_events';
+import { networkKpiTlsHandshakes, networkKpiTlsHandshakesEntities } from './tls_handshakes';
 import { networkKpiUniqueFlows } from './unique_flows';
 import {
   networkKpiUniquePrivateIps,
-  networkKpiUniquePrivateIpsSummary,
+  networkKpiUniquePrivateIpsEntities,
 } from './unique_private_ips';
 
 export const networkKpiFactory: Record<
@@ -25,12 +25,12 @@ export const networkKpiFactory: Record<
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   [NetworkKpiQueries.dns]: networkKpiDns,
-  [NetworkKpiQueries.dnsSummary]: networkKpiDnsSummary,
+  [NetworkKpiQueries.dnsEntities]: networkKpiDnsEntities,
   [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
-  [NetworkKpiQueries.networkEventsSummary]: networkKpiNetworkEventsSummary,
+  [NetworkKpiQueries.networkEventsEntities]: networkKpiNetworkEventsEntities,
   [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
-  [NetworkKpiQueries.tlsHandshakesSummary]: networkKpiTlsHandshakesSummary,
+  [NetworkKpiQueries.tlsHandshakesEntities]: networkKpiTlsHandshakesEntities,
   [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
   [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
-  [NetworkKpiQueries.uniquePrivateIpsSummary]: networkKpiUniquePrivateIpsSummary,
+  [NetworkKpiQueries.uniquePrivateIpsEntities]: networkKpiUniquePrivateIpsEntities,
 };

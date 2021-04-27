@@ -12,10 +12,10 @@ import { hostDetails } from './details';
 import { hostOverview } from './overview';
 import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
-import { authentications, authenticationsSummary } from './authentications';
-import { hostsKpiAuthentications, hostsKpiAuthenticationsSummary } from './kpi/authentications';
-import { hostsKpiHosts, hostsKpiHostsSummary } from './kpi/hosts';
-import { hostsKpiUniqueIps, hostsKpiUniqueIpsSummary } from './kpi/unique_ips';
+import { authentications, authenticationsEntities } from './authentications';
+import { hostsKpiAuthentications, hostsKpiAuthenticationsEntities } from './kpi/authentications';
+import { hostsKpiHosts, hostsKpiHostsEntities } from './kpi/hosts';
+import { hostsKpiUniqueIps, hostsKpiUniqueIpsEntities } from './kpi/unique_ips';
 
 jest.mock('./all');
 jest.mock('./details');
@@ -36,12 +36,12 @@ describe('hostsFactory', () => {
       [HostsQueries.firstOrLastSeen]: firstOrLastSeenHost,
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
       [HostsQueries.authentications]: authentications,
-      [HostsQueries.authenticationsSummary]: authenticationsSummary,
+      [HostsQueries.authenticationsEntities]: authenticationsEntities,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
-      [HostsKpiQueries.kpiAuthenticationsSummary]: hostsKpiAuthenticationsSummary,
+      [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
-      [HostsKpiQueries.kpiHostsSummary]: hostsKpiHostsSummary,
-      [HostsKpiQueries.kpiUniqueIpsSummary]: hostsKpiUniqueIpsSummary,
+      [HostsKpiQueries.kpiHostsEntities]: hostsKpiHostsEntities,
+      [HostsKpiQueries.kpiUniqueIpsEntities]: hostsKpiUniqueIpsEntities,
       [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
     };
     expect(hostsFactory).toEqual(expectedHostsFactory);

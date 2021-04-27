@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { NetworkKpiDnsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import { NetworkKpiNetworkEventsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
-export const buildDnsQuerySummary = ({
+export const buildNetworkEventsQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: NetworkKpiDnsRequestOptions) => {
+}: NetworkKpiNetworkEventsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -33,9 +33,9 @@ export const buildDnsQuerySummary = ({
     track_total_hits: false,
     body: {
       aggs: {
-        dns: {
+        events: {
           sum: {
-            field: 'metrics.dns.queries.value_count',
+            field: 'metrics.network.events.value_count',
           },
         },
       },

@@ -19,13 +19,13 @@ import { networkTls } from './tls';
 import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
 import { networkUsers } from './users';
-import { networkKpiDns, networkKpiDnsSummary } from './kpi/dns';
-import { networkKpiNetworkEvents, networkKpiNetworkEventsSummary } from './kpi/network_events';
-import { networkKpiTlsHandshakes, networkKpiTlsHandshakesSummary } from './kpi/tls_handshakes';
+import { networkKpiDns, networkKpiDnsEntities } from './kpi/dns';
+import { networkKpiNetworkEvents, networkKpiNetworkEventsEntities } from './kpi/network_events';
+import { networkKpiTlsHandshakes, networkKpiTlsHandshakesEntities } from './kpi/tls_handshakes';
 import { networkKpiUniqueFlows } from './kpi/unique_flows';
 import {
   networkKpiUniquePrivateIps,
-  networkKpiUniquePrivateIpsSummary,
+  networkKpiUniquePrivateIpsEntities,
 } from './kpi/unique_private_ips';
 
 jest.mock('./details');
@@ -54,14 +54,14 @@ describe('networkFactory', () => {
       [NetworkQueries.topNFlow]: networkTopNFlow,
       [NetworkQueries.users]: networkUsers,
       [NetworkKpiQueries.dns]: networkKpiDns,
-      [NetworkKpiQueries.dnsSummary]: networkKpiDnsSummary,
+      [NetworkKpiQueries.dnsEntities]: networkKpiDnsEntities,
       [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
-      [NetworkKpiQueries.networkEventsSummary]: networkKpiNetworkEventsSummary,
-      [NetworkKpiQueries.tlsHandshakesSummary]: networkKpiTlsHandshakesSummary,
+      [NetworkKpiQueries.networkEventsEntities]: networkKpiNetworkEventsEntities,
+      [NetworkKpiQueries.tlsHandshakesEntities]: networkKpiTlsHandshakesEntities,
       [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
       [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
       [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
-      [NetworkKpiQueries.uniquePrivateIpsSummary]: networkKpiUniquePrivateIpsSummary,
+      [NetworkKpiQueries.uniquePrivateIpsEntities]: networkKpiUniquePrivateIpsEntities,
     };
     expect(networkFactory).toEqual(expectedNetworkFactory);
   });

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { NetworkKpiTlsHandshakesRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import { NetworkKpiDnsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
-export const buildTlsHandshakeQuerySummary = ({
+export const buildDnsQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: NetworkKpiTlsHandshakesRequestOptions) => {
+}: NetworkKpiDnsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -33,9 +33,9 @@ export const buildTlsHandshakeQuerySummary = ({
     track_total_hits: false,
     body: {
       aggs: {
-        tls: {
+        dns: {
           sum: {
-            field: 'metrics.network.tls.version.value_count',
+            field: 'metrics.dns.queries.value_count',
           },
         },
       },

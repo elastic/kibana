@@ -20,7 +20,7 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
-import { buildHostsQuerySummary } from './query.all_hosts_summary.dsl';
+import { buildHostsQueryEntities } from './query.all_hosts_entities.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {
@@ -62,12 +62,12 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   },
 };
 
-export const allHostsSummary: SecuritySolutionFactory<HostsQueries.hosts> = {
+export const allHostsEntities: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-    return buildHostsQuerySummary(options);
+    return buildHostsQueryEntities(options);
   },
   parse: async (
     options: HostsRequestOptions,
@@ -84,7 +84,7 @@ export const allHostsSummary: SecuritySolutionFactory<HostsQueries.hosts> = {
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildHostsQueryEntities(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

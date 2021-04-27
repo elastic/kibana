@@ -22,7 +22,7 @@ import { SecuritySolutionFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
 import { buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
-import { buildTopNFlowQuerySummary } from './query.top_n_flow_network_summary.dsl';
+import { buildTopNFlowQueryEntities } from './query.top_n_flow_network_entities.dsl';
 
 export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options: NetworkTopNFlowRequestOptions) => {
@@ -59,12 +59,12 @@ export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> =
   },
 };
 
-export const networkTopNFlowSummary: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
+export const networkTopNFlowEntities: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options: NetworkTopNFlowRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-    return buildTopNFlowQuerySummary(options);
+    return buildTopNFlowQueryEntities(options);
   },
   parse: async (
     options: NetworkTopNFlowRequestOptions,
@@ -76,7 +76,7 @@ export const networkTopNFlowSummary: SecuritySolutionFactory<NetworkQueries.topN
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
-      dsl: [inspectStringifyObject(buildTopNFlowQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildTopNFlowQueryEntities(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

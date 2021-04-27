@@ -61,7 +61,7 @@ import {
 } from './network';
 import {
   MatrixHistogramQuery,
-  MatrixHistogramQuerySummary,
+  MatrixHistogramQueryEntities,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
@@ -77,7 +77,7 @@ export type FactoryQueryTypes =
   | NetworkQueries
   | NetworkKpiQueries
   | typeof MatrixHistogramQuery
-  | typeof MatrixHistogramQuerySummary;
+  | typeof MatrixHistogramQueryEntities;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;

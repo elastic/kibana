@@ -17,7 +17,7 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
 import { formatGeneralHistogramData } from '../common';
-import { buildHostsKpiHostsQuerySummary } from './query.hosts_kpi_hosts_summary.dsl';
+import { buildHostsKpiHostsQueryEntities } from './query.hosts_kpi_hosts_entities.dsl';
 
 export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
   buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuery(options),
@@ -43,14 +43,14 @@ export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = 
   },
 };
 
-export const hostsKpiHostsSummary: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
-  buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuerySummary(options),
+export const hostsKpiHostsEntities: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
+  buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQueryEntities(options),
   parse: async (
     options: HostsKpiHostsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiHostsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostsKpiHostsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildHostsKpiHostsQueryEntities(options))],
     };
 
     const hostsHistogram = getOr(

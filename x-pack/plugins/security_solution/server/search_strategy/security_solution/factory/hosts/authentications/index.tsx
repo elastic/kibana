@@ -22,14 +22,14 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
-import { buildQuerySummary as buildAuthenticationQuerySummary } from './dsl/query_summary.dsl';
+import { buildQueryEntities as buildAuthenticationQueryEntities } from './dsl/query_entities.dsl';
 
 import {
   authenticationsFields,
   formatAuthenticationData,
-  formatAuthenticationSummaryData,
+  formatAuthenticationEntitiesData,
   getHits,
-  getHitsSummary,
+  getHitsEntities,
 } from './helpers';
 
 export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
@@ -73,13 +73,13 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
   },
 };
 
-export const authenticationsSummary: SecuritySolutionFactory<HostsQueries.authentications> = {
+export const authenticationsEntities: SecuritySolutionFactory<HostsQueries.authentications> = {
   buildDsl: (options: HostAuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
 
-    return buildAuthenticationQuerySummary(options);
+    return buildAuthenticationQueryEntities(options);
   },
   parse: async (
     options: HostAuthenticationsRequestOptions,
@@ -89,14 +89,14 @@ export const authenticationsSummary: SecuritySolutionFactory<HostsQueries.authen
     const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const hits: AuthenticationHit[] = getHitsSummary(response);
+    const hits: AuthenticationHit[] = getHitsEntities(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationSummaryData(authenticationsFields, hit, auditdFieldsMap)
+      formatAuthenticationEntitiesData(authenticationsFields, hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
-      dsl: [inspectStringifyObject(buildAuthenticationQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildAuthenticationQueryEntities(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

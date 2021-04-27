@@ -33,7 +33,7 @@ export const getGenericData = <T>(
   return result;
 };
 
-export const getSummaryParser = <T>(
+export const getEntitiesParser = <T>(
   data: MatrixHistogramParseData<T>,
   keyBucket: string // TODO: Remove this keyBucket if it is not being used.
 ): MatrixHistogramData[] => {

@@ -65,7 +65,7 @@ const getAggs = (attrQuery: 'source' | 'destination') => ({
   },
 });
 
-export const buildUniquePrivateIpsQuerySummary = ({
+export const buildUniquePrivateIpsQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,

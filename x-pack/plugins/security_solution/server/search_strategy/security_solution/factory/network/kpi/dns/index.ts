@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
-import { buildDnsQuerySummary } from './query.network_kip_dns_summary.dsl';
+import { buildDnsQueryEntities } from './query.network_kip_dns_entities.dsl';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
@@ -35,14 +35,14 @@ export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
   },
 };
 
-export const networkKpiDnsSummary: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
-  buildDsl: (options: NetworkKpiDnsRequestOptions) => buildDnsQuerySummary(options),
+export const networkKpiDnsEntities: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
+  buildDsl: (options: NetworkKpiDnsRequestOptions) => buildDnsQueryEntities(options),
   parse: async (
     options: NetworkKpiDnsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiDnsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildDnsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildDnsQueryEntities(options))],
     };
     return {
       ...response,

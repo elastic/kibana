@@ -14,7 +14,7 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildNetworkEventsQuery } from './query.network_kpi_network_events.dsl';
-import { buildNetworkEventsQuerySummary } from './query.network_kpi_network_events_summary.dsl';
+import { buildNetworkEventsQueryEntities } from './query.network_kpi_network_events_entities.dsl';
 
 export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
   buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) => buildNetworkEventsQuery(options),
@@ -35,15 +35,15 @@ export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.
   },
 };
 
-export const networkKpiNetworkEventsSummary: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
+export const networkKpiNetworkEventsEntities: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
   buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) =>
-    buildNetworkEventsQuerySummary(options),
+    buildNetworkEventsQueryEntities(options),
   parse: async (
     options: NetworkKpiNetworkEventsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiNetworkEventsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildNetworkEventsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildNetworkEventsQueryEntities(options))],
     };
 
     return {

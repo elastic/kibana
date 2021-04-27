@@ -21,7 +21,7 @@ export const formatAuthenticationsHistogramData = (
       }))
     : null;
 
-export const formatAuthenticationsHistogramDataSummary = (
+export const formatAuthenticationsHistogramDataEntities = (
   data: Array<HostsKpiHistogram<HostsKpiAuthenticationsHistogramCount>>
 ): HostsKpiHistogramData[] | null =>
   data && data.length > 0

@@ -17,7 +17,7 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { formatHistogramData } from '../common';
 import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_ips.dsl';
-import { buildUniquePrivateIpsQuerySummary } from './query.network_kpi_unique_private_ips_summary.dsl';
+import { buildUniquePrivateIpsQueryEntities } from './query.network_kpi_unique_private_ips_entities.dsl';
 
 export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> = {
   // @ts-expect-error auto_date_histogram.buckets is incompatible
@@ -63,16 +63,16 @@ export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueri
   },
 };
 
-export const networkKpiUniquePrivateIpsSummary: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> = {
+export const networkKpiUniquePrivateIpsEntities: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> = {
   // @ts-expect-error auto_date_histogram.buckets is incompatible
   buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
-    buildUniquePrivateIpsQuerySummary(options),
+    buildUniquePrivateIpsQueryEntities(options),
   parse: async (
     options: NetworkKpiUniquePrivateIpsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildUniquePrivateIpsQuerySummary(options))],
+      dsl: [inspectStringifyObject(buildUniquePrivateIpsQueryEntities(options))],
     };
 
     const uniqueSourcePrivateIpsHistogram = getOr(

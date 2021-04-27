@@ -15,7 +15,7 @@ import {
   MatrixHistogramQuery,
   MatrixHistogramType,
   MatrixHistogramDataConfig,
-  MatrixHistogramQuerySummary,
+  MatrixHistogramQueryEntities,
 } from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../types';
@@ -24,7 +24,7 @@ import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
 import {
   authenticationsMatrixHistogramConfig,
-  authenticationsMatrixHistogramSummaryConfig,
+  authenticationsMatrixHistogramEntitiesConfig,
 } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
@@ -33,7 +33,7 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
   [MatrixHistogramType.anomalies]: anomaliesMatrixHistogramConfig,
   [MatrixHistogramType.authentications]: authenticationsMatrixHistogramConfig,
-  [MatrixHistogramType.authenticationsSummary]: authenticationsMatrixHistogramSummaryConfig,
+  [MatrixHistogramType.authenticationsEntities]: authenticationsMatrixHistogramEntitiesConfig,
   [MatrixHistogramType.dns]: dnsMatrixHistogramConfig,
   [MatrixHistogramType.events]: eventsMatrixHistogramConfig,
 };
@@ -74,7 +74,7 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
   },
 };
 
-export const matrixHistogramSummary: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
+export const matrixHistogramEntities: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
   buildDsl: (options: MatrixHistogramRequestOptions) => {
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {
@@ -111,9 +111,9 @@ export const matrixHistogramSummary: SecuritySolutionFactory<typeof MatrixHistog
 };
 
 export const matrixHistogramFactory: Record<
-  typeof MatrixHistogramQuery | typeof MatrixHistogramQuerySummary,
+  typeof MatrixHistogramQuery | typeof MatrixHistogramQueryEntities,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   [MatrixHistogramQuery]: matrixHistogram,
-  [MatrixHistogramQuerySummary]: matrixHistogramSummary,
+  [MatrixHistogramQueryEntities]: matrixHistogramEntities,
 };

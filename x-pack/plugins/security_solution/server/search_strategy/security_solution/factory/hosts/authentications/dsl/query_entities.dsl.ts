@@ -12,7 +12,7 @@ import { HostAuthenticationsRequestOptions } from '../../../../../../../common/s
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
-export const buildQuerySummary = ({
+export const buildQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   pagination: { querySize },

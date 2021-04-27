@@ -23,11 +23,11 @@ export * from './dns';
 export * from './events';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
-export const MatrixHistogramQuerySummary = 'matrixHistogramSummary';
+export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
-  authenticationsSummary = 'authenticationsSummary',
+  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',

@@ -20,7 +20,7 @@ export const getTransformChangesForHosts: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['host_ent'],
         }),
-        factoryQueryType: HostsQueries.hostsSummary,
+        factoryQueryType: HostsQueries.hostsEntities,
       };
     }
     case HostsQueries.authentications: {
@@ -29,7 +29,7 @@ export const getTransformChangesForHosts: GetTransformChanges = ({
           prefix: settings.prefix,
           transformIndices: ['user_ent'],
         }),
-        factoryQueryType: HostsQueries.authenticationsSummary,
+        factoryQueryType: HostsQueries.authenticationsEntities,
       };
     }
     default: {

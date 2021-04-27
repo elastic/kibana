@@ -16,7 +16,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
           prefix: settings.prefix,
           transformIndices: ['host_ent'],
         }),
-        factoryQueryType: HostsKpiQueries.kpiHostsSummary,
+        factoryQueryType: HostsKpiQueries.kpiHostsEntities,
       };
     }
     case HostsKpiQueries.kpiAuthentications: {
@@ -25,7 +25,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
           prefix: settings.prefix,
           transformIndices: ['user_ent'],
         }),
-        factoryQueryType: HostsKpiQueries.kpiAuthenticationsSummary,
+        factoryQueryType: HostsKpiQueries.kpiAuthenticationsEntities,
       };
     }
     case HostsKpiQueries.kpiUniqueIps: {
@@ -34,7 +34,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
           prefix: settings.prefix,
           transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
-        factoryQueryType: HostsKpiQueries.kpiUniqueIpsSummary,
+        factoryQueryType: HostsKpiQueries.kpiUniqueIpsEntities,
       };
     }
     default: {

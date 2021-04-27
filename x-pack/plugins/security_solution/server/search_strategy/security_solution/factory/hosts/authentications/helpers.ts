@@ -98,7 +98,7 @@ export const getHits = <T extends FactoryQueryTypes>(response: StrategyResponseT
     })
   );
 
-export const getHitsSummary = <T extends FactoryQueryTypes>(response: StrategyResponseType<T>) =>
+export const getHitsEntities = <T extends FactoryQueryTypes>(response: StrategyResponseType<T>) =>
   getOr([], 'aggregations.group_by_users.buckets', response.rawResponse).map(
     (bucket: AuthenticationBucket) => ({
       _id: getOr(
@@ -116,7 +116,7 @@ export const getHitsSummary = <T extends FactoryQueryTypes>(response: StrategyRe
     })
   );
 
-export const formatAuthenticationSummaryData = (
+export const formatAuthenticationEntitiesData = (
   fields: readonly string[] = authenticationsFields,
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>

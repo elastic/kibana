@@ -10,7 +10,7 @@ import moment from 'moment';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 
-export const buildAuthenticationsHistogramQuerySummary = ({
+export const buildAuthenticationsHistogramQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,

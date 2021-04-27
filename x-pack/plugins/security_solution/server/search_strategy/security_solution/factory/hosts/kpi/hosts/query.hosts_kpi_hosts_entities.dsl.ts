@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { HostsKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
-export const buildHostsKpiAuthenticationsQuerySummary = ({
+export const buildHostsKpiHostsQueryEntities = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: HostsKpiAuthenticationsRequestOptions) => {
+}: HostsKpiHostsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -32,39 +32,21 @@ export const buildHostsKpiAuthenticationsQuerySummary = ({
     ignoreUnavailable: true,
     track_total_hits: false,
     body: {
-      aggs: {
-        authentication_success: {
-          sum: {
-            field: 'metrics.event.authentication.success.value_count',
+      aggregations: {
+        hosts: {
+          cardinality: {
+            field: 'host.name',
           },
         },
-        authentication_success_histogram: {
+        hosts_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
             buckets: 6,
           },
           aggs: {
             count: {
-              sum: {
-                field: 'metrics.event.authentication.success.value_count',
-              },
-            },
-          },
-        },
-        authentication_failure: {
-          sum: {
-            field: 'metrics.event.authentication.failure.value_count',
-          },
-        },
-        authentication_failure_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: 6,
-          },
-          aggs: {
-            count: {
-              sum: {
-                field: 'metrics.event.authentication.failure.value_count',
+              cardinality: {
+                field: 'host.name',
               },
             },
           },
