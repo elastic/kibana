@@ -37,13 +37,6 @@ export const useHostIsolation = ({
     } catch (error) {
       setLoading(false);
       addError(error.message, { title: HOST_ISOLATION_FAILURE });
-
-      // 500 error
-      if (isSecurityAppError(error) && error.body.status_code !== 404) {
-        addError(error.message, {
-          title: HOST_ISOLATION_FAILURE,
-        });
-      }
       return false;
     }
   }, [agentId, comment, addError]);
