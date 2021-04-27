@@ -88,9 +88,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     // Create an unused subscription to ensure all underlying lazy observables are started.
     this.overallSubscription = overall$.subscribe();
 
-    const router = http.createRouter('');
-    registerStatusRoute({
-      router,
+    const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
         packageInfo: this.coreContext.env.packageInfo,
@@ -103,7 +101,26 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
+    };
+
+    const router = http.createRouter('');
+    registerStatusRoute({
+      router,
+      ...commonRouteDeps,
     });
+
+    if (http.notReadyServer && commonRouteDeps.config.allowAnonymous) {
+      http.notReadyServer.registerRoutes('', (notReadyRouter) => {
+        registerStatusRoute({
+          router: notReadyRouter,
+          ...commonRouteDeps,
+          config: {
+            ...commonRouteDeps.config,
+            allowAnonymous: true,
+          },
+        });
+      });
+    }
 
     return {
       core$,

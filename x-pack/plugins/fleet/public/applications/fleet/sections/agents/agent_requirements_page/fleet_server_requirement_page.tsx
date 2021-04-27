@@ -189,7 +189,29 @@ export const FleetServerCommandStep = ({
   };
 };
 
-export const useFleetServerInstructions = () => {
+export function getInstallCommandForPlatform(
+  platform: PLATFORM_TYPE,
+  esHost: string,
+  serviceToken: string,
+  policyId?: string
+) {
+  const commandArguments = `-f --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}${
+    policyId ? ` --fleet-server-policy=${policyId}` : ''
+  }`;
+
+  switch (platform) {
+    case 'linux-mac':
+      return `sudo ./elastic-agent install ${commandArguments}`;
+    case 'windows':
+      return `.\\elastic-agent.exe install ${commandArguments}`;
+    case 'rpm-deb':
+      return `sudo elastic-agent enroll ${commandArguments}`;
+    default:
+      return '';
+  }
+}
+
+export const useFleetServerInstructions = (policyId?: string) => {
   const outputsRequest = useGetOutputs();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
@@ -203,17 +225,9 @@ export const useFleetServerInstructions = () => {
     if (!serviceToken || !esHost) {
       return '';
     }
-    switch (platform) {
-      case 'linux-mac':
-        return `sudo ./elastic-agent install -f --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
-      case 'windows':
-        return `.\\elastic-agent.exe install --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
-      case 'rpm-deb':
-        return `sudo elastic-agent enroll -f --fleet-server-es=${esHost} --fleet-server-service-token=${serviceToken}`;
-      default:
-        return '';
-    }
-  }, [serviceToken, esHost, platform]);
+
+    return getInstallCommandForPlatform(platform, esHost, serviceToken, policyId);
+  }, [serviceToken, esHost, platform, policyId]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -334,7 +348,7 @@ const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl 
               fill
               isLoading={false}
               type="submit"
-              href={deploymentUrl}
+              href={`${deploymentUrl}/edit`}
               target="_blank"
             >
               <FormattedMessage
