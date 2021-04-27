@@ -89,10 +89,7 @@ export const MonitorPageTitle: React.FC = () => {
           <EuiSpacer size="xs" />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EnableMonitorAlert
-            monitorId={monitorId}
-            selectedMonitor={selectedMonitor!}
-          />
+          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
