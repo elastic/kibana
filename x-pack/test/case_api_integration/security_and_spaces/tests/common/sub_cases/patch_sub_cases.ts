@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]),
             type: CommentType.generatedAlert,
+            owner: 'securitySolutionFixture',
           },
         });
 
@@ -156,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]),
             type: CommentType.generatedAlert,
+            owner: 'securitySolutionFixture',
           },
         });
 
@@ -225,6 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]),
             type: CommentType.generatedAlert,
+            owner: 'securitySolutionFixture',
           },
         });
 
@@ -243,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]),
             type: CommentType.generatedAlert,
+            owner: 'securitySolutionFixture',
           },
         });
 
@@ -354,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]),
             type: CommentType.generatedAlert,
+            owner: 'securitySolutionFixture',
           },
         });
 
