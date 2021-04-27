@@ -13,7 +13,7 @@ import { UsageCollector } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsRepositoryMock,
+  savedObjectsClientMock,
 } from '../../../../core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
@@ -34,7 +34,7 @@ describe('CollectorSet', () => {
       loggerSpies.warn.mockRestore();
     });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const mockSoClient = savedObjectsRepositoryMock.create();
+    const mockSoClient = savedObjectsClientMock.create();
     const req = void 0; // No need to instantiate any KibanaRequest in these tests
 
     it('should throw an error if non-Collector type of object is registered', () => {
