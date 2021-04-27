@@ -165,3 +165,45 @@ test('`dispose()` closes stream.', async () => {
   // Consequent `dispose` calls should not fail even if stream has been disposed.
   await appender.dispose();
 });
+
+test('does not call write on ended stream.', async () => {
+  let writableEnded = false;
+  const mockStreamEnd = jest.fn(async (callback) => {
+    writableEnded = true;
+    // emulate the real-world scenario. flush() buffer take some time.
+    await tickMs(100);
+    callback();
+  });
+
+  const writeMock = jest.fn();
+  mockCreateWriteStream.mockReturnValue({
+    end: mockStreamEnd,
+    write: writeMock,
+    get writableEnded() {
+      return writableEnded;
+    },
+  });
+
+  const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log');
+  appender.append({
+    context: 'context-1',
+    level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
+    pid: 5355,
+  });
+
+  expect(writeMock).toHaveBeenCalledTimes(1);
+  const disposePromise = appender.dispose();
+
+  appender.append({
+    context: 'context-2',
+    level: LogLevel.All,
+    message: 'message-2',
+    timestamp: new Date(),
+    pid: 5355,
+  });
+
+  await disposePromise;
+  expect(writeMock).toHaveBeenCalledTimes(1);
+});

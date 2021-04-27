@@ -53,7 +53,11 @@ export class FileAppender implements DisposableAppender {
       });
     }
 
-    this.outputStream.write(`${this.layout.format(record)}\n`);
+    // There might be a race between Stream ended and append method is called.
+    // In this case we have to drop the record to avoid a runtime exception.
+    if (!this.outputStream.writableEnded) {
+      this.outputStream.write(`${this.layout.format(record)}\n`);
+    }
   }
 
   /**
