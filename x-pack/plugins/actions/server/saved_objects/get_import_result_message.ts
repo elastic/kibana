@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportHook } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import { RawAction } from '../types';
 
 export function getImportResultMessage(connectors: Array<SavedObject<RawAction>>) {
