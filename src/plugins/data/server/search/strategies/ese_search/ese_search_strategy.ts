@@ -38,11 +38,15 @@ import {
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  useInternalUser: boolean = false
 ): ISearchStrategy<IEsSearchRequest> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
-      await esClient.asCurrentUser.asyncSearch.delete({ id });
+      await (useInternalUser
+        ? esClient.asInternalUser
+        : esClient.asCurrentUser
+      ).asyncSearch.delete({ id });
     } catch (e) {
       throw getKbnServerError(e);
     }
@@ -53,7 +57,7 @@ export const enhancedEsSearchStrategyProvider = (
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
   ) {
-    const client = esClient.asCurrentUser.asyncSearch;
+    const client = (useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser).asyncSearch;
 
     const search = async () => {
       const params = id
@@ -96,6 +100,7 @@ export const enhancedEsSearchStrategyProvider = (
     options: ISearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
     const method = 'POST';
@@ -108,7 +113,7 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     try {
-      const promise = esClient.asCurrentUser.transport.request({
+      const promise = client.transport.request({
         method,
         path,
         body,
@@ -169,7 +174,10 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+        await (useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser).asyncSearch.get({
+          id,
+          body: { keep_alive: keepAlive },
+        });
       } catch (e) {
         throw getKbnServerError(e);
       }

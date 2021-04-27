@@ -9,6 +9,7 @@
 import { ISearchOptions } from '../../types';
 
 export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
+export const INTERNAL_ENHANCED_ES_SEARCH_STRATEGY = 'ese_internal';
 
 export interface IAsyncSearchOptions extends ISearchOptions {
   /**
