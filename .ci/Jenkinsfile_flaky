@@ -3,6 +3,8 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+env.ES_SNAPSHOT_MANIFEST = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/archives/20210422-191103_e86fc61daf7/manifest.json'
+
 def TASK_PARAM = params.TASK ?: params.CI_GROUP
 
 // Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke'
