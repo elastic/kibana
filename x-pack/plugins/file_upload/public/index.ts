@@ -13,5 +13,7 @@ export function plugin() {
 
 export * from './importer/types';
 
+export { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
+
 export { FileUploadPluginStart } from './plugin';
 export { FileUploadComponentProps, FileUploadGeoResults } from './lazy_load_bundle';

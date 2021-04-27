@@ -1,0 +1,1894 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".ds-metrics-kubernetes.pod-slingshot-2021.04.23-000001",
+    "mappings": {
+      "_data_stream_timestamp": {
+        "enabled": true
+      },
+      "date_detection": false,
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "match_mapping_type": "string"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "ephemeral_id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "hostname": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "cloud": {
+          "properties": {
+            "instance": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "provider": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "region": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "constant_keyword"
+            },
+            "namespace": {
+              "type": "constant_keyword"
+            },
+            "type": {
+              "type": "constant_keyword",
+              "value": "metrics"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "dataset": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "duration": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "module": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "node": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "pod": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "float"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "host_ip": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "ip": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "memory": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "float"
+                            }
+                          }
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "float"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "network": {
+                  "properties": {
+                    "in": {
+                      "properties": {
+                        "bytes": {
+                          "type": "float"
+                        },
+                        "errors": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "out": {
+                      "properties": {
+                        "bytes": {
+                          "type": "float"
+                        },
+                        "errors": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                },
+                "status": {
+                  "properties": {
+                    "phase": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "scheduled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "uid": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "metricset": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "period": {
+              "type": "long"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "address": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "hidden": "true",
+        "lifecycle": {
+          "name": "metrics"
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".ds-metrics-system-slingshot-2021.04.23-000001",
+    "mappings": {
+      "_data_stream_timestamp": {
+        "enabled": true
+      },
+      "date_detection": false,
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "match_mapping_type": "string"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "ephemeral_id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "hostname": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "cloud": {
+          "properties": {
+            "instance": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "provider": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "region": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "constant_keyword"
+            },
+            "namespace": {
+              "type": "constant_keyword"
+            },
+            "type": {
+              "type": "constant_keyword",
+              "value": "metrics"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "dataset": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "duration": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "module": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "architecture": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "cpu": {
+              "properties": {
+                "pct": {
+                  "type": "float"
+                }
+              }
+            },
+            "hostname": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "mac": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "network": {
+              "properties": {
+                "egress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "in": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "ingress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "out": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "os": {
+              "properties": {
+                "platform": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "metricset": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "period": {
+              "type": "long"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "system": {
+          "properties": {
+            "cpu": {
+              "properties": {
+                "cores": {
+                  "type": "long"
+                },
+                "idle": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "nice": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pct": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "system": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "total": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "user": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "load": {
+              "properties": {
+                "1": {
+                  "type": "float"
+                },
+                "15": {
+                  "type": "float"
+                },
+                "5": {
+                  "type": "float"
+                },
+                "norm": {
+                  "properties": {
+                    "1": {
+                      "type": "float"
+                    },
+                    "15": {
+                      "type": "float"
+                    },
+                    "5": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "memory": {
+              "properties": {
+                "actual": {
+                  "properties": {
+                    "free": {
+                      "type": "long"
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                },
+                "free": {
+                  "type": "long"
+                },
+                "swap": {
+                  "properties": {
+                    "free": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "long"
+                },
+                "used": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "network": {
+              "properties": {
+                "in": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    },
+                    "dropped": {
+                      "type": "long"
+                    },
+                    "errors": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "out": {
+                  "properties": {
+                    "bytes": {
+                      "type": "float"
+                    },
+                    "dropped": {
+                      "type": "float"
+                    },
+                    "errors": {
+                      "type": "float"
+                    },
+                    "packets": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "uptime": {
+              "properties": {
+                "duration": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "hidden": "true",
+        "lifecycle": {
+          "name": "metrics"
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-hosts_memory_usage": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-hosts_network_in": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-hosts_network_out": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-k8s_memory_usage": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-k8s_network_in": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-kibana-metrics-ui-default-default-k8s_network_out": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-hosts_memory_usage": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-hosts_memory_usage"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-hosts_network_in": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-hosts_network_in"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-hosts_network_out": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-hosts_network_out"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-k8s_memory_usage": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-k8s_memory_usage"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-k8s_network_in": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-k8s_network_in"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-kibana-metrics-ui-default-default-k8s_network_out": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "kibana-metrics-ui-default-default-k8s_network_out"
+            }
+          }
+        },
+        "is_hidden": true
+      }
+    },
+    "index": ".ml-anomalies-shared",
+    "mappings": {
+      "_meta": {
+        "version": "8.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "actual": {
+          "type": "double"
+        },
+        "all_field_values": {
+          "analyzer": "whitespace",
+          "type": "text"
+        },
+        "anomaly_score": {
+          "type": "double"
+        },
+        "assignment_memory_basis": {
+          "type": "keyword"
+        },
+        "average_bucket_processing_time_ms": {
+          "type": "double"
+        },
+        "bucket_allocation_failures_count": {
+          "type": "long"
+        },
+        "bucket_count": {
+          "type": "long"
+        },
+        "bucket_influencers": {
+          "properties": {
+            "anomaly_score": {
+              "type": "double"
+            },
+            "bucket_span": {
+              "type": "long"
+            },
+            "influencer_field_name": {
+              "type": "keyword"
+            },
+            "initial_anomaly_score": {
+              "type": "double"
+            },
+            "is_interim": {
+              "type": "boolean"
+            },
+            "job_id": {
+              "type": "keyword"
+            },
+            "probability": {
+              "type": "double"
+            },
+            "raw_anomaly_score": {
+              "type": "double"
+            },
+            "result_type": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            }
+          },
+          "type": "nested"
+        },
+        "bucket_span": {
+          "type": "long"
+        },
+        "by_field_name": {
+          "type": "keyword"
+        },
+        "by_field_value": {
+          "copy_to": [
+            "all_field_values"
+          ],
+          "type": "keyword"
+        },
+        "categorization_status": {
+          "type": "keyword"
+        },
+        "categorized_doc_count": {
+          "type": "keyword"
+        },
+        "category_id": {
+          "type": "long"
+        },
+        "causes": {
+          "properties": {
+            "actual": {
+              "type": "double"
+            },
+            "by_field_name": {
+              "type": "keyword"
+            },
+            "by_field_value": {
+              "copy_to": [
+                "all_field_values"
+              ],
+              "type": "keyword"
+            },
+            "correlated_by_field_value": {
+              "copy_to": [
+                "all_field_values"
+              ],
+              "type": "keyword"
+            },
+            "field_name": {
+              "type": "keyword"
+            },
+            "function": {
+              "type": "keyword"
+            },
+            "function_description": {
+              "type": "keyword"
+            },
+            "geo_results": {
+              "properties": {
+                "actual_point": {
+                  "type": "geo_point"
+                },
+                "typical_point": {
+                  "type": "geo_point"
+                }
+              }
+            },
+            "over_field_name": {
+              "type": "keyword"
+            },
+            "over_field_value": {
+              "copy_to": [
+                "all_field_values"
+              ],
+              "type": "keyword"
+            },
+            "partition_field_name": {
+              "type": "keyword"
+            },
+            "partition_field_value": {
+              "copy_to": [
+                "all_field_values"
+              ],
+              "type": "keyword"
+            },
+            "probability": {
+              "type": "double"
+            },
+            "typical": {
+              "type": "double"
+            }
+          },
+          "type": "nested"
+        },
+        "dead_category_count": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "text"
+        },
+        "detector_index": {
+          "type": "integer"
+        },
+        "earliest_record_timestamp": {
+          "type": "date"
+        },
+        "empty_bucket_count": {
+          "type": "long"
+        },
+        "event_count": {
+          "type": "long"
+        },
+        "examples": {
+          "type": "text"
+        },
+        "exponential_average_bucket_processing_time_ms": {
+          "type": "double"
+        },
+        "exponential_average_calculation_context": {
+          "properties": {
+            "incremental_metric_value_ms": {
+              "type": "double"
+            },
+            "latest_timestamp": {
+              "type": "date"
+            },
+            "previous_exponential_average_ms": {
+              "type": "double"
+            }
+          }
+        },
+        "failed_category_count": {
+          "type": "keyword"
+        },
+        "field_name": {
+          "type": "keyword"
+        },
+        "forecast_create_timestamp": {
+          "type": "date"
+        },
+        "forecast_end_timestamp": {
+          "type": "date"
+        },
+        "forecast_expiry_timestamp": {
+          "type": "date"
+        },
+        "forecast_id": {
+          "type": "keyword"
+        },
+        "forecast_lower": {
+          "type": "double"
+        },
+        "forecast_memory_bytes": {
+          "type": "long"
+        },
+        "forecast_messages": {
+          "type": "keyword"
+        },
+        "forecast_prediction": {
+          "type": "double"
+        },
+        "forecast_progress": {
+          "type": "double"
+        },
+        "forecast_start_timestamp": {
+          "type": "date"
+        },
+        "forecast_status": {
+          "type": "keyword"
+        },
+        "forecast_upper": {
+          "type": "double"
+        },
+        "frequent_category_count": {
+          "type": "keyword"
+        },
+        "function": {
+          "type": "keyword"
+        },
+        "function_description": {
+          "type": "keyword"
+        },
+        "geo_results": {
+          "properties": {
+            "actual_point": {
+              "type": "geo_point"
+            },
+            "typical_point": {
+              "type": "geo_point"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "influencer_field_name": {
+          "type": "keyword"
+        },
+        "influencer_field_value": {
+          "copy_to": [
+            "all_field_values"
+          ],
+          "type": "keyword"
+        },
+        "influencer_score": {
+          "type": "double"
+        },
+        "influencers": {
+          "properties": {
+            "influencer_field_name": {
+              "type": "keyword"
+            },
+            "influencer_field_values": {
+              "copy_to": [
+                "all_field_values"
+              ],
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "initial_anomaly_score": {
+          "type": "double"
+        },
+        "initial_influencer_score": {
+          "type": "double"
+        },
+        "initial_record_score": {
+          "type": "double"
+        },
+        "input_bytes": {
+          "type": "long"
+        },
+        "input_field_count": {
+          "type": "long"
+        },
+        "input_record_count": {
+          "type": "long"
+        },
+        "invalid_date_count": {
+          "type": "long"
+        },
+        "is_interim": {
+          "type": "boolean"
+        },
+        "job_id": {
+          "copy_to": [
+            "all_field_values"
+          ],
+          "type": "keyword"
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "type": "keyword"
+            },
+            "node": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "pod": {
+              "properties": {
+                "uid": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "last_data_time": {
+          "type": "date"
+        },
+        "latest_empty_bucket_timestamp": {
+          "type": "date"
+        },
+        "latest_record_time_stamp": {
+          "type": "date"
+        },
+        "latest_record_timestamp": {
+          "type": "date"
+        },
+        "latest_result_time_stamp": {
+          "type": "date"
+        },
+        "latest_sparse_bucket_timestamp": {
+          "type": "date"
+        },
+        "log_time": {
+          "type": "date"
+        },
+        "max_matching_length": {
+          "type": "long"
+        },
+        "maximum_bucket_processing_time_ms": {
+          "type": "double"
+        },
+        "memory_status": {
+          "type": "keyword"
+        },
+        "min_version": {
+          "type": "keyword"
+        },
+        "minimum_bucket_processing_time_ms": {
+          "type": "double"
+        },
+        "missing_field_count": {
+          "type": "long"
+        },
+        "mlcategory": {
+          "type": "keyword"
+        },
+        "model_bytes": {
+          "type": "long"
+        },
+        "model_bytes_exceeded": {
+          "type": "keyword"
+        },
+        "model_bytes_memory_limit": {
+          "type": "keyword"
+        },
+        "model_feature": {
+          "type": "keyword"
+        },
+        "model_lower": {
+          "type": "double"
+        },
+        "model_median": {
+          "type": "double"
+        },
+        "model_size_stats": {
+          "properties": {
+            "assignment_memory_basis": {
+              "type": "keyword"
+            },
+            "bucket_allocation_failures_count": {
+              "type": "long"
+            },
+            "categorization_status": {
+              "type": "keyword"
+            },
+            "categorized_doc_count": {
+              "type": "keyword"
+            },
+            "dead_category_count": {
+              "type": "keyword"
+            },
+            "failed_category_count": {
+              "type": "keyword"
+            },
+            "frequent_category_count": {
+              "type": "keyword"
+            },
+            "job_id": {
+              "type": "keyword"
+            },
+            "log_time": {
+              "type": "date"
+            },
+            "memory_status": {
+              "type": "keyword"
+            },
+            "model_bytes": {
+              "type": "long"
+            },
+            "model_bytes_exceeded": {
+              "type": "keyword"
+            },
+            "model_bytes_memory_limit": {
+              "type": "keyword"
+            },
+            "peak_model_bytes": {
+              "type": "long"
+            },
+            "rare_category_count": {
+              "type": "keyword"
+            },
+            "result_type": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "total_by_field_count": {
+              "type": "long"
+            },
+            "total_category_count": {
+              "type": "keyword"
+            },
+            "total_over_field_count": {
+              "type": "long"
+            },
+            "total_partition_field_count": {
+              "type": "long"
+            }
+          }
+        },
+        "model_upper": {
+          "type": "double"
+        },
+        "multi_bucket_impact": {
+          "type": "double"
+        },
+        "num_matches": {
+          "type": "long"
+        },
+        "out_of_order_timestamp_count": {
+          "type": "long"
+        },
+        "over_field_name": {
+          "type": "keyword"
+        },
+        "over_field_value": {
+          "copy_to": [
+            "all_field_values"
+          ],
+          "type": "keyword"
+        },
+        "partition_field_name": {
+          "type": "keyword"
+        },
+        "partition_field_value": {
+          "copy_to": [
+            "all_field_values"
+          ],
+          "type": "keyword"
+        },
+        "peak_model_bytes": {
+          "type": "keyword"
+        },
+        "preferred_to_categories": {
+          "type": "long"
+        },
+        "probability": {
+          "type": "double"
+        },
+        "processed_field_count": {
+          "type": "long"
+        },
+        "processed_record_count": {
+          "type": "long"
+        },
+        "processing_time_ms": {
+          "type": "long"
+        },
+        "quantiles": {
+          "enabled": false,
+          "type": "object"
+        },
+        "rare_category_count": {
+          "type": "keyword"
+        },
+        "raw_anomaly_score": {
+          "type": "double"
+        },
+        "record_score": {
+          "type": "double"
+        },
+        "regex": {
+          "type": "keyword"
+        },
+        "result_type": {
+          "type": "keyword"
+        },
+        "retain": {
+          "type": "boolean"
+        },
+        "scheduled_events": {
+          "type": "keyword"
+        },
+        "search_count": {
+          "type": "long"
+        },
+        "snapshot_doc_count": {
+          "type": "integer"
+        },
+        "snapshot_id": {
+          "type": "keyword"
+        },
+        "sparse_bucket_count": {
+          "type": "long"
+        },
+        "terms": {
+          "type": "text"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "total_by_field_count": {
+          "type": "long"
+        },
+        "total_category_count": {
+          "type": "keyword"
+        },
+        "total_over_field_count": {
+          "type": "long"
+        },
+        "total_partition_field_count": {
+          "type": "long"
+        },
+        "total_search_time_ms": {
+          "type": "double"
+        },
+        "typical": {
+          "type": "double"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "hidden": "true",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "translog": {
+          "durability": "async"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".ml-config",
+    "mappings": {
+      "_meta": {
+        "version": "8.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "aggregations": {
+          "enabled": false,
+          "type": "object"
+        },
+        "allow_lazy_open": {
+          "type": "keyword"
+        },
+        "allow_lazy_start": {
+          "type": "keyword"
+        },
+        "analysis": {
+          "properties": {
+            "classification": {
+              "properties": {
+                "alpha": {
+                  "type": "double"
+                },
+                "class_assignment_objective": {
+                  "type": "keyword"
+                },
+                "dependent_variable": {
+                  "type": "keyword"
+                },
+                "downsample_factor": {
+                  "type": "double"
+                },
+                "early_stopping_enabled": {
+                  "type": "boolean"
+                },
+                "eta": {
+                  "type": "double"
+                },
+                "eta_growth_rate_per_tree": {
+                  "type": "double"
+                },
+                "feature_bag_fraction": {
+                  "type": "double"
+                },
+                "feature_processors": {
+                  "enabled": false,
+                  "type": "object"
+                },
+                "gamma": {
+                  "type": "double"
+                },
+                "lambda": {
+                  "type": "double"
+                },
+                "max_optimization_rounds_per_hyperparameter": {
+                  "type": "integer"
+                },
+                "max_trees": {
+                  "type": "integer"
+                },
+                "num_top_classes": {
+                  "type": "integer"
+                },
+                "num_top_feature_importance_values": {
+                  "type": "integer"
+                },
+                "prediction_field_name": {
+                  "type": "keyword"
+                },
+                "randomize_seed": {
+                  "type": "keyword"
+                },
+                "soft_tree_depth_limit": {
+                  "type": "double"
+                },
+                "soft_tree_depth_tolerance": {
+                  "type": "double"
+                },
+                "training_percent": {
+                  "type": "double"
+                }
+              }
+            },
+            "outlier_detection": {
+              "properties": {
+                "compute_feature_influence": {
+                  "type": "keyword"
+                },
+                "feature_influence_threshold": {
+                  "type": "double"
+                },
+                "method": {
+                  "type": "keyword"
+                },
+                "n_neighbors": {
+                  "type": "integer"
+                },
+                "outlier_fraction": {
+                  "type": "keyword"
+                },
+                "standardization_enabled": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "regression": {
+              "properties": {
+                "alpha": {
+                  "type": "double"
+                },
+                "dependent_variable": {
+                  "type": "keyword"
+                },
+                "downsample_factor": {
+                  "type": "double"
+                },
+                "early_stopping_enabled": {
+                  "type": "boolean"
+                },
+                "eta": {
+                  "type": "double"
+                },
+                "eta_growth_rate_per_tree": {
+                  "type": "double"
+                },
+                "feature_bag_fraction": {
+                  "type": "double"
+                },
+                "feature_processors": {
+                  "enabled": false,
+                  "type": "object"
+                },
+                "gamma": {
+                  "type": "double"
+                },
+                "lambda": {
+                  "type": "double"
+                },
+                "loss_function": {
+                  "type": "keyword"
+                },
+                "loss_function_parameter": {
+                  "type": "double"
+                },
+                "max_optimization_rounds_per_hyperparameter": {
+                  "type": "integer"
+                },
+                "max_trees": {
+                  "type": "integer"
+                },
+                "num_top_feature_importance_values": {
+                  "type": "integer"
+                },
+                "prediction_field_name": {
+                  "type": "keyword"
+                },
+                "randomize_seed": {
+                  "type": "keyword"
+                },
+                "soft_tree_depth_limit": {
+                  "type": "double"
+                },
+                "soft_tree_depth_tolerance": {
+                  "type": "double"
+                },
+                "training_percent": {
+                  "type": "double"
+                }
+              }
+            }
+          }
+        },
+        "analysis_config": {
+          "properties": {
+            "bucket_span": {
+              "type": "keyword"
+            },
+            "categorization_analyzer": {
+              "enabled": false,
+              "type": "object"
+            },
+            "categorization_field_name": {
+              "type": "keyword"
+            },
+            "categorization_filters": {
+              "type": "keyword"
+            },
+            "detectors": {
+              "properties": {
+                "by_field_name": {
+                  "type": "keyword"
+                },
+                "custom_rules": {
+                  "properties": {
+                    "actions": {
+                      "type": "keyword"
+                    },
+                    "conditions": {
+                      "properties": {
+                        "applies_to": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "double"
+                        }
+                      },
+                      "type": "nested"
+                    },
+                    "scope": {
+                      "enabled": false,
+                      "type": "object"
+                    }
+                  },
+                  "type": "nested"
+                },
+                "detector_description": {
+                  "type": "text"
+                },
+                "detector_index": {
+                  "type": "integer"
+                },
+                "exclude_frequent": {
+                  "type": "keyword"
+                },
+                "field_name": {
+                  "type": "keyword"
+                },
+                "function": {
+                  "type": "keyword"
+                },
+                "over_field_name": {
+                  "type": "keyword"
+                },
+                "partition_field_name": {
+                  "type": "keyword"
+                },
+                "use_null": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "influencers": {
+              "type": "keyword"
+            },
+            "latency": {
+              "type": "keyword"
+            },
+            "multivariate_by_fields": {
+              "type": "boolean"
+            },
+            "per_partition_categorization": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "stop_on_warn": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "summary_count_field_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "analysis_limits": {
+          "properties": {
+            "categorization_examples_limit": {
+              "type": "long"
+            },
+            "model_memory_limit": {
+              "type": "keyword"
+            }
+          }
+        },
+        "analyzed_fields": {
+          "enabled": false,
+          "type": "object"
+        },
+        "background_persist_interval": {
+          "type": "keyword"
+        },
+        "chunking_config": {
+          "properties": {
+            "mode": {
+              "type": "keyword"
+            },
+            "time_span": {
+              "type": "keyword"
+            }
+          }
+        },
+        "config_type": {
+          "type": "keyword"
+        },
+        "create_time": {
+          "type": "date"
+        },
+        "custom_settings": {
+          "enabled": false,
+          "type": "object"
+        },
+        "daily_model_snapshot_retention_after_days": {
+          "type": "long"
+        },
+        "data_description": {
+          "properties": {
+            "field_delimiter": {
+              "type": "keyword"
+            },
+            "format": {
+              "type": "keyword"
+            },
+            "quote_character": {
+              "type": "keyword"
+            },
+            "time_field": {
+              "type": "keyword"
+            },
+            "time_format": {
+              "type": "keyword"
+            }
+          }
+        },
+        "datafeed_id": {
+          "type": "keyword"
+        },
+        "delayed_data_check_config": {
+          "properties": {
+            "check_window": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        },
+        "deleting": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "text"
+        },
+        "dest": {
+          "properties": {
+            "index": {
+              "type": "keyword"
+            },
+            "results_field": {
+              "type": "keyword"
+            }
+          }
+        },
+        "finished_time": {
+          "type": "date"
+        },
+        "frequency": {
+          "type": "keyword"
+        },
+        "groups": {
+          "type": "keyword"
+        },
+        "headers": {
+          "enabled": false,
+          "type": "object"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "indices": {
+          "type": "keyword"
+        },
+        "indices_options": {
+          "enabled": false,
+          "type": "object"
+        },
+        "job_id": {
+          "type": "keyword"
+        },
+        "job_type": {
+          "type": "keyword"
+        },
+        "job_version": {
+          "type": "keyword"
+        },
+        "max_empty_searches": {
+          "type": "keyword"
+        },
+        "max_num_threads": {
+          "type": "integer"
+        },
+        "model_memory_limit": {
+          "type": "keyword"
+        },
+        "model_plot_config": {
+          "properties": {
+            "annotations_enabled": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "terms": {
+              "type": "keyword"
+            }
+          }
+        },
+        "model_snapshot_id": {
+          "type": "keyword"
+        },
+        "model_snapshot_min_version": {
+          "type": "keyword"
+        },
+        "model_snapshot_retention_days": {
+          "type": "long"
+        },
+        "query": {
+          "enabled": false,
+          "type": "object"
+        },
+        "query_delay": {
+          "type": "keyword"
+        },
+        "renormalization_window_days": {
+          "type": "long"
+        },
+        "results_index_name": {
+          "type": "keyword"
+        },
+        "results_retention_days": {
+          "type": "long"
+        },
+        "runtime_mappings": {
+          "enabled": false,
+          "type": "object"
+        },
+        "script_fields": {
+          "enabled": false,
+          "type": "object"
+        },
+        "scroll_size": {
+          "type": "long"
+        },
+        "source": {
+          "properties": {
+            "_source": {
+              "enabled": false,
+              "type": "object"
+            },
+            "index": {
+              "type": "keyword"
+            },
+            "query": {
+              "enabled": false,
+              "type": "object"
+            },
+            "runtime_mappings": {
+              "enabled": false,
+              "type": "object"
+            }
+          }
+        },
+        "version": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "max_result_window": "10000",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
