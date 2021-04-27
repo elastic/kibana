@@ -86,10 +86,10 @@ describe('PalettePicker', function () {
     });
   });
 
-  it('not renders the top level switch for the elastic charts implementation', async () => {
+  it('renders the top level switch for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(0);
+      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(1);
     });
   });
 
