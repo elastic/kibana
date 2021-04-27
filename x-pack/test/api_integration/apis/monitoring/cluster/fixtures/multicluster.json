@@ -82,7 +82,8 @@
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -178,7 +179,8 @@
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -274,7 +276,8 @@
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {

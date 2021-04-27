@@ -24,6 +24,8 @@ import { toExpression, Ast } from '@kbn/interpreter/common';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import isEqual from 'fast-deep-equal';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { METRIC_TYPE } from '../../../../../../src/plugins/usage_collection/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -51,7 +53,7 @@ import {
 } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
-import { getEditPath, DOC_TYPE } from '../../../common';
+import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import type { ErrorMessage } from '../types';
@@ -95,6 +97,7 @@ export interface LensEmbeddableDeps {
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class Embeddable
@@ -112,6 +115,14 @@ export class Embeddable
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
+
+  private logError(type: 'runtime' | 'validation') {
+    this.deps.usageCollection?.reportUiCounter(
+      PLUGIN_ID,
+      METRIC_TYPE.COUNT,
+      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error'
+    );
+  }
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -255,6 +266,9 @@ export class Embeddable
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
     this.errors = errors;
     this.expression = ast ? toExpression(ast) : null;
+    if (errors) {
+      this.logError('validation');
+    }
     await this.initializeOutput();
     this.isInitialized = true;
   }
@@ -326,6 +340,9 @@ export class Embeddable
         className={input.className}
         style={input.style}
         canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+        onRuntimeError={() => {
+          this.logError('runtime');
+        }}
       />,
       domNode
     );

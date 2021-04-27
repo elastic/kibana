@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { loggingSystemMock } from '../../mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { AllControlStates, State } from './types';
@@ -15,6 +15,7 @@ import { createInitialState } from './model';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 
+const esClient = elasticsearchServiceMock.createElasticsearchClient();
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
     jest
@@ -74,6 +75,7 @@ describe('migrationsStateActionMachine', () => {
       logger: mockLogger.get(),
       model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
       next,
+      client: esClient,
     });
     const logs = loggingSystemMock.collect(mockLogger);
     const doneLog = logs.info.splice(8, 1)[0][0];
@@ -151,6 +153,7 @@ describe('migrationsStateActionMachine', () => {
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
         next,
+        client: esClient,
       })
     ).resolves.toEqual(expect.anything());
   });
@@ -161,6 +164,7 @@ describe('migrationsStateActionMachine', () => {
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
         next,
+        client: esClient,
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'migrated' }));
   });
@@ -171,6 +175,7 @@ describe('migrationsStateActionMachine', () => {
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
         next,
+        client: esClient,
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'patched' }));
   });
@@ -181,6 +186,7 @@ describe('migrationsStateActionMachine', () => {
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
         next,
+        client: esClient,
       })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Unable to complete saved object migrations for the [.my-so-index] index: the fatal reason]`
@@ -196,6 +202,7 @@ describe('migrationsStateActionMachine', () => {
       logger: mockLogger.get(),
       model: transitionModel(['LEGACY_DELETE', 'FATAL']),
       next,
+      client: esClient,
     }).catch((err) => err);
     // Ignore the first 4 log entries that come from our model
     const executionLogLogs = loggingSystemMock.collect(mockLogger).info.slice(4);
@@ -418,6 +425,7 @@ describe('migrationsStateActionMachine', () => {
             })
           );
         },
+        client: esClient,
       })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted]`
@@ -450,6 +458,7 @@ describe('migrationsStateActionMachine', () => {
         next: () => {
           throw new Error('this action throws');
         },
+        client: esClient,
       })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Error: this action throws]`
@@ -483,6 +492,7 @@ describe('migrationsStateActionMachine', () => {
           if (state.controlState === 'LEGACY_DELETE') throw new Error('this action throws');
           return () => Promise.resolve('hello');
         },
+        client: esClient,
       });
     } catch (e) {
       /** ignore */
@@ -679,5 +689,38 @@ describe('migrationsStateActionMachine', () => {
         ],
       ]
     `);
+  });
+  describe('cleanup', () => {
+    beforeEach(() => {
+      cleanupMock.mockClear();
+    });
+    it('calls cleanup function when an action throws', async () => {
+      await expect(
+        migrationStateActionMachine({
+          initialState: { ...initialState, reason: 'the fatal reason' } as State,
+          logger: mockLogger.get(),
+          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+          next: () => {
+            throw new Error('this action throws');
+          },
+          client: esClient,
+        })
+      ).rejects.toThrow();
+
+      expect(cleanupMock).toHaveBeenCalledTimes(1);
+    });
+    it('calls cleanup function when reaching the FATAL state', async () => {
+      await expect(
+        migrationStateActionMachine({
+          initialState: { ...initialState, reason: 'the fatal reason' } as State,
+          logger: mockLogger.get(),
+          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+          next,
+          client: esClient,
+        })
+      ).rejects.toThrow();
+
+      expect(cleanupMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
