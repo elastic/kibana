@@ -37,6 +37,7 @@ export const useIndexData = (
       getFieldType,
       getDataGridSchemaFromKibanaFieldType,
       getDataGridSchemaFromESFieldType,
+      getFieldsFromKibanaIndexPattern,
       showDataGridColumnChartErrorMessageToast,
       useDataGrid,
       useRenderCellValue,
@@ -82,9 +83,13 @@ export const useIndexData = (
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
     // Get all field names for each returned doc and flatten it
     // to a list of unique field names used across all docs.
-    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
+    const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))].filter((d) =>
+      allKibanaIndexPatternFields.includes(d)
+    );
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
     setStatus(INDEX_STATUS.LOADED);
