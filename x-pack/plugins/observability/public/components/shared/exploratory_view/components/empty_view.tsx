@@ -6,12 +6,38 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { LOADING_VIEW } from '../series_builder/series_builder';
+import { SeriesUrl } from '../types';
 
-export function EmptyView({ loading, height }: { loading: boolean; height: string }) {
+export function EmptyView({
+  loading,
+  height,
+  series,
+}: {
+  loading: boolean;
+  height: string;
+  series: SeriesUrl;
+}) {
+  const { dataType, reportType, reportDefinitions } = series ?? {};
+
+  let emptyMessage = EMPTY_LABEL;
+
+  if (dataType) {
+    if (reportType) {
+      if (isEmpty(reportDefinitions)) {
+        emptyMessage = CHOOSE_REPORT_DEFINITION;
+      }
+    } else {
+      emptyMessage = SELECT_REPORT_TYPE_BELOW;
+    }
+  } else {
+    emptyMessage = SELECTED_DATA_TYPE_FOR_REPORT;
+  }
+
   return (
     <Wrapper height={height}>
       {loading && (
@@ -27,7 +53,7 @@ export function EmptyView({ loading, height }: { loading: boolean; height: strin
       <EuiSpacer />
       <FlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem>
-          <EuiText>{loading ? LOADING_VIEW : EMPTY_LABEL}</EuiText>
+          <EuiText>{loading ? LOADING_VIEW : emptyMessage}</EuiText>
         </EuiFlexItem>
       </FlexGroup>
     </Wrapper>
@@ -47,3 +73,22 @@ const FlexGroup = styled(EuiFlexGroup)`
 export const EMPTY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.emptyview', {
   defaultMessage: 'Nothing to display.',
 });
+
+export const CHOOSE_REPORT_DEFINITION = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.emptyReportDefinition',
+  {
+    defaultMessage: 'Please choose a report definition below to visualize.',
+  }
+);
+
+export const SELECT_REPORT_TYPE_BELOW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectReportType.empty',
+  {
+    defaultMessage: 'Please Select a report type below to define visualization.',
+  }
+);
+
+const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
+  'xpack.observability.expView.reportType.selectDataType',
+  { defaultMessage: 'Please Select a data type below to start building a series.' }
+);

@@ -75,6 +75,8 @@ export function PageViewsTrend() {
     http?.basePath.get()
   );
 
+  const showAnalyzeButton = false;
+
   return (
     <div>
       <EuiFlexGroup responsive={false}>
@@ -90,18 +92,20 @@ export function PageViewsTrend() {
             dataTestSubj={'pvBreakdownFilter'}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 170 }}>
-          <EuiButton
-            size="s"
-            isDisabled={!serviceName?.[0]}
-            href={exploratoryViewLink}
-          >
-            <FormattedMessage
-              id="xpack.apm.csm.pageViews.analyze"
-              defaultMessage="Analyze"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false} style={{ width: 170 }}>
+            <EuiButton
+              size="s"
+              isDisabled={!serviceName?.[0]}
+              href={exploratoryViewLink}
+            >
+              <FormattedMessage
+                id="xpack.apm.csm.pageViews.analyze"
+                defaultMessage="Analyze"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <PageViewsChart data={data} loading={status !== 'success'} />

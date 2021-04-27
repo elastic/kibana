@@ -182,9 +182,9 @@ export const LOADING_VIEW = i18n.translate(
   }
 );
 
-const SELECT_REPORT_TYPE = i18n.translate(
+export const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
   {
-    defaultMessage: 'Select a report type to define visualization.',
+    defaultMessage: 'No report type selected',
   }
 );

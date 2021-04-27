@@ -41,9 +41,6 @@ export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): 
         field: 'monitor.name',
       },
       {
-        field: 'monitor.id',
-      },
-      {
         field: 'url.full',
       },
     ],

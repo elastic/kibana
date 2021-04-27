@@ -6,13 +6,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { merge } from 'lodash';
 import { EuiComboBox, EuiFormControlLayout, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
 
 const formatOptions = (values?: string[]) => {
-  return (values ?? []).map((val) => ({
+  const uniqueValues = Array.from(new Set(values));
+
+  return (uniqueValues ?? []).map((val) => ({
     label: val,
   }));
 };
@@ -27,11 +30,13 @@ export function FieldValueCombobox({
   setQuery,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
-  const [options, setOptions] = useState<ValueOption[]>(formatOptions(values));
+  const [options, setOptions] = useState<ValueOption[]>(
+    formatOptions(merge(values ?? [], selectedValue ?? []))
+  );
 
   useEffect(() => {
-    setOptions(formatOptions(values));
-  }, [values]);
+    setOptions(formatOptions(merge(values ?? [], selectedValue ?? [])));
+  }, [selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {
     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
@@ -69,6 +74,12 @@ const ComboWrapper = styled.div`
       height: auto;
       .euiFormControlLayout__prepend {
         margin: auto;
+      }
+      .euiComboBoxPill {
+        max-width: 250px;
+      }
+      .euiComboBox__inputWrap {
+        border-radius: 0;
       }
     }
   }

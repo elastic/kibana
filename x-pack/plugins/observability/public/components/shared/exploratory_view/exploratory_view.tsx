@@ -79,7 +79,7 @@ export function ExploratoryView() {
                 attributes={lensAttributes}
               />
             ) : (
-              <EmptyView loading={loading} height={height} />
+              <EmptyView series={series} loading={loading} height={height} />
             )}
           </LensWrapper>
           <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />

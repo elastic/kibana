@@ -77,7 +77,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
 
 export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
   'xpack.observability.expView.reportType.noDataType',
-  { defaultMessage: 'Select a data type to start building a series.' }
+  { defaultMessage: 'No data type selected.' }
 );
 
 const FlexGroup = styled(EuiFlexGroup)`
