@@ -42,7 +42,7 @@ export const getTimeseriesVisRenderer: (deps: {
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     // Build optimization. Move app styles from main bundle
-    // @ts-ignore
+    // @ts-expect-error TS error, cannot find type declaration for scss
     await import('./application/index.scss');
 
     handlers.onDestroy(() => {
