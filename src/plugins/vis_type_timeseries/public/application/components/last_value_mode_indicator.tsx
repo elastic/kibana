@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
+import { getFixedOffset } from './lib/get_fixed_offset';
+import { getTimezone } from '../lib/get_timezone';
 import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
 import { PanelData } from '../../../common/types';
 
@@ -19,6 +21,7 @@ interface LastValueModeIndicatorProps {
   seriesData?: PanelData['data'];
   panelInterval: number;
   modelInterval: string;
+  ignoreDaylightTime: boolean;
 }
 
 const lastValueLabel = i18n.translate('visTypeTimeseries.lastValueModeIndicator.lastValue', {
@@ -29,18 +32,26 @@ export const LastValueModeIndicator = ({
   seriesData,
   panelInterval,
   modelInterval,
+  ignoreDaylightTime,
 }: LastValueModeIndicatorProps) => {
   if (!seriesData?.length) return <EuiBadge>{lastValueLabel}</EuiBadge>;
 
   const dateFormat = getUISettings().get('dateFormat');
   const scaledDataFormat = getUISettings().get('dateFormat:scaled');
+  const timeZone = getTimezone(getUISettings());
 
   const getFormattedPanelInterval = () => {
     const interval = convertIntervalIntoUnit(panelInterval, false);
     return interval && `${interval.unitValue}${interval.unitString}`;
   };
 
-  const formatter = createIntervalBasedFormatter(panelInterval, scaledDataFormat, dateFormat);
+  const formatter = createIntervalBasedFormatter(
+    panelInterval,
+    scaledDataFormat,
+    dateFormat,
+    ignoreDaylightTime,
+    getFixedOffset(timeZone)
+  );
   const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
   const formattedPanelInterval =
     (isAutoInterval(modelInterval) || isGteInterval(modelInterval)) && getFormattedPanelInterval();

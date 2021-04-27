@@ -180,6 +180,7 @@ export const seriesItems = schema.object({
   series_time_field: fieldObject,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
+  series_ignore_daylight_time: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
   palette: schema.object({
     type: stringRequired,
@@ -215,6 +216,7 @@ export const panel = schema.object({
   background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
   drilldown_url: stringOptional,
   drop_last_bucket: numberIntegerOptional,
+  ignore_daylight_time: numberIntegerOptional,
   filter: schema.maybe(queryObject),
   gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
   gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),

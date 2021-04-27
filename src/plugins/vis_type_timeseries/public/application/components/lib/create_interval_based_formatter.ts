@@ -20,9 +20,15 @@ function getFormat(interval: number, rules: string[][] = []) {
 export function createIntervalBasedFormatter(
   interval: number,
   rules: string[][],
-  dateFormat: string
+  dateFormat: string,
+  ignoreDaylightTime: boolean,
+  fixedOffset: number
 ) {
   return (val: moment.MomentInput): string => {
-    return moment(val).format(getFormat(interval, rules) ?? dateFormat);
+    const momentVal = moment(val);
+    if (ignoreDaylightTime) {
+      momentVal.utcOffset(fixedOffset);
+    }
+    return momentVal.format(getFormat(interval, rules) ?? dateFormat);
   };
 }
