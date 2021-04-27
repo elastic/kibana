@@ -114,7 +114,7 @@ The following panel types support drilldowns.
 
 | TSVB
 ^| X
-^|
+^| X
 
 | Tag Cloud
 ^| X
