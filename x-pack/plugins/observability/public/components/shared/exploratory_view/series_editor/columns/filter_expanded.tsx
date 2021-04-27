@@ -6,19 +6,16 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import {
-  EuiFieldSearch,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiLoadingSpinner,
-  EuiFilterGroup,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
+import { rgba } from 'polished';
+import { i18n } from '@kbn/i18n';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   seriesId: string;
@@ -43,15 +40,14 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
     indexPattern,
     sourceField: field,
     time: series.time,
+    keepHistory: true,
   });
 
   const filters = series?.filters ?? [];
 
   const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
-  const displayValues = (values || []).filter((opt) =>
-    opt.toLowerCase().includes(value.toLowerCase())
-  );
+  const displayValues = values.filter((opt) => opt.toLowerCase().includes(value.toLowerCase()));
 
   return (
     <Wrapper>
@@ -60,50 +56,70 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
       </EuiButtonEmpty>
       <EuiFieldSearch
         fullWidth
+        isLoading={loading}
         value={value}
         onChange={(evt) => {
           setValue(evt.target.value);
         }}
+        placeholder={i18n.translate('xpack.observability.filters.expanded.search', {
+          defaultMessage: 'Search for {label}',
+          values: { label },
+        })}
       />
       <EuiSpacer size="s" />
-      {loading && (
-        <div style={{ textAlign: 'center' }}>
-          <EuiLoadingSpinner />
-        </div>
-      )}
-      {displayValues.map((opt) => (
-        <Fragment key={opt}>
-          <EuiFilterGroup fullWidth={true} color="primary">
-            {isNegated !== false && (
+      <ListWrapper>
+        {displayValues.map((opt) => (
+          <Fragment key={opt}>
+            <EuiFilterGroup fullWidth={true} color="primary">
+              {isNegated !== false && (
+                <FilterValueButton
+                  field={field}
+                  value={opt}
+                  allSelectedValues={currFilter?.notValues}
+                  negate={true}
+                  nestedField={nestedField}
+                  seriesId={seriesId}
+                  isNestedOpen={isOpen}
+                  setIsNestedOpen={setIsOpen}
+                />
+              )}
               <FilterValueButton
                 field={field}
                 value={opt}
-                allSelectedValues={currFilter?.notValues}
-                negate={true}
+                allSelectedValues={currFilter?.values}
                 nestedField={nestedField}
                 seriesId={seriesId}
+                negate={false}
                 isNestedOpen={isOpen}
                 setIsNestedOpen={setIsOpen}
               />
-            )}
-            <FilterValueButton
-              field={field}
-              value={opt}
-              allSelectedValues={currFilter?.values}
-              nestedField={nestedField}
-              seriesId={seriesId}
-              negate={false}
-              isNestedOpen={isOpen}
-              setIsNestedOpen={setIsOpen}
-            />
-          </EuiFilterGroup>
-          <EuiSpacer size="s" />
-        </Fragment>
-      ))}
+            </EuiFilterGroup>
+            <EuiSpacer size="s" />
+          </Fragment>
+        ))}
+      </ListWrapper>
     </Wrapper>
   );
 }
 
+const ListWrapper = euiStyled.div`
+  height: 400px;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
+
 const Wrapper = styled.div`
-  max-width: 400px;
+  width: 400px;
 `;
