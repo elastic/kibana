@@ -42,7 +42,7 @@ export const getPieVisTypeDefinition = ({
       },
       labels: {
         show: true,
-        last_level: true,
+        last_level: !showElasticChartsOptions,
         values: true,
         valuesFormat: ValueFormats.PERCENT,
         truncate: 100,

@@ -313,12 +313,16 @@ const PieComponent = (props: PieComponentProps) => {
             valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
             percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
             valueGetter={
-              !visParams.labels.show || visParams.labels.valuesFormat === ValueFormats.VALUE
+              !visParams.labels.show ||
+              visParams.labels.valuesFormat === ValueFormats.VALUE ||
+              !visParams.labels.values
                 ? undefined
                 : 'percent'
             }
             valueFormatter={(d: number) =>
-              !visParams.labels.show ? '' : metricFieldFormatter.convert(d)
+              !visParams.labels.show || !visParams.labels.values
+                ? ''
+                : metricFieldFormatter.convert(d)
             }
             layers={layers}
             config={config}

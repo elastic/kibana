@@ -170,21 +170,25 @@ const PieOptions = (props: PieOptionsProps) => {
             data-test-subj="visTypePieLabelPositionSelect"
           />
         )}
-        {!props.showElasticChartsOptions && (
-          <SwitchOption
-            label={i18n.translate('visTypePie.editors.pie.showTopLevelOnlyLabel', {
-              defaultMessage: 'Show top level only',
-            })}
-            paramName="last_level"
-            value={stateParams.labels.last_level}
-            setValue={setLabels}
-            data-test-subj="visTypePieTopLevelSwitch"
-          />
-        )}
+        <SwitchOption
+          label={i18n.translate('visTypePie.editors.pie.showTopLevelOnlyLabel', {
+            defaultMessage: 'Show top level only',
+          })}
+          disabled={
+            !stateParams.labels.show ||
+            (props.showElasticChartsOptions &&
+              stateParams.labels.position === LabelPositions.INSIDE)
+          }
+          paramName="last_level"
+          value={stateParams.labels.last_level}
+          setValue={setLabels}
+          data-test-subj="visTypePieTopLevelSwitch"
+        />
         <SwitchOption
           label={i18n.translate('visTypePie.editors.pie.showValuesLabel', {
             defaultMessage: 'Show values',
           })}
+          disabled={!stateParams.labels.show}
           paramName="values"
           value={stateParams.labels.values}
           setValue={setLabels}

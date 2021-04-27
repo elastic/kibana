@@ -36,6 +36,15 @@ export const getConfig = (
     config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
   }
 
+  if (visParams.labels.last_level && visParams.labels.show) {
+    config.linkLabel = {
+      maxCount: Number.POSITIVE_INFINITY,
+      maximumSection: Number.POSITIVE_INFINITY,
+      // valueFormatter: !visParams.labels.values ? () => '' : undefined,
+      valueFormatter: () => '',
+    };
+  }
+
   // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   if (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) {
