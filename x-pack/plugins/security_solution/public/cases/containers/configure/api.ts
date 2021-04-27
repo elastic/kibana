@@ -12,6 +12,7 @@ import {
   CasesConfigurePatch,
   CasesConfigureResponse,
   CasesConfigureRequest,
+  CasesConfigurationsResponse,
 } from '../../../../../cases/common/api';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -22,8 +23,13 @@ import {
 } from '../../../../../cases/common/constants';
 
 import { ApiProps } from '../types';
-import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
+import {
+  convertToCamelCase,
+  decodeCaseConfigurationsResponse,
+  decodeCaseConfigureResponse,
+} from '../utils';
 import { CaseConfigure } from './types';
+import { getCaseConfigurationDetailsUrl } from '../../../../../cases/common/api/helpers';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
   const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
@@ -34,8 +40,9 @@ export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConne
   return response;
 };
 
+// TODO: refactor
 export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
-  const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
+  const response = await KibanaServices.get().http.fetch<CasesConfigurationsResponse>(
     CASE_CONFIGURE_URL,
     {
       method: 'GET',
@@ -43,11 +50,16 @@ export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfig
     }
   );
 
-  return !isEmpty(response)
-    ? convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-        decodeCaseConfigureResponse(response)
-      )
-    : null;
+  if (!isEmpty(response)) {
+    const decodedConfigs = decodeCaseConfigurationsResponse(response);
+    if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
+      return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(decodedConfigs[0]);
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
 };
 
 export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
@@ -77,11 +89,12 @@ export const postCaseConfigure = async (
 };
 
 export const patchCaseConfigure = async (
+  id: string,
   caseConfiguration: CasesConfigurePatch,
   signal: AbortSignal
 ): Promise<CaseConfigure> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASE_CONFIGURE_URL,
+    getCaseConfigurationDetailsUrl(id),
     {
       method: 'PATCH',
       body: JSON.stringify(caseConfiguration),
