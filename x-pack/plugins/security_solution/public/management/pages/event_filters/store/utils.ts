@@ -44,7 +44,7 @@ export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListIte
   },
   name: '',
   namespace_type: 'agnostic',
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   // TODO: Try to fix this type casting
   os_types: [
