@@ -1,25 +1,42 @@
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
+- TTL: (e.g. "April 20th, 2021", time the review is expected to be completed by. Don't use relative days.)
+- Champion: (usually you, person who writes and updates the draft and incorporates feedback)
+- Main reviewer: (somebody familiar with the subject matter, who has committed to provide timely and detailed reviews for this RFC)
+- Owner team: (team who will own this feature, if it is accepted)
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
-# Summary
 
-Brief explanation of the feature.
+# Executive Summary
 
-# Basic example
+Summarize this RFC so those unfamiliar with the project and code, and without a
+lot of time, can quickly understand what the problem is, why it is important,
+and the proposed solution. Below are some suggested sections for the Executive
+Summary. Tweak as you desire and try to keep it succinct.
 
-If the proposal involves a new or changed API, include a basic code example.
-Omit this section if it's not applicable.
+## Problem statement
 
-# Motivation
+What is the problem we are trying to solve? Supply any relevant background
+context. Why is this something we should focus on _now_.
 
-Why are we doing this? What use cases does it support? What is the expected
-outcome?
+Focus on explaining the problem so that if this RFC is not accepted, this
+information could be used to develop alternative solutions. In other words,
+don't couple this too closely with the solution you have in mind.
 
-Please focus on explaining the motivation so that if this RFC is not accepted,
-the motivation could be used to develop alternative solutions. In other words,
-enumerate the constraints you are trying to solve without coupling them too
-closely to the solution you have in mind.
+## Goals
+
+What are the goals of this project? How will we know if it was successful?
+
+## Proposal
+
+What are we doing to achieve those goals and solve the problem?
+
+
+# Public API Changes
+
+For folks that don't care about implementation details, give them the proposed
+API changes here. Code snippets showing example usage are encouraged.
+
 
 # Detailed design
 
@@ -29,7 +46,18 @@ implementation to implement. This should get into specifics and corner-cases,
 and include examples of how the feature is used. Any new terminology should be
 defined here.
 
-# Drawbacks
+Below are a couple of suggested sections that you can tweak as you desire.
+
+## Terminology
+
+A glossary of new terms can be very helpful.
+
+## Architectural diagrams.
+
+A picture is worth a thousand words.
+
+
+# Risks
 
 Why should we *not* do this? Please consider:
 
