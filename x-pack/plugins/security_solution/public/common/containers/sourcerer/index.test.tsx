@@ -51,6 +51,11 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 jest.mock('../../lib/kibana', () => ({
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {

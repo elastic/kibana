@@ -276,12 +276,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
       name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Use legacy search',
+        defaultMessage: 'Use sync search',
       }),
       value: false,
       type: 'boolean',
       description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `Kibana uses a new search and batching infrastructure.
+        defaultMessage: `Kibana uses a new asynchronous search and infrastructure.
            Enable this option if you prefer to fallback to the legacy synchronous behavior`,
       }),
       deprecation: {

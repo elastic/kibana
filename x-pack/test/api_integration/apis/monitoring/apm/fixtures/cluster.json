@@ -9,7 +9,10 @@
     "config": {
       "container": false
     },
-    "timeOfLastEvent": "2018-08-31T13:59:21.201Z"
+    "timeOfLastEvent": "2018-08-31T13:59:21.199Z",
+    "versions": [
+      "7.0.0-alpha1"
+    ]
   },
   "metrics": {
     "apm_cpu": [
