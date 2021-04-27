@@ -17,7 +17,6 @@ export function getImportResultMessage(connectors: Array<SavedObject<RawAction>>
     defaultMessage:
       '{connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {connector has} other {connectors have}} secrets that require updates.',
     values: {
-      connectorsLength: connectors.length,
       connectorsWithSecretsLength: connectorsWithSecrets.length,
     },
   });
