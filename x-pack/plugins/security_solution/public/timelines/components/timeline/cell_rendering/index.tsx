@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';

@@ -51,6 +51,7 @@ import { activeTimeline } from '../../../containers/active_timeline_context';
 import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
+import { defaultControlColumn } from '../body/control_columns';
 import { Sort } from '../body/sort';
 
 const TimelineHeaderContainer = styled.div`
@@ -232,6 +233,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
+  const eqlControlColumns = [defaultControlColumn];
+
   return (
     <>
       <InPortal node={eqlEventsCountPortalNode}>
@@ -298,6 +301,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={eqlControlColumns}
+                trailingControlColumns={[]}
               />
             </StyledEuiFlyoutBody>
 

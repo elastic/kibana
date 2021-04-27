@@ -36,6 +36,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { defaultControlColumn } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -198,6 +199,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
+  const pinnedTabControlColumns = [defaultControlColumn];
+
   return (
     <>
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
@@ -229,6 +232,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={pinnedTabControlColumns}
+                trailingControlColumns={[]}
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter

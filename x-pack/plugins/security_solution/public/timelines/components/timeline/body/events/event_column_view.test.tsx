@@ -21,6 +21,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+import { defaultControlColumn } from '../control_columns';
+
 
 jest.mock('../../../../../common/hooks/use_selector');
 
@@ -71,6 +73,8 @@ describe('EventColumnView', () => {
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
+    leadingControlColumns: [defaultControlColumn],
+    trailingControlColumns: [],
   };
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {

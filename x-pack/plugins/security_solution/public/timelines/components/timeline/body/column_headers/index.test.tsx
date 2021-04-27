@@ -21,6 +21,7 @@ import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
+import { defaultControlColumn } from '../control_columns';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -59,6 +60,8 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -79,6 +82,8 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -100,6 +105,8 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -159,6 +166,8 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -201,6 +210,8 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -238,6 +249,8 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
