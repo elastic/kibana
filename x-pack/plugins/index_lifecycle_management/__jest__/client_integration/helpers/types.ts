@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Phases } from '../../../common/types';
+
+export type Phase = keyof Phases;
+
+export type TestSubjects =
+  | 'snapshotPolicyCombobox'
+  | 'savePolicyButton'
+  | 'customPolicyCallout'
+  | 'noPoliciesCallout'
+  | 'policiesErrorCallout'
+  | 'rolloverSwitch'
+  | 'rolloverSettingsRequired'
+  | 'hot-selectedMaxSizeStored'
+  | 'hot-selectedMaxSizeStoredUnits'
+  | 'hot-selectedMaxDocuments'
+  | 'hot-selectedMaxAge'
+  | 'hot-selectedMaxAgeUnits'
+  | 'policyTablePolicyNameLink'
+  | 'policyTitle'
+  | 'createPolicyButton'
+  | 'cold-freezeSwitch'
+  | 'frozen-freezeSwitch'
+  | string;

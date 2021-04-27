@@ -5,25 +5,7 @@
  * 2.0.
  */
 
-export type TestSubjects =
-  | 'snapshotPolicyCombobox'
-  | 'savePolicyButton'
-  | 'customPolicyCallout'
-  | 'noPoliciesCallout'
-  | 'policiesErrorCallout'
-  | 'rolloverSwitch'
-  | 'rolloverSettingsRequired'
-  | 'hot-selectedMaxSizeStored'
-  | 'hot-selectedMaxSizeStoredUnits'
-  | 'hot-selectedMaxDocuments'
-  | 'hot-selectedMaxAge'
-  | 'hot-selectedMaxAgeUnits'
-  | 'policyTablePolicyNameLink'
-  | 'policyTitle'
-  | 'createPolicyButton'
-  | 'cold-freezeSwitch'
-  | 'frozen-freezeSwitch'
-  | string;
+export { TestSubjects, Phase } from './types';
 
 export { createNodeAllocationActions } from './create_node_allocation_actions';
 export { createEnablePhaseAction } from './create_enable_phase_action';

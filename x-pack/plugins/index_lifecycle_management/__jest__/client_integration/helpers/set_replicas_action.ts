@@ -7,13 +7,11 @@
 
 import { TestBed } from '@kbn/test/jest';
 
-import { Phases as PolicyPhases } from '../../../common/types';
+import { Phase } from './types';
 import { createFormToggleAction } from './create_form_toggle_action';
 import { createFormSetValueAction } from './create_form_set_value_action';
 
-type Phases = keyof PolicyPhases;
-
-export const setReplicas = async (testBed: TestBed, phase: Phases, value: string) => {
+export const setReplicas = async (testBed: TestBed, phase: Phase, value: string) => {
   const { exists } = testBed;
 
   if (!exists(`${phase}-selectedReplicaCount`)) {

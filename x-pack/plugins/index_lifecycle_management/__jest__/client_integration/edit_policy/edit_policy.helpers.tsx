@@ -8,10 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import { TestBedConfig } from '@kbn/test/jest';
 
-import { Phases as PolicyPhases } from '../../../common/types';
 import { AppServicesContext } from '../../../public/types';
 
 import {
+  Phase,
   createEnablePhaseAction,
   createNodeAllocationActions,
   createFormToggleAction,
@@ -21,7 +21,6 @@ import {
 } from '../helpers';
 import { initTestBed } from './init_test_bed';
 
-type Phases = keyof PolicyPhases;
 type SetupReturn = ReturnType<typeof setup>;
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
@@ -87,7 +86,7 @@ export const setup = async (arg?: {
     component.update();
   };
 
-  const createForceMergeActions = (phase: Phases) => {
+  const createForceMergeActions = (phase: Phase) => {
     const toggleSelector = `${phase}-forceMergeSwitch`;
     return {
       forceMergeFieldExists: () => exists(toggleSelector),
@@ -100,7 +99,7 @@ export const setup = async (arg?: {
     };
   };
 
-  const createIndexPriorityActions = (phase: Phases) => {
+  const createIndexPriorityActions = (phase: Phase) => {
     const toggleSelector = `${phase}-indexPrioritySwitch`;
     return {
       indexPriorityExists: () => exists(toggleSelector),
@@ -109,7 +108,7 @@ export const setup = async (arg?: {
     };
   };
 
-  const createMinAgeActions = (phase: Phases) => {
+  const createMinAgeActions = (phase: Phase) => {
     return {
       hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
       setMinAgeValue: createFormSetValueAction(testBed, `${phase}-selectedMinimumAge`),
@@ -118,7 +117,7 @@ export const setup = async (arg?: {
     };
   };
 
-  const createShrinkActions = (phase: Phases) => {
+  const createShrinkActions = (phase: Phase) => {
     const toggleSelector = `${phase}-shrinkSwitch`;
     return {
       shrinkExists: () => exists(toggleSelector),
@@ -127,11 +126,11 @@ export const setup = async (arg?: {
     };
   };
 
-  const createSetFreeze = (phase: Phases) =>
+  const createSetFreeze = (phase: Phase) =>
     createFormToggleAction(testBed, `${phase}-freezeSwitch`);
-  const createFreezeExists = (phase: Phases) => () => exists(`${phase}-freezeSwitch`);
+  const createFreezeExists = (phase: Phase) => () => exists(`${phase}-freezeSwitch`);
 
-  const createReadonlyActions = (phase: Phases) => {
+  const createReadonlyActions = (phase: Phase) => {
     const toggleSelector = `${phase}-readonlySwitch`;
     return {
       readonlyExists: () => exists(toggleSelector),
@@ -139,7 +138,7 @@ export const setup = async (arg?: {
     };
   };
 
-  const createSearchableSnapshotActions = (phase: Phases) => {
+  const createSearchableSnapshotActions = (phase: Phase) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;

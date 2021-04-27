@@ -7,11 +7,9 @@
 
 import { TestBed } from '@kbn/test/jest';
 
-import { Phases as PolicyPhases } from '../../../common/types';
+import { Phase } from './types';
 import { createFormToggleAction } from './create_form_toggle_action';
 
-type Phases = keyof PolicyPhases;
-
-export const createEnablePhaseAction = (testBed: TestBed, phase: Phases) => {
+export const createEnablePhaseAction = (testBed: TestBed, phase: Phase) => {
   return createFormToggleAction(testBed, `enablePhaseSwitch-${phase}`);
 };

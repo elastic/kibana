@@ -8,13 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
-import { Phases as PolicyPhases } from '../../../common/types';
+import { Phase } from './types';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 import { createFormSetValueAction } from './create_form_set_value_action';
 
-type Phases = keyof PolicyPhases;
-
-export const createNodeAllocationActions = (testBed: TestBed, phase: Phases) => {
+export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
   const { component, find, exists } = testBed;
 
   const controlsSelector = `${phase}-dataTierAllocationControls`;
