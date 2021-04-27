@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
-  ISavedObjectsRepository,
   KibanaRequest,
   MetricsServiceSetup,
   SavedObjectsClientContract,
@@ -61,7 +60,7 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest
   ): Promise<UsageObject> => {
     const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
