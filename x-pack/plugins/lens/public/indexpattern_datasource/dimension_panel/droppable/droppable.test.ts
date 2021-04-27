@@ -896,7 +896,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           droppedItem: referenceDragging,
           state: testState,
           dropType: 'duplicate_compatible',
-          columnId: 'col1_copy',
+          columnId: 'col1Copy',
         });
 
         expect(setState).toHaveBeenCalledWith({
@@ -904,12 +904,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'ref1Copy', 'col1', 'col1_copy'],
+              columnOrder: ['ref1', 'ref1Copy', 'col1', 'col1Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 col1: testState.layers.first.columns.col1,
                 ref1Copy: { ...testState.layers.first.columns.ref1 },
-                col1_copy: {
+                col1Copy: {
                   ...testState.layers.first.columns.col1,
                   references: ['ref1Copy'],
                 },
@@ -966,7 +966,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           droppedItem: metricDragging,
           state: testState,
           dropType: 'duplicate_compatible',
-          columnId: 'col1_copy',
+          columnId: 'col1Copy',
         });
 
         expect(setState).toHaveBeenCalledWith({
@@ -974,14 +974,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'ref2', 'ref1Copy', 'ref2Copy', 'col1', 'col1_copy'], // todo redefine
+              columnOrder: ['ref1', 'ref2', 'ref1Copy', 'ref2Copy', 'col1', 'col1Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 ref2: testState.layers.first.columns.ref2,
                 col1: testState.layers.first.columns.col1,
                 ref2Copy: { ...testState.layers.first.columns.ref2 },
                 ref1Copy: { ...testState.layers.first.columns.ref1 },
-                col1_copy: {
+                col1Copy: {
                   ...testState.layers.first.columns.col1,
                   references: ['ref1Copy', 'ref2Copy'],
                 },
@@ -1046,7 +1046,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           droppedItem: refDragging,
           state: testState,
           dropType: 'duplicate_compatible',
-          columnId: 'col1_copy',
+          columnId: 'col1Copy',
         });
 
         expect(setState).toHaveBeenCalledWith({
@@ -1062,7 +1062,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 'ref1',
                 'col1',
                 'ref1Copy',
-                'col1_copy',
+                'col1Copy',
               ],
               columns: {
                 innerRef1: testState.layers.first.columns.innerRef1,
@@ -1076,7 +1076,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   ...testState.layers.first.columns.ref1,
                   references: ['innerRef1Copy'],
                 },
-                col1_copy: {
+                col1Copy: {
                   ...testState.layers.first.columns.col1,
                   references: ['ref1Copy', 'ref2Copy'],
                 },

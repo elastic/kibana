@@ -111,18 +111,9 @@ function onMoveCompatible(
   const layer = state.layers[layerId];
   const sourceColumn = layer.columns[droppedItem.columnId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
-  let modifiedLayer = layer;
 
-  if (shouldDeleteSource) {
-    modifiedLayer = deleteColumn({
-      layer,
-      columnId: droppedItem.columnId,
-      indexPattern,
-    });
-  }
-
-  modifiedLayer = copyColumn({
-    layer: modifiedLayer,
+  const modifiedLayer = copyColumn({
+    layer,
     columnId,
     sourceColumnId: droppedItem.columnId,
     sourceColumn,
@@ -131,7 +122,6 @@ function onMoveCompatible(
   });
 
   const updatedColumnOrder = getColumnOrder(modifiedLayer);
-
   reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace

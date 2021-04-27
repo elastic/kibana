@@ -35,54 +35,32 @@ interface ColumnCopy {
   columnId: string;
   sourceColumn: IndexPatternColumn;
   sourceColumnId: string;
-  shouldDeleteSource?: boolean;
   indexPattern: IndexPattern;
+  shouldDeleteSource?: boolean;
 }
 
 export function copyColumn({
   layer,
   columnId,
   sourceColumn,
-  sourceColumnId,
   shouldDeleteSource,
+  indexPattern,
+  sourceColumnId,
 }: ColumnCopy): IndexPatternLayer {
-  const newColumns = copyReferencesRecursively(layer.columns, sourceColumn, columnId);
+  let modifiedLayer = {
+    ...layer,
+    columns: copyReferencesRecursively(layer.columns, sourceColumn, columnId),
+  };
 
-  const newColumnOrder = [...layer.columnOrder];
-
-  const newIds = [];
   if (shouldDeleteSource) {
-    const sourceIndex = newColumnOrder.findIndex((c) => c === sourceColumnId);
-    const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
-
-    if (targetIndex === -1) {
-      // for newly created columns, remove the old entry and add the last one to the end
-      newColumnOrder.splice(sourceIndex, 1);
-      if (newIds.length) {
-        newColumnOrder.push(...newIds);
-      }
-      newColumnOrder.push(columnId);
-    } else {
-      // for drop to replace, reuse the same index
-      newColumnOrder[sourceIndex] = columnId;
-    }
-  } else {
-    // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-    // then reorder based on dimension groups if necessary
-    if (newIds.length) {
-      newColumnOrder.push(...newIds);
-    }
-    const insertionIndex = sourceColumn.isBucketed
-      ? newColumnOrder.findIndex((id) => !layer.columns[id].isBucketed)
-      : newColumnOrder.length;
-    newColumnOrder.splice(insertionIndex, 0, columnId);
+    modifiedLayer = deleteColumn({
+      layer: modifiedLayer,
+      columnId: sourceColumnId,
+      indexPattern,
+    });
   }
 
-  return {
-    ...layer,
-    columnOrder: newColumnOrder,
-    columns: newColumns,
-  };
+  return modifiedLayer;
 }
 
 function copyReferencesRecursively(
