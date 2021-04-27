@@ -38,6 +38,7 @@ describe('TelemetryEventsSender', () => {
             id: 'X',
             name: 'Y',
             ruleset: 'Z',
+            version: '100',
           },
           file: {
             size: 3,
@@ -97,6 +98,7 @@ describe('TelemetryEventsSender', () => {
             id: 'X',
             name: 'Y',
             ruleset: 'Z',
+            version: '100',
           },
           file: {
             size: 3,
@@ -250,6 +252,57 @@ describe('allowlistEventFields', () => {
       c: {
         d: 'd',
       },
+    });
+  });
+
+  it('filters arrays of objects', () => {
+    const event = {
+      a: [
+        {
+          a1: 'a1',
+        },
+      ],
+      b: {
+        b1: 'b1',
+      },
+      c: [
+        {
+          d: 'd1',
+          e: 'e1',
+          f: 'f1',
+        },
+        {
+          d: 'd2',
+          e: 'e2',
+          f: 'f2',
+        },
+        {
+          d: 'd3',
+          e: 'e3',
+          f: 'f3',
+        },
+      ],
+    };
+    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+      a: [
+        {
+          a1: 'a1',
+        },
+      ],
+      b: {
+        b1: 'b1',
+      },
+      c: [
+        {
+          d: 'd1',
+        },
+        {
+          d: 'd2',
+        },
+        {
+          d: 'd3',
+        },
+      ],
     });
   });
 

@@ -15,6 +15,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
@@ -23,6 +24,7 @@ import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
+import { EventFiltersListPageUrlSearchParams } from '../pages/event_filters/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -177,4 +179,14 @@ export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLoc
   return `${path}${appendSearch(
     querystring.stringify(normalizeTrustedAppsPageLocation(location))
   )}`;
+};
+
+export const getEventFiltersListPath = (
+  location?: Partial<EventFiltersListPageUrlSearchParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_EVENT_FILTERS_PATH, {
+    tabName: AdministrationSubTab.eventFilters,
+  });
+
+  return `${path}${appendSearch(querystring.stringify(location))}`;
 };

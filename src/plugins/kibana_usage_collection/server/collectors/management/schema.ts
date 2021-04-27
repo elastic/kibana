@@ -432,11 +432,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableAlertingExperience': {
+  'labs:presentation:timeToPresent': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:presentation:unifiedToolbar': {
+  'labs:canvas:enable_ui': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

@@ -7,11 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { format } from 'url';
+import { stringify } from 'querystring';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
-import { ApmRuleRegistry } from '../../plugin';
+import type { ApmRuleRegistry } from '../../plugin';
+
+const format = ({
+  pathname,
+  query,
+}: {
+  pathname: string;
+  query: Record<string, any>;
+}): string => {
+  return `${pathname}?${stringify(query)}`;
+};
 
 export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
   apmRuleRegistry.registerType({
@@ -31,7 +40,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           },
         }),
         link: format({
-          pathname: `/app/apm/services/${alert['service.name']!}`,
+          pathname: `/app/apm/services/${alert['service.name']!}/errors`,
           query: {
             ...(alert['service.environment']
               ? { environment: alert['service.environment'] }
@@ -71,7 +80,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert }) => ({
+    format: ({ alert, formatters: { asDuration } }) => ({
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionDuration.reason',
         {
@@ -131,7 +140,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert }) => ({
+    format: ({ alert, formatters: { asPercent } }) => ({
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionErrorRate.reason',
         {

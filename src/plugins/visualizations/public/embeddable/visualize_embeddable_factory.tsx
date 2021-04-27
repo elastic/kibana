@@ -113,7 +113,7 @@ export class VisualizeEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('visualizations.displayName', {
-      defaultMessage: 'visualization',
+      defaultMessage: 'Visualization',
     });
   }
 

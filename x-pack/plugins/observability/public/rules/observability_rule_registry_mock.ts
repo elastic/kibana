@@ -9,7 +9,7 @@ import { ObservabilityRuleRegistry } from '../plugin';
 
 const createRuleRegistryMock = () => ({
   registerType: () => {},
-  getTypeByRuleId: () => {},
+  getTypeByRuleId: () => ({ format: () => ({ link: '/test/example' }) }),
   create: () => createRuleRegistryMock(),
 });
 

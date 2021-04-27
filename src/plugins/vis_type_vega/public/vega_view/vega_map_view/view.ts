@@ -175,6 +175,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
+        vegaControls: this._$controls.get(0),
         updateVegaView,
       },
     });

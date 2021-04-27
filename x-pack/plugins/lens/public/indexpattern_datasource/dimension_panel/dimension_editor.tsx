@@ -542,7 +542,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         [columnId]: {
                           ...selectedColumn,
                           label: value,
-                          customLabel: true,
+                          customLabel:
+                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                              selectedColumn,
+                              state.indexPatterns[state.layers[layerId].indexPatternId],
+                              state.layers[layerId].columns
+                            ) !== value,
                         },
                       },
                     },

@@ -30,10 +30,15 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
@@ -46,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
       }
     });
     after(async () => {
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should open the context view with the selected document as anchor', async () => {

@@ -115,6 +115,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
+  sortIds: string[] = ['1234567891111', '2233447556677'],
   ip?: string | string[],
   destIp?: string | string[]
 ): SignalSourceHit => ({
@@ -139,7 +140,7 @@ export const sampleDocWithSortId = (
     'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
     'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
   },
-  sort: ['1234567891111'],
+  sort: sortIds,
 });
 
 export const sampleDocNoSortId = (
@@ -630,7 +631,8 @@ export const repeatedSearchResultsWithSortId = (
   pageSize: number,
   guids: string[],
   ips?: Array<string | string[]>,
-  destIps?: Array<string | string[]>
+  destIps?: Array<string | string[]>,
+  sortIds?: string[]
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -646,6 +648,7 @@ export const repeatedSearchResultsWithSortId = (
     hits: Array.from({ length: pageSize }).map((x, index) => ({
       ...sampleDocWithSortId(
         guids[index],
+        sortIds,
         ips ? ips[index] : '127.0.0.1',
         destIps ? destIps[index] : '127.0.0.1'
       ),

@@ -7,6 +7,7 @@
  */
 
 import { NameList } from 'elasticsearch';
+import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../../index_patterns';
@@ -41,12 +42,20 @@ export enum SortDirection {
   desc = 'desc',
 }
 
+export interface SortDirectionFormat {
+  order: SortDirection;
+  format?: string;
+}
+
 export interface SortDirectionNumeric {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
 }
 
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export type EsQuerySortValue = Record<
+  string,
+  SortDirection | SortDirectionNumeric | SortDirectionFormat
+>;
 
 interface SearchField {
   [key: string]: SearchFieldValue;
@@ -78,7 +87,7 @@ export interface SearchSourceFields {
   /**
    * {@link AggConfigs}
    */
-  aggs?: any;
+  aggs?: object | IAggConfigs | (() => object);
   from?: number;
   size?: number;
   source?: NameList;

@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 
+import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAllAgents {
@@ -14,16 +15,38 @@ interface UseAllAgents {
   osqueryPoliciesLoading: boolean;
 }
 
-export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents) => {
-  // TODO: properly fetch these in an async manner
+interface RequestOptions {
+  perPage?: number;
+  page?: number;
+}
+
+// TODO: break out the paginated vs all cases into separate hooks
+export const useAllAgents = (
+  { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
+  searchValue = '',
+  opts: RequestOptions = { perPage: 9000 }
+) => {
+  const { perPage } = opts;
   const { http } = useKibana().services;
-  const { isLoading: agentsLoading, data: agentData } = useQuery(
-    ['agents', osqueryPolicies],
-    async () => {
-      return await http.get('/api/fleet/agents', {
+  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
+    ['agents', osqueryPolicies, searchValue, perPage],
+    () => {
+      const kueryFragments: string[] = [];
+      if (osqueryPolicies.length) {
+        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
+      }
+
+      if (searchValue) {
+        kueryFragments.push(
+          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
+        );
+      }
+
+      return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
-          perPage: 9000,
+          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
+          perPage,
+          showInactive: true,
         },
       });
     },

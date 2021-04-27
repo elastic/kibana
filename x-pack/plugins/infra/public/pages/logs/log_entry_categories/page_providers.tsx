@@ -28,6 +28,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
       sourceId={sourceId}
       spaceId={space.id}
       timestampField={resolvedSourceConfiguration.timestampField}
+      runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
     >
       <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
     </LogEntryCategoriesModuleProvider>

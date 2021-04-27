@@ -44,6 +44,12 @@ export class License {
   }
 
   start({ pluginId, minimumLicenseType, licensing }: StartSettings) {
+    if (minimumLicenseType === 'basic') {
+      throw Error(
+        `Basic licenses don't restrict the use of plugins. Please don't use license_api_guard in the ${pluginId} plugin, or provide a more restrictive minimumLicenseType.`
+      );
+    }
+
     licensing.license$.subscribe((license: ILicense) => {
       this.licenseType = license.type;
       this.licenseCheckState = license.check(pluginId, minimumLicenseType!).state;

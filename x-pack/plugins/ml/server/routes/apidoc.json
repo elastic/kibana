@@ -127,9 +127,6 @@
     "ValidateCardinality",
     "ValidateJob",
 
-    "NotificationSettings",
-    "GetNotificationSettings",
-
     "DatafeedService",
     "CreateDatafeed",
     "PreviewDatafeed",

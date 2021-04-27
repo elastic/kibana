@@ -195,7 +195,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       : 'show';
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <VisualOptionsPopover

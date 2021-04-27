@@ -65,7 +65,6 @@ interface EqlSearchRequest {
   method: string;
   path: string;
   body: object;
-  event_category_field?: string;
 }
 
 export const buildEqlSearchRequest = (
@@ -109,7 +108,7 @@ export const buildEqlSearchRequest = (
       },
     });
   }
-  const baseRequest = {
+  return {
     method: 'POST',
     path: `/${indexString}/_eql/search?allow_no_indices=true`,
     body: {
@@ -120,14 +119,7 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      event_category_field: eventCategoryOverride,
     },
   };
-  if (eventCategoryOverride) {
-    return {
-      ...baseRequest,
-      event_category_field: eventCategoryOverride,
-    };
-  } else {
-    return baseRequest;
-  }
 };

@@ -171,7 +171,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
     let namespaces = options.namespaces;
@@ -187,12 +187,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         }
         if (namespaces.length === 0) {
           // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
           // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
         throw err;
       }
@@ -200,7 +200,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       namespaces = [this.spaceId];
     }
 
-    return await this.client.find<T>({
+    return await this.client.find<T, A>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         (type) => type !== 'space'

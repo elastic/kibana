@@ -61,6 +61,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
@@ -176,7 +177,7 @@ const getSavedObjectTypes = (
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
-        preconfiguration_id: { type: 'keyword' },
+        is_preconfigured: { type: 'keyword' },
       },
     },
     migrations: {
@@ -365,7 +366,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        preconfiguration_id: { type: 'keyword' },
+        id: { type: 'keyword' },
       },
     },
   },

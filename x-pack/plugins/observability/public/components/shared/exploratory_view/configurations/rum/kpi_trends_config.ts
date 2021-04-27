@@ -37,10 +37,12 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      sourceField: 'business.kpi',
-      operationType: 'median',
-    },
+    yAxisColumns: [
+      {
+        sourceField: 'business.kpi',
+        operationType: 'median',
+      },
+    ],
     hasOperationType: false,
     defaultFilters: [
       {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'kibana/public';
 import { Plugin } from './plugin';
 
-export { RuleRegistryPublicPluginSetupContract } from './plugin';
+export type { RuleRegistryPublicPluginSetupContract } from './plugin';
 export { RuleRegistry } from './rule_registry';
 export type { IRuleRegistry, RuleType } from './rule_registry/types';
 

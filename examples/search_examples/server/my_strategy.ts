@@ -20,6 +20,7 @@ export const mySearchStrategyProvider = (
         map((esSearchRes) => ({
           ...esSearchRes,
           cool: request.get_cool ? 'YES' : 'NOPE',
+          executed_at: new Date().getTime(),
         }))
       ),
     cancel: async (id, options, deps) => {

@@ -25,7 +25,7 @@ export { getVisSchemas } from './vis_schemas';
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types';
-export type { VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
+export type { BaseVisType, VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
 export { SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
