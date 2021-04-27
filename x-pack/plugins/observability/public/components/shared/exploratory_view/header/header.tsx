@@ -35,7 +35,11 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
               i18n.translate('xpack.observability.expView.heading.label', {
                 defaultMessage: 'Exploratory view',
               })}{' '}
-            <EuiBetaBadge label="BETA" />
+            <EuiBetaBadge
+              label={i18n.translate('xpack.observability.expView.heading.experimental', {
+                defaultMessage: 'Experimental',
+              })}
+            />
           </h2>
         </EuiText>
       </EuiFlexItem>
