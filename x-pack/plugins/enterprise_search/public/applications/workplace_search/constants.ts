@@ -751,3 +751,14 @@ export const REMOVE_BUTTON = i18n.translate(
     defaultMessage: 'Remove',
   }
 );
+
+export const COPY_TEXT = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copyText', {
+  defaultMessage: 'Copy',
+});
+
+export const STATUS_POPOVER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
+  {
+    defaultMessage: 'Click to view info',
+  }
+);

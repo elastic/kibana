@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
@@ -24,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
@@ -156,32 +156,36 @@ export class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.annotationsEditor.ignoreGlobalFiltersLabel"
-                    defaultMessage="Ignore global filters?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.annotationsEditor.ignoreGlobalFiltersLabel',
+                    {
+                      defaultMessage: 'Ignore global filters?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filters}
+                    name="ignore_global_filters"
+                    onChange={handleChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filters}
-                  name="ignore_global_filters"
-                  onChange={handleChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel"
-                    defaultMessage="Ignore panel filters?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel',
+                    {
+                      defaultMessage: 'Ignore panel filters?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_panel_filters}
+                    name="ignore_panel_filters"
+                    onChange={handleChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="xs" />
-                <YesNo
-                  value={model.ignore_panel_filters}
-                  name="ignore_panel_filters"
-                  onChange={handleChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 
