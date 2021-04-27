@@ -912,12 +912,8 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [direct, referenceBased] = _.partition(
-    entries,
-    ([, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
-  );
   // If a reference has another reference as input, put it last in sort order
-  referenceBased.sort(([idA, a], [idB, b]) => {
+  entries.sort(([idA, a], [idB, b]) => {
     if ('references' in a && a.references.includes(idB)) {
       return 1;
     }
@@ -926,12 +922,9 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
     return 0;
   });
-  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
 
-  return aggregations
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id))
-    .concat(referenceBased.map(([id]) => id));
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 // Splits existing columnOrder into the three categories
