@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
         20000
       );
 
