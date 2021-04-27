@@ -53,7 +53,7 @@ export class User {
     });
     if (status !== 204) {
       throw new Error(
-        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
     this.log.debug(`disabled user ${username}`);
@@ -67,7 +67,7 @@ export class User {
     });
     if (status !== 204) {
       throw new Error(
-        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
     this.log.debug(`enabled user ${username}`);
