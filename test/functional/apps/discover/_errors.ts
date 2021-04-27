@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
+      await esArchiver.load('empty_kibana');
     });
 
     describe('invalid scripted field error', () => {

@@ -9,6 +9,7 @@ import type { SavedObjectAttributes } from 'src/core/public';
 
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;
+  has_seen_fleet_migration_notice?: boolean;
   fleet_server_hosts: string[];
 }
 

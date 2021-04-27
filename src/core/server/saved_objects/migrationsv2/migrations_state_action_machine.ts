@@ -9,11 +9,20 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
+import type { ElasticsearchClient } from '../../elasticsearch';
 import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
+import { cleanup } from './migrations_state_machine_cleanup';
 import { State } from './types';
 
-type ExecutionLog = Array<
+interface StateLogMeta extends LogMeta {
+  kibana: {
+    migrationState: State;
+  };
+}
+
+/** @internal */
+export type ExecutionLog = Array<
   | {
       type: 'transition';
       prevControlState: State['controlState'];
@@ -25,6 +34,11 @@ type ExecutionLog = Array<
       controlState: State['controlState'];
       res: unknown;
     }
+  | {
+      type: 'cleanup';
+      state: State;
+      message: string;
+    }
 >;
 
 const logStateTransition = (
@@ -35,9 +49,15 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs
-      .slice(oldState.logs.length)
-      .forEach((log) => logger[log.level](logMessagePrefix + log.message));
+    newState.logs.slice(oldState.logs.length).forEach((log) => {
+      const getLogger = (level: keyof Logger) => {
+        if (level === 'error') {
+          return logger[level] as Logger['error'];
+        }
+        return logger[level] as Logger['info'];
+      };
+      getLogger(log.level)(logMessagePrefix + log.message);
+    });
   }
 
   logger.info(
@@ -58,7 +78,14 @@ const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog
   logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {
     if (log.type === 'transition') {
-      logger.info(logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`, log.state);
+      logger.info<StateLogMeta>(
+        logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
+        {
+          kibana: {
+            migrationState: log.state,
+          },
+        }
+      );
     }
     if (log.type === 'response') {
       logger.info(logMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
@@ -80,11 +107,13 @@ export async function migrationStateActionMachine({
   logger,
   next,
   model,
+  client,
 }: {
   initialState: State;
   logger: Logger;
   next: Next<State>;
   model: Model<State>;
+  client: ElasticsearchClient;
 }) {
   const executionLog: ExecutionLog = [];
   const startTime = Date.now();
@@ -93,11 +122,13 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
   let prevTimestamp = startTime;
+  let lastState: State | undefined;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),
       (state, res) => {
+        lastState = state;
         executionLog.push({
           type: 'response',
           res,
@@ -150,6 +181,7 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
+      await cleanup(client, executionLog, finalState);
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
       return Promise.reject(
         new Error(
@@ -161,6 +193,7 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
+    await cleanup(client, executionLog, lastState);
     if (e instanceof EsErrors.ResponseError) {
       logger.error(
         logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
@@ -183,9 +216,13 @@ export async function migrationStateActionMachine({
         );
       }
 
-      throw new Error(
+      const newError = new Error(
         `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
       );
+
+      // restore error stack to point to a source of the problem.
+      newError.stack = `[${e.stack}]`;
+      throw newError;
     }
   }
 }

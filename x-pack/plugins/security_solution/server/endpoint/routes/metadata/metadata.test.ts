@@ -34,7 +34,10 @@ import {
   createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import {
+  EndpointAppContextService,
+  EndpointAppContextServiceStartContract,
+} from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import {
@@ -46,6 +49,7 @@ import { createV1SearchResponse, createV2SearchResponse } from './support/test_s
 import { PackageService } from '../../../../../fleet/server/services';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
@@ -63,6 +67,7 @@ describe('test endpoint route', () => {
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
+  let startContract: EndpointAppContextServiceStartContract;
   const noUnenrolledAgent = {
     agents: [],
     total: 0,
@@ -77,12 +82,23 @@ describe('test endpoint route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
+    startContract = createMockEndpointAppContextServiceStartContract();
+
+    (startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>).list.mockImplementation(
+      () => {
+        return Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 1000,
+        });
+      }
+    );
   });
 
   describe('with no transform package', () => {
     beforeEach(() => {
       endpointAppContextService = new EndpointAppContextService();
-      const startContract = createMockEndpointAppContextServiceStartContract();
       mockPackageService = createMockPackageService();
       mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
         Promise.resolve(([] as unknown) as EsAssetReference[])
@@ -169,7 +185,6 @@ describe('test endpoint route', () => {
   describe('with new transform package', () => {
     beforeEach(() => {
       endpointAppContextService = new EndpointAppContextService();
-      const startContract = createMockEndpointAppContextServiceStartContract();
       mockPackageService = createMockPackageService();
       mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
         Promise.resolve([

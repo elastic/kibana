@@ -27,7 +27,7 @@ export function ExploratoryView() {
     null
   );
 
-  const { loadIndexPattern } = useAppIndexPatternContext();
+  const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
   const LensComponent = lens?.EmbeddableComponent;
 
@@ -61,7 +61,7 @@ export function ExploratoryView() {
               attributes={lensAttributes}
             />
           ) : (
-            <EmptyView />
+            <EmptyView loading={loading} />
           )}
           <SeriesEditor />
         </>

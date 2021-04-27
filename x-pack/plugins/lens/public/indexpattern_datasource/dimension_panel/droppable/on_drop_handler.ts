@@ -147,9 +147,9 @@ function onMoveCompatible(
     columns: newColumns,
   };
 
-  const updatedColumnOrder = getColumnOrder(newLayer);
+  let updatedColumnOrder = getColumnOrder(newLayer);
 
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(
@@ -238,6 +238,7 @@ function onMoveIncompatible(
     field: sourceField,
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
+    shouldResetLabel: true,
   });
 
   trackUiEvent('drop_onto_dimension');
@@ -289,6 +290,7 @@ function onSwapIncompatible({
       op: newOperationForSource,
       field: sourceField,
       visualizationGroups: dimensionGroups,
+      shouldResetLabel: true,
     }),
     columnId: droppedItem.columnId,
     indexPattern,
@@ -296,6 +298,7 @@ function onSwapIncompatible({
     field: targetField,
     visualizationGroups: dimensionGroups,
     targetGroup: droppedItem.groupId,
+    shouldResetLabel: true,
   });
 
   trackUiEvent('drop_onto_dimension');
@@ -339,8 +342,8 @@ function onSwapCompatible({
   newColumns[targetId] = sourceColumn;
   newColumns[sourceId] = targetColumn;
 
-  const updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  let updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(

@@ -11,8 +11,5 @@
     "triggersActionsUi"
   ],
   "server": true,
-  "ui": true,
-  "extraPublicDirs": [
-    "common"
-  ]
+  "ui": true
 }

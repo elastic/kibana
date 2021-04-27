@@ -7,12 +7,17 @@
 import type { RuleType } from '../../../rule_registry/public';
 import type { BaseRuleFieldMap, OutputOfFieldMap } from '../../../rule_registry/common';
 import { RuleRegistry } from '../../../rule_registry/public';
+import type { asDuration, asPercent } from '../../common/utils/formatters';
 
 type AlertTypeOf<TFieldMap extends BaseRuleFieldMap> = OutputOfFieldMap<TFieldMap>;
 
 type FormattableRuleType<TFieldMap extends BaseRuleFieldMap> = RuleType & {
   format?: (options: {
     alert: AlertTypeOf<TFieldMap>;
+    formatters: {
+      asDuration: typeof asDuration;
+      asPercent: typeof asPercent;
+    };
   }) => {
     reason?: string;
     link?: string;

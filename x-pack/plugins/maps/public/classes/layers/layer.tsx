@@ -10,7 +10,7 @@
 import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -18,6 +18,7 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -54,6 +55,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -80,7 +82,7 @@ export interface ILayer {
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): string | undefined;
+  getType(): LAYER_TYPE | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -100,7 +102,7 @@ export interface ILayer {
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactElement<any> | null;
+  icon: ReactNode;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -482,8 +484,8 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): string | undefined {
-    return this._descriptor.type;
+  getType(): LAYER_TYPE | undefined {
+    return this._descriptor.type as LAYER_TYPE;
   }
 
   areLabelsOnTop(): boolean {

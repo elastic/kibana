@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -37,6 +36,7 @@ import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../components/shared/license_badge';
+import { StatusItem } from '../../../components/shared/status_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   RECENT_ACTIVITY_TITLE,
@@ -116,7 +116,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyDocumentSummary">
+        <EuiPanel
+          hasShadow={false}
+          color="subdued"
+          paddingSize="l"
+          data-test-subj="EmptyDocumentSummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{SOURCES_NO_CONTENT_TITLE}</h2>}
             iconType="documents"
@@ -163,7 +168,12 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" data-test-subj="EmptyActivitySummary">
+        <EuiPanel
+          paddingSize="l"
+          hasShadow={false}
+          color="subdued"
+          data-test-subj="EmptyActivitySummary"
+        >
           <EuiEmptyPrompt
             title={<h2>{EMPTY_ACTIVITY_TITLE}</h2>}
             iconType="clock"
@@ -189,15 +199,7 @@ export const Overview: React.FC = () => {
               {!custom && (
                 <EuiTableRowCell>
                   <EuiText size="xs">
-                    {status}{' '}
-                    {activityDetails && (
-                      <EuiIconTip
-                        position="top"
-                        content={activityDetails.map((detail, idx) => (
-                          <div key={idx}>{detail}</div>
-                        ))}
-                      />
-                    )}
+                    {status} {activityDetails && <StatusItem details={activityDetails} />}
                   </EuiText>
                 </EuiTableRowCell>
               )}

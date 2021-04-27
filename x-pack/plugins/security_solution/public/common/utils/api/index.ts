@@ -7,9 +7,7 @@
 
 import { has } from 'lodash/fp';
 
-export interface AppError {
-  name: string;
-  message: string;
+export interface AppError extends Error {
   body: {
     message: string;
   };
