@@ -457,27 +457,33 @@ def withTasks(Map params = [:], Closure closure) {
 
 def allCiTasks() {
   parallel([
-    general: {
-      withTasks {
-        tasks.check()
-        tasks.lint()
-        tasks.test()
-        tasks.functionalOss()
-        tasks.functionalXpack()
-        tasks.storybooksCi()
+    // general: {
+    //   withTasks {
+    //     tasks.check()
+    //     tasks.lint()
+    //     tasks.test()
+    //     tasks.functionalOss()
+    //     tasks.functionalXpack()
+    //     tasks.storybooksCi()
+    //   }
+    // },
+    xpackCiGroupsDocker: {
+      workers.ci(name: 'xpack-cigroups-docker', size: 'm', ramDisk: true) {
+        buildXpack(7)
+        xpackCiGroupProcess('Docker', true)()
       }
     },
-    jest: {
-      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
-        catchErrors {
-          scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
-        }
+    // jest: {
+    //   workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
+    //     catchErrors {
+    //       scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+    //     }
 
-        catchErrors {
-          runbld.junit()
-        }
-      }
-    },
+    //     catchErrors {
+    //       runbld.junit()
+    //     }
+    //   }
+    // },
   ])
 }
 
