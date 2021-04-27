@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TSVB_EDITOR_NAME } from './application';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES } from '../common/panel_types';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
