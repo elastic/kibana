@@ -49,14 +49,13 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs.slice(oldState.logs.length).forEach((log) => {
-      const getLogger = (level: keyof Logger) => {
-        if (level === 'error') {
-          return logger[level] as Logger['error'];
-        }
-        return logger[level] as Logger['info'];
-      };
-      getLogger(log.level)(logMessagePrefix + log.message);
+    newState.logs.slice(oldState.logs.length).forEach((log: State['logs'][0]) => {
+      const line = logMessagePrefix + log.message;
+      if (log.level === 'error') {
+        logger.error(line);
+      } else {
+        logger.info(line);
+      }
     });
   }
 
