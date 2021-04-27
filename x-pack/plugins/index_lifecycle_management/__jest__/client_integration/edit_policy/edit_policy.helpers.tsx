@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
-
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
-
-import { licensingMock } from '../../../../licensing/public/mocks';
-
-import { EditPolicy } from '../../../public/application/sections/edit_policy';
+import { TestBedConfig } from '@kbn/test/jest';
 
 import { Phases as PolicyPhases } from '../../../common/types';
-
-import { KibanaContextProvider } from '../../../public/shared_imports';
 import { AppServicesContext } from '../../../public/types';
-import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
 import {
   createEnablePhaseAction,
@@ -28,72 +19,10 @@ import {
   setReplicas,
   savePolicy,
 } from '../helpers';
-import { TestSubjects } from '../helpers';
-import { POLICY_NAME } from './constants';
+import { initTestBed } from './init_test_bed';
 
 type Phases = keyof PolicyPhases;
-
-window.scrollTo = jest.fn();
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-        data-currentvalue={props.selectedOptions}
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
-  };
-});
-
-const getTestBedConfig = (testBedConfigArgs?: Partial<TestBedConfig>): TestBedConfig => {
-  return {
-    memoryRouter: {
-      initialEntries: [`/policies/edit/${POLICY_NAME}`],
-      componentRoutePath: `/policies/edit/:policyName`,
-    },
-    defaultProps: {
-      getUrlForApp: () => {},
-    },
-    ...testBedConfigArgs,
-  };
-};
-
-const breadcrumbService = createBreadcrumbsMock();
-
-const MyComponent = ({ appServicesContext, ...rest }: any) => {
-  return (
-    <KibanaContextProvider
-      services={{
-        breadcrumbService,
-        license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-        ...appServicesContext,
-      }}
-    >
-      <EditPolicy {...rest} />
-    </KibanaContextProvider>
-  );
-};
-
-const initTestBed = (arg?: {
-  appServicesContext?: Partial<AppServicesContext>;
-  testBedConfig?: Partial<TestBedConfig>;
-}) => {
-  const { testBedConfig: testBedConfigArgs, ...rest } = arg || {};
-  return registerTestBed<TestSubjects>(MyComponent, getTestBedConfig(testBedConfigArgs))(rest);
-};
-
 type SetupReturn = ReturnType<typeof setup>;
-
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
 export const setup = async (arg?: {
