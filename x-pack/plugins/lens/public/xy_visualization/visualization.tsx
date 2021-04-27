@@ -15,8 +15,14 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig } from './types';
+import {
+  Visualization,
+  OperationMetadata,
+  VisualizationType,
+  AccessorConfig,
+  DatasourcePublicAPI,
+} from '../types';
+import { State, SeriesType, visualizationTypes, XYLayerConfig, XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -374,6 +380,9 @@ export const getXyVisualization = ({
     }
 
     if (datasourceLayers && state) {
+      // temporary fix for #87068
+      errors.push(...checkXAccessorCompatibility(state, datasourceLayers));
+
       for (const layer of state.layers) {
         const datasourceAPI = datasourceLayers[layer.layerId];
         if (datasourceAPI) {
@@ -515,5 +524,49 @@ function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
     layerId,
     seriesType,
     accessors: [],
+  };
+}
+
+// min requirement for the bug:
+// * 2 or more layers
+// * at least one with date histogram
+// * at least one with interval function
+function checkXAccessorCompatibility(
+  state: XYState,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+) {
+  const errors = [];
+  const hasDateHistogramSet = state.layers.some(checkIntervalOperation('date', datasourceLayers));
+  const hasNumberHistogram = state.layers.some(checkIntervalOperation('number', datasourceLayers));
+  if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
+    errors.push({
+      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+        defaultMessage: `Wrong data type for {axis}.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
+        defaultMessage: `Data type mismatch for the {axis}. Cannot mix date and number interval types.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+    });
+  }
+  return errors;
+}
+
+function checkIntervalOperation(
+  dataType: 'date' | 'number',
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+) {
+  return (layer: XYLayerConfig) => {
+    const datasourceAPI = datasourceLayers[layer.layerId];
+    if (!layer.xAccessor) {
+      return false;
+    }
+    const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
+    return Boolean(operation?.dataType === dataType && operation.scale === 'interval');
   };
 }
