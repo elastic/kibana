@@ -22,6 +22,6 @@ describe('get_cluster_stats', () => {
     );
     const result = await getClusterStats(esClient);
     expect(esClient.cluster.stats).toHaveBeenCalledWith({ timeout: TIMEOUT });
-    expect(result).toStrictEqual(response);
+    expect(result).toStrictEqual(response.body);
   });
 });
