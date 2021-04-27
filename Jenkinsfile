@@ -1,21 +1,12 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@clone-fix'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
-        }
-      }
-    }
-  }
+node('linux && immutable') {
+  print kibanaCheckout()
+}
 
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
-  }
+node('linux && immutable') {
+  print kibanaCheckout()
 }
