@@ -1681,6 +1681,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    callAsInternalUser?: boolean;
     indexPattern?: IndexPattern;
     // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
     inspector?: IInspectorInfo;
