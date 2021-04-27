@@ -25,6 +25,7 @@ import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
 import { essqlSearchStrategyProvider } from './lib/essql_strategy';
+import { getUISettings } from './ui_settings';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -47,6 +48,7 @@ export class CanvasPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
+    coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
