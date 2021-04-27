@@ -12,12 +12,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
-import {
-  SOURCE_TYPES,
-  FIELD_ORIGIN,
-  VECTOR_SHAPE_TYPE,
-  EMPTY_FEATURE_COLLECTION,
-} from '../../../../common/constants';
+import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -122,20 +117,26 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
-    const emsFileLayer = await this.getEMSFileLayer();
-    const featureCollection = (await emsFileLayer.getGeoJson()) ?? EMPTY_FEATURE_COLLECTION;
+    try {
+      const emsFileLayer = await this.getEMSFileLayer();
+      const featureCollection = await emsFileLayer.getGeoJson();
 
-    const emsIdField = emsFileLayer.getFields().find((field) => {
-      return field.type === 'id';
-    });
-    featureCollection.features.forEach((feature: Feature, index: number) => {
-      feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
-    });
+      if (!featureCollection) throw new Error('No features found');
 
-    return {
-      data: featureCollection,
-      meta: {},
-    };
+      const emsIdField = emsFileLayer.getFields().find((field) => {
+        return field.type === 'id';
+      });
+      featureCollection.features.forEach((feature: Feature, index: number) => {
+        feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
+      });
+
+      return {
+        data: featureCollection,
+        meta: {},
+      };
+    } catch (error) {
+      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${error.message}`);
+    }
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
