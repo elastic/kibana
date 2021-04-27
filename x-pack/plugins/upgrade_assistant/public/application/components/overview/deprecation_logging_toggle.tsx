@@ -166,7 +166,13 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <p data-test-subj="fetchLoggingError">
-              <EuiTextColor color="danger">{i18nTexts.fetchErrorMessage}</EuiTextColor>{' '}
+              <EuiTextColor color="danger">{i18nTexts.fetchErrorMessage}</EuiTextColor>
+              {fetchError.statusCode && fetchError.message && (
+                <>
+                  {' '}
+                  <EuiTextColor color="danger">{`${fetchError.statusCode}: ${fetchError.message}`}</EuiTextColor>
+                </>
+              )}{' '}
               <EuiButtonEmpty iconType="refresh" onClick={resendRequest}>
                 {i18nTexts.reloadButtonLabel}
               </EuiButtonEmpty>
@@ -180,6 +186,12 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
           <EuiText>
             <p data-test-subj="updateLoggingError">
               <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
+              {updateError.statusCode && updateError.message && (
+                <>
+                  {' '}
+                  <EuiTextColor color="danger">{`${updateError.statusCode}: ${updateError.message}`}</EuiTextColor>
+                </>
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
