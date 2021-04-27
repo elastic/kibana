@@ -21,7 +21,8 @@ import { securitySolutionTimelineFactory } from './factory';
 import { SecuritySolutionTimelineFactory } from './factory/types';
 
 export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
-  data: PluginStart
+  data: PluginStart,
+  callAsInternalUser = false
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
@@ -32,7 +33,7 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
       const queryFactory: SecuritySolutionTimelineFactory<T> =
         securitySolutionTimelineFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
-      return es.search({ ...request, params: dsl }, options, deps).pipe(
+      return es.search({ ...request, params: dsl }, { ...options, callAsInternalUser }, deps).pipe(
         map((response) => {
           return {
             ...response,
