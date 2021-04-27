@@ -41,6 +41,7 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
+import { findMinMaxByColumnId } from './shared_utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -227,24 +228,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [columnConfig, isNumericMap]);
 
   const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
-    const minMax: Record<string, { min: number; max: number }> = {};
-    columnConfig.columns
-      .filter(({ columnId }) => isNumericMap[columnId])
-      .forEach(({ columnId }) => {
-        minMax[columnId] = minMax[columnId] || { max: -Infinity, min: Infinity };
-        firstLocalTable.rows.forEach((row) => {
-          const rowValue = row[columnId];
-          if (rowValue != null) {
-            if (minMax[columnId].min > rowValue) {
-              minMax[columnId].min = rowValue;
-            }
-            if (minMax[columnId].max < rowValue) {
-              minMax[columnId].max = rowValue;
-            }
-          }
-        });
-      });
-    return minMax;
+    return findMinMaxByColumnId(
+      columnConfig.columns
+        .filter(({ columnId }) => isNumericMap[columnId])
+        .map(({ columnId }) => columnId),
+      firstLocalTable
+    );
   }, [firstLocalTable, isNumericMap, columnConfig]);
 
   const gradientHelpers: Record<string, (value: number) => string> = useMemo(() => {

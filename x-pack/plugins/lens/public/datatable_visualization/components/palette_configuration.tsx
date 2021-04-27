@@ -167,17 +167,19 @@ export function CustomizablePalette({
   palettes,
   activePalette,
   setPalette,
+  dataBounds,
 }: {
   palettes: PaletteRegistry;
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
+  dataBounds: { min: number; max: number } | undefined;
 }) {
   const [minLocalValue, setMinLocalValue] = useState<string>(
-    String(activePalette.params?.rangeMin ?? DEFAULT_MIN_STOP)
+    String(activePalette.params?.rangeMin ?? dataBounds?.min ?? DEFAULT_MIN_STOP)
   );
 
   const [maxLocalValue, setMaxLocalValue] = useState<string>(
-    String(activePalette.params?.rangeMax ?? DEFAULT_MAX_STOP)
+    String(activePalette.params?.rangeMax ?? dataBounds?.max ?? DEFAULT_MAX_STOP)
   );
 
   const { colorStops } = applyPaletteParams(palettes, activePalette);
@@ -360,17 +362,15 @@ export function CustomizablePalette({
             const isNewAutoRange = newValue.target.checked;
             // update the stops first
             const moreParams = updateRangeValues(
-              String(defaultParams.rangeMin),
-              String(defaultParams.rangeMax)
+              String(isNewAutoRange ? DEFAULT_MIN_STOP : dataBounds?.min),
+              String(isNewAutoRange ? DEFAULT_MAX_STOP : dataBounds?.max)
             ) || { params: {} };
             // now update with the range type
             setPalette(
               mergePaletteParams(activePalette, {
                 ...moreParams.params,
                 // override the range data
-                rangeType: isNewAutoRange ? 'auto' : 'percent',
-                rangeMin: isNewAutoRange ? undefined : defaultParams.rangeMin,
-                rangeMax: isNewAutoRange ? undefined : defaultParams.rangeMax,
+                rangeType: isNewAutoRange ? 'auto' : 'number',
               })
             );
           }}
@@ -412,16 +412,20 @@ export function CustomizablePalette({
             },
           ]}
           idSelected={
-            isAutoRange ? `${idPrefix}percent` : `${idPrefix}${activePalette.params?.rangeType}`
+            isAutoRange ? `${idPrefix}number` : `${idPrefix}${activePalette.params?.rangeType}`
           }
           isDisabled={isAutoRange}
           onChange={(id) => {
             const newRangeType = id.replace(idPrefix, '') as RequiredParamTypes['rangeType'];
+            const isPercent = newRangeType === 'percent';
+            const paramsToUpdate = updateRangeValues(
+              String(isPercent ? 0 : dataBounds?.min ?? minLocalValue),
+              String(isPercent ? 100 : dataBounds?.max ?? maxLocalValue)
+            );
             setPalette(
               mergePaletteParams(activePalette, {
+                ...paramsToUpdate,
                 rangeType: newRangeType,
-                rangeMax: Number(maxLocalValue),
-                rangeMin: Number(minLocalValue),
               })
             );
           }}
@@ -471,7 +475,7 @@ export function CustomizablePalette({
             data-test-subj="lnsDatatable_dynamicColoring_min_range"
             value={minLocalValue}
             onChange={({ target }) => {
-              const paramsToUpdate = updateRangeValues(target.value, maxLocalValue);
+              const paramsToUpdate = updateRangeValues(target.value.trim(), maxLocalValue);
               if (paramsToUpdate) {
                 setPalette(paramsToUpdate);
               }
@@ -526,7 +530,7 @@ export function CustomizablePalette({
             data-test-subj="lnsDatatable_dynamicColoring_max_range"
             value={maxLocalValue}
             onChange={({ target }) => {
-              const paramsToUpdate = updateRangeValues(minLocalValue, target.value);
+              const paramsToUpdate = updateRangeValues(minLocalValue, target.value.trim());
               if (paramsToUpdate) {
                 setPalette(paramsToUpdate);
               }

@@ -23,6 +23,7 @@ import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
 import { CustomizablePalette, applyPaletteParams, defaultParams } from './palette_configuration';
 import { PalettePanelContainer } from './palette_panel_container';
+import { findMinMaxByColumnId } from './shared_utils';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -54,17 +55,20 @@ export function TableDimensionEditor(
   if (!column) return null;
   if (column.isTransposed) return null;
 
+  const currentData = frame.activeData?.[state.layerId];
+
   // either read config state or use same logic as chart itself
   const isNumericField =
-    frame.activeData?.[state.layerId]?.columns.find(
-      (col) => col.id === accessor || getOriginalId(col.id) === accessor
-    )?.meta.type === 'number';
+    currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
+      ?.meta.type === 'number';
 
   const currentAlignment = column?.alignment || (isNumericField ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
 
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
+
+  const minMaxByColumnId = findMinMaxByColumnId([accessor], currentData);
 
   const activePalette = column?.palette || {
     type: 'palette',
@@ -266,6 +270,7 @@ export function TableDimensionEditor(
                     <CustomizablePalette
                       palettes={props.paletteService}
                       activePalette={activePalette}
+                      dataBounds={minMaxByColumnId[accessor]}
                       setPalette={(newPalette) => {
                         setState({
                           ...state,
