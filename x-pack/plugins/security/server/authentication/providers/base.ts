@@ -28,6 +28,10 @@ export interface AuthenticationProviderOptions {
   name: string;
   getServerBaseURL: () => string;
   basePath: HttpServiceSetup['basePath'];
+  getRequestOriginalURL: (
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) => string;
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
