@@ -123,10 +123,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     memoSignalIndexName
   );
 
-  const memoMlJobIds = useMemo(
-    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
-    [maybeRule]
-  );
+  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {

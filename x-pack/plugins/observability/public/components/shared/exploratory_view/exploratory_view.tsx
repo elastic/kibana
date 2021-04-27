@@ -15,6 +15,8 @@ import { useUrlStorage } from './hooks/use_url_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
+import { ReportToDataTypeMap } from './configurations/constants';
 
 export function ExploratoryView() {
   const {
@@ -25,6 +27,8 @@ export function ExploratoryView() {
     null
   );
 
+  const { loadIndexPattern, loading } = useAppIndexPatternContext();
+
   const LensComponent = lens?.EmbeddableComponent;
 
   const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
@@ -34,12 +38,18 @@ export function ExploratoryView() {
   });
 
   useEffect(() => {
+    if (series?.reportType || series?.dataType) {
+      loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
+    }
+  }, [series?.reportType, series?.dataType, loadIndexPattern]);
+
+  useEffect(() => {
     setLensAttributes(lensAttributesT);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
   return (
-    <EuiPanel style={{ maxWidth: 1800, minWidth: 1200, margin: '0 auto' }}>
+    <EuiPanel style={{ maxWidth: 1800, minWidth: 800, margin: '0 auto' }}>
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
@@ -51,7 +61,7 @@ export function ExploratoryView() {
               attributes={lensAttributes}
             />
           ) : (
-            <EmptyView />
+            <EmptyView loading={loading} />
           )}
           <SeriesEditor />
         </>

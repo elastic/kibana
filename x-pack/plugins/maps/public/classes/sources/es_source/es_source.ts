@@ -167,12 +167,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    const requestResponder = this.getInspectorAdapters()?.requests?.start(requestName, {
-      id: requestId,
-      description: requestDescription,
-      searchSessionId,
-    });
-
     let resp;
     try {
       resp = await searchSource
@@ -180,7 +174,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
           legacyHitsTotal: false,
-          requestResponder,
+          inspector: {
+            adapter: this.getInspectorAdapters()?.requests,
+            id: requestId,
+            title: requestName,
+            description: requestDescription,
+          },
         })
         .toPromise();
     } catch (error) {

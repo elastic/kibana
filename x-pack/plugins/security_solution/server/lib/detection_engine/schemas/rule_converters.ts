@@ -7,7 +7,10 @@
 
 import uuid from 'uuid';
 import { SavedObject } from 'kibana/server';
-import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
   RuleParams,
@@ -103,7 +106,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
       return {
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
-        machineLearningJobId: params.machine_learning_job_id,
+        machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
       };
     }
     default: {

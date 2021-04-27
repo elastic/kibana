@@ -139,6 +139,11 @@ In other use cases the message field can be used to concatenate different values
   rowRenderers={
     Array [
       Object {
+        "id": "threat_match",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
         "id": "auditd",
         "isInstance": [Function],
         "renderRow": [Function],

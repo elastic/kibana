@@ -37,6 +37,7 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 
 interface SortObj {
@@ -223,9 +224,10 @@ export const DiscoverGrid = ({
         indexPattern,
         displayedRows,
         displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
-        useNewFieldsApi
+        useNewFieldsApi,
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
       ),
-    [displayedRows, indexPattern, useNewFieldsApi]
+    [displayedRows, indexPattern, useNewFieldsApi, services.uiSettings]
   );
 
   /**

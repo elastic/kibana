@@ -12,8 +12,6 @@ import flowRight from 'lodash/flowRight';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
@@ -23,6 +21,7 @@ import { useLogSource } from '../../containers/logs/log_source';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { LinkDescriptor } from '../../hooks/use_link_props';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -36,10 +35,11 @@ export const RedirectToNodeLogs = ({
   },
   location,
 }: RedirectToNodeLogsType) => {
-  const { services } = useKibana<{ http: HttpStart }>();
+  const { services } = useKibanaContextForPlugin();
   const { isLoading, loadSourceConfiguration, sourceConfiguration } = useLogSource({
     fetch: services.http.fetch,
     sourceId,
+    indexPatternsService: services.data.indexPatterns,
   });
   const fields = sourceConfiguration?.configuration.fields;
 

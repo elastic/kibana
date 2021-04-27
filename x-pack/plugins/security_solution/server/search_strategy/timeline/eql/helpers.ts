@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
+import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { EqlSearchResponse, EqlSequence } from '../../../../common/detection_engine/types';
 import { EventHit, TimelineEdges } from '../../../../common/search_strategy';

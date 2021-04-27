@@ -9,7 +9,7 @@ pageLoadAssetSize:
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 397521
+  core: 414000
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -61,6 +61,7 @@ pageLoadAssetSize:
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204
+  ruleRegistry: 100000
   savedObjects: 108518
   savedObjectsManagement: 101836
   savedObjectsTagging: 59482
@@ -91,7 +92,7 @@ pageLoadAssetSize:
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 155203
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
@@ -105,6 +106,7 @@ pageLoadAssetSize:
   indexPatternFieldEditor: 90489
   osquery: 107090
   fileUpload: 25664
+  fileDataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
   timelines: 28613

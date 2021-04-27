@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.RuntimeFieldEditor.$1",
             "type": "Object",
             "label": "{ defaultValue, onChange, docLinks, ctx }",
             "isRequired": true,
@@ -53,6 +54,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.RuntimeFieldEditorFlyoutContent.$1",
             "type": "Object",
             "label": "{\n  onSave,\n  onCancel,\n  docLinks,\n  defaultValue: field,\n  ctx,\n}",
             "isRequired": true,
@@ -373,13 +375,7 @@
           "label": "loadEditor",
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "runtimeFields",
-              "scope": "public",
-              "docId": "kibRuntimeFieldsPluginApi",
-              "section": "def-public.LoadEditorResponse",
-              "text": "LoadEditorResponse"
-            },
+            "LoadEditorResponse",
             ">"
           ],
           "description": [],

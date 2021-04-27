@@ -11,14 +11,17 @@ import {
 } from '../../../../../../typings/elasticsearch';
 import { AlertServices } from '../../../../alerting/server';
 
-export async function alertingEsClient<TParams extends ESSearchRequest>(
+export async function alertingEsClient<TParams extends ESSearchRequest>({
+  scopedClusterClient,
+  params,
+}: {
   scopedClusterClient: AlertServices<
     never,
     never,
     never
-  >['scopedClusterClient'],
-  params: TParams
-): Promise<ESSearchResponse<unknown, TParams>> {
+  >['scopedClusterClient'];
+  params: TParams;
+}): Promise<ESSearchResponse<unknown, TParams>> {
   const response = await scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,

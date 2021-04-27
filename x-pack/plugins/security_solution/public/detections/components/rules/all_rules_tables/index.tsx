@@ -6,28 +6,22 @@
  */
 
 import {
+  Direction,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiEmptyPrompt,
-  Direction,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import React, { useMemo, memo } from 'react';
-import styled from 'styled-components';
 
-import { EuiBasicTableOnChange } from '../../../pages/detection_engine/rules/types';
-import * as i18n from '../../../pages/detection_engine/rules/translations';
+import React, { memo } from 'react';
+import { Rule, Rules, RulesSortingFields } from '../../../containers/detection_engine/rules/types';
+import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 import {
   RulesColumns,
   RuleStatusRowItemType,
 } from '../../../pages/detection_engine/rules/all/columns';
-import { Rule, Rules, RulesSortingFields } from '../../../containers/detection_engine/rules/types';
-import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
-
-// EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
-// after few hours of fight with typescript !!!! I lost :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
+import * as i18n from '../../../pages/detection_engine/rules/translations';
+import { EuiBasicTableOnChange } from '../../../pages/detection_engine/rules/types';
 
 export interface SortingType {
   sort: {
@@ -51,9 +45,13 @@ interface AllRulesTablesProps {
   rulesStatuses: RuleStatusRowItemType[];
   sorting: SortingType;
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
-  tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
+  tableRef?: React.MutableRefObject<EuiBasicTable | null>;
   selectedTab: AllRulesTabs;
 }
+
+const emptyPrompt = (
+  <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
+);
 
 export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   euiBasicTableSelectionProps,
@@ -68,16 +66,10 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   tableRef,
   selectedTab,
 }) => {
-  const emptyPrompt = useMemo(() => {
-    return (
-      <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
-    );
-  }, []);
-
   return (
     <>
       {selectedTab === AllRulesTabs.rules && (
-        <MyEuiBasicTable
+        <EuiBasicTable
           data-test-subj="rules-table"
           columns={rulesColumns}
           isSelectable={!hasNoPermissions ?? false}
@@ -92,7 +84,7 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
         />
       )}
       {selectedTab === AllRulesTabs.monitoring && (
-        <MyEuiBasicTable
+        <EuiBasicTable
           data-test-subj="monitoring-table"
           columns={monitoringColumns}
           isSelectable={!hasNoPermissions ?? false}
@@ -101,7 +93,6 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
           pagination={pagination}
-          sorting={sorting}
         />
       )}
     </>

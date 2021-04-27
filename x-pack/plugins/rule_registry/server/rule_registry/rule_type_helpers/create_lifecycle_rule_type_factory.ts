@@ -7,28 +7,28 @@
 import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/lib/Either';
 import v4 from 'uuid/v4';
+import { Mutable } from 'utility-types';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
-import { DefaultFieldMap } from '../defaults/field_map';
-import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
+import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../common';
 import { PrepopulatedRuleEventFields } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
 
-type UserDefinedAlertFields<TFieldMap extends DefaultFieldMap> = Omit<
+type UserDefinedAlertFields<TFieldMap extends BaseRuleFieldMap> = Omit<
   OutputOfFieldMap<TFieldMap>,
   PrepopulatedRuleEventFields | 'kibana.rac.alert.id' | 'kibana.rac.alert.uuid' | '@timestamp'
 >;
 
 type LifecycleAlertService<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TActionVariable extends ActionVariable
 > = (alert: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
 }) => AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>;
 
-type CreateLifecycleRuleType<TFieldMap extends DefaultFieldMap> = <
+type CreateLifecycleRuleType<TFieldMap extends BaseRuleFieldMap> = <
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable
 >(
@@ -52,12 +52,12 @@ const wrappedStateRt = t.type({
 });
 
 export function createLifecycleRuleTypeFactory<
-  TRuleRegistry extends RuleRegistry<DefaultFieldMap>
+  TRuleRegistry extends RuleRegistry<BaseRuleFieldMap>
 >(): TRuleRegistry extends RuleRegistry<infer TFieldMap>
   ? CreateLifecycleRuleType<TFieldMap>
   : never;
 
-export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<DefaultFieldMap> {
+export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRuleFieldMap> {
   return (type) => {
     return {
       ...type,
@@ -79,7 +79,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
 
         const currentAlerts: Record<
           string,
-          UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
+          UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
         const timestamp = options.startedAt.toISOString();
@@ -113,7 +113,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
         );
 
-        const alertsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {
+        const alertsDataMap: Record<string, UserDefinedAlertFields<BaseRuleFieldMap>> = {
           ...currentAlerts,
         };
 
@@ -156,7 +156,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           });
         }
 
-        const eventsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = allAlertIds.map(
+        const eventsToIndex: Array<OutputOfFieldMap<BaseRuleFieldMap>> = allAlertIds.map(
           (alertId) => {
             const alertData = alertsDataMap[alertId];
 
@@ -164,7 +164,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
               logger.warn(`Could not find alert data for ${alertId}`);
             }
 
-            const event: OutputOfFieldMap<DefaultFieldMap> = {
+            const event: Mutable<OutputOfFieldMap<BaseRuleFieldMap>> = {
               ...alertData,
               '@timestamp': timestamp,
               'event.kind': 'state',

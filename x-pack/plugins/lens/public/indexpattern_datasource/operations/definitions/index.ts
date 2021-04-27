@@ -179,7 +179,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     columns: Record<string, IndexPatternColumn>
   ) => string;
   /**
-   * This function is called if another column in the same layer changed or got removed.
+   * This function is called if another column in the same layer changed or got added/removed.
    * Can be used to update references to other columns (e.g. for sorting).
    * Based on the current column and the other updated columns, this function has to
    * return an updated column. If not implemented, the `id` function is used instead.

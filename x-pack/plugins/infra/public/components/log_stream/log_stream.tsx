@@ -7,8 +7,8 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
+import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-
 import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -19,6 +19,10 @@ import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
 import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
 import { Query } from '../../../../../../src/plugins/data/common';
+
+interface LogStreamPluginDeps {
+  data: DataPublicPluginStart;
+}
 
 const PAGE_THRESHOLD = 2;
 
@@ -80,8 +84,8 @@ export const LogStream: React.FC<LogStreamProps> = ({
   );
 
   // source boilerplate
-  const { services } = useKibana();
-  if (!services?.http?.fetch) {
+  const { services } = useKibana<LogStreamPluginDeps>();
+  if (!services?.http?.fetch || !services?.data?.indexPatterns) {
     throw new Error(
       `<LogStream /> cannot access kibana core services.
 
@@ -98,6 +102,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   } = useLogSource({
     sourceId,
     fetch: services.http.fetch,
+    indexPatternsService: services.data.indexPatterns,
   });
 
   // Internal state

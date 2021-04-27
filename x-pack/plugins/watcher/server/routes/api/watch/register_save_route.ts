@@ -9,9 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   id: schema.string(),
@@ -26,8 +24,8 @@ const bodySchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export function registerSaveRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerSaveRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{id}',
       validate: {
@@ -35,7 +33,7 @@ export function registerSaveRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { id } = request.params;
       const { type, isNew, isActive, ...watchConfig } = request.body;
 

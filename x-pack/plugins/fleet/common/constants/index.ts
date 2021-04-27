@@ -27,6 +27,8 @@ export const FLEET_SERVER_INDICES_VERSION = 1;
 
 export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';
 
+export const FLEET_SERVER_SERVERS_INDEX = '.fleet-servers';
+
 export const FLEET_SERVER_INDICES = [
   '.fleet-actions',
   '.fleet-agents',
@@ -34,5 +36,5 @@ export const FLEET_SERVER_INDICES = [
   '.fleet-enrollment-api-keys',
   '.fleet-policies',
   '.fleet-policies-leader',
-  '.fleet-servers',
+  FLEET_SERVER_SERVERS_INDEX,
 ];

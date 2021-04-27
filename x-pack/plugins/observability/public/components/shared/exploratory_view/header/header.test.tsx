@@ -41,13 +41,16 @@ describe('ExploratoryViewHeader', function () {
     fireEvent.click(getByText('Open in Lens'));
 
     expect(core?.lens?.navigateToPrefilledEditor).toHaveBeenCalledTimes(1);
-    expect(core?.lens?.navigateToPrefilledEditor).toHaveBeenCalledWith({
-      attributes: { title: 'Performance distribution' },
-      id: '',
-      timeRange: {
-        from: 'now-15m',
-        to: 'now',
+    expect(core?.lens?.navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        attributes: { title: 'Performance distribution' },
+        id: '',
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
       },
-    });
+      true
+    );
   });
 });

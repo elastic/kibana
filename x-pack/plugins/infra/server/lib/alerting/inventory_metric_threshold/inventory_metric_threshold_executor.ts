@@ -70,7 +70,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
   const logQueryFields = await libs.getLogQueryFields(
     sourceId || 'default',
-    services.savedObjectsClient
+    services.savedObjectsClient,
+    services.scopedClusterClient.asCurrentUser
   );
 
   const compositeSize = libs.configuration.inventory.compositeSize;

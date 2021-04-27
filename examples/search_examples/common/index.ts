@@ -16,6 +16,7 @@ export interface IMyStrategyRequest extends IEsSearchRequest {
 }
 export interface IMyStrategyResponse extends IEsSearchResponse {
   cool: string;
+  executed_at: number;
 }
 
 export const SERVER_SEARCH_ROUTE_PATH = '/api/examples/search';

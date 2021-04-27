@@ -36,7 +36,6 @@ import {
   query,
   queryOrUndefined,
   filtersOrUndefined,
-  machine_learning_job_id,
   max_signals,
   risk_score,
   risk_score_mapping,
@@ -62,6 +61,7 @@ import {
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import { machine_learning_job_id_normalized } from '../../../../common/detection_engine/schemas/types/normalized_ml_job_id';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -167,7 +167,7 @@ export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 const machineLearningSpecificRuleParams = t.type({
   type: t.literal('machine_learning'),
   anomalyThreshold: anomaly_threshold,
-  machineLearningJobId: machine_learning_job_id,
+  machineLearningJobId: machine_learning_job_id_normalized,
 });
 export const machineLearningRuleParams = t.intersection([
   baseRuleParams,

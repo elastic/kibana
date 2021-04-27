@@ -683,6 +683,44 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should remove customLabel flag if label is set to default', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          col1: {
+            ...bytesColumn,
+            label: 'Custom label',
+            customLabel: true,
+          },
+        })}
+      />
+    );
+
+    act(() => {
+      wrapper
+        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .simulate('change', { target: { value: 'Maximum of bytes' } });
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              label: 'Maximum of bytes',
+              customLabel: false,
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
+      },
+    });
+  });
+
   describe('transient invalid state', () => {
     it('should set the state if selecting an operation incompatible with the current field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);

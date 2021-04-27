@@ -53,17 +53,18 @@ export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<FieldBasedIndexPatternColumn>;
+  yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested: string }>;
+  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
+  yTitle?: string;
 }
 
 export interface SeriesUrl {
@@ -91,7 +92,7 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

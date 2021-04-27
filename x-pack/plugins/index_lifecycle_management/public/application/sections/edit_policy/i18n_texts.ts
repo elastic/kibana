@@ -126,6 +126,12 @@ export const i18nTexts = {
           defaultMessage: 'Maximum documents is required.',
         }
       ),
+      maximumPrimaryShardSizeRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardSizeMissingError',
+        {
+          defaultMessage: 'A maximum primary shard size is required',
+        }
+      ),
       rollOverConfigurationCallout: {
         title: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.title',
@@ -137,7 +143,7 @@ export const i18nTexts = {
           'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.body',
           {
             defaultMessage:
-              'A value for one of maximum size, maximum documents, or maximum age is required.',
+              'A value for one of maximum primary shard size, maximum documents, maximum age or maximum index size is required.',
           }
         ),
       },

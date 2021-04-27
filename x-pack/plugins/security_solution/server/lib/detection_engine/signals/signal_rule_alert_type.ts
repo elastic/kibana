@@ -330,7 +330,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteWarningStatus) {
+          if (!hasError && !wroteWarningStatus && !result.warning) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

@@ -22,6 +22,7 @@ export declare class AggConfigs
 |  --- | --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-public.aggconfigs.aggs.md) |  | <code>IAggConfig[]</code> |  |
 |  [createAggConfig](./kibana-plugin-plugins-data-public.aggconfigs.createaggconfig.md) |  | <code>&lt;T extends AggConfig = AggConfig&gt;(params: CreateAggConfigParams, { addToAggConfigs }?: {</code><br/><code>        addToAggConfigs?: boolean &#124; undefined;</code><br/><code>    }) =&gt; T</code> |  |
+|  [hierarchical](./kibana-plugin-plugins-data-public.aggconfigs.hierarchical.md) |  | <code>boolean</code> |  |
 |  [indexPattern](./kibana-plugin-plugins-data-public.aggconfigs.indexpattern.md) |  | <code>IndexPattern</code> |  |
 |  [timeFields](./kibana-plugin-plugins-data-public.aggconfigs.timefields.md) |  | <code>string[]</code> |  |
 |  [timeRange](./kibana-plugin-plugins-data-public.aggconfigs.timerange.md) |  | <code>TimeRange</code> |  |
@@ -46,5 +47,5 @@ export declare class AggConfigs
 |  [onSearchRequestStart(searchSource, options)](./kibana-plugin-plugins-data-public.aggconfigs.onsearchrequeststart.md) |  |  |
 |  [setTimeFields(timeFields)](./kibana-plugin-plugins-data-public.aggconfigs.settimefields.md) |  |  |
 |  [setTimeRange(timeRange)](./kibana-plugin-plugins-data-public.aggconfigs.settimerange.md) |  |  |
-|  [toDsl(hierarchical)](./kibana-plugin-plugins-data-public.aggconfigs.todsl.md) |  |  |
+|  [toDsl()](./kibana-plugin-plugins-data-public.aggconfigs.todsl.md) |  |  |
 

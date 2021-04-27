@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -36,17 +34,20 @@ interface UseActionDetails {
 export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
   const { data } = useKibana().services;
 
-  const [actionDetailsRequest, setHostRequest] = useState<ActionDetailsRequestOptions | null>(null);
-
-  const response = useQuery(
-    ['action', { actionId }],
+  return useQuery(
+    ['actionDetails', { actionId, filterQuery }],
     async () => {
-      if (!actionDetailsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(actionDetailsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.actionDetails,
+            filterQuery: createFilter(filterQuery),
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -55,24 +56,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
       };
     },
     {
-      enabled: !skip && !!actionDetailsRequest,
+      enabled: !skip,
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        factoryQueryType: OsqueryQueries.actionDetails,
-        filterQuery: createFilter(filterQuery),
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, filterQuery]);
-
-  return response;
 };

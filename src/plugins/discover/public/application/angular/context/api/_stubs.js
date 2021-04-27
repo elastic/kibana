@@ -66,7 +66,7 @@ export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
     const lastQuery = searchSourceStub.setField.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.bool.must.constant_score.filter.range[timeField];
     const lastSort = searchSourceStub.setField.withArgs('sort').lastCall.args[1];
-    const sortDirection = lastSort[0][timeField];
+    const sortDirection = lastSort[0][timeField].order;
     const sortFunction =
       sortDirection === 'asc'
         ? (first, second) => first[timeField] - second[timeField]

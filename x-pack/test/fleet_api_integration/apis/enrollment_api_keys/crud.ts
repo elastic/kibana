@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/enrollment-api-keys`)
           .expect(200);
 
-        expect(apiResponse.total).to.be(4);
+        expect(apiResponse.total).to.be(3);
         expect(apiResponse.list[0]).to.have.keys('id', 'api_key_id', 'name');
       });
     });

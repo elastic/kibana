@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('maps in embeddable library', () => {
     before(async () => {
@@ -34,8 +33,7 @@ export default function ({ getPageObjects, getService }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickCreateNewLink();
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
+      await dashboardAddPanel.clickEditorMenuButton();
       await PageObjects.visualize.clickMapsApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();

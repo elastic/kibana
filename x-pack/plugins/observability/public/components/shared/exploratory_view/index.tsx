@@ -13,13 +13,12 @@ import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
+import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
-import { useInitExploratoryView } from './hooks/use_init_exploratory_view';
 import { WithHeaderLayout } from '../../app/layout/with_header';
 
 export function ExploratoryViewPage() {
@@ -45,20 +44,16 @@ export function ExploratoryViewPage() {
     ...withNotifyOnErrors(notifications!.toasts),
   });
 
-  const indexPattern = useInitExploratoryView(kbnUrlStateStorage);
-
   return (
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
     >
-      {indexPattern ? (
-        <IndexPatternContextProvider indexPattern={indexPattern!}>
-          <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-            <ExploratoryView />
-          </UrlStorageContextProvider>
-        </IndexPatternContextProvider>
-      ) : null}
+      <IndexPatternContextProvider>
+        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+          <ExploratoryView />
+        </UrlStorageContextProvider>
+      </IndexPatternContextProvider>
     </WithHeaderLayout>
   );
 }

@@ -14,9 +14,7 @@ import type { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
   fleetServerHosts: string[];
-  kibanaUrl: string;
   apiKey: EnrollmentAPIKey;
-  kibanaCASha256?: string;
 }
 
 // Otherwise the copy button is over the text
@@ -28,28 +26,11 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
   return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
 }
 
-function getKibanaUrlEnrollArgs(
-  apiKey: EnrollmentAPIKey,
-  kibanaUrl: string,
-  kibanaCASha256?: string
-) {
-  return `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
-    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
-  }`;
-}
-
 export const ManualInstructions: React.FunctionComponent<Props> = ({
-  kibanaUrl,
   apiKey,
-  kibanaCASha256,
   fleetServerHosts,
 }) => {
-  const fleetServerHostsNotEmpty = fleetServerHosts.length > 0;
-
-  const enrollArgs = fleetServerHostsNotEmpty
-    ? getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts)
-    : // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-      getKibanaUrlEnrollArgs(apiKey, kibanaUrl, kibanaCASha256);
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
   const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
 

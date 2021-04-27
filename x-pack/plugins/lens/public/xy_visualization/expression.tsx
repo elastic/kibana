@@ -57,6 +57,7 @@ import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
+import { getXDomain, XyEndzones } from './x_domain';
 
 declare global {
   interface Window {
@@ -181,6 +182,13 @@ export const xyChart: ExpressionFunctionDefinition<
       options: ['LINEAR', 'CURVE_MONOTONE_X'],
       help: i18n.translate('xpack.lens.xyChart.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
+    hideEndzones: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
+        defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
   },
@@ -330,9 +338,17 @@ export function XYChart({
   renderMode,
   syncColors,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
+  const {
+    legend,
+    layers,
+    fittingFunction,
+    gridlinesVisibilitySettings,
+    valueLabels,
+    hideEndzones,
+  } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
   if (filteredLayers.length === 0) {
@@ -387,15 +403,13 @@ export function XYChart({
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval,
-      }
-    : isHistogramViz
-    ? { minInterval }
-    : undefined;
+  const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    layers,
+    data,
+    minInterval,
+    Boolean(isTimeViz),
+    Boolean(isHistogramViz)
+  );
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -456,19 +470,27 @@ export function XYChart({
 
     const table = data.tables[layer.layerId];
 
+    const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
+    const currentXFormatter =
+      layer.xAccessor && layersAlreadyFormatted[layer.xAccessor] && xColumn
+        ? formatFactory(xColumn.meta.params)
+        : xAxisFormatter;
+
+    const rowIndex = table.rows.findIndex((row) => {
+      if (layer.xAccessor) {
+        if (layersAlreadyFormatted[layer.xAccessor]) {
+          // stringify the value to compare with the chart value
+          return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+        }
+        return row[layer.xAccessor] === xyGeometry.x;
+      }
+    });
+
     const points = [
       {
-        row: table.rows.findIndex((row) => {
-          if (layer.xAccessor) {
-            if (layersAlreadyFormatted[layer.xAccessor]) {
-              // stringify the value to compare with the chart value
-              return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
-            }
-            return row[layer.xAccessor] === xyGeometry.x;
-          }
-        }),
+        row: rowIndex,
         column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-        value: xyGeometry.x,
+        value: layer.xAccessor ? table.rows[rowIndex][layer.xAccessor] : xyGeometry.x,
       },
     ];
 
@@ -594,6 +616,22 @@ export function XYChart({
         />
       ))}
 
+      {!hideEndzones && (
+        <XyEndzones
+          baseDomain={rawXDomain}
+          extendedDomain={xDomain}
+          darkMode={darkMode}
+          histogramMode={filteredLayers.every(
+            (layer) =>
+              layer.isHistogram &&
+              (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
+              (layer.seriesType.includes('stacked') ||
+                !layer.seriesType.includes('bar') ||
+                !chartHasMoreThanOneBarSeries)
+          )}
+        />
+      )}
+
       {filteredLayers.flatMap((layer, layerIndex) =>
         layer.accessors.map((accessor, accessorIndex) => {
           const {
@@ -626,7 +664,11 @@ export function XYChart({
               const newRow = { ...row };
               for (const column of table.columns) {
                 const record = newRow[column.id];
-                if (record && !isPrimitive(record)) {
+                if (
+                  record &&
+                  // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
+                  (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
+                ) {
                   newRow[column.id] = formatFactory(column.meta.params).convert(record);
                 }
               }

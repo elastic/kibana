@@ -20,6 +20,7 @@ export function openAddPanelFlyout(options: {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
+  showCreateNewMenu?: boolean;
 }): OverlayRef {
   const {
     embeddable,
@@ -28,6 +29,7 @@ export function openAddPanelFlyout(options: {
     overlays,
     notifications,
     SavedObjectFinder,
+    showCreateNewMenu,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -42,6 +44,7 @@ export function openAddPanelFlyout(options: {
         getAllFactories={getAllFactories}
         notifications={notifications}
         SavedObjectFinder={SavedObjectFinder}
+        showCreateNewMenu={showCreateNewMenu}
       />
     ),
     {

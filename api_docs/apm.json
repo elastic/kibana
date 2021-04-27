@@ -107,7 +107,10 @@
             "section": "def-server.APMPluginSetup",
             "text": "APMPluginSetup"
           },
-          ", void, object, object>"
+          ", void, ",
+          "APMPluginSetupDependencies",
+          ", ",
+          "APMPluginStartDependencies"
         ],
         "children": [
           {
@@ -120,6 +123,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initContext",
                 "isRequired": true,
@@ -136,7 +140,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 61
+                  "lineNumber": 58
                 }
               }
             ],
@@ -144,7 +148,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 61
+              "lineNumber": 58
             }
           },
           {
@@ -160,42 +164,19 @@
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, plugins: { apmOss: ",
-              {
-                "pluginId": "apmOss",
-                "scope": "server",
-                "docId": "kibApmOssPluginApi",
-                "section": "def-server.APMOSSPluginSetup",
-                "text": "APMOSSPluginSetup"
-              },
-              "; home: ",
-              {
-                "pluginId": "home",
-                "scope": "server",
-                "docId": "kibHomePluginApi",
-                "section": "def-server.HomeServerPluginSetup",
-                "text": "HomeServerPluginSetup"
-              },
-              "; licensing: ",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginSetup",
-                "text": "LicensingPluginSetup"
-              },
-              "; cloud?: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
-              }
+              "<",
+              "APMPluginStartDependencies",
+              ", unknown>, plugins: Pick<",
+              "APMPluginSetupDependencies",
+              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              "Observable",
+              "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
+              "SearchAggregatedTransactionSetting"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -207,274 +188,30 @@
                     "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>"
+                  "<",
+                  "APMPluginStartDependencies",
+                  ", unknown>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 66
+                  "lineNumber": 63
                 }
               },
               {
-                "id": "def-server.APMPlugin.setup.plugins",
+                "id": "def-server.APMPlugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
-                "tags": [],
-                "description": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.apmOss",
-                    "type": "Object",
-                    "label": "apmOss",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 68
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "apmOss",
-                        "scope": "server",
-                        "docId": "kibApmOssPluginApi",
-                        "section": "def-server.APMOSSPluginSetup",
-                        "text": "APMOSSPluginSetup"
-                      }
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.home",
-                    "type": "Object",
-                    "label": "home",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 69
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "home",
-                        "scope": "server",
-                        "docId": "kibHomePluginApi",
-                        "section": "def-server.HomeServerPluginSetup",
-                        "text": "HomeServerPluginSetup"
-                      }
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.licensing",
-                    "type": "Object",
-                    "label": "licensing",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 70
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "licensing",
-                        "scope": "server",
-                        "docId": "kibLicensingPluginApi",
-                        "section": "def-server.LicensingPluginSetup",
-                        "text": "LicensingPluginSetup"
-                      }
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.cloud",
-                    "type": "Object",
-                    "label": "cloud",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 71
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "cloud",
-                        "scope": "server",
-                        "docId": "kibCloudPluginApi",
-                        "section": "def-server.CloudSetup",
-                        "text": "CloudSetup"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.usageCollection",
-                    "type": "Object",
-                    "label": "usageCollection",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 72
-                    },
-                    "signature": [
-                      "Pick<",
-                      {
-                        "pluginId": "usageCollection",
-                        "scope": "server",
-                        "docId": "kibUsageCollectionPluginApi",
-                        "section": "def-server.CollectorSet",
-                        "text": "CollectorSet"
-                      },
-                      ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.taskManager",
-                    "type": "CompoundType",
-                    "label": "taskManager",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 73
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "taskManager",
-                        "scope": "server",
-                        "docId": "kibTaskManagerPluginApi",
-                        "section": "def-server.TaskManagerSetupContract",
-                        "text": "TaskManagerSetupContract"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.alerting",
-                    "type": "Object",
-                    "label": "alerting",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 74
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "alerting",
-                        "scope": "server",
-                        "docId": "kibAlertingPluginApi",
-                        "section": "def-server.PluginSetupContract",
-                        "text": "PluginSetupContract"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.actions",
-                    "type": "Object",
-                    "label": "actions",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 75
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.PluginSetupContract",
-                        "text": "PluginSetupContract"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.observability",
-                    "type": "Object",
-                    "label": "observability",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 76
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "observability",
-                        "scope": "server",
-                        "docId": "kibObservabilityPluginApi",
-                        "section": "def-server.ObservabilityPluginSetup",
-                        "text": "ObservabilityPluginSetup"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.features",
-                    "type": "Object",
-                    "label": "features",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 77
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "features",
-                        "scope": "server",
-                        "docId": "kibFeaturesPluginApi",
-                        "section": "def-server.PluginSetupContract",
-                        "text": "PluginSetupContract"
-                      }
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.security",
-                    "type": "Object",
-                    "label": "security",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 78
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "security",
-                        "scope": "server",
-                        "docId": "kibSecurityPluginApi",
-                        "section": "def-server.SecurityPluginSetup",
-                        "text": "SecurityPluginSetup"
-                      },
-                      " | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.ml",
-                    "type": "CompoundType",
-                    "label": "ml",
-                    "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 79
-                    },
-                    "signature": [
-                      {
-                        "pluginId": "ml",
-                        "scope": "server",
-                        "docId": "kibMlPluginApi",
-                        "section": "def-server.SharedServices",
-                        "text": "SharedServices"
-                      },
-                      " | undefined"
-                    ]
-                  }
+                "isRequired": true,
+                "signature": [
+                  "Pick<",
+                  "APMPluginSetupDependencies",
+                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
                 ],
+                "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 67
+                  "lineNumber": 64
                 }
               }
             ],
@@ -482,7 +219,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 65
+              "lineNumber": 62
             }
           },
           {
@@ -503,6 +240,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -518,7 +256,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 196
+                  "lineNumber": 208
                 }
               }
             ],
@@ -526,7 +264,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 196
+              "lineNumber": 208
             }
           },
           {
@@ -542,13 +280,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 215
+              "lineNumber": 227
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 58
+          "lineNumber": 48
         },
         "initialIsOpen": false
       }
@@ -568,6 +306,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.mergeConfigs.$1",
             "type": "Object",
             "label": "apmOssConfig",
             "isRequired": true,
@@ -581,18 +320,13 @@
             }
           },
           {
+            "id": "def-server.mergeConfigs.$2",
             "type": "Object",
             "label": "apmConfig",
             "isRequired": true,
             "signature": [
               "Readonly<{} & { enabled: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; autocreateApmIndexPattern: boolean; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
-              {
-                "pluginId": "apm",
-                "scope": "common",
-                "docId": "kibApmPluginApi",
-                "section": "def-common.SearchAggregatedTransactionSetting",
-                "text": "SearchAggregatedTransactionSetting"
-              },
+              "SearchAggregatedTransactionSetting",
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; maxServiceEnvironments: number; maxServiceSelection: number; profilingEnabled: boolean; }>"
             ],
             "description": [],
@@ -611,7 +345,184 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "id": "def-server.APMRouteHandlerResources",
+        "type": "Interface",
+        "label": "APMRouteHandlerResources",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.request",
+            "type": "Object",
+            "label": "request",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 43
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.context",
+            "type": "Object",
+            "label": "context",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "ApmPluginRequestHandlerContext"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.params",
+            "type": "Object",
+            "label": "params",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              "{ query: { _inspect: boolean; }; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.config",
+            "type": "Object",
+            "label": "config",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 50
+            },
+            "signature": [
+              "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
+              "SearchAggregatedTransactionSetting",
+              "; 'xpack.apm.metricsInterval': number; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.logger",
+            "type": "Object",
+            "label": "logger",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              "Logger"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.core",
+            "type": "Object",
+            "label": "core",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 52
+            },
+            "signature": [
+              "{ setup: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>; start: () => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ">; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.plugins",
+            "type": "Object",
+            "label": "plugins",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 56
+            },
+            "signature": [
+              "{ data: { setup: ",
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataPluginApi",
+                "section": "def-server.DataPluginSetup",
+                "text": "DataPluginSetup"
+              },
+              "; start: () => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataPluginApi",
+                "section": "def-server.DataPluginStart",
+                "text": "DataPluginStart"
+              },
+              ">; }; features: { setup: ",
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
+              },
+              "; start: () => Promise<",
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              },
+              ">; }; apmOss: { setup: ",
+              {
+                "pluginId": "apmOss",
+                "scope": "server",
+                "docId": "kibApmOssPluginApi",
+                "section": "def-server.APMOSSPluginSetup",
+                "text": "APMOSSPluginSetup"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/apm/server/routes/typings.ts",
+          "lineNumber": 42
+        },
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "id": "def-server.ProcessorEvent",
@@ -643,6 +554,30 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.APMServerRouteRepository",
+        "type": "Type",
+        "label": "APMServerRouteRepository",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
+          "lineNumber": 60
+        },
+        "signature": [
+          "ServerRouteRepository<APMRouteHandlerResources, ",
+          "APMRouteCreateOptions",
+          ", { \"POST /api/apm/index_pattern/static\": ",
+          "ServerRoute",
+          "<\"POST /api/apm/index_pattern/static\", undefined, APMRouteHandlerResources, { created: boolean; }, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/index_pattern/dynamic\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/index_pattern/dynamic\", undefined, APMRouteHandlerResources, { dynamicIndexPattern: ",
+          "IndexPatternTitleAndFields"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.APMXPackConfig",
         "type": "Type",
         "label": "APMXPackConfig",
@@ -654,6 +589,21 @@
         },
         "signature": [
           "{ readonly enabled: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: SearchAggregatedTransactionSetting; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly maxServiceEnvironments: number; readonly maxServiceSelection: number; readonly profilingEnabled: boolean; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.InspectResponse",
+        "type": "Type",
+        "label": "InspectResponse",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/apm/server/routes/typings.ts",
+          "lineNumber": 23
+        },
+        "signature": [
+          "{ response: any; duration: number; requestType: string; requestParams: Record<string, unknown>; esError: Error; }[]"
         ],
         "initialIsOpen": false
       }
@@ -673,19 +623,13 @@
           "label": "config$",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 49
+            "path": "x-pack/plugins/apm/server/types.ts",
+            "lineNumber": 48
           },
           "signature": [
             "Observable",
             "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
-            {
-              "pluginId": "apm",
-              "scope": "common",
-              "docId": "kibApmPluginApi",
-              "section": "def-common.SearchAggregatedTransactionSetting",
-              "text": "SearchAggregatedTransactionSetting"
-            },
+            "SearchAggregatedTransactionSetting",
             "; 'xpack.apm.metricsInterval': number; }>"
           ]
         },
@@ -696,18 +640,12 @@
           "label": "getApmIndices",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 50
+            "path": "x-pack/plugins/apm/server/types.ts",
+            "lineNumber": 49
           },
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "apm",
-              "scope": "server",
-              "docId": "kibApmPluginApi",
-              "section": "def-server.ApmIndicesConfig",
-              "text": "ApmIndicesConfig"
-            },
+            "ApmIndicesConfig",
             ">"
           ]
         },
@@ -718,8 +656,8 @@
           "label": "createApmEventClient",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 51
+            "path": "x-pack/plugins/apm/server/types.ts",
+            "lineNumber": 50
           },
           "signature": [
             "(params: { debug?: boolean | undefined; request: ",
@@ -731,21 +669,9 @@
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>; context: ",
-            {
-              "pluginId": "apm",
-              "scope": "server",
-              "docId": "kibApmPluginApi",
-              "section": "def-server.ApmPluginRequestHandlerContext",
-              "text": "ApmPluginRequestHandlerContext"
-            },
+            "ApmPluginRequestHandlerContext",
             "; }) => Promise<{ search<TParams extends ",
-            {
-              "pluginId": "apm",
-              "scope": "server",
-              "docId": "kibApmPluginApi",
-              "section": "def-server.APMEventESSearchRequest",
-              "text": "APMEventESSearchRequest"
-            },
+            "APMEventESSearchRequest",
             ">(params: TParams, { includeLegacyData }?: { includeLegacyData?: boolean | undefined; }): Promise<",
             "InferSearchResponseOf",
             "<TypeOfProcessorEvent<",
@@ -754,8 +680,8 @@
         }
       ],
       "source": {
-        "path": "x-pack/plugins/apm/server/plugin.ts",
-        "lineNumber": 48
+        "path": "x-pack/plugins/apm/server/types.ts",
+        "lineNumber": 47
       },
       "lifecycle": "setup",
       "initialIsOpen": true
