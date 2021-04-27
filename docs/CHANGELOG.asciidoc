@@ -54,8 +54,6 @@ Review important information about the {kib} 7.12.x releases.
 [[release-notes-7.12.1]]
 == {kib} 7.12.1
 
-coming::[7.12.1]
-
 For information about the {kib} 7.12.1 release, review the following information.
 
 [float]
