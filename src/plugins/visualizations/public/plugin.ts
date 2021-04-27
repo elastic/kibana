@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import './index.scss';
-
 import {
   setUISettings,
   setTypes,
@@ -68,7 +65,7 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { createVisAsync } from './vis_lazy';
+import { createVisAsync } from './vis_async';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

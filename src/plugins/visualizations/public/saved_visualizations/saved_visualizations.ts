@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/public';
+import type { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass, SavedVisServices } from './_saved_vis';

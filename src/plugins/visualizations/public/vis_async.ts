@@ -13,8 +13,13 @@ export const createVisAsync = async <TVisParams = VisParams>(
   visType: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
+  // Build optimization. Move app styles from main bundle
+  // @ts-expect-error TS error, cannot find type declaration for scss
+  await import('./vis.scss');
+
   const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
+
   await vis.setState(visState);
   return vis;
 };

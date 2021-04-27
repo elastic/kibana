@@ -22,7 +22,7 @@ import {
   AttributeService,
 } from '../../../embeddable/public';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import {
+import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
   VisualizeEmbeddable,
@@ -32,7 +32,7 @@ import {
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
-import { createVisAsync } from '../vis_lazy';
+import { createVisAsync } from '../vis_async';
 import {
   getCapabilities,
   getTypes,

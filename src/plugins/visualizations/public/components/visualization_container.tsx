@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, Suspense } from 'react';
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { VisualizationNoResults } from './visualization_noresults';
-import { VisualizationError } from './visualization_error';
+
 import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
 export interface VisualizationContainerProps {
@@ -21,6 +20,9 @@ export interface VisualizationContainerProps {
   showNoResult?: boolean;
   error?: string;
 }
+
+const VisualizationNoResults = lazy(() => import('./visualization_noresults'));
+const VisualizationError = lazy(() => import('./visualization_error'));
 
 export const VisualizationContainer = ({
   'data-test-subj': dataTestSubj = '',
@@ -52,6 +54,3 @@ export const VisualizationContainer = ({
     </div>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default VisualizationContainer;
