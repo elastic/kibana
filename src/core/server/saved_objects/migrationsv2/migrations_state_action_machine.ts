@@ -49,14 +49,14 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
+    const doLog = (level: MigrationLogLevel, message: string) => {
+      if (level === 'error') {
+        logger.error(message);
+      } else {
+        logger[level](message);
+      }
+    };
     newState.logs.slice(oldState.logs.length).forEach((log) => {
-      const doLog = (level: MigrationLogLevel, message: string) => {
-        if (level === 'error') {
-          logger.error(message);
-        } else {
-          logger[level](message);
-        }
-      };
       doLog(log.level, logMessagePrefix + log.message);
     });
   }
