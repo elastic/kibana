@@ -15,7 +15,7 @@ import { SecurityRuleRegistry } from '../../../plugin';
 
 const createSecurityCustomRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
 
-export const customAlertType = createSecurityCustomRuleType({
+export const queryAlertType = createSecurityCustomRuleType({
   id: CUSTOM_ALERT_TYPE_ID,
   name: 'Custom Query Rule',
   validate: {

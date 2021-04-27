@@ -42,7 +42,7 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import { customAlertType } from './lib/detection_engine/reference_rules/custom';
+import { queryAlertType } from './lib/detection_engine/reference_rules/query';
 import { eqlAlertType } from './lib/detection_engine/reference_rules/eql';
 import { thresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
 import { initRoutes } from './routes';
@@ -299,7 +299,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     // Register reference rule types via rule-registry
-    this.setupPlugins.ruleRegistry.registerType(customAlertType);
+    this.setupPlugins.ruleRegistry.registerType(queryAlertType);
     this.setupPlugins.ruleRegistry.registerType(eqlAlertType);
     this.setupPlugins.ruleRegistry.registerType(thresholdAlertType);
 
