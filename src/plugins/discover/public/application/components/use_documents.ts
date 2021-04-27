@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { fetchStatuses } from './constants';
@@ -41,7 +41,9 @@ export function useDocuments({
   const [fetchError, setFetchError] = useState(undefined);
 
   const [documents, setDocuments] = useState<ElasticSearchHit[]>([]);
-  const inspectorAdapters = useRef({ requests: new RequestAdapter() });
+  const [inspectorAdapters, setInspectorAdapters] = useState<
+    undefined | { requests: RequestAdapter }
+  >();
 
   const fetch = useCallback(
     (abortController: AbortController, searchSessionId: string) => {
@@ -62,13 +64,14 @@ export function useDocuments({
         showUnmappedFields,
       });
       setFetchStatus(fetchStatuses.LOADING);
+      const newInspectorAdapters = { requests: new RequestAdapter() };
 
       return volatileSearchSource
         .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
           inspector: {
-            adapter: inspectorAdapters.current.requests,
+            adapter: newInspectorAdapters.requests,
             title: i18n.translate('discover.inspectorRequestDataTitle', {
               defaultMessage: 'data',
             }),
@@ -79,6 +82,7 @@ export function useDocuments({
         .then((resp) => {
           setDocuments(resp.hits.hits as ElasticSearchHit[]);
           setFetchStatus(fetchStatuses.COMPLETE);
+          setInspectorAdapters(newInspectorAdapters);
         })
         .catch((error) => {
           // If the request was aborted then no need to surface this error in the UI
@@ -86,6 +90,7 @@ export function useDocuments({
           setFetchStatus(fetchStatuses.ERROR);
           setFetchError(error);
           services.data.search.showError(error);
+          setInspectorAdapters(newInspectorAdapters);
         });
     },
     [
@@ -103,7 +108,7 @@ export function useDocuments({
     fetchError,
     fetchCounter,
     rows: documents,
-    inspectorAdapters: inspectorAdapters.current,
+    inspectorAdapters,
     fetch,
     reset: () => {
       setDocuments([]);

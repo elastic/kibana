@@ -8,6 +8,7 @@
 import './discover.scss';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
+  EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
