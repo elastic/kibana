@@ -583,7 +583,6 @@ export const getEntryOnOperatorChange = (
       index: parent.parentIndex,
       updatedEntry: {
         ...parent.parent,
-        // @ts-expect-error
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
@@ -592,7 +591,7 @@ export const getEntryOnOperatorChange = (
           },
           ...parent.parent.entries.slice(entryIndex + 1),
         ],
-      },
+      } as BuilderEntry,
     };
   } else {
     return { index: entryIndex, updatedEntry: newEntry };
