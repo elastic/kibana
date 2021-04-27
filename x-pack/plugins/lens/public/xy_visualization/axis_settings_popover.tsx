@@ -14,9 +14,10 @@ import {
   EuiSpacer,
   EuiFieldText,
   IconType,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYLayerConfig, AxesSettingsConfig } from './types';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtent } from './types';
 import { ToolbarPopover } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
@@ -79,7 +80,21 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   * upper bound (only used for y axes)
+   */
+  upperBound?: AxisExtent;
+  /**
+   * lower bound (only used for y axes)
+   */
+  lowerBound?: AxisExtent;
+  /**
+   * Set axis extents
+   */
+  setAxisExtents: (upperBound: AxisExtent, lowerBound: AxisExtent) => void;
+  hasBarSeries: boolean;
 }
+
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
   isHorizontal: boolean
@@ -148,6 +163,10 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
+  setAxisExtents,
+  lowerBound,
+  upperBound,
+  hasBarSeries,
 }) => {
   const [title, setTitle] = useState<string | undefined>(axisTitle);
 
@@ -233,6 +252,103 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
+          />
+        </>
+      )}
+      {axis !== 'x' && lowerBound && upperBound && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs">
+            <h4>
+              {i18n.translate('xpack.lens.xyChart.upperBound', {
+                defaultMessage: 'Upper bound',
+              })}
+            </h4>
+          </EuiText>
+          <EuiSwitch
+            compressed
+            data-test-subj={`lns${axis}UpperBoundScaleToData`}
+            label={i18n.translate('xpack.lens.xyChart.scaleToData', {
+              defaultMessage: 'Scale to data',
+            })}
+            onChange={(event) =>
+              setAxisExtents({ ...upperBound, scaleToData: event.target.checked }, lowerBound)
+            }
+            checked={upperBound.scaleToData}
+          />
+          <EuiFieldNumber
+            data-test-subj={`lns${axis}UpperBoundExtent`}
+            compressed
+            placeholder={i18n.translate('xpack.lens.xyChart.bound', {
+              defaultMessage: 'Bound',
+            })}
+            value={upperBound.value || ''}
+            disabled={upperBound.scaleToData}
+            onChange={({ target }) => {
+              setAxisExtents({ ...upperBound, value: target.valueAsNumber }, lowerBound);
+            }}
+            aria-label={i18n.translate('xpack.lens.xyChart.bound', {
+              defaultMessage: 'Bound',
+            })}
+          />
+          <EuiSpacer size="m" />
+          <EuiText size="xs">
+            <h4>
+              {i18n.translate('xpack.lens.xyChart.lowerBound', {
+                defaultMessage: 'Lower bound',
+              })}
+            </h4>
+          </EuiText>
+          <EuiSwitch
+            compressed
+            data-test-subj={`lns${axis}LowerBoundScaleToData`}
+            label={i18n.translate('xpack.lens.xyChart.scaleToDataLowerBound', {
+              defaultMessage: 'Scale to data',
+            })}
+            onChange={(event) =>
+              setAxisExtents(upperBound, { ...lowerBound, scaleToData: event.target.checked })
+            }
+            checked={lowerBound.scaleToData}
+            disabled={hasBarSeries}
+          />
+          <EuiFieldNumber
+            data-test-subj={`lns${axis}LowerBoundExtent`}
+            compressed
+            placeholder={i18n.translate('xpack.lens.xyChart.bound', {
+              defaultMessage: 'Bound',
+            })}
+            value={lowerBound.value || ''}
+            disabled={lowerBound.scaleToData || hasBarSeries}
+            onChange={({ target }) => {
+              setAxisExtents(upperBound, { ...lowerBound, value: target.valueAsNumber });
+            }}
+            aria-label={i18n.translate('xpack.lens.xyChart.bound', {
+              defaultMessage: 'Bound',
+            })}
+          />
+          <EuiSpacer size="m" />
+          <EuiText size="xs">
+            <h4>
+              {i18n.translate('xpack.lens.xyChart.margin', {
+                defaultMessage: 'Margin',
+              })}
+            </h4>
+          </EuiText>
+          <EuiFieldNumber
+            data-test-subj={`lns${axis}Margin`}
+            compressed
+            placeholder={i18n.translate('xpack.lens.xyChart.margin', {
+              defaultMessage: 'Margin',
+            })}
+            append="%"
+            value={lowerBound.margin || ''}
+            disabled={!lowerBound.scaleToData || !upperBound.scaleToData}
+            onChange={({ target }) => {
+              setAxisExtents(upperBound, { ...lowerBound, margin: target.valueAsNumber });
+            }}
+            aria-label={i18n.translate('xpack.lens.xyChart.margin', {
+              defaultMessage: 'Margin',
+            })}
           />
         </>
       )}

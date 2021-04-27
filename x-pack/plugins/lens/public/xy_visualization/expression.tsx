@@ -191,6 +191,30 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
+    yLeftUpperBound: {
+      types: ['lens_xy_axisExtent'],
+      help: i18n.translate('xpack.lens.xyChart.axisExtent.help', {
+        defaultMessage: 'Specify bound for a y axis',
+      }),
+    },
+    yLeftLowerBound: {
+      types: ['lens_xy_axisExtent'],
+      help: i18n.translate('xpack.lens.xyChart.axisExtent.help', {
+        defaultMessage: 'Specify bound for a y axis',
+      }),
+    },
+    yRightUpperBound: {
+      types: ['lens_xy_axisExtent'],
+      help: i18n.translate('xpack.lens.xyChart.axisExtent.help', {
+        defaultMessage: 'Specify bound for a y axis',
+      }),
+    },
+    yRightLowerBound: {
+      types: ['lens_xy_axisExtent'],
+      help: i18n.translate('xpack.lens.xyChart.axisExtent.help', {
+        defaultMessage: 'Specify bound for a y axis',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -345,6 +369,10 @@ export function XYChart({
     gridlinesVisibilitySettings,
     valueLabels,
     hideEndzones,
+    yLeftLowerBound,
+    yLeftUpperBound,
+    yRightLowerBound,
+    yRightUpperBound,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -609,6 +637,34 @@ export function XYChart({
               axis.groupId === 'right'
                 ? gridlinesVisibilitySettings?.yRight
                 : gridlinesVisibilitySettings?.yLeft,
+          }}
+          domain={{
+            fit:
+              axis.groupId === 'left'
+                ? yLeftLowerBound?.scaleToData
+                : yRightLowerBound?.scaleToData,
+            min: axis.series.some((series) =>
+              layers.find((l) => series.layer === l.layerId)?.seriesType.includes('bar')
+            )
+              ? undefined
+              : axis.groupId === 'left'
+              ? yLeftLowerBound?.value && !yLeftLowerBound.scaleToData
+                ? yLeftLowerBound.value
+                : undefined
+              : yRightLowerBound?.value && !yRightLowerBound.scaleToData
+              ? yRightLowerBound.value
+              : undefined,
+            max:
+              axis.groupId === 'left'
+                ? yLeftUpperBound?.value && !yLeftUpperBound.scaleToData
+                  ? yLeftUpperBound.value
+                  : undefined
+                : yRightUpperBound?.value && !yRightUpperBound.scaleToData
+                ? yRightUpperBound.value
+                : undefined,
+            padding: `${
+              (axis.groupId === 'left' ? yLeftLowerBound?.margin : yRightLowerBound?.margin) || 0
+            }%`,
           }}
           hide={filteredLayers[0].hide}
           tickFormat={(d) => axis.formatter?.convert(d) || ''}

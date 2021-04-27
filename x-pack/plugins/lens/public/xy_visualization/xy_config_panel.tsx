@@ -28,7 +28,14 @@ import {
   VisualizationDimensionEditorProps,
   FormatFactory,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  AxisExtent,
+} from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
@@ -204,6 +211,28 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       }
     : undefined;
 
+  const onChangeAxisExtents = (side: 'left' | 'right') => (
+    upperBound: AxisExtent,
+    lowerBound: AxisExtent
+  ) => {
+    setState({
+      ...state,
+      [side === 'left' ? 'yLeftUpperBound' : 'yRightUpperBound']: upperBound,
+      [side === 'left' ? 'yLeftLowerBound' : 'yRightLowerBound']: lowerBound,
+    });
+  };
+
+  const hasBarOnLeftAxis = axisGroups
+    .find((group) => group.groupId === 'left')
+    ?.series?.some((series) =>
+      state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
+    );
+  const hasBarOnRightAxis = axisGroups
+    .find((group) => group.groupId === 'left')
+    ?.series?.some((series) =>
+      state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
+    );
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -282,6 +311,10 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               }
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              setAxisExtents={onChangeAxisExtents('left')}
+              upperBound={state.yLeftUpperBound || { scaleToData: true }}
+              lowerBound={state.yLeftLowerBound || { scaleToData: false }}
+              hasBarSeries={Boolean(hasBarOnLeftAxis)}
             />
           </TooltipWrapper>
           <AxisSettingsPopover
@@ -297,6 +330,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
+            setAxisExtents={() => {}}
+            hasBarSeries={Boolean(hasBarOnLeftAxis || hasBarOnRightAxis)}
           />
           <TooltipWrapper
             tooltipContent={
@@ -327,6 +362,10 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               }
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              setAxisExtents={onChangeAxisExtents('right')}
+              upperBound={state.yRightUpperBound || { scaleToData: true }}
+              lowerBound={state.yRightLowerBound || { scaleToData: false }}
+              hasBarSeries={Boolean(hasBarOnRightAxis)}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

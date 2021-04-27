@@ -197,6 +197,78 @@ export const buildExpression = (
               ],
             },
           ],
+          yLeftUpperBound: state?.yLeftUpperBound
+            ? [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_xy_axisExtent',
+                      arguments: {
+                        scaleToData: [state.yLeftUpperBound.scaleToData],
+                        value: [state.yLeftUpperBound.value || 0],
+                        margin: [state.yLeftUpperBound.margin || 0],
+                      },
+                    },
+                  ],
+                },
+              ]
+            : [],
+          yLeftLowerBound: state?.yLeftLowerBound
+            ? [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_xy_axisExtent',
+                      arguments: {
+                        scaleToData: [state.yLeftLowerBound.scaleToData],
+                        value: [state.yLeftLowerBound.value || 0],
+                        margin: [state.yLeftLowerBound.margin || 0],
+                      },
+                    },
+                  ],
+                },
+              ]
+            : [],
+          yRightUpperBound: state?.yRightUpperBound
+            ? [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_xy_axisExtent',
+                      arguments: {
+                        scaleToData: [state.yRightUpperBound.scaleToData],
+                        value: [state.yRightUpperBound.value || 0],
+                        margin: [state.yRightUpperBound.margin || 0],
+                      },
+                    },
+                  ],
+                },
+              ]
+            : [],
+          yRightLowerBound: state?.yRightLowerBound
+            ? [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_xy_axisExtent',
+                      arguments: {
+                        scaleToData: [state.yRightLowerBound.scaleToData],
+                        value: [state.yRightLowerBound.value || 0],
+                        margin: [state.yRightLowerBound.margin || 0],
+                      },
+                    },
+                  ],
+                },
+              ]
+            : [],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           layers: validLayers.map((layer) => {

@@ -80,6 +80,54 @@ export const legendConfig: ExpressionFunctionDefinition<
   },
 };
 
+export interface AxisExtent {
+  scaleToData: boolean;
+  value?: number;
+  margin?: number;
+}
+
+type AxisExtentResult = AxisExtent & { type: 'lens_xy_axisExtent' };
+
+export const axisExtent: ExpressionFunctionDefinition<
+  'lens_xy_axisExtent',
+  null,
+  AxisExtent,
+  AxisExtentResult
+> = {
+  name: 'lens_xy_axisExtent',
+  aliases: [],
+  type: 'lens_xy_axisExtent',
+  help: `Configure the upper or lower bound of an axis`,
+  inputTypes: ['null'],
+  args: {
+    scaleToData: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.scaleToData.help', {
+        defaultMessage: 'Specifies whether the extent should be inferred from the data',
+      }),
+    },
+    value: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentValue.help', {
+        defaultMessage: 'Specifies the value of the axis extent',
+      }),
+    },
+    margin: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentMargin.help', {
+        defaultMessage:
+          'Specifies the margin between the extent of the axis and the closest data point. Only used if scaleToData is set',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: AxisExtent) {
+    return {
+      type: 'lens_xy_axisExtent',
+      ...args,
+    };
+  },
+};
+
 export interface AxesSettingsConfig {
   x: boolean;
   yLeft: boolean;
@@ -415,6 +463,10 @@ export interface XYArgs {
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
   curveType?: XYCurveType;
   hideEndzones?: boolean;
+  yLeftUpperBound?: AxisExtentResult;
+  yLeftLowerBound?: AxisExtentResult;
+  yRightUpperBound?: AxisExtentResult;
+  yRightLowerBound?: AxisExtentResult;
 }
 
 export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
@@ -434,6 +486,10 @@ export interface XYState {
   gridlinesVisibilitySettings?: AxesSettingsConfig;
   curveType?: XYCurveType;
   hideEndzones?: boolean;
+  yLeftUpperBound?: AxisExtent;
+  yLeftLowerBound?: AxisExtent;
+  yRightUpperBound?: AxisExtent;
+  yRightLowerBound?: AxisExtent;
 }
 
 export type State = XYState;
