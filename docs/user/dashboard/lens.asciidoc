@@ -213,7 +213,7 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 
 Sorting dimensions in visualizations is unsupported in *Lens* for charts.
 
-Sorting is possible in *Lens* datatables, but it is limited to a single column. Click on the dimension header to sort by the dimension/column and select the sorting criteria.
+Sorting is possible in *Lens* datatables, but it is limited to a single column. Click on the column header to sort by the column and select the sorting criteria.
 Note that if the dimension is used within the `Columns` (transposed) then all columns that belong to the same dimension will be sorted.
 
 [float]
@@ -264,5 +264,4 @@ At the moment it is not possible to change the scale of the Y axis (for instance
 ===== Is it possible to have more than one Y axis scale in visualization?
 
 *Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.
-
 
