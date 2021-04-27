@@ -1413,7 +1413,7 @@ module.exports = {
         // 'src/plugins/usage_collection/**',
         // 'src/plugins/telemetry/**',
         'src/plugins/telemetry_collection_manager/**',
-        // 'src/plugins/telemetry_management_section/**',
+        'src/plugins/telemetry_management_section/**',
         'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
