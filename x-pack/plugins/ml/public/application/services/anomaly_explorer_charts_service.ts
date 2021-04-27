@@ -551,6 +551,7 @@ export class AnomalyExplorerChartsService {
     }
 
     function handleError(errorMsg: string, jobId: string): void {
+      // Group the jobIds by the type of error message
       if (!data.errorMessages) {
         data.errorMessages = {};
       }
@@ -810,11 +811,11 @@ export class AnomalyExplorerChartsService {
       );
     });
     function processChartData(
-      response: [MetricData | undefined, RecordsForCriteria, ScheduledEventsByBucket, any],
+      response: [MetricData, RecordsForCriteria, ScheduledEventsByBucket, any],
       seriesIndex: number
     ) {
-      const metricData = response[0]?.results;
-      const records = response[1]?.records ?? [];
+      const metricData = response[0].results;
+      const records = response[1].records;
       const jobId = seriesConfigsForPromises[seriesIndex].jobId;
       const scheduledEvents = response[2].events[jobId];
       const eventDistribution = response[3];
