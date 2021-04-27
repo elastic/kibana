@@ -21,18 +21,21 @@ import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
   const { beats } = response.hits?.hits.reduce((accum: any, hit: ElasticsearchResponseHit) => {
-    const stats = hit._source.beats_stats;
+    const stats = hit._source.beats_stats ?? hit._source.beat?.stats;
+    const statsMetrics = hit._source.beats_stats?.metrics ?? hit._source.beat?.stats;
     if (!stats) {
       return accum;
     }
 
     let earliestStats = null;
-    if (
-      hit.inner_hits?.earliest?.hits?.hits &&
-      hit.inner_hits?.earliest?.hits?.hits.length > 0 &&
-      hit.inner_hits.earliest.hits.hits[0]._source.beats_stats
-    ) {
-      earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
+    let earliestStatsMetrics = null;
+    if (hit.inner_hits?.earliest?.hits?.hits && hit.inner_hits?.earliest?.hits?.hits.length > 0) {
+      earliestStats =
+        hit.inner_hits.earliest.hits.hits[0]._source.beats_stats ??
+        hit.inner_hits.earliest.hits.hits[0]._source.beat?.stats;
+      earliestStatsMetrics =
+        hit.inner_hits.earliest.hits.hits[0]._source.beats_stats?.metrics ??
+        hit.inner_hits.earliest.hits.hits[0]._source.beat?.stats;
     }
 
     const uuid = stats?.beat?.uuid;
@@ -46,44 +49,47 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: stats.timestamp,
-      earliestHitTimestamp: earliestStats?.timestamp,
+      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'],
+      earliestHitTimestamp:
+        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'],
       timeWindowMin: start,
       timeWindowMax: end,
     };
 
     const { rate: bytesSentRate } = calculateRate({
-      latestTotal: stats.metrics?.libbeat?.output?.write?.bytes,
-      earliestTotal: earliestStats?.metrics?.libbeat?.output?.write?.bytes,
+      latestTotal: statsMetrics?.libbeat?.output?.write?.bytes,
+      earliestTotal: earliestStatsMetrics?.libbeat?.output?.write?.bytes,
       ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
-      latestTotal: stats.metrics?.libbeat?.pipeline?.events?.total,
-      earliestTotal: earliestStats?.metrics?.libbeat?.pipeline?.events?.total,
+      latestTotal: statsMetrics?.libbeat?.pipeline?.events?.total,
+      earliestTotal: earliestStatsMetrics?.libbeat?.pipeline?.events?.total,
       ...rateOptions,
     });
 
-    const errorsWrittenLatest = stats.metrics?.libbeat?.output?.write?.errors ?? 0;
-    const errorsWrittenEarliest = earliestStats?.metrics?.libbeat?.output?.write?.errors ?? 0;
-    const errorsReadLatest = stats.metrics?.libbeat?.output?.read?.errors ?? 0;
-    const errorsReadEarliest = earliestStats?.metrics?.libbeat?.output?.read?.errors ?? 0;
+    const errorsWrittenLatest = statsMetrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsWrittenEarliest = earliestStatsMetrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsReadLatest = statsMetrics?.libbeat?.output?.read?.errors ?? 0;
+    const errorsReadEarliest = earliestStatsMetrics?.libbeat?.output?.read?.errors ?? 0;
     const errors = getDiffCalculation(
       errorsWrittenLatest + errorsReadLatest,
       errorsWrittenEarliest + errorsReadEarliest
     );
 
     accum.beats.push({
-      uuid: stats.beat?.uuid,
-      name: stats.beat?.name,
-      type: upperFirst(stats.beat?.type),
-      output: upperFirst(stats.metrics?.libbeat?.output?.type),
+      uuid: stats?.beat?.uuid,
+      name: stats?.beat?.name,
+      type: upperFirst(stats?.beat?.type),
+      output: upperFirst(statsMetrics?.libbeat?.output?.type),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,
-      memory: stats.metrics?.beat?.memstats?.memory_alloc,
-      version: stats.beat?.version,
-      time_of_last_event: hit._source.timestamp,
+      memory:
+        hit._source.beats_stats?.metrics?.beat?.memstats?.memory_alloc ??
+        hit._source.beat?.stats?.memstats?.memory?.alloc,
+      version: stats?.beat?.version,
+      time_of_last_event: hit._source.beats_stats?.timestamp ?? hit._source['@timestamp'],
     });
 
     return accum;
@@ -106,6 +112,7 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
     filterPath: [
       // only filter path can filter for inner_hits
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beats_stats.beat.name',
       'hits.hits._source.beats_stats.beat.host',
@@ -115,18 +122,34 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
       'hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
       'hits.hits._source.beats_stats.metrics.beat.memstats.memory_alloc',
+      'hits.hits._source.beat.stats.beat.uuid',
+      'hits.hits._source.beat.stats.beat.name',
+      'hits.hits._source.beat.stats.beat.host',
+      'hits.hits._source.beat.stats.beat.type',
+      'hits.hits._source.beat.stats.beat.version',
+      'hits.hits._source.beat.stats.libbeat.output.type',
+      'hits.hits._source.beat.stats.libbeat.output.read.errors',
+      'hits.hits._source.beat.stats.libbeat.output.write.errors',
+      'hits.hits._source.beat.stats.memstats.memory.alloc',
 
       // latest hits for calculating metrics
       'hits.hits._source.beats_stats.timestamp',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits._source.beat.stats.libbeat.output.write.bytes',
+      'hits.hits._source.beat.stats.libbeat.pipeline.events.total',
 
       // earliest hits for calculating metrics
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.timestamp',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.@timestamp',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beat.stats.libbeat.output.write.bytes',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beat.stats.libbeat.pipeline.events.total',
 
       // earliest hits for calculating diffs
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
     ],
@@ -141,7 +164,10 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } }],
+          sort: [
+            { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+            { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
+          ],
         },
       },
       sort: [
