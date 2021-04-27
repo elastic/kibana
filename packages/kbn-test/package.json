@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/expect": "link:../kbn-expect",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/expect": "link:../kbn-expect"
   }
 }

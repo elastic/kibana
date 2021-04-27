@@ -9,7 +9,7 @@ pageLoadAssetSize:
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 413500
+  core: 414000
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -92,7 +92,7 @@ pageLoadAssetSize:
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 155203
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
