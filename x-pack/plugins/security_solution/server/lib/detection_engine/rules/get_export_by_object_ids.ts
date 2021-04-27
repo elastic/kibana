@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { AlertsClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
@@ -47,12 +49,24 @@ export const getRulesFromObjects = async (
   alertsClient: AlertsClient,
   objects: Array<{ rule_id: string }>
 ): Promise<RulesErrors> => {
-  const joinedIds = objects
-    .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
+  // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
+  // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
+  // to limiting the length of "should" arrays to 1024. By chunking the array into blocks of 1024 ids,
+  // we can force the KQL -> ES DSL query generator into grouping them in blocks of 1024.
+  // The generated KQL query here looks like
+  // "alert.attributes.tags: (id1 OR id2 OR ... OR id1024) OR alert.attributes.tags: (...) ..."
+  const chunkedObjects = chunk(objects, 1024);
+  const filter = chunkedObjects
+    .map((chunkedArray) => {
+      const joinedIds = chunkedArray
+        .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
+        .join(' OR ');
+      return `alert.attributes.tags: (${joinedIds})`;
+    })
     .join(' OR ');
   const rules = await findRules({
     alertsClient,
-    filter: `alert.attributes.tags: (${joinedIds})`,
+    filter,
     page: 1,
     fields: undefined,
     perPage: 10000,
