@@ -42,7 +42,6 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
   }
 
   if (search.length > 0) {
-    // Change everything to lower case for a case-insensitive comparison
     conditions.push((dep) => {
       try {
         const searchReg = new RegExp(search, 'i');
