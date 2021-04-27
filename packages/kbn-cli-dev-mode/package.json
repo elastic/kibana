@@ -18,8 +18,6 @@
     "@kbn/logging": "link:../kbn-logging",
     "@kbn/server-http-tools": "link:../kbn-server-http-tools",
     "@kbn/optimizer": "link:../kbn-optimizer",
-    "@kbn/std": "link:../kbn-std",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

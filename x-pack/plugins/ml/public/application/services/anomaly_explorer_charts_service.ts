@@ -40,6 +40,7 @@ import { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
 import { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { ExplorerService } from '../explorer/explorer_dashboard_service';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -427,6 +428,7 @@ export class AnomalyExplorerChartsService {
   }
 
   public async getAnomalyData(
+    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -534,6 +536,11 @@ export class AnomalyExplorerChartsService {
       data.errorMessages = errorMessages;
     }
 
+    // TODO: replace this temporary fix for flickering issue
+    // https://github.com/elastic/kibana/issues/97266
+    if (explorerService) {
+      explorerService.setCharts({ ...data });
+    }
     if (seriesConfigs.length === 0) {
       return data;
     }
@@ -895,6 +902,12 @@ export class AnomalyExplorerChartsService {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
         }
+
+        // TODO: replace this temporary fix for flickering issue
+        if (explorerService) {
+          explorerService.setCharts({ ...data });
+        }
+
         return Promise.resolve(data);
       })
       .catch((error) => {
