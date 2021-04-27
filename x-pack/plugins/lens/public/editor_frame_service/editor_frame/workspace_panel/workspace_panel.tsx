@@ -43,7 +43,6 @@ import {
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   UiActionsStart,
@@ -368,7 +367,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
-export const InnerVisualizationWrapper = ({
+export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
   timefilter,
@@ -619,5 +618,3 @@ export const InnerVisualizationWrapper = ({
     </div>
   );
 };
-
-export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

@@ -97,7 +97,7 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/apm-rum-react": "^1.2.5",
-    "@elastic/charts": "29.0.0",
+    "@elastic/charts": "29.1.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath/npm_module",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.4",
     "@elastic/ems-client": "7.13.0",
@@ -446,7 +446,7 @@
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
     "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
-    "@kbn/expect": "link:packages/kbn-expect",
+    "@kbn/expect": "link:bazel-bin/packages/kbn-expect/npm_module",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
