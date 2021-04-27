@@ -28,7 +28,7 @@ describe('getCloudFleetServersHosts', () => {
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
       Array [
-        "https://deployment-id-1.fleet.us-east-1.aws.found.io",
+        "https://deployment-id-1.fleet.us-east-1.aws.found.io:443",
       ]
     `);
   });
