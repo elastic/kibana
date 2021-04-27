@@ -40,6 +40,8 @@ describe('Cases connectors', () => {
       { source: 'comments', target: 'comments', action_type: 'append' },
     ],
     version: 'WzEwNCwxXQ==',
+    id: '123',
+    owner: 'securitySolution',
   };
   beforeEach(() => {
     cleanKibana();
