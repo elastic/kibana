@@ -165,11 +165,6 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#54B399', percentage: 90 },
               ],
             },
-            {
-              chartAvailable: false,
-              id: 'customer_birth_date',
-              legend: '0 documents contain field.',
-            },
             { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
             { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
             {
@@ -204,6 +199,15 @@ export default function ({ getService }: FtrProviderContext) {
               chartAvailable: true,
               id: 'day_of_week',
               legend: '7 categories',
+              colorStats: [
+                { color: '#000000', percentage: 20 },
+                { color: '#54B399', percentage: 75 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'day_of_week_i',
+              legend: '0 - 6',
               colorStats: [
                 { color: '#000000', percentage: 20 },
                 { color: '#54B399', percentage: 75 },
@@ -293,7 +297,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
         },
       } as PivotTransformTestData,
       {
@@ -331,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
+          histogramCharts: undefined,
           transformPreview: {
             column: 0,
             values: [
@@ -398,10 +401,14 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(true);
 
-          await transform.testExecution.logTestStep('displays the index preview histogram charts');
-          await transform.wizard.assertIndexPreviewHistogramCharts(
-            testData.expected.histogramCharts
-          );
+          if (Array.isArray(testData.expected.histogramCharts)) {
+            await transform.testExecution.logTestStep(
+              'displays the index preview histogram charts'
+            );
+            await transform.wizard.assertIndexPreviewHistogramCharts(
+              testData.expected.histogramCharts
+            );
+          }
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');
