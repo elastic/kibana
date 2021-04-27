@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-describe('Home page', () => {
-  it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
+import { esArchiverLoad } from '../tasks/es_archiver';
 
+describe('Home page', () => {
+  before(() => {
+    cy.loginAs('apm_read_user', 'changeme');
+  });
+  it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
+    // esArchiverLoad('apm_8.0.0');
     cy.visit('/app/apm');
 
     cy.url().should(
