@@ -341,8 +341,10 @@ exports.Cluster = class Cluster {
           },
         });
 
-        logz.directory(path.resolve(installPath, 'logs'));
-        await asyncPipeline(logz, fs.createWriteStream(archivePath));
+        logz.directory(path.resolve(installPath, 'logs'), 'logs');
+        const promise = asyncPipeline(logz, fs.createWriteStream(archivePath));
+        logz.finalize();
+        await promise;
       }
 
       if (this._stopCalled) {
