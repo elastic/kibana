@@ -334,7 +334,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: undefined,
           transformPreview: {
             column: 0,
             values: [
