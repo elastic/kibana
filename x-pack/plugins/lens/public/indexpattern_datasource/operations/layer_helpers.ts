@@ -45,32 +45,12 @@ export function copyColumn({
   sourceColumn,
   sourceColumnId,
   shouldDeleteSource,
-  indexPattern,
 }: ColumnCopy): IndexPatternLayer {
-  let newColumns = {
-    ...layer.columns,
-    [columnId]: { ...sourceColumn },
-  };
-
-  const operationDefinition = operationDefinitionMap[sourceColumn.operationType];
-  const newIds: string[] = [];
-  if (operationDefinition.input === 'fullReference' && 'references' in sourceColumn) {
-    sourceColumn?.references.forEach((ref) => {
-      const newId = generateId();
-      newIds.push(newId);
-      const refId = Object.keys(layer.columns).find((c) => c === ref);
-      if (refId) {
-        newColumns = {
-          ...newColumns,
-          [newId]: { ...layer.columns[refId] },
-          [columnId]: { ...sourceColumn, references: [newId] },
-        };
-      }
-    });
-  }
+  const newColumns = copyReferencesRecursively(layer.columns, sourceColumn, columnId);
 
   const newColumnOrder = [...layer.columnOrder];
 
+  const newIds = [];
   if (shouldDeleteSource) {
     const sourceIndex = newColumnOrder.findIndex((c) => c === sourceColumnId);
     const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
@@ -103,6 +83,44 @@ export function copyColumn({
     columnOrder: newColumnOrder,
     columns: newColumns,
   };
+}
+
+function copyReferencesRecursively(
+  columns: Record<string, IndexPatternColumn>,
+  sourceColumn: IndexPatternColumn,
+  columnId: string
+) {
+  if ('references' in sourceColumn) {
+    sourceColumn?.references.forEach((ref) => {
+      const newId = generateId();
+      const refColumn = { ...columns[ref] };
+
+      // TODO: For fullReference types, now all references are hidden columns,
+      // but in the future we will have references to visible columns
+      // and visible columns shouldn't be copied
+      const refColumnWithInnerRefs =
+        'references' in refColumn
+          ? copyReferencesRecursively(columns, refColumn, newId) // if a column has references, copy them too
+          : { [newId]: refColumn };
+      const newColumn = columns[columnId];
+      const references =
+        newColumn && 'references' in newColumn ? [...newColumn.references, newId] : [newId];
+      columns = {
+        ...columns,
+        ...refColumnWithInnerRefs,
+        [columnId]: {
+          ...sourceColumn,
+          references,
+        },
+      };
+    });
+  } else {
+    columns = {
+      ...columns,
+      [columnId]: sourceColumn,
+    };
+  }
+  return columns;
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
