@@ -273,6 +273,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
   return (
     <DiscoverMemoized
       {...props}
+      indexPattern={indexPattern}
       state={state}
       stateContainer={stateContainer}
       searchSessionManager={searchSessionManager}
