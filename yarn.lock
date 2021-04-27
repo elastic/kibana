@@ -2653,7 +2653,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logging@link:packages/kbn-logging":
+"@kbn/logging@link:bazel-bin/packages/kbn-logging/npm_module":
   version "0.0.0"
   uid ""
 
