@@ -53,7 +53,7 @@ const logStateTransition = (
       if (level === 'error') {
         logger.error(message);
       } else {
-        logger[level](message);
+        logger.info(message);
       }
     };
     newState.logs.slice(oldState.logs.length).forEach((log) => {
