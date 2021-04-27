@@ -6,6 +6,7 @@
  */
 
 import { keyBy } from 'lodash';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -20,7 +21,6 @@ import {
   kqlQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
-import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,

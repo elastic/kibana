@@ -57,6 +57,14 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('goToDocker');
     },
 
+    async goToSettings() {
+      await testSubjects.click('infrastructureNavLink_/settings');
+    },
+
+    async goToInventory() {
+      await testSubjects.click('infrastructureNavLink_/inventory');
+    },
+
     async goToMetricExplorer() {
       return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
     },
@@ -101,6 +109,46 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
 
     async waitForLoading() {
       await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
+    },
+
+    async openAnomalyFlyout() {
+      await testSubjects.click('openAnomalyFlyoutButton');
+      await testSubjects.exists('loadMLFlyout');
+    },
+    async closeFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
+    },
+    async goToAnomaliesTab() {
+      await testSubjects.click('anomalyFlyoutAnomaliesTab');
+    },
+    async getNoAnomaliesMsg() {
+      await testSubjects.find('noAnomaliesFoundMsg');
+    },
+    async clickHostsAnomaliesDropdown() {
+      await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.click('anomaliesHostComboBoxItem');
+    },
+    async clickK8sAnomaliesDropdown() {
+      await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.click('anomaliesK8sComboBoxItem');
+    },
+    async findAnomalies() {
+      return testSubjects.findAll('anomalyRow');
+    },
+    async setAnomaliesDate(date: string) {
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
+      await datePickerInput.clearValueWithKeyboard();
+      await datePickerInput.type([date]);
+    },
+    async setAnomaliesThreshold(threshold: string) {
+      const thresholdInput = await find.byCssSelector(
+        `.euiFieldNumber.euiRangeInput.euiRangeInput--max`
+      );
+      await thresholdInput.clearValueWithKeyboard({ charByChar: true });
+      await thresholdInput.type([threshold]);
     },
   };
 }

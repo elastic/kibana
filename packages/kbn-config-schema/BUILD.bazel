@@ -63,7 +63,7 @@ ts_project(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [],
+  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [":tsc"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
@@ -71,7 +71,6 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [
     ":%s" % PKG_BASE_NAME,
   ]
