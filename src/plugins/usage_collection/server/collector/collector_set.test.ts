@@ -43,8 +43,9 @@ describe('CollectorSet', () => {
         collectors.registerCollector({
           type: 'type_collector_test',
           init,
+          // @ts-expect-error we are intentionally sending it wrong.
           fetch,
-        } as any); // We are intentionally sending it wrong.
+        });
       };
 
       expect(registerPojo).toThrowError(
@@ -71,13 +72,14 @@ describe('CollectorSet', () => {
     });
 
     it('should log debug status of fetching from the collector', async () => {
-      mockEsClient.get.mockResolvedValue({ passTest: 1000 } as any);
+      // @ts-expect-error we are just mocking the output of any call
+      mockEsClient.ping.mockResolvedValue({ passTest: 1000 });
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: (collectorFetchContext: any) => {
-            return collectorFetchContext.esClient.get();
+          fetch: (collectorFetchContext) => {
+            return collectorFetchContext.esClient.ping();
           },
           isReady: () => true,
         })
@@ -122,7 +124,8 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          isReady: true as any,
+          // @ts-expect-error we are intentionally sending it wrong
+          isReady: true,
         })
       );
 
@@ -138,10 +141,11 @@ describe('CollectorSet', () => {
     it('should not break if isReady is not provided', async () => {
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
+        // @ts-expect-error we are intentionally sending it wrong.
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-        } as any)
+        })
       );
 
       const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);

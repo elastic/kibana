@@ -30,6 +30,12 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMe
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
+interface UsageObject {
+  kibana?: UsageObject;
+  xpack?: UsageObject;
+  [key: string]: unknown | UsageObject;
+}
+
 export function registerStatsRoute({
   router,
   config,
@@ -57,7 +63,7 @@ export function registerStatsRoute({
     esClient: ElasticsearchClient,
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest
-  ): Promise<any> => {
+  ): Promise<UsageObject> => {
     const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
     return collectorSet.toObject(usage);
   };
@@ -104,7 +110,7 @@ export function registerStatsRoute({
 
         const usagePromise = shouldGetUsage
           ? getUsage(asCurrentUser, savedObjectsClient, req)
-          : Promise.resolve({});
+          : Promise.resolve<UsageObject>({});
         const [usage, clusterUuid] = await Promise.all([
           usagePromise,
           getClusterUuid(asCurrentUser),
@@ -138,7 +144,7 @@ export function registerStatsRoute({
             }
 
             return accum;
-          }, {} as any);
+          }, {} as UsageObject);
 
           extended = {
             usage: modifiedUsage,

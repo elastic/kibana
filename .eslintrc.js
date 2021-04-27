@@ -1410,7 +1410,7 @@ module.exports = {
         'packages/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
         'src/plugins/kibana_usage_collection/**',
-        // 'src/plugins/usage_collection/**',
+        'src/plugins/usage_collection/**',
         // 'src/plugins/telemetry/**',
         'src/plugins/telemetry_collection_manager/**',
         'src/plugins/telemetry_management_section/**',
