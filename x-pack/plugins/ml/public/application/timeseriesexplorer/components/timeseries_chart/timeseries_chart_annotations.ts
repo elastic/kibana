@@ -136,7 +136,6 @@ export function renderAnnotations(
     showFocusChartTooltip(d, this);
   };
 
-  const onAnnotationMouseOut = () => hideFocusChartTooltip();
   const onAnnotationClick = (d: Annotation) => {
     // clear a possible existing annotation set up for editing before setting the new one.
     // this needs to be done explicitly here because a new annotation created using the brush tool
@@ -163,7 +162,7 @@ export function renderAnnotations(
     .classed('mlAnnotationRect', true)
     .attr('mask', `url(#${ANNOTATION_MASK_ID})`)
     .on('mouseover', onAnnotationMouseOver)
-    .on('mouseout', onAnnotationMouseOut)
+    .on('mouseout', hideFocusChartTooltip)
     .on('click', onAnnotationClick);
 
   rects
@@ -203,7 +202,7 @@ export function renderAnnotations(
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .on('mouseover', onAnnotationMouseOver)
-    .on('mouseout', onAnnotationMouseOut)
+    .on('mouseout', hideFocusChartTooltip)
     .on('click', onAnnotationClick);
 
   texts
@@ -211,7 +210,7 @@ export function renderAnnotations(
     .append('text')
     .classed('mlAnnotationText', true)
     .on('mouseover', onAnnotationMouseOver)
-    .on('mouseout', onAnnotationMouseOut)
+    .on('mouseout', hideFocusChartTooltip)
     .on('click', onAnnotationClick);
 
   function labelXOffset(ts: number) {
