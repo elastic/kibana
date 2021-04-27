@@ -121,8 +121,8 @@ function onMoveCompatible(
     indexPattern,
   });
 
-  const updatedColumnOrder = getColumnOrder(modifiedLayer);
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  let updatedColumnOrder = getColumnOrder(modifiedLayer);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(
@@ -315,8 +315,8 @@ function onSwapCompatible({
   newColumns[targetId] = sourceColumn;
   newColumns[sourceId] = targetColumn;
 
-  const updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  let updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(

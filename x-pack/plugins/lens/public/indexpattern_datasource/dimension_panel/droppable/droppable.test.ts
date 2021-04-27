@@ -904,7 +904,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'ref1Copy', 'col1', 'col1Copy'],
+              columnOrder: ['ref1', 'col1', 'ref1Copy', 'col1Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 col1: testState.layers.first.columns.col1,
@@ -974,7 +974,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'ref2', 'ref1Copy', 'ref2Copy', 'col1', 'col1Copy'],
+              columnOrder: ['ref1', 'ref2', 'col1', 'ref1Copy', 'ref2Copy', 'col1Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 ref2: testState.layers.first.columns.ref2,
@@ -1057,11 +1057,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
               columnOrder: [
                 'innerRef1',
                 'ref2',
-                'innerRef1Copy',
-                'ref2Copy',
                 'ref1',
                 'col1',
+                'innerRef1Copy',
                 'ref1Copy',
+                'ref2Copy',
                 'col1Copy',
               ],
               columns: {
@@ -1377,6 +1377,85 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col3,
                   col2: testState.layers.first.columns.col2,
                   col4: testState.layers.first.columns.col4,
+                },
+              },
+            },
+          });
+        });
+
+        it('respects groups on moving operations if some columns are not listed in groups', () => {
+          // config:
+          // a: col1,
+          // b: col2, col3
+          // c: col4
+          // col5, col6 not in visualization groups
+          // dragging col3 onto col1 in group a
+          onDrop({
+            ...defaultProps,
+            columnId: 'col1',
+            droppedItem: draggingCol3,
+            state: {
+              ...testState,
+              layers: {
+                first: {
+                  ...testState.layers.first,
+                  columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+                  columns: {
+                    ...testState.layers.first.columns,
+                    col5: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                      customLabel: true,
+                    },
+                    col6: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                      customLabel: true,
+                    },
+                  },
+                },
+              },
+            },
+            groupId: 'a',
+            dimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'move_compatible',
+          });
+
+          expect(setState).toBeCalledTimes(1);
+          expect(setState).toHaveBeenCalledWith({
+            ...testState,
+            layers: {
+              first: {
+                ...testState.layers.first,
+                columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
+                columns: {
+                  col1: testState.layers.first.columns.col3,
+                  col2: testState.layers.first.columns.col2,
+                  col4: testState.layers.first.columns.col4,
+                  col5: expect.objectContaining({
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  }),
+                  col6: expect.objectContaining({
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  }),
                 },
               },
             },
