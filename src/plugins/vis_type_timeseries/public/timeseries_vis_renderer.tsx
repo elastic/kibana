@@ -12,13 +12,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
-import type { PersistedState } from '../../visualizations/public';
-import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
-import { TimeseriesRenderValue } from './metrics_fn';
+
+import { VisualizationContainer, PersistedState } from '../../visualizations/public';
+
 import { isVisTableData, TimeseriesVisData } from '../common/types';
-import { TimeseriesVisParams } from './types';
 import { getChartsSetup } from './services';
+
+import type { TimeseriesVisParams } from './types';
+import type { ExpressionRenderDefinition } from '../../expressions/common';
+import type { TimeseriesRenderValue } from './metrics_fn';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -39,6 +41,10 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    // Build optimization. Move app styles from main bundle
+    // @ts-expect-error TS error, cannot find type declaration for scss
+    await import('./application/index.scss');
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
