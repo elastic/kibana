@@ -8,6 +8,8 @@
 import { AppDataType, ReportViewTypeId } from '../../types';
 import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
 
+export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
+
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
   'user_agent.version': 'Browser version',
@@ -59,10 +61,10 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   upp: 'synthetics',
   tpt: 'apm',
   svl: 'apm',
-  kpi: 'rum',
-  pld: 'rum',
-  nwk: 'metrics',
-  mem: 'metrics',
-  logs: 'logs',
-  cpu: 'metrics',
+  kpi: 'ux',
+  pld: 'ux',
+  nwk: 'infra_metrics',
+  mem: 'infra_metrics',
+  logs: 'infra_logs',
+  cpu: 'infra_metrics',
 };

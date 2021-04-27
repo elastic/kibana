@@ -31,13 +31,7 @@
             },
             "signature": [
               "() => ",
-              {
-                "pluginId": "cases",
-                "scope": "server",
-                "docId": "kibCasesPluginApi",
-                "section": "def-server.CasesClient",
-                "text": "CasesClient"
-              }
+              "CasesClient"
             ]
           }
         ],

@@ -45,6 +45,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TableListView.Unnamed.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -207,7 +208,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListView.setFilter.{-queryText }",
+                "id": "def-public.TableListView.setFilter.$1.queryText",
                 "type": "Object",
                 "label": "{ queryText }",
                 "tags": [],
@@ -215,7 +216,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.TableListView.setFilter.{-queryText }.queryText",
+                    "id": "def-public.TableListView.setFilter.$1.queryText.queryText",
                     "type": "string",
                     "label": "queryText",
                     "description": [],
@@ -303,22 +304,6 @@
             }
           },
           {
-            "id": "def-public.TableListView.renderNoItemsMessage",
-            "type": "Function",
-            "label": "renderNoItemsMessage",
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 350
-            }
-          },
-          {
             "id": "def-public.TableListView.renderToolsLeft",
             "type": "Function",
             "label": "renderToolsLeft",
@@ -331,7 +316,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 364
+              "lineNumber": 350
             }
           },
           {
@@ -347,7 +332,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 395
+              "lineNumber": 381
             }
           },
           {
@@ -363,7 +348,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 475
+              "lineNumber": 461
             }
           },
           {
@@ -379,7 +364,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 483
+              "lineNumber": 468
             }
           },
           {
@@ -395,7 +380,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 528
+              "lineNumber": 513
             }
           },
           {
@@ -411,7 +396,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 540
+              "lineNumber": 525
             }
           }
         ],
@@ -511,6 +496,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "label": "nextProps",
                 "isRequired": true,
@@ -524,6 +510,7 @@
                 }
               },
               {
+                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.$2",
                 "type": "Object",
                 "label": "prevState",
                 "isRequired": true,
@@ -561,6 +548,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ValidatedDualRange._onChange.$1",
                 "type": "Object",
                 "label": "value",
                 "isRequired": true,
@@ -616,18 +604,13 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.CodeEditor.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               ">"
             ],
             "description": [],
@@ -657,6 +640,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createKibanaReactContext.$1",
             "type": "Uncategorized",
             "label": "services",
             "isRequired": true,
@@ -704,6 +688,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createNotifications.$1",
             "type": "Object",
             "label": "services",
             "isRequired": true,
@@ -758,6 +743,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createReactOverlays.$1",
             "type": "Object",
             "label": "services",
             "isRequired": true,
@@ -825,6 +811,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.FieldButton.$1",
             "type": "Object",
             "label": "{\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
             "isRequired": true,
@@ -872,6 +859,7 @@
         ],
         "children": [
           {
+            "id": "def-public.FieldIcon.$1",
             "type": "Object",
             "label": "{\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}",
             "isRequired": true,
@@ -919,17 +907,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.Markdown.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.MarkdownProps",
-                "text": "MarkdownProps"
-              }
+              "MarkdownProps"
             ],
             "description": [],
             "source": {
@@ -958,17 +941,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.MarkdownSimple.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.MarkdownSimpleProps",
-                "text": "MarkdownSimpleProps"
-              }
+              "MarkdownSimpleProps"
             ],
             "description": [],
             "source": {
@@ -997,6 +975,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.MountPointPortal.$1",
             "type": "CompoundType",
             "label": "{ children, setMountPoint }",
             "isRequired": true,
@@ -1030,6 +1009,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.OverviewPageFooter.$1",
             "type": "CompoundType",
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "isRequired": true,
@@ -1061,6 +1041,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.OverviewPageHeader.$1",
             "type": "CompoundType",
             "label": "{\n  hideToolbar,\n  iconType,\n  overlap,\n  showDevToolsLink,\n  showManagementLink,\n  title,\n  addBasePath,\n}",
             "isRequired": true,
@@ -1099,17 +1080,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.Panel.$1",
             "type": "Object",
             "label": "{ children, className, initialWidth = 100, style = {} }",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
+              "Props"
             ],
             "description": [],
             "source": {
@@ -1138,17 +1114,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.PanelsContainer.$1",
             "type": "Object",
             "label": "{\n  children,\n  className,\n  onPanelWidthChange,\n  resizerClassName,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
+              "Props"
             ],
             "description": [],
             "source": {
@@ -1170,6 +1141,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.reactRouterNavigate.$1",
             "type": "CompoundType",
             "label": "history",
             "isRequired": true,
@@ -1192,6 +1164,7 @@
             }
           },
           {
+            "id": "def-public.reactRouterNavigate.$2",
             "type": "CompoundType",
             "label": "to",
             "isRequired": true,
@@ -1205,6 +1178,7 @@
             }
           },
           {
+            "id": "def-public.reactRouterNavigate.$3",
             "type": "Object",
             "label": "onClickCallback",
             "isRequired": false,
@@ -1246,6 +1220,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.reactRouterOnClickHandler.$1",
             "type": "CompoundType",
             "label": "history",
             "isRequired": true,
@@ -1268,6 +1243,7 @@
             }
           },
           {
+            "id": "def-public.reactRouterOnClickHandler.$2",
             "type": "CompoundType",
             "label": "to",
             "isRequired": true,
@@ -1281,6 +1257,7 @@
             }
           },
           {
+            "id": "def-public.reactRouterOnClickHandler.$3",
             "type": "Object",
             "label": "onClickCallback",
             "isRequired": false,
@@ -1322,6 +1299,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.reactToUiComponent.$1",
             "type": "CompoundType",
             "label": "ReactComp",
             "isRequired": true,
@@ -1363,6 +1341,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.RedirectAppLinks.$1",
             "type": "CompoundType",
             "label": "{\n  application,\n  children,\n  className,\n  ...otherProps\n}",
             "isRequired": true,
@@ -1396,6 +1375,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.toMountPoint.$1",
             "type": "CompoundType",
             "label": "node",
             "isRequired": false,
@@ -1437,6 +1417,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.ToolbarButton.$1",
             "type": "CompoundType",
             "label": "{\n  children,\n  className,\n  fontWeight = 'normal',\n  size = 'm',\n  hasArrow = true,\n  groupPosition = 'none',\n  dataTestSubj = '',\n  ...rest\n}",
             "isRequired": true,
@@ -1484,6 +1465,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.uiToReactComponent.$1",
             "type": "Function",
             "label": "Comp",
             "isRequired": true,
@@ -1504,6 +1486,7 @@
             }
           },
           {
+            "id": "def-public.uiToReactComponent.$2",
             "type": "string",
             "label": "as",
             "isRequired": true,
@@ -1545,6 +1528,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.UrlTemplateEditor.$1",
             "type": "CompoundType",
             "label": "{\n  height = 105,\n  value,\n  variables,\n  onChange,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "isRequired": true,
@@ -1625,6 +1609,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.UseKibana.$1",
             "type": "CompoundType",
             "label": "{ children }",
             "isRequired": true,
@@ -1672,6 +1657,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useUiSetting.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -1685,6 +1671,7 @@
             }
           },
           {
+            "id": "def-public.useUiSetting.$2",
             "type": "Uncategorized",
             "label": "defaultValue",
             "isRequired": false,
@@ -1718,6 +1705,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useUiSetting$.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -1731,6 +1719,7 @@
             }
           },
           {
+            "id": "def-public.useUiSetting$.$2",
             "type": "Uncategorized",
             "label": "defaultValue",
             "isRequired": false,
@@ -1764,6 +1753,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.withKibana.$1",
             "type": "CompoundType",
             "label": "type",
             "isRequired": true,
@@ -2417,6 +2407,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TableListViewProps.deleteItems.$1",
                 "type": "Array",
                 "label": "items",
                 "isRequired": true,
@@ -2447,6 +2438,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TableListViewProps.editItem.$1",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -2499,6 +2491,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TableListViewProps.findItems.$1",
                 "type": "string",
                 "label": "query",
                 "isRequired": true,
@@ -2768,13 +2761,7 @@
               "lineNumber": 75
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpFetchError",
-                "text": "HttpFetchError"
-              },
+              "HttpFetchError",
               " | undefined"
             ]
           },
@@ -3014,21 +3001,9 @@
             },
             "signature": [
               "React.FunctionComponent<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               "> | React.ComponentClass<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               ", any> | undefined"
             ]
           }
@@ -3825,6 +3800,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.EuiThemeProvider.$1",
             "type": "CompoundType",
             "label": "{\n  darkMode = false,\n  ...otherProps\n}",
             "isRequired": true,
@@ -3939,7 +3915,7 @@
               "lineNumber": 17
             },
             "signature": [
-              "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; disabled: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; } | { paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; disabled: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; }"
+              "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; } | { paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; }"
             ]
           },
           {

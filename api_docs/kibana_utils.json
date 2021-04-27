@@ -31,6 +31,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AbortError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -162,6 +163,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DuplicateField.Unnamed.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -240,6 +242,7 @@
             ],
             "children": [
               {
+                "id": "def-public.HashedItemStore.Unnamed.$1",
                 "type": "Object",
                 "label": "storage",
                 "isRequired": true,
@@ -270,6 +273,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.HashedItemStore.setItem.$1",
                 "type": "string",
                 "label": "hash",
                 "isRequired": true,
@@ -283,6 +287,7 @@
                 }
               },
               {
+                "id": "def-public.HashedItemStore.setItem.$2",
                 "type": "string",
                 "label": "item",
                 "isRequired": true,
@@ -313,6 +318,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.HashedItemStore.getItem.$1",
                 "type": "string",
                 "label": "hash",
                 "isRequired": true,
@@ -343,6 +349,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.HashedItemStore.removeItem.$1",
                 "type": "string",
                 "label": "hash",
                 "isRequired": true,
@@ -422,6 +429,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InvalidJSONProperty.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -431,7 +439,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-                  "lineNumber": 56
+                  "lineNumber": 74
                 }
               }
             ],
@@ -439,13 +447,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-              "lineNumber": 56
+              "lineNumber": 74
             }
           }
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-          "lineNumber": 55
+          "lineNumber": 73
         },
         "initialIsOpen": false
       },
@@ -476,6 +484,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.KbnError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -522,6 +531,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderCompleteDispatcher.Unnamed.$1",
                 "type": "Object",
                 "label": "el",
                 "isRequired": false,
@@ -552,6 +562,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderCompleteDispatcher.setEl.$1",
                 "type": "Object",
                 "label": "el",
                 "isRequired": false,
@@ -630,6 +641,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderCompleteDispatcher.setTitle.$1",
                 "type": "string",
                 "label": "title",
                 "isRequired": true,
@@ -674,6 +686,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderCompleteListener.Unnamed.$1",
                 "type": "Object",
                 "label": "element",
                 "isRequired": true,
@@ -779,6 +792,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ResizeChecker.Unnamed.$1",
                 "type": "Object",
                 "label": "el",
                 "isRequired": true,
@@ -792,7 +806,7 @@
                 }
               },
               {
-                "id": "def-public.ResizeChecker.Unnamed.args",
+                "id": "def-public.ResizeChecker.Unnamed.$2.args",
                 "type": "Object",
                 "label": "args",
                 "tags": [],
@@ -800,7 +814,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ResizeChecker.Unnamed.args.disabled",
+                    "id": "def-public.ResizeChecker.Unnamed.$2.args.disabled",
                     "type": "CompoundType",
                     "label": "disabled",
                     "description": [],
@@ -854,6 +868,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ResizeChecker.modifySizeWithoutTriggeringResize.$1",
                 "type": "Function",
                 "label": "block",
                 "isRequired": true,
@@ -896,6 +911,134 @@
         "source": {
           "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
           "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedFieldNotFound",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedFieldNotFound",
+        "description": [
+          "\nA saved field doesn't exist anymore"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SavedFieldNotFound",
+            "text": "SavedFieldNotFound"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "children": [
+          {
+            "id": "def-public.SavedFieldNotFound.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.SavedFieldNotFound.Unnamed.$1",
+                "type": "string",
+                "label": "message",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 54
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+              "lineNumber": 54
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+          "lineNumber": 53
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedFieldTypeInvalidForAgg",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedFieldTypeInvalidForAgg",
+        "description": [
+          "\nA saved field type isn't compatible with aggregation"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SavedFieldTypeInvalidForAgg",
+            "text": "SavedFieldTypeInvalidForAgg"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "children": [
+          {
+            "id": "def-public.SavedFieldTypeInvalidForAgg.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.SavedFieldTypeInvalidForAgg.Unnamed.$1",
+                "type": "string",
+                "label": "message",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 63
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+              "lineNumber": 63
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+          "lineNumber": 62
         },
         "initialIsOpen": false
       },
@@ -960,6 +1103,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectNotFound.Unnamed.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -973,6 +1117,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectNotFound.Unnamed.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -986,8 +1131,23 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectNotFound.Unnamed.$3",
                 "type": "string",
                 "label": "link",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 35
+                }
+              },
+              {
+                "id": "def-public.SavedObjectNotFound.Unnamed.$4",
+                "type": "string",
+                "label": "customMessage",
                 "isRequired": false,
                 "signature": [
                   "string | undefined"
@@ -1069,6 +1229,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Storage.Unnamed.$1",
                 "type": "Object",
                 "label": "store",
                 "isRequired": true,
@@ -1101,6 +1262,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.Storage.get.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -1131,6 +1293,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.Storage.set.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -1144,6 +1307,7 @@
                 }
               },
               {
+                "id": "def-public.Storage.set.$2",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -1174,6 +1338,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.Storage.remove.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -1236,6 +1401,7 @@
         ],
         "children": [
           {
+            "id": "def-public.abortSignalToPromise.$1",
             "type": "Object",
             "label": "signal",
             "isRequired": true,
@@ -1270,6 +1436,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.applyDiff.$1",
             "type": "Object",
             "label": "target",
             "isRequired": true,
@@ -1283,6 +1450,7 @@
             }
           },
           {
+            "id": "def-public.applyDiff.$2",
             "type": "Object",
             "label": "source",
             "isRequired": true,
@@ -1324,6 +1492,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createGetterSetter.$1",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -1386,6 +1555,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createHistoryObservable.$1",
             "type": "Object",
             "label": "history",
             "isRequired": true,
@@ -1415,6 +1585,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createKbnUrlControls.$1",
             "type": "Object",
             "label": "history",
             "isRequired": true,
@@ -1450,7 +1621,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError",
             "type": "Object",
             "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "tags": [],
@@ -1458,7 +1629,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.useHash",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.useHash",
                 "type": "boolean",
                 "label": "useHash",
                 "description": [],
@@ -1469,7 +1640,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.history",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.history",
                 "type": "Object",
                 "label": "history",
                 "description": [],
@@ -1484,7 +1655,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onGetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onGetError",
                 "type": "Function",
                 "label": "onGetError",
                 "description": [],
@@ -1498,7 +1669,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onSetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onSetError",
                 "type": "Function",
                 "label": "onSetError",
                 "description": [],
@@ -1578,7 +1749,7 @@
         ],
         "children": [
           {
-            "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
+            "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink",
             "type": "Object",
             "label": "{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
             "tags": [],
@@ -1586,7 +1757,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.baseUrl",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrl",
                 "type": "string",
                 "label": "baseUrl",
                 "description": [
@@ -1599,7 +1770,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.defaultSubUrl",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.defaultSubUrl",
                 "type": "string",
                 "label": "defaultSubUrl",
                 "description": [
@@ -1612,7 +1783,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.stateParams",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.stateParams",
                 "type": "Array",
                 "label": "stateParams",
                 "description": [
@@ -1630,7 +1801,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storageKey",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storageKey",
                 "type": "string",
                 "label": "storageKey",
                 "description": [
@@ -1643,7 +1814,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.navLinkUpdater$",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.navLinkUpdater$",
                 "type": "Object",
                 "label": "navLinkUpdater$",
                 "description": [
@@ -1668,7 +1839,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.toastNotifications",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
                 "description": [
@@ -1692,7 +1863,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.history",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.history",
                 "type": "Object",
                 "label": "history",
                 "description": [
@@ -1709,7 +1880,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.getHistory",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.getHistory",
                 "type": "Function",
                 "label": "getHistory",
                 "description": [
@@ -1727,7 +1898,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storage",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storage",
                 "type": "Object",
                 "label": "storage",
                 "description": [
@@ -1743,7 +1914,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.shouldTrackUrlUpdate",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate",
                 "type": "Function",
                 "label": "shouldTrackUrlUpdate",
                 "description": [
@@ -1759,7 +1930,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.onBeforeNavLinkSaved",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved",
                 "type": "Function",
                 "label": "onBeforeNavLinkSaved",
                 "description": [
@@ -1804,6 +1975,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createQueryParamObservable.$1",
             "type": "Object",
             "label": "history",
             "isRequired": true,
@@ -1820,6 +1992,7 @@
             }
           },
           {
+            "id": "def-public.createQueryParamObservable.$2",
             "type": "string",
             "label": "paramKey",
             "isRequired": true,
@@ -1861,6 +2034,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createQueryParamsObservable.$1",
             "type": "Object",
             "label": "history",
             "isRequired": true,
@@ -1890,6 +2064,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createSessionStorageStateStorage.$1",
             "type": "Object",
             "label": "storage",
             "isRequired": true,
@@ -1934,6 +2109,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createStartServicesGetter.$1",
             "type": "Function",
             "label": "accessor",
             "isRequired": true,
@@ -2015,6 +2191,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -2060,6 +2237,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -2075,6 +2253,7 @@
             }
           },
           {
+            "id": "def-public.createStateContainer.$2",
             "type": "Uncategorized",
             "label": "pureTransitions",
             "isRequired": true,
@@ -2128,6 +2307,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -2143,6 +2323,7 @@
             }
           },
           {
+            "id": "def-public.createStateContainer.$2",
             "type": "Uncategorized",
             "label": "pureTransitions",
             "isRequired": true,
@@ -2158,6 +2339,7 @@
             }
           },
           {
+            "id": "def-public.createStateContainer.$3",
             "type": "Uncategorized",
             "label": "pureSelectors",
             "isRequired": true,
@@ -2173,6 +2355,7 @@
             }
           },
           {
+            "id": "def-public.createStateContainer.$4",
             "type": "Object",
             "label": "options",
             "isRequired": false,
@@ -2275,6 +2458,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createStateHash.$1",
             "type": "string",
             "label": "json",
             "isRequired": true,
@@ -2288,6 +2472,7 @@
             }
           },
           {
+            "id": "def-public.createStateHash.$2",
             "type": "Function",
             "label": "existingJsonProvider",
             "isRequired": false,
@@ -2322,6 +2507,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createUrlTracker.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -2335,6 +2521,7 @@
             }
           },
           {
+            "id": "def-public.createUrlTracker.$2",
             "type": "Object",
             "label": "storage",
             "isRequired": true,
@@ -2391,6 +2578,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.dispatchRenderComplete.$1",
             "type": "Object",
             "label": "el",
             "isRequired": true,
@@ -2422,6 +2610,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.dispatchRenderStart.$1",
             "type": "Object",
             "label": "el",
             "isRequired": true,
@@ -2453,6 +2642,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.fieldWildcardFilter.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -2466,6 +2656,7 @@
             }
           },
           {
+            "id": "def-public.fieldWildcardFilter.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -2497,6 +2688,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.fieldWildcardMatcher.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -2510,6 +2702,7 @@
             }
           },
           {
+            "id": "def-public.fieldWildcardMatcher.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -2532,39 +2725,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-public.getCombinedAbortSignal",
-        "type": "Function",
-        "label": "getCombinedAbortSignal",
-        "signature": [
-          "(signals: AbortSignal[]) => { signal: AbortSignal; cleanup: () => void; }"
-        ],
-        "description": [
-          "\nReturns an `AbortSignal` that will be aborted when the first of the given signals aborts.\n"
-        ],
-        "children": [
-          {
-            "type": "Array",
-            "label": "signals",
-            "isRequired": true,
-            "signature": [
-              "AbortSignal[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-              "lineNumber": 55
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-          "lineNumber": 54
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.getQueryParams",
         "type": "Function",
         "label": "getQueryParams",
@@ -2578,6 +2738,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getQueryParams.$1",
             "type": "Object",
             "label": "location",
             "isRequired": true,
@@ -2612,6 +2773,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getStateFromKbnUrl.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -2625,6 +2787,7 @@
             }
           },
           {
+            "id": "def-public.getStateFromKbnUrl.$2",
             "type": "string",
             "label": "url",
             "isRequired": true,
@@ -2638,7 +2801,7 @@
             }
           },
           {
-            "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }",
+            "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
             "tags": [],
@@ -2646,7 +2809,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }.getFromHashQuery",
+                "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
                 "description": [],
@@ -2682,6 +2845,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getStatesFromKbnUrl.$1",
             "type": "string",
             "label": "url",
             "isRequired": true,
@@ -2695,6 +2859,7 @@
             }
           },
           {
+            "id": "def-public.getStatesFromKbnUrl.$2",
             "type": "Array",
             "label": "keys",
             "isRequired": false,
@@ -2708,7 +2873,7 @@
             }
           },
           {
-            "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }",
+            "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
             "tags": [],
@@ -2716,7 +2881,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }.getFromHashQuery",
+                "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
                 "description": [],
@@ -2780,6 +2945,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.isStateHash.$1",
             "type": "string",
             "label": "str",
             "isRequired": true,
@@ -2806,6 +2972,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.of.$1",
             "type": "Object",
             "label": "promise",
             "isRequired": true,
@@ -2844,6 +3011,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.persistState.$1",
             "type": "Uncategorized",
             "label": "state",
             "isRequired": true,
@@ -2910,7 +3078,7 @@
         ],
         "children": [
           {
-            "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
+            "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect",
             "type": "Object",
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
             "tags": [],
@@ -2918,7 +3086,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.history",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.history",
                 "type": "Object",
                 "label": "history",
                 "description": [],
@@ -2933,7 +3101,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.navigateToApp",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.navigateToApp",
                 "type": "Function",
                 "label": "navigateToApp",
                 "description": [],
@@ -2955,7 +3123,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.basePath",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.basePath",
                 "type": "Object",
                 "label": "basePath",
                 "description": [],
@@ -2975,7 +3143,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.mapping",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.mapping",
                 "type": "CompoundType",
                 "label": "mapping",
                 "description": [
@@ -2991,7 +3159,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.toastNotifications",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
                 "description": [
@@ -3015,7 +3183,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.onBeforeRedirect",
+                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect",
                 "type": "Function",
                 "label": "onBeforeRedirect",
                 "description": [
@@ -3064,6 +3232,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.removeQueryParam.$1",
             "type": "Object",
             "label": "history",
             "isRequired": true,
@@ -3078,6 +3247,7 @@
             }
           },
           {
+            "id": "def-public.removeQueryParam.$2",
             "type": "string",
             "label": "param",
             "isRequired": true,
@@ -3091,6 +3261,7 @@
             }
           },
           {
+            "id": "def-public.removeQueryParam.$3",
             "type": "boolean",
             "label": "replace",
             "isRequired": true,
@@ -3126,6 +3297,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.replaceUrlHashQuery.$1",
             "type": "string",
             "label": "rawUrl",
             "isRequired": true,
@@ -3139,6 +3311,7 @@
             }
           },
           {
+            "id": "def-public.replaceUrlHashQuery.$2",
             "type": "Function",
             "label": "queryReplacer",
             "isRequired": true,
@@ -3178,6 +3351,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.replaceUrlQuery.$1",
             "type": "string",
             "label": "rawUrl",
             "isRequired": true,
@@ -3191,6 +3365,7 @@
             }
           },
           {
+            "id": "def-public.replaceUrlQuery.$2",
             "type": "Function",
             "label": "queryReplacer",
             "isRequired": true,
@@ -3226,6 +3401,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.retrieveState.$1",
             "type": "string",
             "label": "stateHash",
             "isRequired": true,
@@ -3259,6 +3435,7 @@
         ],
         "children": [
           {
+            "id": "def-public.setStateToKbnUrl.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -3272,6 +3449,7 @@
             }
           },
           {
+            "id": "def-public.setStateToKbnUrl.$2",
             "type": "Uncategorized",
             "label": "state",
             "isRequired": true,
@@ -3285,7 +3463,7 @@
             }
           },
           {
-            "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }",
+            "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue",
             "type": "Object",
             "label": "{ useHash = false, storeInHashQuery = true }",
             "tags": [],
@@ -3293,7 +3471,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.useHash",
+                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.useHash",
                 "type": "boolean",
                 "label": "useHash",
                 "description": [],
@@ -3304,7 +3482,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.storeInHashQuery",
+                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.storeInHashQuery",
                 "type": "CompoundType",
                 "label": "storeInHashQuery",
                 "description": [],
@@ -3323,6 +3501,7 @@
             }
           },
           {
+            "id": "def-public.setStateToKbnUrl.$4",
             "type": "string",
             "label": "rawUrl",
             "isRequired": true,
@@ -3376,6 +3555,7 @@
         ],
         "children": [
           {
+            "id": "def-public.syncState.$1",
             "type": "Object",
             "label": "{\n  storageKey,\n  stateStorage,\n  stateContainer,\n}",
             "isRequired": true,
@@ -3388,13 +3568,7 @@
                 "text": "IStateSyncConfig"
               },
               "<State, ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.IStateStorage",
-                "text": "IStateStorage"
-              },
+              "IStateStorage",
               ">"
             ],
             "description": [],
@@ -3446,6 +3620,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.syncStates.$1",
             "type": "Array",
             "label": "stateSyncConfigs",
             "isRequired": true,
@@ -3458,13 +3633,7 @@
                 "text": "IStateSyncConfig"
               },
               "<any, ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.IStateStorage",
-                "text": "IStateStorage"
-              },
+              "IStateStorage",
               ">[]"
             ],
             "description": [
@@ -3519,6 +3688,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useContainerSelector.$1",
             "type": "Uncategorized",
             "label": "container",
             "isRequired": true,
@@ -3532,6 +3702,7 @@
             }
           },
           {
+            "id": "def-public.useContainerSelector.$2",
             "type": "Function",
             "label": "selector",
             "isRequired": true,
@@ -3553,6 +3724,7 @@
             }
           },
           {
+            "id": "def-public.useContainerSelector.$3",
             "type": "Function",
             "label": "comparator",
             "isRequired": true,
@@ -3621,6 +3793,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useContainerState.$1",
             "type": "Uncategorized",
             "label": "container",
             "isRequired": true,
@@ -3674,6 +3847,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.withNotifyOnErrors.$1",
             "type": "Object",
             "label": "toasts",
             "isRequired": true,
@@ -4091,13 +4265,7 @@
               "lineNumber": 50
             },
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.IKbnUrlControls",
-                "text": "IKbnUrlControls"
-              }
+              "IKbnUrlControls"
             ]
           }
         ],
@@ -4741,13 +4909,7 @@
             },
             "signature": [
               "(action: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.TransitionDescription",
-                "text": "TransitionDescription"
-              },
+              "TransitionDescription",
               "<string, any[]>) => void"
             ]
           },
@@ -4901,13 +5063,7 @@
             },
             "signature": [
               "Readonly<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.PureTransitionsToTransitions",
-                "text": "PureTransitionsToTransitions"
-              },
+              "PureTransitionsToTransitions",
               "<PureTransitions>>"
             ]
           },
@@ -4971,6 +5127,7 @@
             ],
             "children": [
               {
+                "id": "def-public.UiComponentInstance.render.$1",
                 "type": "Object",
                 "label": "el",
                 "isRequired": true,
@@ -4986,6 +5143,7 @@
                 }
               },
               {
+                "id": "def-public.UiComponentInstance.render.$2",
                 "type": "Uncategorized",
                 "label": "props",
                 "isRequired": true,
@@ -5546,13 +5704,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.encodeUriQuery",
-                "text": "encodeUriQuery"
-              }
+              "encodeUriQuery"
             ]
           },
           {
@@ -5611,6 +5763,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AbortError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -5686,6 +5839,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.KbnServerError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -5699,6 +5853,7 @@
                 }
               },
               {
+                "id": "def-server.KbnServerError.Unnamed.$2",
                 "type": "number",
                 "label": "statusCode",
                 "isRequired": true,
@@ -5712,6 +5867,7 @@
                 }
               },
               {
+                "id": "def-server.KbnServerError.Unnamed.$3",
                 "type": "Object",
                 "label": "errBody",
                 "isRequired": false,
@@ -5753,6 +5909,7 @@
         ],
         "children": [
           {
+            "id": "def-server.abortSignalToPromise.$1",
             "type": "Object",
             "label": "signal",
             "isRequired": true,
@@ -5781,6 +5938,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createGetterSetter.$1",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -5833,6 +5991,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.fieldWildcardFilter.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -5846,6 +6005,7 @@
             }
           },
           {
+            "id": "def-server.fieldWildcardFilter.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -5877,6 +6037,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.fieldWildcardMatcher.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -5890,6 +6051,7 @@
             }
           },
           {
+            "id": "def-server.fieldWildcardMatcher.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -5912,39 +6074,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.getCombinedAbortSignal",
-        "type": "Function",
-        "label": "getCombinedAbortSignal",
-        "signature": [
-          "(signals: AbortSignal[]) => { signal: AbortSignal; cleanup: () => void; }"
-        ],
-        "description": [
-          "\nReturns an `AbortSignal` that will be aborted when the first of the given signals aborts.\n"
-        ],
-        "children": [
-          {
-            "type": "Array",
-            "label": "signals",
-            "isRequired": true,
-            "signature": [
-              "AbortSignal[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-              "lineNumber": 55
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-          "lineNumber": 54
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.getKbnServerError",
         "type": "Function",
         "label": "getKbnServerError",
@@ -5963,6 +6092,7 @@
         ],
         "children": [
           {
+            "id": "def-server.getKbnServerError.$1",
             "type": "Object",
             "label": "e",
             "isRequired": true,
@@ -6021,6 +6151,7 @@
         ],
         "children": [
           {
+            "id": "def-server.reportServerError.$1",
             "type": "Object",
             "label": "res",
             "isRequired": true,
@@ -6036,13 +6167,7 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              },
+              "KibanaResponse",
               "<T>; badRequest: (options?: ",
               {
                 "pluginId": "core",
@@ -6052,13 +6177,7 @@
                 "text": "ErrorHttpResponseOptions"
               },
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              }
+              "KibanaResponse"
             ],
             "description": [
               "Formats a `KbnServerError` into a server error response"
@@ -6069,6 +6188,7 @@
             }
           },
           {
+            "id": "def-server.reportServerError.$2",
             "type": "Object",
             "label": "err",
             "isRequired": true,
@@ -6167,13 +6287,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.encodeUriQuery",
-                "text": "encodeUriQuery"
-              }
+              "encodeUriQuery"
             ]
           },
           {
@@ -6232,6 +6346,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.AbortError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -6363,6 +6478,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.DuplicateField.Unnamed.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -6426,6 +6542,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.InvalidJSONProperty.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -6435,7 +6552,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-                  "lineNumber": 56
+                  "lineNumber": 74
                 }
               }
             ],
@@ -6443,13 +6560,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-              "lineNumber": 56
+              "lineNumber": 74
             }
           }
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-          "lineNumber": 55
+          "lineNumber": 73
         },
         "initialIsOpen": false
       },
@@ -6480,6 +6597,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.KbnError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -6504,6 +6622,134 @@
         "source": {
           "path": "src/plugins/kibana_utils/common/errors/errors.ts",
           "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SavedFieldNotFound",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedFieldNotFound",
+        "description": [
+          "\nA saved field doesn't exist anymore"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SavedFieldNotFound",
+            "text": "SavedFieldNotFound"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "children": [
+          {
+            "id": "def-common.SavedFieldNotFound.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-common.SavedFieldNotFound.Unnamed.$1",
+                "type": "string",
+                "label": "message",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 54
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+              "lineNumber": 54
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+          "lineNumber": 53
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SavedFieldTypeInvalidForAgg",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedFieldTypeInvalidForAgg",
+        "description": [
+          "\nA saved field type isn't compatible with aggregation"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SavedFieldTypeInvalidForAgg",
+            "text": "SavedFieldTypeInvalidForAgg"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "children": [
+          {
+            "id": "def-common.SavedFieldTypeInvalidForAgg.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-common.SavedFieldTypeInvalidForAgg.Unnamed.$1",
+                "type": "string",
+                "label": "message",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 63
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+              "lineNumber": 63
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+          "lineNumber": 62
         },
         "initialIsOpen": false
       },
@@ -6568,6 +6814,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.SavedObjectNotFound.Unnamed.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6581,6 +6828,7 @@
                 }
               },
               {
+                "id": "def-common.SavedObjectNotFound.Unnamed.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -6594,8 +6842,23 @@
                 }
               },
               {
+                "id": "def-common.SavedObjectNotFound.Unnamed.$3",
                 "type": "string",
                 "label": "link",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                  "lineNumber": 35
+                }
+              },
+              {
+                "id": "def-common.SavedObjectNotFound.Unnamed.$4",
+                "type": "string",
+                "label": "customMessage",
                 "isRequired": false,
                 "signature": [
                   "string | undefined"
@@ -6635,6 +6898,7 @@
         ],
         "children": [
           {
+            "id": "def-common.abortSignalToPromise.$1",
             "type": "Object",
             "label": "signal",
             "isRequired": true,
@@ -6678,6 +6942,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.createGetterSetter.$1",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -6740,6 +7005,7 @@
         ],
         "children": [
           {
+            "id": "def-common.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -6785,6 +7051,7 @@
         ],
         "children": [
           {
+            "id": "def-common.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -6800,6 +7067,7 @@
             }
           },
           {
+            "id": "def-common.createStateContainer.$2",
             "type": "Uncategorized",
             "label": "pureTransitions",
             "isRequired": true,
@@ -6853,6 +7121,7 @@
         ],
         "children": [
           {
+            "id": "def-common.createStateContainer.$1",
             "type": "Uncategorized",
             "label": "defaultState",
             "isRequired": true,
@@ -6868,6 +7137,7 @@
             }
           },
           {
+            "id": "def-common.createStateContainer.$2",
             "type": "Uncategorized",
             "label": "pureTransitions",
             "isRequired": true,
@@ -6883,6 +7153,7 @@
             }
           },
           {
+            "id": "def-common.createStateContainer.$3",
             "type": "Uncategorized",
             "label": "pureSelectors",
             "isRequired": true,
@@ -6898,6 +7169,7 @@
             }
           },
           {
+            "id": "def-common.createStateContainer.$4",
             "type": "Object",
             "label": "options",
             "isRequired": false,
@@ -7027,6 +7299,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.distinctUntilChangedWithInitialValue.$1",
             "type": "CompoundType",
             "label": "initialValue",
             "isRequired": true,
@@ -7040,6 +7313,7 @@
             }
           },
           {
+            "id": "def-common.distinctUntilChangedWithInitialValue.$2",
             "type": "Function",
             "label": "compare",
             "isRequired": false,
@@ -7071,6 +7345,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.fieldWildcardFilter.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -7084,6 +7359,7 @@
             }
           },
           {
+            "id": "def-common.fieldWildcardFilter.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -7115,6 +7391,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.fieldWildcardMatcher.$1",
             "type": "Array",
             "label": "globs",
             "isRequired": true,
@@ -7128,6 +7405,7 @@
             }
           },
           {
+            "id": "def-common.fieldWildcardMatcher.$2",
             "type": "Array",
             "label": "metaFields",
             "isRequired": true,
@@ -7146,39 +7424,6 @@
         "source": {
           "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
           "lineNumber": 18
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.getCombinedAbortSignal",
-        "type": "Function",
-        "label": "getCombinedAbortSignal",
-        "signature": [
-          "(signals: AbortSignal[]) => { signal: AbortSignal; cleanup: () => void; }"
-        ],
-        "description": [
-          "\nReturns an `AbortSignal` that will be aborted when the first of the given signals aborts.\n"
-        ],
-        "children": [
-          {
-            "type": "Array",
-            "label": "signals",
-            "isRequired": true,
-            "signature": [
-              "AbortSignal[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-              "lineNumber": 55
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/abort_utils.ts",
-          "lineNumber": 54
         },
         "initialIsOpen": false
       },
@@ -7219,6 +7464,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.of.$1",
             "type": "Object",
             "label": "promise",
             "isRequired": true,
@@ -7252,6 +7498,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.useContainerSelector.$1",
             "type": "Uncategorized",
             "label": "container",
             "isRequired": true,
@@ -7265,6 +7512,7 @@
             }
           },
           {
+            "id": "def-common.useContainerSelector.$2",
             "type": "Function",
             "label": "selector",
             "isRequired": true,
@@ -7286,6 +7534,7 @@
             }
           },
           {
+            "id": "def-common.useContainerSelector.$3",
             "type": "Function",
             "label": "comparator",
             "isRequired": true,
@@ -7354,6 +7603,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.useContainerState.$1",
             "type": "Uncategorized",
             "label": "container",
             "isRequired": true,
@@ -7683,13 +7933,7 @@
             },
             "signature": [
               "(state: P, references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => P"
             ]
           },
@@ -7707,13 +7951,7 @@
             },
             "signature": [
               "(state: P) => { state: P; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ]
           },
@@ -7793,13 +8031,7 @@
             },
             "signature": [
               "(state: P, references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => P"
             ]
           },
@@ -7817,13 +8049,7 @@
             },
             "signature": [
               "(state: P) => { state: P; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ]
           },
@@ -7987,13 +8213,7 @@
             },
             "signature": [
               "(action: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.TransitionDescription",
-                "text": "TransitionDescription"
-              },
+              "TransitionDescription",
               "<string, any[]>) => void"
             ]
           },
@@ -8081,13 +8301,7 @@
             },
             "signature": [
               "Readonly<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.PureTransitionsToTransitions",
-                "text": "PureTransitionsToTransitions"
-              },
+              "PureTransitionsToTransitions",
               "<PureTransitions>>"
             ]
           },
@@ -8151,6 +8365,7 @@
             ],
             "children": [
               {
+                "id": "def-common.UiComponentInstance.render.$1",
                 "type": "Object",
                 "label": "el",
                 "isRequired": true,
@@ -8166,6 +8381,7 @@
                 }
               },
               {
+                "id": "def-common.UiComponentInstance.render.$2",
                 "type": "Uncategorized",
                 "label": "props",
                 "isRequired": true,
@@ -8753,13 +8969,7 @@
             },
             "signature": [
               "typeof ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.encodeUriQuery",
-                "text": "encodeUriQuery"
-              }
+              "encodeUriQuery"
             ]
           },
           {

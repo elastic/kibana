@@ -8,18 +8,13 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.TrackApplicationView.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "usageCollection",
-                "scope": "public",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-public.TrackApplicationViewProps",
-                "text": "TrackApplicationViewProps"
-              },
+              "TrackApplicationViewProps",
               ">"
             ],
             "description": [],
@@ -177,13 +172,7 @@
               "lineNumber": 144
             },
             "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorOptionsFetchExtendedContext",
-                "text": "CollectorOptionsFetchExtendedContext"
-              },
+              "CollectorOptionsFetchExtendedContext",
               "<any>"
             ]
           },
@@ -223,13 +212,7 @@
               "lineNumber": 147
             },
             "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorFetchMethod",
-                "text": "CollectorFetchMethod"
-              },
+              "CollectorFetchMethod",
               "<any, TFetchReturn, ExtraOptions>"
             ]
           },
@@ -257,6 +240,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Collector.Unnamed.$1",
                 "type": "Object",
                 "label": "log",
                 "isRequired": true,
@@ -270,6 +254,7 @@
                 }
               },
               {
+                "id": "def-server.Collector.Unnamed.$2",
                 "type": "CompoundType",
                 "label": "{\n      type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
                 "isRequired": true,

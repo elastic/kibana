@@ -31,21 +31,9 @@
                 "text": "CoreStart"
               },
               " & ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasStartDeps",
-                "text": "CanvasStartDeps"
-              },
+              "CanvasStartDeps",
               " & { canvas: ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasServices",
-                "text": "CanvasServices"
-              },
+              "CanvasServices",
               "; }; }"
             ]
           }
@@ -72,7 +60,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 63
+        "lineNumber": 65
       },
       "signature": [
         "CanvasApi"
@@ -88,7 +76,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 64
+        "lineNumber": 66
       },
       "signature": [
         "void"

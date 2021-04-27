@@ -6,15 +6,18 @@
  */
 
 import { Duration } from 'moment';
+import { filter, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   RunContext,
+  TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { ConfigSchema } from '../../../config';
-import { SEARCH_SESSION_TYPE } from '../../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../../src/plugins/data/common';
 import { DataEnhancedStartDependencies } from '../../type';
 
 export const SEARCH_SESSIONS_TASK_TYPE = 'search_sessions_monitor';
@@ -29,8 +32,9 @@ interface SearchSessionTaskDeps {
 function searchSessionRunner(
   core: CoreSetup<DataEnhancedStartDependencies>,
   { logger, config }: SearchSessionTaskDeps
-) {
+): TaskRunCreatorFunction {
   return ({ taskInstance }: RunContext) => {
+    const aborted$ = new BehaviorSubject<boolean>(false);
     return {
       async run() {
         const sessionConfig = config.search.sessions;
@@ -39,6 +43,8 @@ function searchSessionRunner(
           logger.debug('Search sessions are disabled. Skipping task.');
           return;
         }
+        if (aborted$.getValue()) return;
+
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
         await checkRunningSessions(
@@ -48,11 +54,16 @@ function searchSessionRunner(
             logger,
           },
           sessionConfig
-        );
+        )
+          .pipe(takeUntil(aborted$.pipe(filter((aborted) => aborted))))
+          .toPromise();
 
         return {
           state: {},
         };
+      },
+      cancel: async () => {
+        aborted$.next(true);
       },
     };
   };
@@ -66,6 +77,7 @@ export function registerSearchSessionsTask(
     [SEARCH_SESSIONS_TASK_TYPE]: {
       title: 'Search Sessions Monitor',
       createTaskRunner: searchSessionRunner(core, deps),
+      timeout: `${deps.config.search.sessions.monitoringTaskTimeout.asSeconds()}s`,
     },
   });
 }

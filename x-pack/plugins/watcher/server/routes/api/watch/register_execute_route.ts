@@ -8,8 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
@@ -33,15 +31,15 @@ function executeWatch(dataClient: ILegacyScopedClusterClient, executeDetails: an
   });
 }
 
-export function registerExecuteRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerExecuteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/execute',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
       const watch = Watch.fromDownstreamJson(request.body.watch);
 

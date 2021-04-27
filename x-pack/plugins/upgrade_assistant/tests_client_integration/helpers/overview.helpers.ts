@@ -6,27 +6,40 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { PageContent } from '../../public/application/components/page_content';
+import { DeprecationsOverview } from '../../public/application/components/overview';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
+  memoryRouter: {
+    initialEntries: [`/overview`],
+    componentRoutePath: '/overview',
+  },
   doMountAsync: true,
 };
 
 export type OverviewTestBed = TestBed<OverviewTestSubjects>;
 
-export const setup = async (overrides?: any): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(PageContent, overrides), testBedConfig);
+export const setup = async (overrides?: Record<string, unknown>): Promise<OverviewTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(DeprecationsOverview, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return testBed;
 };
 
 export type OverviewTestSubjects =
-  | 'comingSoonPrompt'
-  | 'upgradeAssistantPageContent'
+  | 'overviewPageContent'
+  | 'esStatsPanel'
+  | 'esStatsPanel.totalDeprecations'
+  | 'esStatsPanel.criticalDeprecations'
+  | 'deprecationLoggingFormRow'
+  | 'requestErrorIconTip'
+  | 'partiallyUpgradedErrorIconTip'
+  | 'upgradedErrorIconTip'
+  | 'unauthorizedErrorIconTip'
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
   | 'upgradeAssistantDeprecationToggle'
-  | 'deprecationLoggingStep'
   | 'upgradeStatusError';

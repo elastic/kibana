@@ -56,7 +56,5 @@ export function buildFunctionDec(
     returnComment: getJSDocReturnTagComment(node),
     source: getSourceForNode(node),
   };
-
-  log.warning(`fn ${label} has tags: ${fn.tags.join(', ')}`);
   return fn;
 }

@@ -84,11 +84,13 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.maps.enableDrawingFeature=true',
+        '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
@@ -236,8 +238,8 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['all'],
-                visualize: ['all'],
+                canvas: ['minimal_all'],
+                visualize: ['minimal_all'],
               },
               spaces: ['*'],
             },

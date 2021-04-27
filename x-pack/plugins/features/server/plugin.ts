@@ -46,6 +46,14 @@ export interface PluginSetupContract {
    * */
   getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
+
+  /*
+   * In the future, OSS features should register their own subfeature
+   * privileges. This can be done when parts of Reporting are moved to
+   * src/plugins. For now, this method exists for `reporting` to tell
+   * `features` to include Reporting when registering OSS features.
+   */
+  enableReportingUiCapabilities(): void;
 }
 
 export interface PluginStartContract {
@@ -66,6 +74,7 @@ export class FeaturesPlugin
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isTimelionEnabled: boolean = false;
+  private isReportingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -100,6 +109,7 @@ export class FeaturesPlugin
         this.featureRegistry
       ),
       getFeaturesUICapabilities,
+      enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
     });
   }
 
@@ -128,10 +138,18 @@ export class FeaturesPlugin
     const features = buildOSSFeatures({
       savedObjectTypes,
       includeTimelion: this.isTimelionEnabled,
+      includeReporting: this.isReportingEnabled,
     });
 
     for (const feature of features) {
       this.featureRegistry.registerKibanaFeature(feature);
     }
+  }
+
+  private enableReportingUiCapabilities() {
+    this.logger.debug(
+      `Feature controls for Reporting plugin are enabled. Please assign access to Reporting use Kibana feature controls for applications.`
+    );
+    this.isReportingEnabled = true;
   }
 }

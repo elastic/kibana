@@ -8,6 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
   AggregationRequest,
@@ -16,7 +17,6 @@ import {
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 
 export const HOST_FIELDS = [
   '_id',

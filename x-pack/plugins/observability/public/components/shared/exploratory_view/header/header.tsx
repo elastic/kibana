@@ -45,11 +45,14 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           isDisabled={!lens.canUseEditor() || lensAttributes === null}
           onClick={() => {
             if (lensAttributes) {
-              lens.navigateToPrefilledEditor({
-                id: '',
-                timeRange: series.time,
-                attributes: lensAttributes,
-              });
+              lens.navigateToPrefilledEditor(
+                {
+                  id: '',
+                  timeRange: series.time,
+                  attributes: lensAttributes,
+                },
+                true
+              );
             }
           }}
         >

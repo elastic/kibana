@@ -13,11 +13,12 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
-import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
+import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -40,15 +41,17 @@ export const getPrepackagedRulesStatusRoute = (
       },
     },
     async (context, request, response) => {
+      const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
+      const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
       if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
       try {
-        const rulesFromFileSystem = getPrepackagedRules();
+        const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
         const customRules = await findRules({
           alertsClient,
           perPage: 1,
@@ -61,8 +64,8 @@ export const getPrepackagedRulesStatusRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
 
-        const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
-        const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
+        const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
+        const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
         const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
         const [validatedprepackagedTimelineStatus] = validate(
           prepackagedTimelineStatus,

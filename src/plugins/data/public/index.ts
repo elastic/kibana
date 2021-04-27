@@ -380,14 +380,17 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
+  IEsError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  Reason,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   WaitUntilNextSessionCompletesOptions,
+  isEsError,
 } from './search';
 
 export type {

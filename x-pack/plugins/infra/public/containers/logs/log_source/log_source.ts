@@ -11,15 +11,20 @@ import useMountedState from 'react-use/lib/useMountedState';
 import type { HttpHandler } from 'src/core/public';
 import {
   LogIndexField,
-  LogSourceConfiguration,
-  LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
 } from '../../../../common/http_api/log_sources';
+import {
+  LogSourceConfiguration,
+  LogSourceConfigurationProperties,
+  ResolvedLogSourceConfiguration,
+  resolveLogSourceConfiguration,
+} from '../../../../common/log_sources';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
 
 export {
   LogIndexField,
@@ -29,10 +34,22 @@ export {
   LogSourceStatus,
 };
 
-export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: HttpHandler }) => {
+export const useLogSource = ({
+  sourceId,
+  fetch,
+  indexPatternsService,
+}: {
+  sourceId: string;
+  fetch: HttpHandler;
+  indexPatternsService: IndexPatternsContract;
+}) => {
   const getIsMounted = useMountedState();
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
+  >(undefined);
+
+  const [resolvedSourceConfiguration, setResolvedSourceConfiguration] = useState<
+    ResolvedLogSourceConfiguration | undefined
   >(undefined);
 
   const [sourceStatus, setSourceStatus] = useState<LogSourceStatus | undefined>(undefined);
@@ -41,35 +58,54 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callFetchLogSourceConfigurationAPI(sourceId, fetch);
+        const { data: sourceConfigurationResponse } = await callFetchLogSourceConfigurationAPI(
+          sourceId,
+          fetch
+        );
+        const resolvedSourceConfigurationResponse = await resolveLogSourceConfiguration(
+          sourceConfigurationResponse?.configuration,
+          indexPatternsService
+        );
+        return { sourceConfigurationResponse, resolvedSourceConfigurationResponse };
       },
-      onResolve: ({ data }) => {
+      onResolve: ({ sourceConfigurationResponse, resolvedSourceConfigurationResponse }) => {
         if (!getIsMounted()) {
           return;
         }
 
-        setSourceConfiguration(data);
+        setSourceConfiguration(sourceConfigurationResponse);
+        setResolvedSourceConfiguration(resolvedSourceConfigurationResponse);
       },
     },
-    [sourceId, fetch]
+    [sourceId, fetch, indexPatternsService]
   );
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
-        return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties, fetch);
+        const { data: updatedSourceConfig } = await callPatchLogSourceConfigurationAPI(
+          sourceId,
+          patchedProperties,
+          fetch
+        );
+        const resolvedSourceConfig = await resolveLogSourceConfiguration(
+          updatedSourceConfig.configuration,
+          indexPatternsService
+        );
+        return { updatedSourceConfig, resolvedSourceConfig };
       },
-      onResolve: ({ data }) => {
+      onResolve: ({ updatedSourceConfig, resolvedSourceConfig }) => {
         if (!getIsMounted()) {
           return;
         }
 
-        setSourceConfiguration(data);
+        setSourceConfiguration(updatedSourceConfig);
+        setResolvedSourceConfiguration(resolvedSourceConfig);
         loadSourceStatus();
       },
     },
-    [sourceId, fetch]
+    [sourceId, fetch, indexPatternsService]
   );
 
   const [loadSourceStatusRequest, loadSourceStatus] = useTrackedPromise(
@@ -91,10 +127,10 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
 
   const derivedIndexPattern = useMemo(
     () => ({
-      fields: sourceStatus?.logIndexFields ?? [],
-      title: sourceConfiguration?.configuration.logAlias ?? 'unknown',
+      fields: resolvedSourceConfiguration?.fields ?? [],
+      title: resolvedSourceConfiguration?.indices ?? 'unknown',
     }),
-    [sourceConfiguration, sourceStatus]
+    [resolvedSourceConfiguration]
   );
 
   const isLoadingSourceConfiguration = useMemo(
@@ -153,22 +189,28 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
   }, [isUninitialized, loadSource]);
 
   return {
+    sourceId,
+    initialize,
+    isUninitialized,
     derivedIndexPattern,
+    // Failure states
     hasFailedLoadingSource,
     hasFailedLoadingSourceStatus,
-    initialize,
+    loadSourceFailureMessage,
+    // Loading states
     isLoading,
     isLoadingSourceConfiguration,
     isLoadingSourceStatus,
-    isUninitialized,
-    loadSource,
-    loadSourceFailureMessage,
-    loadSourceConfiguration,
-    loadSourceStatus,
-    sourceConfiguration,
-    sourceId,
+    // Source status (denotes the state of the indices, e.g. missing)
     sourceStatus,
+    loadSourceStatus,
+    // Source configuration (represents the raw attributes of the source configuration)
+    loadSource,
+    loadSourceConfiguration,
+    sourceConfiguration,
     updateSourceConfiguration,
+    // Resolved source configuration (represents a fully resolved state, you would use this for the vast majority of "read" scenarios)
+    resolvedSourceConfiguration,
   };
 };
 

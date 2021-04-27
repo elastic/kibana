@@ -97,19 +97,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
-
-    const extractedIndexPatterns = extractIndexPatternValues(
-      this.state.model,
-      this.state.defaultIndex
-    );
-    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
-        this.setState({
-          visFields,
-          extractedIndexPatterns,
-        });
-      });
-    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   abortableFetchFields = (extractedIndexPatterns: IndexPatternValue[]) => {
@@ -124,15 +111,25 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       return;
     }
     const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
-    const nextModel = {
-      ...this.state.model,
-      ...partialModel,
-    };
     let dirty = true;
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
       dirty = false;
+    }
+
+    const nextModel = {
+      ...this.state.model,
+      ...partialModel,
+    };
+    const extractedIndexPatterns = extractIndexPatternValues(nextModel, this.state.defaultIndex);
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        });
+      });
     }
 
     this.setState({

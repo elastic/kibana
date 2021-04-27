@@ -174,7 +174,7 @@ export const useMetricsHostsAnomaliesResults = ({
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async (metric?: Metric, query?: string) => {
+      createPromise: async (metric?: Metric, query?: string, hostName?: string) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -195,6 +195,7 @@ export const useMetricsHostsAnomaliesResults = ({
               ...paginationOptions,
               cursor: paginationCursor,
             },
+            hostName,
           },
           services.http.fetch
         );
@@ -309,6 +310,7 @@ interface RequestArgs {
   endTime: number;
   metric?: Metric;
   query?: string;
+  hostName?: string;
   sort: Sort;
   pagination: Pagination;
 }
@@ -326,6 +328,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
     sort,
     pagination,
     query,
+    hostName,
   } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
@@ -342,6 +345,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
           metric,
           sort,
           pagination,
+          hostName,
         },
       })
     ),

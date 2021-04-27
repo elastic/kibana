@@ -35,6 +35,7 @@ export default function ({ getPageObjects, getService }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {

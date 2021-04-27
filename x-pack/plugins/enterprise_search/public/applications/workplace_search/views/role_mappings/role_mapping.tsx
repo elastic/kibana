@@ -24,13 +24,19 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import {
   AttributeSelector,
   DeleteMappingCallout,
   RoleSelector,
 } from '../../../shared/role_mapping';
-import { ROLE_LABEL } from '../../../shared/role_mapping/constants';
+import {
+  ROLE_LABEL,
+  ROLE_MAPPINGS_TITLE,
+  ADD_ROLE_MAPPING_TITLE,
+  MANAGE_ROLE_MAPPING_TITLE,
+} from '../../../shared/role_mapping/constants';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { Role } from '../../types';
 
@@ -105,6 +111,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 
+  const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
   const SAVE_ROLE_MAPPING_LABEL = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.roleMapping.saveRoleMappingButtonMessage',
     {
@@ -121,6 +128,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   return (
     <>
+      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, TITLE]} />
       <ViewContentHeader title={SAVE_ROLE_MAPPING_LABEL} action={saveRoleMappingButton} />
       <EuiSpacer size="l" />
       <div>
@@ -141,7 +149,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
         <EuiSpacer />
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
-            <EuiPanel hasBorder paddingSize="l">
+            <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
               <EuiTitle size="s">
                 <h3>{ROLE_LABEL}</h3>
               </EuiTitle>
@@ -158,7 +166,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder paddingSize="l">
+            <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
               <EuiTitle size="s">
                 <h3>{GROUP_ASSIGNMENT_TITLE}</h3>
               </EuiTitle>

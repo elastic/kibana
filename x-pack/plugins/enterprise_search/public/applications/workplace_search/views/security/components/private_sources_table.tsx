@@ -152,7 +152,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
           {contentSources.map((source, i) => (
             <EuiTableRow key={i}>
               <EuiTableRowCell>{source.name}</EuiTableRowCell>
-              <EuiTableRowCell>
+              <EuiTableRowCell align="right">
                 <EuiSwitch
                   checked={!!source.isEnabled}
                   disabled={sectionDisabled}

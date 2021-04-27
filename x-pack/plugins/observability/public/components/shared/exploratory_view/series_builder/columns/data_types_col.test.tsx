@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockUrlStorage, render } from '../../rtl_helpers';
+import { mockAppIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 
 describe('DataTypesCol', function () {
+  mockAppIndexPattern();
+
   it('should render properly', function () {
     const { getByText } = render(<DataTypesCol />);
 
@@ -28,11 +30,11 @@ describe('DataTypesCol', function () {
     fireEvent.click(screen.getByText(/user experience\(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: 'rum' });
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, { dataType: 'ux' });
   });
 
   it('should set series on change on already selected', function () {
-    const { setSeries } = mockUrlStorage({
+    mockUrlStorage({
       data: {
         [NEW_SERIES_KEY]: {
           dataType: 'synthetics',
@@ -50,10 +52,5 @@ describe('DataTypesCol', function () {
     });
 
     expect(button.classList).toContain('euiButton--fill');
-
-    fireEvent.click(button);
-
-    // undefined on click selected
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: undefined });
   });
 });

@@ -12,14 +12,34 @@ import {
   InjectDeps,
   ExtractDeps,
 } from './saved_dashboard_references';
+
+import { createExtract, createInject } from './embeddable/dashboard_container_persistable_state';
 import { createEmbeddablePersistableStateServiceMock } from '../../embeddable/common/mocks';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
+const dashboardInject = createInject(embeddablePersistableStateServiceMock);
+const dashboardExtract = createExtract(embeddablePersistableStateServiceMock);
+
+embeddablePersistableStateServiceMock.extract.mockImplementation((state) => {
+  if (state.type === 'dashboard') {
+    return dashboardExtract(state);
+  }
+
+  return { state, references: [] };
+});
+
+embeddablePersistableStateServiceMock.inject.mockImplementation((state, references) => {
+  if (state.type === 'dashboard') {
+    return dashboardInject(state, references);
+  }
+
+  return state;
+});
 const deps: InjectDeps & ExtractDeps = {
   embeddablePersistableStateService: embeddablePersistableStateServiceMock,
 };
 
-describe('extractReferences', () => {
+describe('legacy extract references', () => {
   test('extracts references from panelsJSON', () => {
     const doc = {
       id: '1',
@@ -30,13 +50,13 @@ describe('extractReferences', () => {
             type: 'visualization',
             id: '1',
             title: 'Title 1',
-            version: '7.9.1',
+            version: '7.0.0',
           },
           {
             type: 'visualization',
             id: '2',
             title: 'Title 2',
-            version: '7.9.1',
+            version: '7.0.0',
           },
         ]),
       },
@@ -48,7 +68,7 @@ describe('extractReferences', () => {
       Object {
         "attributes": Object {
           "foo": true,
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"version\\":\\"7.9.1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
+          "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_1\\"}]",
         },
         "references": Array [
           Object {
@@ -75,7 +95,7 @@ describe('extractReferences', () => {
           {
             id: '1',
             title: 'Title 1',
-            version: '7.9.1',
+            version: '7.0.0',
           },
         ]),
       },
@@ -186,6 +206,102 @@ describe('extractReferences', () => {
   });
 });
 
+describe('extractReferences', () => {
+  test('extracts references from panelsJSON', () => {
+    const doc = {
+      id: '1',
+      attributes: {
+        foo: true,
+        panelsJSON: JSON.stringify([
+          {
+            panelIndex: 'panel-1',
+            type: 'visualization',
+            id: '1',
+            title: 'Title 1',
+            version: '7.9.1',
+          },
+          {
+            panelIndex: 'panel-2',
+            type: 'visualization',
+            id: '2',
+            title: 'Title 2',
+            version: '7.9.1',
+          },
+        ]),
+      },
+      references: [],
+    };
+    const updatedDoc = extractReferences(doc, deps);
+
+    expect(updatedDoc).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\"},{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\"}]",
+        },
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "panel-1:panel_panel-1",
+            "type": "visualization",
+          },
+          Object {
+            "id": "2",
+            "name": "panel-2:panel_panel-2",
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
+  });
+
+  test('fails when "type" attribute is missing from a panel', () => {
+    const doc = {
+      id: '1',
+      attributes: {
+        foo: true,
+        panelsJSON: JSON.stringify([
+          {
+            id: '1',
+            title: 'Title 1',
+            version: '7.9.1',
+          },
+        ]),
+      },
+      references: [],
+    };
+    expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
+      `"\\"type\\" attribute is missing from panel \\"0\\""`
+    );
+  });
+
+  test('passes when "id" attribute is missing from a panel', () => {
+    const doc = {
+      id: '1',
+      attributes: {
+        foo: true,
+        panelsJSON: JSON.stringify([
+          {
+            type: 'visualization',
+            title: 'Title 1',
+            version: '7.9.1',
+          },
+        ]),
+      },
+      references: [],
+    };
+    expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+});
+
 describe('injectReferences', () => {
   test('returns injected attributes', () => {
     const attributes = {
@@ -195,10 +311,12 @@ describe('injectReferences', () => {
         {
           panelRefName: 'panel_0',
           title: 'Title 1',
+          version: '7.9.0',
         },
         {
           panelRefName: 'panel_1',
           title: 'Title 2',
+          version: '7.9.0',
         },
       ]),
     };
@@ -219,7 +337,7 @@ describe('injectReferences', () => {
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
-        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "panelsJSON": "[{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
         "title": "test",
       }
     `);
@@ -280,7 +398,7 @@ describe('injectReferences', () => {
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
-        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "panelsJSON": "[{\\"version\\":\\"\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
         "title": "test",
       }
     `);

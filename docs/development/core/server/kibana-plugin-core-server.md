@@ -230,6 +230,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |
@@ -272,6 +273,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyElasticsearchClientConfig](./kibana-plugin-core-server.legacyelasticsearchclientconfig.md) |  |
 |  [LifecycleResponseFactory](./kibana-plugin-core-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [LoggerConfigType](./kibana-plugin-core-server.loggerconfigtype.md) |  |
+|  [MakeUsageFromSchema](./kibana-plugin-core-server.makeusagefromschema.md) | List of configuration values that will be exposed to usage collection. If parent node or actual config path is set to <code>true</code> then the actual value of these configs will be reoprted. If parent node or actual config path is set to <code>false</code> then the config will be reported as \[redacted\]. |
 |  [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-core-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-core-server.migration_deprecation_level.md) |  |

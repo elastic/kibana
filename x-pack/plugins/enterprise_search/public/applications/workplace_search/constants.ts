@@ -40,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Role Mappings',
+    defaultMessage: 'Users & roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -749,5 +749,16 @@ export const REMOVE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.remove.button',
   {
     defaultMessage: 'Remove',
+  }
+);
+
+export const COPY_TEXT = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copyText', {
+  defaultMessage: 'Copy',
+});
+
+export const STATUS_POPOVER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
+  {
+    defaultMessage: 'Click to view info',
   }
 );

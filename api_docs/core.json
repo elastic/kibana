@@ -41,7 +41,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ToastsApi.Unnamed.deps",
+                "id": "def-public.ToastsApi.Unnamed.$1.deps",
                 "type": "Object",
                 "label": "deps",
                 "tags": [],
@@ -49,7 +49,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ToastsApi.Unnamed.deps.uiSettings",
+                    "id": "def-public.ToastsApi.Unnamed.$1.deps.uiSettings",
                     "type": "Object",
                     "label": "uiSettings",
                     "description": [],
@@ -136,6 +136,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.add.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -186,6 +187,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.remove.$1",
                 "type": "CompoundType",
                 "label": "toastOrId",
                 "isRequired": true,
@@ -250,6 +252,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.addInfo.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -271,6 +274,7 @@
                 }
               },
               {
+                "id": "def-public.ToastsApi.addInfo.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -337,6 +341,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.addSuccess.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -358,6 +363,7 @@
                 }
               },
               {
+                "id": "def-public.ToastsApi.addSuccess.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -424,6 +430,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.addWarning.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -445,6 +452,7 @@
                 }
               },
               {
+                "id": "def-public.ToastsApi.addWarning.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -511,6 +519,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.addDanger.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -532,6 +541,7 @@
                 }
               },
               {
+                "id": "def-public.ToastsApi.addDanger.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -590,6 +600,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ToastsApi.addError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -605,6 +616,7 @@
                 }
               },
               {
+                "id": "def-public.ToastsApi.addError.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -777,6 +789,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AsyncPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -797,6 +810,7 @@
                 }
               },
               {
+                "id": "def-public.AsyncPlugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -835,6 +849,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AsyncPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -854,6 +869,7 @@
                 }
               },
               {
+                "id": "def-public.AsyncPlugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -1010,7 +1026,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 207
+              "lineNumber": 210
             },
             "signature": [
               {
@@ -1032,7 +1048,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 209
+              "lineNumber": 212
             },
             "signature": [
               {
@@ -1054,7 +1070,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 211
+              "lineNumber": 214
             },
             "signature": [
               {
@@ -1076,7 +1092,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 213
+              "lineNumber": 216
             },
             "signature": [
               {
@@ -1098,7 +1114,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 215
+              "lineNumber": 218
             },
             "signature": [
               {
@@ -1122,7 +1138,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 222
+              "lineNumber": 225
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -1138,7 +1154,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 226
+              "lineNumber": 229
             },
             "signature": [
               {
@@ -1154,7 +1170,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 205
+          "lineNumber": 208
         },
         "initialIsOpen": false
       },
@@ -1179,7 +1195,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 252
+              "lineNumber": 255
             },
             "signature": [
               {
@@ -1201,7 +1217,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 254
+              "lineNumber": 257
             },
             "signature": [
               {
@@ -1223,7 +1239,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 256
+              "lineNumber": 259
             },
             "signature": [
               {
@@ -1245,7 +1261,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 258
+              "lineNumber": 261
             },
             "signature": [
               {
@@ -1267,7 +1283,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 260
+              "lineNumber": 263
             },
             "signature": [
               {
@@ -1289,7 +1305,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 262
+              "lineNumber": 265
             },
             "signature": [
               {
@@ -1311,7 +1327,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 264
+              "lineNumber": 267
             },
             "signature": [
               {
@@ -1333,7 +1349,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 266
+              "lineNumber": 269
             },
             "signature": [
               {
@@ -1355,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 268
+              "lineNumber": 271
             },
             "signature": [
               {
@@ -1377,7 +1393,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 270
+              "lineNumber": 273
             },
             "signature": [
               {
@@ -1386,6 +1402,28 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CoreStart.deprecations",
+            "type": "Object",
+            "label": "deprecations",
+            "description": [
+              "{@link DeprecationsServiceStart}"
+            ],
+            "source": {
+              "path": "src/core/public/index.ts",
+              "lineNumber": 275
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.DeprecationsServiceStart",
+                "text": "DeprecationsServiceStart"
               }
             ]
           },
@@ -1401,7 +1439,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 277
+              "lineNumber": 282
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -1410,7 +1448,105 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 250
+          "lineNumber": 253
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.DeprecationsServiceStart",
+        "type": "Interface",
+        "label": "DeprecationsServiceStart",
+        "description": [
+          "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
+        ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.DeprecationsServiceStart.getAllDeprecations",
+            "type": "Function",
+            "label": "getAllDeprecations",
+            "description": [
+              "\nGrabs deprecations details for all domains."
+            ],
+            "source": {
+              "path": "src/core/public/deprecations/deprecations_service.ts",
+              "lineNumber": 24
+            },
+            "signature": [
+              "() => Promise<",
+              "DomainDeprecationDetails",
+              "[]>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DeprecationsServiceStart.getDeprecations",
+            "type": "Function",
+            "label": "getDeprecations",
+            "description": [
+              "\nGrabs deprecations for a specific domain.\n"
+            ],
+            "source": {
+              "path": "src/core/public/deprecations/deprecations_service.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "(domainId: string) => Promise<",
+              "DomainDeprecationDetails",
+              "[]>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable",
+            "type": "Function",
+            "label": "isDeprecationResolvable",
+            "description": [
+              "\nReturns a boolean if the provided deprecation can be automatically resolvable.\n"
+            ],
+            "source": {
+              "path": "src/core/public/deprecations/deprecations_service.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "(details: ",
+              "DomainDeprecationDetails",
+              ") => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DeprecationsServiceStart.resolveDeprecation",
+            "type": "Function",
+            "label": "resolveDeprecation",
+            "description": [
+              "\nCalls the correctiveActions.api to automatically resolve the depprecation.\n"
+            ],
+            "source": {
+              "path": "src/core/public/deprecations/deprecations_service.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              "(details: ",
+              "DomainDeprecationDetails",
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ResolveDeprecationResponse",
+                "text": "ResolveDeprecationResponse"
+              },
+              ">"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/public/deprecations/deprecations_service.ts",
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
@@ -1431,7 +1567,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 302
+              "lineNumber": 349
             }
           },
           {
@@ -1442,7 +1578,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 303
+              "lineNumber": 350
             }
           },
           {
@@ -1453,16 +1589,16 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 304
+              "lineNumber": 351
             },
             "signature": [
-              "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: string; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; simulatePipeline: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ]
           }
         ],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 301
+          "lineNumber": 348
         },
         "initialIsOpen": false
       },
@@ -1874,21 +2010,9 @@
             },
             "signature": [
               "() => Readonly<Record<string, Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"validation\"> & ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UiSettingsParams",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\"> & ",
+              "UserProvidedValues",
               "<any>>>"
             ]
           },
@@ -2174,6 +2298,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayBannersStart.add.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2194,6 +2319,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayBannersStart.add.$2",
                 "type": "number",
                 "label": "priority",
                 "isRequired": false,
@@ -2230,6 +2356,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayBannersStart.remove.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2274,6 +2401,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayBannersStart.replace.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -2289,6 +2417,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayBannersStart.replace.$2",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2309,6 +2438,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayBannersStart.replace.$3",
                 "type": "number",
                 "label": "priority",
                 "isRequired": false,
@@ -2409,7 +2539,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayFlyoutOpenOptions.'data-test-subj'",
+            "id": "def-public.OverlayFlyoutOpenOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -2502,6 +2632,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayFlyoutStart.open.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2522,6 +2653,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayFlyoutStart.open.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2639,7 +2771,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayModalConfirmOptions.'data-test-subj'",
+            "id": "def-public.OverlayModalConfirmOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -2741,7 +2873,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayModalOpenOptions.'data-test-subj'",
+            "id": "def-public.OverlayModalOpenOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -2820,6 +2952,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayModalStart.open.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2840,6 +2973,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayModalStart.open.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2897,6 +3031,7 @@
             ],
             "children": [
               {
+                "id": "def-public.OverlayModalStart.openConfirm.$1",
                 "type": "CompoundType",
                 "label": "message",
                 "isRequired": true,
@@ -2918,6 +3053,7 @@
                 }
               },
               {
+                "id": "def-public.OverlayModalStart.openConfirm.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3265,6 +3401,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3285,6 +3422,7 @@
                 }
               },
               {
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -3323,6 +3461,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3342,6 +3481,7 @@
                 }
               },
               {
+                "id": "def-public.Plugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -3541,13 +3681,7 @@
               "lineNumber": 78
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -3580,13 +3714,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -3603,13 +3731,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -5334,13 +5456,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ]
           },
@@ -5371,29 +5487,11 @@
               "lineNumber": 81
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.ImageValidation",
-                "text": "ImageValidation"
-              },
+              "ImageValidation",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegex",
-                "text": "StringValidationRegex"
-              },
+              "StringValidationRegex",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegexString",
-                "text": "StringValidationRegexString"
-              },
+              "StringValidationRegexString",
               " | undefined"
             ]
           },
@@ -5661,7 +5759,22 @@
           "lineNumber": 102
         },
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; }"
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ResolveDeprecationResponse",
+        "type": "Type",
+        "label": "ResolveDeprecationResponse",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/core/public/deprecations/deprecations_client.ts",
+          "lineNumber": 18
+        },
+        "signature": [
+          "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
         ],
         "initialIsOpen": false
       },
@@ -5772,7 +5885,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 236
+          "lineNumber": 239
         },
         "signature": [
           "() => Promise<[",
@@ -6385,6 +6498,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ElasticsearchConfig.Unnamed.$1",
                 "type": "Object",
                 "label": "rawConfig",
                 "isRequired": true,
@@ -6452,6 +6566,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.LegacyClusterClient.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "config",
                 "isRequired": true,
@@ -6471,6 +6586,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyClusterClient.Unnamed.$2",
                 "type": "Object",
                 "label": "log",
                 "isRequired": true,
@@ -6484,6 +6600,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyClusterClient.Unnamed.$3",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6497,6 +6614,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyClusterClient.Unnamed.$4",
                 "type": "Function",
                 "label": "getAuthHeaders",
                 "isRequired": true,
@@ -6528,6 +6646,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -6541,6 +6660,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -6554,6 +6674,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -6660,6 +6781,7 @@
             ],
             "children": [
               {
+                "id": "def-server.LegacyClusterClient.asScoped.$1",
                 "type": "CompoundType",
                 "label": "request",
                 "isRequired": false,
@@ -6741,6 +6863,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.LegacyElasticsearchErrorHelpers.isNotAuthorizedError.$1",
                 "type": "Any",
                 "label": "error",
                 "isRequired": true,
@@ -6779,6 +6902,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -6792,6 +6916,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -6859,6 +6984,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$1",
                 "type": "Function",
                 "label": "internalAPICaller",
                 "isRequired": true,
@@ -6878,6 +7004,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$2",
                 "type": "Function",
                 "label": "scopedAPICaller",
                 "isRequired": true,
@@ -6897,6 +7024,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$3",
                 "type": "CompoundType",
                 "label": "headers",
                 "isRequired": false,
@@ -6944,6 +7072,7 @@
             ],
             "children": [
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -6959,6 +7088,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -6974,6 +7104,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7025,6 +7156,7 @@
             ],
             "children": [
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -7040,6 +7172,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -7055,6 +7188,7 @@
                 }
               },
               {
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7323,6 +7457,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AsyncPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -7339,10 +7474,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 269
+                  "lineNumber": 274
                 }
               },
               {
+                "id": "def-server.AsyncPlugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -7352,7 +7488,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 269
+                  "lineNumber": 274
                 }
               }
             ],
@@ -7360,7 +7496,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             }
           },
           {
@@ -7381,6 +7517,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AsyncPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -7396,10 +7533,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 270
+                  "lineNumber": 276
                 }
               },
               {
+                "id": "def-server.AsyncPlugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -7409,7 +7547,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 270
+                  "lineNumber": 276
                 }
               }
             ],
@@ -7417,7 +7555,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 270
+              "lineNumber": 276
             }
           },
           {
@@ -7433,13 +7571,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 271
+              "lineNumber": 278
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 263
+          "lineNumber": 268
         },
         "initialIsOpen": false
       },
@@ -7556,6 +7694,7 @@
             ],
             "children": [
               {
+                "id": "def-server.CapabilitiesSetup.registerProvider.$1",
                 "type": "Function",
                 "label": "provider",
                 "isRequired": true,
@@ -7602,6 +7741,7 @@
             ],
             "children": [
               {
+                "id": "def-server.CapabilitiesSetup.registerSwitcher.$1",
                 "type": "Function",
                 "label": "switcher",
                 "isRequired": true,
@@ -7668,13 +7808,7 @@
                 "text": "ResolveCapabilitiesOptions"
               },
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">"
             ],
             "description": [
@@ -7682,6 +7816,7 @@
             ],
             "children": [
               {
+                "id": "def-server.CapabilitiesStart.resolveCapabilities.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -7702,6 +7837,7 @@
                 }
               },
               {
+                "id": "def-server.CapabilitiesStart.resolveCapabilities.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7755,7 +7891,9 @@
             "type": "Function",
             "label": "rename",
             "signature": [
-              "(oldKey: string, newKey: string) => ",
+              "(oldKey: string, newKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -7763,6 +7901,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ConfigDeprecationFactory.rename.$1",
                 "type": "string",
                 "label": "oldKey",
                 "isRequired": true,
@@ -7772,10 +7911,11 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 63
+                  "lineNumber": 80
                 }
               },
               {
+                "id": "def-server.ConfigDeprecationFactory.rename.$2",
                 "type": "string",
                 "label": "newKey",
                 "isRequired": true,
@@ -7785,7 +7925,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 63
+                  "lineNumber": 80
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.rename.$3",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 80
                 }
               }
             ],
@@ -7793,7 +7949,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 63
+              "lineNumber": 80
             }
           },
           {
@@ -7801,7 +7957,9 @@
             "type": "Function",
             "label": "renameFromRoot",
             "signature": [
-              "(oldKey: string, newKey: string, silent?: boolean | undefined) => ",
+              "(oldKey: string, newKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -7809,6 +7967,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$1",
                 "type": "string",
                 "label": "oldKey",
                 "isRequired": true,
@@ -7818,10 +7977,11 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               },
               {
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$2",
                 "type": "string",
                 "label": "newKey",
                 "isRequired": true,
@@ -7831,20 +7991,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               },
               {
-                "type": "CompoundType",
-                "label": "silent",
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$3",
+                "type": "Object",
+                "label": "details",
                 "isRequired": false,
                 "signature": [
-                  "boolean | undefined"
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
                 ],
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               }
             ],
@@ -7852,7 +8015,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 79
+              "lineNumber": 96
             }
           },
           {
@@ -7860,7 +8023,9 @@
             "type": "Function",
             "label": "unused",
             "signature": [
-              "(unusedKey: string) => ",
+              "(unusedKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -7868,6 +8033,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ConfigDeprecationFactory.unused.$1",
                 "type": "string",
                 "label": "unusedKey",
                 "isRequired": true,
@@ -7877,7 +8043,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 92
+                  "lineNumber": 109
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.unused.$2",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 109
                 }
               }
             ],
@@ -7885,7 +8067,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 92
+              "lineNumber": 109
             }
           },
           {
@@ -7893,7 +8075,9 @@
             "type": "Function",
             "label": "unusedFromRoot",
             "signature": [
-              "(unusedKey: string) => ",
+              "(unusedKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -7901,6 +8085,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.$1",
                 "type": "string",
                 "label": "unusedKey",
                 "isRequired": true,
@@ -7910,7 +8095,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 108
+                  "lineNumber": 125
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.$2",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 125
                 }
               }
             ],
@@ -7918,13 +8119,13 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 108
+              "lineNumber": 125
             }
           }
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 50
+          "lineNumber": 67
         },
         "initialIsOpen": false
       },
@@ -8002,7 +8203,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 462
+              "lineNumber": 466
             },
             "signature": [
               {
@@ -8024,7 +8225,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 464
+              "lineNumber": 468
             },
             "signature": [
               {
@@ -8046,7 +8247,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 466
+              "lineNumber": 470
             },
             "signature": [
               {
@@ -8068,7 +8269,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 468
+              "lineNumber": 472
             },
             "signature": [
               {
@@ -8099,7 +8300,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 473
+              "lineNumber": 477
             },
             "signature": [
               {
@@ -8121,7 +8322,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 475
+              "lineNumber": 479
             },
             "signature": [
               {
@@ -8143,7 +8344,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 477
+              "lineNumber": 481
             },
             "signature": [
               {
@@ -8165,7 +8366,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 479
+              "lineNumber": 483
             },
             "signature": [
               {
@@ -8187,7 +8388,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 481
+              "lineNumber": 485
             },
             "signature": [
               {
@@ -8209,7 +8410,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 483
+              "lineNumber": 487
             },
             "signature": [
               {
@@ -8223,6 +8424,28 @@
           },
           {
             "tags": [],
+            "id": "def-server.CoreSetup.deprecations",
+            "type": "Object",
+            "label": "deprecations",
+            "description": [
+              "{@link DeprecationsServiceSetup}"
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 489
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationsServiceSetup",
+                "text": "DeprecationsServiceSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-server.CoreSetup.getStartServices",
             "type": "Function",
             "label": "getStartServices",
@@ -8231,7 +8454,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 491
             },
             "signature": [
               {
@@ -8247,7 +8470,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 460
+          "lineNumber": 464
         },
         "initialIsOpen": false
       },
@@ -8272,7 +8495,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 508
+              "lineNumber": 514
             },
             "signature": [
               {
@@ -8294,7 +8517,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 510
+              "lineNumber": 516
             },
             "signature": [
               {
@@ -8316,7 +8539,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 512
+              "lineNumber": 518
             },
             "signature": [
               {
@@ -8338,7 +8561,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 514
+              "lineNumber": 520
             },
             "signature": [
               {
@@ -8360,7 +8583,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 516
+              "lineNumber": 522
             },
             "signature": [
               {
@@ -8382,7 +8605,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 518
+              "lineNumber": 524
             },
             "signature": [
               {
@@ -8397,7 +8620,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 506
+          "lineNumber": 512
         },
         "initialIsOpen": false
       },
@@ -8854,6 +9077,75 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.DeprecationsDetails",
+        "type": "Interface",
+        "label": "DeprecationsDetails",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DeprecationsDetails.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 20
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationsDetails.level",
+            "type": "CompoundType",
+            "label": "level",
+            "description": [
+              "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade.\n- fetch_error: Deprecations service failed to grab the deprecation details for the domain."
+            ],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "\"warning\" | \"critical\" | \"fetch_error\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationsDetails.documentationUrl",
+            "type": "string",
+            "label": "documentationUrl",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationsDetails.correctiveActions",
+            "type": "Object",
+            "label": "correctiveActions",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; } | undefined; manualSteps?: string[] | undefined; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/deprecations/types.ts",
+          "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.DeprecationSettings",
         "type": "Interface",
         "label": "DeprecationSettings",
@@ -8894,6 +9186,47 @@
         "source": {
           "path": "src/core/types/ui_settings.ts",
           "lineNumber": 32
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.DeprecationsServiceSetup",
+        "type": "Interface",
+        "label": "DeprecationsServiceSetup",
+        "description": [
+          "\nThe deprecations service provides a way for the Kibana platform to communicate deprecated\nfeatures and configs with its users. These deprecations are only communicated\nif the deployment is using these features. Allowing for a user tailored experience\nfor upgrading the stack version.\n\nThe Deprecation service is consumed by the upgrade assistant to assist with the upgrade\nexperience.\n\nIf a deprecated feature can be resolved without manual user intervention.\nUsing correctiveActions.api allows the Upgrade Assistant to use this api to correct the\ndeprecation upon a user trigger.\n"
+        ],
+        "tags": [
+          "gmail",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DeprecationsServiceSetup.registerDeprecations",
+            "type": "Function",
+            "label": "registerDeprecations",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/deprecations_service.ts",
+              "lineNumber": 104
+            },
+            "signature": [
+              "(deprecationContext: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RegisterDeprecationsConfig",
+                "text": "RegisterDeprecationsConfig"
+              },
+              ") => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/deprecations/deprecations_service.ts",
+          "lineNumber": 103
         },
         "initialIsOpen": false
       },
@@ -9311,6 +9644,62 @@
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
           "lineNumber": 180
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.GetDeprecationsContext",
+        "type": "Interface",
+        "label": "GetDeprecationsContext",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.GetDeprecationsContext.esClient",
+            "type": "Object",
+            "label": "esClient",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 61
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.GetDeprecationsContext.savedObjectsClient",
+            "type": "Object",
+            "label": "savedObjectsClient",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 62
+            },
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsClient",
+                "text": "SavedObjectsClient"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/deprecations/types.ts",
+          "lineNumber": 60
         },
         "initialIsOpen": false
       },
@@ -9854,6 +10243,7 @@
             ],
             "children": [
               {
+                "id": "def-server.IContextContainer.registerContext.$1",
                 "type": "Uncategorized",
                 "label": "pluginOpaqueId",
                 "isRequired": true,
@@ -9869,6 +10259,7 @@
                 }
               },
               {
+                "id": "def-server.IContextContainer.registerContext.$2",
                 "type": "Uncategorized",
                 "label": "contextName",
                 "isRequired": true,
@@ -9884,6 +10275,7 @@
                 }
               },
               {
+                "id": "def-server.IContextContainer.registerContext.$3",
                 "type": "Function",
                 "label": "provider",
                 "isRequired": true,
@@ -9947,19 +10339,14 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              }
+              "KibanaResponse"
             ],
             "description": [
               "\nCreate a new handler function pre-wired to context for the plugin.\n"
             ],
             "children": [
               {
+                "id": "def-server.IContextContainer.createHandler.$1",
                 "type": "Uncategorized",
                 "label": "pluginOpaqueId",
                 "isRequired": true,
@@ -9975,6 +10362,7 @@
                 }
               },
               {
+                "id": "def-server.IContextContainer.createHandler.$2",
                 "type": "Function",
                 "label": "handler",
                 "isRequired": true,
@@ -10005,13 +10393,7 @@
                     "text": "CustomHttpResponseOptions"
                   },
                   "<T>) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaResponse",
-                    "text": "KibanaResponse"
-                  }
+                  "KibanaResponse"
                 ],
                 "description": [
                   "- Handler function to pass context object to."
@@ -10446,14 +10828,8 @@
             },
             "signature": [
               "() => Readonly<Record<string, Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"validation\">>>"
+              "UiSettingsParams",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\">>>"
             ]
           },
           {
@@ -10502,13 +10878,7 @@
             },
             "signature": [
               "<T = any>() => Promise<Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<T>>>"
             ]
           },
@@ -12387,7 +12757,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.LegacyElasticsearchError.[code]",
+            "id": "def-server.LegacyElasticsearchError.code",
             "type": "string",
             "label": "[code]",
             "description": [],
@@ -12403,116 +12773,6 @@
         "source": {
           "path": "src/core/server/elasticsearch/legacy/errors.ts",
           "lineNumber": 22
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LegacyServiceSetupDeps",
-        "type": "Interface",
-        "label": "LegacyServiceSetupDeps",
-        "description": [],
-        "tags": [
-          "public",
-          "deprecated"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.core",
-            "type": "CompoundType",
-            "label": "core",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 43
-            },
-            "signature": [
-              "LegacyCoreSetup"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.plugins",
-            "type": "Object",
-            "label": "plugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 44
-            },
-            "signature": [
-              "Record<string, unknown>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.uiPlugins",
-            "type": "Object",
-            "label": "uiPlugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UiPlugins",
-                "text": "UiPlugins"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/legacy/types.ts",
-          "lineNumber": 42
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LegacyServiceStartDeps",
-        "type": "Interface",
-        "label": "LegacyServiceStartDeps",
-        "description": [],
-        "tags": [
-          "public",
-          "deprecated"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceStartDeps.core",
-            "type": "CompoundType",
-            "label": "core",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 53
-            },
-            "signature": [
-              "LegacyCoreStart"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceStartDeps.plugins",
-            "type": "Object",
-            "label": "plugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 54
-            },
-            "signature": [
-              "Record<string, unknown>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/legacy/types.ts",
-          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -12544,6 +12804,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.trace.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -12559,6 +12820,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.trace.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12596,6 +12858,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.debug.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -12611,6 +12874,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.debug.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12648,6 +12912,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.info.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -12663,6 +12928,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.info.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12700,6 +12966,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.warn.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -12715,6 +12982,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.warn.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12752,6 +13020,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.error.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -12767,6 +13036,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.error.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12804,6 +13074,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.fatal.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -12819,6 +13090,7 @@
                 }
               },
               {
+                "id": "def-server.Logger.fatal.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12855,6 +13127,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Logger.get.$1",
                 "type": "Array",
                 "label": "childContextPaths",
                 "isRequired": true,
@@ -12899,7 +13172,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/logging/logging_config.ts",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "signature": [
               "Record<string, ",
@@ -12929,7 +13202,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/logging/logging_config.ts",
-              "lineNumber": 112
+              "lineNumber": 114
             },
             "signature": [
               "Readonly<{} & { name: string; level: ",
@@ -12940,7 +13213,7 @@
         ],
         "source": {
           "path": "src/core/server/logging/logging_config.ts",
-          "lineNumber": 109
+          "lineNumber": 111
         },
         "initialIsOpen": false
       },
@@ -12971,6 +13244,7 @@
             ],
             "children": [
               {
+                "id": "def-server.LoggerFactory.get.$1",
                 "type": "Array",
                 "label": "contextParts",
                 "isRequired": true,
@@ -13033,6 +13307,7 @@
             ],
             "children": [
               {
+                "id": "def-server.LoggingServiceSetup.configure.$1",
                 "type": "Object",
                 "label": "config$",
                 "isRequired": true,
@@ -13767,6 +14042,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -13783,10 +14059,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 252
+                  "lineNumber": 255
                 }
               },
               {
+                "id": "def-server.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -13796,7 +14073,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 252
+                  "lineNumber": 255
                 }
               }
             ],
@@ -13804,7 +14081,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 252
+              "lineNumber": 255
             }
           },
           {
@@ -13825,6 +14102,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -13840,10 +14118,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 253
+                  "lineNumber": 257
                 }
               },
               {
+                "id": "def-server.Plugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -13853,7 +14132,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 253
+                  "lineNumber": 257
                 }
               }
             ],
@@ -13861,7 +14140,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 253
+              "lineNumber": 257
             }
           },
           {
@@ -13877,13 +14156,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 254
+              "lineNumber": 259
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 246
+          "lineNumber": 249
         },
         "initialIsOpen": false
       },
@@ -14000,7 +14279,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 298
+              "lineNumber": 305
             },
             "signature": [
               "symbol"
@@ -14014,7 +14293,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 299
+              "lineNumber": 306
             },
             "signature": [
               "{ mode: ",
@@ -14034,7 +14313,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 322
+              "lineNumber": 329
             },
             "signature": [
               "LoggerFactory"
@@ -14050,7 +14329,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 326
+              "lineNumber": 333
             },
             "signature": [
               "{ legacy: { globalConfig$: ",
@@ -14068,7 +14347,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 297
+          "lineNumber": 304
         },
         "initialIsOpen": false
       },
@@ -14254,6 +14533,50 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.RegisterDeprecationsConfig",
+        "type": "Interface",
+        "label": "RegisterDeprecationsConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.RegisterDeprecationsConfig.getDeprecations",
+            "type": "Function",
+            "label": "getDeprecations",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 57
+            },
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.GetDeprecationsContext",
+                "text": "GetDeprecationsContext"
+              },
+              ") => MaybePromise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
+              "[]>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/deprecations/types.ts",
+          "lineNumber": 56
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.RequestHandlerContext",
         "type": "Interface",
         "label": "RequestHandlerContext",
@@ -14272,7 +14595,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 428
+              "lineNumber": 432
             },
             "signature": [
               "{ savedObjects: { client: Pick<",
@@ -14283,7 +14606,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14307,7 +14630,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">; getExporter: (client: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; getExporter: (client: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14320,7 +14643,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 427
+          "lineNumber": 431
         },
         "initialIsOpen": false
       },
@@ -14435,13 +14758,7 @@
               "lineNumber": 78
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -14474,13 +14791,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -14497,13 +14808,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -14764,13 +15069,7 @@
             },
             "signature": [
               "{ total: number; max_score: number; hits: { _index: string; _type: string; _id: string; _score: number; _source: T; _version?: number | undefined; _explanation?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.Explanation",
-                "text": "Explanation"
-              },
+              "Explanation",
               " | undefined; fields?: any; highlight?: any; inner_hits?: any; matched_queries?: string[] | undefined; sort?: unknown[] | undefined; }[]; }"
             ]
           },
@@ -15125,6 +15424,7 @@
             ],
             "children": [
               {
+                "id": "def-server.StatusServiceSetup.set.$1",
                 "type": "Object",
                 "label": "status$",
                 "isRequired": true,
@@ -15498,13 +15798,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ]
           },
@@ -15535,29 +15829,11 @@
               "lineNumber": 81
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.ImageValidation",
-                "text": "ImageValidation"
-              },
+              "ImageValidation",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegex",
-                "text": "StringValidationRegex"
-              },
+              "StringValidationRegex",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegexString",
-                "text": "StringValidationRegexString"
-              },
+              "StringValidationRegexString",
               " | undefined"
             ]
           },
@@ -15618,13 +15894,7 @@
             "label": "register",
             "signature": [
               "(settings: Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
+              "UiSettingsParams",
               "<unknown>>) => void"
             ],
             "description": [
@@ -15632,18 +15902,13 @@
             ],
             "children": [
               {
+                "id": "def-server.UiSettingsServiceSetup.register.$1",
                 "type": "Object",
                 "label": "settings",
                 "isRequired": true,
                 "signature": [
                   "Record<string, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.UiSettingsParams",
-                    "text": "UiSettingsParams"
-                  },
+                  "UiSettingsParams",
                   "<unknown>>"
                 ],
                 "description": [],
@@ -15689,7 +15954,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15703,6 +15968,7 @@
             ],
             "children": [
               {
+                "id": "def-server.UiSettingsServiceStart.asScopedToClient.$1",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -15715,7 +15981,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "description": [],
                 "source": {
@@ -15791,6 +16057,27 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-server.AddConfigDeprecation",
+        "type": "Type",
+        "label": "AddConfigDeprecation",
+        "tags": [
+          "public"
+        ],
+        "description": [
+          "\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\n"
+        ],
+        "source": {
+          "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+          "lineNumber": 6
+        },
+        "signature": [
+          "(details: ",
+          "DeprecatedConfigDetails",
+          ") => void"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.AppenderConfigType",
         "type": "Type",
@@ -15882,31 +16169,12 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 16
+          "lineNumber": 33
         },
         "signature": [
-          "(config: Record<string, any>, fromPath: string, logger: ",
-          "ConfigDeprecationLogger",
+          "(config: Record<string, any>, fromPath: string, addDeprecation: ",
+          "AddConfigDeprecation",
           ") => Record<string, any>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ConfigDeprecationLogger",
-        "type": "Type",
-        "label": "ConfigDeprecationLogger",
-        "tags": [
-          "public"
-        ],
-        "description": [
-          "\nLogger interface used when invoking a {@link ConfigDeprecation}\n"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 6
-        },
-        "signature": [
-          "(message: string) => void"
         ],
         "initialIsOpen": false
       },
@@ -15922,7 +16190,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 33
+          "lineNumber": 50
         },
         "signature": [
           "(factory: ",
@@ -15965,7 +16233,7 @@
           "lineNumber": 22
         },
         "signature": [
-          "Pick<KibanaClient, \"get\" | \"delete\" | \"create\" | \"helpers\" | \"count\" | \"update\" | \"index\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"closePointInTime\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: TransportRequestParams, options?: TransportRequestOptions | undefined): TransportRequestPromise<ApiResponse>; }; }"
+          "Pick<KibanaClient, \"get\" | \"delete\" | \"create\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"index\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: TransportRequestParams, options?: TransportRequestOptions | undefined): TransportRequestPromise<ApiResponse>; }; }"
         ],
         "initialIsOpen": false
       },
@@ -16280,7 +16548,7 @@
           "lineNumber": 27
         },
         "signature": [
-          "Pick<ConfigOptions, \"plugins\" | \"keepAlive\" | \"log\"> & Pick<ElasticsearchConfig, \"password\" | \"sniffOnStart\" | \"sniffOnConnectionFault\" | \"hosts\" | \"username\" | \"requestHeadersWhitelist\" | \"customHeaders\" | \"apiVersion\"> & { pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout']; requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout']; sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval']; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; }"
+          "Pick<ConfigOptions, \"plugins\" | \"log\" | \"keepAlive\"> & Pick<ElasticsearchConfig, \"password\" | \"sniffOnStart\" | \"sniffOnConnectionFault\" | \"hosts\" | \"username\" | \"requestHeadersWhitelist\" | \"customHeaders\" | \"apiVersion\"> & { pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout']; requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout']; sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval']; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -16294,7 +16562,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/logging/logging_config.ts",
-          "lineNumber": 59
+          "lineNumber": 60
         },
         "signature": [
           "{ readonly name: string; readonly level: ",
@@ -16389,7 +16657,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 404
+          "lineNumber": 411
         },
         "signature": [
           "(core: ",
@@ -16471,7 +16739,7 @@
           "lineNumber": 102
         },
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; }"
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -16588,7 +16856,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 285
+          "lineNumber": 292
         },
         "signature": [
           "{ readonly kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => ",
@@ -16616,7 +16884,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 496
+          "lineNumber": 502
         },
         "signature": [
           "() => Promise<[",

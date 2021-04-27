@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
   describe('machine learning embeddables anomaly charts', function () {
@@ -96,10 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-          await dashboardAddPanel.clickOpenAddPanel();
-          await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
-          await ml.dashboardJobSelectionTable.assertJobSelectionTableExists();
+          await ml.dashboardEmbeddables.openJobSelectionFlyout();
           await a11y.testAppSnapshot();
         });
 
