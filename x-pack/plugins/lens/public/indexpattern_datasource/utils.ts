@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DataType } from '../types';
 import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
@@ -84,3 +85,15 @@ export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPatt
   }
   return !!getInvalidFieldMessage(column, indexPattern)?.length;
 }
+
+export const getIncompleteLabel = () =>
+  i18n.translate('xpack.lens.configure.incompleteDimensionLabel', {
+    defaultMessage: 'Incomplete configuration',
+  });
+
+export const wrapOnDot = (str?: string) => {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+};

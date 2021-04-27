@@ -13,7 +13,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn } from '../indexpattern';
-import { isColumnInvalid } from '../utils';
+import { getIncompleteLabel, isColumnInvalid, wrapOnDot } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../common';
@@ -34,32 +34,27 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<In
   dateRange: DateRange;
 };
 
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
-
 export const IndexPatternDimensionTriggerComponent = function IndexPatternDimensionTrigger(
   props: IndexPatternDimensionTriggerProps
 ) {
-  const layerId = props.layerId;
-  const layer = props.state.layers[layerId];
-  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel } = props;
+  const { columnId, uniqueLabel, layerId, state } = props;
+  const layer = state.layers[layerId];
+  const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
 
-  const currentColumnHasErrors = useMemo(
-    () => isColumnInvalid(layer, columnId, currentIndexPattern),
-    [layer, columnId, currentIndexPattern]
-  );
+  const isEmptyLabel = uniqueLabel == null || uniqueLabel === '';
+  const currentColumnHasErrors =
+    useMemo(() => isColumnInvalid(layer, columnId, currentIndexPattern), [
+      layer,
+      columnId,
+      currentIndexPattern,
+    ]) || isEmptyLabel;
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
+  const selectedColumn: IndexPatternColumn | null = layer.columns[columnId] ?? null;
 
-  if (!selectedColumn) {
+  if (!selectedColumn && !currentColumnHasErrors) {
     return null;
   }
-  const formattedLabel = wrapOnDot(uniqueLabel);
+  const formattedLabel = wrapOnDot(uniqueLabel) || getIncompleteLabel();
 
   if (currentColumnHasErrors) {
     return (
@@ -88,7 +83,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="alert" />
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>{selectedColumn.label}</EuiFlexItem>
+            <EuiFlexItem grow={true}>{formattedLabel}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
       </EuiToolTip>

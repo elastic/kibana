@@ -18,6 +18,15 @@ const triggerLinkA11yText = (label: string) =>
     values: { label },
   });
 
+const handleEmptyLabel = (label: string | undefined) => {
+  if (label == null || label === '') {
+    return i18n.translate('xpack.lens.configure.incompleteLabel', {
+      defaultMessage: 'incomplete',
+    });
+  }
+  return label;
+};
+
 export function DimensionButton({
   group,
   children,
@@ -39,8 +48,8 @@ export function DimensionButton({
         className="lnsLayerPanel__dimensionLink"
         data-test-subj="lnsLayerPanel-dimensionLink"
         onClick={() => onClick(accessorConfig.columnId)}
-        aria-label={triggerLinkA11yText(label)}
-        title={triggerLinkA11yText(label)}
+        aria-label={triggerLinkA11yText(handleEmptyLabel(label))}
+        title={triggerLinkA11yText(handleEmptyLabel(label))}
       >
         <ColorIndicator accessorConfig={accessorConfig}>{children}</ColorIndicator>
       </EuiLink>

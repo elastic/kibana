@@ -56,6 +56,7 @@ import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 import { debouncedComponent } from '../debounced_component';
+import { wrapOnDot } from './utils';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -84,13 +85,6 @@ interface State {
   sampledValues?: number;
   histogram?: BucketedAggregation<number | string>;
   topValues?: BucketedAggregation<number | string>;
-}
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
