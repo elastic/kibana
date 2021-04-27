@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TimeseriesexplorerChartDataError } from './timeseriesexplorer_error';
+export { TimeseriesexplorerChartDataError } from './timeseriesexplorer_chart_data_error';

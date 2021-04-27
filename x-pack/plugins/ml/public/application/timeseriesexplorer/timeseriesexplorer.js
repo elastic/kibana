@@ -85,7 +85,7 @@ import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/times
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
-import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error/timeseriesexplorer_chart_data_error';
+import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
