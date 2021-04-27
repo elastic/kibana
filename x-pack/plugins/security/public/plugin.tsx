@@ -21,7 +21,7 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import { accountManagementApp } from './account_management';
-import type { AuthenticationServiceSetup } from './authentication';
+import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
 import { ManagementService } from './management';
@@ -153,7 +153,10 @@ export class SecurityPlugin
       this.managementService.start({ capabilities: core.application.capabilities });
     }
 
-    return { navControlService: this.navControlService.start({ core }) };
+    return {
+      navControlService: this.navControlService.start({ core }),
+      authc: this.authc as AuthenticationServiceStart,
+    };
   }
 
   public stop() {

@@ -39,7 +39,7 @@ export default function ({ getService }) {
           apms: {
             total: 2,
           },
-          timeOfLastEvent: '2018-08-31T13:59:21.201Z',
+          timeOfLastEvent: '2018-08-31T13:59:21.199Z',
         },
         apms: [
           {
@@ -52,7 +52,7 @@ export default function ({ getService }) {
             errors: 0,
             memory: 3445920,
             version: '7.0.0-alpha1',
-            time_of_last_event: '2018-08-31T13:59:21.201Z',
+            time_of_last_event: '2018-08-31T13:59:21.199Z',
           },
           {
             uuid: '9b16f434-2092-4983-a401-80a2b61c79d6',
@@ -64,7 +64,7 @@ export default function ({ getService }) {
             errors: 0,
             memory: 3087640,
             version: '7.0.0-alpha1',
-            time_of_last_event: '2018-08-31T13:59:21.165Z',
+            time_of_last_event: '2018-08-31T13:59:21.163Z',
           },
         ],
       };
