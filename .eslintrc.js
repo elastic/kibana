@@ -1382,6 +1382,10 @@ module.exports = {
             ],
             pathGroups: [
               {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
                 pattern: '{@kbn/**,src/**,kibana{,/**}}',
                 group: 'internal',
               },

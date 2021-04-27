@@ -21,6 +21,7 @@ export function mockAuthenticationProviderOptions(options?: { name: string }) {
     client: elasticsearchServiceMock.createClusterClient(),
     logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(),
+    getRequestOriginalURL: jest.fn(),
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
     name: options?.name ?? 'basic1',
     urls: {
