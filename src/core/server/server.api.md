@@ -176,6 +176,9 @@ import { URL } from 'url';
 export { AddConfigDeprecation }
 
 // @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
+
+// @public
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
