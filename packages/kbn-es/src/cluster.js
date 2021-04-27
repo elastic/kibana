@@ -12,6 +12,7 @@ const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
 const { pipeline } = require('stream');
+const globby = require('globby');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const {
@@ -341,7 +342,17 @@ exports.Cluster = class Cluster {
           },
         });
 
+        const heapDumps = await globby(['*.hprof'], {
+          cwd: installPath,
+          absolute: true,
+        });
+
+        for (const hprofPath of heapDumps) {
+          logz.append(hprofPath, path.join('heap_dumps', path.basename(hprofPath)));
+        }
+
         logz.directory(path.resolve(installPath, 'logs'), 'logs');
+
         const promise = asyncPipeline(logz, fs.createWriteStream(archivePath));
         logz.finalize();
         await promise;
