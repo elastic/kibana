@@ -13,9 +13,7 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/93705
-  /* eslint-disable ban/ban */
-  describe.only('monitor state scoping', async () => {
+  describe('monitor state scoping', async () => {
     const numIps = 4; // Must be > 2 for IP uniqueness checks
 
     let dateRangeStart: string;
@@ -205,5 +203,4 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
   });
-  /* eslint-enable ban/ban */
 }

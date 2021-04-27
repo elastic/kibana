@@ -37,8 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       }
     });
 
-    /* eslint-disable ban/ban */
-    describe.only('with generated data', () => {
+    describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => await esArchiver.loadIfNeeded('uptime/blank'));
       after('unload', async () => await esArchiver.unload('uptime/blank'));
 
@@ -48,7 +47,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
     });
-    /* eslint-enable ban/ban */
 
     describe('with real-world data', () => {
       beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
