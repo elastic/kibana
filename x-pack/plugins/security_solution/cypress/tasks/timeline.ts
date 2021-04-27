@@ -90,7 +90,9 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
 };
 
 export const goToNotesTab = () => {
-  return cy.get(NOTES_TAB_BUTTON).click({ force: true });
+  cy.get(NOTES_TAB_BUTTON)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
 };
 
 export const getNotePreviewByNoteId = (noteId: string) => {
