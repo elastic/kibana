@@ -19,6 +19,15 @@ export interface EventFiltersService {
   addEventFilters(
     exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema>;
+
+  getList(
+    options?: Partial<{
+      page: number;
+      perPage: number;
+      sortField: keyof ExceptionListItemSchema;
+      sortOrder: 'asc' | 'desc';
+    }>
+  ): Promise<FoundExceptionListItemSchema>;
 }
 
 export class EventFiltersHttpService implements EventFiltersService {

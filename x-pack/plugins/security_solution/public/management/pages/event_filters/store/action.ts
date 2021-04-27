@@ -8,6 +8,11 @@
 import { Action } from 'redux';
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
+import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
+
+export type EventFiltersListPageStateChanged = Action<'eventFiltersListPageStateChanged'> & {
+  payload: AsyncResourceState<FoundExceptionListItemSchema>;
+};
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
@@ -36,10 +41,10 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 };
 
 export type EventFiltersPageAction =
+  | EventFiltersListPageStateChanged
   | EventFiltersCreateStart
   | EventFiltersInitForm
   | EventFiltersChangeForm
-  | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
   | EventFiltersFormStateChanged;

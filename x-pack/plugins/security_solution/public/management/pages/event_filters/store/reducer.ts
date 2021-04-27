@@ -13,6 +13,7 @@ import {
   EventFiltersInitForm,
   EventFiltersChangeForm,
   EventFiltersFormStateChanged,
+  EventFiltersListPageStateChanged,
 } from './action';
 
 import { EventFiltersListPageState } from '../state';
@@ -23,6 +24,16 @@ type CaseReducer<T extends AppAction> = (
   state: Immutable<EventFiltersListPageState>,
   action: Immutable<T>
 ) => Immutable<EventFiltersListPageState>;
+
+const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    listPage: action.payload,
+  };
+};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
@@ -71,6 +82,8 @@ export const eventFiltersPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
+    case 'eventFiltersListPageStateChanged':
+      return handleEventFiltersListPageChanges(state, action);
     case 'eventFiltersInitForm':
       return eventFiltersInitForm(state, action);
     case 'eventFiltersChangeForm':

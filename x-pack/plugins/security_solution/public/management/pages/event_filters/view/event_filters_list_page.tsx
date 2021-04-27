@@ -10,16 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useEventFiltersSelector } from './hooks';
-import { getListIsLoading, getListItems, getListPagination } from '../store/selector';
+import {
+  getListFetchError,
+  getListIsLoading,
+  getListItems,
+  getListPagination,
+} from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 const TemporaryComponent = memo(() => {
   return <div>{Math.random()}</div>;
 });
 TemporaryComponent.displayName = 'TemporaryComponent';
+
 type EventListPaginatedContent = PaginatedContentProps<
-  ExceptionListItemSchema,
+  Immutable<ExceptionListItemSchema>,
   typeof TemporaryComponent
 >;
 
@@ -28,6 +35,7 @@ export const EventFiltersListPage = memo(() => {
   const listItems = useEventFiltersSelector(getListItems);
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
+  const fetchError = useEventFiltersSelector(getListFetchError);
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(() => {}, []);
 
@@ -50,11 +58,12 @@ export const EventFiltersListPage = memo(() => {
           'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
       })}
     >
-      <PaginatedContent
+      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof TemporaryComponent>
         items={listItems}
         ItemComponent={TemporaryComponent}
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
+        error={fetchError?.message}
         loading={isLoading}
         pagination={pagination}
         noItemsMessage={noItemsMessage}

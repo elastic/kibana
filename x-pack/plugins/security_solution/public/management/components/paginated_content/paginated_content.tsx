@@ -200,7 +200,6 @@ export const PaginatedContent = memo(
         {loading && <EuiProgress size="xs" color="primary" />}
 
         <div className="body" data-test-subj={getTestId('body')}>
-          <EuiSpacer size="l" />
           <div className={`body-content ${contentClassName}`}>
             {children ? children : generatedBodyItemContent}
           </div>

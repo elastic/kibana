@@ -16,37 +16,57 @@ import {
   isFailedResourceState,
 } from '../../../state/async_resource_state';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import {
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
+import { Immutable } from '../../../../../common/endpoint/types';
 
-export const getListItems = (state: EventFiltersListPageState): ExceptionListItemSchema[] => {
-  return (isLoadedResourceState(state.listPage) && state.listPage.data.data) || [];
+type StoreState = Immutable<EventFiltersListPageState>;
+type EventFiltersSelector<T> = (state: StoreState) => T;
+
+export const getCurrentListPageState: EventFiltersSelector<StoreState['listPage']> = (state) => {
+  return state.listPage;
 };
 
-export const getListApiSuccessResponse = (
-  state: EventFiltersListPageState
-): FoundExceptionListItemSchema | undefined => {
-  return (isLoadedResourceState(state.listPage) && state.listPage.data) || undefined;
-};
+export const getListItems: EventFiltersSelector<
+  Immutable<ExceptionListItemSchema[]>
+> = createSelector(getCurrentListPageState, (listPageState) => {
+  return (isLoadedResourceState(listPageState) && listPageState.data.data) || [];
+});
 
-export const getListPagination: (state: EventFiltersListPageState) => Pagination = createSelector(
+export const getListApiSuccessResponse: EventFiltersSelector<
+  Immutable<FoundExceptionListItemSchema> | undefined
+> = createSelector(getCurrentListPageState, (listPageState) => {
+  return (isLoadedResourceState(listPageState) && listPageState.data) || undefined;
+});
+
+export const getListPagination: EventFiltersSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
   // memoized via `reselect` until the API response changes
   (response) => {
     return {
       totalItemCount: response?.total ?? 0,
-      pageSize: response?.per_page ?? MANAGEMENT_PAGE_SIZE_OPTIONS[0],
+      pageSize: response?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
       pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       pageIndex: (response?.page ?? 1) - 1,
     };
   }
 );
 
-export const getListFetchError = (state: EventFiltersListPageState): ServerApiError | undefined => {
-  return (isFailedResourceState(state.listPage) && state.listPage.error) || undefined;
+export const listDataNeedsRefresh: EventFiltersSelector<boolean> = (state) => {
+  // FIXME:PT implement this selector
+  return true;
 };
 
-export const getListIsLoading = (state: EventFiltersListPageState): boolean => {
-  return isLoadedResourceState(state.listPage);
+export const getListFetchError: EventFiltersSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentListPageState, (listPageState) => {
+  return (isFailedResourceState(listPageState) && listPageState.error) || undefined;
+});
+
+export const getListIsLoading: EventFiltersSelector<boolean> = (state) => {
+  return isLoadingResourceState(state.listPage);
 };
 
 export const getFormEntry = (
