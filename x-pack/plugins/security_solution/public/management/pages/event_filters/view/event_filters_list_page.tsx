@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -13,7 +13,6 @@ import { useEventFiltersSelector } from './hooks';
 import { getListIsLoading, getListItems, getListPagination } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
-import { EventFiltersEmptyState } from './components/event_list_empty_state';
 
 const TemporaryComponent = memo(() => {
   return <div>{Math.random()}</div>;
@@ -34,12 +33,7 @@ export const EventFiltersListPage = memo(() => {
 
   const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(() => {}, []);
 
-  const noItemsMessage = useMemo(() => {
-    if (pagination.totalItemCount === 0) {
-      // FIXME: plugin in create process
-      return <EventFiltersEmptyState onAdd={() => {}} isAddDisabled={false} />;
-    }
-  }, [pagination.totalItemCount]);
+  const noItemsMessage = <>{'No Items. Placeholder until create dialog is merged'}</>;
 
   return (
     <AdministrationListPage
