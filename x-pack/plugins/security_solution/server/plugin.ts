@@ -217,9 +217,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     router.get({ path: '/security-myfakepath', validate: false }, async (context, req, res) => {
       try {
         const racClient = await context.ruleRegistry?.getRacClient();
-        const thing = await racClient?.get({ id: 'hello world', owner: 'securitySolution' });
-        console.error('THE THING EXISTS??', JSON.stringify(thing.body, null, 2));
-        return res.ok({ body: { success: true } });
+        const thing = await racClient?.get({ id: 'hello world', owner: SERVER_APP_ID });
+        console.error('hits?', JSON.stringify(thing.body.hits.hits, null, 2));
+        return res.ok({ body: { success: true, thing: thing.body.hits.hits } });
       } catch (err) {
         console.error('monitoring route threw an error');
         console.error(err);
@@ -236,12 +236,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       order: 1100,
       app: [...securitySubPlugins, 'kibana'],
       category: DEFAULT_APP_CATEGORIES.security,
-      rac: ['securitySolution'],
+      rac: [SERVER_APP_ID],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
           rac: {
-            all: ['securitySolution'],
+            all: [SERVER_APP_ID],
           },
           savedObject: {
             all: [
@@ -275,11 +275,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: ruleTypes,
-      rac: ['securitySolution'],
+      rac: [SERVER_APP_ID],
       privileges: {
         all: {
           rac: {
-            all: ['securitySolution'],
+            all: [SERVER_APP_ID],
           },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
@@ -320,7 +320,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             read: ruleTypes,
           },
           rac: {
-            all: ['securitySolution'],
+            all: [SERVER_APP_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
