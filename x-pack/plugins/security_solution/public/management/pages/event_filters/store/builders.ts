@@ -15,4 +15,5 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasItemsError: false,
     submissionResourceState: { type: 'UninitialisedResourceState' },
   },
+  listPage: { type: 'UninitialisedResourceState' },
 });

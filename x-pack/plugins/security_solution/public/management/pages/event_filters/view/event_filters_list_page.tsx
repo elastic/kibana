@@ -5,12 +5,42 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { useEventFiltersSelector } from './hooks';
+import { getListIsLoading, getListItems, getListPagination } from '../store/selector';
+import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
+import { ExceptionListItemSchema } from '../../../../../../lists/common';
+import { EventFiltersEmptyState } from './components/event_list_empty_state';
+
+const TemporaryComponent = memo(() => {
+  return <div>{Math.random()}</div>;
+});
+TemporaryComponent.displayName = 'TemporaryComponent';
+type EventListPaginatedContent = PaginatedContentProps<
+  ExceptionListItemSchema,
+  typeof TemporaryComponent
+>;
 
 export const EventFiltersListPage = memo(() => {
+  // const dispatch = useDispatch<Dispatch<AppAction>>();
+  const listItems = useEventFiltersSelector(getListItems);
+  const pagination = useEventFiltersSelector(getListPagination);
+  const isLoading = useEventFiltersSelector(getListIsLoading);
+
+  const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(() => {}, []);
+
+  const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(() => {}, []);
+
+  const noItemsMessage = useMemo(() => {
+    if (pagination.totalItemCount === 0) {
+      // FIXME: plugin in create process
+      return <EventFiltersEmptyState onAdd={() => {}} isAddDisabled={false} />;
+    }
+  }, [pagination.totalItemCount]);
+
   return (
     <AdministrationListPage
       beta={false}
@@ -26,7 +56,15 @@ export const EventFiltersListPage = memo(() => {
           'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
       })}
     >
-      {/* <PaginatedContent />*/}
+      <PaginatedContent
+        items={listItems}
+        ItemComponent={TemporaryComponent}
+        itemComponentProps={handleItemComponentProps}
+        onChange={handlePaginatedContentChange}
+        loading={isLoading}
+        pagination={pagination}
+        noItemsMessage={noItemsMessage}
+      />
     </AdministrationListPage>
   );
 });
