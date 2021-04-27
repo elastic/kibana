@@ -32,7 +32,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       ).getVisibleText();
       expect(actualIndexPatternSwitchLinkText).to.eql(
         expectedDestinationIndex,
-        `Destination index should be ${expectedDestinationIndex}, got ${expectedDestinationIndex}`
+        `Destination index should be ${expectedDestinationIndex}, got ${actualIndexPatternSwitchLinkText}`
       );
 
       await testSubjects.existOrFail('discoverNoResults');
