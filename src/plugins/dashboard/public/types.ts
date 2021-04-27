@@ -125,7 +125,7 @@ export interface DashboardBuildContext {
 export interface DashboardOptions {
   hidePanelTitles: boolean;
   useMargins: boolean;
-  syncColors?: boolean;
+  syncColors: boolean;
 }
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
