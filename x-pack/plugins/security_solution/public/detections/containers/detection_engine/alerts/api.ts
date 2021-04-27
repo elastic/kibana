@@ -21,7 +21,7 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
-  HostIsolationIndex,
+  HostIsolationResponse,
 } from './types';
 
 /**
@@ -118,8 +118,8 @@ export const createHostIsolation = async ({
 }: {
   agentId: string;
   comment?: string;
-}): Promise<HostIsolationIndex> =>
-  KibanaServices.get().http.fetch<HostIsolationIndex>(HOST_ISOLATION_CREATE_API, {
+}): Promise<HostIsolationResponse> =>
+  KibanaServices.get().http.fetch<HostIsolationResponse>(HOST_ISOLATION_CREATE_API, {
     method: 'POST',
     body: JSON.stringify({
       agent_ids: [agentId],

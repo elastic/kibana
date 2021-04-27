@@ -48,7 +48,7 @@ export interface AlertsIndex {
   index_mapping_outdated: boolean;
 }
 
-export interface HostIsolationIndex {
+export interface HostIsolationResponse {
   action: string;
 }
 
