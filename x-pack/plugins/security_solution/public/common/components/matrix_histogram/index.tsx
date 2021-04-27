@@ -40,6 +40,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     id: string;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
+    onoError?: () => void;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
     setAbsoluteRangeDatePickerTarget?: InputsModelId;
@@ -77,6 +78,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   isPtrIncluded,
   legendPosition,
   mapping,
+  onError,
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
@@ -139,6 +141,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     filterQuery,
     histogramType,
     indexNames,
+    onError,
     startDate,
     stackByField: selectedStackByOption.value,
     isPtrIncluded,

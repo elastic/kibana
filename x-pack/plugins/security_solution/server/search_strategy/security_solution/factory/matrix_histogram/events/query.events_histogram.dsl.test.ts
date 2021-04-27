@@ -99,6 +99,7 @@ describe('buildEventsHistogramQuery', () => {
           bool: {
             filter: [
               { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
+              { exists: { field: mockOptions.stackByField } },
               {
                 range: {
                   '@timestamp': {

@@ -26,6 +26,11 @@ export const buildEventsHistogramQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
+      exists: {
+        field: stackByField,
+      },
+    },
+    {
       range: {
         '@timestamp': {
           gte: from,

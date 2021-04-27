@@ -52,6 +52,7 @@ export const useMatrixHistogram = ({
   histogramType,
   indexNames,
   isPtrIncluded,
+  onError,
   stackByField,
   startDate,
   threshold,
