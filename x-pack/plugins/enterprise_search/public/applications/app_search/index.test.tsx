@@ -16,7 +16,7 @@ import { Redirect, useRouteMatch } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { SideNav, SideNavLink } from '../shared/layout';
 
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
@@ -76,21 +76,13 @@ describe('AppSearchConfigured', () => {
     wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
   });
 
-  it('renders with layout', () => {
-    expect(wrapper.find(Layout)).toHaveLength(0);
+  it('renders', () => {
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   it('mounts AppLogic with passed initial data props', () => {
     expect(AppLogic).toHaveBeenCalledWith(DEFAULT_INITIAL_APP_DATA);
-  });
-
-  it('passes readOnlyMode state', () => {
-    setMockValues({ myRole: {}, readOnlyMode: true });
-    rerender(wrapper);
-
-    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
