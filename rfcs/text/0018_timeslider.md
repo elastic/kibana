@@ -39,7 +39,7 @@ A first phase includes arbitrary time-range selection and stepped navigation.
 
 ![Timeslider version 1](../images/timeslider/v1.png)
 
-This is the focus of this RFC
+This is the focus of this RFC.
 
 ### 2.2.2 Data distribution preview with histogram and playback
 
@@ -47,7 +47,7 @@ A second phase adds a date histogram showing the preview of the data.
 
 ![Timeslider version 2](../images/timeslider/v2.png)
 
-Details on this compinent are beyond the scope of this RFC.
+Details on this phase 2 are beyond the scope of this RFC.
 
 ## 2.2 The timeslider UX React-component (phase 1)
 
@@ -136,12 +136,12 @@ We believe that a Timeslider-embeddable would be a better vehicle to
 ---
 **NOTE**
 
-The below is very Maps-specific, although similar challenges would be present in other applications as well. 
+The below section is Maps-specific, although similar challenges would be present in other applications as well. 
 
 Some of these considerations will not generalize to all of Kibana.
 
-The main ways that Maps distinguishes if from other use-cases:
- - the majority of the data-fetching for layers in Maps depends on the scale and extent. Ie. different data is requested based on the current zoom-level and current-extent of the Map, even if they share the same time, query and filter-state.
+The main ways that Maps distinguishes in data-fetch from other use-cases:
+ - the majority of the data-fetching for layers in Maps depends on the scale and extent. Ie. different data is requested based on the current zoom-level and current-extent of the Map. So for example, even if two views share the same time, query and filter-state, if their extent and/or scale is different, their requests to ES will be different.
  - For some layer-types, Maps will fetch individual documents, rather than the result of an aggregation.
 
 ---
@@ -150,39 +150,42 @@ Data-fetch for timeslider should be responsive and smooth. A user dragging the s
  
 In addition, we expect the timeslider will be used a lot for "comparisons", ie. a user stepping back&forth between timeslices.
 
-For this reason, we want to flexibly:
+For this reason, apps using a timeslider (such as Maps) should:
 - pre-fetch data when possible
 - cache data when possible
 
-Every layer will therefore implement time-based datasets based on _two_ pieces of state
+For Maps specifically, when introducing timeslider, layers will therefore need to implement time-based data fetch based on _two_ pieces of state
 - the entire `timeRange` (aka. the global Kibana timerange)
 - the selected `timeslice` (aka. the timeslice chosen by the user in the timeslider)
 
-##### 2.3.3.1 Pre-fetching individual documents for faster display
+##### 2.3.3.1 Pre-fetching individual documents and masking of data
 
-todo
+ES-document layers (which display individual documents) can prefetch all documents within the entire `TimeRange`, when the total number of docs is belwo some threshold. In the context of Maps, this is the default index-search-size of the index.
+
+Maps can then just mask data on the map based on some filter-expression. The evaluation of this filter-expression is done by mapbox-gl is fast because it occurs on the GPU. There is immediate visual feedback to the user, without a network roundtrip to update the data.
 
 ##### 2.3.3.2 Caching of aggregated searches
 
 
-
-
+Aggregated data can be cached on the client, so toggling between timeslices can avoid a round-trip data-fetch. 
+The main technique here is for layers to use the mvt to request data. Tiled-based data can be cached client-side
 
 We do not propose pre-fetching of aggregated data in this initial phase of the Maps timeslider effort. There is a couple reasons:
-- Based on the intended user-interactions for timeslider, where the end-user can flexible select a time-range, it would be 
-- Maps already strains the maximum bucket sizes.
+- Based on the intended user-interactions for timeslider, where the end-user can flexible select a time-range, it would be really hard to determine how to determine which timeslices to aggregate up front.
+- Maps already strains the maximum bucket sizes we can retrieve from Elasticsearch. Cluster/grid-layers often push up to 10k or more buckets, and terms-aggregations for choropleth maps also is going up to 10k buckets. Prefetching this for timeslices (x10 timeslices) would easily exceed the default bucket limit.
 
 
 ##### 2.3.3.3 Decouple data-fetch from UX-effort
 
-The implementation will decouple any data-fetch considerations from the actual timeslider-UX work.
+Apart from refactoring the data-fetch for layers to now use two pieces of time-based state, the implementation will decouple any data-fetch considerations from the actual timeslider-UX work.
  
-The idea is that dial in data-fetch optimizations can be dialed into Maps in a parallel work-thread. These optimizations would not only affect timeslider users, but support all interaction patterns that require smooth data-updates (e.g. panning back&forth to two locations, toggling back&forth between two filters, ...)
+The idea is that dial in data-fetch optimizations can be dialed into Maps in a parallel work-thread, not necessarily dependent on any changes or additions to the UX. Any optimizations would not only affect timeslider users, but support all interaction patterns that require smooth data-updates (e.g. panning back&forth to two locations, toggling back&forth between two filters, ...)
 
 The main effort to support efficient data-fetch in a maps-context is move use `.mvt` as the default data format. This is a stack-wide effort in collaboration with the Elasticsearch team, which will add `.mvt` as a core response format to Elasticsearch.
 
-- More efficient pre-fetching of data. `.mvt` are a more efficient dfata
-- Efficient client-side caching of 
+Growing the use of `mvt` will help with both pre-fetching and client-side caching:
+- mvt is a binary format which allows more data can be packed inside a response, as compared to Json. Multiple tiles are patched together, so there is a form of parallelization as well. This provided thus a pathway to increase the number of features that can be time-filtered.
+- the tiled-layout of the data-fetching allows tiles to be cached on the client. This cache can be the implict browser disc-cache, or the transient in-mem cache of mapbox-gl. mvt thus provides a pathway for smooth toggling back&forth between timeslices.
 
 
 ##### 2.3.3.4 timeslider and async search
@@ -191,8 +194,7 @@ It is unclear on what the practical uses for async-search would be in the contex
 
 timeslider is a highly interactive control that require immediate visual feedback. We also do not intend to activate timeslider in Maps on a Dashboard (see above).
 
-End-users who are interested in creating a dashboard with a long-running background search will need to manipulate the _global Kibana time picker_ to select the time-range, and will not be able to use the timeslider to do so.
-
+End-users who need to view a dashboard with a long-running background search will need to manipulate the _global Kibana time picker_ to select the time-range, and will not be able to use the timeslider to do so.
 
 # Unresolved questions
 
@@ -200,12 +202,14 @@ End-users who are interested in creating a dashboard with a long-running backgro
 
 This below is a forward looking section. It's a proposal of how the Timeslider-UX can be exposed as an Embeddable.
 
-The main 
-- a
-- specifically, the 
+This would require the extraction of the timeslider-UX component to a separate plugin. As outlined above, this migration should be fairly straightforward, a "copy paste".
 
-It requires the new
-`TimeSlice`
+It would require the creation of a `TimesliderEmbeddable` which wraps this UX-component.
+
+It would also require the introduction of a new piece of embeddable-state, `TimeSlice`, which can be controlled by the `TimesliderEmbeddable`.
+
+It is important to keep Timeslice and Timerange separate, as individual apps and other embeddables will have different mechanism to efficiently fetch data and respond to changes in timeslice.
+
 
 
 
