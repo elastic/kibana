@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line
-/// <reference types="cypress" />
-
 declare namespace Cypress {
   interface Chainable {
-    loginAs(username: string, password: string): void;
+    loginAs(params: { username: string; password: string }): void;
   }
 }

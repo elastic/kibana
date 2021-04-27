@@ -9,7 +9,7 @@ import { esArchiverLoad } from '../tasks/es_archiver';
 
 describe('Home page', () => {
   before(() => {
-    cy.loginAs('apm_read_user', 'changeme');
+    cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
   });
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     // esArchiverLoad('apm_8.0.0');

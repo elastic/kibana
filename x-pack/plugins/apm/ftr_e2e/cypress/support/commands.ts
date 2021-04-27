@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-// eslint-disable-next-line
-/// <reference types="cypress" />
-
-Cypress.Commands.add('loginAs', (username: string, password: string) => {
-  cy.log(`Logging in as ${username}`);
-  const kibanaUrl = Cypress.env('KIBANA_URL');
-  cy.request({
-    method: 'POST',
-    url: `${kibanaUrl}/internal/security/login`,
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: `${kibanaUrl}/login`,
-      params: { username, password },
-    },
-    headers: {
-      'kbn-xsrf': 'e2e_test',
-    },
-  });
-});
+Cypress.Commands.add(
+  'loginAs',
+  ({ username, password }: { username: string; password: string }) => {
+    cy.log(`Logging in as ${username}`);
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.request({
+      method: 'POST',
+      url: `${kibanaUrl}/internal/security/login`,
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: `${kibanaUrl}/login`,
+        params: { username, password },
+      },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+    });
+  }
+);

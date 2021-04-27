@@ -1,0 +1,31 @@
+// {
+//   "extends": "../../../../tsconfig.base.json",
+//   "exclude": [
+//     "tmp"
+//   ],
+//   "include": [
+//     "./cypress/support/index.d.ts",
+//     "./**/*"
+//   ],
+//   "compilerOptions": {
+//     "types": [
+//       "cypress",
+//       "node"
+//     ]
+//   }
+// }
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "es5",
+      "dom"
+    ],
+    "types": [
+      "cypress"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}
