@@ -3,6 +3,7 @@
 - Champion: (usually you, person who writes and updates the draft and incorporates feedback)
 - Main reviewer: (somebody familiar with the subject matter, who has committed to provide timely and detailed reviews for this RFC)
 - Owner team: (team who will own this feature, if it is accepted)
+- Stakeholders: (people or groups who may be affected by the proposed changes)
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
