@@ -86,31 +86,30 @@ export class EphemeralTaskLifecycle {
       .subscribe(async (e) => {
         let overallCapacity = this.getCapacity();
         const capacityByType = new Map<string, number>();
+        const queue = [...this.ephemeralTaskQueue].filter((ephemeralTask) => {
+          if (overallCapacity > 0) {
+            if (!capacityByType.has(ephemeralTask.taskType)) {
+              capacityByType.set(ephemeralTask.taskType, this.getCapacity(ephemeralTask.taskType));
+            }
+            if (capacityByType.get(ephemeralTask.taskType)! > 0) {
+              overallCapacity--;
+              capacityByType.set(
+                ephemeralTask.taskType,
+                capacityByType.get(ephemeralTask.taskType)! - 1
+              );
+              return true;
+            }
+          }
+        });
+        const runQueue = this.config.ephemeral_tasks.enabled
+          ? queue.slice(0, this.config.ephemeral_tasks.max_per_cycle)
+          : queue;
         this.pool
           .run(
-            [...this.ephemeralTaskQueue]
-              .filter((ephemeralTask) => {
-                if (overallCapacity > 0) {
-                  if (!capacityByType.has(ephemeralTask.taskType)) {
-                    capacityByType.set(
-                      ephemeralTask.taskType,
-                      this.getCapacity(ephemeralTask.taskType)
-                    );
-                  }
-                  if (capacityByType.get(ephemeralTask.taskType)! > 0) {
-                    overallCapacity--;
-                    capacityByType.set(
-                      ephemeralTask.taskType,
-                      capacityByType.get(ephemeralTask.taskType)! - 1
-                    );
-                    return true;
-                  }
-                }
-              })
-              .map((taskToRun) => {
-                this.ephemeralTaskQueue.delete(taskToRun);
-                return this.createTaskRunnerForTask(taskToRun);
-              })
+            runQueue.map((taskToRun) => {
+              this.ephemeralTaskQueue.delete(taskToRun);
+              return this.createTaskRunnerForTask(taskToRun);
+            })
           )
           .then((successTaskPoolRunResult) => {
             this.logger.debug(

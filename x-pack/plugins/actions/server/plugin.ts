@@ -158,7 +158,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
-  private ephemeralRunNow?: (task: EphemeralTask, options?: Record<string, unknown>) => void;
+  private ephemeralRunNow?: (tasks: EphemeralTask[], options?: Record<string, unknown>) => void;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get('actions');

@@ -70,7 +70,7 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
-  ephemeralRunNow: (task: EphemeralTask) => void;
+  ephemeralRunNow: (tasks: EphemeralTask[]) => void;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -92,7 +92,7 @@ export class ActionsClient {
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
   private readonly ephemeralRunNow: (
-    task: EphemeralTask,
+    tasks: EphemeralTask[],
     options?: Record<string, unknown>
   ) => void;
   private readonly auditLogger?: AuditLogger;
@@ -493,8 +493,8 @@ export class ActionsClient {
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async executeEphemeralTask(
-    task: EphemeralTask,
+  public async executeEphemeralTasks(
+    tasks: EphemeralTask[],
     options?: Record<string, unknown>
   ): Promise<void> {
     // const { source } = options;
@@ -504,7 +504,7 @@ export class ActionsClient {
     // ) {
     //   await this.authorization.ensureAuthorized('execute');
     // }
-    return this.ephemeralRunNow(task, options);
+    return this.ephemeralRunNow(tasks, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {

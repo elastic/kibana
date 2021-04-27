@@ -20,6 +20,7 @@ import {
   RawAlert,
 } from '../types';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { EphemeralTask } from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
@@ -143,7 +144,9 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
-    const promises = [];
+    // const promises = [];
+
+    const tasks: EphemeralTask[] = [];
 
     for (const action of actions) {
       if (
@@ -157,50 +160,50 @@ export function createExecutionHandler<
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      const promise = new Promise(async (resolve, reject) => {
-        try {
-          await actionsClient.executeEphemeralTask({
-            taskType: `actions:${action.actionTypeId}`,
-            params: {
-              ...action.params,
-              taskParams: {
-                actionId: action.id,
-                apiKey,
-              },
-            },
-            state: {},
-          });
 
-          const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
-          const event: IEvent = {
-            event: { action: EVENT_LOG_ACTIONS.executeAction },
-            kibana: {
-              alerting: {
-                instance_id: alertInstanceId,
-                action_group_id: actionGroup,
-                action_subgroup: actionSubgroup,
-              },
-              saved_objects: [
-                { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-                { type: 'action', id: action.id, ...namespace },
-              ],
-            },
-          };
-
-          event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-            actionSubgroup
-              ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-              : `actionGroup: '${actionGroup}'`
-          } action: ${actionLabel}`;
-          eventLogger.logEvent(event);
-          resolve(true);
-        } catch (err) {
-          return reject(err);
-        }
+      // const promise = new Promise(async (resolve, reject) => {
+      //   try {
+      tasks.push({
+        taskType: `actions:${action.actionTypeId}`,
+        params: {
+          ...action.params,
+          taskParams: {
+            actionId: action.id,
+            apiKey,
+          },
+        },
+        state: {},
       });
-      promises.push(promise);
+
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+      const event: IEvent = {
+        event: { action: EVENT_LOG_ACTIONS.executeAction },
+        kibana: {
+          alerting: {
+            instance_id: alertInstanceId,
+            action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
+          },
+          saved_objects: [
+            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+            { type: 'action', id: action.id, ...namespace },
+          ],
+        },
+      };
+
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
+      eventLogger.logEvent(event);
+      // resolve(true);
+      // } catch (err) {
+      //   return reject(err);
+      // }
+      // });
+      // promises.push(promise);
       // await actionsClient.executeEphemeralTask({
       //   taskType: `actions:${action.actionTypeId}`,
       //   params: {
@@ -214,6 +217,9 @@ export function createExecutionHandler<
       // });
     }
 
-    await Promise.all(promises);
+    const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+    await actionsClient.executeEphemeralTasks(tasks);
+
+    // await Promise.all(promises);
   };
 }
