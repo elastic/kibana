@@ -37,7 +37,10 @@ import {
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import {
+  checkActionFormActionTypeEnabled,
+  checkConnectorHasMissingSecrets,
+} from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
@@ -201,6 +204,8 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const checkMissingSecretsResult = checkConnectorHasMissingSecrets(actionConnector);
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <Fragment>
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
@@ -290,7 +295,9 @@ export const ActionTypeForm = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
-      {ParamsFieldsComponent ? (
+      {!checkMissingSecretsResult.isEnabled ? (
+        checkMissingSecretsResult.messageCard
+      ) : ParamsFieldsComponent ? (
         <EuiErrorBoundary>
           <Suspense fallback={null}>
             <ParamsFieldsComponent
