@@ -5,45 +5,44 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  getExistingIndexNames,
-  getExistingIndexPatternNames,
-  checkIndexPatternValid,
-  createNewIndexAndPattern,
-} from './utils/indexing_service';
+import { createNewIndexAndPattern } from './utils/indexing_service';
+import { getFileUpload } from '../../../kibana_services';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
-import { IndexEntryDescription } from './index_entry_description';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
+import { IndexNameFormProps } from '../../../../../file_upload/public';
 
 export const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 interface State {
   indexName: string;
   indexError: string;
-  currentIndexNames: string[];
   indexingTriggered: boolean;
   indexPatternId: string;
+  indexNameFormComponent: React.ComponentType<IndexNameFormProps> | null;
 }
 
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
   state: State = {
     indexName: '',
     indexError: '',
-    currentIndexNames: [],
     indexingTriggered: false,
     indexPatternId: '',
+    indexNameFormComponent: null,
   };
 
-  private _isMounted = false;
+  componentDidMount() {
+    this._loadIndexNameFormComponent();
+  }
 
-  async componentDidMount() {
-    this._isMounted = true;
-    this._loadcurrentIndexNames();
+  async _loadIndexNameFormComponent() {
+    this.setState({
+      indexNameFormComponent: await getFileUpload().getIndexNameFormComponent(),
+    });
   }
 
   async componentDidUpdate() {
@@ -58,10 +57,6 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       await this._createNewIndex();
       this.props.advanceToNextStep();
     }
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
   }
 
   _createNewIndex = async () => {
@@ -79,45 +74,11 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     this.props.previewLayers([layerDescriptor]);
   };
 
-  _loadcurrentIndexNames = async () => {
-    const indexNameList = await getExistingIndexNames();
-    const indexPatternList = await getExistingIndexPatternNames();
-    if (this._isMounted) {
-      this.setState({
-        currentIndexNames: [...indexNameList, ...indexPatternList],
-      });
-    }
-  };
-
-  _onIndexNameChange = () => {
-    if (this.state.currentIndexNames.includes(this.state.indexName)) {
-      this.setState({
-        indexError: i18n.translate(
-          'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
-          {
-            defaultMessage: 'Index name already exists.',
-          }
-        ),
-      });
-    } else if (!checkIndexPatternValid(this.state.indexName)) {
-      this.setState({
-        indexError: i18n.translate(
-          'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
-          {
-            defaultMessage: 'Index name contains illegal characters.',
-          }
-        ),
-      });
-    } else {
-      this.setState({ indexError: '' });
-    }
-  };
-
-  _onIndexNameChangeEvent = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ indexName: event.target.value }, this._onIndexNameChange);
-  };
-
   render() {
+    if (!this.state.indexNameFormComponent) {
+      return null;
+    }
+    const IndexNameForm = this.state.indexNameFormComponent;
     return (
       <EuiPanel>
         <>
@@ -142,31 +103,16 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
               </Fragment>
             }
           />
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.maps.layers.newVectorLayerWizard.indexSettings.enterIndexNameLabel',
-              {
-                defaultMessage: 'Index name',
-              }
-            )}
-            isInvalid={!!this.state.indexError}
-            error={!!this.state.indexError ? [this.state.indexError] : []}
-          >
-            <EuiFieldText
-              data-test-subj="fileUploadIndexNameInput"
-              value={this.state.indexName}
-              onChange={this._onIndexNameChangeEvent}
-              isInvalid={!!this.state.indexError}
-              aria-label={i18n.translate(
-                'xpack.maps.layers.newVectorLayerWizard.indexNameReqField',
-                {
-                  defaultMessage: 'Index name, required field',
-                }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          {IndexEntryDescription()}
+          <IndexNameForm
+            indexName={this.state.indexName}
+            indexNameError={this.state.indexError}
+            onIndexNameChange={(indexName, indexError) => {
+              this.setState({
+                indexName,
+                ...(indexError ? { indexError } : { indexError: '' }),
+              });
+            }}
+          />
         </>
       </EuiPanel>
     );
