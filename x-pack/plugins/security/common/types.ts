@@ -9,7 +9,9 @@ import type { AuthenticationProvider } from './model';
 
 export interface SessionInfo {
   now: number;
+  idleTimeout: number | null;
   idleTimeoutExpiration: number | null;
+  lifespan: number | null;
   lifespanExpiration: number | null;
   provider: AuthenticationProvider;
 }

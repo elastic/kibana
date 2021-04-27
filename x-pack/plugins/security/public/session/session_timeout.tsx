@@ -6,51 +6,83 @@
  */
 
 import { BroadcastChannel } from 'broadcast-channel';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { skip, tap, throttleTime } from 'rxjs/operators';
 
-import type { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
+import type {
+  HttpFetchOptionsWithPath,
+  HttpResponse,
+  HttpSetup,
+  NotificationsSetup,
+  Toast,
+} from 'src/core/public';
 
 import type { SessionInfo } from '../../common/types';
+import { createSessionExpirationToast } from './session_expiration_toast';
 import type { ISessionExpired } from './session_expired';
-import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
-import { createToast as createLifespanToast } from './session_lifespan_warning';
 
 /**
- * Client session timeout is decreased by this number so that Kibana server
- * can still access session content during logout request to properly clean
- * user session up (invalidate access tokens, redirect to logout portal etc.).
+ * Client session timeout is decreased by this number so that Kibana server can still access session
+ * content during logout request to properly clean user session up (invalidate access tokens,
+ * redirect to logout portal etc.).
  */
-const GRACE_PERIOD_MS = 5 * 1000;
+export const GRACE_PERIOD_MS = 5 * 1000;
 
 /**
  * Duration we'll normally display the warning toast
  */
-const WARNING_MS = 60 * 1000;
+export const WARNING_MS = 5 * 60 * 1000;
 
 /**
- * Current session info is checked this number of milliseconds before the
- * warning toast shows. This will prevent the toast from being shown if the
- * session has already been extended.
+ * Current session info is checked this number of milliseconds before the warning toast shows. This
+ * will prevent the toast from being shown if the session has already been extended.
  */
-const SESSION_CHECK_MS = 1000;
+export const SESSION_CHECK_MS = 1000;
+
+/**
+ * Session will be extended at most once this number of milliseconds while user activity is detected.
+ */
+export const EXTENSION_THROTTLE_MS = 60 * 1000;
 
 /**
  * Route to get session info and extend session expiration
  */
-const SESSION_ROUTE = '/internal/security/session';
+export const SESSION_ROUTE = '/internal/security/session';
 
 export interface ISessionTimeout {
   start(): void;
   stop(): void;
-  extend(url: string): void;
 }
 
-export class SessionTimeout implements ISessionTimeout {
-  private channel?: BroadcastChannel<SessionInfo>;
-  private sessionInfo?: SessionInfo;
-  private fetchTimer?: number;
-  private warningTimer?: number;
-  private expirationTimer?: number;
+export interface SessionState {
+  lastExtensionTime: number;
+  expiresInMs: number;
+  canBeExtendedByMs: number;
+}
+
+export class SessionTimeout {
+  private channel?: BroadcastChannel<SessionState>;
+
+  private isVisible = document.visibilityState !== 'hidden';
+  private isExtending = false;
+
+  private sessionState$ = new BehaviorSubject<SessionState>({
+    lastExtensionTime: 0,
+    expiresInMs: 0,
+    canBeExtendedByMs: 0,
+  });
+  private subscription?: Subscription;
+
   private warningToast?: Toast;
+
+  private stopActivityMonitor?: Function;
+  private stopVisibilityMonitor?: Function;
+  private removeHttpInterceptor?: Function;
+
+  private stopRefreshTimer?: Function;
+  private stopWarningTimer?: Function;
+  private stopLogoutTimer?: Function;
 
   constructor(
     private notifications: NotificationsSetup,
@@ -59,186 +91,282 @@ export class SessionTimeout implements ISessionTimeout {
     private tenant: string
   ) {}
 
-  start() {
+  public start() {
     if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 
-    // subscribe to a broadcast channel for session timeout messages
-    // this allows us to synchronize the UX across tabs and avoid repetitive API calls
-    const name = `${this.tenant}/session_timeout`;
-    this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
-    this.channel.onmessage = this.handleSessionInfoAndResetTimers;
+    this.subscription = this.sessionState$
+      .pipe(skip(1), throttleTime(1000), tap(this.toggleEventHandlers))
+      .subscribe(this.resetTimers);
 
-    // Triggers an initial call to the endpoint to get session info;
-    // when that returns, it will set the timeout
-    return this.fetchSessionInfoAndResetTimers();
+    return this.fetchSessionInfo();
   }
 
-  stop() {
-    if (this.channel) {
-      this.channel.close();
-    }
-    this.cleanup();
+  public stop() {
+    const disabled = {
+      lastExtensionTime: 0,
+      expiresInMs: 0,
+      canBeExtendedByMs: 0,
+    };
+    this.toggleEventHandlers(disabled);
+    this.resetTimers(disabled);
+    this.subscription?.unsubscribe();
   }
 
   /**
-   * When the user makes an authenticated, non-system API call, this function is used to check
-   * and see if the session has been extended.
-   * @param url The URL that was called
+   * Event handler that receives session information from other browser tabs.
    */
-  extend(url: string) {
-    // avoid an additional API calls when the user clicks the button on the session idle timeout
-    if (url.endsWith(SESSION_ROUTE)) {
+  private handleChannelMessage = (message: SessionState) => {
+    this.sessionState$.next(message);
+  };
+
+  /**
+   * HTTP request interceptor which ensures that API calls extend the session only if tab is
+   * visible.
+   */
+  private handleHttpRequest = (fetchOptions: HttpFetchOptionsWithPath) => {
+    // Ignore requests to external URLs
+    if (!fetchOptions.path.startsWith('/')) {
       return;
     }
 
-    const { isLifespanTimeout } = this.getTimeout();
-    if (this.warningToast && !isLifespanTimeout) {
-      // the idle timeout warning is currently showing and the user has clicked elsewhere on the page;
-      // make a new call to get the latest session info
-      return this.fetchSessionInfoAndResetTimers();
+    if (fetchOptions.asSystemRequest === undefined) {
+      return { asSystemRequest: !this.isVisible };
     }
-  }
+  };
 
   /**
-   * Fetch latest session information from the server, and optionally attempt to extend
-   * the session expiration.
+   * HTTP response interceptor which allows us to prevent extending the session manually if it has
+   * already been extended as part of an API call.
    */
-  private fetchSessionInfoAndResetTimers = async (extend = false) => {
-    const method = extend ? 'POST' : 'GET';
-    try {
-      const result = await this.http.fetch(SESSION_ROUTE, { method, asSystemRequest: !extend });
+  private handleHttpResponse = (httpResponse: HttpResponse) => {
+    // Ignore session endpoint which is already handled by fetch callback
+    if (httpResponse.fetchOptions.path === SESSION_ROUTE) {
+      return;
+    }
 
-      this.handleSessionInfoAndResetTimers(result);
-
-      // share this updated session info with any other tabs to sync the UX
-      if (this.channel) {
-        this.channel.postMessage(result);
+    // Only mark session as extended if not a system request
+    if (httpResponse.fetchOptions.asSystemRequest === false) {
+      const currentState = this.sessionState$.getValue();
+      if (currentState.canBeExtendedByMs) {
+        const nextState = {
+          ...currentState,
+          lastExtensionTime: Date.now(),
+          expiresInMs: currentState.canBeExtendedByMs,
+        };
+        this.sessionState$.next(nextState);
+        if (this.channel) {
+          this.channel.postMessage(nextState);
+        }
       }
-    } catch (err) {
-      // do nothing; 401 errors will be caught by the http interceptor
     }
   };
 
   /**
-   * Processes latest session information, and resets timers based on it. These timers are
-   * used to trigger an HTTP call for updated session information, to show a timeout
-   * warning, and to log the user out when their session is expired.
+   * Event handler that tracks user activity and extends the session if needed.
    */
-  private handleSessionInfoAndResetTimers = (sessionInfo: SessionInfo) => {
-    this.sessionInfo = sessionInfo;
-    // save the provider name in session storage, we will need it when we log out
-    const key = `${this.tenant}/session_provider`;
-    sessionStorage.setItem(key, sessionInfo.provider.name);
-
-    const { timeout, isLifespanTimeout } = this.getTimeout();
-    if (timeout == null) {
-      return;
-    }
-
-    this.cleanup();
-
-    // set timers
-    const timeoutVal = timeout - WARNING_MS - GRACE_PERIOD_MS - SESSION_CHECK_MS;
-    if (timeoutVal > 0 && !isLifespanTimeout) {
-      // we should check for the latest session info before the warning displays
-      this.startTimer(
-        (timeoutID) => (this.fetchTimer = timeoutID),
-        this.fetchSessionInfoAndResetTimers,
-        timeoutVal
-      );
-    }
-
-    this.startTimer(
-      (timeoutID) => (this.warningTimer = timeoutID),
-      this.showWarning,
-      Math.max(timeout - WARNING_MS - GRACE_PERIOD_MS, 0)
-    );
-
-    this.startTimer(
-      (timeoutID) => (this.expirationTimer = timeoutID),
-      () => this.sessionExpired.logout(),
-      Math.max(timeout - GRACE_PERIOD_MS, 0)
-    );
-  };
-
-  private cleanup = () => {
-    if (this.fetchTimer) {
-      window.clearTimeout(this.fetchTimer);
-    }
-    if (this.warningTimer) {
-      window.clearTimeout(this.warningTimer);
-    }
-    if (this.expirationTimer) {
-      window.clearTimeout(this.expirationTimer);
-    }
-    if (this.warningToast) {
-      this.notifications.toasts.remove(this.warningToast);
-      this.warningToast = undefined;
+  private handleUserActivity = () => {
+    if (this.shouldExtend()) {
+      this.fetchSessionInfo(true);
     }
   };
 
   /**
-   * Get the amount of time until the session times out, and whether or not the
-   * session has reached it maximum lifespan.
+   * Event handler that tracks page visibility.
    */
-  private getTimeout = (): { timeout: number | null; isLifespanTimeout: boolean } => {
-    let timeout = null;
-    let isLifespanTimeout = false;
-    if (this.sessionInfo) {
-      const { now, idleTimeoutExpiration, lifespanExpiration } = this.sessionInfo;
+  private handleVisibilityChange = (isVisible: boolean) => {
+    this.isVisible = isVisible;
+    if (isVisible) {
+      this.handleUserActivity();
+    }
+  };
+
+  public resetTimers = ({ expiresInMs }: SessionState) => {
+    console.log('resetTimers', expiresInMs);
+
+    this.stopRefreshTimer = this.stopRefreshTimer?.();
+    this.stopWarningTimer = this.stopWarningTimer?.();
+    this.stopLogoutTimer = this.stopLogoutTimer?.();
+
+    if (expiresInMs) {
+      const refreshTimeout = expiresInMs - GRACE_PERIOD_MS - WARNING_MS - SESSION_CHECK_MS;
+      const warningTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS - WARNING_MS, 0);
+      const logoutTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS, 0);
+
+      // 1. Refresh session info before displaying any warnings
+      if (refreshTimeout > 0) {
+        this.stopRefreshTimer = startTimer(this.fetchSessionInfo, refreshTimeout);
+      }
+
+      // 2. Afterwards, show warning toast
+      if (warningTimeout > 0) {
+        this.hideWarning();
+      }
+      this.stopWarningTimer = startTimer(this.showWarning, warningTimeout);
+
+      // 3. Finally, logout
+      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(), logoutTimeout);
+    }
+  };
+
+  private toggleEventHandlers = ({ expiresInMs, canBeExtendedByMs }: SessionState) => {
+    if (expiresInMs) {
+      if (!this.channel) {
+        // Subscribe to a broadcast channel for session timeout messages.
+        // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
+        this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`, {
+          webWorkerSupport: false,
+        });
+        this.channel.onmessage = this.handleChannelMessage;
+      }
+
+      // Monitor activity if session can be extended. No need to do it if idleTimeout hasn't been
+      // configured.
+      if (canBeExtendedByMs && !this.stopActivityMonitor) {
+        this.stopActivityMonitor = monitorActivity(this.handleUserActivity);
+      }
+
+      // Intercept HTTP requests if session can expire
+      if (!this.removeHttpInterceptor) {
+        this.removeHttpInterceptor = this.http.intercept({
+          request: this.handleHttpRequest,
+          response: this.handleHttpResponse,
+        });
+      }
+
+      if (!this.stopVisibilityMonitor) {
+        this.stopVisibilityMonitor = monitorVisibility(this.handleVisibilityChange);
+      }
+    } else {
+      if (this.channel) {
+        this.channel.close();
+        this.channel = undefined;
+      }
+      this.removeHttpInterceptor = this.removeHttpInterceptor?.();
+      this.stopActivityMonitor = this.stopActivityMonitor?.();
+      this.stopVisibilityMonitor = this.stopVisibilityMonitor?.();
+    }
+  };
+
+  private shouldExtend() {
+    const { lastExtensionTime } = this.sessionState$.getValue();
+    return (
+      !this.isExtending &&
+      !this.warningToast &&
+      Date.now() > lastExtensionTime + EXTENSION_THROTTLE_MS
+    );
+  }
+
+  private fetchSessionInfo = async (extend = false) => {
+    console.log('>>> fetchSessionInfo', extend);
+    this.isExtending = true;
+    try {
+      const sessionInfo = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
+        method: extend ? 'POST' : 'GET',
+        asSystemRequest: !extend,
+      });
+
+      let expiresInMs = 0;
+      let canBeExtendedByMs = sessionInfo.idleTimeout || 0;
+
+      const { now, idleTimeoutExpiration, lifespanExpiration } = sessionInfo;
       if (idleTimeoutExpiration) {
-        timeout = idleTimeoutExpiration - now;
+        expiresInMs = idleTimeoutExpiration - now;
       }
       if (
         lifespanExpiration &&
         (idleTimeoutExpiration === null || lifespanExpiration <= idleTimeoutExpiration)
       ) {
-        timeout = lifespanExpiration - now;
-        isLifespanTimeout = true;
+        expiresInMs = lifespanExpiration - now;
+        canBeExtendedByMs = 0;
       }
+
+      const nextState = {
+        lastExtensionTime: Date.now(),
+        expiresInMs,
+        canBeExtendedByMs,
+      };
+      this.sessionState$.next(nextState);
+      if (this.channel) {
+        this.channel.postMessage(nextState);
+      }
+    } catch (error) {
+      // ignore
+    } finally {
+      this.isExtending = false;
     }
-    return { timeout, isLifespanTimeout };
   };
 
-  /**
-   * Show a warning toast depending on the session state.
-   */
   private showWarning = () => {
-    const { timeout, isLifespanTimeout } = this.getTimeout();
-    const toastLifeTimeMs = Math.min(timeout! - GRACE_PERIOD_MS, WARNING_MS);
-    let toast: ToastInput;
-    if (!isLifespanTimeout) {
-      const refresh = () => this.fetchSessionInfoAndResetTimers(true);
-      toast = createIdleTimeoutToast(toastLifeTimeMs, refresh);
-    } else {
-      toast = createLifespanToast(toastLifeTimeMs);
+    if (!this.warningToast) {
+      const onExtend = () => this.fetchSessionInfo(true);
+      const onClose = () => (this.warningToast = undefined);
+      const toast = createSessionExpirationToast(this.sessionState$, onExtend, onClose);
+      this.warningToast = this.notifications.toasts.add(toast);
     }
-    this.warningToast = this.notifications.toasts.add(toast);
   };
 
-  /**
-   * Starts a timer that uses a native `setTimeout` under the hood. When `timeout` is larger
-   * than the maximum supported one then method calls itself recursively as many times as needed.
-   * @param updater Method that is supposed to update a reference to a native timer ID that can be
-   * used with native `clearTimeout`. It's essential for the larger timeouts when `setTimeout` is
-   * called multiple times and timer ID changes.
-   * when timer ID changes
-   * @param callback A function to be executed after the timer expires.
-   * @param timeout The time, in milliseconds the timer should wait before the specified function is
-   * executed.
-   */
-  private startTimer(updater: (timeoutID: number) => void, callback: () => void, timeout: number) {
-    // Max timeout is the largest possible 32-bit signed integer or 2,147,483,647 or 0x7fffffff.
-    const maxTimeout = 0x7fffffff;
-    updater(
-      timeout > maxTimeout
-        ? window.setTimeout(
-            () => this.startTimer(updater, callback, timeout - maxTimeout),
-            maxTimeout
-          )
-        : window.setTimeout(callback, timeout)
-    );
+  private hideWarning = () => {
+    if (this.warningToast) {
+      this.notifications.toasts.remove(this.warningToast);
+      this.warningToast = undefined;
+    }
+  };
+}
+
+/**
+ * Starts a timer that uses a native `setTimeout` under the hood. When `timeout` is larger
+ * than the maximum supported one then method calls itself recursively as many times as needed.
+ * @param callback A function to be executed after the timer expires.
+ * @param timeout The time, in milliseconds the timer should wait before the specified function is
+ * executed.
+ * @returns Function to stop the timer.
+ */
+function startTimer(callback: () => void, timeout: number, updater?: (id: NodeJS.Timeout) => void) {
+  // Max timeout is the largest possible 32-bit signed integer or 2,147,483,647 or 0x7fffffff.
+  const maxTimeout = 0x7fffffff;
+  let timeoutID: NodeJS.Timeout;
+  updater = updater ?? ((id: NodeJS.Timeout) => (timeoutID = id));
+
+  updater(
+    timeout > maxTimeout
+      ? setTimeout(() => startTimer(callback, timeout - maxTimeout, updater), maxTimeout)
+      : setTimeout(callback, timeout)
+  );
+
+  return () => clearTimeout(timeoutID);
+}
+
+/**
+ * Adds event handlers to the window object that track user activity.
+ * @param callback Function to be executed when user activity is detected.
+ * @returns Function to remove all event handlers from window.
+ */
+function monitorActivity(callback: () => void) {
+  const eventTypes = ['mousemove', 'mousedown', 'wheel', 'touchstart', 'keydown', 'resize'];
+  for (const eventType of eventTypes) {
+    window.addEventListener(eventType, callback);
   }
+
+  return () => {
+    for (const eventType of eventTypes) {
+      window.removeEventListener(eventType, callback);
+    }
+  };
+}
+
+/**
+ * Adds event handlers to the document object that track page visility.
+ * @param callback Function to be executed when page visibility changes.
+ * @returns Function to remove all event handlers from document.
+ */
+function monitorVisibility(callback: (isVisible: boolean) => void) {
+  const handleVisibilityChange = () => callback(document.visibilityState !== 'hidden');
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
 }
