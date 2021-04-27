@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-let _esBase: string;
+import type { DocLinksStart } from 'src/core/public';
 
-export const init = (esBase: string) => {
-  _esBase = esBase;
+let autoFollowPatternUrl: string;
+let followerIndexUrl: string;
+let byteUnitsUrl: string;
+let timeUnitsUrl: string;
+
+export const init = (docLinks: DocLinksStart) => {
+  autoFollowPatternUrl = `${docLinks.links.apis.createAutoFollowPattern}`;
+  followerIndexUrl = `${docLinks.links.apis.createFollower}`;
+  byteUnitsUrl = `${docLinks.links.apis.byteSizeUnits}`;
+  timeUnitsUrl = `${docLinks.links.apis.timeUnits}`;
 };
 
-export const getAutoFollowPatternUrl = (): string => `${_esBase}/ccr-put-auto-follow-pattern.html`;
-export const getFollowerIndexUrl = (): string => `${_esBase}/ccr-put-follow.html`;
-export const getByteUnitsUrl = (): string => `${_esBase}/common-options.html#byte-units`;
-export const getTimeUnitsUrl = (): string => `${_esBase}/common-options.html#time-units`;
+export const getAutoFollowPatternUrl = (): string => autoFollowPatternUrl;
+export const getFollowerIndexUrl = (): string => followerIndexUrl;
+export const getByteUnitsUrl = (): string => byteUnitsUrl;
+export const getTimeUnitsUrl = (): string => timeUnitsUrl;
