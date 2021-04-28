@@ -7,12 +7,17 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { EngineLogic } from '../engine';
+
 interface InitialFieldValues {
   validFields: string[];
   validSortFields: string[];
   validFacetFields: string[];
 }
 interface SearchUIActions {
+  initializeData(): void;
   dataInitialized(initialFieldValues: InitialFieldValues): InitialFieldValues;
   titleFieldChanged(titleField: string): { titleField: string };
   URLFieldChanged(urlField: string): { urlField: string };
@@ -36,6 +41,7 @@ interface SearchUIValues {
 export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>({
   path: ['enterprise_search', 'app_search', 'search_ui_logic'],
   actions: () => ({
+    initializeData: () => true,
     dataInitialized: (initialFieldValues) => initialFieldValues,
     titleFieldChanged: (titleField) => ({ titleField }),
     URLFieldChanged: (urlField) => ({ urlField }),
@@ -58,5 +64,21 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     facetFields: [[], { facetFieldsChanged: (_, { facetFields }) => facetFields }],
     sortFields: [[], { sortFieldsChanged: (_, { sortFields }) => sortFields }],
     activeField: ['', { activeFieldChanged: (_, { activeField }) => activeField }],
+  }),
+  listeners: ({ actions }) => ({
+    initializeData: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const url = `/api/app_search/engines/${engineName}/reference_application/field_config`;
+
+      try {
+        const initialFieldValues = await http.get(url);
+
+        actions.dataInitialized(initialFieldValues);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
   }),
 });

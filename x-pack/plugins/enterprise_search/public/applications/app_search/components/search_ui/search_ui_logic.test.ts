@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 
 import { mockEngineValues } from '../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { SearchUILogic } from './';
 
 describe('SearchUILogic', () => {
+  const { mount } = new LogicMounter(SearchUILogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const DEFAULT_VALUES = {
     dataLoading: true,
     validFields: [],
@@ -23,8 +29,6 @@ describe('SearchUILogic', () => {
     sortFields: [],
     activeField: '',
   };
-
-  const { mount } = new LogicMounter(SearchUILogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,56 +67,90 @@ describe('SearchUILogic', () => {
 
     describe('titleFieldChanged', () => {
       it('sets the titleField value', () => {
-        expectAction(() => {
-          SearchUILogic.actions.titleFieldChanged('foo');
-        }).toChangeState({
-          from: { titleField: '' },
-          to: { titleField: 'foo' },
+        mount({ titleField: '' });
+        SearchUILogic.actions.titleFieldChanged('foo');
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          titleField: 'foo',
         });
       });
     });
 
     describe('URLFieldChanged', () => {
       it('sets the urlField value', () => {
-        expectAction(() => {
-          SearchUILogic.actions.URLFieldChanged('foo');
-        }).toChangeState({
-          from: { urlField: '' },
-          to: { urlField: 'foo' },
+        mount({ urlField: '' });
+        SearchUILogic.actions.URLFieldChanged('foo');
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          urlField: 'foo',
         });
       });
     });
 
     describe('facetFieldsChanged', () => {
       it('sets the facetFields value', () => {
-        expectAction(() => {
-          SearchUILogic.actions.facetFieldsChanged(['foo']);
-        }).toChangeState({
-          from: { facetFields: [] },
-          to: { facetFields: ['foo'] },
+        mount({ facetFields: [] });
+        SearchUILogic.actions.facetFieldsChanged(['foo']);
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          facetFields: ['foo'],
         });
       });
     });
 
     describe('sortFieldsChanged', () => {
       it('sets the sortFields value', () => {
-        expectAction(() => {
-          SearchUILogic.actions.sortFieldsChanged(['foo']);
-        }).toChangeState({
-          from: { sortFields: [] },
-          to: { sortFields: ['foo'] },
+        mount({ sortFields: [] });
+        SearchUILogic.actions.sortFieldsChanged(['foo']);
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          sortFields: ['foo'],
         });
       });
     });
 
     describe('activeFieldChanged', () => {
       it('sets the activeField value', () => {
-        expectAction(() => {
-          SearchUILogic.actions.activeFieldChanged('foo');
-        }).toChangeState({
-          from: { activeField: '' },
-          to: { activeField: 'foo' },
+        mount({ activeField: '' });
+        SearchUILogic.actions.activeFieldChanged('foo');
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          activeField: 'foo',
         });
+      });
+    });
+  });
+
+  describe('listeners', () => {
+    const MOCK_RESPONSE = {
+      validFields: ['test'],
+      validSortFields: ['test'],
+      validFacetFields: ['test'],
+    };
+
+    describe('initializeData', () => {
+      it('should make an API call and set state based on the response', async () => {
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
+        mount();
+        jest.spyOn(SearchUILogic.actions, 'dataInitialized');
+
+        SearchUILogic.actions.initializeData();
+        await nextTick();
+
+        expect(http.get).toHaveBeenCalledWith(
+          '/api/app_search/engines/engine1/reference_application/field_config'
+        );
+        expect(SearchUILogic.actions.dataInitialized).toHaveBeenCalledWith(MOCK_RESPONSE);
+      });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        SearchUILogic.actions.initializeData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
