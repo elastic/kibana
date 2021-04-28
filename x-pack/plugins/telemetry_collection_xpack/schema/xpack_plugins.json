@@ -5328,25 +5328,25 @@
             "cluster": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user opened the Elasticsearch cluster deprecations page"
+                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
               }
             },
             "indices": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user opened the Elasticsearch index deprecations page"
+                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
               }
             },
             "overview": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user opened the overview page"
+                "description": "Number of times a user viewed the Overview page."
               }
             },
             "kibana": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user opened the Kibana deprecations page"
+                "description": "Number of times a user viewed the list of Kibana deprecations"
               }
             }
           }
