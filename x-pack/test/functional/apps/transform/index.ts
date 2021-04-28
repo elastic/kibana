@@ -66,6 +66,7 @@ export interface BaseTransformTestData {
   transformDescription: string;
   expected: any;
   destinationIndex: string;
+  discoverAdjustSuperDatePicker: boolean;
 }
 
 export interface PivotTransformTestData extends BaseTransformTestData {

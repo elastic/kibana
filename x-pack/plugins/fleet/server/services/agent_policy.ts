@@ -14,9 +14,10 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
-  DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
@@ -37,7 +38,6 @@ import {
   dataTypes,
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
-  DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -106,39 +106,6 @@ class AgentPolicyService {
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
-  public async ensureDefaultAgentPolicy(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
-  ): Promise<{
-    created: boolean;
-    policy: AgentPolicy;
-  }> {
-    const searchParams = {
-      searchFields: ['is_default'],
-      search: 'true',
-    };
-    return await this.ensureAgentPolicy(soClient, esClient, DEFAULT_AGENT_POLICY, searchParams);
-  }
-
-  public async ensureDefaultFleetServerAgentPolicy(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
-  ): Promise<{
-    created: boolean;
-    policy: AgentPolicy;
-  }> {
-    const searchParams = {
-      searchFields: ['is_default_fleet_server'],
-      search: 'true',
-    };
-    return await this.ensureAgentPolicy(
-      soClient,
-      esClient,
-      DEFAULT_FLEET_SERVER_AGENT_POLICY,
-      searchParams
-    );
-  }
-
   public async ensurePreconfiguredAgentPolicy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -148,22 +115,36 @@ class AgentPolicyService {
     policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
-    const preconfigurationId = String(id);
-    const searchParams = {
-      searchFields: ['preconfiguration_id'],
-      search: escapeSearchQueryPhrase(preconfigurationId),
-    };
-
-    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+    const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    const newAgentPolicy = {
+    const newAgentPolicy: NewAgentPolicy = {
       ...newAgentPolicyDefaults,
       ...preconfiguredAgentPolicy,
-      preconfiguration_id: preconfigurationId,
-    } as NewAgentPolicy;
+      is_preconfigured: true,
+    };
+
+    let searchParams;
+    if (id) {
+      searchParams = {
+        id: String(id),
+      };
+    } else if (
+      preconfiguredAgentPolicy.is_default ||
+      preconfiguredAgentPolicy.is_default_fleet_server
+    ) {
+      searchParams = {
+        searchFields: [
+          preconfiguredAgentPolicy.is_default_fleet_server
+            ? 'is_default_fleet_server'
+            : 'is_default',
+        ],
+        search: 'true',
+      };
+    }
+    if (!searchParams) throw new Error('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
@@ -172,14 +153,41 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams: {
-      searchFields: string[];
-      search: string;
-    }
+    searchParams:
+      | { id: string }
+      | {
+          searchFields: string[];
+          search: string;
+        }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
+    // For preconfigured policies with a specified ID
+    if ('id' in searchParams) {
+      try {
+        const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
+          AGENT_POLICY_SAVED_OBJECT_TYPE,
+          searchParams.id
+        );
+        return {
+          created: false,
+          policy: {
+            id: agentPolicy.id,
+            ...agentPolicy.attributes,
+          },
+        };
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          return {
+            created: true,
+            policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+          };
+        } else throw e;
+      }
+    }
+
+    // For default policies without a specified ID
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       ...searchParams,
@@ -554,11 +562,12 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    const {
-      policy: { id: defaultAgentPolicyId },
-    } = await this.ensureDefaultAgentPolicy(soClient, esClient);
-    if (id === defaultAgentPolicyId) {
+    if (agentPolicy.is_default) {
       throw new Error('The default agent policy cannot be deleted');
+    }
+
+    if (agentPolicy.is_default_fleet_server) {
+      throw new Error('The default fleet server agent policy cannot be deleted');
     }
 
     const { total } = await getAgentsByKuery(esClient, {
@@ -583,9 +592,9 @@ class AgentPolicyService {
       );
     }
 
-    if (agentPolicy.preconfiguration_id) {
+    if (agentPolicy.is_preconfigured) {
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
-        preconfiguration_id: String(agentPolicy.preconfiguration_id),
+        id: String(id),
       });
     }
 
