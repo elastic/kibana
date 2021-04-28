@@ -14,7 +14,7 @@ import {
 
 import { EventFiltersHttpService, EventFiltersService } from '../service';
 
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState } from '../types';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 import { CreateExceptionListItemSchema, transformNewItemOutput } from '../../../../shared_imports';
 

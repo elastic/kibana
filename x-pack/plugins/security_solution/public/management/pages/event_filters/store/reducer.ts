@@ -22,7 +22,7 @@ import {
   EventFiltersCreateSuccess,
 } from './action';
 
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState } from '../types';
 import { initialEventFiltersPageState } from './builders';
 
 type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;

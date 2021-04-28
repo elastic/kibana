@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({

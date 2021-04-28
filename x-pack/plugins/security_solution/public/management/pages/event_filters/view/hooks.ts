@@ -20,7 +20,7 @@ import { useToasts } from '../../../../common/lib/kibana';
 import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState } from '../types';
 import { getEventFiltersListPath } from '../../../common/routing';
 
 import {

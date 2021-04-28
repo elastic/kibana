@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {

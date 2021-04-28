@@ -9,7 +9,7 @@ import { initialEventFiltersPageState } from './builders';
 import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
-import { EventFiltersPageLocation } from '../state';
+import { EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 const initialState = initialEventFiltersPageState();
