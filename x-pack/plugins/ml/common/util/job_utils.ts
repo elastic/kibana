@@ -101,6 +101,15 @@ export function hasValidComposite(buckets: estypes.AggregationContainer) {
   return true;
 }
 
+/**
+ * Validates if aggregation type is currently not supported
+ * e.g. any other type other than 'date_histogram' or 'aggregations'
+ * @param buckets
+ */
+export function isUnsupportedAggType(aggType: string) {
+  return aggType !== 'date_histogram' && aggType !== 'aggs' && aggType !== 'aggregations';
+}
+
 // Returns a flag to indicate whether the source data can be plotted in a time
 // series chart for the specified detector.
 export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
@@ -143,13 +152,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       if (isPopulatedObject(aggs)) {
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
-          // We current don't support aggregations that reference other nested aggregations
-          // e.g. aggregation that reference another nested term aggregation
-          if (
-            Object.keys(aggs[aggBucketsName]).some(
-              (key) => key !== 'date_histogram' && key !== 'aggs' && key !== 'aggregations'
-            )
-          ) {
+          if (Object.keys(aggs[aggBucketsName]).some(isUnsupportedAggType)) {
             return false;
           }
           // if fieldName is an aggregated field under nested terms using bucket_script
