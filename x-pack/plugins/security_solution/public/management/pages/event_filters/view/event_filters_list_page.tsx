@@ -9,7 +9,8 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
-import { AdministrationListPage } from '../../../components/administration_list_page';
+import styled from 'styled-components';
+import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
 import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
 import { EventFiltersFlyout } from './components/flyout';
@@ -22,23 +23,26 @@ import {
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
-import { Immutable, MaybeImmutable } from '../../../../../common/endpoint/types';
+import { Immutable } from '../../../../../common/endpoint/types';
 import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
 
-const TemporaryComponent = memo<{ item: MaybeImmutable<ExceptionListItemSchema> }>(({ item }) => {
-  return (
-    <div style={{ margin: '1em 0', border: '1px solid lightgrey' }}>{JSON.stringify(item)}</div>
-  );
-});
-TemporaryComponent.displayName = 'TemporaryComponent';
-
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
   typeof ExceptionItem
 >;
+
+const AdministrationListPage = styled(_AdministrationListPage)`
+  .event-filter-container > * {
+    margin-bottom: ${({ theme }) => theme.eui.spacerSizes.l};
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`;
 
 export const EventFiltersListPage = memo(() => {
   const listItems = useEventFiltersSelector(getListItems);
@@ -137,6 +141,7 @@ export const EventFiltersListPage = memo(() => {
         error={fetchError?.message}
         loading={isLoading}
         pagination={pagination}
+        contentClassName="event-filter-container"
         noItemsMessage={
           <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
         }
