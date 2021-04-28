@@ -5,7 +5,7 @@ symbol_level = 0
 is_component_build = false
 enable_nacl = false
 
-# Out build will fail without this
+# Our build will fail without this
 headless_use_embedded_resources = false
 
 # Please, consult @elastic/kibana-security before changing/removing this option.
