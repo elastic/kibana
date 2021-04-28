@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton } from '@elastic/eui';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
@@ -84,6 +85,22 @@ export const EventFiltersListPage = memo(() => {
           'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch. Event ' +
           'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
       })}
+      actions={
+        listItems.length && (
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            isDisabled={showFlyout}
+            onClick={handleAddButtonClick}
+            data-test-subj="eventFiltersPageAddButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.pageAddButton"
+              defaultMessage="Add Endpoint Event Filter"
+            />
+          </EuiButton>
+        )
+      }
     >
       {showFlyout && <EventFiltersFlyout onCancel={handleCancelButtonClick} />}
 
