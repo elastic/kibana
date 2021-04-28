@@ -137,7 +137,7 @@ export function renderAnnotations(
   };
 
   const onAnnotationClick = (d: Annotation) => {
-    // clear a possible existing annotation set up for editing before setting the new one.
+    // clear a possible existing annotation previously set for editing before setting the new one.
     // this needs to be done explicitly here because a new annotation created using the brush tool
     // could still be present in the chart.
     annotationUpdatesService.setValue(null);
