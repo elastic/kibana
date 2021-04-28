@@ -4,6 +4,7 @@ filegroup(
   name = "build",
   srcs = [
       "//packages/elastic-datemath:build",
+      "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-apm-config-loader:build",
       "//packages/kbn-apm-utils:build",
