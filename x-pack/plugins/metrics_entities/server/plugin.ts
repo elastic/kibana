@@ -27,9 +27,11 @@ import { deleteTransforms } from './routes/delete_transforms';
 export class MetricsEntitiesPlugin
   implements Plugin<MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart> {
   private readonly logger: Logger;
+  private kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup): MetricsEntitiesPluginSetup {
@@ -50,6 +52,7 @@ export class MetricsEntitiesPlugin
       getMetricsEntitiesClient: (esClient): MetricsEntitiesClient =>
         new MetricsEntitiesClient({
           esClient,
+          kibanaVersion: this.kibanaVersion,
           logger: this.logger,
         }),
     };
@@ -77,6 +80,7 @@ export class MetricsEntitiesPlugin
         getMetricsEntitiesClient: (): MetricsEntitiesClient =>
           new MetricsEntitiesClient({
             esClient,
+            kibanaVersion: this.kibanaVersion,
             logger: this.logger,
           }),
       };

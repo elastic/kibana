@@ -21,6 +21,7 @@ interface PostTransformsOptions {
   frequency: string;
   indices: string[];
   docsPerSecond: number | null;
+  kibanaVersion: string;
   maxPageSearchSize: number;
   query: object;
   prefix: string;
@@ -40,6 +41,7 @@ export const postTransforms = async ({
   frequency,
   indices,
   docsPerSecond,
+  kibanaVersion,
   maxPageSearchSize,
   modules,
   prefix,
@@ -51,7 +53,7 @@ export const postTransforms = async ({
     const mappings = installableMappings[moduleName];
     const transforms = installableTransforms[moduleName];
 
-    await installMappings({ esClient, logger, mappings, prefix, suffix });
+    await installMappings({ esClient, kibanaVersion, logger, mappings, prefix, suffix });
     await installTransforms({
       autoStart,
       docsPerSecond,

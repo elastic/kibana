@@ -10,8 +10,6 @@
 set -e
 ./check_env_variables.sh
 
-# TODO: Make example work
-
 # Example: ./get_transforms.sh
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

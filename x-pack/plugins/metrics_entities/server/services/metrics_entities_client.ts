@@ -21,9 +21,12 @@ import { deleteTransforms } from './delete_transforms';
 export class MetricsEntitiesClient {
   private readonly esClient: ElasticsearchClient;
   private readonly logger: Logger;
-  constructor({ esClient, logger }: ConstructorOptions) {
+  private readonly kibanaVersion: string;
+
+  constructor({ esClient, logger, kibanaVersion }: ConstructorOptions) {
     this.esClient = esClient;
     this.logger = logger;
+    this.kibanaVersion = kibanaVersion;
   }
 
   // TODO: Type the unknown to be stronger
@@ -44,13 +47,14 @@ export class MetricsEntitiesClient {
     query,
     sync,
   }: PostTransformsOptions): Promise<void> => {
-    const { esClient, logger } = this;
+    const { esClient, logger, kibanaVersion } = this;
     return postTransforms({
       autoStart,
       docsPerSecond,
       esClient,
       frequency,
       indices,
+      kibanaVersion,
       logger,
       maxPageSearchSize,
       modules,

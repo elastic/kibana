@@ -13,6 +13,7 @@ import { ModuleNames } from '../modules';
 export interface ConstructorOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
+  kibanaVersion: string;
 }
 
 export interface PostTransformsOptions {

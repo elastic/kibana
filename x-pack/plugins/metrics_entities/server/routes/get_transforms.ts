@@ -11,13 +11,8 @@ import { METRICS_ENTITIES_TRANSFORMS } from '../../common/constants';
 import { getMetricsEntitiesClient } from './utils/get_metrics_entities_client';
 
 /**
- * Returns a transform given a parameter of:
- *   namespace - The namespace for the transform group (default if not given is empty string)
- *   key - A key which will be hashed as part of the string (default if not given is empty string)
- *   type - Either metric or entities (default is metrics)
- *   module - The module name of the transforms
- * Example:
- *   GET /api/metrics_entities/transforms?namespace=myNamespace&key=myKey
+ * Returns all transforms from all modules
+ * TODO: Add support for specific modules
  * @param router The router to get the collection of transforms
  */
 export const getTransforms = (router: IRouter): void => {
