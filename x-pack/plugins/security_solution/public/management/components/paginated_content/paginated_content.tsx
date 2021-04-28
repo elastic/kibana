@@ -80,6 +80,7 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
@@ -198,7 +199,7 @@ export const PaginatedContent = memo(
 
     return (
       <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
-        {loading && <EuiProgress size="xs" color="primary" />}
+        {loading && <EuiProgress size="xs" color="primary" position="absolute" />}
 
         <div className="body" data-test-subj={getTestId('body')}>
           <div className={`body-content ${contentClassName}`}>
