@@ -982,7 +982,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `reserved privilege assigned with a base privilege returns populated kibana section with _transform_error set to ['kibana']`,
+      `reserved privilege assigned with a base privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
         apiResponse: async () => ({
           first_role: {

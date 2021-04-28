@@ -83,7 +83,7 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
-  // if there is a reserved privilege assigned to the non-wildcard application, we won't transform these
+  // if there is a reserved privilege assigned to an application other than the reserved privileges application wildcard, we won't transform these.
   if (
     roleKibanaApplications.some(
       (entry) =>
@@ -163,8 +163,8 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   const allResources = roleKibanaApplications
     .filter((entry) => entry.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD)
-    .map((entry) => entry.resources)
-    .flat();
+    .flatMap((entry) => entry.resources);
+
   // if we have improperly formatted resource entries, we can't transform these
   if (
     allResources.some(
