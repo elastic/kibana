@@ -113,7 +113,8 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
     {
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
-      width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+      initialWidth:
+        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
     }
   );
 
