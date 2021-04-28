@@ -748,7 +748,7 @@
     "lmdb-store": "^1.2.4",
     "load-grunt-config": "^3.0.1",
     "marge": "^1.0.1",
-    "micromatch": "3.1.10",
+    "micromatch": "4.0.4",
     "minimist": "^1.2.5",
     "mkdirp": "0.5.1",
     "mocha": "^8.2.1",
