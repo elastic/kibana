@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
@@ -51,57 +51,66 @@ export interface AuthenticatedElasticUser {
 }
 
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
+  const isMounted = useRef(false);
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
 
   const [, dispatchToaster] = useStateToaster();
 
   const { security } = useKibana().services;
 
-  const fetchUser = useCallback(() => {
-    let didCancel = false;
-    const fetchData = async () => {
-      try {
-        if (security != null) {
-          const response = await security.authc.getCurrentUser();
-          if (!didCancel) {
-            setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+  const fetchUser = useCallback(
+    () => {
+      let didCancel = false;
+      const fetchData = async () => {
+        try {
+          if (security != null) {
+            const response = await security.authc.getCurrentUser();
+            if (!isMounted.current) return;
+            if (!didCancel) {
+              setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+            }
+          } else {
+            setUser({
+              username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
+                defaultMessage: 'Unknown',
+              }),
+              email: '',
+              fullName: '',
+              roles: [],
+              enabled: false,
+              authenticationRealm: { name: '', type: '' },
+              lookupRealm: { name: '', type: '' },
+              authenticationProvider: '',
+            });
           }
-        } else {
-          setUser({
-            username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
-              defaultMessage: 'Unknown',
-            }),
-            email: '',
-            fullName: '',
-            roles: [],
-            enabled: false,
-            authenticationRealm: { name: '', type: '' },
-            lookupRealm: { name: '', type: '' },
-            authenticationProvider: '',
-          });
+        } catch (error) {
+          if (!didCancel) {
+            errorToToaster({
+              title: i18n.translate('xpack.securitySolution.getCurrentUser.Error', {
+                defaultMessage: 'Error getting user',
+              }),
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+            setUser(null);
+          }
         }
-      } catch (error) {
-        if (!didCancel) {
-          errorToToaster({
-            title: i18n.translate('xpack.securitySolution.getCurrentUser.Error', {
-              defaultMessage: 'Error getting user',
-            }),
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-          setUser(null);
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-    };
+      };
+      fetchData();
+      return () => {
+        didCancel = true;
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [security]);
+    [security]
+  );
 
   useEffect(() => {
+    isMounted.current = true;
     fetchUser();
+    return () => {
+      isMounted.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return user;
