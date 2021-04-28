@@ -219,7 +219,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
         return i18n.translate(
           'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
           {
-            defaultMessage: 'Disabled because the datafeed contains unsupported composite sources.',
+            defaultMessage: 'the datafeed contains unsupported composite sources',
           }
         );
       }
@@ -235,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'Disabled because not a viewable time series job.',
+      defaultMessage: 'not a viewable time series job',
     });
   }
 }
