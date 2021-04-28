@@ -48,13 +48,16 @@ export function handleLocalStats<ClusterStats extends estypes.ClusterStatsRespon
   };
 }
 
+/**
+ * The payload structure as composed by the OSS telemetry collection mechanism.
+ */
 export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
- * @param {Array} cluster uuids array of cluster uuid's
- * @param {Object} config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
- * @param {Object} StatsCollectionContext contains logger and version (string)
+ * @param clustersDetails uuids array of cluster uuid's
+ * @param config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
+ * @param context contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
   clustersDetails,
