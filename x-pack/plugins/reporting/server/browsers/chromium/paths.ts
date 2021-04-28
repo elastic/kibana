@@ -19,7 +19,7 @@ interface ChromiumPackageInfo {
 }
 
 // We download some zip files from the official chromium download location
-// And some custom onces from a Kibana team GCS bucket
+// And some custom ones from a Kibana team GCS bucket
 enum BaseUrl {
   common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots', // see https://www.chromium.org/getting-involved/download-chromium
   custom = 'https://storage.googleapis.com/headless_shell', // A Google Cloud Storage bucket the Kibana team project ID
