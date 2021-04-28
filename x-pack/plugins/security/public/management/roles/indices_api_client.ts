@@ -8,12 +8,25 @@
 import type { HttpStart } from 'src/core/public';
 
 export class IndicesAPIClient {
+  private fieldCache = new Map<string, string[]>();
+
   constructor(private readonly http: HttpStart) {}
 
-  async getFields(query: string) {
-    return (
-      (await this.http.get<string[]>(`/internal/security/fields/${encodeURIComponent(query)}`)) ||
-      []
-    );
+  async getFields(pattern: string): Promise<string[]> {
+    if (pattern && !this.fieldCache.has(pattern)) {
+      try {
+        const fields = await this.http.get<string[] | undefined>(
+          `/internal/security/fields/${encodeURIComponent(pattern)}`
+        );
+        if (Array.isArray(fields) && fields.length > 0) {
+          this.fieldCache.set(pattern, fields);
+        }
+      } catch (e) {
+        // ignore
+        // this does not power a critical feature, and silently failing is the best we can do right now.
+      }
+    }
+
+    return this.fieldCache.get(pattern) ?? [];
   }
 }

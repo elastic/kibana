@@ -23,8 +23,8 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
         } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
           index: request.params.query,
           fields: '*',
-          allow_no_indices: false,
           include_defaults: true,
+          allow_no_indices: true,
           filter_path: '*.mappings.*.mapping.*.type',
         });
 
@@ -63,7 +63,17 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
           body: fields,
         });
       } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
+        const customResponse = wrapIntoCustomErrorResponse(error);
+
+        // Elasticsearch returns a 404 response if the provided pattern does not match any indices.
+        // In this scenario, we want to instead treat this as an empty response.
+        if (customResponse.statusCode === 404) {
+          return response.ok({
+            body: [],
+          });
+        }
+
+        return response.customError(customResponse);
       }
     }
   );
