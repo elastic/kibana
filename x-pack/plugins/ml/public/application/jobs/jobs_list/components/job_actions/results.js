@@ -39,6 +39,15 @@ export function ResultLinks({ jobs }) {
   const singleMetricDisabledMessage =
     jobs.length === 1 && jobs[0].isNotSingleMetricViewerJobMessage;
 
+  const singleMetricDisabledMessageText =
+    singleMetricDisabledMessage !== undefined
+      ? i18n.translate('xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText', {
+          defaultMessage: 'Disabled because {reason}.',
+          values: {
+            reason: singleMetricDisabledMessage,
+          },
+        })
+      : undefined;
   const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
@@ -52,7 +61,7 @@ export function ResultLinks({ jobs }) {
       {singleMetricVisible && (
         <EuiToolTip
           position="bottom"
-          content={singleMetricDisabledMessage ?? openJobsInSingleMetricViewerText}
+          content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
         >
           <EuiButtonIcon
             href={timeSeriesExplorerLink}

@@ -393,7 +393,7 @@ export class TimeSeriesExplorer extends React.Component {
 
   displayErrorToastMessages = (error, errorMsg) => {
     if (this.props.toastNotificationService) {
-      this.props.toastNotificationService.displayErrorToast(error, errorMsg);
+      this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
     }
     this.setState({ loading: false, chartDataError: errorMsg });
   };
@@ -434,6 +434,7 @@ export class TimeSeriesExplorer extends React.Component {
         fullRefresh,
         loadCounter: currentLoadCounter + 1,
         loading: true,
+        chartDataError: undefined,
         ...(fullRefresh
           ? {
               chartDetails: undefined,
