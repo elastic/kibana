@@ -10,7 +10,7 @@
       }
     },
     "mappings": {
-      "dynamic": true,
+      "dynamic": "strict",
       "properties": {
         "test-actions-export-hidden": {
           "properties": {
@@ -497,6 +497,20 @@
             }
           },
           "type": "nested"
+        },
+        "test-hidden-non-importable-exportable": {
+          "properties": {
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "test-hidden-importable-exportable": {
+          "properties": {
+            "title": {
+              "type": "text"
+            }
+          }
         }
       }
     }

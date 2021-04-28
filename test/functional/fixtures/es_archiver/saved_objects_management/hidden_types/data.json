@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "test-actions-export-hidden:obj_1",
     "source": {
       "test-actions-export-hidden": {
@@ -19,7 +18,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "test-actions-export-hidden:obj_2",
     "source": {
       "test-actions-export-hidden": {
@@ -36,7 +34,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -66,7 +63,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "dashboard:i-exist",
     "source": {
       "dashboard": {
