@@ -43,7 +43,7 @@ export function useMetricsExplorerData(
 
   const from = DateMath.parse(timerange.from);
   const to = DateMath.parse(timerange.to, { roundUp: true });
-  const [request, makeRequest] = useTrackedPromise(
+  const [, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: () => {
