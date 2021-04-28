@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import moment from 'moment';
+import _, { cloneDeep, isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
+import { Aggregate, FiltersAggregate, FiltersBucketItem } from '@elastic/elasticsearch/api/types';
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
+import { IEsSearchResponse, ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
@@ -183,6 +185,9 @@ export class AggConfigs {
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
+    const timeShifts = this.getTimeShifts();
+    const hasTimeShifts = Object.keys(timeShifts).length > 0;
+
     if (this.hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = this.aggs
@@ -196,55 +201,102 @@ export class AggConfigs {
           };
         });
     }
-    this.getRequestAggs()
-      .filter((config: AggConfig) => !config.type.hasNoDsl)
-      .forEach((config: AggConfig, i: number, list) => {
-        if (!dslLvlCursor) {
-          // start at the top level
-          dslLvlCursor = dslTopLvl;
-        } else {
-          const prevConfig: AggConfig = list[i - 1];
-          const prevDsl = dslLvlCursor[prevConfig.id];
+    this.getRequestAggs().forEach((config: AggConfig, i: number, list) => {
+      if (!dslLvlCursor) {
+        // start at the top level
+        dslLvlCursor = dslTopLvl;
+      } else {
+        const prevConfig: AggConfig = list[i - 1];
+        const prevDsl = dslLvlCursor[prevConfig.id];
 
-          // advance the cursor and nest under the previous agg, or
-          // put it on the same level if the previous agg doesn't accept
-          // sub aggs
-          dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
-        }
+        // advance the cursor and nest under the previous agg, or
+        // put it on the same level if the previous agg doesn't accept
+        // sub aggs
+        dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
+      }
 
-        const dsl = config.type.hasNoDslParams
-          ? config.toDsl(this)
-          : (dslLvlCursor[config.id] = config.toDsl(this));
-        let subAggs: any;
+      if (hasTimeShifts) {
+        dslLvlCursor = this.insertTimeShiftSplit(config, timeShifts, dslLvlCursor);
+      }
 
-        parseParentAggs(dslLvlCursor, dsl);
+      if (config.type.hasNoDsl) {
+        return;
+      }
 
-        if (config.type.type === AggGroupNames.Buckets && i < list.length - 1) {
-          // buckets that are not the last item in the list accept sub-aggs
-          subAggs = dsl.aggs || (dsl.aggs = {});
-        }
+      const dsl = config.type.hasNoDslParams
+        ? config.toDsl(this)
+        : (dslLvlCursor[config.id] = config.toDsl(this));
+      let subAggs: any;
 
-        if (subAggs) {
-          _.each(subAggs, (agg) => {
-            parseParentAggs(subAggs, agg);
-          });
-        }
-        if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach((agg: any) => {
-            subAggs[agg.config.id] = agg.dsl;
-            // if a nested metric agg has parent aggs, we have to add them to every level of the tree
-            // to make sure "bucket_path" references in the nested metric agg itself are still working
-            if (agg.dsl.parentAggs) {
-              Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
-                subAggs[parentAggId] = parentAgg;
-              });
-            }
-          });
-        }
-      });
+      parseParentAggs(dslLvlCursor, dsl);
+
+      if (config.type.type === AggGroupNames.Buckets && i < list.length - 1) {
+        // buckets that are not the last item in the list accept sub-aggs
+        subAggs = dsl.aggs || (dsl.aggs = {});
+      }
+
+      if (subAggs) {
+        _.each(subAggs, (agg) => {
+          parseParentAggs(subAggs, agg);
+        });
+      }
+      if (subAggs && nestedMetrics) {
+        nestedMetrics.forEach((agg: any) => {
+          subAggs[agg.config.id] = agg.dsl;
+          // if a nested metric agg has parent aggs, we have to add them to every level of the tree
+          // to make sure "bucket_path" references in the nested metric agg itself are still working
+          if (agg.dsl.parentAggs) {
+            Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
+              subAggs[parentAggId] = parentAgg;
+            });
+          }
+        });
+      }
+    });
 
     removeParentAggs(dslTopLvl);
     return dslTopLvl;
+  }
+
+  private insertTimeShiftSplit(
+    config: AggConfig,
+    timeShifts: Record<string, moment.Duration>,
+    dslLvlCursor: Record<string, any>
+  ) {
+    if (this.isTimeShiftSplitAgg(config)) {
+      const filters: Record<string, unknown> = {};
+      // TODO validate this
+      const timeField = this.timeFields![0];
+      filters['0'] = {
+        range: {
+          [timeField]: {
+            // only works if there is a time range
+            gte: this.timeRange!.from,
+            lte: this.timeRange!.to,
+          },
+        },
+      };
+      Object.entries(timeShifts).forEach(([key, shift]) => {
+        filters[key] = {
+          range: {
+            [timeField]: {
+              // only works if there is a time range
+              gte: moment(this.timeRange!.from).subtract(shift).toISOString(),
+              lte: moment(this.timeRange!.to).subtract(shift).toISOString(),
+            },
+          },
+        };
+      });
+      dslLvlCursor.time_offset_split = {
+        filters: {
+          filters,
+        },
+        aggs: {},
+      };
+
+      dslLvlCursor = dslLvlCursor.time_offset_split.aggs;
+    }
+    return dslLvlCursor;
   }
 
   getAll() {
@@ -287,6 +339,98 @@ export class AggConfigs {
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
     );
+  }
+
+  getTimeShifts(): Record<string, moment.Duration> {
+    const timeShifts: Record<string, moment.Duration> = {};
+    this.getAll()
+      .filter((agg) => agg.schema === 'metric')
+      .map((agg) => agg.getTimeShift())
+      .forEach((timeShift) => {
+        if (timeShift) {
+          timeShifts[String(timeShift.asMilliseconds())] = timeShift;
+        }
+      });
+    return timeShifts;
+  }
+
+  isTimeShiftSplitAgg(aggConfig: AggConfig) {
+    // TODO - probably abstract this in an optional flag on the agg config instead of hard-coding the relationship here
+    const hasDateHistograms = this.getAll().some((agg) => agg.type.name === 'date_histogram');
+    // the first date histogram or the first metric (if there are no date histograms) is the level to add the time shift filter split
+    return (
+      (hasDateHistograms && aggConfig.type.name === 'date_histogram') ||
+      this.byType('metrics')[0] === aggConfig
+    );
+  }
+
+  postFlightTransform(response: IEsSearchResponse<any>) {
+    const timeShifts = this.getTimeShifts();
+    if (Object.keys(timeShifts).length === 0) {
+      return response;
+    }
+    const transformedRawResponse = cloneDeep(response.rawResponse);
+    const aggCursor = transformedRawResponse.aggregations!;
+
+    // TODO: Add a "context" param here which keeps track of at which level of the response we are
+    const mergeObject = (target: any, source: any, shiftKey: string) => {
+      Object.entries(source).forEach(([key, val]) => {
+        if (typeof val !== 'object') {
+          if (key === 'doc_count') {
+            target[`doc_count_${shiftKey}`] = val;
+          } else {
+            target[key] = val;
+          }
+        } else {
+          const agg = this.byId(key);
+          if (agg && agg.type.type === 'metrics') {
+            const timeShift = agg.getTimeShift();
+            if (!timeShift || String(timeShift.asMilliseconds()) !== shiftKey) {
+              // this is a metric from another time shift, do not copy over
+              return;
+            }
+          }
+          if (!target[key]) {
+            target[key] = {};
+          }
+          mergeObject(target[key], source[key], shiftKey);
+        }
+      });
+    };
+    const transformTimeShift = (cursor: Record<string, Aggregate>): undefined => {
+      if (cursor.time_offset_split) {
+        const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate).buckets as Record<
+          string,
+          FiltersBucketItem
+        >;
+        const subTree = timeShiftedBuckets['0'];
+        // TODO pull in metrics from other buckets
+        Object.entries(timeShifts).forEach(([key, shift]) => {
+          mergeObject(subTree, timeShiftedBuckets[key], key);
+        });
+
+        delete cursor.time_offset_split;
+        Object.assign(cursor, subTree);
+        return;
+      }
+      // recurse deeper into the response object
+      Object.keys(cursor).forEach((subAggId) => {
+        const subAgg = cursor[subAggId];
+        if (typeof subAgg !== 'object' || !('buckets' in subAgg)) {
+          return;
+        }
+        if (isArray(subAgg.buckets)) {
+          subAgg.buckets.forEach(transformTimeShift);
+        } else {
+          Object.values(subAgg.buckets).forEach(transformTimeShift);
+        }
+      });
+    };
+    transformTimeShift(aggCursor);
+    return {
+      ...response,
+      rawResponse: transformedRawResponse,
+    };
   }
 
   getRequestAggById(id: string) {

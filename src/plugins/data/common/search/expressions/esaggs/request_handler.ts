@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { Adapters } from 'src/plugins/inspector/common';
 
 import {
@@ -70,8 +71,14 @@ export const handleRequest = async ({
   const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
   const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
+  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
+  // pattern if it's available.
+  const defaultTimeField = indexPattern?.getTimeField?.();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
+  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
+
   aggs.setTimeRange(timeRange as TimeRange);
-  aggs.setTimeFields(timeFields);
+  aggs.setTimeFields(allTimeFields);
 
   // For now we need to mirror the history of the passed search source, since
   // the request inspector wouldn't work otherwise.
@@ -90,19 +97,60 @@ export const handleRequest = async ({
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
-  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
-  // pattern if it's available.
-  const defaultTimeField = indexPattern?.getTimeField?.();
-  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
-  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
-
   // If a timeRange has been specified and we had at least one timeField available, create range
   // filters for that those time fields
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
-        .filter(isRangeFilter);
+      const timeShifts = aggs.getTimeShifts();
+      const hasTimeShift = Object.values(aggs.getTimeShifts()).length > 0;
+      if (!hasTimeShift) {
+        return allTimeFields
+          .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
+          .filter(isRangeFilter);
+      }
+      return [
+        {
+          meta: { index: indexPattern?.id, params: {}, alias: '', disabled: false, negate: false },
+          query: {
+            bool: {
+              should: [
+                ...Object.entries(timeShifts).map(([, shift]) => {
+                  return {
+                    bool: {
+                      filter: allTimeFields
+                        .map((fieldName) =>
+                          getTime(
+                            indexPattern,
+                            {
+                              from: moment(timeRange.from).subtract(shift).toISOString(),
+                              to: moment(timeRange.to).subtract(shift).toISOString(),
+                            },
+                            { fieldName, forceNow }
+                          )
+                        )
+                        .filter(isRangeFilter)
+                        .map((filter) => ({
+                          range: filter.range,
+                        })),
+                    },
+                  };
+                }),
+                {
+                  bool: {
+                    filter: allTimeFields
+                      .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
+                      .filter(isRangeFilter)
+                      .map((filter) => ({
+                        range: filter.range,
+                      })),
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
     });
   }
 

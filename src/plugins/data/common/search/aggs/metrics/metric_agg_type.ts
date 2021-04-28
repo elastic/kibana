@@ -11,7 +11,7 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FieldTypes } from '../param_types';
+import { BaseParamType, FieldTypes } from '../param_types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -46,6 +46,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);
+
+    this.params.push(
+      new BaseParamType({
+        name: 'timeShift',
+        type: 'string',
+        write: () => {},
+      }) as MetricAggParam<TMetricAggConfig>
+    );
 
     this.getValue =
       config.getValue ||

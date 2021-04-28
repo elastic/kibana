@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
@@ -170,6 +171,13 @@ export class AggConfig {
 
   getParam(key: string): any {
     return _.get(this.params, key);
+  }
+
+  getTimeShift(): undefined | moment.Duration {
+    const rawTimeShift = this.getParam('timeShift');
+    if (!rawTimeShift) return undefined;
+    const [, amount, unit] = rawTimeShift.match(/(\d+)(\w)/);
+    return moment.duration(Number(amount), unit);
   }
 
   write(aggs?: IAggConfigs) {

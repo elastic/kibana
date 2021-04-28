@@ -84,6 +84,9 @@ function getExpressionForLayer(
           layer,
           uiSettings
         );
+        if (col.label === 'shifted') {
+          aggAst.arguments.timeShift = ['1h'];
+        }
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',

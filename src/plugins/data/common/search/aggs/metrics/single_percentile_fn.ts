@@ -74,6 +74,13 @@ export const aggSinglePercentile = (): FunctionDefinition => ({
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
+    timeShift: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
+        defaultMessage:
+          'Specifies whether the time range of documents used for the metric should be shifted by the specified amount',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
