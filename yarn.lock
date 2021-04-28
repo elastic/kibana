@@ -2623,7 +2623,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:packages/kbn-dev-utils":
+"@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils/npm_module":
   version "0.0.0"
   uid ""
 
