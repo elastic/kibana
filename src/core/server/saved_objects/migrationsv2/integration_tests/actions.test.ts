@@ -14,9 +14,14 @@ import { SavedObjectsRawDoc } from '../../serialization';
 import {
   bulkOverwriteTransformedDocuments,
   cloneIndex,
+  closePit,
   createIndex,
   fetchIndices,
+  openPit,
+  OpenPitResponse,
   reindex,
+  readWithPit,
+  ReadWithPit,
   searchForOutdatedDocuments,
   SearchResponse,
   setWriteBlock,
@@ -30,6 +35,7 @@ import {
   UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
+  transformDocs,
   waitForIndexStatusYellow,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
@@ -70,14 +76,20 @@ describe('migration actions', () => {
       { _source: { title: 'saved object 4', type: 'another_unused_type' } },
       { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
     ] as unknown) as SavedObjectsRawDoc[];
-    await bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', sourceDocs)();
+    await bulkOverwriteTransformedDocuments(
+      client,
+      'existing_index_with_docs',
+      sourceDocs,
+      'wait_for'
+    )();
 
     await createIndex(client, 'existing_index_2', { properties: {} })();
     await createIndex(client, 'existing_index_with_write_block', { properties: {} })();
     await bulkOverwriteTransformedDocuments(
       client,
       'existing_index_with_write_block',
-      sourceDocs
+      sourceDocs,
+      'wait_for'
     )();
     await setWriteBlock(client, 'existing_index_with_write_block')();
     await updateAliases(client, [
@@ -155,7 +167,12 @@ describe('migration actions', () => {
         { _source: { title: 'doc 4' } },
       ] as unknown) as SavedObjectsRawDoc[];
       await expect(
-        bulkOverwriteTransformedDocuments(client, 'new_index_without_write_block', sourceDocs)()
+        bulkOverwriteTransformedDocuments(
+          client,
+          'new_index_without_write_block',
+          sourceDocs,
+          'wait_for'
+        )()
       ).rejects.toMatchObject(expect.anything());
     });
     it('resolves left index_not_found_exception when the index does not exist', async () => {
@@ -265,14 +282,14 @@ describe('migration actions', () => {
       const task = cloneIndex(client, 'existing_index_with_write_block', 'clone_target_1');
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": Object {
+                          "acknowledged": true,
+                          "shardsAcknowledged": true,
+                        },
+                      }
+                  `);
     });
     it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
@@ -331,14 +348,14 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = cloneIndex(client, 'no_such_index', 'clone_target_3');
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "index": "no_such_index",
-            "type": "index_not_found_exception",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "index": "no_such_index",
+                          "type": "index_not_found_exception",
+                        },
+                      }
+                  `);
     });
     it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
@@ -406,13 +423,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
           "doc 3",
-          "saved object 4",
           "f-agent-event 5",
+          "saved object 4",
         ]
       `);
     });
@@ -433,18 +450,18 @@ describe('migration actions', () => {
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "reindex_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "reindex_succeeded",
+                      }
+                  `);
 
       const results = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'reindex_target_excluded_docs',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -474,13 +491,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_2',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -526,13 +543,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_3',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -551,7 +568,7 @@ describe('migration actions', () => {
           _id,
           _source,
         }));
-      await bulkOverwriteTransformedDocuments(client, 'reindex_target_4', sourceDocs)();
+      await bulkOverwriteTransformedDocuments(client, 'reindex_target_4', sourceDocs, 'wait_for')();
 
       // Now do a real reindex
       const res = (await reindex(
@@ -576,13 +593,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_4',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -790,9 +807,169 @@ describe('migration actions', () => {
       );
 
       task = verifyReindex(client, 'existing_index_2', 'no_such_index');
-      await expect(task()).rejects.toMatchInlineSnapshot(
-        `[ResponseError: index_not_found_exception]`
+      await expect(task()).rejects.toThrow('index_not_found_exception');
+    });
+  });
+
+  describe('openPit', () => {
+    it('opens PointInTime for an index', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      expect(pitResponse.right.pitId).toEqual(expect.any(String));
+
+      const searchResponse = await client.search({
+        body: {
+          pit: { id: pitResponse.right.pitId },
+        },
+      });
+
+      await expect(searchResponse.body.hits.hits.length).toBeGreaterThan(0);
+    });
+    it('rejects if index does not exist', async () => {
+      const openPitTask = openPit(client, 'no_such_index');
+      await expect(openPitTask()).rejects.toThrow('index_not_found_exception');
+    });
+  });
+
+  describe('readWithPit', () => {
+    it('requests documents from an index using given PIT', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        Option.none,
+        1000,
+        undefined
       );
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      await expect(docsResponse.right.outdatedDocuments.length).toBe(5);
+    });
+
+    it('requests the batchSize of documents from an index', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        Option.none,
+        3,
+        undefined
+      );
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      await expect(docsResponse.right.outdatedDocuments.length).toBe(3);
+    });
+
+    it('it excludes documents not matching the provided "unusedTypesQuery"', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        Option.some({
+          bool: {
+            must_not: [
+              {
+                term: {
+                  type: 'f_agent_event',
+                },
+              },
+              {
+                term: {
+                  type: 'another_unused_type',
+                },
+              },
+            ],
+          },
+        }),
+        1000,
+        undefined
+      );
+
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
+        Array [
+          "doc 1",
+          "doc 2",
+          "doc 3",
+        ]
+      `);
+    });
+
+    it('rejects if PIT does not exist', async () => {
+      const readWithPitTask = readWithPit(client, 'no_such_pit', Option.none, 1000, undefined);
+      await expect(readWithPitTask()).rejects.toThrow('illegal_argument_exception');
+    });
+  });
+
+  describe('closePit', () => {
+    it('closes PointInTime', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const pitId = pitResponse.right.pitId;
+      await closePit(client, pitId)();
+
+      const searchTask = client.search({
+        body: {
+          pit: { id: pitId },
+        },
+      });
+
+      await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
+    });
+
+    it('rejects if PIT does not exist', async () => {
+      const closePitTask = closePit(client, 'no_such_pit');
+      await expect(closePitTask()).rejects.toThrow('illegal_argument_exception');
+    });
+  });
+
+  describe('transformDocs', () => {
+    it('applies "transformRawDocs" and writes result into an index', async () => {
+      const index = 'transform_docs_index';
+      const originalDocs = [
+        { _id: 'foo:1', _source: { type: 'dashboard', value: 1 } },
+        { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
+      ];
+
+      const createIndexTask = createIndex(client, index, {
+        dynamic: true,
+        properties: {},
+      });
+      await createIndexTask();
+
+      async function tranformRawDocs(docs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]> {
+        for (const doc of docs) {
+          doc._source.value += 1;
+        }
+        return docs;
+      }
+
+      const transformTask = transformDocs(client, tranformRawDocs, originalDocs, index, 'wait_for');
+
+      const result = (await transformTask()) as Either.Right<'bulk_index_succeeded'>;
+
+      expect(result.right).toBe('bulk_index_succeeded');
+
+      const { body } = await client.search<{ value: number }>({
+        index,
+      });
+      const hits = body.hits.hits;
+
+      const foo1 = hits.find((h) => h._id === 'foo:1');
+      expect(foo1?._source?.value).toBe(2);
+
+      const foo2 = hits.find((h) => h._id === 'foo:2');
+      expect(foo2?._source?.value).toBe(3);
     });
   });
 
@@ -919,7 +1096,8 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments(
         client,
         'existing_index_without_mappings',
-        sourceDocs
+        sourceDocs,
+        'wait_for'
       )();
 
       // Assert that we can't search over the unmapped fields of the document
@@ -1147,7 +1325,13 @@ describe('migration actions', () => {
         { _source: { title: 'doc 6' } },
         { _source: { title: 'doc 7' } },
       ] as unknown) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', newDocs);
+      const task = bulkOverwriteTransformedDocuments(
+        client,
+        'existing_index_with_docs',
+        newDocs,
+        'wait_for'
+      );
+
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -1162,10 +1346,12 @@ describe('migration actions', () => {
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
 
-      const task = bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', [
-        ...existingDocs,
-        ({ _source: { title: 'doc 8' } } as unknown) as SavedObjectsRawDoc,
-      ]);
+      const task = bulkOverwriteTransformedDocuments(
+        client,
+        'existing_index_with_docs',
+        [...existingDocs, ({ _source: { title: 'doc 8' } } as unknown) as SavedObjectsRawDoc],
+        'wait_for'
+      );
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -1180,7 +1366,12 @@ describe('migration actions', () => {
         { _source: { title: 'doc 7' } },
       ] as unknown) as SavedObjectsRawDoc[];
       await expect(
-        bulkOverwriteTransformedDocuments(client, 'existing_index_with_write_block', newDocs)()
+        bulkOverwriteTransformedDocuments(
+          client,
+          'existing_index_with_write_block',
+          newDocs,
+          'wait_for'
+        )()
       ).rejects.toMatchObject(expect.anything());
     });
   });
