@@ -40,11 +40,9 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 [id=elastic-maps-server]
 === Host Elastic Maps Service locally
 
-beta::[]
-
 If you cannot connect to Elastic Maps Service from the {kib} server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
 
-{hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. You must first download and run the image. After connecting it to your {es} cluster for license validation, you're guided to download and configure the basemaps database, which must be retrieved separately.
+{hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
 
 IMPORTANT: {hosted-ems} does not serve raster tiles, needed by Vega, coordinate, and region map visualizations.
 
@@ -69,7 +67,7 @@ docker run --rm --init --publish 8080:8080 \
   {ems-docker-image}
 ----------------------------------
 
-Once {hosted-ems} is running, follow instructions from the webpage at `localhost:8080` to define a configuration file and download the basemaps database.
+Once {hosted-ems} is running, follow instructions from the webpage at `localhost:8080` to define a configuration file and optionally download a more detailed basemaps database.
 
 [role="screenshot"]
 image::images/elastic-maps-server-instructions.png[Set-up instructions]
@@ -91,6 +89,9 @@ endif::[]
 
 | `port`
  | Specifies the port used by the backend server. Default: *`8080`*. <<server-port,Equivalent {kib} setting>>. 
+
+| `basePath`
+ | Specify a path at which to mount the server if you are running behind a proxy. This setting cannot end in a slash (`/`). <<server-basePath,Equivalent {kib} setting>>. 
 
 | `ui`
  | Controls the display of the status page and the layer preview. *Default: `true`*
@@ -190,9 +191,13 @@ services:
 [[elastic-maps-server-data]]
 ==== Data
 
-{hosted-ems} hosts vector layer boundaries and vector tile basemaps for the entire planet. Boundaries include world countries, global administrative regions, and specific country regions. A minimal basemap is provided with {hosted-ems}. This can be used for testing environments but won't be functional for normal operations. The full basemap (around 90GB file) needs to be mounted on the Docker container for {hosted-ems} to run normally.
+{hosted-ems} hosts vector layer boundaries and vector tile basemaps for the entire planet. Boundaries include world countries, global administrative regions, and specific country regions. Basemaps up to zoom level 8 are bundled in the Docker image. These basemaps are sufficient for maps and dashboards at the country level. To present maps with higher detail, follow the instructions of the front page to download and configure the appropriate basemaps database. The most detailed basemaps at zoom level 14 are good for street level maps, but require ~90GB of disk space.
 
-TIP: The available basemaps and boundaries can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co
+
+[role="screenshot"]
+image::images/elastic-maps-server-basemaps.png[Basemaps download options]
+
+TIP: The available basemaps and boundaries can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co.
 
 
 [float]

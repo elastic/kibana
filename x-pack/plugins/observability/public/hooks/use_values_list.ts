@@ -89,21 +89,21 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to]
+    [debouncedQuery, from, to, JSON.stringify(filters)]
   );
 
   useEffect(() => {
     const newValues =
       data?.aggregations?.values.buckets.map(({ key: value }) => value as string) ?? [];
 
-    if (keepHistory) {
+    if (keepHistory && query) {
       setValues((prevState) => {
         return merge(newValues, prevState);
       });
     } else {
       setValues(newValues);
     }
-  }, [data, keepHistory, loading]);
+  }, [data, keepHistory, loading, query]);
 
   return { values, loading };
 };
