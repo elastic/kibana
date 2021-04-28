@@ -180,6 +180,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobId } = request.params;
         const { body } = await mlClient.putJob({
           job_id: jobId,
+          // @ts-expect-error job type custom_rules is incorrect
           body: request.body,
         });
 
