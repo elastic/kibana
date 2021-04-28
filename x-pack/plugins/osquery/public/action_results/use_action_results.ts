@@ -32,7 +32,7 @@ export interface ResultsArgs {
   totalCount: number;
 }
 
-interface UseActionResults {
+export interface UseActionResults {
   actionId: string;
   activePage: number;
   agentIds?: string[];

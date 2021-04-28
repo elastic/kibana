@@ -19,8 +19,15 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     {
       path: '/internal/osquery/action',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object({
+          query: schema.string(),
+          agentSelection: schema.object({
+            agents: schema.arrayOf(schema.string()),
+            allAgentsSelected: schema.boolean(),
+            platformsSelected: schema.arrayOf(schema.string()),
+            policiesSelected: schema.arrayOf(schema.string()),
+          }),
+        }),
       },
       options: {
         tags: ['access:osquery', 'access:osquery_write'],
@@ -38,7 +45,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       );
 
       if (!selectedAgents.length) {
-        throw new Error('No agents found for selection, aborting.')
+        throw new Error('No agents found for selection, aborting.');
       }
 
       const action = {
@@ -50,7 +57,6 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         agents: selectedAgents,
         data: {
           id: uuid.v4(),
-          // @ts-expect-error update validation
           query: request.body.query,
         },
       };
