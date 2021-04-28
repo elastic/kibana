@@ -28,9 +28,6 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           CreateActionRequestBodySchema
         >(createActionRequestBodySchema),
       },
-      options: {
-        tags: ['access:osquery', 'access:osquery_write'],
-      },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;

@@ -8,24 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const generateEmptyDataMessage = (agentsResponded: number): string => {
-  switch (agentsResponded) {
-    case 0:
-      return i18n.translate('xpack.osquery.results.noAgentsResponded', {
-        defaultMessage: 'No agents have responded.',
-      });
-    case 1:
-      return i18n.translate('xpack.osquery.results.oneAgentResponded', {
-        defaultMessage:
-          '{agentsResponded} agent has responded, but no osquery data has been reported.',
-        values: { agentsResponded },
-      });
-    default:
-      return i18n.translate('xpack.osquery.results.multipleAgentsResponded', {
-        defaultMessage:
-          '{agentsResponded} agents have responded, but no osquery data has been reported.',
-        values: { agentsResponded },
-      });
-  }
+  return i18n.translate('xpack.osquery.results.multipleAgentsResponded', {
+    defaultMessage:
+      '{agentsResponded, plural, one {# agent has} other {# agents have}} responded, but no osquery data has been reported.',
+    values: { agentsResponded },
+  });
 };
 
 export const ERROR_ALL_RESULTS = i18n.translate('xpack.osquery.results.errorSearchDescription', {
