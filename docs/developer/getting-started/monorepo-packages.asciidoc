@@ -69,6 +69,7 @@ yarn kbn watch-bazel
 - @kbn/babel-preset
 - @kbn/config-schema
 - @kbn/expect
+- @kbn/logging
 - @kbn/std
 - @kbn/tinymath
 - @kbn/utility-types

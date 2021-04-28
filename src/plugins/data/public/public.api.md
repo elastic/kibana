@@ -10,7 +10,6 @@ import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
@@ -579,10 +578,6 @@ export type CustomFilter = Filter & {
 //
 // @public
 export interface DataPublicPluginSetup {
-    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1695,10 +1690,6 @@ export interface ISearchOptions {
 //
 // @public
 export interface ISearchSetup {
-    // Warning: (ae-forgotten-export) The symbol "SearchEnhancements" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    __enhance: (enhancements: SearchEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AggsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -2387,25 +2378,12 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps);
-    // @internal (undocumented)
-    protected application: CoreStart['application'];
-    // (undocumented)
-    protected readonly deps: SearchInterceptorDeps;
-    // (undocumented)
-    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
-    // (undocumented)
-    protected getTimeoutMode(): TimeoutErrorMode;
-    // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
-    // @internal
-    protected pendingCount$: BehaviorSubject<number>;
-    // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
-    search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+    // Warning: (ae-forgotten-export) The symbol "IAsyncSearchOptions" needs to be exported by the entry point index.d.ts
+    search({ id, ...request }: IKibanaSearchRequest, options?: IAsyncSearchOptions): import("rxjs").Observable<IKibanaSearchResponse<any>>;
     // (undocumented)
     showError(e: Error): void;
+    // (undocumented)
+    stop(): void;
     }
 
 // Warning: (ae-missing-release-tag) "SearchInterceptorDeps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2468,7 +2446,7 @@ export class SearchSource {
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;
     destroy(): void;
-    fetch$(options?: ISearchOptions): Observable<estypes.SearchResponse<any>>;
+    fetch$(options?: ISearchOptions): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>>;
     // @deprecated
     fetch(options?: ISearchOptions): Promise<estypes.SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
@@ -2643,11 +2621,9 @@ export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;
 // @public (undocumented)
 export enum TimeoutErrorMode {
     // (undocumented)
-    CHANGE = 2,
+    CHANGE = 1,
     // (undocumented)
-    CONTACT = 1,
-    // (undocumented)
-    UPGRADE = 0
+    CONTACT = 0
 }
 
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

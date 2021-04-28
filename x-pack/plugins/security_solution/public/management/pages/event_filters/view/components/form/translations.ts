@@ -30,7 +30,7 @@ export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.for
 });
 
 export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
-  defaultMessage: 'Seelct OS',
+  defaultMessage: 'Select operating system',
 });
 
 export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form.rule.name', {
