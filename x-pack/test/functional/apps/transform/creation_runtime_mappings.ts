@@ -46,14 +46,37 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.api.cleanTransformIndices();
     });
 
-    // Only testing that histogram charts are available for runtime fields here
     const histogramCharts: HistogramCharts = [
+      {
+        // Skipping colorStats assertion for this chart,
+        // results can be quite different on each run because of sampling.
+        chartAvailable: true,
+        id: '@timestamp',
+      },
+      { chartAvailable: false, id: '@version', legend: 'Chart not supported.' },
+      {
+        chartAvailable: true,
+        id: 'airline',
+        legend: '19 categories',
+        colorStats: [
+          { color: '#000000', percentage: 49 },
+          { color: '#54B399', percentage: 41 },
+        ],
+      },
+      {
+        chartAvailable: true,
+        id: 'responsetime',
+        colorStats: [
+          { color: '#54B399', percentage: 5 },
+          { color: '#000000', percentage: 95 },
+        ],
+      },
       {
         chartAvailable: true,
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { color: '#000000', percentage: 48 },
+          { color: '#000000', percentage: 49 },
           { color: '#54B399', percentage: 41 },
         ],
       },
@@ -65,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
           { color: '#000000', percentage: 95 },
         ],
       },
+      { chartAvailable: false, id: 'type', legend: 'Chart not supported.' },
     ];
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [

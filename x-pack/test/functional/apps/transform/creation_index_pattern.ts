@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
           pivotAdvancedEditorValue: {
@@ -165,11 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#54B399', percentage: 90 },
               ],
             },
-            {
-              chartAvailable: false,
-              id: 'customer_birth_date',
-              legend: '0 documents contain field.',
-            },
             { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
             { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
             {
@@ -209,7 +205,17 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#54B399', percentage: 75 },
               ],
             },
+            {
+              chartAvailable: true,
+              id: 'day_of_week_i',
+              legend: '0 - 6',
+              colorStats: [
+                { color: '#000000', percentage: 20 },
+                { color: '#54B399', percentage: 75 },
+              ],
+            },
           ],
+          discoverQueryHits: '7,270',
         },
       } as PivotTransformTestData,
       {
@@ -247,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: false,
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -293,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
+          discoverQueryHits: '10',
         },
       } as PivotTransformTestData,
       {
@@ -317,6 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
             column: 0,
@@ -331,7 +339,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
           transformPreview: {
             column: 0,
             values: [
@@ -342,6 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
               'July 12th 2019, 23:31:12',
             ],
           },
+          discoverQueryHits: '10',
         },
       } as LatestTransformTestData,
     ];
@@ -398,10 +406,14 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(true);
 
-          await transform.testExecution.logTestStep('displays the index preview histogram charts');
-          await transform.wizard.assertIndexPreviewHistogramCharts(
-            testData.expected.histogramCharts
-          );
+          if (Array.isArray(testData.expected.histogramCharts)) {
+            await transform.testExecution.logTestStep(
+              'displays the index preview histogram charts'
+            );
+            await transform.wizard.assertIndexPreviewHistogramCharts(
+              testData.expected.histogramCharts
+            );
+          }
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');
@@ -532,6 +544,26 @@ export default function ({ getService }: FtrProviderContext) {
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
           });
+        });
+
+        it('navigates to discover and displays results of the destination index', async () => {
+          await transform.testExecution.logTestStep('should show the actions popover');
+          await transform.table.assertTransformRowActions(testData.transformId, false);
+
+          await transform.testExecution.logTestStep('should navigate to discover');
+          await transform.table.clickTransformRowAction('Discover');
+
+          if (testData.discoverAdjustSuperDatePicker) {
+            await transform.discover.assertNoResults(testData.destinationIndex);
+            await transform.testExecution.logTestStep(
+              'should switch quick select lookback to years'
+            );
+            await transform.discover.assertSuperDatePickerToggleQuickMenuButtonExists();
+            await transform.discover.openSuperDatePicker();
+            await transform.discover.quickSelectYears();
+          }
+
+          await transform.discover.assertDiscoverQueryHits(testData.expected.discoverQueryHits);
         });
       });
     }
