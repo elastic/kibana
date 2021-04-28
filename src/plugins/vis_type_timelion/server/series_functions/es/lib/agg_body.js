@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-export function buildAggBody(fieldName, scriptFields) {
-  const [, script] = Object.entries(scriptFields).find(([name]) => name === fieldName) ?? [];
-
-  return (
-    script ?? {
-      field: fieldName,
-    }
-  );
-}
+export const buildAggBody = (fieldName, scriptFields) =>
+  scriptFields[fieldName] ?? {
+    field: fieldName,
+  };
