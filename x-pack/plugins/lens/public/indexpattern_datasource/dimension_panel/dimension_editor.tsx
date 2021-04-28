@@ -27,7 +27,6 @@ import {
   getOperationDisplay,
   insertOrReplaceColumn,
   replaceColumn,
-  deleteColumn,
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
