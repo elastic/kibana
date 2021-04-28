@@ -366,7 +366,7 @@
     "semver": "^7.3.2",
     "set-value": "^3.0.2",
     "source-map-support": "^0.5.19",
-    "squel": "^5.13.0",
+    "safe-squel": "^5.12.5",
     "stats-lite": "^2.2.0",
     "strip-ansi": "^6.0.0",
     "style-it": "^2.1.3",
