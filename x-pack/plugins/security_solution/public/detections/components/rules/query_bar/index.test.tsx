@@ -59,7 +59,7 @@ describe('QueryBarDefineRule', () => {
     expect(wrapper.dive().find('[data-test-subj="query-bar-define-rule"]')).toHaveLength(1);
   });
 
-  it('renders import query from saved timeline modal with no timeline action correctly', () => {
+  it('renders import query from saved timeline modal actions hidden correctly', () => {
     const Component = () => {
       const field = useFormFieldMock();
 
@@ -84,8 +84,7 @@ describe('QueryBarDefineRule', () => {
       </TestProviders>
     );
 
-    const firstRow = wrapper.find('[data-test-subj="timelines-table"] table tbody tr').first();
-    const actionsCell = firstRow.find('.euiTableRowCell').last();
-    expect(actionsCell.find('.euiTableCellContent').isEmptyRender()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="create-from-template"]').exists()).toBeFalsy();
   });
 });
