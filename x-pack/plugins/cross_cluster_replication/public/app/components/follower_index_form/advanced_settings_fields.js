@@ -8,16 +8,15 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getByteUnitsUrl, getTimeUnitsUrl } from '../../services/documentation_links';
 import { getSettingDefault } from '../../services/follower_index_default_settings';
 
-const byteUnitsHelpText = (
+const getByteUnitsHelpText = (documentationLinks) => (
   <FormattedMessage
     id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpText"
     defaultMessage="Example values: 10b, 1024kb, 1mb, 5gb, 2tb, 1pb. {link}"
     values={{
       link: (
-        <a href={getByteUnitsUrl()} target="_blank">
+        <a href={documentationLinks.apis.byteSizeUnits} target="_blank">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpTextLinkMessage"
             defaultMessage="Learn more"
@@ -28,13 +27,13 @@ const byteUnitsHelpText = (
   />
 );
 
-const timeUnitsHelpText = (
+const getTimeUnitsHelpText = (documentationLinks) => (
   <FormattedMessage
     id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpText"
     defaultMessage="Example values: 2d, 24h, 20m, 30s, 500ms, 10000micros, 80000nanos. {link}"
     values={{
       link: (
-        <a href={getTimeUnitsUrl()} target="_blank">
+        <a href={documentationLinks.apis.timeUnits} target="_blank">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpTextLinkMessage"
             defaultMessage="Learn more"
@@ -45,7 +44,7 @@ const timeUnitsHelpText = (
   />
 );
 
-export const advancedSettingsFields = [
+export const getAdvancedSettingsFields = (documentationLinks) => [
   {
     field: 'maxReadRequestOperationCount',
     testSubject: 'maxReadRequestOperationCountInput',
@@ -118,7 +117,7 @@ export const advancedSettingsFields = [
       }
     ),
     defaultValue: getSettingDefault('maxReadRequestSize'),
-    helpText: byteUnitsHelpText,
+    helpText: getByteUnitsHelpText(documentationLinks),
   },
   {
     field: 'maxWriteRequestOperationCount',
@@ -168,7 +167,7 @@ export const advancedSettingsFields = [
       }
     ),
     defaultValue: getSettingDefault('maxWriteRequestSize'),
-    helpText: byteUnitsHelpText,
+    helpText: getByteUnitsHelpText(documentationLinks),
   },
   {
     field: 'maxOutstandingWriteRequests',
@@ -246,7 +245,7 @@ export const advancedSettingsFields = [
       }
     ),
     defaultValue: getSettingDefault('maxWriteBufferSize'),
-    helpText: byteUnitsHelpText,
+    helpText: getByteUnitsHelpText(documentationLinks),
   },
   {
     field: 'maxRetryDelay',
@@ -272,7 +271,7 @@ export const advancedSettingsFields = [
       }
     ),
     defaultValue: getSettingDefault('maxRetryDelay'),
-    helpText: timeUnitsHelpText,
+    helpText: getTimeUnitsHelpText(documentationLinks),
   },
   {
     field: 'readPollTimeout',
@@ -300,18 +299,19 @@ export const advancedSettingsFields = [
       }
     ),
     defaultValue: getSettingDefault('readPollTimeout'),
-    helpText: timeUnitsHelpText,
+    helpText: getTimeUnitsHelpText(documentationLinks),
   },
 ];
 
-export const emptyAdvancedSettings = advancedSettingsFields.reduce((obj, advancedSetting) => {
-  const { field, defaultValue } = advancedSetting;
-  return { ...obj, [field]: defaultValue };
-}, {});
+export const getEmptyAdvancedSettings = (documentationLinks) =>
+  getAdvancedSettingsFields(documentationLinks).reduce((obj, advancedSetting) => {
+    const { field, defaultValue } = advancedSetting;
+    return { ...obj, [field]: defaultValue };
+  }, {});
 
-export function areAdvancedSettingsEdited(followerIndex) {
-  return advancedSettingsFields.some((advancedSetting) => {
+export function areAdvancedSettingsEdited(followerIndex, documentationLinks) {
+  return getAdvancedSettingsFields(documentationLinks).some((advancedSetting) => {
     const { field } = advancedSetting;
-    return followerIndex[field] !== emptyAdvancedSettings[field];
+    return followerIndex[field] !== getEmptyAdvancedSettings(documentationLinks)[field];
   });
 }
