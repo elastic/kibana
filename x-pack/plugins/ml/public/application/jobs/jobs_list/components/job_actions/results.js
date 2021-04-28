@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { useMemo } from 'react';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateADLinks } from '../../../../components/custom_hooks/use_create_ad_links';
 
@@ -48,34 +48,44 @@ export function ResultLinks({ jobs }) {
   const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
 
   return (
-    <React.Fragment>
+    <EuiFlexGroup
+      gutterSize="xs"
+      justifyContent="flexEnd"
+      alignItems="center"
+      wrap={false}
+      direction="row"
+      responsive={false}
+    >
       {singleMetricVisible && (
-        <EuiToolTip
-          position="bottom"
-          content={singleMetricDisabledMessage ?? openJobsInSingleMetricViewerText}
-        >
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="bottom"
+            content={singleMetricDisabledMessage ?? openJobsInSingleMetricViewerText}
+          >
+            <EuiButtonIcon
+              href={timeSeriesExplorerLink}
+              iconType="visLine"
+              aria-label={openJobsInSingleMetricViewerText}
+              className="results-button"
+              isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
+              data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
           <EuiButtonIcon
-            href={timeSeriesExplorerLink}
-            iconType="visLine"
-            aria-label={openJobsInSingleMetricViewerText}
+            href={anomalyExplorerLink}
+            iconType="visTable"
+            aria-label={openJobsInAnomalyExplorerText}
             className="results-button"
-            isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-            data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+            isDisabled={jobActionsDisabled === true}
+            data-test-subj="mlOpenJobsInAnomalyExplorerButton"
           />
         </EuiToolTip>
-      )}
-      <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-        <EuiButtonIcon
-          href={anomalyExplorerLink}
-          iconType="visTable"
-          aria-label={openJobsInAnomalyExplorerText}
-          className="results-button"
-          isDisabled={jobActionsDisabled === true}
-          data-test-subj="mlOpenJobsInAnomalyExplorerButton"
-        />
-      </EuiToolTip>
-      <div className="actions-border" />
-    </React.Fragment>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 ResultLinks.propTypes = {

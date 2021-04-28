@@ -5,95 +5,100 @@
  * 2.0.
  */
 
-import { useState, useMemo } from 'react';
 import createContainer from 'constate';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { esKuery } from '../../../../../../../src/plugins/data/public';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import { useCallback, useState } from 'react';
+import { useDebounce } from 'react-use';
+import { esQuery, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 
-export interface KueryFilterQuery {
-  kind: 'kuery';
-  expression: string;
+type ParsedQuery = ReturnType<typeof esQuery.buildEsQuery>;
+
+interface ILogFilterState {
+  filterQuery: {
+    parsedQuery: ParsedQuery;
+    serializedQuery: string;
+    originalQuery: Query;
+  } | null;
+  filterQueryDraft: Query;
+  validationErrors: string[];
 }
 
-export interface SerializedFilterQuery {
-  query: KueryFilterQuery;
-  serializedQuery: string;
-}
-
-interface LogFilterInternalStateParams {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
-}
-
-export const logFilterInitialState: LogFilterInternalStateParams = {
+const initialLogFilterState: ILogFilterState = {
   filterQuery: null,
-  filterQueryDraft: null,
+  filterQueryDraft: {
+    language: 'kuery',
+    query: '',
+  },
+  validationErrors: [],
 };
 
-export type LogFilterStateParams = Omit<LogFilterInternalStateParams, 'filterQuery'> & {
-  filterQuery: SerializedFilterQuery['serializedQuery'] | null;
-  filterQueryAsKuery: SerializedFilterQuery['query'] | null;
-  isFilterQueryDraftValid: boolean;
-};
-export interface LogFilterCallbacks {
-  setLogFilterQueryDraft: (expression: string) => void;
-  applyLogFilterQuery: (expression: string) => void;
-}
+const validationDebounceTimeout = 1000; // milliseconds
 
-export const useLogFilterState: (props: {
-  indexPattern: IIndexPattern;
-}) => LogFilterStateParams & LogFilterCallbacks = ({ indexPattern }) => {
-  const [state, setState] = useState(logFilterInitialState);
-  const { filterQuery, filterQueryDraft } = state;
+export const useLogFilterState = ({ indexPattern }: { indexPattern: IIndexPattern }) => {
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
 
-  const setLogFilterQueryDraft = useMemo(() => {
-    const setDraft = (payload: KueryFilterQuery) =>
-      setState((prevState) => ({ ...prevState, filterQueryDraft: payload }));
-    return (expression: string) =>
-      setDraft({
-        kind: 'kuery',
-        expression,
-      });
+  const parseQuery = useCallback(
+    (filterQuery: Query) => esQuery.buildEsQuery(indexPattern, filterQuery, []),
+    [indexPattern]
+  );
+
+  const setLogFilterQueryDraft = useCallback((filterQueryDraft: Query) => {
+    setLogFilterState((previousLogFilterState) => ({
+      ...previousLogFilterState,
+      filterQueryDraft,
+      validationErrors: [],
+    }));
   }, []);
-  const applyLogFilterQuery = useMemo(() => {
-    const applyQuery = (payload: SerializedFilterQuery) =>
-      setState((prevState) => ({
-        ...prevState,
-        filterQueryDraft: payload.query,
-        filterQuery: payload,
-      }));
-    return (expression: string) =>
-      applyQuery({
-        query: {
-          kind: 'kuery',
-          expression,
-        },
-        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+
+  const [, cancelPendingValidation] = useDebounce(
+    () => {
+      setLogFilterState((previousLogFilterState) => {
+        try {
+          parseQuery(logFilterState.filterQueryDraft);
+          return {
+            ...previousLogFilterState,
+            validationErrors: [],
+          };
+        } catch (error) {
+          return {
+            ...previousLogFilterState,
+            validationErrors: [`${error}`],
+          };
+        }
       });
-  }, [indexPattern]);
+    },
+    validationDebounceTimeout,
+    [logFilterState.filterQueryDraft, parseQuery]
+  );
 
-  const isFilterQueryDraftValid = useMemo(() => {
-    if (filterQueryDraft?.kind === 'kuery') {
+  const applyLogFilterQuery = useCallback(
+    (filterQuery: Query) => {
+      cancelPendingValidation();
       try {
-        esKuery.fromKueryExpression(filterQueryDraft.expression);
-      } catch (err) {
-        return false;
+        const parsedQuery = parseQuery(filterQuery);
+        setLogFilterState((previousLogFilterState) => ({
+          ...previousLogFilterState,
+          filterQuery: {
+            parsedQuery,
+            serializedQuery: JSON.stringify(parsedQuery),
+            originalQuery: filterQuery,
+          },
+          filterQueryDraft: filterQuery,
+          validationErrors: [],
+        }));
+      } catch (error) {
+        setLogFilterState((previousLogFilterState) => ({
+          ...previousLogFilterState,
+          validationErrors: [`${error}`],
+        }));
       }
-    }
-
-    return true;
-  }, [filterQueryDraft]);
-
-  const serializedFilterQuery = useMemo(() => (filterQuery ? filterQuery.serializedQuery : null), [
-    filterQuery,
-  ]);
+    },
+    [cancelPendingValidation, parseQuery]
+  );
 
   return {
-    ...state,
-    filterQueryAsKuery: state.filterQuery ? state.filterQuery.query : null,
-    filterQuery: serializedFilterQuery,
-    isFilterQueryDraftValid,
+    filterQuery: logFilterState.filterQuery,
+    filterQueryDraft: logFilterState.filterQueryDraft,
+    isFilterQueryDraftValid: logFilterState.validationErrors.length === 0,
     setLogFilterQueryDraft,
     applyLogFilterQuery,
   };
