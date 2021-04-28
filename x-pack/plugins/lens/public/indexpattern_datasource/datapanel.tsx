@@ -41,6 +41,8 @@ import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import { getUiActions } from '../kibana_services';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -84,6 +86,18 @@ const fieldTypeNames: Record<DataType, string> = {
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
   histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
 };
+
+const visualizeGeoFieldTrigger = getUiActions().getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
+if (visualizeGeoFieldTrigger) {
+  fieldTypeNames.geo_point = i18n.translate('xpack.lens.datatypes.geoPoint', {
+    defaultMessage: 'geo_point',
+  });
+  fieldTypeNames.geo_shape = i18n.translate('xpack.lens.datatypes.geoShape', {
+    defaultMessage: 'geo_shape',
+  });
+  supportedFieldTypes.add('geo_point');
+  supportedFieldTypes.add('geo_shape');
+}
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything

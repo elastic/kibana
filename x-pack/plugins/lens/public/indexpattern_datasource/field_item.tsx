@@ -54,6 +54,7 @@ import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 
 import { debouncedComponent } from '../debounced_component';
 
@@ -149,7 +150,13 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   function fetchData() {
     // Range types don't have any useful stats we can show
-    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
+    if (
+      state.isLoading ||
+      field.type === 'document' ||
+      field.type.includes('range') ||
+      field.type === 'geo_point' ||
+      field.type === 'geo_shape'
+    ) {
       return;
     }
 
@@ -465,6 +472,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             defaultMessage: `Summary information is not available for range type fields.`,
           })}
         </EuiText>
+      </>
+    );
+  } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+            defaultMessage: `Lens cannot visualize {fieldType} fields.`,
+            values: { fieldType: field.type },
+          })}
+        </EuiText>
+
+        <VisualizeGeoFieldButton indexPatternId={indexPattern.id} fieldName={field.name} />
       </>
     );
   } else if (
