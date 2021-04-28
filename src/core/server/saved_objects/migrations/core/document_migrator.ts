@@ -850,7 +850,8 @@ function assertNoDowngrades(
  * that we can later regenerate any inbound object references to match.
  *
  * @note This is only intended to be used when single-namespace object types are converted into multi-namespace object types.
+ * @internal
  */
-function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
+export function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
   return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }
