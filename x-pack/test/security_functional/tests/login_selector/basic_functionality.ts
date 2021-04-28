@@ -20,17 +20,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Basic functionality', function () {
     this.tags('includeFirefox');
 
+    const testCredentials = { username: 'admin_user', password: 'change_me' };
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/saml1')
         .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'saml1' } } })
         .expect(200);
 
+      await security.user.create(testCredentials.username, {
+        password: testCredentials.password,
+        roles: ['kibana_admin'],
+        full_name: 'Admin',
+      });
+
       await esArchiver.load('../../functional/es_archives/empty_kibana');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
+      await security.user.delete(testCredentials.username);
       await esArchiver.unload('../../functional/es_archives/empty_kibana');
     });
 
@@ -93,6 +101,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
+    });
+
+    it('can login after `Unauthorized` error after request authentication preserving original URL', async () => {
+      await getService('supertest')
+        .post('/authentication/app/setup')
+        .send({ simulateUnauthorized: true })
+        .expect(200);
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+      await browser.get(`${deployment.getHostPort()}/authentication/app?one=two`);
+
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be(
+        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
+      );
+
+      await getService('supertest')
+        .post('/authentication/app/setup')
+        .send({ simulateUnauthorized: false })
+        .expect(200);
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.path).to.eql('/authentication/app?one=two');
+    });
+
+    it('can login after `Unauthorized` error during request authentication preserving original URL', async () => {
+      // 1. Navigate to Kibana to make sure user is properly authenticated.
+      await PageObjects.common.navigateToUrl('management', 'security/users', {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
+      });
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+      await PageObjects.security.loginSelector.login('basic', 'basic1', testCredentials);
+      expect(parse(await browser.getCurrentUrl()).pathname).to.eql(
+        '/app/management/security/users'
+      );
+
+      // 2. Now disable user and try to refresh page causing authentication to fail.
+      await security.user.disable(testCredentials.username);
+      await browser.refresh();
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be(
+        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
+      );
+
+      // 3. Re-enable user and try to login again.
+      await security.user.enable(testCredentials.username);
+      await PageObjects.security.loginSelector.login('basic', 'basic1', testCredentials);
+      expect(parse(await browser.getCurrentUrl()).pathname).to.eql(
+        '/app/management/security/users'
+      );
     });
 
     it('should show toast with error if SSO fails', async () => {
