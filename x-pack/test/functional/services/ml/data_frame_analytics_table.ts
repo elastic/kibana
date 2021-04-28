@@ -10,9 +10,10 @@ import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+type ExpectedSectionTableEntries = Record<string, string>;
 export interface ExpectedSectionTable {
   section: string;
-  expectedEntries: Record<string, string>;
+  expectedEntries: ExpectedSectionTableEntries;
 }
 
 export type AnalyticsTableRowDetails = Record<'jobDetails' | 'jobStats', ExpectedSectionTable[]>;
@@ -364,54 +365,43 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return vars;
     }
 
-    public async assertJobDetailsTabContent(
+    public async assertRowDetailsSectionContent(
       jobId: string,
-      sections: Array<{
-        section: string;
-        expectedEntries: Record<string, string>;
-      }>
+      sectionSubject: string,
+      expectedEntries: ExpectedSectionTable['expectedEntries']
     ) {
-      const tabSubject = 'job-details';
-      await this.ensureDetailsTabOpen(jobId, tabSubject);
+      const sectionSelector = this.detailsSectionSelector(jobId, sectionSubject);
+      await this.assertDetailsSectionExists(jobId, sectionSubject);
 
-      for (const { section: sectionSubject, expectedEntries } of sections) {
-        const sectionSelector = this.detailsSectionSelector(jobId, sectionSubject);
-        await this.assertDetailsSectionExists(jobId, sectionSubject);
+      const sectionTable = await testSubjects.find(`${sectionSelector}-table`);
+      const parsedSectionTableEntries = await this.parseDetailsSectionTable(sectionTable);
 
-        const sectionTable = await testSubjects.find(`${sectionSelector}-table`);
-        const parsedSectionTableEntries = await this.parseDetailsSectionTable(sectionTable);
-
-        for (const [key, value] of Object.entries(expectedEntries)) {
-          expect(parsedSectionTableEntries)
-            .to.have.property(key)
-            .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
-        }
+      for (const [key, value] of Object.entries(expectedEntries)) {
+        expect(parsedSectionTableEntries)
+          .to.have.property(key)
+          .eql(
+            value,
+            `Expected ${sectionSubject} property '${key}' to exist with value '${value}'`
+          );
       }
     }
 
-    public async assertJobStatsTabContent(
-      jobId: string,
-      sections: Array<{
-        section: string;
-        expectedEntries: Record<string, string>;
-      }>
-    ) {
+    public async assertJobDetailsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
+      const tabSubject = 'job-details';
+      await this.ensureDetailsTabOpen(jobId, tabSubject);
+
+      for (const { section, expectedEntries } of sections) {
+        await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
+      }
+    }
+
+    public async assertJobStatsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
       const tabSubject = 'job-stats';
       await this.ensureDetailsTabOpen(jobId, tabSubject);
       await this.assertDetailsSectionExists(jobId, 'stats');
 
-      for (const { section: sectionSubject, expectedEntries } of sections) {
-        const sectionSelector = this.detailsSectionSelector(jobId, sectionSubject);
-        await this.assertDetailsSectionExists(jobId, sectionSubject);
-
-        const sectionTable = await testSubjects.find(`${sectionSelector}-table`);
-        const parsedSectionTableEntries = await this.parseDetailsSectionTable(sectionTable);
-
-        for (const [key, value] of Object.entries(expectedEntries)) {
-          expect(parsedSectionTableEntries)
-            .to.have.property(key)
-            .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
-        }
+      for (const { section, expectedEntries } of sections) {
+        await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
       }
     }
 
