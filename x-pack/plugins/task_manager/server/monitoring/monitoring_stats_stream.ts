@@ -17,6 +17,7 @@ import {
   summarizeWorkloadStat,
   WorkloadStat,
 } from './workload_statistics';
+import { EphemeralTaskStat, createEphemeralTaskAggregator } from './ephemeral_task_statistics';
 import {
   createTaskRunAggregator,
   summarizeTaskRunStat,
@@ -27,6 +28,7 @@ import { ConfigStat, createConfigurationAggregator } from './configuration_stati
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 
 export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -36,6 +38,7 @@ export interface MonitoringStats {
     configuration?: MonitoredStat<ConfigStat>;
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
+    ephemeral?: MonitoredStat<EphemeralTaskStat>;
   };
 }
 
@@ -64,6 +67,7 @@ export interface RawMonitoringStats {
 
 export function createAggregators(
   taskPollingLifecycle: TaskPollingLifecycle,
+  ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   taskStore: TaskStore,
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
@@ -79,7 +83,8 @@ export function createAggregators(
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
       logger
-    )
+    ),
+    createEphemeralTaskAggregator(ephemeralTaskLifecycle, logger)
   );
 }
 
@@ -116,7 +121,7 @@ export function summarizeMonitoringStats(
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
-    stats: { runtime, workload, configuration },
+    stats: { runtime, workload, configuration, ephemeral },
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
@@ -144,6 +149,14 @@ export function summarizeMonitoringStats(
             workload: {
               timestamp: workload.timestamp,
               ...summarizeWorkloadStat(workload.value),
+            },
+          }
+        : {}),
+      ...(ephemeral
+        ? {
+            ephemeral: {
+              timestamp: ephemeral.timestamp,
+              ...ephemeral.value,
             },
           }
         : {}),
