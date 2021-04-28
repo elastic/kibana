@@ -81,7 +81,6 @@ export const isCompleteDashboardAppState = (
 };
 
 export interface DashboardTopNavProps {
-  onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
   dashboardAppState: CompleteDashboardAppState;
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -89,7 +88,6 @@ export interface DashboardTopNavProps {
 
 export function DashboardTopNav({
   dashboardAppState,
-  onQuerySubmit,
   embedSettings,
   redirectTo,
 }: DashboardTopNavProps) {
@@ -497,7 +495,11 @@ export function DashboardTopNav({
       indexPatterns: dashboardAppState.indexPatterns,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
-      onQuerySubmit,
+      onQuerySubmit: (_payload, isUpdate) => {
+        if (isUpdate === false) {
+          dashboardAppState.$triggerDashboardRefresh.next({ force: true });
+        }
+      },
       onSavedQueryUpdated: (savedQuery: SavedQuery) => {
         // TODO: Figure out why this isn't run -- even in master
         const allFilters = data.query.filterManager.getFilters();
@@ -516,8 +518,9 @@ export function DashboardTopNav({
       },
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,
-      onSavedQueryIdChange: (newId: string | undefined) =>
-        dispatchDashboardStateChange(setSavedQueryId(newId)),
+      onSavedQueryIdChange: (newId: string | undefined) => {
+        dispatchDashboardStateChange(setSavedQueryId(newId));
+      },
     };
   };
 

@@ -17,7 +17,6 @@ import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import {
   syncQueryStateWithUrl,
   connectToQueryState,
-  esFilters,
   Filter,
   Query,
   waitUntilNextSessionCompletes$,
@@ -38,7 +37,6 @@ export const syncDashboardFilterState = ({
   savedDashboard,
   kbnUrlStateStorage,
   $onDashboardStateChange,
-  getLatestDashboardState,
   $triggerDashboardRefresh,
   dispatchDashboardStateChange,
 }: SyncDashboardFilterStateProps) => {
@@ -61,30 +59,29 @@ export const syncDashboardFilterState = ({
   );
 
   // starts syncing app filters between dashboard state and filterManager
+  const intermediateFilterState: { filters: Filter[]; query: Query } = {
+    query: queryString.getDefaultQuery(),
+    filters: [],
+  };
   const stopSyncingAppFilters = connectToQueryState(
     queryService,
     {
-      set: ({ filters, query }) =>
-        dispatchDashboardStateChange(
-          setFiltersAndQuery({
-            query: query || queryString.getDefaultQuery(),
-            filters: cleanFiltersForSerialize(filters) || [],
-          })
-        ),
-      get: () => ({
-        filters: getLatestDashboardState().filters,
-        query: getLatestDashboardState().query,
-      }),
+      get: () => intermediateFilterState,
+      set: ({ filters, query }) => {
+        intermediateFilterState.filters = cleanFiltersForSerialize(filters) || [];
+        intermediateFilterState.query = query || queryString.getDefaultQuery();
+        dispatchDashboardStateChange(setFiltersAndQuery(intermediateFilterState));
+      },
       state$: $onDashboardStateChange.pipe(
         map((appState) => ({
           filters: appState.filters,
-          query: queryString.formatQuery(appState.query),
+          query: appState.query,
         }))
       ),
     },
     {
-      filters: esFilters.FilterStateStore.APP_STATE,
       query: true,
+      filters: true,
     }
   );
 

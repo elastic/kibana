@@ -91,17 +91,7 @@ export function DashboardApp({
     <div className="app-container dshAppContainer">
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          <DashboardTopNav
-            {...{
-              dashboardAppState,
-              redirectTo,
-            }}
-            onQuerySubmit={(_payload, isUpdate) => {
-              if (isUpdate === false) {
-                dashboardAppState.$triggerDashboardRefresh.next({ force: true });
-              }
-            }}
-          />
+          <DashboardTopNav redirectTo={redirectTo} dashboardAppState={dashboardAppState} />
           <div className="dashboardViewport">
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>

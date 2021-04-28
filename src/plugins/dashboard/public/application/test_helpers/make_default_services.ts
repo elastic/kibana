@@ -21,6 +21,7 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
+import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 
 export function makeDefaultServices(): DashboardAppServices {
