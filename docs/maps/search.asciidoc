@@ -51,7 +51,7 @@ A spatial filter narrows search results to documents that either intersect with,
 
 You can create spatial filters in two ways:
 
-* Click the tool icon image:maps/images/tools_icon.png[], and then draw a shape, bounding box, or circle on the map to define the spatial filter.
+* Click the tool icon image:maps/images/tools_icon.png[], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
 * Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 
 Spatial filters have the following properties:
