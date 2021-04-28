@@ -591,7 +591,7 @@ export const getEntryOnOperatorChange = (
           },
           ...parent.parent.entries.slice(entryIndex + 1),
         ],
-      } as BuilderEntry,
+      },
     };
   } else {
     return { index: entryIndex, updatedEntry: newEntry };

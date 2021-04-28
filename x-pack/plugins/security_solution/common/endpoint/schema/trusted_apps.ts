@@ -35,7 +35,7 @@ const ConditionEntryTypeSchema = schema.conditional(
   schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
   schema.literal('match')
 );
-const ConditionEntryOperatorSchema = schema.literal('included' as ConditionEntry['operator']);
+const ConditionEntryOperatorSchema = schema.literal('included');
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
