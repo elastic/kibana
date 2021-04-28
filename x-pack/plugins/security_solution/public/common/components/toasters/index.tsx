@@ -20,6 +20,7 @@ export * from './errors';
  * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 export interface AppToast extends Toast {
+  // FunFact: In a very rare case of errors this can be something other than array. We have a unit test case for it and am leaving it like this type for now.
   errors?: string[];
 }
 

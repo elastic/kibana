@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { GetConfigFn } from '../../../types';
+import { IKibanaSearchResponse } from '../../types';
 
 /**
  * @internal
@@ -24,10 +24,7 @@ export interface FetchHandlers {
    * Callback which can be used to hook into responses, modify them, or perform
    * side effects like displaying UI errors on the client.
    */
-  onResponse: (
-    request: SearchRequest,
-    response: estypes.SearchResponse<any>
-  ) => estypes.SearchResponse<any>;
+  onResponse: (request: SearchRequest, response: IKibanaSearchResponse) => IKibanaSearchResponse;
 }
 
 export interface SearchError {
