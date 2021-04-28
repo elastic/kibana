@@ -75,7 +75,8 @@ const InputGroup = styled.div`
   grid-template-areas: 'field operator value remove';
 `;
 
-const InputItem = styled.div`
+const InputItem = styled.div<{ gridArea: string }>`
+  grid-area: ${({ gridArea }) => gridArea};
   align-self: center;
   margin: 4px;
   vertical-align: baseline;
@@ -158,7 +159,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
-        <InputItem style={{ gridArea: 'field' }}>
+        <InputItem gridArea="field">
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.field}>
             <EuiSuperSelect
               options={fieldOptions}
@@ -168,7 +169,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             />
           </ConditionEntryCell>
         </InputItem>
-        <InputItem style={{ gridArea: 'operator' }}>
+        <InputItem gridArea="operator">
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
             {entry.field === ConditionEntryField.PATH ? (
               <EuiSuperSelect
@@ -187,7 +188,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             )}
           </ConditionEntryCell>
         </InputItem>
-        <InputItem style={{ gridArea: 'value' }}>
+        <InputItem gridArea="value">
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText
               name="value"
@@ -205,7 +206,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             />
           </ConditionEntryCell>
         </InputItem>
-        <InputItem style={{ gridArea: 'remove' }}>
+        <InputItem gridArea="remove">
           {/* Unicode `nbsp` is used below so that Remove button is property displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
             <EuiButtonIcon
