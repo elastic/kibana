@@ -5,7 +5,13 @@
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"]
+      "kibana/server": ["src/core/server"],
+      "@emotion/core": [
+        "node_modules/@emotion/react"
+      ],
+      "emotion-theming": [
+        "node_modules/@emotion/react"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -54,7 +60,8 @@
       "jest",
       "flot",
       "jest-styled-components",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@emotion/react/types/css-prop"
     ]
   }
 }

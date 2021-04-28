@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+const usesStyledComponents = [
+  /src[\/\\]plugins[\/\\](data|kibana_react)[\/\\]/,
+  /x-pack[\/\\]plugins[\/\\](apm|beats_management|fleet|infra|lists|observability|osquery|security_solution|uptime)[\/\\]/,
+  /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
+];
+
 module.exports = () => {
   return {
     presets: [
@@ -20,12 +26,6 @@ module.exports = () => {
         },
       ],
       require('./common_preset'),
-      [
-        require.resolve('@emotion/babel-preset-css-prop'),
-        {
-          labelFormat: '[local]',
-        },
-      ],
     ],
     env: {
       production: {
@@ -42,16 +42,23 @@ module.exports = () => {
     },
     overrides: [
       {
-        include: [
-          /src[\/\\]plugins[\/\\](data|kibana_react)[\/\\]/,
-          /x-pack[\/\\]plugins[\/\\](apm|beats_management|fleet|infra|lists|observability|osquery|security_solution|uptime)[\/\\]/,
-          /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
-        ],
+        include: usesStyledComponents,
         plugins: [
           [
             require.resolve('babel-plugin-styled-components'),
             {
               fileName: false,
+            },
+          ],
+        ],
+      },
+      {
+        exclude: usesStyledComponents,
+        presets: [
+          [
+            require.resolve('@emotion/babel-preset-css-prop'),
+            {
+              labelFormat: '[local]',
             },
           ],
         ],

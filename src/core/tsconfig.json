@@ -15,7 +15,5 @@
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts",
-    // TODO: Remove when EUI includes `emotion`
-    "../../typings/react.d.ts",
   ]
 }
