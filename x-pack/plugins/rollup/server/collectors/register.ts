@@ -113,7 +113,7 @@ async function fetchRollupVisualizations(
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.references'],
+    filterPath: ['hits.hits._source.references', 'hits.hits._source.type'],
     body: {
       query: {
         bool: {
@@ -131,7 +131,9 @@ async function fetchRollupVisualizations(
   const visualizations = get(esResponse, 'hits.hits', []);
 
   let rollupVisualizations = 0;
+  let rollupLensVisualizations = 0;
   let rollupVisualizationsFromSavedSearches = 0;
+  let rollupLensVisualizationsFromSavedSearches = 0;
 
   visualizations.forEach((visualization: any) => {
     const references: Array<{ name: string; id: string; type: string }> | undefined = get(
@@ -148,8 +150,14 @@ async function fetchRollupVisualizations(
       );
       if (visualizationsFromPatterns.length) {
         rollupVisualizations++;
+        if (visualization._source.type === 'lens') {
+          rollupLensVisualizations++;
+        }
       } else if (visualizationsFromSavedSearches.length) {
         rollupVisualizationsFromSavedSearches++;
+        if (visualization._source.type === 'lens') {
+          rollupLensVisualizationsFromSavedSearches++;
+        }
       }
     }
   });
@@ -157,6 +165,8 @@ async function fetchRollupVisualizations(
   return {
     rollupVisualizations,
     rollupVisualizationsFromSavedSearches,
+    rollupLensVisualizations,
+    rollupLensVisualizationsFromSavedSearches,
   };
 }
 
@@ -169,8 +179,10 @@ interface Usage {
   };
   visualizations: {
     total: number;
+    lens_total: number;
     saved_searches: {
       total: number;
+      lens_total: number;
     };
   };
 }
@@ -192,8 +204,10 @@ export function registerRollupUsageCollector(
       visualizations: {
         saved_searches: {
           total: { type: 'long' },
+          lens_total: { type: 'long' },
         },
         total: { type: 'long' },
+        lens_total: { type: 'long' },
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
@@ -210,6 +224,8 @@ export function registerRollupUsageCollector(
       const {
         rollupVisualizations,
         rollupVisualizationsFromSavedSearches,
+        rollupLensVisualizations,
+        rollupLensVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(
         kibanaIndex,
         esClient,
@@ -226,8 +242,10 @@ export function registerRollupUsageCollector(
         },
         visualizations: {
           total: rollupVisualizations,
+          lens_total: rollupLensVisualizations,
           saved_searches: {
             total: rollupVisualizationsFromSavedSearches,
+            lens_total: rollupLensVisualizationsFromSavedSearches,
           },
         },
       };
