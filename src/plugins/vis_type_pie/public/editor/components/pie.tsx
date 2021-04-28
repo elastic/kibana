@@ -42,7 +42,7 @@ function DecimalSlider<ParamName extends string>({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('visDefaultEditor.decimalSlider.label', {
+      label={i18n.translate('visTypePie.editors.pie.decimalSliderLabel', {
         defaultMessage: 'Maximum decimal places for percent',
       })}
       data-test-subj="visTypePieValueDecimals"
