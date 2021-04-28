@@ -5,26 +5,82 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { GeoJsonProperties, Geometry } from 'geojson';
+import { Filter } from 'src/plugins/data/public';
 import { FeatureProperties } from './feature_properties';
-import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE, RawValue } from '../../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 import { Footer } from './footer';
 import { Header } from './header';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { PreIndexedShape } from '../../../../common/elasticsearch_util';
+import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+import { TooltipFeature } from '../../../../common/descriptor_types';
+import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
+import { ILayer } from '../../../classes/layers/layer';
 
-const VIEWS = {
-  PROPERTIES_VIEW: 'PROPERTIES_VIEW',
-  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW',
-  FILTER_ACTIONS_VIEW: 'FILTER_ACTIONS_VIEW',
-};
+enum VIEWS {
+  PROPERTIES_VIEW = 'PROPERTIES_VIEW',
+  GEOMETRY_FILTER_VIEW = 'GEOMETRY_FILTER_VIEW',
+  FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW',
+}
 
-export class FeaturesTooltip extends Component {
-  state = {};
+interface Props {
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  closeTooltip: () => void;
+  features: TooltipFeature[];
+  isLocked: boolean;
+  loadFeatureProperties: ({
+    layerId,
+    featureId,
+    mbProperties,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+    mbProperties: GeoJsonProperties;
+  }) => Promise<ITooltipProperty[]>;
+  loadFeatureGeometry: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Geometry | null;
+  getLayerName: (layerId: string) => Promise<string | null>;
+  findLayerById: (layerId: string) => ILayer | undefined;
+  geoFields: GeoFieldWithIndex[];
+  loadPreIndexedShape: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Promise<PreIndexedShape | null>;
+}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+interface State {
+  currentFeature: TooltipFeature | null;
+  filterView: ReactNode | null;
+  prevFeatures: TooltipFeature[];
+  view: VIEWS;
+}
+
+export class FeaturesTooltip extends Component<Props, State> {
+  state: State = {
+    currentFeature: null,
+    filterView: null,
+    prevFeatures: [],
+    view: VIEWS.PROPERTIES_VIEW,
+  };
+
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (nextProps.features !== prevState.prevFeatures) {
       return {
         currentFeature: nextProps.features ? nextProps.features[0] : null,
@@ -36,7 +92,7 @@ export class FeaturesTooltip extends Component {
     return null;
   }
 
-  _setCurrentFeature = (feature) => {
+  _setCurrentFeature = (feature: TooltipFeature) => {
     this.setState({ currentFeature: feature });
   };
 
@@ -48,11 +104,11 @@ export class FeaturesTooltip extends Component {
     this.setState({ view: VIEWS.PROPERTIES_VIEW, filterView: null });
   };
 
-  _showFilterActionsView = (filterView) => {
+  _showFilterActionsView = (filterView: ReactNode) => {
     this.setState({ view: VIEWS.FILTER_ACTIONS_VIEW, filterView });
   };
 
-  _renderActions(geoFields) {
+  _renderActions(geoFields: GeoFieldWithIndex[]) {
     if (!this.props.isLocked || geoFields.length === 0) {
       return null;
     }
@@ -67,7 +123,7 @@ export class FeaturesTooltip extends Component {
     );
   }
 
-  _filterGeoFields(featureGeometry) {
+  _filterGeoFields(featureGeometry: Geometry | null) {
     if (!featureGeometry) {
       return [];
     }
@@ -93,9 +149,9 @@ export class FeaturesTooltip extends Component {
     return this.props.geoFields;
   }
 
-  _loadCurrentFeaturePreIndexedShape = () => {
+  _loadCurrentFeaturePreIndexedShape = async () => {
     if (!this.state.currentFeature) {
-      return;
+      return null;
     }
 
     return this.props.loadPreIndexedShape({
@@ -104,7 +160,7 @@ export class FeaturesTooltip extends Component {
     });
   };
 
-  _renderBackButton(label) {
+  _renderBackButton(label: string) {
     return (
       <button
         className="euiContextMenuPanelTitle mapFeatureTooltip_backButton"
@@ -131,7 +187,11 @@ export class FeaturesTooltip extends Component {
     });
     const geoFields = this._filterGeoFields(currentFeatureGeometry);
 
-    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW && currentFeatureGeometry) {
+    if (
+      this.state.view === VIEWS.GEOMETRY_FILTER_VIEW &&
+      currentFeatureGeometry &&
+      this.props.addFilters
+    ) {
       return (
         <Fragment>
           {this._renderBackButton(
@@ -141,7 +201,6 @@ export class FeaturesTooltip extends Component {
           )}
           <FeatureGeometryFilterForm
             onClose={this.props.closeTooltip}
-            showPropertiesView={this._showPropertiesView}
             geometry={currentFeatureGeometry}
             geoFields={geoFields}
             addFilters={this.props.addFilters}

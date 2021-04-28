@@ -155,6 +155,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -164,6 +165,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -228,6 +230,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -245,6 +248,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
+      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
@@ -299,6 +303,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
