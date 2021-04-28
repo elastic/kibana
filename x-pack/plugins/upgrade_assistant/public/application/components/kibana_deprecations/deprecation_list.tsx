@@ -13,7 +13,7 @@ import type { DomainDeprecationDetails } from 'kibana/public';
 
 import { LevelFilterOption } from '../types';
 import { SearchBar, DeprecationListBar, DeprecationPagination } from '../shared';
-import { LEVEL_MAP, DEPRECATIONS_PER_PAGE } from '../constants';
+import { DEPRECATIONS_PER_PAGE } from '../constants';
 import { KibanaDeprecationAccordion } from './deprecation_item';
 import { StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
@@ -28,7 +28,7 @@ interface Props {
 
 const getFilteredDeprecations = (
   deprecations: DomainDeprecationDetails[],
-  level: string,
+  level: LevelFilterOption,
   search: string
 ) => {
   return deprecations
@@ -38,6 +38,7 @@ const getFilteredDeprecations = (
     .filter((filteredDep) => {
       if (search.length > 0) {
         try {
+          // 'i' is used for case-insensitive matching
           const searchReg = new RegExp(search, 'i');
           return searchReg.test(filteredDep.message);
         } catch (e) {
@@ -49,10 +50,6 @@ const getFilteredDeprecations = (
     });
 };
 
-const sortByLevelDesc = (a: DomainDeprecationDetails, b: DomainDeprecationDetails) => {
-  return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
-};
-
 export const KibanaDeprecationList: FunctionComponent<Props> = ({
   deprecations,
   showStepsModal,
@@ -60,7 +57,7 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
   reloadDeprecations,
   isLoading,
 }) => {
-  const [currentFilter, setCurrentFilter] = useState<LevelFilterOption>(LevelFilterOption.all);
+  const [currentFilter, setCurrentFilter] = useState<LevelFilterOption>('all');
   const [search, setSearch] = useState('');
   const [expandState, setExpandState] = useState({
     forceExpand: false,
@@ -73,7 +70,7 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
   };
 
   const levelGroups = groupBy(deprecations, 'level');
-  const deprecationLevelsCount = Object.keys(levelGroups).reduce((counts, level) => {
+  const levelToDeprecationCountMap = Object.keys(levelGroups).reduce((counts, level) => {
     counts[level] = levelGroups[level].length;
     return counts;
   }, {} as { [level: string]: number });
@@ -98,7 +95,7 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
         onFilterChange={setCurrentFilter}
         onSearchChange={setSearch}
         totalDeprecationsCount={deprecations.length}
-        deprecationLevelsCount={deprecationLevelsCount}
+        levelToDeprecationCountMap={levelToDeprecationCountMap}
       />
 
       {deprecationsWithErrors.length > 0 && (
@@ -119,7 +116,6 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
       <>
         {filteredDeprecations
           .slice(currentPage * DEPRECATIONS_PER_PAGE, (currentPage + 1) * DEPRECATIONS_PER_PAGE)
-          .sort(sortByLevelDesc)
           .map((deprecation, index) => [
             <div key={`kibana-deprecation-${index}`} data-test-subj="kibanaDeprecationItem">
               <KibanaDeprecationAccordion

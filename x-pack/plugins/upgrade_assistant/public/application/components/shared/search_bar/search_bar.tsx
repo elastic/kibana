@@ -31,7 +31,7 @@ interface SearchBarProps {
   onFilterChange: (filter: LevelFilterOption) => void;
   onSearchChange: (filter: string) => void;
   totalDeprecationsCount: number;
-  deprecationLevelsCount: {
+  levelToDeprecationCountMap: {
     [key: string]: number;
   };
   groupByFilterProps?: {
@@ -67,7 +67,7 @@ const i18nTexts = {
 
 export const SearchBar: FunctionComponent<SearchBarProps> = ({
   totalDeprecationsCount,
-  deprecationLevelsCount,
+  levelToDeprecationCountMap,
   isLoading,
   loadData,
   currentFilter,
@@ -108,7 +108,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = ({
             <DeprecationLevelFilter
               {...{
                 totalDeprecationsCount,
-                levelsCount: deprecationLevelsCount,
+                levelsCount: levelToDeprecationCountMap,
                 currentFilter,
                 onFilterChange,
               }}

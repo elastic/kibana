@@ -61,8 +61,8 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
           </EuiTitle>
         )}
 
-        {items.map((item) => (
-          <EuiText key={item.title || item.body}>
+        {items.map((item, index) => (
+          <EuiText key={`deprecation-item-${index}`}>
             {item.title && <h6>{item.title}</h6>}
             <p>{item.body}</p>
           </EuiText>

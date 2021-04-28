@@ -26,6 +26,7 @@ import { KibanaDeprecationList } from './deprecation_list';
 import { StepsModal, StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 import { ResolveDeprecationModal } from './resolve_deprecation_modal';
+import { LEVEL_MAP } from '../constants';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
@@ -51,6 +52,10 @@ const i18nTexts = {
   }),
 };
 
+const sortByLevelDesc = (a: DomainDeprecationDetails, b: DomainDeprecationDetails) => {
+  return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
+};
+
 export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     DomainDeprecationDetails[] | undefined
@@ -72,7 +77,8 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
     try {
       const response = await deprecations.getAllDeprecations();
-      setKibanaDeprecations(response);
+      const sortedDeprecations = response.sort(sortByLevelDesc);
+      setKibanaDeprecations(sortedDeprecations);
     } catch (e) {
       setError(e);
     }
@@ -81,18 +87,10 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   }, [deprecations]);
 
   const toggleStepsModal = (newStepsModalContent?: StepsModalContent) => {
-    if (typeof newStepsModalContent === 'undefined') {
-      setStepsModalContent(undefined);
-    }
-
     setStepsModalContent(newStepsModalContent);
   };
 
   const toggleResolveModal = (newResolveModalContent?: DomainDeprecationDetails) => {
-    if (typeof newResolveModalContent === 'undefined') {
-      setResolveModalContent(undefined);
-    }
-
     setResolveModalContent(newResolveModalContent);
   };
 
@@ -115,7 +113,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
     notifications.toasts.addSuccess(i18nTexts.successMessage);
     // Refetch deprecations
-    await getAllDeprecations();
+    getAllDeprecations();
   };
 
   useEffect(() => {

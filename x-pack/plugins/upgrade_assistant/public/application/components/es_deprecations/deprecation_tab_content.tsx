@@ -34,16 +34,17 @@ export interface CheckupTabProps extends UpgradeAssistantTabProps {
   checkupLabel: string;
 }
 
-export const filterDeps = (level: LevelFilterOption, search: string = '') => {
+export const createDependenciesFilter = (level: LevelFilterOption, search: string = '') => {
   const conditions: Array<(dep: EnrichedDeprecationInfo) => boolean> = [];
 
-  if (level !== LevelFilterOption.all) {
+  if (level !== 'all') {
     conditions.push((dep: EnrichedDeprecationInfo) => dep.level === level);
   }
 
   if (search.length > 0) {
     conditions.push((dep) => {
       try {
+        // 'i' is used for case-insensitive matching
         const searchReg = new RegExp(search, 'i');
         return searchReg.test(dep.message);
       } catch (e) {
@@ -57,37 +58,29 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
   return (dep: EnrichedDeprecationInfo) => conditions.map((c) => c(dep)).every((t) => t);
 };
 
-/**
- * Collection of calculated fields based on props
- */
-const calcFields = {
-  filteredDeprecations(props: {
-    deprecations: EnrichedDeprecationInfo[];
-    currentFilter: LevelFilterOption;
-    search: string;
-  }) {
-    const { deprecations = [], currentFilter, search } = props;
-    return deprecations.filter(filterDeps(currentFilter, search));
-  },
+const filterDeprecations = (
+  deprecations: EnrichedDeprecationInfo[] = [],
+  currentFilter: LevelFilterOption,
+  search: string
+) => deprecations.filter(createDependenciesFilter(currentFilter, search));
 
-  groups(props: {
-    deprecations: EnrichedDeprecationInfo[];
-    currentFilter: LevelFilterOption;
-    search: string;
-    currentGroupBy: GroupByOption;
-  }) {
-    return groupBy(calcFields.filteredDeprecations(props), props.currentGroupBy);
-  },
+const groupDeprecations = (
+  deprecations: EnrichedDeprecationInfo[],
+  currentFilter: LevelFilterOption,
+  search: string,
+  currentGroupBy: GroupByOption
+) => groupBy(filterDeprecations(deprecations, currentFilter, search), currentGroupBy);
 
-  numPages(props: {
-    deprecations: EnrichedDeprecationInfo[];
-    currentFilter: LevelFilterOption;
-    search: string;
-    currentGroupBy: GroupByOption;
-  }) {
-    return Math.ceil(Object.keys(calcFields.groups(props)).length / DEPRECATIONS_PER_PAGE);
-  },
-};
+const getPageCount = (
+  deprecations: EnrichedDeprecationInfo[],
+  currentFilter: LevelFilterOption,
+  search: string,
+  currentGroupBy: GroupByOption
+) =>
+  Math.ceil(
+    Object.keys(groupDeprecations(deprecations, currentFilter, search, currentGroupBy)).length /
+      DEPRECATIONS_PER_PAGE
+  );
 
 /**
  * Displays a list of deprecations that are filterable and groupable. Can be used for cluster,
@@ -101,7 +94,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   refreshCheckupData,
   navigateToOverviewPage,
 }) => {
-  const [currentFilter, setCurrentFilter] = useState<LevelFilterOption>(LevelFilterOption.all);
+  const [currentFilter, setCurrentFilter] = useState<LevelFilterOption>('all');
   const [search, setSearch] = useState<string>('');
   const [currentGroupBy, setCurrentGroupBy] = useState<GroupByOption>(GroupByOption.message);
   const [expandState, setExpandState] = useState({
@@ -124,12 +117,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
 
   useEffect(() => {
     if (deprecations) {
-      const pageCount = calcFields.numPages({
-        deprecations,
-        currentFilter,
-        search,
-        currentGroupBy,
-      });
+      const pageCount = getPageCount(deprecations, currentFilter, search, currentGroupBy);
 
       if (currentPage >= pageCount) {
         setCurrentPage(0);
@@ -154,23 +142,14 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
     content = <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   } else if (deprecations?.length) {
     const levelGroups = groupBy(deprecations, 'level');
-    const deprecationLevelsCount = Object.keys(levelGroups).reduce((counts, level) => {
+    const levelToDeprecationCountMap = Object.keys(levelGroups).reduce((counts, level) => {
       counts[level] = levelGroups[level].length;
       return counts;
     }, {} as Record<string, number>);
 
-    const filteredDeprecations = calcFields.filteredDeprecations({
-      deprecations,
-      currentFilter,
-      search,
-    });
+    const filteredDeprecations = filterDeprecations(deprecations, currentFilter, search);
 
-    const groups = calcFields.groups({
-      deprecations,
-      currentFilter,
-      search,
-      currentGroupBy,
-    });
+    const groups = groupDeprecations(deprecations, currentFilter, search, currentGroupBy);
 
     content = (
       <div data-test-subj="deprecationsContainer">
@@ -182,7 +161,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
           onFilterChange={setCurrentFilter}
           onSearchChange={setSearch}
           totalDeprecationsCount={deprecations.length}
-          deprecationLevelsCount={deprecationLevelsCount}
+          levelToDeprecationCountMap={levelToDeprecationCountMap}
           groupByFilterProps={{
             availableGroupByOptions: getAvailableGroupByOptions(),
             currentGroupBy,
@@ -218,7 +197,6 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
                 />
                 <EuiHorizontalRule margin="s" />
               </div>,
-              ,
             ])}
 
           {/* Only show pagination if we have more than DEPRECATIONS_PER_PAGE. */}
@@ -227,12 +205,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
               <EuiSpacer />
 
               <DeprecationPagination
-                pageCount={calcFields.numPages({
-                  deprecations,
-                  currentFilter,
-                  search,
-                  currentGroupBy,
-                })}
+                pageCount={getPageCount(deprecations, currentFilter, search, currentGroupBy)}
                 activePage={currentPage}
                 setPage={setCurrentPage}
               />

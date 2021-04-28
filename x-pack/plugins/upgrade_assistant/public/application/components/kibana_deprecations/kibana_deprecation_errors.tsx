@@ -16,7 +16,7 @@ interface Props {
 const i18nTexts = {
   pluginError: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorMessage', {
     defaultMessage:
-      'Not all Kibana deprecations were retrieved successfully. This list may be incomplete.',
+      'Not all Kibana deprecations were retrieved successfully. This list may be incomplete. Check the Kibana server logs for errors.',
   }),
   loadingError: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorMessage',

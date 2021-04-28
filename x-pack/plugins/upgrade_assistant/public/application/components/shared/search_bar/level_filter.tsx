@@ -41,19 +41,15 @@ export const DeprecationLevelFilter: React.FunctionComponent<DeprecationLevelPro
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
         <EuiFilterButton
-          key={LevelFilterOption.critical}
+          key="critical"
           onClick={() => {
-            onFilterChange(
-              currentFilter !== LevelFilterOption.critical
-                ? LevelFilterOption.critical
-                : LevelFilterOption.all
-            );
+            onFilterChange(currentFilter !== 'critical' ? 'critical' : 'all');
           }}
-          hasActiveFilters={currentFilter === LevelFilterOption.critical}
-          numFilters={levelsCount[LevelFilterOption.critical] || undefined}
+          hasActiveFilters={currentFilter === 'critical'}
+          numFilters={levelsCount.critical || undefined}
           data-test-subj="criticalLevelFilter"
         >
-          {LocalizedOptions[LevelFilterOption.critical]}
+          {LocalizedOptions.critical}
         </EuiFilterButton>
       </EuiFilterGroup>
     </EuiFlexItem>

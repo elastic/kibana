@@ -32,10 +32,7 @@ export enum LoadingState {
   Error,
 }
 
-export enum LevelFilterOption {
-  all = 'all',
-  critical = 'critical',
-}
+export type LevelFilterOption = 'all' | 'critical';
 
 export enum GroupByOption {
   message = 'message',
