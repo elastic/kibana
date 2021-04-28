@@ -57,4 +57,5 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
     examples/**/target/public \
     x-pack/examples/**/target/public \
     test/**/target/public
+  shopt -u globstar
 fi
