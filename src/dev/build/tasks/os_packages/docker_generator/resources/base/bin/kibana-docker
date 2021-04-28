@@ -162,6 +162,7 @@ kibana_vars=(
     timelion.enabled
     vega.enableExternalUrls
     xpack.actions.allowedHosts
+    xpack.actions.customHostSettings
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
     xpack.actions.preconfiguredAlertHistoryEsIndex
