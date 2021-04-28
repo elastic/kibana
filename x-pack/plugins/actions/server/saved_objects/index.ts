@@ -10,7 +10,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { RawAction } from '../types';
-import { getImportResultMessage, GO_TO_CONNECTORS_BUTTON_LABLE } from './get_import_result_message';
+import { getImportWarnings } from './get_import_warnings';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
 export const ALERT_SAVED_OBJECT_TYPE = 'alert';
@@ -34,14 +34,7 @@ export function setupSavedObjects(
       },
       onImport(connectors) {
         return {
-          warnings: [
-            {
-              type: 'action_required',
-              message: getImportResultMessage(connectors as Array<SavedObject<RawAction>>),
-              actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
-              buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
-            },
-          ],
+          warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
         };
       },
     },
