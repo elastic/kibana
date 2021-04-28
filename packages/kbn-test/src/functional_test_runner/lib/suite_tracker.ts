@@ -119,7 +119,10 @@ export class SuiteTracker {
     lifecycle.cleanup.add(() => {
       const suites = this.getAllFinishedSuites();
 
-      fs.writeFileSync(getTestMetadataPath(), JSON.stringify(suites, null, 2));
+      const json = JSON.stringify(suites, null, 2);
+      // eslint-disable-next-line no-console
+      console.log(json);
+      fs.writeFileSync(getTestMetadataPath(), json);
     });
   }
 

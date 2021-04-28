@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('spaces api with security', function () {
-    this.tags('ciGroup8');
+    this.tags('ciGroup27');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);

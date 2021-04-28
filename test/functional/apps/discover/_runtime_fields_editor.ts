@@ -32,7 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  describe('discover integration with runtime fields editor', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/97864
+  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');

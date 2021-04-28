@@ -1,15 +1,13 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/kibana-ci-baseline'
-  SLACK_NOTIFICATIONS_CHANNEL: '#kb-bk'
-  SLACK_NOTIFICATIONS_ENABLED: 'true'
 steps:
-  - command: .buildkite/scripts/build-setup.sh
+  - command: .buildkite/setup/pre_build.sh
     label: Pre-Build
 
   - wait
 
-  - command: .ci/buildkite/jobs/baseline.sh
+  - command: .buildkite/scripts/jobs/baseline.sh
     label: Default Build and Metrics
     agents:
       queue: baseline
@@ -17,5 +15,5 @@ steps:
   - wait: ~
     continue_on_failure: true
 
-  - command: .buildkite/scripts/post-build.sh
+  - command: .buildkite/setup/post_build.sh
     label: Post-Build

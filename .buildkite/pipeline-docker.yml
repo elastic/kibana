@@ -1,0 +1,52 @@
+steps:
+  # https://cloud.google.com/blog/products/devops-sre/artifact-registry-is-ga
+  # - command: |
+  #     export DOCKER_BUILDKIT=1 && \
+  #     docker buildx create --use && \
+  #     docker buildx build -t us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain \
+  #       --output type=image,name=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
+  #       --cache-to type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache \
+  #       --cache-from type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache
+  - command: .buildkite/scripts/bootstrap_docker.sh
+    label: Create bootstrapped docker image
+    agents:
+      queue: bootstrap
+  - wait
+  - command: node scripts/jest --ci --verbose --maxWorkers=6
+    label: 'Jest'
+    agents:
+      queue: bootstrap
+    artifact_paths: target/junit/**/*.xml
+    plugins:
+      - docker#v3.8.0:
+          image: 'us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT'
+          propagate-environment: true
+          volumes:
+            - './.git:/var/lib/kibana/workspace/kibana/.git'
+          # mount-checkout: false
+    parallelism: 2
+    timeout_in_minutes: 120
+  - command: .buildkite/scripts/build_kibana_docker.sh
+    label: Create docker image with Kibana distribution
+    agents:
+      queue: bootstrap
+    key: default-build
+  - command: '.buildkite/scripts/xpack-cigroup.sh'
+    label: 'Default CI Group %n (+1)'
+    parallelism: 13
+    agents:
+      queue: ci-group
+    artifact_paths: target/junit/**/*.xml
+    plugins:
+      - docker#v3.8.0:
+          image: 'us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT'
+          propagate-environment: true
+          volumes:
+            - './.git:/var/lib/kibana/workspace/kibana/.git'
+          # mount-checkout: false
+    depends_on: default-build
+  - wait: ~
+    continue_on_failure: true
+  - plugins:
+      - junit-annotate#v1.9.0:
+          artifacts: target/junit/**/*.xml

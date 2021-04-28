@@ -13,7 +13,7 @@ export default function alertingApiIntegrationTests({
   getService,
 }: FtrProviderContext) {
   describe('alerting api integration basic license', function () {
-    this.tags('ciGroup13');
+    this.tags('ciGroup26');
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerts'));

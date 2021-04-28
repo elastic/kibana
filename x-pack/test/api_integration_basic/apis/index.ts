@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
-    this.tags('ciGroup11');
+    this.tags('ciGroup24');
 
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));

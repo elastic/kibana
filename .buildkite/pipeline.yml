@@ -1,116 +1,102 @@
 steps:
-  # https://cloud.google.com/blog/products/devops-sre/artifact-registry-is-ga
-  # - command: |
-  #     export DOCKER_BUILDKIT=1 && \
-  #     docker buildx create --use && \
-  #     docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain \
-  #       --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
-  #       --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
-  #       --cache-from type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache
-  - command: |
-      export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
-      docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
-    agents:
-      queue: bootstrap
+  - command: .buildkite/setup/pre_build.sh
+    label: Pre-Build
   - wait
-  - command: node scripts/jest --ci --verbose --maxWorkers=6
-    label: 'Jest'
+  - command: .buildkite/scripts/jobs/build.sh
+    label: Build Kibana Distribution
+    agents:
+      queue: bootstrap
+    key: build
+  - command: .buildkite/scripts/jobs/build_oss.sh
+    label: Build OSS Kibana Distribution
+    agents:
+      queue: bootstrap
+    key: build-oss
+  - command: .buildkite/scripts/xpack-cigroup.sh
+    label: 'Default CI Group %n'
+    parallelism: 31
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/oss-cigroup.sh
+    label: 'OSS CI Group %n'
+    parallelism: 12
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/oss-firefox.sh
+    label: 'OSS Firefox Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/oss-accessibility.sh
+    label: 'OSS Accessibility Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/plugin_functional.sh
+    label: 'Plugin and Interpreter Functional Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build-oss
+
+  - command: .buildkite/scripts/xpack-firefox.sh
+    label: 'Default Firefox Smoke Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/xpack-accessibility.sh
+    label: 'Default Accessibility Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/test/jest.sh
+    label: 'Jest Tests'
     agents:
       queue: bootstrap
     artifact_paths: target/junit/**/*.xml
-    plugins:
-      - docker#v3.8.0:
-          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
-          propagate-environment: true
-          mount-checkout: false
-    parallelism: 2
-    timeout_in_minutes: 120
-  - command: |
-      export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .ci/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
-      docker push gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT
+
+  - command: .buildkite/scripts/test/jest_integration.sh
+    label: 'Jest Integration Tests'
     agents:
-      queue: bootstrap
-    key: default-build
-  - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
-    label: 'Default CI Group 1'
-    agents:
-      queue: ci-group
+      queue: jest
     artifact_paths: target/junit/**/*.xml
-    plugins:
-      - docker#v3.8.0:
-          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT'
-          propagate-environment: true
-          mount-checkout: false
-    depends_on: default-build
-  # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 1'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=2 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 2'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=3 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 3'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=4 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 4'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=5 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 5'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=6 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 6'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=7 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 7'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=8 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 8'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=9 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 9'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=10 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 10'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=11 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 11'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=12 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 12'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=13 .ci/buildkite/xpack-cigroup.sh'
-  #   label: 'Default CI Group 13'
-  #   agents:
-  #     queue: ci-group
-  #   artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/test/api_integration.sh
+    label: 'API Integration Tests'
+    agents:
+      queue: jest
+    artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/lint.sh
+    label: 'Lint'
+    agents:
+      queue: jest
+
+  - command: .buildkite/scripts/checks.sh
+    label: 'Checks'
+    agents:
+      queue: jest
+
   - wait: ~
     continue_on_failure: true
   - plugins:
       - junit-annotate#v1.9.0:
           artifacts: target/junit/**/*.xml
+  - wait: ~
+    continue_on_failure: true
+  - command: .buildkite/setup/post_build.sh
+    label: Post-Build

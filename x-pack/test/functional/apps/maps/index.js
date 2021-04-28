@@ -29,7 +29,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', async function () {
-      this.tags('ciGroup9');
+      this.tags('ciGroup22');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
       loadTestFile(require.resolve('./vector_styling'));
@@ -43,7 +43,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup10');
+      this.tags('ciGroup23');
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));

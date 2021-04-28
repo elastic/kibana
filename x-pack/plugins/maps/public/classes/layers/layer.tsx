@@ -54,6 +54,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;

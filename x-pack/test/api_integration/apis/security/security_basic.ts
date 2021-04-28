@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security (basic license)', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup19');
 
     // Updates here should be mirrored in `./index.js` if tests
     // should also run under a trial/platinum license.

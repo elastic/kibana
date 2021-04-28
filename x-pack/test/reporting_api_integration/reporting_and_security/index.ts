@@ -10,11 +10,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
-    this.tags('ciGroup2');
+    this.tags('ciGroup15');
 
     before(async () => {
       const reportingAPI = getService('reportingAPI');
       await reportingAPI.createDataAnalystRole();
+      await reportingAPI.createTestReportingUserRole();
       await reportingAPI.createDataAnalyst();
       await reportingAPI.createTestReportingUser();
     });

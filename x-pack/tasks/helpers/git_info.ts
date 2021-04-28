@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import path from 'path';
 // @ts-ignore barely used, untyped module
 import simpleGit from 'simple-git';
@@ -12,6 +13,12 @@ import simpleGit from 'simple-git';
 const gitDir = path.resolve(__dirname, '..', '..');
 
 export async function gitInfo() {
+  if (!fs.existsSync(path.join(gitDir, '.git'))) {
+    return {
+      number: 1,
+      sha: process.env.GIT_COMMIT,
+    }; // TODO
+  }
   const git = simpleGit(gitDir);
 
   return new Promise<{ number: number; sha: string }>((resolve, reject) => {

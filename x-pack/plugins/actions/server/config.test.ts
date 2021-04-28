@@ -23,6 +23,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -58,6 +64,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",

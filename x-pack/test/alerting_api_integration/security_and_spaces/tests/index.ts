@@ -58,9 +58,13 @@ export async function tearDown(getService: FtrProviderContext['getService']) {
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration security and spaces enabled', function () {
-    this.tags('ciGroup5');
+    describe('', () => {
+      this.tags('ciGroup30');
+      loadTestFile(require.resolve('./actions'));
+    });
 
-    loadTestFile(require.resolve('./actions'));
-    loadTestFile(require.resolve('./alerting'));
+    describe('', () => {
+      loadTestFile(require.resolve('./alerting'));
+    });
   });
 }

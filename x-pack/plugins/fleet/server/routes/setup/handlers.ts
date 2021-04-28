@@ -46,13 +46,10 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const setupStatus = await setupIngestManager(soClient, esClient);
-    const body: PostIngestSetupResponse = {
-      isInitialized: true,
-    };
+    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
 
-    if (setupStatus.nonFatalPackageUpgradeErrors.length > 0) {
-      body.nonFatalPackageUpgradeErrors = setupStatus.nonFatalPackageUpgradeErrors;
+    if (body.nonFatalPackageUpgradeErrors?.length === 0) {
+      delete body.nonFatalPackageUpgradeErrors;
     }
 
     return response.ok({

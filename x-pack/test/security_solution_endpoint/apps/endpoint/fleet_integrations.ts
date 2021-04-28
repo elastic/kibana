@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('When in the Fleet application', function () {
-    this.tags(['ciGroup7']);
+    this.tags(['ciGroup25']);
 
     describe('and on the Endpoint Integration details page', () => {
       beforeEach(async () => {

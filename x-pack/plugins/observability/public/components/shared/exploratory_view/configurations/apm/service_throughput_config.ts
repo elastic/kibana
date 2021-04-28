@@ -22,11 +22,13 @@ export function getServiceThroughputLensConfig({
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'transaction.duration.us',
-      label: 'Throughput',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'transaction.duration.us',
+        label: 'Throughput',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [
       'user_agent.name',

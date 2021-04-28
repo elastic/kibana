@@ -9,6 +9,7 @@
 import Path from 'path';
 
 import execa from 'execa';
+import fs from 'fs';
 
 export type Changes = Map<string, 'modified' | 'deleted'>;
 
@@ -16,11 +17,16 @@ export type Changes = Map<string, 'modified' | 'deleted'>;
  * get the changes in all the context directories (plugin public paths)
  */
 export async function getChanges(dir: string) {
+  const changes: Changes = new Map();
+
+  if (!fs.existsSync(Path.join(dir, '.git'))) {
+    return changes;
+  }
+
   const { stdout } = await execa('git', ['ls-files', '-dmt', '--', dir], {
     cwd: dir,
   });
 
-  const changes: Changes = new Map();
   const output = stdout.trim();
 
   if (output) {

@@ -83,14 +83,14 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
-            if (setupResponse.data.preconfigurationError) {
+            if (setupResponse.data?.preconfigurationError) {
               notifications.toasts.addError(setupResponse.data.preconfigurationError, {
                 title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
                   defaultMessage: 'Configuration error',
                 }),
               });
             }
-            if (setupResponse.data.nonFatalPackageUpgradeErrors) {
+            if (setupResponse.data?.nonFatalPackageUpgradeErrors) {
               notifications.toasts.addError(setupResponse.data.nonFatalPackageUpgradeErrors, {
                 title: i18n.translate('xpack.fleet.setup.nonFatalPackageErrorsTitle', {
                   defaultMessage: 'One or more packages could not be successfully upgraded',

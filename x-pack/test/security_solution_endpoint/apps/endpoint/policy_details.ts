@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
-    this.tags(['ciGroup7']);
+    this.tags(['ciGroup25']);
 
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {

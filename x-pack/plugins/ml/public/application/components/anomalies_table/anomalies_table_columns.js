@@ -99,7 +99,7 @@ export function getColumns(
       field: 'time',
       'data-test-subj': 'mlAnomaliesListColumnTime',
       name: i18n.translate('xpack.ml.anomaliesTable.timeColumnName', {
-        defaultMessage: 'time',
+        defaultMessage: 'Time',
       }),
       dataType: 'date',
       scope: 'row',
@@ -110,9 +110,21 @@ export function getColumns(
     {
       field: 'severity',
       'data-test-subj': 'mlAnomaliesListColumnSeverity',
-      name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-        defaultMessage: 'severity',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
+            defaultMessage:
+              'A normalized score between 0-100, which indicates the relative significance of the anomaly record results.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+              defaultMessage: 'Severity',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       render: (score, item) => (
         <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />
       ),
@@ -122,7 +134,7 @@ export function getColumns(
       field: 'detector',
       'data-test-subj': 'mlAnomaliesListColumnDetector',
       name: i18n.translate('xpack.ml.anomaliesTable.detectorColumnName', {
-        defaultMessage: 'detector',
+        defaultMessage: 'Detector',
       }),
       render: (detectorDescription, item) => (
         <DetectorCell detectorDescription={detectorDescription} numberOfRules={item.rulesLength} />
@@ -137,7 +149,7 @@ export function getColumns(
       field: 'entityValue',
       'data-test-subj': 'mlAnomaliesListColumnFoundFor',
       name: i18n.translate('xpack.ml.anomaliesTable.entityValueColumnName', {
-        defaultMessage: 'found for',
+        defaultMessage: 'Found for',
       }),
       render: (entityValue, item) => (
         <EntityCell
@@ -157,7 +169,7 @@ export function getColumns(
       field: 'influencers',
       'data-test-subj': 'mlAnomaliesListColumnInfluencers',
       name: i18n.translate('xpack.ml.anomaliesTable.influencersColumnName', {
-        defaultMessage: 'influenced by',
+        defaultMessage: 'Influenced by',
       }),
       render: (influencers) => (
         <InfluencersCell
@@ -242,7 +254,7 @@ export function getColumns(
         field: 'metricDescriptionSort',
         'data-test-subj': 'mlAnomaliesListColumnDescription',
         name: i18n.translate('xpack.ml.anomaliesTable.metricDescriptionSortColumnName', {
-          defaultMessage: 'description',
+          defaultMessage: 'Description',
         }),
         render: (metricDescriptionSort, item) => (
           <DescriptionCell actual={item.actual} typical={item.typical} />
@@ -258,7 +270,7 @@ export function getColumns(
       field: 'jobId',
       'data-test-subj': 'mlAnomaliesListColumnJobID',
       name: i18n.translate('xpack.ml.anomaliesTable.jobIdColumnName', {
-        defaultMessage: 'job ID',
+        defaultMessage: 'Job ID',
       }),
       sortable: true,
     });
@@ -269,7 +281,7 @@ export function getColumns(
     columns.push({
       'data-test-subj': 'mlAnomaliesListColumnCategoryExamples',
       name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
-        defaultMessage: 'category examples',
+        defaultMessage: 'Category examples',
       }),
       truncateText: true,
       render: (item) => {
@@ -299,7 +311,7 @@ export function getColumns(
     columns.push({
       'data-test-subj': 'mlAnomaliesListColumnAction',
       name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
-        defaultMessage: 'actions',
+        defaultMessage: 'Actions',
       }),
       render: (item) => {
         if (showLinksMenuForItem(item, showViewSeriesLink) === true) {

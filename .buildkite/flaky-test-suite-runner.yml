@@ -15,5 +15,5 @@ steps:
   #       required: true
   #       default: 75
   # - wait
-  - command: .buildkite/scripts/flaky-test-suite-runner.sh | buildkite-agent pipeline upload
+  - command: .buildkite/scripts/jobs/flaky_test_suite_runner.sh | buildkite-agent pipeline upload
     label: ':pipeline: Upload'
