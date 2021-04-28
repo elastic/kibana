@@ -85,24 +85,6 @@ const configurationCheckResult = {
   ),
 };
 
-const isMissingSecretsMessage = {
-  isEnabled: false,
-  message: i18n.translate(
-    'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeHasMissingSecretsMessage',
-    { defaultMessage: 'This connector has missing secrets.' }
-  ),
-  messageCard: (
-    <EuiCard
-      title={i18n.translate(
-        'xpack.triggersActionsUI.sections.alertForm.actionTypeHasMissingSecretsTitle',
-        { defaultMessage: 'This connector is broken.' }
-      )}
-      description=""
-      className="actCheckActionTypeEnabled__disabledActionWarningCard"
-    />
-  ),
-};
-
 export function checkActionTypeEnabled(
   actionType?: ActionType
 ): IsEnabledResult | IsDisabledResult {
@@ -133,16 +115,6 @@ export function checkActionFormActionTypeEnabled(
     )
   ) {
     return configurationCheckResult;
-  }
-
-  return { isEnabled: true };
-}
-
-export function checkConnectorHasMissingSecrets(
-  connector: ActionConnector
-): IsEnabledResult | IsDisabledResult {
-  if (connector.isMissingSecrets) {
-    return isMissingSecretsMessage;
   }
 
   return { isEnabled: true };
