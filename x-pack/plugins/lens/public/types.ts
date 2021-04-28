@@ -302,6 +302,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
+  isFullscreen: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;

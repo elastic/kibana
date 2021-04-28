@@ -122,6 +122,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     dateRange,
     dimensionGroups,
     toggleFullscreen,
+    isFullscreen,
   } = props;
   const services = {
     data: props.data,
@@ -473,6 +474,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             indexPattern={currentIndexPattern}
             operationDefinitionMap={operationDefinitionMap}
             toggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
             {...services}
           />
         )}
@@ -567,6 +569,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             indexPattern={currentIndexPattern}
             operationDefinitionMap={operationDefinitionMap}
             toggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
             {...services}
           />
         </>

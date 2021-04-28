@@ -230,9 +230,9 @@ function FormulaEditor({
   operationDefinitionMap,
   data,
   toggleFullscreen,
+  isFullscreen,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel>(
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
@@ -599,13 +599,13 @@ function FormulaEditor({
   // while it has focus.
   useEffect(() => {
     if (updateAfterTyping.current) {
-      if (isOpen) {
+      if (isFullscreen) {
         if (editor2.current) registerOnTypeHandler(editor2.current);
       } else {
         if (editor1.current) registerOnTypeHandler(editor1.current);
       }
     }
-  }, [isOpen, registerOnTypeHandler]);
+  }, [isFullscreen, registerOnTypeHandler]);
 
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
@@ -621,7 +621,7 @@ function FormulaEditor({
       wordWrap: 'on',
       // Disable suggestions that appear when we don't provide a default suggestion
       wordBasedSuggestions: false,
-      dimension: { width: 290, height: 280 },
+      dimension: { width: 290, height: isFullscreen ? 400 : 280 },
       fixedOverflowWidgets: true,
     },
   };
@@ -657,7 +657,6 @@ function FormulaEditor({
           <EuiFlexItem>
             <EuiButtonEmpty
               onClick={() => {
-                setIsOpen(!isOpen);
                 toggleFullscreen();
               }}
               iconType="fullScreen"
@@ -675,7 +674,7 @@ function FormulaEditor({
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <CodeEditor
           {...codeEditorOptions}
-          height={50}
+          height={isFullscreen ? 200 : 50}
           width={'100%'}
           options={{
             ...codeEditorOptions.options,
@@ -693,7 +692,7 @@ function FormulaEditor({
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top lnsIndexPatternDimensionEditor__section--bottom">
         <EuiFlexGroup>
           <EuiFlexItem>
-            {isOpen ? (
+            {isFullscreen ? (
               <MemoizedFormulaHelp
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}
@@ -730,7 +729,7 @@ function FormulaEditor({
         {false ? (
           <EuiModal
             onClose={() => {
-              setIsOpen(false);
+              // setIsOpen(false);
               setText(currentColumn.params.formula);
             }}
           >

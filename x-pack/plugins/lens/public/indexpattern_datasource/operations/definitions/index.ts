@@ -151,6 +151,7 @@ export interface ParamEditorProps<C> {
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   toggleFullscreen: () => void;
+  isFullscreen: boolean;
   columnId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;

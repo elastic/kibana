@@ -109,4 +109,5 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 
 .lnsFrameLayout__sidebar--fullscreen {
   flex-basis: 50%;
+  max-width: calc(50%);
 }

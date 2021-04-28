@@ -50,6 +50,7 @@ export function LayerPanel(
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
+    isFullscreen: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -67,6 +68,7 @@ export function LayerPanel(
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
+    isFullscreen,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
@@ -421,6 +423,9 @@ export function LayerPanel(
             }
           }
           setActiveDimension(initialActiveDimensionState);
+          if (isFullscreen) {
+            toggleFullscreen();
+          }
         }}
         panel={
           <>
@@ -436,6 +441,7 @@ export function LayerPanel(
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
                   toggleFullscreen,
+                  isFullscreen,
                   setState: (
                     newState: unknown,
                     {
@@ -476,6 +482,7 @@ export function LayerPanel(
             )}
             {activeGroup &&
               activeId &&
+              !isFullscreen &&
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
