@@ -16,7 +16,10 @@ import { SearchError } from './types';
  * @param {Object} resp - optional HTTP response
  */
 export class RequestFailure extends KbnError {
-  constructor(err: SearchError | null = null, public resp?: IKibanaSearchResponse) {
+  public resp?: IKibanaSearchResponse;
+  constructor(err: SearchError | null = null, resp?: IKibanaSearchResponse) {
     super(`Request to Elasticsearch failed: ${JSON.stringify(resp?.rawResponse || err?.message)}`);
+
+    this.resp = resp;
   }
 }
