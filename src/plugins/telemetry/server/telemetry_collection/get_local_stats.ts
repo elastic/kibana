@@ -55,6 +55,7 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
+ * @internal only used externally by the X-Pack Telemetry extension
  * @param clustersDetails uuids array of cluster uuid's
  * @param config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
  * @param context contains logger and version (string)
