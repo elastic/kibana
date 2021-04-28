@@ -32,7 +32,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     overflow: hidden;
   }
 
-  div.app-wrapper {
+  div.kbnAppWrapper {
     background-color: rgba(0,0,0,0);
   }
 

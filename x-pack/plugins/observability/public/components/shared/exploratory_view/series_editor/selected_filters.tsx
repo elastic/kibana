@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { useUrlStorage } from '../hooks/use_url_storage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -31,7 +31,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
   let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions, dataSeries);
 
   // we don't want to display report definition filters in new series view
-  if (seriesId === NEW_SERIES_KEY && isNew) {
+  if (isNew) {
     definitionFilters = [];
   }
 

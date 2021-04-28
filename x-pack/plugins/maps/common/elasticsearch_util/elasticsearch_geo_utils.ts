@@ -371,7 +371,7 @@ export function createSpatialFilterWithGeometry({
   geoFieldName,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
-  preIndexedShape?: PreIndexedShape;
+  preIndexedShape?: PreIndexedShape | null;
   geometry: Polygon;
   geometryLabel: string;
   indexPatternId: string;
