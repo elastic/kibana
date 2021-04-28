@@ -58,7 +58,7 @@ def xpackCiGroupDocker() {
         tar -xzf ../kibana-default.tar.gz -C "../kibana-build-xpack" --strip=1
         tar -xzf ../kibana-default-plugins.tar.gz
       """, "Extract Default Build artifacts")
-      kibanaPipeline.xpackCiGroupProcess('Docker', true)
+      kibanaPipeline.xpackCiGroupProcess('Docker', true)()
     }
   }
 }
