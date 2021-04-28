@@ -49,43 +49,35 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       const ids = body.ids;
       try {
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const statusesById = await ruleStatusClient.findBulk(ids);
         const failingRules = await getFailingRules(ids, alertsClient);
 
         const statuses = await ids.reduce(async (acc, id) => {
           const accumulated = await acc;
-          const lastFiveErrorsForId = await ruleStatusClient.find({
-            perPage: 6,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: id,
-            searchFields: ['alertId'],
-          });
+          const lastFiveErrorsForId = statusesById[id];
 
-          if (lastFiveErrorsForId.saved_objects.length === 0) {
+          if (lastFiveErrorsForId == null || lastFiveErrorsForId.length === 0) {
             return accumulated;
           }
 
           const failingRule = failingRules[id];
-          const lastFailureAt = lastFiveErrorsForId.saved_objects[0].attributes.lastFailureAt;
+          const lastFailureAt = lastFiveErrorsForId[0].lastFailureAt;
 
           if (
             failingRule != null &&
             (lastFailureAt == null ||
               new Date(failingRule.executionStatus.lastExecutionDate) > new Date(lastFailureAt))
           ) {
-            const currentStatus = lastFiveErrorsForId.saved_objects[0];
+            const currentStatus = lastFiveErrorsForId[0];
             currentStatus.attributes.lastFailureMessage = `Reason: ${failingRule.executionStatus.error?.reason} Message: ${failingRule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.statusDate = failingRule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = 'failed';
-            const updatedLastFiveErrorsSO = [
-              currentStatus,
-              ...lastFiveErrorsForId.saved_objects.slice(1),
-            ];
+            const updatedLastFiveErrorsSO = [currentStatus, ...lastFiveErrorsForId.slice(1)];
 
             return mergeStatuses(id, updatedLastFiveErrorsSO, accumulated);
           }
-          return mergeStatuses(id, [...lastFiveErrorsForId.saved_objects], accumulated);
+          return mergeStatuses(id, [...lastFiveErrorsForId], accumulated);
         }, Promise.resolve<RuleStatusResponse>({}));
 
         return response.ok({ body: statuses });
