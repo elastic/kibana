@@ -252,12 +252,21 @@ You will still see the `X.keyword` field, when available.
 This is useful for sparse data in time series.
 
 To select a different way to represent missing values, click on the *brush* button above the visualization in the editor to see a selection of strategies to handle missing values. The default strategy is to hide the gaps.
++
+[role="screenshot"]
+image::images/lens_missing_values_strategy.png[Lens Missing values strategies menu]
 
 [float]
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
 ===== Is it possible to statically define the scale of the Y axis in a visualization?
 
-At the moment it is not possible to change the scale of the Y axis (for instance, making it start from another value than 0) in *Lens*.
+At the moment it is not possible to change the scale of the Y axis (for instance, making it start from another value than 0, or use a logarithmic scale.) in *Lens*.
+
+[float]
+[[is-it-possible-to-have-pagination-for-datatable]]
+===== Is it possible to have pagination in the datatable visualization?
+
+At the moment it is not possible to have pagination on a *Lens* datatable. However the <<types-of-visualizations,aggregation based data table>> does support this feature.
 
 [float]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
