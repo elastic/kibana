@@ -15,7 +15,6 @@ import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { KibanaContextProvider } from '../../../public/shared_imports';
 import { AppServicesContext } from '../../../public/types';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
-import { TestSubjects } from '../helpers';
 import { POLICY_NAME } from './constants';
 
 const getTestBedConfig = (testBedConfigArgs?: Partial<TestBedConfig>): TestBedConfig => {
@@ -52,8 +51,5 @@ export const initTestBed = (arg?: {
   testBedConfig?: Partial<TestBedConfig>;
 }) => {
   const { testBedConfig: testBedConfigArgs, ...rest } = arg || {};
-  return registerTestBed<TestSubjects>(
-    EditPolicyContainer,
-    getTestBedConfig(testBedConfigArgs)
-  )(rest);
+  return registerTestBed(EditPolicyContainer, getTestBedConfig(testBedConfigArgs))(rest);
 };

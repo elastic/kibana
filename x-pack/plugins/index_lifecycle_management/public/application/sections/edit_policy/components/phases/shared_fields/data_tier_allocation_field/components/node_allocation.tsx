@@ -69,7 +69,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
   let nodeAllocationOptions = [];
 
   // On Cloud, allocating to data tiers and allocating to data nodes is mutually exclusive. So we
-  // only let users select this option if they're using data nodes. Otherwise we remove it.r
+  // only let users select this option if they're using data nodes. Otherwise we remove it.
   //
   // On prem, users should have the freedom to choose this option, even if they're using node roles.
   // So we always give them this option.

@@ -8,23 +8,3 @@
 import { Phases } from '../../../common/types';
 
 export type Phase = keyof Phases;
-
-export type TestSubjects =
-  | 'snapshotPolicyCombobox'
-  | 'savePolicyButton'
-  | 'customPolicyCallout'
-  | 'noPoliciesCallout'
-  | 'policiesErrorCallout'
-  | 'rolloverSwitch'
-  | 'rolloverSettingsRequired'
-  | 'hot-selectedMaxSizeStored'
-  | 'hot-selectedMaxSizeStoredUnits'
-  | 'hot-selectedMaxDocuments'
-  | 'hot-selectedMaxAge'
-  | 'hot-selectedMaxAgeUnits'
-  | 'policyTablePolicyNameLink'
-  | 'policyTitle'
-  | 'createPolicyButton'
-  | 'cold-freezeSwitch'
-  | 'frozen-freezeSwitch'
-  | string;

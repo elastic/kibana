@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { TestSubjects, Phase } from './types';
+export { Phase } from './types';
 
 export { createNodeAllocationActions } from './create_node_allocation_actions';
 export { createEnablePhaseAction } from './create_enable_phase_action';
