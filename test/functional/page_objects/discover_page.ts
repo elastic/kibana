@@ -88,6 +88,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
+      const isLegacy = await this.useLegacyTable();
+      if (isLegacy) {
+        return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      }
       const table = await this.getDocTable();
       return await table.getHeaderFields();
     }
