@@ -50,6 +50,8 @@ interface QueryBarDefineRuleProps {
   onValidityChange?: (arg: boolean) => void;
 }
 
+const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
+
 const StyledEuiFormRow = styled(EuiFormRow)`
   .kbnTypeahead__items {
     max-height: 45vh !important;
@@ -252,11 +254,6 @@ export const QueryBarDefineRule = ({
       }
     }
   };
-
-  const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(
-    () => ['duplicate', 'createFrom'],
-    []
-  );
 
   return (
     <>
