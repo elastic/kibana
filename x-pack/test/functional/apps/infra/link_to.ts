@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(parsedUrl.pathname).to.be('/app/logs/stream');
         expect(parsedUrl.searchParams.get('logFilter')).to.be(
-          `(expression:'trace.id:${traceId}',kind:kuery)`
+          `(language:kuery,query:'trace.id:${traceId}')`
         );
         expect(parsedUrl.searchParams.get('logPosition')).to.be(
           `(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)`
