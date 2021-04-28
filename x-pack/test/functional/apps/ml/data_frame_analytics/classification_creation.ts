@@ -89,7 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'stats',
                 expectedEntries: {
-                  model_memory_limit: '25mb',
                   version: '8.0.0',
                 },
               },
