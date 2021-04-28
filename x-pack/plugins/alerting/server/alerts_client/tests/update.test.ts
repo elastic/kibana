@@ -692,6 +692,53 @@ describe('update()', () => {
     `);
   });
 
+  it('throws an error if API key creation throws', async () => {
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () =>
+        await alertsClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '10s' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: could not create API key - no"`
+    );
+  });
+
   it('should validate params', async () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',

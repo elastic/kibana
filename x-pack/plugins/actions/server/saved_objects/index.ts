@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import { SavedObject, SavedObjectsServiceSetup } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
+import { RawAction } from '../types';
+import { getImportResultMessage, GO_TO_CONNECTORS_BUTTON_LABLE } from './get_import_result_message';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
 export const ALERT_SAVED_OBJECT_TYPE = 'alert';
@@ -24,6 +26,25 @@ export function setupSavedObjects(
     namespaceType: 'single',
     mappings: mappings.action,
     migrations: getMigrations(encryptedSavedObjects),
+    management: {
+      defaultSearchField: 'name',
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Connector: [${obj.attributes.name}]`;
+      },
+      onImport(connectors) {
+        return {
+          warnings: [
+            {
+              type: 'action_required',
+              message: getImportResultMessage(connectors as Array<SavedObject<RawAction>>),
+              actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
+              buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
+            },
+          ],
+        };
+      },
+    },
   });
 
   // Encrypted attributes

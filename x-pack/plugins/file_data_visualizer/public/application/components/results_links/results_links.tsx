@@ -220,6 +220,7 @@ export const ResultsLinks: FC<Props> = ({
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+          data-test-subj="fileDataVisFilebeatConfigLink"
           title={
             <FormattedMessage
               id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfig"

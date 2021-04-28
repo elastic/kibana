@@ -88,7 +88,7 @@ export function DashboardApp({
   }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
 
   return (
-    <div className="app-container dshAppContainer">
+    <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
           <DashboardTopNav redirectTo={redirectTo} dashboardAppState={dashboardAppState} />
@@ -97,6 +97,6 @@ export function DashboardApp({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }
