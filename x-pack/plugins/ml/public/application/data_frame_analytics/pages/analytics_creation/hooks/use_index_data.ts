@@ -125,9 +125,9 @@ export const useIndexData = (
       // Get all field names for each returned doc and flatten it
       // to a list of unique field names used across all docs.
       const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
-      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))].filter((d) =>
-        allKibanaIndexPatternFields.includes(d)
-      );
+      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+        .filter((d) => allKibanaIndexPatternFields.includes(d))
+        .sort();
 
       setStatus(INDEX_STATUS.LOADED);
       setIndexPatternFields(populatedFields);
