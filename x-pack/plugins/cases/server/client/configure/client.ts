@@ -40,10 +40,9 @@ import { getMappings } from './get_mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
-import { ECS_OUTCOMES, Operations } from '../../authorization';
+import { Operations } from '../../authorization';
 import {
   combineAuthorizedAndOwnerFilter,
-  createAuditMsg,
   ensureAuthorized,
   getAuthorizationFilter,
 } from '../utils';
@@ -275,15 +274,6 @@ async function update(
       savedObjectIDs: [configuration.id],
     });
 
-    // log that we're attempting to update a configuration
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.updateConfiguration,
-        outcome: ECS_OUTCOMES.unknown,
-        savedObjectID: configuration.id,
-      })
-    );
-
     if (version !== configuration.version) {
       throw Boom.conflict(
         'This configuration has been updated. Please refresh before saving additional updates.'
@@ -424,15 +414,6 @@ async function create(
       auditLogger,
       savedObjectIDs: [savedObjectID],
     });
-
-    // log that we're attempting to create a configuration
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.createConfiguration,
-        outcome: ECS_OUTCOMES.unknown,
-        savedObjectID,
-      })
-    );
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];

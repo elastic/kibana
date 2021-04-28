@@ -36,7 +36,6 @@ export const globalRead: Role = {
       {
         feature: {
           securitySolutionFixture: ['read'],
-          // TODO: is this supposed to be all or read here?
           observabilityFixture: ['read'],
         },
         spaces: ['*'],

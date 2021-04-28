@@ -482,6 +482,52 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
 };
 
 /**
+ * Creates an AuditEvent describing the state of a request.
+ */
+function createAuditMsg({
+  operation,
+  outcome,
+  error,
+  savedObjectID,
+}: {
+  operation: OperationDetails;
+  savedObjectID?: string;
+  outcome?: EcsEventOutcome;
+  error?: Error;
+}): AuditEvent {
+  const doc =
+    savedObjectID != null
+      ? `${operation.savedObjectType} [id=${savedObjectID}]`
+      : `a ${operation.docType}`;
+  const message = error
+    ? `Failed attempt to ${operation.verbs.present} ${doc}`
+    : outcome === ECS_OUTCOMES.unknown
+    ? `User is ${operation.verbs.progressive} ${doc}`
+    : `User has ${operation.verbs.past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action: operation.action,
+      category: DATABASE_CATEGORY,
+      type: [operation.type],
+      outcome: outcome ?? (error ? ECS_OUTCOMES.failure : ECS_OUTCOMES.success),
+    },
+    ...(savedObjectID != null && {
+      kibana: {
+        saved_object: { type: operation.savedObjectType, id: savedObjectID },
+      },
+    }),
+    ...(error != null && {
+      error: {
+        code: error.name,
+        message: error.message,
+      },
+    }),
+  };
+}
+
+/**
  * Wraps the Authorization class' ensureAuthorized call in a try/catch to handle the audit logging
  * on a failure.
  */
@@ -498,12 +544,19 @@ export async function ensureAuthorized({
   authorization: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
 }) {
-  try {
-    return await authorization.ensureAuthorized(owners, operation);
-  } catch (error) {
+  const logSavedObjects = ({ outcome, error }: { outcome?: EcsEventOutcome; error?: Error }) => {
     for (const savedObjectID of savedObjectIDs) {
-      auditLogger?.log(createAuditMsg({ operation, error, savedObjectID }));
+      auditLogger?.log(createAuditMsg({ operation, outcome, error, savedObjectID }));
     }
+  };
+
+  try {
+    await authorization.ensureAuthorized(owners, operation);
+
+    // log that we're attempting an operation
+    logSavedObjects({ outcome: ECS_OUTCOMES.unknown });
+  } catch (error) {
+    logSavedObjects({ error });
     throw error;
   }
 }
@@ -560,50 +613,4 @@ export async function getAuthorizationFilter({
     auditLogger?.log(createAuditMsg({ error, operation }));
     throw error;
   }
-}
-
-/**
- * Creates an AuditEvent describing the state of a request.
- */
-export function createAuditMsg({
-  operation,
-  outcome,
-  error,
-  savedObjectID,
-}: {
-  operation: OperationDetails;
-  savedObjectID?: string;
-  outcome?: EcsEventOutcome;
-  error?: Error;
-}): AuditEvent {
-  const doc =
-    savedObjectID != null
-      ? `${operation.savedObjectType} [id=${savedObjectID}]`
-      : `a ${operation.docType}`;
-  const message = error
-    ? `Failed attempt to ${operation.verbs.present} ${doc}`
-    : outcome === ECS_OUTCOMES.unknown
-    ? `User is ${operation.verbs.progressive} ${doc}`
-    : `User has ${operation.verbs.past} ${doc}`;
-
-  return {
-    message,
-    event: {
-      action: operation.action,
-      category: DATABASE_CATEGORY,
-      type: [operation.type],
-      outcome: outcome ?? (error ? ECS_OUTCOMES.failure : ECS_OUTCOMES.success),
-    },
-    ...(savedObjectID != null && {
-      kibana: {
-        saved_object: { type: operation.savedObjectType, id: savedObjectID },
-      },
-    }),
-    ...(error != null && {
-      error: {
-        code: error.name,
-        message: error.message,
-      },
-    }),
-  };
 }

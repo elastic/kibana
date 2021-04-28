@@ -12,8 +12,8 @@ import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CaseService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { ECS_OUTCOMES, Operations } from '../../authorization';
-import { createAuditMsg, ensureAuthorized } from '../utils';
+import { Operations } from '../../authorization';
+import { ensureAuthorized } from '../utils';
 
 async function deleteSubCases({
   attachmentService,
@@ -86,17 +86,6 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       auditLogger,
       savedObjectIDs: [...soIds.values()],
     });
-
-    // log that we're attempting to delete a case
-    for (const savedObjectID of soIds) {
-      auditLogger?.log(
-        createAuditMsg({
-          operation: Operations.deleteCase,
-          outcome: ECS_OUTCOMES.unknown,
-          savedObjectID,
-        })
-      );
-    }
 
     await Promise.all(
       ids.map((id) =>

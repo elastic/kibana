@@ -456,9 +456,9 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
     deleteCasesByESQuery(es),
     deleteSubCases(es),
     deleteCasesUserActions(es),
+    deleteComments(es),
     deleteConfiguration(es),
     deleteMappings(es),
-    deleteComments(es),
   ]);
 };
 
@@ -611,14 +611,14 @@ export const createComment = async ({
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<CaseResponse> => {
-  const { body: comment } = await supertest
+  const { body: theCase } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
-    .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);
 
-  return comment;
+  return theCase;
 };
 
 export const getAllUserAction = async (
