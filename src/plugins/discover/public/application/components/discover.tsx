@@ -127,11 +127,13 @@ export function Discover({
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = services.inspector.open(useSavedSearch.inspectorAdapters, {
-      title: savedSearch.title,
-    });
-    setInspectorSession(session);
+    if (useSavedSearch.inspectorAdapters) {
+      setExpandedDoc(undefined);
+      const session = services.inspector.open(useSavedSearch.inspectorAdapters, {
+        title: savedSearch.title,
+      });
+      setInspectorSession(session);
+    }
   }, [setExpandedDoc, useSavedSearch.inspectorAdapters, savedSearch, services.inspector]);
 
   useEffect(() => {

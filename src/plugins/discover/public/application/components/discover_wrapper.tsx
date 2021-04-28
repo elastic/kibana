@@ -19,7 +19,7 @@ import {
   noSearchSessionStorageCapabilityMessage,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { useFetch } from './use_fetch';
+import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { getStateDefaults } from '../helpers/get_state_defaults';
@@ -29,7 +29,8 @@ const DiscoverMemoized = React.memo(Discover);
 
 export function DiscoverWrapper(props: DiscoverProps) {
   const [indexPattern, setIndexPattern] = useState(props.indexPattern);
-  const { savedSearch, config, services } = props.opts;
+  const [savedSearch, setSavedSearch] = useState(props.opts.savedSearch);
+  const { config, services } = props.opts;
   const { capabilities, data, chrome, docLinks } = services;
 
   const persistentSearchSource = useMemo(() => {
@@ -82,21 +83,6 @@ export function DiscoverWrapper(props: DiscoverProps) {
   const { appStateContainer, getPreviousAppState, stopSync } = stateContainer;
 
   const [state, setState] = useState(stateContainer.appStateContainer.getState());
-  useEffect(() => {
-    const unsubsribe = stateContainer.appStateContainer.subscribe(async (newState) => {
-      // NOTE: this is also called when navigating from discover app to context app
-      if (newState.index && state.index !== newState.index) {
-        // in case of index pattern switch the route has currently to be reloaded, legacy
-        const ip = await loadIndexPattern(newState.index, services.indexPatterns, config);
-
-        if (ip) {
-          setIndexPattern(ip.loaded);
-        }
-      }
-      setState(newState);
-    });
-    return () => unsubsribe();
-  }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer]);
 
   useEffect(() => {
     /**
@@ -147,6 +133,21 @@ export function DiscoverWrapper(props: DiscoverProps) {
     stopSync,
   ]);
 
+  const resetSavedSearch = useCallback(async () => {
+    const newSavedSearch = await services.getSavedSearchById();
+    newSavedSearch.searchSource.setField('index', indexPattern);
+    stateContainer.setAppState(
+      getStateDefaults({
+        config,
+        data,
+        indexPattern,
+        savedSearch,
+        searchSource: newSavedSearch.searchSource,
+      })
+    );
+    setSavedSearch(newSavedSearch);
+  }, [config, data, indexPattern, savedSearch, services, stateContainer]);
+
   /**
    * Url / Routing logic
    */
@@ -156,15 +157,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
-        stateContainer.setAppState(
-          getStateDefaults({
-            config,
-            data,
-            indexPattern,
-            savedSearch,
-            searchSource: persistentSearchSource,
-          })
-        );
+        resetSavedSearch();
       }
     });
     return () => unlistenHistoryBasePath();
@@ -177,6 +170,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
     props.opts,
     savedSearch,
     stateContainer,
+    resetSavedSearch,
   ]);
 
   /**
@@ -231,7 +225,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
     );
   }, [config, savedSearch.id, searchSessionManager, services.timefilter]);
 
-  const useSavedSearch = useFetch({
+  const useSavedSearch = useSavedSearchData({
     indexPattern,
     savedSearch,
     searchSessionManager,
@@ -242,6 +236,29 @@ export function DiscoverWrapper(props: DiscoverProps) {
     useNewFieldsApi,
     shouldSearchOnPageLoad,
   });
+
+  useEffect(() => {
+    const unsubsribe = stateContainer.appStateContainer.subscribe(async (newState) => {
+      // NOTE: this is also called when navigating from discover app to context app
+      if (newState.index && state.index !== newState.index) {
+        // in case of index pattern switch the route has currently to be reloaded, legacy
+        const ip = await loadIndexPattern(newState.index, services.indexPatterns, config);
+
+        if (ip) {
+          setIndexPattern(ip.loaded);
+        }
+      }
+      setState(newState);
+    });
+    return () => unsubsribe();
+  }, [
+    config,
+    services.indexPatterns,
+    state.hideChart,
+    state.index,
+    stateContainer.appStateContainer,
+    useSavedSearch.refetch$,
+  ]);
 
   /**
    * Initializing

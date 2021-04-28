@@ -55,7 +55,7 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
@@ -86,7 +86,7 @@ export async function buildServices(
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,

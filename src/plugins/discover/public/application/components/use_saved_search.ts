@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import { merge, Subject, Observable } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
@@ -28,12 +28,12 @@ export interface UseSavedSearch {
   fetchError?: Error;
   fetchStatus: string;
   hits$: TotalHitsSubject;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters?: { requests: RequestAdapter };
   refetch$: Subject<unknown>;
   rows: ElasticSearchHit[];
   reset: () => void;
 }
-export const useFetch = ({
+export const useSavedSearch = ({
   services,
   searchSessionManager,
   state,
@@ -54,6 +54,7 @@ export const useFetch = ({
   shouldSearchOnPageLoad: () => boolean;
   useNewFieldsApi: boolean;
 }): UseSavedSearch => {
+  const [cachedState, setCachedState] = useState(state);
   const abortControllerRef = useRef<AbortController | undefined>();
   const { data, filterManager, timefilter } = services;
   const refetch$ = useMemo(() => new Subject(), []);
@@ -126,6 +127,7 @@ export const useFetch = ({
     }
 
     requests.push(fetchHits(abortControllerRef.current, searchSessionId));
+
     Promise.all(requests).finally(() => {
       autoRefreshDoneCb.current?.();
       autoRefreshDoneCb.current = undefined;
@@ -152,31 +154,21 @@ export const useFetch = ({
   }, [fetchAll, fetch$]);
 
   useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe((nextState) => {
-      let triggerFetch = false;
-      if (state.hideChart !== nextState.hideChart && !nextState.hideChart) {
-        triggerFetch = true;
-      }
-      if (state.interval !== nextState.interval) {
-        triggerFetch = true;
-      }
-      if (!isEqual(state.sort, nextState.sort)) {
-        triggerFetch = true;
-      }
-      if (triggerFetch) {
-        fetchAll();
-      }
-    });
-
-    return () => unsubscribe();
-  }, [
-    state.hideChart,
-    stateContainer.appStateContainer,
-    refetch$,
-    state.interval,
-    state.sort,
-    fetchAll,
-  ]);
+    let triggerFetch = false;
+    if (state.hideChart !== cachedState.hideChart && !state.hideChart) {
+      triggerFetch = true;
+    }
+    if (state.interval !== cachedState.interval) {
+      triggerFetch = true;
+    }
+    if (!isEqual(state.sort, cachedState.sort)) {
+      triggerFetch = true;
+    }
+    setCachedState(state);
+    if (triggerFetch) {
+      fetchAll();
+    }
+  }, [cachedState, refetch$, state.interval, state.sort, fetchAll, state]);
 
   return {
     fetch$,
