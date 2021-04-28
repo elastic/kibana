@@ -353,7 +353,7 @@ describe('SearchSource', () => {
         expect(request.stored_fields).toEqual(['*']);
       });
 
-      test('fieldsFromSource is not set when using the fields API', async () => {
+      test('_source is not set when using the fields API', async () => {
         searchSource.setField('fields', ['*']);
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['*']);
