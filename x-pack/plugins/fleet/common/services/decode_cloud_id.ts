@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+const CLOUD_DEFAULT_PORT = '9243';
+
 // decodeCloudId decodes the c.id into c.esURL and c.kibURL
 export function decodeCloudId(
   cid: string
@@ -51,6 +53,7 @@ export function decodeCloudId(
   // 5. form the URLs
   const esUrl = `https://${esId}.${host}:${esPort}`;
   const kbUrl = `https://${kbId}.${host}:${kbPort}`;
+
   return {
     host,
     defaultPort,
@@ -60,7 +63,7 @@ export function decodeCloudId(
 }
 // extractPortFromName takes a string in the form `id:port` and returns the
 // Id and the port. If there's no `:`, the default port is returned
-function extractPortFromName(word: string, defaultPort = '443') {
+function extractPortFromName(word: string, defaultPort = CLOUD_DEFAULT_PORT) {
   const [host, port = defaultPort] = word.split(':');
   return [host, port];
 }
