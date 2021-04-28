@@ -428,6 +428,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ].sort();
         if (await PageObjects.visChart.isNewLibraryChart('visTypePieChart')) {
           await PageObjects.visEditor.clickOptionsTab();
+          await PageObjects.visEditor.togglePieLegend();
           await PageObjects.visEditor.togglePieNestedLegend();
           await PageObjects.visEditor.clickDataTab();
           await PageObjects.visEditor.clickGo();
