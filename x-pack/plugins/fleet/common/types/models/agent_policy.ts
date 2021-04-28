@@ -21,7 +21,7 @@ export interface NewAgentPolicy {
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
-  preconfiguration_id?: string; // Uniqifies preconfigured policies by something other than `name`
+  is_preconfigured?: boolean;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {

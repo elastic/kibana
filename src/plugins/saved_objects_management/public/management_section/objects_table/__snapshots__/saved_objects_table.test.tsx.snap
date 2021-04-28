@@ -9,10 +9,12 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
     Array [
       Object {
         "id": "1",
+        "meta": Object {},
         "type": "index-pattern",
       },
       Object {
         "id": "3",
+        "meta": Object {},
         "type": "dashboard",
       },
     ]
