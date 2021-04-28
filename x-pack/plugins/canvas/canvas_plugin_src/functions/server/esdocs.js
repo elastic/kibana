@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import squel from 'squel';
+import squel from 'safe-squel';
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 
 export const esdocs = () => ({

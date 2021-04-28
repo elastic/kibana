@@ -18786,6 +18786,13 @@ safe-regex@^1.1.0:
   dependencies:
     ret "~0.1.10"
 
+safe-squel@^5.12.5:
+  version "5.12.5"
+  resolved "https://registry.yarnpkg.com/safe-squel/-/safe-squel-5.12.5.tgz#9597cec498dc184a15fe94082b7bcc80cb4d048b"
+  integrity sha512-ls4iMpRE+/yTJ3W9GDRAT9rjqNVl220ng+N55udJXNu9ubcidMFA66Nung5UuE3xFlSSwvkV9PaMR5HZvShuvw==
+  dependencies:
+    sql-escape-string "^1.1.0"
+
 safefs@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/safefs/-/safefs-4.1.0.tgz#f82aeb4bdd7ae51f653eb20f6728b3058c8d6445"
@@ -19632,10 +19639,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-squel@^5.12.2:
-  version "5.12.2"
-  resolved "https://registry.yarnpkg.com/squel/-/squel-5.12.2.tgz#8c7b54fd5462d95fe2432663c8762b65d29efe4c"
-  integrity sha512-pIM8SjlUJlN2G6xz3we+lCp2aNQgxauGqKXJDi8y2n0hqJlSot0IUEdHh7/zGFFuRYnypbDiOhSWLZzT1BXnlQ==
+sql-escape-string@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/sql-escape-string/-/sql-escape-string-1.1.0.tgz#fe744b8514868c0eb4bfb9e4a989271d40f30eb9"
+  integrity sha1-/nRLhRSGjA60v7nkqYknHUDzDrk=
 
 sshpk@^1.7.0:
   version "1.15.2"
