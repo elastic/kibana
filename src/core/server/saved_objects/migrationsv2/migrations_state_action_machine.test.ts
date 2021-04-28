@@ -157,7 +157,6 @@ describe('migrationsStateActionMachine', () => {
         logger,
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
         next,
-        client: esClient,
       })
     ).resolves.toEqual(expect.anything());
 
