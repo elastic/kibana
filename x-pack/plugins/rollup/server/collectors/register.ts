@@ -55,52 +55,85 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: Elasticse
   });
 }
 
+const getSavedObjectsList = async ({
+  esClient,
+  searchAfter,
+  kibanaIndex,
+  filterPath,
+  filter,
+}: {
+  esClient: ElasticsearchClient;
+  searchAfter: string[] | undefined;
+  kibanaIndex: string;
+  filterPath: string[];
+  filter: any;
+}) => {
+  const { body: esResponse } = await esClient.search({
+    body: {
+      search_after: searchAfter,
+      sort: [{ updated_at: 'asc' }],
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    },
+    ignore_unavailable: true,
+    index: kibanaIndex,
+    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
+    // @ts-expect-error@elastic/elasticsearch _source does not exist in type SearchRequest
+    _source: filterPath,
+  });
+  return esResponse;
+};
+
 async function fetchRollupSavedSearches(
   kibanaIndex: string,
   esClient: ElasticsearchClient,
   rollupIndexPatternToFlagMap: IdToFlagMap
 ) {
-  const searchParams = {
-    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.references'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              type: 'search',
-            },
-          },
-        },
+  const searchProps = {
+    esClient,
+    kibanaIndex,
+    searchAfter: undefined,
+    filterPath: ['references'],
+    filter: {
+      term: {
+        type: 'search',
       },
     },
   };
+  let savedSearchesList = await getSavedObjectsList(searchProps);
 
-  const { body: esResponse } = await esClient.search(searchParams);
-  const savedSearches = get(esResponse, 'hits.hits', []);
+  const rollupSavedSearches: string[] = [];
 
-  // Filter for ones with rollup index patterns.
-  return savedSearches.reduce((rollupSavedSearches: any, savedSearch: any) => {
-    const { _id: savedObjectId } = savedSearch;
-    const references: Array<{ name: string; id: string; type: string }> | undefined = get(
-      savedSearch,
-      '_source.references'
-    );
-
-    if (references?.length) {
-      const visualizationsFromPatterns = references.filter(
-        ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+  while (savedSearchesList.hits.hits.length !== 0) {
+    const savedSearches = get(savedSearchesList, 'hits.hits', []);
+    savedSearches.map(async (savedSearch: any) => {
+      const { _id: savedObjectId } = savedSearch;
+      const references: Array<{ name: string; id: string; type: string }> | undefined = get(
+        savedSearch,
+        '_source.references'
       );
-      if (visualizationsFromPatterns.length) {
-        const id = getIdFromSavedObjectId(savedObjectId) as string;
-        rollupSavedSearches.push(id);
-      }
-    }
 
-    return rollupSavedSearches;
-  }, [] as string[]);
+      if (references?.length) {
+        const visualizationsFromPatterns = references.filter(
+          ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+        );
+        if (visualizationsFromPatterns.length) {
+          const id = getIdFromSavedObjectId(savedObjectId) as string;
+          rollupSavedSearches.push(id);
+        }
+      }
+    }, [] as string[]);
+
+    savedSearchesList = await getSavedObjectsList({
+      ...searchProps,
+      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
+      searchAfter: savedSearchesList.hits.hits[savedSearchesList.hits.hits.length - 1].sort,
+    });
+  }
+  return rollupSavedSearches;
 }
 
 async function fetchRollupVisualizations(
@@ -109,58 +142,61 @@ async function fetchRollupVisualizations(
   rollupIndexPatternToFlagMap: IdToFlagMap,
   rollupSavedSearchesToFlagMap: IdToFlagMap
 ) {
-  const searchParams = {
-    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.references', 'hits.hits._source.type'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            terms: {
-              type: ['visualization', 'lens'],
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search(searchParams);
-  const visualizations = get(esResponse, 'hits.hits', []);
-
   let rollupVisualizations = 0;
   let rollupLensVisualizations = 0;
   let rollupVisualizationsFromSavedSearches = 0;
   let rollupLensVisualizationsFromSavedSearches = 0;
 
-  visualizations.forEach((visualization: any) => {
-    const references: Array<{ name: string; id: string; type: string }> | undefined = get(
-      visualization,
-      '_source.references'
-    );
+  const searchProps = {
+    esClient,
+    kibanaIndex,
+    searchAfter: undefined,
+    filterPath: ['type', 'references'],
+    filter: {
+      terms: {
+        type: ['visualization', 'lens'],
+      },
+    },
+  };
 
-    if (references?.length) {
-      const visualizationsFromPatterns = references.filter(
-        ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+  let savedVisualizationsList = await getSavedObjectsList(searchProps);
+
+  while (savedVisualizationsList.hits.hits.length !== 0) {
+    const visualizations = get(savedVisualizationsList, 'hits.hits', []);
+    const sort =
+      savedVisualizationsList.hits.hits[savedVisualizationsList.hits.hits.length - 1].sort;
+    visualizations.forEach(async (visualization: any) => {
+      const references: Array<{ name: string; id: string; type: string }> | undefined = get(
+        visualization,
+        '_source.references'
       );
-      const visualizationsFromSavedSearches = references.filter(
-        ({ type, id }) => type === 'search' && rollupSavedSearchesToFlagMap[id]
-      );
-      if (visualizationsFromPatterns.length) {
-        rollupVisualizations++;
-        if (visualization._source.type === 'lens') {
-          rollupLensVisualizations++;
-        }
-      } else if (visualizationsFromSavedSearches.length) {
-        rollupVisualizationsFromSavedSearches++;
-        if (visualization._source.type === 'lens') {
-          rollupLensVisualizationsFromSavedSearches++;
+
+      if (references?.length) {
+        const visualizationsFromPatterns = references.filter(
+          ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+        );
+        const visualizationsFromSavedSearches = references.filter(
+          ({ type, id }) => type === 'search' && rollupSavedSearchesToFlagMap[id]
+        );
+        if (visualizationsFromPatterns.length) {
+          rollupVisualizations++;
+          if (visualization._source.type === 'lens') {
+            rollupLensVisualizations++;
+          }
+        } else if (visualizationsFromSavedSearches.length) {
+          rollupVisualizationsFromSavedSearches++;
+          if (visualization._source.type === 'lens') {
+            rollupLensVisualizationsFromSavedSearches++;
+          }
         }
       }
-    }
-  });
+    }, [] as string[]);
+    savedVisualizationsList = await getSavedObjectsList({
+      ...searchProps,
+      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
+      searchAfter: sort,
+    });
+  }
 
   return {
     rollupVisualizations,
