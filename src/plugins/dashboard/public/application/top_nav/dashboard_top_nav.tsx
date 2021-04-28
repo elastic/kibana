@@ -559,9 +559,7 @@ export function DashboardTopNav({
               primaryActionButton: (
                 <PrimaryActionButton
                   isDarkModeEnabled={IS_DARK_THEME}
-                  label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-                    defaultMessage: 'Create visualization',
-                  })}
+                  label={getCreateVisualizationButtonTitle()}
                   onClick={createNewVisType(lensAlias)}
                   iconType="lensApp"
                   data-test-subj="dashboardAddNewPanelButton"
