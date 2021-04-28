@@ -17,11 +17,24 @@ export async function createOSPackageKibanaYML(config: Config, build: Build) {
 
   await mkdirp(configWriteDir);
 
-  const kibanaYML = readFileSync(configReadPath, {
+  let kibanaYML = readFileSync(configReadPath, {
     encoding: 'utf-8',
-  })
-    .replace(/#pid.file:.*/g, 'pid.file: /run/kibana/kibana.pid')
-    .replace(/#logging.dest:.*/g, 'logging.dest: /var/log/kibana/kibana.log');
+  });
+
+  [
+    [/#pid.file:.*/g, 'pid.file: /run/kibana/kibana.pid'],
+    [/#logging.dest:.*/g, 'logging.dest: /var/log/kibana/kibana.log'],
+  ].forEach((options) => {
+    const [regex, setting] = options;
+    const match = kibanaYML.search(regex) >= 0;
+    if (match) {
+      if (typeof setting === 'string') {
+        kibanaYML = kibanaYML.replace(regex, setting);
+      }
+    } else {
+      kibanaYML += `\n${setting}`;
+    }
+  });
 
   try {
     writeFileSync(configWritePath, kibanaYML, { flag: 'wx' });
