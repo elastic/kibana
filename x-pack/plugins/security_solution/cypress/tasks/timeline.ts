@@ -73,7 +73,6 @@ export const addDescriptionToTimeline = (description: string) => {
 
 export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
-  // cy.log('HERE:', cy.get(TIMELINE_TITLE_INPUT));
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
