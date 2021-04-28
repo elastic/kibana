@@ -13,9 +13,12 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -26,6 +29,7 @@ import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { DeleteScheduledQueryGroupButton } from '../../../scheduled_query_groups/delete_scheduled_query_group_button';
 
 const Divider = styled.div`
   width: 0;
@@ -39,6 +43,10 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
   const editQueryLinkProps = useRouterNavigate(
     `scheduled_query_groups/${scheduledQueryGroupId}/edit`
   );
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const showActionsPopover = useCallback(() => setPopover(true), []);
+  const closeActionsPopover = useCallback(() => setPopover(false), []);
 
   const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
 
@@ -55,7 +63,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
             size="xs"
           >
             <FormattedMessage
-              id="xpack.osquery.scheduledQueryDetails.viewAllScheduledQueriesListTitle"
+              id="xpack.osquery.scheduledQueryGroupDetails.viewAllScheduledQueriesListTitle"
               defaultMessage="View all scheduled query groups"
             />
           </EuiButtonEmpty>
@@ -64,7 +72,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
           <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryDetails.pageTitle"
+                id="xpack.osquery.scheduledQueryGroupDetails.pageTitle"
                 defaultMessage="{queryName} details"
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{
@@ -78,6 +86,33 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
       </EuiFlexGroup>
     ),
     [data?.name, scheduledQueryGroupsListProps]
+  );
+
+  const button = useMemo(
+    () => (
+      <EuiButton iconType="arrowDown" iconSide="right" onClick={showActionsPopover}>
+        <FormattedMessage
+          id="xpack.osquery.scheduledQueryGroupDetailsPage.actionsButtonLabel"
+          defaultMessage="Actions"
+        />
+      </EuiButton>
+    ),
+    [showActionsPopover]
+  );
+
+  const items = useMemo(
+    () => [
+      <EuiContextMenuItem key="edit" icon="pencil" {...editQueryLinkProps}>
+        <FormattedMessage
+          id="xpack.osquery.scheduledQueryGroupDetailsPage.editQueryButtonLabel"
+          defaultMessage="Edit"
+        />
+      </EuiContextMenuItem>,
+      data ? (
+        <DeleteScheduledQueryGroupButton key="delete" item={data} onSuccess={closeActionsPopover} />
+      ) : null,
+    ],
+    [closeActionsPopover, data, editQueryLinkProps]
   );
 
   const RightColumn = useMemo(
@@ -100,17 +135,20 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
         <EuiFlexItem grow={false} key="agents_failed_count_divider">
           <Divider />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="edit_button">
-          <EuiButton fill {...editQueryLinkProps} iconType="pencil">
-            <FormattedMessage
-              id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButton>
+        <EuiFlexItem grow={false} key="actions_button">
+          <EuiPopover
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closeActionsPopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s" items={items} />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.policy_id, editQueryLinkProps]
+    [button, closeActionsPopover, data?.policy_id, isPopoverOpen, items]
   );
 
   return (

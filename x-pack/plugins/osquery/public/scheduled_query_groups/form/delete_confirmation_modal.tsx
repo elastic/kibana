@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { AgentPolicy } from '../../../../fleet/common';
 
-interface ConfirmDeployAgentPolicyModalProps {
+interface ConfirmDeleteAgentPolicyModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
   agentPolicy: AgentPolicy;
 }
 
-const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyModalProps> = ({
+const ConfirmDeleteAgentPolicyModalComponent: React.FC<ConfirmDeleteAgentPolicyModalProps> = ({
   onConfirm,
   onCancel,
   agentCount,
@@ -28,8 +28,8 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
   <EuiConfirmModal
     title={
       <FormattedMessage
-        id="xpack.osquery.agentPolicy.confirmModalTitle"
-        defaultMessage="Save and deploy changes"
+        id="xpack.osquery.agentPolicy.deleteConfirmModalTitle"
+        defaultMessage="Delete scheduled query group?"
       />
     }
     onCancel={onCancel}
@@ -42,17 +42,17 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     }
     confirmButtonText={
       <FormattedMessage
-        id="xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel"
-        defaultMessage="Save and deploy changes"
+        id="xpack.osquery.agentPolicy.deleteConfirmModalConfirmButtonLabel"
+        defaultMessage="Delete scheduled query group"
       />
     }
-    buttonColor="primary"
+    buttonColor="danger"
   >
     <EuiCallOut
-      iconType="iInCircle"
-      title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
+      color="danger"
+      title={i18n.translate('xpack.osquery.agentPolicy.deleteConfirmModalCalloutTitle', {
         defaultMessage:
-          'This action will update {agentCount, plural, one {# agent} other {# agents}}.',
+          'This action will affect {agentCount, plural, one {# agent} other {# agents}}.',
         values: {
           agentCount,
         },
@@ -60,10 +60,9 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     >
       <div className="eui-textBreakWord">
         <FormattedMessage
-          id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
-          defaultMessage="Fleet has detected that the selected agent policy, {policyName}, is already in use by
-            some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this policy."
+          id="xpack.osquery.agentPolicy.deleteConfirmModalCalloutDescription"
+          defaultMessage="Fleet has detected that {policyName} is already in use by some
+           of your agents."
           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           values={{
             policyName: <b>{agentPolicy.name}</b>,
@@ -73,10 +72,10 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     </EuiCallOut>
     <EuiSpacer size="l" />
     <FormattedMessage
-      id="xpack.osquery.agentPolicy.confirmModalDescription"
-      defaultMessage="This action can not be undone. Are you sure you wish to continue?"
+      id="xpack.osquery.agentPolicy.deleteConfirmModalDescription"
+      defaultMessage="Are you sure you wish to continue?"
     />
   </EuiConfirmModal>
 );
 
-export const ConfirmDeployAgentPolicyModal = React.memo(ConfirmDeployAgentPolicyModalComponent);
+export const ConfirmDeleteAgentPolicyModal = React.memo(ConfirmDeleteAgentPolicyModalComponent);
