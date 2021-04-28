@@ -57,9 +57,6 @@ $mlAnnotationRectDefaultFillOpacity: .05;
   fill: $euiColorFullShade;
   transition: fill $euiAnimSpeedFast;
 
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 
 }
