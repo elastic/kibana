@@ -340,7 +340,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           onClose={onConfirmModalClose}
         />
       )}
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} size="m">
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerSettingsFlyoutTitle">

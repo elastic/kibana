@@ -6,6 +6,7 @@
  */
 
 import { EventFiltersListPageState } from '../state';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
@@ -13,6 +14,12 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     entry: undefined,
     hasNameError: false,
     hasItemsError: false,
+    hasOSError: false,
     submissionResourceState: { type: 'UninitialisedResourceState' },
+  },
+  location: {
+    page_index: MANAGEMENT_DEFAULT_PAGE,
+    page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    filter: '',
   },
 });
