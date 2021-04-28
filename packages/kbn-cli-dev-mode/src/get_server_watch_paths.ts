@@ -28,6 +28,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
       (acc: string[], path) => [
         ...acc,
         Path.resolve(path, 'test/**'),
+        Path.resolve(path, 'integration_tests/**'),
         Path.resolve(path, 'build/**'),
         Path.resolve(path, 'target/**'),
         Path.resolve(path, 'scripts/**'),

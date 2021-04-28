@@ -79,7 +79,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected field type for custom field with passed value', function () {
     lnsAttr = new LensAttributes(mockIndexPattern, reportViewConfig, 'line', [], 'count', {
-      'performance.metric': LCP_FIELD,
+      'performance.metric': [LCP_FIELD],
     });
 
     expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
