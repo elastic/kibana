@@ -207,7 +207,10 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string) => {
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).pipe(($el) => $el.trigger('click'));
+  return cy
+    .get(TIMELINE_TITLE_BY_ID(timelineId))
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
 };
 
 export const pinFirstEvent = () => {
