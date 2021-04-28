@@ -25,6 +25,7 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
           fields: '*',
           allow_no_indices: false,
           include_defaults: true,
+          filter_path: '*.mappings.*.mapping.*.type',
         });
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
