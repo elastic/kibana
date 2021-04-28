@@ -20,7 +20,6 @@ import { NotFound } from '../shared/not_found';
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
-  ALPHA_PATH,
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
@@ -108,7 +107,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           <SourcesRouter />
         </Layout>
       </Route>
-      <Route path={ALPHA_PATH}>
+      <Route path="/">
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
           <Overview />
         </Layout>
