@@ -15,6 +15,7 @@ import {
   ScaleType,
   Settings,
   SettingsSpec,
+  TooltipInfo,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
@@ -31,12 +32,13 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { CustomTooltip } from './custom_tooltip';
 
 type TransactionDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
 type DistributionBucket = TransactionDistributionAPIResponse['buckets'][0];
 
-interface IChartPoint {
+export interface IChartPoint {
   x0: number;
   x: number;
   y: number;
@@ -77,7 +79,7 @@ const formatYShort = (t: number) => {
   );
 };
 
-const formatYLong = (t: number) => {
+export const formatYLong = (t: number) => {
   return i18n.translate(
     'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
     {
@@ -89,11 +91,6 @@ const formatYLong = (t: number) => {
     }
   );
 };
-
-const NO_SAMPLES_AVAILABLE_LABEL = i18n.translate(
-  'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSamplesAvailable',
-  { defaultMessage: '(No samples available)' }
-);
 
 interface Props {
   distribution?: TransactionDistributionAPIResponse;
@@ -140,20 +137,19 @@ export function TransactionDistribution({
   const distributionMap = keyBy(distribution?.buckets, 'key');
   const bucketsMap = keyBy(buckets, 'x0');
 
-  const tooltipProps: SettingsSpec['tooltip'] = {
-    headerFormatter: (tooltip) => {
-      const datum = tooltip.datum as typeof buckets[0];
+  const tooltip: SettingsSpec['tooltip'] = {
+    customTooltip: (props: TooltipInfo) => {
+      const datum = props.header?.datum as IChartPoint;
       const selectedDistribution = distributionMap[datum?.x0];
-      const noSampleAvailable = isEmpty(selectedDistribution?.samples)
-        ? NO_SAMPLES_AVAILABLE_LABEL
-        : '';
-      const serie = bucketsMap[tooltip.value];
-      if (serie) {
-        const xFormatted = timeFormatter(serie.x);
-        const x0Formatted = timeFormatter(serie.x0);
-        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit} ${noSampleAvailable}`;
-      }
-      return `${timeFormatter(tooltip.value)} ${noSampleAvailable}`;
+      const serie = bucketsMap[datum?.x0];
+      return (
+        <CustomTooltip
+          {...props}
+          hasSamples={isEmpty(selectedDistribution?.samples)}
+          serie={serie}
+          timeFormatter={timeFormatter}
+        />
+      );
     },
   };
 
@@ -204,7 +200,7 @@ export function TransactionDistribution({
         <Chart>
           <Settings
             xDomain={{ min: xMin, max: xMax }}
-            tooltip={tooltipProps}
+            tooltip={tooltip}
             onProjectionClick={onBarClick}
           />
           {selectedBucket && (
