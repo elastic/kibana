@@ -17,22 +17,25 @@ export async function createOSPackageKibanaYML(config: Config, build: Build) {
 
   await mkdirp(configWriteDir);
 
-  let kibanaYML = readFileSync(configReadPath, {
-    encoding: 'utf-8',
-  });
+  let kibanaYML = readFileSync(configReadPath, { encoding: 'utf8' });
 
   [
     [/#pid.file:.*/g, 'pid.file: /run/kibana/kibana.pid'],
     [/#logging.dest:.*/g, 'logging.dest: /var/log/kibana/kibana.log'],
   ].forEach((options) => {
     const [regex, setting] = options;
+    const diff = kibanaYML;
     const match = kibanaYML.search(regex) >= 0;
     if (match) {
       if (typeof setting === 'string') {
         kibanaYML = kibanaYML.replace(regex, setting);
       }
-    } else {
-      kibanaYML += `\n${setting}`;
+    }
+
+    if (!diff.localeCompare(kibanaYML)) {
+      throw new Error(
+        `OS package configuration unmodified.  Verify match for ${regex} is available`
+      );
     }
   });
 
