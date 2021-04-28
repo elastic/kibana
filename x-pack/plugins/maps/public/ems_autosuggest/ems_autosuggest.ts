@@ -6,8 +6,8 @@
  */
 
 import type { FileLayer } from '@elastic/ems-client';
-import { getEmsFileLayers, fetchGeoJson } from '../util';
-import { FORMAT_TYPE, emsWorldLayerId, emsRegionLayerId, emsUsaZipLayerId } from '../../common';
+import { getEmsFileLayers } from '../util';
+import { emsWorldLayerId, emsRegionLayerId, emsUsaZipLayerId } from '../../common';
 
 export interface SampleValuesConfig {
   emsLayerIds?: string[];
@@ -165,14 +165,9 @@ async function getMatchesForEMSLayer(
   }
 
   const emsFields = emsFileLayer.getFields();
-  const url = emsFileLayer.getDefaultFormatUrl();
 
   try {
-    const emsJson = await fetchGeoJson(
-      url,
-      emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
-      'data'
-    );
+    const emsJson = await emsFileLayer.getGeoJson();
     const matches: EMSTermJoinConfig[] = [];
     for (let f = 0; f < emsFields.length; f++) {
       if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
