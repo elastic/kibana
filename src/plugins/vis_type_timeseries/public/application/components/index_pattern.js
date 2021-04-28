@@ -76,7 +76,6 @@ export const IndexPattern = ({
   const intervalName = `${prefix}interval`;
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
-  const ignoreDSTName = `${prefix}ignore_daylight_time`;
   const updateControlValidity = useContext(FormValidationContext);
   const defaultIndex = useContext(DefaultIndexPatternContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
@@ -115,7 +114,6 @@ export const IndexPattern = ({
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
-    [ignoreDSTName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
@@ -251,22 +249,6 @@ export const IndexPattern = ({
               onChange={handleTextChange(intervalName, AUTO_INTERVAL)}
               value={model[intervalName]}
               placeholder={AUTO_INTERVAL}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            id={htmlId('ignoreDaylightTime')}
-            label={i18n.translate('visTypeTimeseries.indexPattern.ignoreDaylightTime', {
-              defaultMessage: 'Ignore daylight time?',
-            })}
-          >
-            <YesNo
-              data-test-subj="timeseriesIgnoreDaylightTime"
-              value={model[ignoreDSTName]}
-              name={ignoreDSTName}
-              onChange={onChange}
-              disabled={disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>

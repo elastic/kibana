@@ -127,6 +127,7 @@ export class TimeseriesPanelConfig extends Component<
       legend_position: 'right',
       show_grid: 1,
       tooltip_mode: 'show_all',
+      ignore_daylight_time: 0,
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -222,6 +223,21 @@ export class TimeseriesPanelConfig extends Component<
                 <YesNo
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel"
+                    defaultMessage="Ignore daylight time?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="m" />
+                <YesNo
+                  data-test-subj="timeseriesIgnoreDaylightTime"
+                  value={model.ignore_daylight_time}
+                  name="ignore_daylight_time"
                   onChange={this.props.onChange}
                 />
               </EuiFlexItem>

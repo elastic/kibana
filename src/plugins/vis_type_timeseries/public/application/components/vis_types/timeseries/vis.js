@@ -19,11 +19,10 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { getTimezone } from '../../../lib/get_timezone';
 import { getFixedOffset } from '../../lib/get_fixed_offset';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart, getUISettings } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 
 class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -35,7 +34,6 @@ class TimeseriesVisualization extends Component {
 
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
-  timeZone = getTimezone(getUISettings());
 
   xAxisFormatter = (interval) => (val) => {
     const formatter = createIntervalBasedFormatter(
@@ -43,7 +41,7 @@ class TimeseriesVisualization extends Component {
       this.scaledDataFormat,
       this.dateFormat,
       Boolean(this.props.model.ignore_daylight_time),
-      getFixedOffset(this.timeZone)
+      getFixedOffset()
     );
     return formatter(val);
   };

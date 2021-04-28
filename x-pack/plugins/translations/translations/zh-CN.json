@@ -4465,6 +4465,7 @@
     "visTypeTimeseries.timeseries.optionsTab.dataLabel": "数据",
     "visTypeTimeseries.timeseries.optionsTab.displayGridLabel": "显示网格",
     "visTypeTimeseries.timeseries.optionsTab.ignoreGlobalFilterLabel": "忽略全局筛选？",
+    "visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel": "忽略夏令時間？",
     "visTypeTimeseries.timeseries.optionsTab.legendPositionLabel": "图例位置",
     "visTypeTimeseries.timeseries.optionsTab.panelFilterLabel": "面板筛选",
     "visTypeTimeseries.timeseries.optionsTab.panelOptionsButtonLabel": "面板选项",

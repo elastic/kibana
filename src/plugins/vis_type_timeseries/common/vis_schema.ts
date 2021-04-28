@@ -180,7 +180,6 @@ export const seriesItems = schema.object({
   series_time_field: fieldObject,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
-  series_ignore_daylight_time: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
   palette: schema.object({
     type: stringRequired,

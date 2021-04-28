@@ -10,6 +10,6 @@ import moment from 'moment';
 
 const JANUARY_MOMENT_CONFIG = { M: 0, d: 1 };
 
-export const getFixedOffset = (timeZone: string) => {
-  return moment.tz(JANUARY_MOMENT_CONFIG, timeZone).utcOffset();
+export const getFixedOffset = () => {
+  return moment(JANUARY_MOMENT_CONFIG).utcOffset();
 };
