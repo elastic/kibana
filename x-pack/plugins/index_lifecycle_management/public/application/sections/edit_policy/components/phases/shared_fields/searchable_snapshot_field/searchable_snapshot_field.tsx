@@ -25,31 +25,60 @@ export interface Props {
   canBeDisabled?: boolean;
 }
 
-const geti18nTexts = (phase: Props['phase']) => ({
-  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
-    defaultMessage: 'Searchable snapshot',
-  }),
-  description:
-    phase === 'frozen' ? (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.searchableSnapshotFieldDescription"
-        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. To reduce costs, only a cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
-        values={{
-          learnMoreLink: (
-            <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
-          ),
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. {learnMoreLink}"
-        values={{
-          learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-        }}
-      />
-    ),
-});
+const geti18nTexts = (phase: Props['phase']) => {
+  switch (phase) {
+    // Hot and cold phases both create fully mounted snapshots.
+    case 'hot':
+    case 'cold':
+      return {
+        title: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.title',
+          {
+            defaultMessage: 'Fully-mounted index',
+          }
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
+            defaultMessage="Take a snapshot of your data and mount it as a fully-mounted index. To reduce costs, the number of local replicas is reduced and a full cache of the snapshot is mounted. {learnMoreLink}"
+            values={{
+              learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+            }}
+          />
+        ),
+        toggleLabel: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.toggleLabel',
+          { defaultMessage: 'Create fully-mounted index' }
+        ),
+      };
+
+    // Frozen phase creates a partially mounted snapshot.
+    case 'frozen':
+      return {
+        title: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title',
+          {
+            defaultMessage: 'Partially-mounted index',
+          }
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.partiallyMountedSearchableSnapshotField.description"
+            defaultMessage="Take a snapshot of your data and mount it as a partially-mounted index. To reduce costs, only a partial cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
+              ),
+            }}
+          />
+        ),
+        toggleLabel: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.toggleLabel',
+          { defaultMessage: 'Create partially-mounted index' }
+        ),
+      };
+  }
+};
 
 export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
@@ -273,10 +302,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
               disabled: isDisabledDueToLicense,
               onChange: setIsFieldToggleChecked,
               'data-test-subj': 'searchableSnapshotToggle',
-              label: i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-                { defaultMessage: 'Create searchable snapshot' }
-              ),
+              label: i18nTexts.toggleLabel,
             }
           : undefined
       }
