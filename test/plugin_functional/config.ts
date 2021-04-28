@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
+      require.resolve('./test_suites/stream_compression'),
     ],
     services: {
       ...functionalConfig.get('services'),
