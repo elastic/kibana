@@ -100,16 +100,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
       const table = await PageObjects.discover.getDocTable();
+      const useLegacyTable = await PageObjects.discover.useLegacyTable();
       await table.clickRowToggle();
 
       // click the open action
       await retry.try(async () => {
-        const actionIndex = (await PageObjects.discover.useLegacyTable()) ? 1 : 0;
-        const rowActions = await table.getRowActions({ rowIndex: actionIndex });
+        const rowActions = await table.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[0].click();
+        const idxToClick = useLegacyTable ? 1 : 0;
+        await rowActions[idxToClick].click();
       });
 
       const hasDocHit = await testSubjects.exists('doc-hit');
