@@ -140,7 +140,7 @@ describe('Parser', () => {
       );
     });
 
-    it('named argument is empty strin', () => {
+    it('named argument is empty string', () => {
       expect(parse('foo(q="")')).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
       expect(parse(`foo(q='')`)).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
     });
