@@ -68,7 +68,7 @@ export function ResultLinks({ jobs }) {
               aria-label={openJobsInSingleMetricViewerText}
               className="results-button"
               isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-              data-test--webkit-subj="mlOpenJobsInSingleMetricViewerButton"
+              data-test-subj="mlOpenJobsInSingleMetricViewerButton"
             />
           </EuiToolTip>
         </EuiFlexItem>
