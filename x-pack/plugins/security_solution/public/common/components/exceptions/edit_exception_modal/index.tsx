@@ -53,6 +53,7 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -281,6 +282,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const osDisplay = (osTypes: OsTypeArray): string => {
+    const translateOS = (currentOs: OsType): string => {
+      return currentOs === 'linux'
+        ? sharedI18n.OPERATING_SYSTEM_LINUX
+        : currentOs === 'macos'
+        ? sharedI18n.OPERATING_SYSTEM_MAC
+        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+    };
+    return osTypes
+      .reduce((osString, currentOs) => {
+        return `${translateOS(currentOs)}, ${osString}`;
+      }, '')
+      .slice(0, -2);
+  };
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
@@ -314,6 +330,17 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="xs">
+                    <dl>
+                      <dt>{sharedI18n.OPERATING_SYSTEM_LABEL}</dt>
+                      <dd>{osDisplay(exceptionItem.os_types)}</dd>
+                    </dl>
+                  </EuiText>
+                  <EuiSpacer />
+                </>
+              )}
               <ExceptionBuilder.ExceptionBuilderComponent
                 allowLargeValueLists={
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)

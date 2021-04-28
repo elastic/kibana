@@ -91,37 +91,9 @@ export const ADD_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
   }
 );
 
-export const OPERATING_SYSTEM_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.operatingSystemLabel',
-  {
-    defaultMessage: 'Operating System',
-  }
-);
-
 export const OPERATING_SYSTEM_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.addException.operatingSystemPlaceHolder',
   {
     defaultMessage: 'Select an operating system',
-  }
-);
-
-export const OPERATING_SYSTEM_WINDOWS = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.operatingSystemWindows',
-  {
-    defaultMessage: 'Windows',
-  }
-);
-
-export const OPERATING_SYSTEM_MAC = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.operatingSystemMac',
-  {
-    defaultMessage: 'macOS',
-  }
-);
-
-export const OPERATING_SYSTEM_LINUX = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.operatingSystemLinux',
-  {
-    defaultMessage: 'Linux',
   }
 );

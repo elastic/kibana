@@ -361,15 +361,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   > => {
     return [
       {
-        label: i18n.OPERATING_SYSTEM_WINDOWS,
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS,
         value: 'windows',
       },
       {
-        label: i18n.OPERATING_SYSTEM_MAC,
+        label: sharedI18n.OPERATING_SYSTEM_MAC,
         value: 'macos',
       },
       {
-        label: i18n.OPERATING_SYSTEM_LINUX,
+        label: sharedI18n.OPERATING_SYSTEM_LINUX,
         value: 'linux',
       },
     ];
@@ -454,7 +454,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <EuiSpacer />
               {exceptionListType === 'endpoint' && !hasAlertData && (
                 <>
-                  <EuiFormRow label={i18n.OPERATING_SYSTEM_LABEL}>
+                  <EuiFormRow label={sharedI18n.OPERATING_SYSTEM_LABEL}>
                     <EuiComboBox
                       placeholder={i18n.OPERATING_SYSTEM_PLACEHOLDER}
                       singleSelection={singleSelectionOptions}
