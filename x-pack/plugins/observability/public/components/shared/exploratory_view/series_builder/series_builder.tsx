@@ -28,6 +28,12 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
   ],
+  mobile: [
+    {
+      id: 'mrp',
+      label: 'Response duration',
+    },
+  ],
   apm: [
     { id: 'svl', label: 'Latency' },
     { id: 'tpt', label: 'Throughput' },

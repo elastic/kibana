@@ -134,7 +134,7 @@ export interface ObservabilityFetchDataResponse {
 }
 
 export interface ObservabilityHasDataResponse {
-  apm: boolean;
+  apm: HasDataResponse;
   infra_metrics: boolean;
   infra_logs: boolean;
   synthetics: HasDataResponse;

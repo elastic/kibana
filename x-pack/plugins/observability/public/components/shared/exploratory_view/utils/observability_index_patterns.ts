@@ -23,6 +23,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   ux: rumFieldFormats,
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
+  mobile: null,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
@@ -35,6 +36,7 @@ export const indexPatternList: Record<AppDataType, string> = {
   ux: 'rum_static_index_pattern_id',
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
+  mobile: 'mobile_static_index_pattern_id',
 };
 
 const appToPatternMap: Record<AppDataType, string> = {
@@ -43,6 +45,7 @@ const appToPatternMap: Record<AppDataType, string> = {
   ux: '(rum-data-view)*',
   infra_logs: '',
   infra_metrics: '',
+  mobile: '(mobile-data-view)*',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {

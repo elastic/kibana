@@ -41,6 +41,15 @@ export const FieldLabels: Record<string, string> = {
 
   'performance.metric': 'Metric',
   'Business.KPI': 'KPI',
+
+  'labels.net_connection_carrier_name': 'Carrier Name',
+  'http.request.method': 'Request Method',
+  'labels.net_connection_type': 'Connection Type',
+  'host.os.full': 'Host OS',
+  'host.os.platform': 'OS Platform',
+  'labels.device_model': ' Device Model',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'labels.net_connection_carrier_isoCountryCode': 'Carrier Location',
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
@@ -54,6 +63,7 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
   logs: 'Logs Frequency',
   mem: 'System Memory Usage',
   nwk: 'Network Activity',
+  mrp: 'Mobile response duration',
 };
 
 export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {

@@ -41,6 +41,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
     synthetics: null,
     ux: null,
     apm: null,
+    mobile: null,
   } as HasAppDataState);
 
   const {
@@ -48,7 +49,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const checkIfAppHasData = async (dataType: AppDataType) => {
-    const handler = getDataHandler(dataType);
+    const handler = getDataHandler(dataType === 'mobile' ? 'apm' : dataType);
     return handler?.hasData();
   };
 

@@ -29,6 +29,7 @@ export const ReportViewTypes = {
   cpu: 'cpu-usage',
   mem: 'memory-usage',
   nwk: 'network-activity',
+  mrp: 'response-duration',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -95,7 +96,7 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

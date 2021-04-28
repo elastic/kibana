@@ -16,6 +16,7 @@ import { ReportToDataTypeMap } from '../../configurations/constants';
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'ux', label: 'User Experience (RUM)' },
+  { id: 'mobile', label: 'Mobile Experience' },
   // { id: 'infra_logs', label: 'Logs' },
   // { id: 'infra_metrics', label: 'Metrics' },
   // { id: 'apm', label: 'APM' },
