@@ -79,4 +79,16 @@ describe('Axes Settings', () => {
       false
     );
   });
+
+  it('hides the endzone visibility flag if no setter is passed in', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    expect(component.find('[data-test-subj="lnsshowEndzones"]').length).toBe(0);
+  });
+
+  it('shows the switch if setter is present', () => {
+    const component = shallow(
+      <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
+    );
+    expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
+  });
 });

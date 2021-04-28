@@ -479,8 +479,8 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'index-pattern', meta: {} },
+        { id: '3', type: 'dashboard', meta: {} },
       ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
@@ -498,8 +498,8 @@ describe('SavedObjectsTable', () => {
 
     it('should delete selected objects', async () => {
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'index-pattern', meta: {} },
+        { id: '3', type: 'dashboard', meta: {} },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -529,7 +529,6 @@ describe('SavedObjectsTable', () => {
       await component.instance().delete();
 
       expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
-      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[0].type,
         mockSavedObjects[0].id,
@@ -541,6 +540,45 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+    });
+
+    it('should not delete hidden selected objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern', meta: {} },
+        { id: '3', type: 'hidden-type', meta: { hiddenType: true } },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn(),
+      };
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().delete();
+
+      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', '1', {
+        force: true,
+      });
     });
   });
 });
