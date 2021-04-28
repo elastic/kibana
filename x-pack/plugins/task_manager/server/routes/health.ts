@@ -34,13 +34,22 @@ const LEVEL_SUMMARY = {
   [ServiceStatusLevels.unavailable.toString()]: 'Task Manager is unavailable',
 };
 
+/**
+ * We enforce a `meta` of `never` because this meta gets duplicated into *every dependant plugin*, and
+ * this will then get logged out when logging is set to Verbose.
+ * We used to pass in the the entire MonitoredHealth into this `meta` field, but this means that the
+ * whole MonitoredHealth JSON (which can be quite big) was duplicated dozens of times and when we
+ * try to view logs in Discover, it fails to render as this JSON was often dozens of levels deep.
+ */
+type TaskManagerServiceStatus = ServiceStatus<never>;
+
 export function healthRoute(
   router: IRouter,
   monitoringStats$: Observable<MonitoringStats>,
   logger: Logger,
   taskManagerId: string,
   config: TaskManagerConfig
-): Observable<ServiceStatus> {
+): Observable<TaskManagerServiceStatus> {
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
@@ -67,7 +76,7 @@ export function healthRoute(
     return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
   }
 
-  const serviceStatus$: Subject<ServiceStatus> = new Subject<ServiceStatus>();
+  const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
 
   /* keep track of last health summary, as we'll return that to the next call to _health */
   let lastMonitoredStats: MonitoringStats | null = null;
@@ -110,7 +119,7 @@ export function healthRoute(
 
 export function withServiceStatus(
   monitoredHealth: MonitoredHealth
-): [MonitoredHealth, ServiceStatus] {
+): [MonitoredHealth, TaskManagerServiceStatus] {
   const level =
     monitoredHealth.status === HealthStatus.OK
       ? ServiceStatusLevels.available
@@ -122,7 +131,6 @@ export function withServiceStatus(
     {
       level,
       summary: LEVEL_SUMMARY[level.toString()],
-      meta: monitoredHealth,
     },
   ];
 }
