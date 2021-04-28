@@ -12,8 +12,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/97382
-  describe.skip('feature controls', () => {
+  describe('feature controls', () => {
     const kibanaUsername = 'kibana_admin';
     const kibanaUserRoleName = 'kibana_admin';
 

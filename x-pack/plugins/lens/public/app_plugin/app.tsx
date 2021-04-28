@@ -648,68 +648,66 @@ export function App({
   return (
     <>
       <div className="lnsApp">
-        <div className="lnsApp__header">
-          <TopNavMenu
-            setMenuMountPoint={setHeaderActionMenu}
-            config={topNavConfig}
-            showSearchBar={true}
-            showDatePicker={true}
-            showQueryBar={true}
-            showFilterBar={true}
-            indexPatterns={state.indexPatternsForTopNav}
-            showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-            savedQuery={state.savedQuery}
-            data-test-subj="lnsApp_topNav"
-            screenTitle={'lens'}
-            appName={'lens'}
-            onQuerySubmit={(payload) => {
-              const { dateRange, query } = payload;
-              const currentRange = data.query.timefilter.timefilter.getTime();
-              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-                data.query.timefilter.timefilter.setTime(dateRange);
-                trackUiEvent('app_date_change');
-              } else {
-                // Query has changed, renew the session id.
-                // Time change will be picked up by the time subscription
-                setState((s) => ({
-                  ...s,
-                  searchSessionId: startSession(),
-                }));
-                trackUiEvent('app_query_change');
-              }
+        <TopNavMenu
+          setMenuMountPoint={setHeaderActionMenu}
+          config={topNavConfig}
+          showSearchBar={true}
+          showDatePicker={true}
+          showQueryBar={true}
+          showFilterBar={true}
+          indexPatterns={state.indexPatternsForTopNav}
+          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+          savedQuery={state.savedQuery}
+          data-test-subj="lnsApp_topNav"
+          screenTitle={'lens'}
+          appName={'lens'}
+          onQuerySubmit={(payload) => {
+            const { dateRange, query } = payload;
+            const currentRange = data.query.timefilter.timefilter.getTime();
+            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+              data.query.timefilter.timefilter.setTime(dateRange);
+              trackUiEvent('app_date_change');
+            } else {
+              // Query has changed, renew the session id.
+              // Time change will be picked up by the time subscription
               setState((s) => ({
                 ...s,
-                query: query || s.query,
+                searchSessionId: startSession(),
               }));
-            }}
-            onSaved={(savedQuery) => {
-              setState((s) => ({ ...s, savedQuery }));
-            }}
-            onSavedQueryUpdated={(savedQuery) => {
-              const savedQueryFilters = savedQuery.attributes.filters || [];
-              const globalFilters = data.query.filterManager.getGlobalFilters();
-              data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-              setState((s) => ({
-                ...s,
-                savedQuery: { ...savedQuery }, // Shallow query for reference issues
-                query: savedQuery.attributes.query,
-              }));
-            }}
-            onClearSavedQuery={() => {
-              data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-              setState((s) => ({
-                ...s,
-                savedQuery: undefined,
-                filters: data.query.filterManager.getGlobalFilters(),
-                query: data.query.queryString.getDefaultQuery(),
-              }));
-            }}
-            query={state.query}
-            dateRangeFrom={fromDate}
-            dateRangeTo={toDate}
-            indicateNoData={state.indicateNoData}
-          />
-        </div>
+              trackUiEvent('app_query_change');
+            }
+            setState((s) => ({
+              ...s,
+              query: query || s.query,
+            }));
+          }}
+          onSaved={(savedQuery) => {
+            setState((s) => ({ ...s, savedQuery }));
+          }}
+          onSavedQueryUpdated={(savedQuery) => {
+            const savedQueryFilters = savedQuery.attributes.filters || [];
+            const globalFilters = data.query.filterManager.getGlobalFilters();
+            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+            setState((s) => ({
+              ...s,
+              savedQuery: { ...savedQuery }, // Shallow query for reference issues
+              query: savedQuery.attributes.query,
+            }));
+          }}
+          onClearSavedQuery={() => {
+            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+            setState((s) => ({
+              ...s,
+              savedQuery: undefined,
+              filters: data.query.filterManager.getGlobalFilters(),
+              query: data.query.queryString.getDefaultQuery(),
+            }));
+          }}
+          query={state.query}
+          dateRangeFrom={fromDate}
+          dateRangeTo={toDate}
+          indicateNoData={state.indicateNoData}
+        />
         {(!state.isLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}

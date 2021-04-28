@@ -13,10 +13,11 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeader, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
+import { EmptyState } from './components';
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -86,6 +87,17 @@ describe('ResultSettings', () => {
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
+  it('renders the "save" button as disabled if everything is disabled', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+      resultFieldsEmpty: true,
+    });
+    const buttons = findButtons(subject());
+    const saveButton = shallow(buttons[0]);
+    expect(saveButton.prop('disabled')).toBe(true);
+  });
+
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
     const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);
@@ -140,8 +152,8 @@ describe('ResultSettings', () => {
       expect(wrapper.find(SampleResponse).exists()).toBe(false);
     });
 
-    it('will render an "empty" message', () => {
-      expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+    it('will render an empty state', () => {
+      expect(wrapper.find(EmptyState).exists()).toBe(true);
     });
   });
 });
