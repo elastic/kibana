@@ -4,10 +4,6 @@ set -euo pipefail
 
 # TODO this file is temporary for testing
 
-source "$(dirname "${0}")/env.sh"
-
-# "$(dirname "${0}")/bootstrap.sh"
-
 echo "--- Build Platform Plugins"
 node scripts/build_kibana_platform_plugins \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \

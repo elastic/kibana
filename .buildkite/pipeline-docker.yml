@@ -1,12 +1,4 @@
 steps:
-  # https://cloud.google.com/blog/products/devops-sre/artifact-registry-is-ga
-  # - command: |
-  #     export DOCKER_BUILDKIT=1 && \
-  #     docker buildx create --use && \
-  #     docker buildx build -t us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain \
-  #       --output type=image,name=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
-  #       --cache-to type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache \
-  #       --cache-from type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache
   - command: .buildkite/scripts/bootstrap_docker.sh
     label: Create bootstrapped docker image
     agents:

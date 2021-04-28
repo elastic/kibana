@@ -4,6 +4,10 @@ set -euo pipefail
 
 cd /var/lib/kibana/workspace/kibana
 
-source "$(dirname "${0}")/env.sh"
+if [[ -f ".buildkite/scripts/env.sh" ]]; then
+  source ".buildkite/scripts/env.sh"
+else
+  source "/var/lib/kibana/workspace/kibana/.buildkite/env.sh"
+fi
 
 exec "${@-$SHELL}"
