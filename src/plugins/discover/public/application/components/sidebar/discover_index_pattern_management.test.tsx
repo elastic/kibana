@@ -14,6 +14,8 @@ import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
+import { findTestSubject } from '@kbn/test/jest';
 
 const mockServices = ({
   history: () => ({
@@ -29,6 +31,11 @@ const mockServices = ({
       save: false,
     },
   },
+  core: {
+    application: {
+      navigateToApp: jest.fn(),
+    },
+  },
   uiSettings: {
     get: (key: string) => {
       if (key === 'fields:popularLimit') {
@@ -39,14 +46,12 @@ const mockServices = ({
   indexPatternFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
-      editIndexPattern: jest.fn(),
+      editIndexPattern: () => {
+        return true;
+      },
     },
   },
 } as unknown) as DiscoverServices;
-
-jest.mock('../../../kibana_services', () => ({
-  getServices: () => mockServices,
-}));
 
 describe('Discover IndexPattern Management', () => {
   const indexPattern = getStubIndexPattern(
@@ -59,8 +64,8 @@ describe('Discover IndexPattern Management', () => {
 
   const editField = jest.fn();
 
-  test('renders correctly', () => {
-    const component = mountWithIntl(
+  const mountComponent = () => {
+    return mountWithIntl(
       <DiscoverIndexPatternManagement
         services={mockServices}
         editField={editField}
@@ -68,6 +73,42 @@ describe('Discover IndexPattern Management', () => {
         useNewFieldsApi={true}
       />
     );
+  };
+
+  test('renders correctly', () => {
+    const component = mountComponent();
     expect(component).toMatchSnapshot();
+    expect(component.find(EuiPopover).length).toBe(1);
+  });
+
+  test('click on a button opens popover', () => {
+    const component = mountComponent();
+    expect(component.find(EuiContextMenuPanel).length).toBe(0);
+
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    expect(component.find(EuiContextMenuPanel).length).toBe(1);
+    expect(component.find(EuiContextMenuItem).length).toBe(2);
+  });
+
+  test('click on an add button executes editField callback', () => {
+    const component = mountComponent();
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    const addButton = findTestSubject(component, 'indexPattern-add-field');
+    addButton.simulate('click');
+    expect(editField).toHaveBeenCalledWith(undefined);
+  });
+
+  test('click on a manage button navigates away from discover', () => {
+    const component = mountComponent();
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    const manageButton = findTestSubject(component, 'indexPattern-manage-field');
+    manageButton.simulate('click');
+    expect(mockServices.core.application.navigateToApp).toHaveBeenCalled();
   });
 });
