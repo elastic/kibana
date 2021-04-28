@@ -37,7 +37,6 @@ type EventListPaginatedContent = PaginatedContentProps<
 >;
 
 export const EventFiltersListPage = memo(() => {
-  // const dispatch = useDispatch<Dispatch<AppAction>>();
   const listItems = useEventFiltersSelector(getListItems);
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
@@ -69,7 +68,15 @@ export const EventFiltersListPage = memo(() => {
     []
   );
 
-  const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(() => {}, []);
+  const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(
+    ({ pageIndex, pageSize }) => {
+      navigateCallback({
+        page_index: pageIndex,
+        page_size: pageSize,
+      });
+    },
+    [navigateCallback]
+  );
 
   return (
     <AdministrationListPage

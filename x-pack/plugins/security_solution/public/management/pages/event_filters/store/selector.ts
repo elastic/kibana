@@ -126,6 +126,7 @@ export const getCreationError = (state: EventFiltersListPageState): ServerApiErr
 export const getCurrentLocation: EventFiltersSelector<StoreState['location']> = (state) =>
   state.location;
 
+/** Compares the URL param values to the values used in the last data query */
 export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelector(
   getCurrentLocation,
   getCurrentListItemsQuery,
