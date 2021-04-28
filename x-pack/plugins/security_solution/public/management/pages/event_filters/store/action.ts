@@ -25,6 +25,7 @@ export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
     entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
     hasNameError?: boolean;
     hasItemsError?: boolean;
+    hasOSError?: boolean;
   };
 };
 

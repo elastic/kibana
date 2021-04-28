@@ -46,6 +46,12 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
 
     const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
     store.dispatch({
+      type: 'eventFiltersCreateSuccess',
+      payload: {
+        exception,
+      },
+    });
+    store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadedResourceState',

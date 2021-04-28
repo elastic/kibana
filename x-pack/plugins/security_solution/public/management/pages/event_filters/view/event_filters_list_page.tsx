@@ -9,12 +9,15 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { useEventFiltersSelector } from './hooks';
+import { EventFiltersListEmptyState } from './components/empty';
+import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
+import { EventFiltersFlyout } from './components/flyout';
 import {
   getListFetchError,
   getListIsLoading,
   getListItems,
   getListPagination,
+  getCurrentLocation,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
@@ -38,6 +41,27 @@ export const EventFiltersListPage = memo(() => {
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
   const fetchError = useEventFiltersSelector(getListFetchError);
+  const location = useEventFiltersSelector(getCurrentLocation);
+  const navigateCallback = useEventFiltersNavigateCallback();
+  const showFlyout = !!location.show;
+
+  const handleAddButtonClick = useCallback(
+    () =>
+      navigateCallback({
+        show: 'create',
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
+  const handleCancelButtonClick = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
     (item) => ({ item }),
@@ -45,8 +69,6 @@ export const EventFiltersListPage = memo(() => {
   );
 
   const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(() => {}, []);
-
-  const noItemsMessage = <>{'No Items. Placeholder until create dialog is merged'}</>;
 
   return (
     <AdministrationListPage
@@ -63,6 +85,8 @@ export const EventFiltersListPage = memo(() => {
           'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
       })}
     >
+      {showFlyout && <EventFiltersFlyout onCancel={handleCancelButtonClick} />}
+
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof TemporaryComponent>
         items={listItems}
         ItemComponent={TemporaryComponent}
@@ -71,7 +95,9 @@ export const EventFiltersListPage = memo(() => {
         error={fetchError?.message}
         loading={isLoading}
         pagination={pagination}
-        noItemsMessage={noItemsMessage}
+        noItemsMessage={
+          <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+        }
       />
     </AdministrationListPage>
   );
