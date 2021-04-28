@@ -24,6 +24,7 @@ import { StatusPagePageProvider } from './status_page';
 import { UpgradeAssistantPageProvider } from './upgrade_assistant_page';
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
+import { SyntheticsIntegrationPageProvider } from './synthetics_integration_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
@@ -64,6 +65,7 @@ export const pageObjects = {
   statusPage: StatusPagePageProvider,
   upgradeAssistant: UpgradeAssistantPageProvider,
   uptime: UptimePageProvider,
+  syntheticsIntegration: SyntheticsIntegrationPageProvider,
   rollup: RollupPageProvider,
   apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,

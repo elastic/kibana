@@ -15,6 +15,7 @@ import { UptimeAlertsProvider } from './alerts';
 import { UptimeMLAnomalyProvider } from './ml_anomaly';
 import { UptimeCertProvider } from './certificates';
 import { UptimeOverviewProvider } from './overview';
+import { SyntheticsPolicyProvider } from './synthetics_policy';
 
 export function UptimeProvider(context: FtrProviderContext) {
   const common = UptimeCommonProvider(context);
@@ -25,6 +26,7 @@ export function UptimeProvider(context: FtrProviderContext) {
   const ml = UptimeMLAnomalyProvider(context);
   const cert = UptimeCertProvider(context);
   const overview = UptimeOverviewProvider(context);
+  const syntheticsPolicy = SyntheticsPolicyProvider(context);
 
   return {
     common,
@@ -35,5 +37,6 @@ export function UptimeProvider(context: FtrProviderContext) {
     ml,
     cert,
     overview,
+    syntheticsPolicy,
   };
 }

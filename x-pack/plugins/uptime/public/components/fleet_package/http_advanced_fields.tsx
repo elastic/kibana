@@ -51,6 +51,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           defaultMessage="Advanced HTTP options"
         />
       }
+      data-test-subj="httpAdvancedFieldsSectionAccordion"
     >
       <EuiSpacer size="xl" />
       <EuiDescribedFormGroup
@@ -68,6 +69,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             defaultMessage="Configure an optional request to send to the remote host including method, body, and headers."
           />
         }
+        data-test-subj="httpAdvancedFieldsSection"
       >
         <EuiSpacer size="s" />
         <EuiFormRow

@@ -76,6 +76,7 @@ export const CustomFields = memo<Props>(
               defaultMessage="Configure your monitor with the following options."
             />
           }
+          data-test-subj="monitorSettingsSection"
         >
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -104,6 +105,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.MONITOR_TYPE,
                       })
                     }
+                    data-test-subj="syntheticsMontiorTypeField"
                   />
                 </EuiFormRow>
               )}
@@ -128,6 +130,7 @@ export const CustomFields = memo<Props>(
                     onChange={(event) =>
                       handleInputChange({ value: event.target.value, configKey: ConfigKeys.URLS })
                     }
+                    data-test-subj="syntheticsUrlField"
                   />
                 </EuiFormRow>
               )}
@@ -155,6 +158,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.HOSTS,
                       })
                     }
+                    data-test-subj="syntheticsTCPHostField"
                   />
                 </EuiFormRow>
               )}
@@ -182,6 +186,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.HOSTS,
                       })
                     }
+                    data-test-subj="syntheticsICMPHostField"
                   />
                 </EuiFormRow>
               )}
