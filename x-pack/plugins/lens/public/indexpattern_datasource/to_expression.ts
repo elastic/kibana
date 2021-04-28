@@ -77,7 +77,7 @@ function getExpressionForLayer(
 
     esAggEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
-      if (def.input !== 'fullReference') {
+      if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
