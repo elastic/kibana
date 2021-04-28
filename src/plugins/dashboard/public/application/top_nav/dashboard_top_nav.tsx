@@ -266,6 +266,7 @@ export function DashboardTopNav({
       if (saveResult.id && !saveResult.redirected) {
         dispatchDashboardStateChange(setStateFromSaveModal(stateFromSaveModal));
         dashboardAppState.updateLastSavedState?.();
+        chrome.docTitle.change(stateFromSaveModal.title);
       }
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
@@ -294,6 +295,7 @@ export function DashboardTopNav({
     savedObjectsTagging,
     dashboardAppState,
     core.i18n.Context,
+    chrome.docTitle,
     clearAddPanel,
     kibanaVersion,
     timefilter,

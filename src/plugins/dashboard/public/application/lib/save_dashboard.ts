@@ -94,9 +94,9 @@ export const saveDashboard = async ({
         dashboardSessionStorage.clearState(lastDashboardId);
         redirectTo({
           id: newId,
-          // editMode: true,
-          destination: 'dashboard',
+          editMode: true,
           useReplace: true,
+          destination: 'dashboard',
         });
         return { redirected: true, id: newId };
       }
