@@ -25,3 +25,6 @@ export const TRUSTED_APPS_SUMMARY_API = '/api/endpoint/trusted_apps/summary';
 export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
 export const BASE_POLICY_ROUTE = `/api/endpoint/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+
+/** Host Isolation Routes */
+export const HOST_ISOLATION_CREATE_API = `/api/endpoint/isolate`;

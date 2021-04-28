@@ -10,7 +10,7 @@
 <titleabbrev>Users and privileges</titleabbrev>
 ++++
 
-You can use role-based access control to grant users access to secured
+Use role-based access control to grant users access to secured
 resources. The roles that you set up depend on your organization's security
 requirements and the minimum privileges required to use specific features.
 
@@ -24,6 +24,13 @@ In general, there are three types of privileges you'll work with:
 * **Elasticsearch index privileges**: Control access to the data in specific indices your cluster.
 * **Kibana space privileges**: Grant users write or read access to features and apps within Kibana.
 
+Select your use-case to get started:
+
+* <<apm-app-reader>>
+* <<apm-app-annotation-user-create>>
+* <<apm-app-central-config-user>>
+* <<apm-app-api-user>>
+
 ////
 ***********************************  ***********************************
 ////
@@ -36,13 +43,25 @@ In general, there are three types of privileges you'll work with:
 <titleabbrev>Create an APM reader user</titleabbrev>
 ++++
 
-[[apm-app-reader-full]]
-==== Full APM reader
-
-APM reader users typically need to view the APM app, dashboards, and visualizations that contain APM data.
+APM reader users typically need to view the APM app and dashboards and visualizations that use APM data.
 These users might also need to create and edit dashboards, visualizations, and machine learning jobs.
 
-. Assign the following built-in roles:
+[[apm-app-reader-full]]
+==== APM reader
+
+To create an APM reader user:
+
+. Create a new role, named something like `read-apm`, and assign the following privileges:
++
+--
+include::./tab-widgets/apm-app-reader/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
+
+. Assign the `read-apm` role created in the previous step, and the following built-in roles to
+any APM reader users:
 +
 [options="header"]
 |====
@@ -50,9 +69,6 @@ These users might also need to create and edit dashboards, visualizations, and m
 
 |`kibana_admin`
 |Grants access to all features in Kibana.
-
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
 
 |`machine_learning_admin`
 |Grants the privileges required to create, update, and view machine learning jobs
@@ -63,14 +79,14 @@ These users might also need to create and edit dashboards, visualizations, and m
 
 In some instances, you may wish to restrict certain Kibana apps that a user has access to.
 
-. Assign the following built in roles:
+. Create a new role, named something like `read-apm-partial`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
+--
+include::./tab-widgets/apm-app-reader/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
 . Assign space privileges to any Kibana space that the user needs access to.
 Here are two examples:
@@ -97,6 +113,8 @@ Here are two examples:
 |`machine_learning_admin`
 |Grants the privileges required to create, update, and view machine learning jobs
 |====
+
+include::./tab-widgets/code.asciidoc[]
 
 ////
 ***********************************  ***********************************
@@ -138,7 +156,7 @@ and assign the following privileges:
 ^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
 <<apm-settings-kb,`xpack.observability.annotations.index`>>.
 
-. Assign the `annotation_user` created previously, and the built-in roles necessary to create
+. Assign the `annotation_user` created previously, and the roles and privileges necessary to create
 a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
 
 [[apm-app-annotation-api]]
@@ -163,17 +181,17 @@ See <<apm-app-api-user>>.
 
 Central configuration users need to be able to view, create, update, and delete Agent configurations.
 
-. Assign the following built-in roles:
+. Create a new role, named something like `central-config-manager`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
+--
+include::./tab-widgets/central-config-users/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
-
-. Assign the following Kibana space privileges:
+. Assign the `central-config-manager` role created in the previous step, and the following Kibana space privileges to
+anyone who needs to manage central configurations:
 +
 [options="header"]
 |====
@@ -190,16 +208,17 @@ Central configuration users need to be able to view, create, update, and delete 
 In some instances, you may wish to create a user that can only read central configurations,
 but not create, update, or delete them.
 
-. Assign the following built-in roles:
+. Create a new role, named something like `central-config-reader`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
+--
+include::./tab-widgets/central-config-users/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
-. Assign the following Kibana space privileges:
+. Assign the `central-config-reader` role created in the previous step, and the following Kibana space privileges to
+anyone who needs to read central configurations:
 +
 [options="header"]
 |====
@@ -214,6 +233,8 @@ but not create, update, or delete them.
 ==== Central configuration API
 
 See <<apm-app-api-user>>.
+
+include::./tab-widgets/code.asciidoc[]
 
 ////
 ***********************************  ***********************************
