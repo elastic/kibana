@@ -64,7 +64,7 @@ async function fetchRollupSavedSearches(
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.search.kibanaSavedObjectMeta'],
+    filterPath: ['hits.hits._id', 'hits.hits._source.references'],
     body: {
       query: {
         bool: {
@@ -83,20 +83,20 @@ async function fetchRollupSavedSearches(
 
   // Filter for ones with rollup index patterns.
   return savedSearches.reduce((rollupSavedSearches: any, savedSearch: any) => {
-    const {
-      _id: savedObjectId,
-      _source: {
-        search: {
-          kibanaSavedObjectMeta: { searchSourceJSON },
-        },
-      },
-    } = savedSearch;
+    const { _id: savedObjectId } = savedSearch;
+    const references: Array<{ name: string; id: string; type: string }> | undefined = get(
+      savedSearch,
+      '_source.references'
+    );
 
-    const searchSource = JSON.parse(searchSourceJSON);
-
-    if (rollupIndexPatternToFlagMap[searchSource.index]) {
-      const id = getIdFromSavedObjectId(savedObjectId) as string;
-      rollupSavedSearches.push(id);
+    if (references?.length) {
+      const visualizationsFromPatterns = references.filter(
+        ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+      );
+      if (visualizationsFromPatterns.length) {
+        const id = getIdFromSavedObjectId(savedObjectId) as string;
+        rollupSavedSearches.push(id);
+      }
     }
 
     return rollupSavedSearches;
@@ -113,17 +113,13 @@ async function fetchRollupVisualizations(
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
     ignoreUnavailable: true,
-    filterPath: [
-      'hits.hits._source.visualization.savedSearchRefName',
-      'hits.hits._source.visualization.kibanaSavedObjectMeta',
-      'hits.hits._source.references',
-    ],
+    filterPath: ['hits.hits._source.references'],
     body: {
       query: {
         bool: {
           filter: {
-            term: {
-              type: 'visualization',
+            terms: {
+              type: ['visualization', 'lens'],
             },
           },
         },
@@ -138,36 +134,24 @@ async function fetchRollupVisualizations(
   let rollupVisualizationsFromSavedSearches = 0;
 
   visualizations.forEach((visualization: any) => {
-    const references: Array<{ name: string; id: string }> | undefined = get(
+    const references: Array<{ name: string; id: string; type: string }> | undefined = get(
       visualization,
       '_source.references'
     );
-    const savedSearchRefName: string | undefined = get(
-      visualization,
-      '_source.visualization.savedSearchRefName'
-    );
-    const searchSourceJSON: string | undefined = get(
-      visualization,
-      '_source.visualization.kibanaSavedObjectMeta.searchSourceJSON'
-    );
 
-    if (savedSearchRefName && references?.length) {
-      // This visualization depends upon a saved search.
-      const savedSearch = references.find(({ name }) => name === savedSearchRefName);
-      if (savedSearch && rollupSavedSearchesToFlagMap[savedSearch.id]) {
+    if (references?.length) {
+      const visualizationsFromPatterns = references.filter(
+        ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
+      );
+      const visualizationsFromSavedSearches = references.filter(
+        ({ type, id }) => type === 'search' && rollupSavedSearchesToFlagMap[id]
+      );
+      if (visualizationsFromPatterns.length) {
         rollupVisualizations++;
+      } else if (visualizationsFromSavedSearches.length) {
         rollupVisualizationsFromSavedSearches++;
       }
-    } else if (searchSourceJSON) {
-      // This visualization depends upon an index pattern.
-      const searchSource = JSON.parse(searchSourceJSON);
-
-      if (rollupIndexPatternToFlagMap[searchSource.index]) {
-        rollupVisualizations++;
-      }
     }
-
-    return rollupVisualizations;
   });
 
   return {
