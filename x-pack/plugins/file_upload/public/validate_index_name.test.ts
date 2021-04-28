@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-// Not all index pattern dependencies are avab. in jest context,
-// prevent unrelated import errors by mocking kibana services
-jest.mock('../kibana_services', () => {});
-import { checkIndexPatternValid } from './indexing_service';
+jest.mock('./kibana_services', () => {});
+import { checkIndexPatternValid } from './validate_index_name';
 
-describe('indexing_service', () => {
+describe('checkIndexPatternValid', () => {
   const validNames = [
     'lowercaseletters', // Lowercase only
     '123', // Cannot include \, /, *, ?, ", <, >, |, " " (space character), , (comma), #
