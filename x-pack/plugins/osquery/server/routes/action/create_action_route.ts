@@ -7,27 +7,26 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import {
+  createActionRequestBodySchema,
+  CreateActionRequestBodySchema,
+} from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/action',
       validate: {
-        body: schema.object({
-          query: schema.string(),
-          agentSelection: schema.object({
-            agents: schema.arrayOf(schema.string()),
-            allAgentsSelected: schema.boolean(),
-            platformsSelected: schema.arrayOf(schema.string()),
-            policiesSelected: schema.arrayOf(schema.string()),
-          }),
-        }),
+        body: buildRouteValidation<
+          typeof createActionRequestBodySchema,
+          CreateActionRequestBodySchema
+        >(createActionRequestBodySchema),
       },
       options: {
         tags: ['access:osquery', 'access:osquery_write'],

@@ -7,39 +7,42 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ValidationFunc } from '../../shared_imports';
+import { ValidationFunc, fieldValidators } from '../../shared_imports';
 export { queryFieldValidation } from '../../common/validations';
 
 const idPattern = /^[a-zA-Z0-9-_]+$/;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const idFieldValidation: ValidationFunc<any, string, string> = ({ value }) => {
-  if (!value) {
-    return {
-      message: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.emptyIdError', {
-        defaultMessage: 'ID is required',
-      }),
-    };
-  }
+const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);
   if (!valueIsValid) {
     return {
       message: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.invalidIdError', {
-        defaultMessage: 'Characters must be alphanumeric, or -',
+        defaultMessage: 'Characters must be alphanumeric, _, or -',
       }),
     };
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const intervalFieldValidation: ValidationFunc<any, string, number> = ({ value }) => {
-  if (!value || value <= 0) {
-    return {
-      message: i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.invalidIntervalField',
-        {
-          defaultMessage: 'A positive interval value is required',
-        }
-      ),
-    };
-  }
-};
+export const idFieldValidations = [
+  fieldValidators.emptyField(
+    i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.emptyIdError', {
+      defaultMessage: 'ID is required',
+    })
+  ),
+  idSchemaValidation,
+];
+
+export const intervalFieldValidation: ValidationFunc<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  string,
+  number
+> = fieldValidators.numberGreaterThanField({
+  than: 0,
+  message: i18n.translate(
+    'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.invalidIntervalField',
+    {
+      defaultMessage: 'A positive interval value is required',
+    }
+  ),
+});

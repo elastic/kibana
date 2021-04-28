@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { PackagePolicyInputStream } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
-import { idFieldValidation, intervalFieldValidation, queryFieldValidation } from './validations';
+import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
@@ -65,7 +65,7 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
         label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
           defaultMessage: 'ID',
         }),
-        validations: [{ validator: idFieldValidation }],
+        validations: idFieldValidations.map((validator) => ({ validator })),
       },
       query: {
         type: FIELD_TYPES.TEXT,

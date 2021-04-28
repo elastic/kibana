@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from './use_agent_policies';
 
@@ -35,7 +36,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   const [loading, setLoading] = useState(true);
   const [overlap, setOverlap] = useState<Overlap>(() => ({}));
   const [totalCount, setTotalCount] = useState<number>(0);
-  const { error } = useQuery(
+  useQuery(
     ['agentGroups'],
     async () => {
       const responseData = await data.search
@@ -99,12 +100,14 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
     },
     {
       enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_groups.fetchError', {
+            defaultMessage: 'Error while fetching agent groups',
+          }),
+        }),
     }
   );
-
-  if (error) {
-    toasts.addError(error as Error, { title: 'Error while fetching agent groups' });
-  }
 
   return {
     loading,

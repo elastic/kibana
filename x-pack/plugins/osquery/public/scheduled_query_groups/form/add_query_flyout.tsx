@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditorField } from '../../queries/form/code_editor_field';
-import { idFieldValidation, intervalFieldValidation, queryFieldValidation } from './validations';
+import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
 import { Form, useForm, FormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const FORM_ID = 'addQueryFlyoutForm';
@@ -51,7 +51,7 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
         label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
           defaultMessage: 'ID',
         }),
-        validations: [{ validator: idFieldValidation }],
+        validations: idFieldValidations.map((validator) => ({ validator })),
       },
       query: {
         type: FIELD_TYPES.TEXT,

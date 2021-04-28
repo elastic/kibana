@@ -18,24 +18,12 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
+import { fieldValidators } from '../../shared_imports';
 
 const FORM_ID = 'liveQueryForm';
 
 export const MAX_QUERY_LENGTH = 2000;
 
-const queryValidator: typeof queryFieldValidation = (arg) => {
-  const { value } = arg;
-  if (value.length > 2000) {
-    return {
-      message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-        defaultMessage: 'Query is too large (max {maxLength} characters)',
-        values: { maxLength: MAX_QUERY_LENGTH },
-      }),
-    };
-  }
-
-  return queryFieldValidation(arg);
-};
 interface LiveQueryFormProps {
   defaultValue?: Partial<FormData> | undefined;
   onSubmit?: (payload: Record<string, string>) => Promise<void>;
@@ -69,7 +57,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const formSchema = {
     query: {
       type: FIELD_TYPES.TEXT,
-      validations: [{ validator: queryValidator }],
+      validations: [
+        {
+          validator: fieldValidators.maxLengthField({
+            length: MAX_QUERY_LENGTH,
+            message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+              defaultMessage: 'Query is too large (max {maxLength} characters)',
+              values: { maxLength: MAX_QUERY_LENGTH },
+            }),
+          }),
+        },
+        { validator: queryFieldValidation },
+      ],
     },
   };
 

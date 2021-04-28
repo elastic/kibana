@@ -8,6 +8,7 @@
 import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -60,7 +61,7 @@ export const useActionResults = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const response = useQuery(
+  return useQuery(
     ['actionResults', { actionId }],
     async () => {
       const responseData = await data.search
@@ -123,12 +124,12 @@ export const useActionResults = ({
       refetchInterval: isLive ? 1000 : false,
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.action_results.fetchError', {
+            defaultMessage: 'Error while fetching action results',
+          }),
+        }),
     }
   );
-
-  if (response.error) {
-    toasts.addError(response.error as Error, { title: 'Error while fetching action results' });
-  }
-
-  return response;
 };

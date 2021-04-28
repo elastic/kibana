@@ -7,6 +7,7 @@
 
 import { mapKeys } from 'lodash';
 import { useQueries, UseQueryResult } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { agentPolicyRouteService, GetOneAgentPolicyResponse } from '../../../fleet/common';
 
@@ -21,19 +22,18 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
       queryKey: ['agentPolicy', policyId],
       queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
       enabled: policyIds.length > 0,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {
+            defaultMessage: 'Error while fetching policy details',
+          }),
+        }),
     }))
   ) as Array<UseQueryResult<GetOneAgentPolicyResponse>>;
 
   const agentPoliciesLoading = agentResponse.some((p) => p.isLoading);
   const agentPolicies = agentResponse.map((p) => p.data?.item);
   const agentPolicyById = mapKeys(agentPolicies, 'id');
-  const errored = agentResponse.filter((p) => p.isError);
 
-  if (errored.length) {
-    const erroredResponse = errored[0];
-    toasts.addError(erroredResponse.error as Error, {
-      title: 'Error while fetching policy details',
-    });
-  }
   return { agentPoliciesLoading, agentPolicies, agentPolicyById };
 };

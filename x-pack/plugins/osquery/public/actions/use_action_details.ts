@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -37,7 +38,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
     notifications: { toasts },
   } = useKibana().services;
 
-  const response = useQuery(
+  return useQuery(
     ['actionDetails', { actionId, filterQuery }],
     async () => {
       const responseData = await data.search
@@ -60,10 +61,12 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
     },
     {
       enabled: !skip,
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.action_details.fetchError', {
+            defaultMessage: 'Error while fetching action details',
+          }),
+        }),
     }
   );
-  if (response.error) {
-    toasts.addError(response.error as Error, { title: 'Error while fetching action details' });
-  }
-  return response;
 };
