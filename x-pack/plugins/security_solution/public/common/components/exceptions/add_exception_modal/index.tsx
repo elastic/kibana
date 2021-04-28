@@ -361,15 +361,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   > => {
     return [
       {
-        label: 'Windows',
+        label: i18n.OPERATING_SYSTEM_WINDOWS,
         value: 'windows',
       },
       {
-        label: 'macOS',
+        label: i18n.OPERATING_SYSTEM_MAC,
         value: 'macos',
       },
       {
-        label: 'Linux',
+        label: i18n.OPERATING_SYSTEM_LINUX,
         value: 'linux',
       },
     ];

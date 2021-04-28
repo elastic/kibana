@@ -104,3 +104,24 @@ export const OPERATING_SYSTEM_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select an operating system',
   }
 );
+
+export const OPERATING_SYSTEM_WINDOWS = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.operatingSystemWindows',
+  {
+    defaultMessage: 'Windows',
+  }
+);
+
+export const OPERATING_SYSTEM_MAC = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.operatingSystemMac',
+  {
+    defaultMessage: 'macOS',
+  }
+);
+
+export const OPERATING_SYSTEM_LINUX = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.operatingSystemLinux',
+  {
+    defaultMessage: 'Linux',
+  }
+);
