@@ -17,20 +17,22 @@ import { handleRequest, RequestHandlerParams } from './request_handler';
 
 jest.mock('../../tabify', () => ({
   tabifyAggResponse: jest.fn(),
-})); 
+}));
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
-  
+
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<RequestHandlerParams>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    searchSourceInstanceMock.fetch$ = jest.fn(() => of({
-      rawResponse: {},
-    }));
+    searchSourceInstanceMock.fetch$ = jest.fn(() =>
+      of({
+        rawResponse: {},
+      })
+    );
 
     mockParams = {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
