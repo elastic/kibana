@@ -31,6 +31,7 @@ import {
   OPERATOR_TITLES,
 } from '../../translations';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { getPlaceholderText } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;
@@ -191,17 +192,11 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
-              placeholder={
-                entry.field === ConditionEntryField.PATH
-                  ? entry.type === 'wildcard'
-                    ? os === OperatingSystem.WINDOWS
-                      ? `C:\\sample\\**\\*`
-                      : `/opt/**/*`
-                    : os === OperatingSystem.WINDOWS
-                    ? `C:\\sample\\path.exe`
-                    : `/opt/bin/`
-                  : undefined
-              }
+              placeholder={getPlaceholderText({
+                os,
+                field: entry.field,
+                type: entry.type,
+              })}
               fullWidth
               required
               onChange={handleValueUpdate}
