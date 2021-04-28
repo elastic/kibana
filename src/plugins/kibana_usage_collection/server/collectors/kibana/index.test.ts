@@ -34,7 +34,8 @@ describe('telemetry_kibana', () => {
   const getMockFetchClients = (hits?: unknown[]) => {
     const fetchParamsMock = createCollectorFetchContextMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search.mockResolvedValue({ body: { hits: { hits } } } as any);
+    // @ts-expect-error for the sake of the tests, we only require `hits`
+    esClient.search.mockResolvedValue({ body: { hits: { hits } } });
     fetchParamsMock.esClient = esClient;
     return fetchParamsMock;
   };
