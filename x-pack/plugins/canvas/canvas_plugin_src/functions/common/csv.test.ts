@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+// @ts-expect-error untyped lib
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
+import { Datatable } from 'src/plugins/expressions';
 
 const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
   const fn = functionWrapper(csv);
-  const expected = {
+  const expected: Datatable = {
     type: 'datatable',
     columns: [
-      { name: 'name', type: 'string' },
-      { name: 'number', type: 'string' },
+      { id: 'name', name: 'name', meta: { type: 'string' } },
+      { id: 'name', name: 'number', meta: { type: 'string' } },
     ],
     rows: [
       { name: 'one', number: '1' },
@@ -69,43 +71,47 @@ fourty two%SPLIT%42`,
   });
 
   it('should trim column names', () => {
+    const expectedResult: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'foo', name: 'foo', meta: { type: 'string' } },
+        { id: 'bar', name: 'bar', meta: { type: 'string' } },
+        { id: 'baz', name: 'baz', meta: { type: 'string' } },
+        { id: 'buz', name: 'buz', meta: { type: 'string' } },
+      ],
+      rows: [{ foo: '1', bar: '2', baz: '3', buz: '4' }],
+    };
+
     expect(
       fn(null, {
         data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
       })
-    ).toEqual({
-      type: 'datatable',
-      columns: [
-        { name: 'foo', type: 'string' },
-        { name: 'bar', type: 'string' },
-        { name: 'baz', type: 'string' },
-        { name: 'buz', type: 'string' },
-      ],
-      rows: [{ foo: '1', bar: '2', baz: '3', buz: '4' }],
-    });
+    ).toEqual(expectedResult);
   });
 
   it('should handle odd spaces correctly', () => {
+    const expectedResult: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'foo', name: 'foo', meta: { type: 'string' } },
+        { id: 'bar', name: 'bar', meta: { type: 'string' } },
+        { id: 'baz', name: 'baz', meta: { type: 'string' } },
+        { id: 'buz', name: 'buz', meta: { type: 'string' } },
+      ],
+      rows: [
+        { foo: '1', bar: '  best  ', baz: '3', buz: '  ok' },
+        { foo: '  good', bar: ' bad', baz: ' better   ', buz: ' worst    ' },
+      ],
+    };
+
     expect(
       fn(null, {
         data: `foo," bar  ", baz, " buz "
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
       })
-    ).toEqual({
-      type: 'datatable',
-      columns: [
-        { name: 'foo', type: 'string' },
-        { name: 'bar', type: 'string' },
-        { name: 'baz', type: 'string' },
-        { name: 'buz', type: 'string' },
-      ],
-      rows: [
-        { foo: '1', bar: '  best  ', baz: '3', buz: '  ok' },
-        { foo: '  good', bar: ' bad', baz: ' better   ', buz: ' worst    ' },
-      ],
-    });
+    ).toEqual(expectedResult);
   });
 
   it('throws when given invalid csv', () => {
