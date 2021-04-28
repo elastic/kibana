@@ -16,7 +16,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   `}
 `;
 
-export const Empty = memo<{
+export const EventFiltersListEmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
@@ -56,4 +56,4 @@ export const Empty = memo<{
   );
 });
 
-Empty.displayName = 'Empty';
+EventFiltersListEmptyState.displayName = 'EventFiltersListEmptyState';

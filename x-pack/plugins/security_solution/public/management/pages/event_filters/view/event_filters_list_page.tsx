@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { Empty } from './components/empty';
+import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
 import { getCurrentLocation } from '../store/selector';
 import { EventFiltersFlyout } from './components/flyout';
 
 export const EventFiltersListPage = memo(() => {
-  const handleAddButtonClick = useEventFiltersNavigateCallback(() => ({
-    show: 'create',
-    id: undefined,
-  }));
-
-  const handleFlyoutClose = useEventFiltersNavigateCallback(() => ({
-    show: undefined,
-    id: undefined,
-  }));
-
   const location = useEventFiltersSelector(getCurrentLocation);
+  const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
+
+  const handleAddButtonClick = useCallback(
+    () =>
+      navigateCallback({
+        show: 'create',
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
+  const handleCancelButtonClick = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
   return (
     <AdministrationListPage
       beta={false}
@@ -42,8 +51,8 @@ export const EventFiltersListPage = memo(() => {
     >
       {/* <PaginatedContent />*/}
       {/* TODO: Display this only when list is empty (there are no endpoint events) */}
-      <Empty onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
-      {showFlyout ? <EventFiltersFlyout onCancel={handleFlyoutClose} /> : null}
+      <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+      {showFlyout ? <EventFiltersFlyout onCancel={handleCancelButtonClick} /> : null}
     </AdministrationListPage>
   );
 });

@@ -20,7 +20,7 @@ import { useToasts } from '../../../../common/lib/kibana';
 import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
+import { EventFiltersListPageState } from '../state';
 import { getEventFiltersListPath } from '../../../common/routing';
 
 import {
@@ -50,16 +50,12 @@ export const useEventFiltersNotification = () => {
   }
 };
 
-export type NavigationCallback = (
-  ...args: Parameters<Parameters<typeof useCallback>[0]>
-) => Partial<EventFiltersPageLocation>;
-
-export function useEventFiltersNavigateCallback(callback: NavigationCallback) {
+export function useEventFiltersNavigateCallback() {
   const location = useEventFiltersSelector(getCurrentLocation);
   const history = useHistory();
 
-  return useCallback(
-    (...args) => history.push(getEventFiltersListPath({ ...location, ...callback(...args) })),
-    [callback, history, location]
-  );
+  return useCallback((args) => history.push(getEventFiltersListPath({ ...location, ...args })), [
+    history,
+    location,
+  ]);
 }
