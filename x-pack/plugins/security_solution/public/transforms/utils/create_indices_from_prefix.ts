@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ELASTIC_NAME } from '../constants';
+import { ELASTIC_NAME } from '../../../common/constants';
 
 export const createIndicesFromPrefix = ({
   transformIndices,

@@ -10,9 +10,12 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Transforms } from '../modules/types';
 import type { Logger } from '../../../../../src/core/server';
 
-import { computeTransformId, getTransformExists } from './utils';
-import { logTransformError } from './utils/log_transform_error';
-import { logTransformDebug } from './utils/log_transform_debug';
+import {
+  computeTransformId,
+  getTransformExists,
+  logTransformError,
+  logTransformInfo,
+} from './utils';
 
 interface UninstallTransformsOptions {
   esClient: ElasticsearchClient;
@@ -37,7 +40,7 @@ export const uninstallTransforms = async ({
     const computedId = computeTransformId({ id, prefix, suffix });
     const exists = await getTransformExists(esClient, computedId);
     if (exists) {
-      logTransformDebug({
+      logTransformInfo({
         id: computedId,
         logger,
         message: 'stopping transform',
@@ -59,7 +62,7 @@ export const uninstallTransforms = async ({
           postBody: undefined,
         });
       }
-      logTransformDebug({
+      logTransformInfo({
         id: computedId,
         logger,
         message: 'deleting transform',
@@ -79,10 +82,10 @@ export const uninstallTransforms = async ({
         });
       }
     } else {
-      logTransformDebug({
+      logTransformInfo({
         id: computedId,
         logger,
-        message: 'transform does not exist',
+        message: 'transform does not exist to delete',
       });
     }
   });

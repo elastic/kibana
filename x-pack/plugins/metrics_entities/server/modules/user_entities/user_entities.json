@@ -3,15 +3,15 @@
   "description": "[user.name entities] grouped by @timestamp and aggregated on user.name, and event.categories of success, failure, and unknown",
   "pivot": {
     "group_by": {
-      "user.name": {
-        "terms": {
-          "field": "user.name"
-        }
-      },
       "@timestamp": {
         "date_histogram": {
           "field": "@timestamp",
           "calendar_interval": "1h"
+        }
+      },
+      "user.name": {
+        "terms": {
+          "field": "user.name"
         }
       }
     },

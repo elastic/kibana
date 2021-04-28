@@ -3,6 +3,12 @@
   "description": "[host.name entities] grouped by @timestamp, host.name, os.name, and os.version, and aggregated on host.name",
   "pivot": {
     "group_by": {
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      },
       "host.name": {
         "terms": {
           "field": "host.name"
@@ -18,12 +24,6 @@
         "terms": {
           "field": "host.os.version",
           "missing_bucket": true
-        }
-      },
-      "@timestamp": {
-        "date_histogram": {
-          "field": "@timestamp",
-          "calendar_interval": "1h"
         }
       }
     },

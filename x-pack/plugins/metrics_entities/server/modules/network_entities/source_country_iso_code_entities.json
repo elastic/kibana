@@ -3,15 +3,15 @@
   "description": "[source.geo.country_iso_code entities] grouped by @timestamp and aggregated on source.geo.country_iso_code, source.bytes, destination.bytes, network.community_id, source.ip, and destination.ip",
   "pivot": {
     "group_by": {
-      "source.geo.country_iso_code": {
-        "terms": {
-          "field": "source.geo.country_iso_code"
-        }
-      },
       "@timestamp": {
         "date_histogram": {
           "field": "@timestamp",
           "calendar_interval": "1h"
+        }
+      },
+      "source.geo.country_iso_code": {
+        "terms": {
+          "field": "source.geo.country_iso_code"
         }
       }
     },

@@ -10,9 +10,8 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Mappings } from '../modules/types';
 import type { Logger } from '../../../../../src/core/server';
 
-import { computeMappingId } from './utils';
+import { computeMappingId, logMappingInfo } from './utils';
 import { logMappingError } from './utils/log_mapping_error';
-import { logMappingDebug } from './utils/log_mapping_debug';
 
 interface UninstallMappingOptions {
   esClient: ElasticsearchClient;
@@ -33,7 +32,7 @@ export const uninstallMappings = async ({
     const { index } = mapping.mappings._meta;
     return computeMappingId({ id: index, prefix, suffix });
   });
-  logMappingDebug({
+  logMappingInfo({
     id: indices.join(),
     logger,
     message: 'deleting indices',

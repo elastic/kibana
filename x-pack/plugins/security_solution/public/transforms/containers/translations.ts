@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TRANSFORM_CREATE_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.transforms.errorCreatingTransforms',
+  'xpack.securitySolution.containers.transforms.errorCreatingTransformsLabel',
   {
     defaultMessage: 'Failed to create transforms',
   }

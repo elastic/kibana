@@ -246,3 +246,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * Used for transforms for metrics_entities. If the security_solutions pulls in
+ * the metrics_entities plugin, then it should pull this constant from there rather
+ * than use it from here.
+ */
+export const ELASTIC_NAME = 'estc';

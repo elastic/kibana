@@ -3,15 +3,15 @@
   "description": "[source.ip entities] grouped by @timestamp and aggregated on destination.ip, source.bytes, destination.bytes, network.community_id, and destination.ip",
   "pivot": {
     "group_by": {
-      "source.ip": {
-        "terms": {
-          "field": "source.ip"
-        }
-      },
       "@timestamp": {
         "date_histogram": {
           "field": "@timestamp",
           "calendar_interval": "1h"
+        }
+      },
+      "source.ip": {
+        "terms": {
+          "field": "source.ip"
         }
       }
     },
