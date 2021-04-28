@@ -25,9 +25,9 @@ function getOverallStats(
   aggregatableFields: string[],
   nonAggregatableFields: string[],
   samplerShardSize: number,
-  timeFieldName: string,
-  earliestMs: number,
-  latestMs: number,
+  timeFieldName: string | undefined,
+  earliestMs: number | undefined,
+  latestMs: number | undefined,
   runtimeMappings: RuntimeMappings
 ) {
   const dv = new DataVisualizer(client);
@@ -50,9 +50,9 @@ function getStatsForFields(
   query: any,
   fields: Field[],
   samplerShardSize: number,
-  timeFieldName: string,
-  earliestMs: number,
-  latestMs: number,
+  timeFieldName: string | undefined,
+  earliestMs: number | undefined,
+  latestMs: number | undefined,
   interval: number,
   maxExamples: number,
   runtimeMappings: RuntimeMappings

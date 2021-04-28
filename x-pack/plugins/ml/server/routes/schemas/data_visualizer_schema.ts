@@ -36,8 +36,8 @@ export const dataVisualizerFieldStatsSchema = schema.object({
   earliest: schema.maybe(schema.number()),
   /** Latest timestamp for search, as epoch ms (optional). */
   latest: schema.maybe(schema.number()),
-  /** Aggregation interval, in milliseconds, to use for obtaining document counts over time (optional). */
-  interval: schema.maybe(schema.number()),
+  /** Aggregation interval, in milliseconds, to use for obtaining document counts over time. */
+  interval: schema.number(),
   /** Maximum number of examples to return for text type fields.  */
   maxExamples: schema.number(),
   /** Optional search time runtime fields */

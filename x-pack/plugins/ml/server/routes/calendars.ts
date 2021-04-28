@@ -7,7 +7,12 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
+import {
+  calendarSchema,
+  calendarIdSchema,
+  calendarIdsSchema,
+  updateCalendarSchema,
+} from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 import type { MlClient } from '../lib/ml_client';
 
@@ -36,7 +41,7 @@ function deleteCalendar(mlClient: MlClient, calendarId: string) {
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(mlClient: MlClient, calendarIds: string) {
+function getCalendarsByIds(mlClient: MlClient, calendarIds: string[]) {
   const cal = new CalendarManager(mlClient);
   return cal.getCalendarsByIds(calendarIds);
 }
@@ -157,7 +162,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
         params: calendarIdSchema,
-        body: calendarSchema,
+        body: updateCalendarSchema,
       },
       options: {
         tags: ['access:ml:canCreateCalendar'],
