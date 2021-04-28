@@ -38,6 +38,18 @@ interface AddToCaseActionProps {
   ecsRowData: Ecs;
 }
 
+interface PostCommentArg {
+  caseId: string;
+  data: {
+    type: 'alert';
+    alertId: string | string[];
+    index: string | string[];
+    rule: { id: string | null; name: string | null };
+  };
+  updateCase?: (newCase: Case) => void;
+  subCaseId?: string;
+}
+
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   ecsRowData,
@@ -80,6 +92,31 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     closeControl: closeCaseFlyoutOpen,
   } = useControl();
 
+  const attachAlertToCase = useCallback(
+    async (
+      theCase: Case,
+      postComment?: (arg: PostCommentArg) => Promise<void>,
+      updateCase?: (newCase: Case) => void
+    ) => {
+      closeCaseFlyoutOpen();
+      if (postComment) {
+        await postComment({
+          caseId: theCase.id,
+          data: {
+            type: 'alert',
+            alertId: eventId,
+            index: eventIndex ?? '',
+            rule: {
+              id: rule?.id != null ? rule.id[0] : null,
+              name: rule?.name != null ? rule.name[0] : null,
+            },
+          },
+          updateCase,
+        });
+      }
+    },
+    [closeCaseFlyoutOpen, eventId, eventIndex, rule]
+  );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
       closeCaseFlyoutOpen();
@@ -183,7 +220,11 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         </EuiPopover>
       </ActionIconItem>
       {isCreateCaseFlyoutOpen && (
-        <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onSuccess={onCaseSuccess} />
+        <CreateCaseFlyout
+          afterCaseCreated={attachAlertToCase}
+          onCloseFlyout={closeCaseFlyoutOpen}
+          onSuccess={onCaseSuccess}
+        />
       )}
       {isAllCaseModalOpen &&
         cases.getAllCasesSelectorModal({

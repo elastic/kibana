@@ -13,6 +13,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { ConnectorTypes } from '../../../common';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
+import { usePostComment } from '../../containers/use_post_comment';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -41,6 +42,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 const sampleId = 'case-id';
 
 jest.mock('../../containers/use_post_case');
+jest.mock('../../containers/use_post_comment');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -56,6 +58,7 @@ jest.mock('../connectors/servicenow/use_get_choices');
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
+const usePostCommentMock = usePostComment as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -104,6 +107,7 @@ describe('Create case', () => {
   const fetchTags = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
+  const postComment = jest.fn();
 
   beforeAll(() => {
     postCase.mockResolvedValue({
@@ -111,6 +115,7 @@ describe('Create case', () => {
       ...sampleData,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
+    usePostCommentMock.mockImplementation(() => ({ postComment }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -629,10 +634,13 @@ describe('Create case', () => {
 
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => {
-      expect(afterCaseCreated).toHaveBeenCalledWith({
-        id: sampleId,
-        ...sampleData,
-      });
+      expect(afterCaseCreated).toHaveBeenCalledWith(
+        {
+          id: sampleId,
+          ...sampleData,
+        },
+        postComment
+      );
     });
   });
 

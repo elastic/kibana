@@ -20,6 +20,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
 import { CaseType, ConnectorTypes } from '../../../common';
+import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -31,7 +32,7 @@ const initialCaseValue: FormProps = {
 };
 
 interface Props {
-  afterCaseCreated?: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
@@ -48,6 +49,7 @@ export const FormContext: React.FC<Props> = ({
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
+  const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
 
   const connectorId = useMemo(() => {
@@ -87,7 +89,7 @@ export const FormContext: React.FC<Props> = ({
         });
 
         if (afterCaseCreated && updatedCase) {
-          await afterCaseCreated(updatedCase);
+          await afterCaseCreated(updatedCase, postComment);
         }
 
         if (updatedCase?.id && dataConnectorId !== 'none') {
@@ -102,7 +104,15 @@ export const FormContext: React.FC<Props> = ({
         }
       }
     },
-    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService, afterCaseCreated]
+    [
+      caseType,
+      connectors,
+      postCase,
+      postComment,
+      onSuccess,
+      pushCaseToExternalService,
+      afterCaseCreated,
+    ]
   );
 
   const { form } = useForm<FormProps>({

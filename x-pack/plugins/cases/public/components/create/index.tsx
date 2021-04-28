@@ -19,6 +19,7 @@ import { CaseType } from '../../../common/api/cases';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';
+import { UsePostComment } from '../../containers/use_post_comment';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -29,7 +30,7 @@ const Container = styled.div`
 `;
 
 export interface CreateCaseProps {
-  afterCaseCreated?: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
