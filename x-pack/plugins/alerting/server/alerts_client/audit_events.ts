@@ -21,6 +21,7 @@ export enum AlertAuditAction {
   UNMUTE = 'alert_unmute',
   MUTE_INSTANCE = 'alert_instance_mute',
   UNMUTE_INSTANCE = 'alert_instance_unmute',
+  EXPORT = 'alert_export',
 }
 
 type VerbsTuple = [string, string, string];
@@ -38,6 +39,7 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_unmute: ['unmute', 'unmuting', 'unmuted'],
   alert_instance_mute: ['mute instance of', 'muting instance of', 'muted instance of'],
   alert_instance_unmute: ['unmute instance of', 'unmuting instance of', 'unmuted instance of'],
+  alert_export: ['export', 'exporting', 'exported'],
 };
 
 const eventTypes: Record<AlertAuditAction, EcsEventType> = {
@@ -53,6 +55,7 @@ const eventTypes: Record<AlertAuditAction, EcsEventType> = {
   alert_unmute: 'change',
   alert_instance_mute: 'change',
   alert_instance_unmute: 'change',
+  alert_export: 'access',
 };
 
 export interface AlertAuditEventParams {

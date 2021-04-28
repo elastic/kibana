@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+} from 'kibana/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-
+import { transformRulesForExport } from './transform_rule_for_export';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -35,7 +40,8 @@ export type AlertAttributesExcludedFromAADType =
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  security?: SecurityPluginSetup
 ) {
   savedObjects.registerType({
     name: 'alert',
@@ -43,6 +49,19 @@ export function setupSavedObjects(
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
+    management: {
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Rule: [${obj.attributes.name}]`;
+      },
+      onExport<RawAlert>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAlert>>
+      ) {
+        const auditLogger = security?.audit.asScoped(context.request);
+        return transformRulesForExport(objects, auditLogger);
+      },
+    },
   });
 
   savedObjects.registerType({
