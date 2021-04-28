@@ -14,7 +14,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['host_ent'],
+          transformIndices: ['host_ent*'],
         }),
         factoryQueryType: HostsKpiQueries.kpiHostsEntities,
       };
@@ -23,7 +23,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['user_ent'],
+          transformIndices: ['user_ent*'],
         }),
         factoryQueryType: HostsKpiQueries.kpiAuthenticationsEntities,
       };
@@ -32,7 +32,7 @@ export const getTransformChangesForKpi: GetTransformChanges = ({ factoryQueryTyp
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
+          transformIndices: ['src_ip_ent*', 'dest_ip_ent*'],
         }),
         factoryQueryType: HostsKpiQueries.kpiUniqueIpsEntities,
       };

@@ -25,7 +25,7 @@ export const getTransformChangesForMatrixHistogram: GetTransformChanges = ({
           return {
             indices: createIndicesFromPrefix({
               prefix: settings.prefix,
-              transformIndices: ['user_met'],
+              transformIndices: ['user_met*'],
             }),
             factoryQueryType: MatrixHistogramQueryEntities,
             histogramType: MatrixHistogramType.authenticationsEntities,

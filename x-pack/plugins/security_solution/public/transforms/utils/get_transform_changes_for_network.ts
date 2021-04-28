@@ -18,7 +18,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['src_iso_ent', 'dest_iso_ent'],
+          transformIndices: ['src_iso_ent*', 'dest_iso_ent*'],
         }),
         factoryQueryType: NetworkQueries.topCountriesEntities,
       };
@@ -27,7 +27,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
+          transformIndices: ['src_ip_ent*', 'dest_ip_ent*'],
         }),
         factoryQueryType: NetworkQueries.topNFlowEntities,
       };
@@ -36,7 +36,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_met'],
+          transformIndices: ['ip_met*'],
         }),
         factoryQueryType: NetworkKpiQueries.dnsEntities,
       };
@@ -45,7 +45,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_met'],
+          transformIndices: ['ip_met*'],
         }),
         factoryQueryType: NetworkKpiQueries.networkEventsEntities,
       };
@@ -54,7 +54,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_met'],
+          transformIndices: ['ip_met*'],
         }),
         factoryQueryType: NetworkKpiQueries.tlsHandshakesEntities,
       };
@@ -63,7 +63,7 @@ export const getTransformChangesForNetwork: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
+          transformIndices: ['src_ip_ent*', 'dest_ip_ent*'],
         }),
         factoryQueryType: NetworkKpiQueries.uniquePrivateIpsEntities,
       };

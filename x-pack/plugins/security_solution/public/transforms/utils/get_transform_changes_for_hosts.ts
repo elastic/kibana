@@ -18,7 +18,7 @@ export const getTransformChangesForHosts: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['host_ent'],
+          transformIndices: ['host_ent*'],
         }),
         factoryQueryType: HostsQueries.hostsEntities,
       };
@@ -27,7 +27,7 @@ export const getTransformChangesForHosts: GetTransformChanges = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['user_ent'],
+          transformIndices: ['user_ent*'],
         }),
         factoryQueryType: HostsQueries.authenticationsEntities,
       };
