@@ -13,9 +13,12 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useKibana } from '../lib/kibana';
 
 export const useOsqueryIntegration = () => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery(
+  const integrationResponse = useQuery(
     'integrations',
     () =>
       http.get(epmRouteService.getListPath(), {
@@ -28,4 +31,10 @@ export const useOsqueryIntegration = () => {
         find(['name', OSQUERY_INTEGRATION_NAME], response),
     }
   );
+  if (integrationResponse.error) {
+    toasts.addError(integrationResponse.error as Error, {
+      title: 'Error while fetching osquery integration',
+    });
+  }
+  return integrationResponse;
 };

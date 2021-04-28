@@ -51,9 +51,12 @@ export const useAllResults = ({
   skip = false,
   isLive = false,
 }: UseAllResults) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery(
+  const response = useQuery(
     ['allActionResults', { actionId, activePage, direction, limit, sortField }],
     async () => {
       const responseData = await data.search
@@ -84,4 +87,8 @@ export const useAllResults = ({
       enabled: !skip,
     }
   );
+  if (response.error) {
+    toasts.addError(response.error as Error, { title: 'Error while fetching results' });
+  }
+  return response;
 };

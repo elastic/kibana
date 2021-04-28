@@ -16,9 +16,16 @@ interface UseAgentStatus {
 }
 
 export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
+  const agentResponse = useQuery<
+    GetAgentStatusResponse,
+    unknown,
+    GetAgentStatusResponse['results']
+  >(
     ['agentStatus', policyId],
     () =>
       http.get(
@@ -36,4 +43,9 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
       select: (response) => response.results,
     }
   );
+
+  if (agentResponse.error) {
+    toasts.addError(agentResponse.error as Error, { title: 'Error while fetching agent status' });
+  }
+  return agentResponse;
 };

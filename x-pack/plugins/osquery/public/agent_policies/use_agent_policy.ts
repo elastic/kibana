@@ -16,9 +16,12 @@ interface UseAgentPolicy {
 }
 
 export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery(
+  const policyResponse = useQuery(
     ['agentPolicy', { policyId }],
     () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
     {
@@ -27,4 +30,10 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
       select: (response) => response.item,
     }
   );
+  if (policyResponse.error) {
+    toasts.addError(policyResponse.error as Error, {
+      title: 'Error while fetching agent policy details',
+    });
+  }
+  return policyResponse;
 };

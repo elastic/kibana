@@ -28,7 +28,8 @@ const queryValidator: typeof queryFieldValidation = (arg) => {
   if (value.length > 2000) {
     return {
       message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-        defaultMessage: `Query is too large (max ${MAX_QUERY_LENGTH} characters)`,
+        defaultMessage: 'Query is too large (max {maxLength} characters)',
+        values: { maxLength: MAX_QUERY_LENGTH },
       }),
     };
   }

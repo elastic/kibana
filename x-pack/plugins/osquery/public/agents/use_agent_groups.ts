@@ -24,7 +24,10 @@ interface UseAgentGroups {
 }
 
 export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);
@@ -32,7 +35,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   const [loading, setLoading] = useState(true);
   const [overlap, setOverlap] = useState<Overlap>(() => ({}));
   const [totalCount, setTotalCount] = useState<number>(0);
-  useQuery(
+  const { error } = useQuery(
     ['agentGroups'],
     async () => {
       const responseData = await data.search
@@ -98,6 +101,10 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
       enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
     }
   );
+
+  if (error) {
+    toasts.addError(error as Error, { title: 'Error while fetching agent groups' });
+  }
 
   return {
     loading,

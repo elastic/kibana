@@ -192,30 +192,41 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     const newColumns = keys(allResultsData?.edges[0]?.fields)
       .sort()
-      .reduce((acc, fieldName) => {
-        if (fieldName === 'agent.name') {
-          acc.push({
-            id: fieldName,
-            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
-              defaultMessage: 'agent',
-            }),
-            defaultSortDirection: Direction.asc,
-          });
+      .reduce(
+        (acc, fieldName) => {
+          const { data, seen } = acc;
+          if (fieldName === 'agent.name') {
+            data.push({
+              id: fieldName,
+              displayAsText: i18n.translate(
+                'xpack.osquery.liveQueryResults.table.agentColumnTitle',
+                {
+                  defaultMessage: 'agent',
+                }
+              ),
+              defaultSortDirection: Direction.asc,
+            });
+
+            return acc;
+          }
+
+          if (fieldName.startsWith('osquery.')) {
+            const displayAsText = fieldName.split('.')[1];
+            if (!seen.has(displayAsText)) {
+              data.push({
+                id: fieldName,
+                displayAsText,
+                defaultSortDirection: Direction.asc,
+              });
+              seen.add(displayAsText);
+            }
+            return acc;
+          }
 
           return acc;
-        }
-
-        if (fieldName.startsWith('osquery.')) {
-          acc.push({
-            id: fieldName,
-            displayAsText: fieldName.split('.')[1],
-            defaultSortDirection: Direction.asc,
-          });
-          return acc;
-        }
-
-        return acc;
-      }, [] as EuiDataGridColumn[]);
+        },
+        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+      ).data;
 
     if (!isEqual(columns, newColumns)) {
       setColumns(newColumns);

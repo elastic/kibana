@@ -11,7 +11,10 @@ import { useKibana } from '../common/lib/kibana';
 import { agentPolicyRouteService, GetOneAgentPolicyResponse } from '../../../fleet/common';
 
 export const useAgentPolicies = (policyIds: string[] = []) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const agentResponse = useQueries(
     policyIds.map((policyId) => ({
@@ -24,6 +27,13 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
   const agentPoliciesLoading = agentResponse.some((p) => p.isLoading);
   const agentPolicies = agentResponse.map((p) => p.data?.item);
   const agentPolicyById = mapKeys(agentPolicies, 'id');
+  const errored = agentResponse.filter((p) => p.isError);
 
+  if (errored.length) {
+    const erroredResponse = errored[0];
+    toasts.addError(erroredResponse.error as Error, {
+      title: 'Error while fetching policy details',
+    });
+  }
   return { agentPoliciesLoading, agentPolicies, agentPolicyById };
 };

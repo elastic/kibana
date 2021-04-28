@@ -27,8 +27,11 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const { http } = useKibana().services;
-  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const { isLoading: agentsLoading, error, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
       const kueryFragments: string[] = [];
@@ -54,6 +57,10 @@ export const useAllAgents = (
       enabled: !osqueryPoliciesLoading,
     }
   );
+
+  if (error) {
+    toasts.addError(error as Error, { title: 'Error while fetching agents' });
+  }
 
   return { agentsLoading, agents: agentData?.list };
 };

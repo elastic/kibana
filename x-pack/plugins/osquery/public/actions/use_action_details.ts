@@ -32,9 +32,12 @@ interface UseActionDetails {
 }
 
 export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery(
+  const response = useQuery(
     ['actionDetails', { actionId, filterQuery }],
     async () => {
       const responseData = await data.search
@@ -59,4 +62,8 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
       enabled: !skip,
     }
   );
+  if (response.error) {
+    toasts.addError(response.error as Error, { title: 'Error while fetching action details' });
+  }
+  return response;
 };

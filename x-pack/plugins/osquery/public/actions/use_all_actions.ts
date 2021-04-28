@@ -47,9 +47,12 @@ export const useAllActions = ({
   filterQuery,
   skip = false,
 }: UseAllActions) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  return useQuery(
+  const response = useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
       const responseData = await data.search
@@ -80,4 +83,8 @@ export const useAllActions = ({
       enabled: !skip,
     }
   );
+  if (response.error) {
+    toasts.addError(response.error as Error, { title: 'Error while fetching actions' });
+  }
+  return response;
 };

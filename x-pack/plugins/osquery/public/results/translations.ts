@@ -15,12 +15,14 @@ export const generateEmptyDataMessage = (agentsResponded: number): string => {
       });
     case 1:
       return i18n.translate('xpack.osquery.results.oneAgentResponded', {
-        defaultMessage: '{agentsResponded} agent has responded, but no osquery data has been reported.',
+        defaultMessage:
+          '{agentsResponded} agent has responded, but no osquery data has been reported.',
         values: { agentsResponded },
       });
     default:
       return i18n.translate('xpack.osquery.results.multipleAgentsResponded', {
-        defaultMessage: '{agentsResponded} agents have responded, but no osquery data has been reported.',
+        defaultMessage:
+          '{agentsResponded} agents have responded, but no osquery data has been reported.',
         values: { agentsResponded },
       });
   }

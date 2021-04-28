@@ -12,9 +12,12 @@ import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const useOsqueryPolicies = () => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  const { isLoading: osqueryPoliciesLoading, data } = useQuery(
+  const { isLoading: osqueryPoliciesLoading, data, error } = useQuery(
     ['osqueryPolicies'],
     () =>
       http.get(packagePolicyRouteService.getListPath(), {
@@ -27,6 +30,9 @@ export const useOsqueryPolicies = () => {
         uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
     }
   );
+  if (error) {
+    toasts.addError(error as Error, { title: 'Error while fetching osquery policies' });
+  }
   const osqueryPolicies = data ?? [];
   return { osqueryPoliciesLoading, osqueryPolicies };
 };
