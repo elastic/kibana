@@ -251,6 +251,12 @@ export const registerTestBed = <T extends string = string>(
         component.update();
       };
 
+      /**
+       * Sets a value to the EUI search bar component and triggers its onChange event
+       *
+       * @param testSubject The data test subject of the search bar
+       * @param value The search bar value to set
+       */
       const setSearchBarValue: TestBed<T>['form']['setSearchBarValue'] = (testSubject, value) => {
         const searchBar = find(testSubject);
         if (!searchBar.length) {

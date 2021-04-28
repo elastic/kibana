@@ -63,7 +63,6 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('when there are multiple pages of auto-follow patterns', () => {
-    let find;
     let component;
     let table;
     let actions;
@@ -83,7 +82,7 @@ describe('<AutoFollowPatternList />', () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
-      ({ find, component, table, actions, form } = setup());
+      ({ component, table, actions, form } = setup());
 
       await nextTick(); // Make sure that the http request is fulfilled
       component.update();
