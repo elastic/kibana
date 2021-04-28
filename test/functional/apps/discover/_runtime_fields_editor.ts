@@ -12,7 +12,6 @@ import { FtrProviderContext } from './ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -100,11 +99,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
-      await dataGrid.clickRowToggle();
+      const table = await PageObjects.discover.getDocTable();
+      await table.clickRowToggle();
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const actionIndex = (await PageObjects.discover.useLegacyTable()) ? 1 : 0;
+        const rowActions = await table.getRowActions({ rowIndex: actionIndex });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }

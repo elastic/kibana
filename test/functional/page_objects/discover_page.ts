@@ -21,11 +21,21 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
   const dataGrid = getService('dataGrid');
+  const kibanaServer = getService('kibanaServer');
 
   class DiscoverPage {
     public async getChartTimespan() {
       const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
       return await el.getVisibleText();
+    }
+
+    public async getDocTable() {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        return docTable;
+      } else {
+        return dataGrid;
+      }
     }
 
     public async findFieldByName(name: string) {
@@ -78,7 +88,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await dataGrid.getHeaderFields();
+      const table = await this.getDocTable();
+      return await table.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -180,16 +191,28 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocHeader() {
-      const docHeader = await dataGrid.getHeaders();
+      const table = await this.getDocTable();
+      const docHeader = await table.getHeaders();
       return docHeader.join();
     }
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
-      return await dataGrid.getBodyRows();
+      const table = await this.getDocTable();
+      return await table.getBodyRows();
+    }
+
+    public async useLegacyTable() {
+      return (await kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
     }
 
     public async getDocTableIndex(index: number) {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+        return await row.getVisibleText();
+      }
+
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
       // Remove control columns
@@ -202,6 +225,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocTableField(index: number, cellIdx: number = 2) {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+        return await row.getVisibleText();
+      }
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
       return result[cellIdx];
@@ -230,11 +258,21 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickDocSortDown() {
-      await dataGrid.clickDocSortAsc();
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await find.clickByCssSelector('.fa-sort-down');
+      } else {
+        await dataGrid.clickDocSortAsc();
+      }
     }
 
     public async clickDocSortUp() {
-      await dataGrid.clickDocSortDesc();
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await find.clickByCssSelector('.fa-sort-up');
+      } else {
+        await dataGrid.clickDocSortDesc();
+      }
     }
 
     public async isShowingDocViewer() {
@@ -300,7 +338,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldSort(field: string, text = 'Sort New-Old') {
-      await dataGrid.clickDocSortAsc(field, text);
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+      }
+      return await dataGrid.clickDocSortAsc(field, text);
     }
 
     public async clickFieldListItemToggle(field: string) {
@@ -372,6 +414,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(name: string) {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await testSubjects.moveMouseTo(`docTableHeader-${name}`);
+        await testSubjects.click(`docTableRemoveHeader-${name}`);
+      }
       await dataGrid.clickRemoveColumn(name);
     }
 
