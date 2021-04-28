@@ -9,9 +9,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FeatureProperties } from './feature_properties';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
+import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
 class MockTooltipProperty {
-  constructor(key, value, isFilterable) {
+  private _key: string;
+  private _value: string;
+  private _isFilterable: boolean;
+
+  constructor(key: string, value: string, isFilterable: boolean) {
     this._key = key;
     this._value = value;
     this._isFilterable = isFilterable;
@@ -31,21 +37,27 @@ class MockTooltipProperty {
 }
 
 const defaultProps = {
-  loadFeatureProperties: () => {
+  loadFeatureProperties: async () => {
     return [];
   },
   featureId: `feature`,
   layerId: `layer`,
+  mbProperties: {},
   onCloseTooltip: () => {},
   showFilterButtons: false,
-  getFilterActions: () => {
-    return [{ id: ACTION_GLOBAL_APPLY_FILTER }];
+  addFilters: async () => {},
+  getActionContext: () => {
+    return ({} as unknown) as ActionExecutionContext;
   },
+  getFilterActions: async () => {
+    return [({ id: ACTION_GLOBAL_APPLY_FILTER } as unknown) as Action];
+  },
+  showFilterActions: () => {},
 };
 
 const mockTooltipProperties = [
-  new MockTooltipProperty('prop1', 'foobar1', true),
-  new MockTooltipProperty('prop2', 'foobar2', false),
+  (new MockTooltipProperty('prop1', 'foobar1', true) as unknown) as ITooltipProperty,
+  (new MockTooltipProperty('prop2', 'foobar2', false) as unknown) as ITooltipProperty,
 ];
 
 describe('FeatureProperties', () => {
@@ -53,7 +65,7 @@ describe('FeatureProperties', () => {
     const component = shallow(
       <FeatureProperties
         {...defaultProps}
-        loadFeatureProperties={() => {
+        loadFeatureProperties={async () => {
           return mockTooltipProperties;
         }}
       />
@@ -72,7 +84,7 @@ describe('FeatureProperties', () => {
       <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
-        loadFeatureProperties={() => {
+        loadFeatureProperties={async () => {
           return mockTooltipProperties;
         }}
       />
@@ -91,11 +103,11 @@ describe('FeatureProperties', () => {
       <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
-        loadFeatureProperties={() => {
+        loadFeatureProperties={async () => {
           return mockTooltipProperties;
         }}
-        getFilterActions={() => {
-          return [{ id: 'drilldown1' }];
+        getFilterActions={async () => {
+          return [({ id: 'drilldown1' } as unknown) as Action];
         }}
       />
     );
@@ -113,7 +125,7 @@ describe('FeatureProperties', () => {
       <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
-        loadFeatureProperties={() => {
+        loadFeatureProperties={async () => {
           throw new Error('Simulated load properties error');
         }}
       />

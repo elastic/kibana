@@ -53,8 +53,7 @@ function createRoot() {
   );
 }
 
-// CI FAILURE: https://github.com/elastic/kibana/issues/98352
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
