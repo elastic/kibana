@@ -14,6 +14,8 @@ import { entriesList } from './entry_list';
 import { entriesNested } from './entry_nested';
 import { entriesMatchWildcard } from './entry_match_wildcard';
 
+// NOTE: Type nested is not included here to denote it's non-recursive nature.
+// So a nested entry is really just a collection of `Entry` types.
 export const entry = t.union([
   entriesMatch,
   entriesMatchAny,
