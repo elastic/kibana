@@ -88,16 +88,19 @@ export function PageLoadDistribution() {
   const exploratoryViewLink = createExploratoryViewUrl(
     {
       [`${serviceName}-page-views`]: {
+        dataType: 'ux',
         reportType: 'pld',
         time: { from: rangeFrom!, to: rangeTo! },
         reportDefinitions: {
-          'service.name': serviceName?.[0] as string,
+          'service.name': serviceName as string[],
         },
         ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
       },
     },
     http?.basePath.get()
   );
+
+  const showAnalyzeButton = false;
 
   return (
     <div data-cy="pageLoadDist">
@@ -118,18 +121,20 @@ export function PageLoadDistribution() {
             dataTestSubj={'pldBreakdownFilter'}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            isDisabled={!serviceName?.[0]}
-            href={exploratoryViewLink}
-          >
-            <FormattedMessage
-              id="xpack.apm.csm.pageViews.analyze"
-              defaultMessage="Analyze"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              isDisabled={!serviceName?.[0]}
+              href={exploratoryViewLink}
+            >
+              <FormattedMessage
+                id="xpack.apm.csm.pageViews.analyze"
+                defaultMessage="Analyze"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart

@@ -8,8 +8,5 @@
   "scripts": {
     "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
-  },
-  "dependencies": {
-    "@kbn/logging": "link:../kbn-logging"
   }
 }
