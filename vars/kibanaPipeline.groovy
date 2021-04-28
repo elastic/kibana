@@ -130,7 +130,7 @@ def functionalTestProcess(String name, String script) {
 
 def ossCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("ciGroup" + ciGroup) {
-    if (withDelay && ciGroup.isNumber()) {
+    if (withDelay && !(ciGroup instanceof String) && !(ciGroup instanceof GString)) {
       sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
     }
 
@@ -147,7 +147,7 @@ def ossCiGroupProcess(ciGroup, withDelay = false) {
 
 def xpackCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
-    if (withDelay && ciGroup.isNumber()) {
+    if (withDelay && !(ciGroup instanceof String) && !(ciGroup instanceof GString)) {
       sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
     }
     withEnv([
