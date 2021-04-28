@@ -316,7 +316,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       });
     }
 
-    public async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
+    public async assertRowDetailsTabEnabled(tabSubject: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(tabSubject);
       expect(isEnabled).to.eql(
         expectedValue,
@@ -332,6 +332,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
 
       await retry.tryForTime(10000, async () => {
         if (!(await testSubjects.exists(tabContentSelector))) {
+          await this.assertRowDetailsTabEnabled(tabSelector, true);
           await testSubjects.click(tabSelector);
           await testSubjects.existOrFail(tabContentSelector, { timeout: 1000 });
         }
