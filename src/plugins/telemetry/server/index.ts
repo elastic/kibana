@@ -8,7 +8,6 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';
 
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
@@ -28,7 +27,6 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
 
 export const plugin = (initializerContext: PluginInitializerContext<TelemetryConfigType>) =>
   new TelemetryPlugin(initializerContext);
-export { constants };
 export { getClusterUuids, getLocalStats } from './telemetry_collection';
 
 export type {
