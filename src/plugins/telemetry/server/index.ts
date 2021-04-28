@@ -11,7 +11,6 @@ import { TelemetryPlugin } from './plugin';
 import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';
 
-export { FetcherTask } from './fetcher';
 export { handleOldSettings } from './handle_old_settings';
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
@@ -42,4 +41,6 @@ export type {
   TelemetryLocalStats,
   DataTelemetryIndex,
   DataTelemetryPayload,
+  NodeUsage,
+  NodeUsageAggregation,
 } from './telemetry_collection';
