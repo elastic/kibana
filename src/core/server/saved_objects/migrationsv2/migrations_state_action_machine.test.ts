@@ -162,6 +162,20 @@ describe('migrationsStateActionMachine', () => {
         client: esClient,
       })
     ).resolves.toEqual(expect.anything());
+
+    const allLogs = loggingSystemMock.collect(mockLogger);
+    const stateTransitionLogs = allLogs.info
+      .map((call) => call[0])
+      .filter((log) => log.match('control state'));
+
+    expect(stateTransitionLogs).toMatchInlineSnapshot(`
+      Array [
+        "[.my-so-index] Log from LEGACY_REINDEX control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from DONE control state",
+      ]
+    `);
   });
 
   it('resolves when reaching the DONE state', async () => {
