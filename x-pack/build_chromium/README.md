@@ -12,8 +12,8 @@ which is where we have two machines provisioned for the Linux and Windows
 builds. Mac builds can be achieved locally, and are a great place to start to
 gain familiarity.
 
-**NOTE:** Linux builds should be done in Ubuntu on x86 architecture. ARM builds
-are created in x86. CentOS is not supported for building Chromium.
+**NOTE:** Linux builds should be done in Ubuntu on x64 architecture. ARM builds
+are created in x64 using cross-compiling. CentOS is not supported for building Chromium.
 
 1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
 2. Click the "Compute Engine" tab.
@@ -27,25 +27,33 @@ are created in x86. CentOS is not supported for building Chromium.
     - python2 (`python` must link to `python2`)
     - lsb_release
     - tmux is recommended in case your ssh session is interrupted
-6. Copy the entire `build_chromium` directory into a GCP storage bucket, so you can copy the scripts into the instance and run them.
+6. Copy the entire `build_chromium` directory into a GCP storage bucket. To do this, use `gsutil rsync`:
+
+   ```sh
+   # This shows a preview of what would change by synchronizing the source scripts with the destination GCS bucket.
+   # Remove the `-n` flag to enact the changes
+   gsutil rsync -n -r x-pack/build_chromium gs://tsullivan-build_chromium/build_chromium
+   ```
 
 ## Build Script Usage
 
-```
+These commands show how to set up an environment to build:
+
+```sh
 # Allow our scripts to use depot_tools commands
 export PATH=$HOME/chromium/depot_tools:$PATH
 
 # Create a dedicated working directory for this directory of Python scripts.
 mkdir ~/chromium && cd ~/chromium
 
-# Copy the scripts from the Kibana repo to use them conveniently in the working directory
-gsutil cp -r gs://my-bucket/build_chromium .
+# Copy the scripts from the Kibana team's GCS bucket
+gsutil cp -r gs://tsullivan-build_chromium/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.sh [arch_name]
+python ./build_chromium/init.py [arch_name]
 
 # Run the build script with the path to the chromium src directory, the git commit hash
-python ./build_chromium/build.py <commit_id> x86
+python ./build_chromium/build.py <commit_id> x64
 
 # OR You can build for ARM
 python ./build_chromium/build.py <commit_id> arm64
@@ -107,7 +115,8 @@ use the Kibana `build.py` script (in this directory).
 
 It's recommended that you create a working directory for the chromium source
 code and all the build tools, and run the commands from there:
-```
+
+```sh
 mkdir ~/chromium && cd ~/chromium
 cp -r ~/path/to/kibana/x-pack/build_chromium .
 python ./build_chromium/init.sh [arch_name]

@@ -4,8 +4,8 @@ from build_util import (
   runcmd,
   runcmdsilent,
   mkdir,
-  md5_file,
   configure_environment,
+  md5_file,
 )
 
 # This file builds Chromium headless on Windows, Mac, and Linux.
@@ -56,6 +56,8 @@ if checked_out != 0:
   runcmd('git fetch origin ' + source_version)
   print('Creating a new branch for tracking the source version')
   runcmd('git checkout -b build-' + base_version + ' ' + source_version)
+
+configure_environment(arch_name, build_path, src_path)
 
 depot_tools_path = os.path.join(build_path, 'depot_tools')
 path_value = depot_tools_path + os.pathsep + os.environ['PATH']
@@ -136,3 +138,6 @@ archive.close()
 print('Creating ' + path.join(src_path, md5_filename))
 with open (md5_filename, 'w') as f:
   f.write(md5_file(zip_filename))
+
+# TODO Upload to GCS
+# runcmd('gsutil cp -r output.zip gs://tsullivan-build_chromium/build_chromium')
