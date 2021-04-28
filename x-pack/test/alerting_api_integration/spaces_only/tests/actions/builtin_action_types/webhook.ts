@@ -15,6 +15,7 @@ import {
   getWebhookServer,
   getHttpsWebhookServer,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { createTlsWebhookServer } from '../../../../common/lib/get_tls_webhook_servers';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
@@ -45,6 +46,19 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       .expect(200);
 
     return createdAction.id;
+  }
+
+  async function getPortOfConnector(connectorId: string): Promise<string> {
+    const response = await supertest.get(`/api/actions/connectors`).expect(200);
+    const connector = response.body.find((conn: { id: string }) => conn.id === connectorId);
+    if (connector === undefined) {
+      throw new Error(`unable to find connector with id ${connectorId}`);
+    }
+
+    // server URL is the connector name
+    const url = connector.name;
+    const parsedUrl = new URL(url);
+    return parsedUrl.port;
   }
 
   describe('webhook action', () => {
@@ -106,6 +120,81 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       after(() => {
         webhookServer.close();
+      });
+    });
+
+    describe('tls customization', () => {
+      it('should handle the xpack.actions.rejectUnauthorized: false', async () => {
+        const connectorId = 'custom.tls.noCustom';
+        const port = await getPortOfConnector(connectorId);
+        const server = await createTlsWebhookServer(port);
+        const { status, body } = await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              body: 'foo',
+            },
+          });
+        expect(status).to.eql(200);
+        server.close();
+
+        expect(body.status).to.eql('ok');
+      });
+
+      it('should handle the customized rejectUnauthorized: false', async () => {
+        const connectorId = 'custom.tls.rejectUnauthorizedFalse';
+        const port = await getPortOfConnector(connectorId);
+        const server = await createTlsWebhookServer(port);
+        const { status, body } = await supertest
+          .post(`/api/actions/connector/custom.tls.rejectUnauthorizedFalse/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              body: 'foo',
+            },
+          });
+        expect(status).to.eql(200);
+        server.close();
+
+        expect(body.status).to.eql('ok');
+      });
+
+      it('should handle the customized rejectUnauthorized: true', async () => {
+        const connectorId = 'custom.tls.rejectUnauthorizedTrue';
+        const port = await getPortOfConnector(connectorId);
+        const server = await createTlsWebhookServer(port);
+        const { status, body } = await supertest
+          .post(`/api/actions/connector/custom.tls.rejectUnauthorizedTrue/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              body: 'foo',
+            },
+          });
+        expect(status).to.eql(200);
+        server.close();
+
+        expect(body.status).to.eql('error');
+        expect(body.service_message.indexOf('certificate')).to.be.greaterThan(0);
+      });
+
+      it('should handle the customized ca file', async () => {
+        const connectorId = 'custom.tls.caFile';
+        const port = await getPortOfConnector(connectorId);
+        const server = await createTlsWebhookServer(port);
+        const { status, body } = await supertest
+          .post(`/api/actions/connector/custom.tls.caFile/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              body: 'foo',
+            },
+          });
+        expect(status).to.eql(200);
+        server.close();
+
+        expect(body.status).to.eql('ok');
       });
     });
   });
