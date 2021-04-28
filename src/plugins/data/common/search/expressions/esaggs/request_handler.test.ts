@@ -28,11 +28,9 @@ describe('esaggs expression function - public', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    searchSourceInstanceMock.fetch$ = jest.fn().mockReturnValue(
-      of({
-        rawResponse: {},
-      })
-    );
+    searchSourceInstanceMock.fetch$ = jest.fn(() => of({
+      rawResponse: {},
+    }));
 
     mockParams = {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
