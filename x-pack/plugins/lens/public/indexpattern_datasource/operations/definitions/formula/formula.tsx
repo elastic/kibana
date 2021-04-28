@@ -230,6 +230,7 @@ function FormulaEditor({
   indexPattern,
   operationDefinitionMap,
   data,
+  toggleFullscreen,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -656,7 +657,10 @@ function FormulaEditor({
 
           <EuiFlexItem>
             <EuiButtonEmpty
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                setIsOpen(!isOpen);
+                toggleFullscreen();
+              }}
               iconType="fullScreen"
               size="s"
               color="text"
@@ -690,34 +694,41 @@ function FormulaEditor({
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top lnsIndexPatternDimensionEditor__section--bottom">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiPopover
-              isOpen={isHelpOpen}
-              closePopover={() => setIsHelpOpen(false)}
-              button={
-                <EuiButtonEmpty
-                  onClick={() => setIsHelpOpen(!isHelpOpen)}
-                  iconType="help"
-                  size="s"
-                  color="text"
-                >
-                  {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
-                    defaultMessage: 'Function reference',
-                  })}
-                </EuiButtonEmpty>
-              }
-              anchorPosition="leftDown"
-            >
+            {isOpen ? (
               <MemoizedFormulaHelp
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}
               />
-            </EuiPopover>
+            ) : (
+              <EuiPopover
+                isOpen={isHelpOpen}
+                closePopover={() => setIsHelpOpen(false)}
+                button={
+                  <EuiButtonEmpty
+                    onClick={() => setIsHelpOpen(!isHelpOpen)}
+                    iconType="help"
+                    size="s"
+                    color="text"
+                  >
+                    {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
+                      defaultMessage: 'Function reference',
+                    })}
+                  </EuiButtonEmpty>
+                }
+                anchorPosition="leftDown"
+              >
+                <MemoizedFormulaHelp
+                  indexPattern={indexPattern}
+                  operationDefinitionMap={operationDefinitionMap}
+                />
+              </EuiPopover>
+            )}
           </EuiFlexItem>
 
           <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
         </EuiFlexGroup>
 
-        {isOpen ? (
+        {false ? (
           <EuiModal
             onClose={() => {
               setIsOpen(false);

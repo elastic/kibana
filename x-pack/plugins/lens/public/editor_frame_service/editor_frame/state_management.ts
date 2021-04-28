@@ -24,6 +24,7 @@ export interface EditorFrameState extends PreviewState {
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
   activeData?: TableInspectorAdapter;
+  isFullscreenDatasource?: boolean;
 }
 
 export type Action =
@@ -96,6 +97,9 @@ export type Action =
   | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
+    }
+  | {
+      type: 'TOGGLE_FULLSCREEN';
     };
 
 export function getActiveDatasourceIdFromDoc(doc?: Document) {
@@ -290,6 +294,8 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         },
         stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
       };
+    case 'TOGGLE_FULLSCREEN':
+      return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
     default:
       return state;
   }

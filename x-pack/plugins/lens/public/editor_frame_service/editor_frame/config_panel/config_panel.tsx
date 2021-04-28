@@ -96,6 +96,14 @@ export function LayerPanels(
     },
     [dispatch]
   );
+  const toggleFullscreen = useMemo(
+    () => () => {
+      dispatch({
+        type: 'TOGGLE_FULLSCREEN',
+      });
+    },
+    [dispatch]
+  );
 
   const datasourcePublicAPIs = props.framePublicAPI.datasourceLayers;
 
@@ -130,6 +138,7 @@ export function LayerPanels(
               });
               removeLayerRef(layerId);
             }}
+            toggleFullscreen={toggleFullscreen}
           />
         ) : null
       )}

@@ -310,6 +310,7 @@ export function EditorFrame(props: EditorFrameProps) {
   return (
     <RootDragDropProvider>
       <FrameLayout
+        isFullscreen={state.isFullscreenDatasource}
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}

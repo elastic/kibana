@@ -121,6 +121,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     hideGrouping,
     dateRange,
     dimensionGroups,
+    toggleFullscreen,
   } = props;
   const services = {
     data: props.data,
@@ -390,6 +391,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     currentColumn: state.layers[layerId].columns[columnId],
                   })}
                   dimensionGroups={dimensionGroups}
+                  toggleFullscreen={toggleFullscreen}
                   {...services}
                 />
               );
@@ -470,6 +472,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             dateRange={dateRange}
             indexPattern={currentIndexPattern}
             operationDefinitionMap={operationDefinitionMap}
+            toggleFullscreen={toggleFullscreen}
             {...services}
           />
         )}
@@ -563,6 +566,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             dateRange={dateRange}
             indexPattern={currentIndexPattern}
             operationDefinitionMap={operationDefinitionMap}
+            toggleFullscreen={toggleFullscreen}
             {...services}
           />
         </>

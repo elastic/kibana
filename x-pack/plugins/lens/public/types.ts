@@ -301,6 +301,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
+  toggleFullscreen: () => void;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
