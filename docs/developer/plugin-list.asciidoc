@@ -343,6 +343,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
+The client-side plugin configures following values:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
@@ -362,7 +363,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
-|The data_enhanced plugin is the x-pack counterpart to the OSS data plugin.
+|The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]

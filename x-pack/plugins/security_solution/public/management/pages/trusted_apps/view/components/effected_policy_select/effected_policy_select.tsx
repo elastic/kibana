@@ -26,6 +26,7 @@ import { getPolicyDetailPath } from '../../../../../common/routing';
 import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../../../../common/constants';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
@@ -69,14 +70,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
-    const getTestId = useCallback(
-      (suffix): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));

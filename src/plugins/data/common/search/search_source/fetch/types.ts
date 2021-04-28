@@ -7,7 +7,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { LegacyFetchHandlers } from '../legacy/types';
 import { GetConfigFn } from '../../../types';
 
 /**
@@ -29,11 +28,6 @@ export interface FetchHandlers {
     request: SearchRequest,
     response: estypes.SearchResponse<any>
   ) => estypes.SearchResponse<any>;
-  /**
-   * These handlers are only used by the legacy defaultSearchStrategy and can be removed
-   * once that strategy has been deprecated.
-   */
-  legacy: LegacyFetchHandlers;
 }
 
 export interface SearchError {

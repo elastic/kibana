@@ -27,6 +27,7 @@ describe('MultiInputRows', () => {
   };
   const values = {
     values: ['a', 'b', 'c'],
+    addedNewRow: false,
     hasEmptyValues: false,
     hasOnlyOneValue: false,
   };
@@ -54,6 +55,20 @@ describe('MultiInputRows', () => {
     expect(wrapper.find(InputRow).at(0).prop('value')).toEqual('a');
     expect(wrapper.find(InputRow).at(1).prop('value')).toEqual('b');
     expect(wrapper.find(InputRow).at(2).prop('value')).toEqual('c');
+  });
+
+  it('focuses the first input row on load, but focuses new input rows on add', () => {
+    setMockValues({ ...values, addedNewRow: false });
+    const wrapper = shallow(<MultiInputRows {...props} />);
+
+    expect(wrapper.find(InputRow).first().prop('autoFocus')).toEqual(true);
+    expect(wrapper.find(InputRow).last().prop('autoFocus')).toEqual(false);
+
+    setMockValues({ ...values, addedNewRow: true });
+    rerender(wrapper);
+
+    expect(wrapper.find(InputRow).first().prop('autoFocus')).toEqual(false);
+    expect(wrapper.find(InputRow).last().prop('autoFocus')).toEqual(true);
   });
 
   it('calls editValue when the InputRow value changes', () => {
