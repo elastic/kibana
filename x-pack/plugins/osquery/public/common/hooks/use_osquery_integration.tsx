@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
@@ -18,7 +19,7 @@ export const useOsqueryIntegration = () => {
     notifications: { toasts },
   } = useKibana().services;
 
-  const integrationResponse = useQuery(
+  return useQuery(
     'integrations',
     () =>
       http.get(epmRouteService.getListPath(), {
@@ -29,12 +30,12 @@ export const useOsqueryIntegration = () => {
     {
       select: ({ response }: GetPackagesResponse) =>
         find(['name', OSQUERY_INTEGRATION_NAME], response),
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
+            defaultMessage: 'Error while fetching osquery integration',
+          }),
+        }),
     }
   );
-  if (integrationResponse.error) {
-    toasts.addError(integrationResponse.error as Error, {
-      title: 'Error while fetching osquery integration',
-    });
-  }
-  return integrationResponse;
 };
