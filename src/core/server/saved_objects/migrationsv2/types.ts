@@ -13,6 +13,13 @@ import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 
+export type MigrationLogLevel = 'error' | 'info';
+
+export interface MigrationLog {
+  level: MigrationLogLevel;
+  message: string;
+}
+
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
@@ -70,7 +77,7 @@ export interface BaseState extends ControlState {
    * In this case, you should set a smaller batchSize value and restart the migration process again.
    */
   readonly batchSize: number;
-  readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
+  readonly logs: MigrationLog[];
   /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
