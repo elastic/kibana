@@ -46,6 +46,7 @@ export interface LabelsParams {
   values: boolean;
   truncate: number | null;
   valuesFormat: ValueFormats;
+  percentDecimals: number;
 }
 
 export interface PieVisParams extends PieCommonParams {

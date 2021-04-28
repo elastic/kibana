@@ -29,6 +29,7 @@ describe('interpreter/functions#pie', () => {
       values: true,
       position: 'default',
       valuesFormat: 'percent',
+      percentDecimals: 2,
       truncate: 100,
     },
     metric: {

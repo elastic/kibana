@@ -29,6 +29,7 @@ import {
 import { DataPublicPluginStart, FieldFormat } from '../../data/public';
 import type { PersistedState } from '../../visualizations/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
+import { DEFAULT_PERCENT_DECIMALS } from '../common';
 import { PieVisParams, BucketColumns, ValueFormats } from './types';
 import {
   getColorPicker,
@@ -187,7 +188,7 @@ const PieComponent = (props: PieComponentProps) => {
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
     params: {
-      pattern: '0.[00]%',
+      pattern: `0,0.[${'0'.repeat(visParams.labels.percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
 

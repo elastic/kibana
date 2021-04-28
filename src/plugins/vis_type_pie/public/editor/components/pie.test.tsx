@@ -55,6 +55,7 @@ describe('PalettePicker', function () {
           show: true,
         },
       },
+      setValue: jest.fn(),
     } as unknown) as PieOptionsProps;
   });
 
@@ -111,6 +112,13 @@ describe('PalettePicker', function () {
     component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
       expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(0);
+    });
+  });
+
+  it('renders the percent slider for the elastic charts implementation', async () => {
+    component = mountWithIntl(<PieOptions {...props} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieValueDecimals').length).toBe(1);
     });
   });
 });

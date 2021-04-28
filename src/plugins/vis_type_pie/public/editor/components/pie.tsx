@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -21,11 +21,46 @@ import {
 import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../charts/public';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
+
+function DecimalSlider<ParamName extends string>({
+  paramName,
+  value,
+  setValue,
+  disabled,
+}: {
+  value: number;
+  paramName: ParamName;
+  setValue: (paramName: ParamName, value: number) => void;
+  disabled: boolean;
+}) {
+  return (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('visDefaultEditor.decimalSlider.label', {
+        defaultMessage: 'Maximum decimal places for percent',
+      })}
+      data-test-subj="visTypePieValueDecimals"
+    >
+      <EuiRange
+        value={value}
+        min={0}
+        max={10}
+        showInput
+        compressed
+        disabled={disabled}
+        onChange={(e) => {
+          setValue(paramName, Number(e.currentTarget.value));
+        }}
+      />
+    </EuiFormRow>
+  );
+}
 
 const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue, aggs } = props;
@@ -40,6 +75,7 @@ const PieOptions = (props: PieOptionsProps) => {
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const hasSplitChart = aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled);
+  const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled);
 
   useEffect(() => {
     setLegendVisibility(legendUiStateValue);
@@ -82,6 +118,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="distinctColors"
               value={stateParams.distinctColors}
+              disabled={segments?.length <= 1 && !Boolean(hasSplitChart)}
               setValue={setValue}
               data-test-subj="visTypePiedistinctColorsSwitch"
             />
@@ -103,6 +140,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="nestedLegend"
               value={stateParams.nestedLegend}
+              disabled={!stateParams.addLegend}
               setValue={(paramName, value) => {
                 if (props.trackUiMetric) {
                   props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
@@ -194,22 +232,32 @@ const PieOptions = (props: PieOptionsProps) => {
           setValue={setLabels}
         />
         {props.showElasticChartsOptions && (
-          <SelectOption
-            label={i18n.translate('visTypePie.editors.pie.valueFormatsLabel', {
-              defaultMessage: 'Values',
-            })}
-            disabled={!stateParams.labels.values}
-            options={getValuesFormats}
-            paramName="valuesFormat"
-            value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
-            setValue={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
+          <>
+            <SelectOption
+              label={i18n.translate('visTypePie.editors.pie.valueFormatsLabel', {
+                defaultMessage: 'Values',
+              })}
+              disabled={!stateParams.labels.values}
+              options={getValuesFormats}
+              paramName="valuesFormat"
+              value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
+              setValue={(paramName, value) => {
+                if (props.trackUiMetric) {
+                  props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
+                }
+                setLabels(paramName, value);
+              }}
+              data-test-subj="visTypePieValueFormatsSelect"
+            />
+            <DecimalSlider
+              paramName="percentDecimals"
+              value={stateParams.labels.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+              setValue={setLabels}
+              disabled={
+                stateParams.labels.valuesFormat === ValueFormats.VALUE || !stateParams.labels.values
               }
-              setLabels(paramName, value);
-            }}
-            data-test-subj="visTypePieValueFormatsSelect"
-          />
+            />
+          </>
         )}
         <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />
       </EuiPanel>

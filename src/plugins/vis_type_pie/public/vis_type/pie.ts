@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
+import { DEFAULT_PERCENT_DECIMALS } from '../../common';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
@@ -45,6 +46,7 @@ export const getPieVisTypeDefinition = ({
         last_level: !showElasticChartsOptions,
         values: true,
         valuesFormat: ValueFormats.PERCENT,
+        percentDecimals: DEFAULT_PERCENT_DECIMALS,
         truncate: 100,
         position: LabelPositions.DEFAULT,
       },

@@ -29,6 +29,7 @@ Object {
       "distinctColors": false,
       "isDonut": true,
       "labels": Object {
+        "percentDecimals": 2,
         "position": "default",
         "show": false,
         "truncate": 100,

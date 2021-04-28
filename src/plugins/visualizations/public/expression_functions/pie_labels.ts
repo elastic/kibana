@@ -20,6 +20,7 @@ interface Arguments {
   truncate: number | null;
   valuesFormat: string;
   last_level: boolean;
+  percentDecimals: number;
 }
 
 export type ExpressionValuePieLabels = ExpressionValueBoxed<
@@ -31,6 +32,7 @@ export type ExpressionValuePieLabels = ExpressionValueBoxed<
     truncate: number | null;
     valuesFormat: string;
     last_level: boolean;
+    percentDecimals: number;
   }
 >;
 
@@ -67,6 +69,13 @@ export const pieLabels = (): ExpressionFunctionDefinition<
       }),
       default: true,
     },
+    percentDecimals: {
+      types: ['number'],
+      help: i18n.translate('visualizations.function.pieLabels.percentDecimals.help', {
+        defaultMessage: 'Defines the number of decimals that will appear on the values as percent',
+      }),
+      default: 2,
+    },
     last_level: {
       types: ['boolean'],
       help: i18n.translate('visualizations.function.pieLabels.lastLevel.help', {
@@ -94,6 +103,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
       type: 'pie_labels',
       show: args.show,
       position: args.position,
+      percentDecimals: args.percentDecimals,
       values: args.values,
       truncate: args.truncate,
       valuesFormat: args.valuesFormat,

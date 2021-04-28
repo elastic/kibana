@@ -275,6 +275,7 @@ export const createMockPieParams = (): PieVisParams => {
       truncate: 100,
       values: true,
       valuesFormat: ValueFormats.PERCENT,
+      percentDecimals: 2,
     },
     legendPosition: 'right',
     nestedLegend: false,
