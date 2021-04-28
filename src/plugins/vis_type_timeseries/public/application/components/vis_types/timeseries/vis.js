@@ -19,7 +19,6 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { getFixedOffset } from '../../lib/get_fixed_offset';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
@@ -35,15 +34,16 @@ class TimeseriesVisualization extends Component {
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
 
-  xAxisFormatter = (interval) => (val) => {
+  xAxisFormatter = (interval) => {
     const formatter = createIntervalBasedFormatter(
       interval,
       this.scaledDataFormat,
       this.dateFormat,
-      Boolean(this.props.model.ignore_daylight_time),
-      getFixedOffset()
+      Boolean(this.props.model.ignore_daylight_time)
     );
-    return formatter(val);
+    return (val) => {
+      return formatter(val);
+    };
   };
 
   yAxisStackedByPercentFormatter = (val) => {

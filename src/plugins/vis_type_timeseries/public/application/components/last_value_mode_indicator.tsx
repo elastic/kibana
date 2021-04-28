@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
-import { getFixedOffset } from './lib/get_fixed_offset';
 import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
 import { PanelData } from '../../../common/types';
 
@@ -47,8 +46,7 @@ export const LastValueModeIndicator = ({
     panelInterval,
     scaledDataFormat,
     dateFormat,
-    ignoreDaylightTime,
-    getFixedOffset()
+    ignoreDaylightTime
   );
   const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
   const formattedPanelInterval =

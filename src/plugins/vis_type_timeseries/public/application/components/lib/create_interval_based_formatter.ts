@@ -8,6 +8,8 @@
 
 import moment from 'moment';
 
+const JANUARY_MOMENT_CONFIG = { M: 0, d: 1 };
+
 function getFormat(interval: number, rules: string[][] = []) {
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
@@ -21,9 +23,9 @@ export function createIntervalBasedFormatter(
   interval: number,
   rules: string[][],
   dateFormat: string,
-  ignoreDaylightTime: boolean,
-  fixedOffset: number
+  ignoreDaylightTime: boolean
 ) {
+  const fixedOffset = moment(JANUARY_MOMENT_CONFIG).utcOffset();
   return (val: moment.MomentInput): string => {
     const momentVal = moment(val);
     if (ignoreDaylightTime) {
