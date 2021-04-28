@@ -30,7 +30,7 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionItemProps {
+export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;

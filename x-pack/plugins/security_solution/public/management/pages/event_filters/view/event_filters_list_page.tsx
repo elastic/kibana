@@ -23,6 +23,10 @@ import {
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
 import { Immutable, MaybeImmutable } from '../../../../../common/endpoint/types';
+import {
+  ExceptionItem,
+  ExceptionItemProps,
+} from '../../../../common/components/exceptions/viewer/exception_item';
 
 const TemporaryComponent = memo<{ item: MaybeImmutable<ExceptionListItemSchema> }>(({ item }) => {
   return (
@@ -33,7 +37,7 @@ TemporaryComponent.displayName = 'TemporaryComponent';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
-  typeof TemporaryComponent
+  typeof ExceptionItem
 >;
 
 export const EventFiltersListPage = memo(() => {
@@ -54,7 +58,7 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleCancelButtonClick = useCallback(
+  const handleAddCancelButtonClick = useCallback(
     () =>
       navigateCallback({
         show: undefined,
@@ -63,9 +67,23 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
+  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback((item) => {
+    // TODO: implement edit item
+  }, []);
+
+  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
+    // TODO: implement delete item
+  }, []);
+
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
-    (item) => ({ item }),
-    []
+    (exceptionItem) => ({
+      exceptionItem: exceptionItem as ExceptionListItemSchema,
+      loadingItemIds: [],
+      commentsAccordionId: '',
+      onEditException: handleItemEdit,
+      onDeleteException: handleItemDelete,
+    }),
+    [handleItemDelete, handleItemEdit]
   );
 
   const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(
@@ -109,11 +127,11 @@ export const EventFiltersListPage = memo(() => {
         )
       }
     >
-      {showFlyout && <EventFiltersFlyout onCancel={handleCancelButtonClick} />}
+      {showFlyout && <EventFiltersFlyout onCancel={handleAddCancelButtonClick} />}
 
-      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof TemporaryComponent>
+      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
-        ItemComponent={TemporaryComponent}
+        ItemComponent={ExceptionItem}
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
         error={fetchError?.message}
