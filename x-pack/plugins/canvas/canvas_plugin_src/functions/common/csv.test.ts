@@ -19,7 +19,7 @@ describe('csv', () => {
     type: 'datatable',
     columns: [
       { id: 'name', name: 'name', meta: { type: 'string' } },
-      { id: 'name', name: 'number', meta: { type: 'string' } },
+      { id: 'number', name: 'number', meta: { type: 'string' } },
     ],
     rows: [
       { name: 'one', number: '1' },
