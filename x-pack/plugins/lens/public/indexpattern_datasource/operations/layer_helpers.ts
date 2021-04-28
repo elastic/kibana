@@ -69,7 +69,8 @@ function copyReferencesRecursively(
   columnId: string
 ) {
   if ('references' in sourceColumn) {
-    sourceColumn?.references.forEach((ref) => {
+    sourceColumn?.references.forEach((ref, index) => {
+      // TODO: Add an option to assign IDs without generating the new one
       const newId = generateId();
       const refColumn = { ...columns[ref] };
 
@@ -80,9 +81,14 @@ function copyReferencesRecursively(
         'references' in refColumn
           ? copyReferencesRecursively(columns, refColumn, newId) // if a column has references, copy them too
           : { [newId]: refColumn };
+
       const newColumn = columns[columnId];
-      const references =
-        newColumn && 'references' in newColumn ? [...newColumn.references, newId] : [newId];
+      let references = [newId];
+      if (newColumn && 'references' in newColumn) {
+        references = newColumn.references;
+        references[index] = newId;
+      }
+
       columns = {
         ...columns,
         ...refColumnWithInnerRefs,
