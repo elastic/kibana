@@ -18,10 +18,12 @@ import {
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, MaybeImmutable } from '../../../../../common/endpoint/types';
 
-const TemporaryComponent = memo(() => {
-  return <div>{Math.random()}</div>;
+const TemporaryComponent = memo<{ item: MaybeImmutable<ExceptionListItemSchema> }>(({ item }) => {
+  return (
+    <div style={{ margin: '1em 0', border: '1px solid lightgrey' }}>{JSON.stringify(item)}</div>
+  );
 });
 TemporaryComponent.displayName = 'TemporaryComponent';
 
@@ -37,7 +39,10 @@ export const EventFiltersListPage = memo(() => {
   const isLoading = useEventFiltersSelector(getListIsLoading);
   const fetchError = useEventFiltersSelector(getListFetchError);
 
-  const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(() => {}, []);
+  const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
+    (item) => ({ item }),
+    []
+  );
 
   const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(() => {}, []);
 

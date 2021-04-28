@@ -32,12 +32,13 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
 export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
-  items: T[];
+  items: MaybeImmutable<T[]>;
   onChange: (changes: { pageIndex: number; pageSize: number }) => void;
   /**
    * The React Component that will be used to render the `items`. use `itemComponentProps` below to
