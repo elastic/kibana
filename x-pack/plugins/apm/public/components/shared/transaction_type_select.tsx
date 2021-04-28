@@ -6,7 +6,6 @@
  */
 
 import { EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,7 +17,7 @@ import * as urlHelpers from './Links/url_helpers';
 // min-width on here to the width when "request" is loaded so it doesn't start
 // out collapsed and change its width when the list of transaction types is loaded.
 const EuiSelectWithWidth = styled(EuiSelect)`
-  min-width: 157px;
+  min-width: 200px;
 `;
 
 export function TransactionTypeSelect() {
@@ -45,9 +44,6 @@ export function TransactionTypeSelect() {
       <EuiSelectWithWidth
         onChange={handleChange}
         options={options}
-        prepend={i18n.translate('xpack.apm.transactionTypeSelectLabel', {
-          defaultMessage: 'Type',
-        })}
         value={transactionType}
       />
     </>

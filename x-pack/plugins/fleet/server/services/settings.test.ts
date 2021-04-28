@@ -17,7 +17,7 @@ describe('getCloudFleetServersHosts', () => {
     expect(getCloudFleetServersHosts()).toBeUndefined();
   });
 
-  it('should return fleet server hosts if cloud is correctly setup', () => {
+  it('should return fleet server hosts if cloud is correctly setup with default port == 443', () => {
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
@@ -29,6 +29,22 @@ describe('getCloudFleetServersHosts', () => {
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
       Array [
         "https://deployment-id-1.fleet.us-east-1.aws.found.io",
+      ]
+    `);
+  });
+
+  it('should return fleet server hosts if cloud is correctly setup with a default port', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      apm: {},
+    });
+
+    expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
+      Array [
+        "https://deployment-id-1.fleet.test.fr:9243",
       ]
     `);
   });
