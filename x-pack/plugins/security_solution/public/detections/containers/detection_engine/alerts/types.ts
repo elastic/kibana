@@ -48,6 +48,10 @@ export interface AlertsIndex {
   index_mapping_outdated: boolean;
 }
 
+export interface HostIsolationResponse {
+  action: string;
+}
+
 export interface Privilege {
   username: string;
   has_all_requested: boolean;

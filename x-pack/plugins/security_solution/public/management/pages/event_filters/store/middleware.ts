@@ -38,6 +38,12 @@ const eventFiltersCreate = async (
 
     const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
     store.dispatch({
+      type: 'eventFiltersCreateSuccess',
+      payload: {
+        exception,
+      },
+    });
+    store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadedResourceState',

@@ -12,8 +12,5 @@
     "@kbn/analytics": "link:../kbn-analytics",
     "@kbn/i18n": "link:../kbn-i18n",
     "@kbn/monaco": "link:../kbn-monaco"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
