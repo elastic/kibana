@@ -17,11 +17,11 @@ import { handleRequest, RequestHandlerParams } from './request_handler';
 
 jest.mock('../../tabify', () => ({
   tabifyAggResponse: jest.fn(),
-}));
+})); 
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
-
+  
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<RequestHandlerParams>;
 
