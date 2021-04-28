@@ -16,6 +16,7 @@ import {
   GeoContainmentInstanceState,
   GeoContainmentAlertType,
   GeoContainmentInstanceContext,
+  GeoContainmentState,
 } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
@@ -141,7 +142,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     params,
     alertId,
     state,
-  }) {
+  }): Promise<GeoContainmentState> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(

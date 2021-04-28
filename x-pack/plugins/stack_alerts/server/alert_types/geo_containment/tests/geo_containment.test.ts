@@ -6,13 +6,25 @@
  */
 
 import _ from 'lodash';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
 import sampleJsonResponse from './es_sample_response.json';
+import sampleJsonResponseForExecutorTests from './es_sample_response_for_executor_tests.json';
 import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
-import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
+import {
+  getActiveEntriesAndGenerateAlerts,
+  transformResults,
+  getGeoContainmentExecutor,
+} from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import { alertsMock } from '../../../../../alerting/server/mocks';
-import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import {
+  GeoContainmentInstanceContext,
+  GeoContainmentInstanceState,
+  GeoContainmentParams,
+} from '../alert_type';
 import { SearchResponse } from 'elasticsearch';
+
+jest.mock('../es_query_builder', () => ({}));
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -249,6 +261,7 @@ describe('geo_containment', () => {
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(testAlertActionArr).toMatchObject(expectedContext);
     });
+
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = new Map([
         [
@@ -273,6 +286,7 @@ describe('geo_containment', () => {
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(testAlertActionArr).toMatchObject(expectedContext);
     });
+
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = new Map([
         [
@@ -443,6 +457,107 @@ describe('geo_containment', () => {
           },
         ])
       );
+    });
+  });
+
+  describe('getGeoContainmentExecutor', () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
+    const startedAt = new Date('2021-04-29T16:56:11.923Z');
+    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const geoContainmentParams: GeoContainmentParams = {
+      index: 'testIndex',
+      indexId: 'testIndexId',
+      geoField: 'location',
+      entity: 'testEntity',
+      dateField: '@timestamp',
+      boundaryType: 'testBoundaryType',
+      boundaryIndexTitle: 'testBoundaryIndexTitle',
+      boundaryIndexId: 'testBoundaryIndexId',
+      boundaryGeoField: 'testBoundaryGeoField',
+    };
+    const alertId = 'testAlertId';
+    const geoContainmentState = {
+      shapesFilters: {
+        testShape: 'thisIsAShape',
+      },
+      shapesIdsNamesMap: {},
+      prevLocationMap: {},
+    };
+    const expectedPrevLocationMap = {
+      '0': [
+        {
+          dateInShape: '2021-04-28T16:56:11.923Z',
+          docId: 'ZVBoGXkBsFLYN2Tj1wmV',
+          location: [-73.99018926545978, 40.751759740523994],
+          shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+        },
+        {
+          dateInShape: '2021-04-28T16:56:01.896Z',
+          docId: 'YlBoGXkBsFLYN2TjsAlp',
+          location: [-73.98968475870788, 40.7506317878142],
+          shapeLocationId: 'other',
+        },
+      ],
+      '1': [
+        {
+          dateInShape: '2021-04-28T16:56:11.923Z',
+          docId: 'ZlBoGXkBsFLYN2Tj1wmV',
+          location: [-73.99561604484916, 40.75449890457094],
+          shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+        },
+        {
+          dateInShape: '2021-04-28T16:56:01.896Z',
+          docId: 'Y1BoGXkBsFLYN2TjsAlp',
+          location: [-73.99459345266223, 40.755913141183555],
+          shapeLocationId: 'other',
+        },
+      ],
+      '2': [
+        {
+          dateInShape: '2021-04-28T16:56:11.923Z',
+          docId: 'Z1BoGXkBsFLYN2Tj1wmV',
+          location: [-73.98662586696446, 40.7667087810114],
+          shapeLocationId: 'other',
+        },
+      ],
+    };
+
+    beforeAll(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../es_query_builder').executeEsQueryFactory = async () => {
+        return () => sampleJsonResponseForExecutorTests;
+      };
+    });
+
+    it('should return previous locations map', async () => {
+      const executor = await getGeoContainmentExecutor(mockLogger)({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServices,
+        params: geoContainmentParams,
+        alertId,
+        state: geoContainmentState,
+      });
+      if (executor && executor.shapesFilters) {
+        expect(executor.prevLocationMap).toEqual(expectedPrevLocationMap);
+      }
+    });
+
+    it('should carry through shapes filters in state to next call unmodified', async () => {
+      const executor = await getGeoContainmentExecutor(mockLogger)({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServices,
+        params: geoContainmentParams,
+        alertId,
+        state: geoContainmentState,
+      });
+      if (executor && executor.shapesFilters) {
+        expect(executor.shapesFilters).toEqual(geoContainmentState.shapesFilters);
+      }
     });
   });
 });
