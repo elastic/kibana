@@ -431,7 +431,7 @@ function discoverController($route, $scope) {
         },
       })
       .toPromise()
-      .then(onResults)
+      .then(({ rawResponse }) => onResults(rawResponse))
       .catch((error) => {
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;

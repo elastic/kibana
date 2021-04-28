@@ -290,6 +290,13 @@ To add a panel to another dashboard, copy the panel.
 
 View the underlying documents in a panel, or in a data series. 
 
+. In kibana.yml, add the following:
++
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled: true
+-----------
+
 TIP: *Explore underlying data* is supported only for visualization panels with a single index pattern.
 
 To view the underlying documents in the panel: 
