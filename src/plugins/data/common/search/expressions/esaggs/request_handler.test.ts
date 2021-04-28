@@ -28,7 +28,7 @@ describe('esaggs expression function - public', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    searchSourceInstanceMock.fetch$ = jest.fn(() =>
+    searchSourceInstanceMock.fetch$ = jest.fn().mockReturnValue(
       of({
         rawResponse: {},
       })
