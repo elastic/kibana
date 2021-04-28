@@ -108,23 +108,27 @@ describe('MultiInputRows', () => {
     const onSubmit = jest.fn();
     const preventDefault = jest.fn();
 
+    it('renders a form component', () => {
+      const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
+
+      expect(wrapper.prop('component')).toEqual('form');
+    });
+
     it('calls the passed onSubmit callback when the form is submitted', () => {
       setMockValues({ ...values, values: ['some value'] });
       const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
 
-      wrapper.find('[data-test-subj="multiInputRowsForm"]').simulate('submit', { preventDefault });
+      wrapper.simulate('submit', { preventDefault });
 
       expect(preventDefault).toHaveBeenCalled();
       expect(onSubmit).toHaveBeenCalledWith(['some value']);
     });
 
-    it('does nothing if form submission is triggered without an onSubmit callback', () => {
+    it('does not render a form component or onSubmit event if onSubmit is not passed', () => {
       const wrapper = shallow(<MultiInputRows {...props} />);
 
-      wrapper.find('[data-test-subj="multiInputRowsForm"]').simulate('submit', { preventDefault });
-
-      expect(preventDefault).toHaveBeenCalled();
-      expect(onSubmit).not.toHaveBeenCalledWith();
+      expect(wrapper.prop('component')).toEqual('div');
+      expect(wrapper.prop('onSubmit')).toBeUndefined();
     });
 
     describe('submit button', () => {

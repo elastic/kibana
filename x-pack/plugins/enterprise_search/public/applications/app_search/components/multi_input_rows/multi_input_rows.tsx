@@ -58,12 +58,15 @@ export const MultiInputRows: React.FC<Props> = ({
   return (
     <EuiForm
       id={id}
-      component="form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (onSubmit) onSubmit(filterEmptyValues(values));
-      }}
-      data-test-subj="multiInputRowsForm"
+      component={onSubmit ? 'form' : 'div'}
+      onSubmit={
+        onSubmit
+          ? (e: React.SyntheticEvent) => {
+              e.preventDefault();
+              onSubmit(filterEmptyValues(values));
+            }
+          : undefined
+      }
     >
       {values.map((value: string, index: number) => {
         const firstRow = index === 0;
