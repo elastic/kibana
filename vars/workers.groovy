@@ -71,7 +71,7 @@ def base(Map params, Closure closure) {
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        checkout scm
+        kibanaCheckout()
       }
 
       dir("kibana") {
