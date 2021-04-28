@@ -6,24 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { template } from 'lodash';
+import React, { Fragment } from 'react';
+import ReactDOM from 'react-dom/server';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { getServices, IndexPattern } from '../../../kibana_services';
 
-function noWhiteSpace(html: string) {
-  const TAGS_WITH_WS = />\s+</g;
-  return html.replace(TAGS_WITH_WS, '><');
+interface Props {
+  defPairs: Array<[string, unknown]>;
 }
-
-const templateHtml = `
-  <dl class="source truncate-by-height">
-    <% defPairs.forEach(function (def) { %>
-      <dt><%- def[0] %>:</dt>
-      <dd><%= def[1] %></dd>
-      <%= ' ' %>
-    <% }); %>
-  </dl>`;
-export const doTemplate = template(noWhiteSpace(templateHtml));
+const TemplateComponent = ({ defPairs }: Props) => {
+  return (
+    <dl className={'source truncate-by-height'}>
+      {defPairs.map((pair, idx) => (
+        <Fragment key={idx}>
+          <dt>{pair[0]}:</dt>
+          <dd
+            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
+            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
+          />{' '}
+        </Fragment>
+      ))}
+    </dl>
+  );
+};
 
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
@@ -38,7 +43,9 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     pairs.push([displayKey ? displayKey : key, val]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs].slice(0, maxEntries) });
+  return ReactDOM.renderToStaticMarkup(
+    <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
+  );
 };
 
 export const formatTopLevelObject = (
@@ -70,5 +77,7 @@ export const formatTopLevelObject = (
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs].slice(0, maxEntries) });
+  return ReactDOM.renderToStaticMarkup(
+    <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
+  );
 };
