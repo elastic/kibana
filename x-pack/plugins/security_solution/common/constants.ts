@@ -122,7 +122,7 @@ export const defaultTransformsSetting: TransformConfigSchema = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '3d',
+      max_age: '1w',
     },
   },
   max_page_search_size: 5000,
