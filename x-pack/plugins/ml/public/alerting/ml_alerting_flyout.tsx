@@ -82,7 +82,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
 interface JobListMlAnomalyAlertFlyoutProps {
   setShowFunction: (callback: Function) => void;
   unsetShowFunction: () => void;
-  refreshJobList: () => void;
+  onSave: () => void;
 }
 
 /**
@@ -94,7 +94,7 @@ interface JobListMlAnomalyAlertFlyoutProps {
 export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> = ({
   setShowFunction,
   unsetShowFunction,
-  refreshJobList,
+  onSave,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [jobIds, setJobIds] = useState<JobId[] | undefined>();
@@ -117,7 +117,7 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
       onCloseFlyout={() => setIsVisible(false)}
       onSave={() => {
         setIsVisible(false);
-        refreshJobList();
+        onSave();
       }}
     />
   ) : null;
@@ -125,9 +125,10 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
 
 interface EditRuleFlyoutProps {
   initialAlert: MlAnomalyDetectionAlertRule;
+  onSave: () => void;
 }
 
-export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert }) => {
+export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert, onSave }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <>
@@ -139,7 +140,10 @@ export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert }) => {
         <MlAnomalyAlertFlyout
           initialAlert={initialAlert}
           onCloseFlyout={setIsVisible.bind(null, false)}
-          onSave={setIsVisible.bind(null, false)}
+          onSave={() => {
+            setIsVisible(false);
+            onSave();
+          }}
         />
       ) : null}
     </>
