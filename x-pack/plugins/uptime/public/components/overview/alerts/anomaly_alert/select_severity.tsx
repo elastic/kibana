@@ -13,7 +13,7 @@ import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '../../../../../../ml/public';
 
 const warningLabel = i18n.translate('xpack.uptime.controls.selectSeverity.warningLabel', {
-  defaultMessage: 'low',
+  defaultMessage: 'warning',
 });
 const minorLabel = i18n.translate('xpack.uptime.controls.selectSeverity.minorLabel', {
   defaultMessage: 'minor',
@@ -32,7 +32,7 @@ const optionsMap = {
   [criticalLabel]: 75,
 };
 
-export interface TableSeverity {
+interface TableSeverity {
   val: number;
   display: string;
   color: string;
