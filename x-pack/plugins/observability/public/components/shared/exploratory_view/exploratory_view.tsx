@@ -89,7 +89,7 @@ export function ExploratoryView() {
                   } else {
                     notifications?.toasts.add(
                       i18n.translate('xpack.observability.exploratoryView.noBrusing', {
-                        defaultMessage: 'Brushing time is only available on time series charts.',
+                        defaultMessage: 'Zoom by brush selection is only available on time series charts.',
                       })
                     );
                   }
