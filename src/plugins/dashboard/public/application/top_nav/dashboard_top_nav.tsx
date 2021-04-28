@@ -495,29 +495,13 @@ export function DashboardTopNav({
       indexPatterns: dashboardAppState.indexPatterns,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
+      savedQuery: state.savedQuery,
+      savedQueryId: dashboardState.savedQuery,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
           dashboardAppState.$triggerDashboardRefresh.next({ force: true });
         }
       },
-      onSavedQueryUpdated: (savedQuery: SavedQuery) => {
-        // TODO: Figure out why this isn't run -- even in master
-        const allFilters = data.query.filterManager.getFilters();
-        data.query.filterManager.setFilters(allFilters);
-        dashboardAppState.applyFilters(savedQuery.attributes.query, allFilters);
-        if (savedQuery.attributes.timefilter) {
-          timefilter.setTime({
-            from: savedQuery.attributes.timefilter.from,
-            to: savedQuery.attributes.timefilter.to,
-          });
-          if (savedQuery.attributes.timefilter.refreshInterval) {
-            timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
-          }
-        }
-        setState((s) => ({ ...s, savedQuery }));
-      },
-      savedQuery: state.savedQuery,
-      savedQueryId: dashboardState.savedQuery,
       onSavedQueryIdChange: (newId: string | undefined) => {
         dispatchDashboardStateChange(setSavedQueryId(newId));
       },

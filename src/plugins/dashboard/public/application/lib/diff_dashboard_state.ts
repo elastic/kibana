@@ -40,7 +40,7 @@ export const diffDashboardState = (
   const common = commonDiffFilters<DashboardState>(
     (original as unknown) as DashboardDiffCommonFilters,
     (newState as unknown) as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options']
+    ['viewMode', 'panels', 'options', 'savedQuery']
   );
 
   return {
