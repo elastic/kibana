@@ -50,19 +50,21 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   });
 }
 
-function getInitialColumns(indexPattern: IndexPattern) {
+function getInitialColumns(indexPattern: IndexPattern, fieldsFilter: string[]) {
   const { fields } = newJobCapsServiceAnalytics;
-  const columns = fields.map((field: any) => {
-    const schema =
-      getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
+  const columns = fields
+    .filter((field) => fieldsFilter.includes(field.name))
+    .map((field) => {
+      const schema =
+        getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
 
-    return {
-      id: field.name,
-      schema,
-      isExpandable: schema !== 'boolean',
-      isRuntimeFieldColumn: false,
-    };
-  });
+      return {
+        id: field.name,
+        schema,
+        isExpandable: schema !== 'boolean',
+        isRuntimeFieldColumn: false,
+      };
+    });
 
   // Add runtime fields defined in index pattern to columns
   if (indexPattern) {
@@ -91,10 +93,57 @@ export const useIndexData = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
-  const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
-    indexPattern,
-  ]);
-  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>(getInitialColumns(indexPattern));
+  const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+
+  // Fetch 500 random documents to determine populated fields.
+  // This is a workaround to avoid passing potentially thousands of unpopulated fields
+  // (for example, as part of filebeat/metricbeat/ECS based indices)
+  // to the data grid component which would significantly slow down the page.
+  const fetchDataGridSampleDocuments = async function () {
+    setErrorMessage('');
+    setStatus(INDEX_STATUS.LOADING);
+
+    const esSearchRequest = {
+      index: indexPattern.title,
+      body: {
+        fields: ['*'],
+        _source: false,
+        query: {
+          function_score: {
+            query: { match_all: {} },
+            random_score: {},
+          },
+        },
+        size: 500,
+      },
+    };
+
+    try {
+      const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+      // Get all field names for each returned doc and flatten it
+      // to a list of unique field names used across all docs.
+      const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+        .filter((d) => allKibanaIndexPatternFields.includes(d))
+        .sort();
+
+      setStatus(INDEX_STATUS.LOADED);
+      setIndexPatternFields(populatedFields);
+    } catch (e) {
+      setErrorMessage(extractErrorMessage(e));
+      setStatus(INDEX_STATUS.ERROR);
+    }
+  };
+
+  useEffect(() => {
+    fetchDataGridSampleDocuments();
+  }, []);
+
+  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>(
+    getInitialColumns(indexPattern, indexPatternFields ?? [])
+  );
   const dataGrid = useDataGrid(columns);
 
   const {
@@ -151,7 +200,7 @@ export const useIndexData = (
           ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
         ]);
       } else {
-        setColumns(getInitialColumns(indexPattern));
+        setColumns(getInitialColumns(indexPattern, indexPatternFields ?? []));
       }
       setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
       setRowCountRelation(

@@ -25,12 +25,12 @@ import {
   ENGINE_DOCUMENT_DETAIL_PATH,
   // ENGINE_SCHEMA_PATH,
   // ENGINE_CRAWLER_PATH,
-  // META_ENGINE_SOURCE_ENGINES_PATH,
+  META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
   ENGINE_SYNONYMS_PATH,
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
-  // ENGINE_SEARCH_UI_PATH,
+  ENGINE_SEARCH_UI_PATH,
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
@@ -40,6 +40,8 @@ import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SearchUI } from '../search_ui';
+import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from './';
@@ -51,12 +53,12 @@ export const EngineRouter: React.FC = () => {
       // canViewEngineDocuments,
       // canViewEngineSchema,
       // canViewEngineCrawler,
-      // canViewMetaEngineSourceEngines,
+      canViewMetaEngineSourceEngines,
       canManageEngineRelevanceTuning,
       canManageEngineSynonyms,
       canManageEngineCurations,
       canManageEngineResultSettings,
-      // canManageEngineSearchUi,
+      canManageEngineSearchUi,
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
@@ -120,6 +122,16 @@ export const EngineRouter: React.FC = () => {
       {canViewEngineApiLogs && (
         <Route path={ENGINE_API_LOGS_PATH}>
           <ApiLogs />
+        </Route>
+      )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
+        </Route>
+      )}
+      {canViewMetaEngineSourceEngines && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
         </Route>
       )}
       <Route>

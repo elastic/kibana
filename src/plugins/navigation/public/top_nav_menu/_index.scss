@@ -1,5 +1,13 @@
 .kbnTopNavMenu {
-  margin-right: $euiSizeXS;
+  @include kbnThemeStyle('v7') {
+    margin-right: $euiSizeXS;
+  }
+
+  @include kbnThemeStyle('v8') {
+    button:last-child {
+      margin-right: 0;
+    }
+  }
 }
 
 .kbnTopNavMenu__badgeWrapper {
