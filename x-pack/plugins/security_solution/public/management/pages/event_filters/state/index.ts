@@ -8,6 +8,7 @@
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
+import { EventFiltersServiceGetListOptions } from '../types';
 
 export interface EventFiltersPageLocation {
   page_index: number;
@@ -28,6 +29,12 @@ export interface EventFiltersListPageState {
     submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
   };
   location: EventFiltersPageLocation;
+  listPageActive: boolean;
   /** State for the Event Filters List page */
-  listPage: AsyncResourceState<FoundExceptionListItemSchema>;
+  listPage: AsyncResourceState<{
+    /** The query that was used to retrieve the data */
+    query: EventFiltersServiceGetListOptions;
+    /** The data retrieved from the API */
+    content: FoundExceptionListItemSchema;
+  }>;
 }

@@ -106,8 +106,19 @@ const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isEventFiltersPageLocation(action.payload)) {
     const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
-    return { ...state, location };
+    return { ...state, location, listPageActive: true };
   } else {
+    // Reset the list page state if needed
+    if (state.listPageActive) {
+      const { listPageActive, listPage } = initialEventFiltersPageState();
+
+      return {
+        ...state,
+        listPage,
+        listPageActive,
+      };
+    }
+
     return state;
   }
 };

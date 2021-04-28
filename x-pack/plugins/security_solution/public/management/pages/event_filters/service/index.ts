@@ -7,28 +7,13 @@
 
 import { HttpStart } from 'kibana/public';
 import {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ExceptionListItemSchema,
 } from '../../../../shared_imports';
-import { Immutable } from '../../../../../common/endpoint/types';
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-
-export interface EventFiltersService {
-  addEventFilters(
-    exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
-  ): Promise<ExceptionListItemSchema>;
-
-  getList(
-    options?: Partial<{
-      page: number;
-      perPage: number;
-      sortField: keyof ExceptionListItemSchema;
-      sortOrder: 'asc' | 'desc';
-    }>
-  ): Promise<FoundExceptionListItemSchema>;
-}
+import { EventFiltersService } from '../types';
 
 export class EventFiltersHttpService implements EventFiltersService {
   private listHasBeenCreated: boolean;

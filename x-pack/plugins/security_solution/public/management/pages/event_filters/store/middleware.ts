@@ -12,17 +12,19 @@ import {
   ImmutableMiddlewareFactory,
 } from '../../../../common/store';
 
-import { EventFiltersHttpService, EventFiltersService } from '../service';
+import { EventFiltersHttpService } from '../service';
 
 import { EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 import { CreateExceptionListItemSchema, transformNewItemOutput } from '../../../../shared_imports';
 import {
   getCurrentListPageState,
+  getCurrentLocation,
   getListIsLoading,
-  getListPagination,
+  getListPageActiveState,
   listDataNeedsRefresh,
 } from './selector';
+import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
 
 type MiddlewareActionHandler = (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
@@ -88,21 +90,25 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
       },
     });
 
-    const { pageIndex, pageSize } = getListPagination(state);
+    const { page_size: pageSize, page_index: pageIndex } = getCurrentLocation(state);
+    const query: EventFiltersServiceGetListOptions = {
+      page: pageIndex + 1,
+      perPage: pageSize,
+      sortField: 'created_at',
+      sortOrder: 'desc',
+    };
 
     try {
-      const results = await eventFiltersService.getList({
-        page: pageIndex + 1,
-        perPage: pageSize,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
+      const results = await eventFiltersService.getList(query);
 
       dispatch({
         type: 'eventFiltersListPageStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: results,
+          data: {
+            query,
+            content: results,
+          },
         },
       });
     } catch (error) {
@@ -127,9 +133,11 @@ export const createEventFiltersPageMiddleware = (
       await eventFiltersCreate(store, eventFiltersService);
     }
 
-    // FIXME:PT ensure user is on event filters list
-    if (action.type === 'userChangedUrl') {
-      refreshListDataIfNeeded(store, eventFiltersService);
+    // Middleware that only applies to the List Page for Event Filters
+    if (getListPageActiveState(store.getState())) {
+      if (action.type === 'userChangedUrl') {
+        refreshListDataIfNeeded(store, eventFiltersService);
+      }
     }
   };
 };

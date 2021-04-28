@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
-import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
+import { EventFiltersListPageState } from '../state';
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
@@ -21,6 +21,7 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
 import { Immutable } from '../../../../../common/endpoint/types';
+import { EventFiltersServiceGetListOptions } from '../types';
 
 type StoreState = Immutable<EventFiltersListPageState>;
 type EventFiltersSelector<T> = (state: StoreState) => T;
@@ -29,17 +30,45 @@ export const getCurrentListPageState: EventFiltersSelector<StoreState['listPage'
   return state.listPage;
 };
 
-export const getListItems: EventFiltersSelector<
-  Immutable<ExceptionListItemSchema[]>
-> = createSelector(getCurrentListPageState, (listPageState) => {
-  return (isLoadedResourceState(listPageState) && listPageState.data.data) || [];
-});
-
+/**
+ * Will return the API response with event filters. If the current state is attempting to load a new
+ * page of content, then return the previous API response if we have one
+ */
 export const getListApiSuccessResponse: EventFiltersSelector<
   Immutable<FoundExceptionListItemSchema> | undefined
 > = createSelector(getCurrentListPageState, (listPageState) => {
-  return (isLoadedResourceState(listPageState) && listPageState.data) || undefined;
+  return (
+    (isLoadedResourceState(listPageState) && listPageState.data.content) ||
+    (isLoadingResourceState(listPageState) &&
+      isLoadedResourceState(listPageState.previousState) &&
+      listPageState.previousState.data.content) ||
+    undefined
+  );
 });
+
+export const getListItems: EventFiltersSelector<
+  Immutable<ExceptionListItemSchema[]>
+> = createSelector(getListApiSuccessResponse, (apiResponseData) => {
+  return apiResponseData?.data || [];
+});
+
+/**
+ * Will return the query that was used with the currently displayed list of content. If a new page
+ * of content is being loaded, this selector will then attempt to use the previousState to return
+ * the query used.
+ */
+export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> = createSelector(
+  getCurrentListPageState,
+  (pageState) => {
+    return (
+      (isLoadedResourceState(pageState) && pageState.data.query) ||
+      (isLoadingResourceState(pageState) &&
+        isLoadedResourceState(pageState.previousState) &&
+        pageState.previousState.data.query) ||
+      {}
+    );
+  }
+);
 
 export const getListPagination: EventFiltersSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
@@ -54,11 +83,6 @@ export const getListPagination: EventFiltersSelector<Pagination> = createSelecto
   }
 );
 
-export const listDataNeedsRefresh: EventFiltersSelector<boolean> = (state) => {
-  // FIXME:PT implement this selector
-  return true;
-};
-
 export const getListFetchError: EventFiltersSelector<
   Immutable<ServerApiError> | undefined
 > = createSelector(getCurrentListPageState, (listPageState) => {
@@ -67,6 +91,12 @@ export const getListFetchError: EventFiltersSelector<
 
 export const getListIsLoading: EventFiltersSelector<boolean> = (state) => {
   return isLoadingResourceState(state.listPage);
+};
+
+export const getListPageActiveState: EventFiltersSelector<StoreState['listPageActive']> = (
+  state
+) => {
+  return state.listPageActive;
 };
 
 export const getFormEntry = (
@@ -93,5 +123,15 @@ export const getCreationError = (state: EventFiltersListPageState): ServerApiErr
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
 
-export const getCurrentLocation = (state: EventFiltersListPageState): EventFiltersPageLocation =>
+export const getCurrentLocation: EventFiltersSelector<StoreState['location']> = (state) =>
   state.location;
+
+export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelector(
+  getCurrentLocation,
+  getCurrentListItemsQuery,
+  (location, currentQuery) => {
+    return (
+      location.page_index + 1 !== currentQuery.page || location.page_size !== currentQuery.perPage
+    );
+  }
+);
