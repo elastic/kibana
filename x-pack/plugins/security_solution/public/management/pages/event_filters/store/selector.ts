@@ -110,6 +110,22 @@ export const getListPageActiveState: EventFiltersSelector<boolean> = createSelec
   (pageState) => pageState.active
 );
 
+export const getListPageDataExistsState: EventFiltersSelector<
+  StoreState['listPage']['dataExist']
+> = ({ listPage: { dataExist } }) => dataExist;
+
+export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
+  getListPageDataExistsState,
+  (dataExistsState) => {
+    if (isLoadedResourceState(dataExistsState)) {
+      return dataExistsState.data;
+    }
+
+    // Until we know for sure that data exists (LoadedState), we assume `true`
+    return true;
+  }
+);
+
 export const getFormEntry = (
   state: EventFiltersListPageState
 ): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {

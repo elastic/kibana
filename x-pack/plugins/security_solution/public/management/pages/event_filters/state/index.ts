@@ -39,5 +39,7 @@ export interface EventFiltersListPageState {
       /** The data retrieved from the API */
       content: FoundExceptionListItemSchema;
     }>;
+    /** tracks if the overall list (not filtered or with invalid page numbers) contains data */
+    dataExist: AsyncResourceState<boolean>;
   };
 }

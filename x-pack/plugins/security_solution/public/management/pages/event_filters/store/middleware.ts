@@ -22,6 +22,7 @@ import {
   getCurrentLocation,
   getListIsLoading,
   getListPageActiveState,
+  getListPageDataExistsState,
   listDataNeedsRefresh,
 } from './selector';
 import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
@@ -72,10 +73,43 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
   }
 };
 
-const refreshListDataIfNeeded: MiddlewareActionHandler = async (
+const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
   { dispatch, getState },
-  eventFiltersService
+  eventFiltersService: EventFiltersService
 ) => {
+  dispatch({
+    type: 'eventFiltersListPageDataExistsChanged',
+    payload: {
+      type: 'LoadingResourceState',
+      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+      // @ts-ignore
+      previousState: getListPageDataExistsState(getState()),
+    },
+  });
+
+  try {
+    const anythingInListResults = await eventFiltersService.getList({ perPage: 1, page: 1 });
+
+    dispatch({
+      type: 'eventFiltersListPageDataExistsChanged',
+      payload: {
+        type: 'LoadedResourceState',
+        data: Boolean(anythingInListResults.total),
+      },
+    });
+  } catch (error) {
+    dispatch({
+      type: 'eventFiltersListPageDataExistsChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+      },
+    });
+  }
+};
+
+const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFiltersService) => {
+  const { dispatch, getState } = store;
   const state = getState();
   const isLoading = getListIsLoading(state);
 
@@ -111,6 +145,13 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
           },
         },
       });
+
+      // If no results were returned, then just check to make sure data actually exists for
+      // event filters. This is used to drive the UI between showing "empty state" and "no items found"
+      // messages to the user
+      if (results.total === 0) {
+        await checkIfEventFilterDataExist(store, eventFiltersService);
+      }
     } catch (error) {
       dispatch({
         type: 'eventFiltersListPageDataChanged',

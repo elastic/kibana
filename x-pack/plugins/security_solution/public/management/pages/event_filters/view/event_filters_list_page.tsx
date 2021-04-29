@@ -20,6 +20,7 @@ import {
   getListItems,
   getListPagination,
   getCurrentLocation,
+  getListPageDoesDataExist,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
@@ -50,6 +51,8 @@ export const EventFiltersListPage = memo(() => {
   const isLoading = useEventFiltersSelector(getListIsLoading);
   const fetchError = useEventFiltersSelector(getListFetchError);
   const location = useEventFiltersSelector(getCurrentLocation);
+  const doesDataExist = useEventFiltersSelector(getListPageDoesDataExist);
+
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
 
@@ -115,7 +118,7 @@ export const EventFiltersListPage = memo(() => {
           'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
       })}
       actions={
-        listItems.length && (
+        doesDataExist && (
           <EuiButton
             fill
             iconType="plusInCircle"
@@ -143,7 +146,9 @@ export const EventFiltersListPage = memo(() => {
         pagination={pagination}
         contentClassName="event-filter-container"
         noItemsMessage={
-          <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+          !doesDataExist && (
+            <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+          )
         }
       />
     </AdministrationListPage>
