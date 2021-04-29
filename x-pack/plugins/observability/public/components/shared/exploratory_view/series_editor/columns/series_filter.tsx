@@ -131,7 +131,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
             onClick={() => {
               setSeries(seriesId, { ...urlSeries, filters: undefined });
             }}
-            size="xs"
+            size="s"
           >
             {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
               defaultMessage: 'Clear filters',
