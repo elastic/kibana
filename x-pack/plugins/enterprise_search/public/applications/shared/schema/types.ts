@@ -12,9 +12,8 @@
 export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
 // Certain API endpoints will use these internal type names, which map to the external names above
 export type InternalSchemaTypes = 'string' | 'float' | 'location' | 'date';
-export interface Schema {
-  [key: string]: SchemaTypes;
-}
+
+export type Schema = Record<string, SchemaTypes>;
 
 /**
  * Schema conflict types
@@ -22,9 +21,7 @@ export interface Schema {
 
 // This is a mapping of schema field types ("text", "number", "geolocation", "date")
 // to the names of source engines which utilize that type
-export type SchemaConflictFieldTypes = {
-  [key in SchemaTypes]: string[];
-};
+export type SchemaConflictFieldTypes = Record<SchemaTypes, string[]>;
 
 export interface SchemaConflict {
   fieldTypes: SchemaConflictFieldTypes;
@@ -33,9 +30,7 @@ export interface SchemaConflict {
 
 // For now these values are SchemaConflictFieldTypes, but in the near future will be SchemaConflict
 // once we implement schema conflict resolution
-export interface SchemaConflicts {
-  [key: string]: SchemaConflictFieldTypes;
-}
+export type SchemaConflicts = Record<string, SchemaConflictFieldTypes>;
 
 /**
  * Indexing job / errors types
