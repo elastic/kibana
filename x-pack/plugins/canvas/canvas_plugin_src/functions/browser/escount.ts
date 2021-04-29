@@ -9,8 +9,11 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
+
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';
+
+import { searchService } from '../../../public/services';
 
 import { getFunctionHelp } from '../../../i18n';
 
@@ -61,6 +64,8 @@ export function escount(): ExpressionFunctionDefinition<
         {
           index: args.index,
           body: {
+            track_total_hits: true,
+            size: 0,
             query: {
               bool: {
                 must: [{ match_all: {} }],
@@ -71,9 +76,19 @@ export function escount(): ExpressionFunctionDefinition<
         input
       );
 
-      return ((handlers as any) as { elasticsearchClient: any })
-        .elasticsearchClient('count', esRequest)
-        .then((resp: { count: number }) => resp.count);
+      const search = searchService.getService().search;
+      const req = {
+        params: {
+          ...esRequest,
+        },
+      };
+
+      return search
+        .search(req)
+        .toPromise()
+        .then((resp: any) => {
+          return resp.rawResponse.hits.total;
+        });
     },
   };
 }
