@@ -6,8 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiCallOut } from '@elastic/eui';
+
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common/constants';
 
 import type { PackagePolicy, PackagePolicyPackage } from '../../../types';
 import { useGetOneAgentPolicy } from '../../../hooks';
@@ -16,11 +19,13 @@ import { PackageIcon } from '../../../components/package_icon';
 interface Props {
   agentPolicyId: string;
   hideTitle?: boolean;
+  excludeFleetServer?: boolean;
 }
 
 export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
   agentPolicyId,
   hideTitle,
+  excludeFleetServer,
 }) => {
   const agentPolicyRequest = useGetOneAgentPolicy(agentPolicyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
@@ -49,6 +54,13 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
     return null;
   }
 
+  const showFleetServerWarning =
+    excludeFleetServer && packages.some((pkg) => pkg.name === FLEET_SERVER_PACKAGE);
+
+  const collectedIntegrationsCount = packages.filter(
+    (pkg) => !excludeFleetServer || pkg.name !== FLEET_SERVER_PACKAGE
+  ).length;
+
   return (
     <>
       {!hideTitle && (
@@ -58,8 +70,8 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
               id="xpack.fleet.agentReassignPolicy.policyDescription"
               defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
               values={{
-                count: packages.length,
-                countValue: <b>{packages.length}</b>,
+                count: collectedIntegrationsCount,
+                countValue: <b>{collectedIntegrationsCount}</b>,
               }}
             />
           </EuiText>
@@ -68,7 +80,11 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
       )}
       {packages.map((pkg, idx) => {
         return (
-          <EuiBadge key={idx} color="hollow">
+          <EuiBadge
+            key={idx}
+            color="hollow"
+            isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
+          >
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
                 <PackageIcon
@@ -89,6 +105,23 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
           </EuiBadge>
         );
       })}
+      {showFleetServerWarning && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18n.translate(
+              'xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning',
+              {
+                defaultMessage:
+                  'The Fleet Server integration will not collect data in standalone mode.',
+              }
+            )}
+          />
+        </>
+      )}
     </>
   );
 };
