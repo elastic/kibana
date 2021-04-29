@@ -21,6 +21,7 @@ function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
       index: indexes,
       fields: ['*'],
       allow_no_indices: true,
+      ignore_unavailable: true,
     },
     { ignore: [404] }
   );

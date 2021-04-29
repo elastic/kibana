@@ -41,7 +41,9 @@ export function registerDeleteRoute({
           body: await deleteWatch(ctx.core.elasticsearch.client, watchId),
         });
       } catch (e) {
-        // TODO: Figure out if this covers us sufficiently given that previous logic returned a body with "Watch with id = ${watchId} not found" previously
+        if (e?.statusCode === 404 && e.meta?.body?.error) {
+          e.meta.body.error.reason = `Watch with id = ${watchId} not found`;
+        }
         return handleEsError({ error: e, response });
       }
     })

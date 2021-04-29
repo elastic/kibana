@@ -72,7 +72,6 @@ export function registerExecuteRoute({
           },
         });
       } catch (e) {
-        // TODO: Figure out if this covers us sufficiently given that previous logic returned a body with "Watch with id = ${watchId} not found" previously
         return handleEsError({ error: e, response });
       }
     })
