@@ -12,6 +12,7 @@ import {
   patchLogSourceConfigurationRequestBodyRT,
   LogSourceConfigurationPropertiesPatch,
 } from '../../../../../common/http_api/log_sources';
+import { PatchLogSourceConfigurationError } from '../../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callPatchLogSourceConfigurationAPI = async (
@@ -41,11 +42,3 @@ export const callPatchLogSourceConfigurationAPI = async (
       )
   )(response);
 };
-
-export class PatchLogSourceConfigurationError extends Error {
-  constructor(message: string, public cause?: Error) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'PatchLogSourceConfigurationError';
-  }
-}

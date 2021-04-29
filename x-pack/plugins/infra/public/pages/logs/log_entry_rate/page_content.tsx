@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { memo, useEffect, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -20,8 +19,9 @@ import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SourceErrorPage } from '../../../components/source_error_page';
+import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
@@ -33,11 +33,11 @@ const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const LogEntryRatePageContent = memo(() => {
   const {
-    hasFailedLoadingSource,
+    hasFailedLoading,
     isLoading,
     isUninitialized,
     loadSource,
-    loadSourceFailureMessage,
+    latestLoadSourceFailures,
   } = useLogSourceContext();
 
   const {
@@ -95,8 +95,8 @@ export const LogEntryRatePageContent = memo(() => {
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (hasFailedLoading) {
+    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
   } else if (!hasLogAnalysisCapabilites) {
     return <SubscriptionSplashContent />;
   } else if (!hasLogAnalysisReadCapabilities) {

@@ -10,6 +10,7 @@ import {
   getLogSourceConfigurationPath,
   getLogSourceConfigurationSuccessResponsePayloadRT,
 } from '../../../../../common/http_api/log_sources';
+import { FetchLogSourceConfigurationError } from '../../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callFetchLogSourceConfigurationAPI = async (sourceId: string, fetch: HttpHandler) => {
@@ -30,11 +31,3 @@ export const callFetchLogSourceConfigurationAPI = async (sourceId: string, fetch
       )
   )(response);
 };
-
-export class FetchLogSourceConfigurationError extends Error {
-  constructor(message: string, public cause?: Error) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'FetchLogSourceConfigurationError';
-  }
-}
