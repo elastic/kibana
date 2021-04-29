@@ -12,6 +12,10 @@ import {
   EuiDataGridProps,
   EuiDataGridColumn,
   EuiLink,
+  EuiTextColor,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -20,16 +24,89 @@ import { pagePathGetters } from '../../../fleet/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import { useActionResults } from '../action_results/use_action_results';
+import { generateEmptyDataMessage } from './translations';
 
 const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
-  agentId?: string;
+  selectedAgent?: string;
+  agentIds?: string[];
   isLive?: boolean;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, isLive }) => {
+interface SummaryTableValue {
+  total: number | string;
+  pending: number | string;
+  responded: number;
+  failed: number;
+}
+
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
+  actionId,
+  agentIds,
+  isLive,
+}) => {
+  const {
+    // @ts-expect-error update types
+    data: { aggregations },
+  } = useActionResults({
+    actionId,
+    activePage: 0,
+    agentIds,
+    limit: 0,
+    direction: Direction.asc,
+    sortField: '@timestamp',
+    isLive,
+  });
+
+  const notRespondedCount = useMemo(() => {
+    if (!agentIds || !aggregations.totalResponded) {
+      return '-';
+    }
+
+    return agentIds.length - aggregations.totalResponded;
+  }, [aggregations.totalResponded, agentIds]);
+
+  const summaryColumns: Array<EuiBasicTableColumn<SummaryTableValue>> = useMemo(
+    () => [
+      {
+        field: 'total',
+        name: 'Agents queried',
+      },
+      {
+        field: 'responded',
+        name: 'Successful',
+      },
+      {
+        field: 'pending',
+        name: 'Not yet responded',
+      },
+      {
+        field: 'failed',
+        name: 'Failed',
+        // eslint-disable-next-line react/display-name
+        render: (failed: number) => (
+          <EuiTextColor color={failed ? 'danger' : 'default'}>{failed}</EuiTextColor>
+        ),
+      },
+    ],
+    []
+  );
+
+  const summaryItems = useMemo(
+    () => [
+      {
+        total: agentIds?.length ?? '-',
+        pending: notRespondedCount,
+        responded: aggregations.totalResponded,
+        failed: aggregations.failed,
+      },
+    ],
+    [aggregations, agentIds, notRespondedCount]
+  );
+
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
@@ -115,30 +192,41 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
     const newColumns = keys(allResultsData?.edges[0]?.fields)
       .sort()
-      .reduce((acc, fieldName) => {
-        if (fieldName === 'agent.name') {
-          acc.push({
-            id: fieldName,
-            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
-              defaultMessage: 'agent',
-            }),
-            defaultSortDirection: Direction.asc,
-          });
+      .reduce(
+        (acc, fieldName) => {
+          const { data, seen } = acc;
+          if (fieldName === 'agent.name') {
+            data.push({
+              id: fieldName,
+              displayAsText: i18n.translate(
+                'xpack.osquery.liveQueryResults.table.agentColumnTitle',
+                {
+                  defaultMessage: 'agent',
+                }
+              ),
+              defaultSortDirection: Direction.asc,
+            });
+
+            return acc;
+          }
+
+          if (fieldName.startsWith('osquery.')) {
+            const displayAsText = fieldName.split('.')[1];
+            if (!seen.has(displayAsText)) {
+              data.push({
+                id: fieldName,
+                displayAsText,
+                defaultSortDirection: Direction.asc,
+              });
+              seen.add(displayAsText);
+            }
+            return acc;
+          }
 
           return acc;
-        }
-
-        if (fieldName.startsWith('osquery.')) {
-          acc.push({
-            id: fieldName,
-            displayAsText: fieldName.split('.')[1],
-            defaultSortDirection: Direction.asc,
-          });
-          return acc;
-        }
-
-        return acc;
-      }, [] as EuiDataGridColumn[]);
+        },
+        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+      ).data;
 
     if (!isEqual(columns, newColumns)) {
       setColumns(newColumns);
@@ -149,16 +237,24 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   return (
     // @ts-expect-error update types
     <DataContext.Provider value={allResultsData?.edges}>
-      <EuiDataGrid
-        aria-label="Osquery results"
-        columns={columns}
-        columnVisibility={columnVisibility}
-        rowCount={allResultsData?.totalCount ?? 0}
-        renderCellValue={renderCellValue}
-        sorting={tableSorting}
-        pagination={tablePagination}
-        height="500px"
-      />
+      <EuiBasicTable items={summaryItems} rowHeader="total" columns={summaryColumns} />
+      <EuiSpacer />
+      {columns.length > 0 ? (
+        <EuiDataGrid
+          aria-label="Osquery results"
+          columns={columns}
+          columnVisibility={columnVisibility}
+          rowCount={allResultsData?.totalCount ?? 0}
+          renderCellValue={renderCellValue}
+          sorting={tableSorting}
+          pagination={tablePagination}
+          height="500px"
+        />
+      ) : (
+        <div className={'eui-textCenter'}>
+          {generateEmptyDataMessage(aggregations.totalResponded)}
+        </div>
+      )}
     </DataContext.Provider>
   );
 };

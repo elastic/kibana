@@ -7,16 +7,17 @@
  */
 
 import { snakeCase } from 'lodash';
-import {
+import type {
   Logger,
   ElasticsearchClient,
-  ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
+// Needed for the general array containing all the collectors. We don't really care about their types here
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyCollector = Collector<any, any>;
 
 interface CollectorSetConfig {
@@ -144,7 +145,7 @@ export class CollectorSet {
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    soClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
@@ -183,7 +184,7 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
