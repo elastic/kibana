@@ -20,6 +20,7 @@ import {
   EuiCheckbox,
   EuiCheckboxGroup,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -170,7 +171,20 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.namespaceFieldDescription"
-            defaultMessage="Apply a default namespace to integrations that use this policy. Integrations can specify their own namespaces."
+            defaultMessage="Namespaces are part of the data stream naming scheme and make it easier to search for data and manage user permissions. The policy's default namespace is applied to the naming of an integration's data streams. For more information, see the {fleetUserGuide}."
+            values={{
+              fleetUserGuide: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme"
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel',
+                    { defaultMessage: 'Fleet user guide' }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
         }
       >
