@@ -21,7 +21,7 @@ describe('Trusted Apps: Path placeholder text', () => {
 
   it('returns a placeholder text when field IS PATH', () => {
     expect(getPlaceholderText({ ...trustedAppEntry, field: ConditionEntryField.PATH })).toEqual(
-      placeholderText.others.exact
+      placeholderText().others.exact
     );
   });
 
@@ -32,7 +32,7 @@ describe('Trusted Apps: Path placeholder text', () => {
         os: OperatingSystem.MAC,
         field: ConditionEntryField.PATH,
       })
-    ).toEqual(placeholderText.others.exact);
+    ).toEqual(placeholderText().others.exact);
   });
 
   it('returns LINUX/MAC equivalent placholder text when field IS PATH and WILDCARD operator is selected', () => {
@@ -43,7 +43,7 @@ describe('Trusted Apps: Path placeholder text', () => {
         field: ConditionEntryField.PATH,
         type: 'wildcard',
       })
-    ).toEqual(placeholderText.others.wildcard);
+    ).toEqual(placeholderText().others.wildcard);
   });
 
   it('returns WINDOWS equivalent placholder text when field IS PATH', () => {
@@ -53,10 +53,10 @@ describe('Trusted Apps: Path placeholder text', () => {
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
       })
-    ).toEqual(placeholderText.windows.exact);
+    ).toEqual(placeholderText().windows.exact);
   });
 
-  it('returns WINDOWS equivalent placholder text when field IS PATH and WILDCARD operator is selected', () => {
+  it('returns WINDOWS equivalent placeholder text when field IS PATH and WILDCARD operator is selected', () => {
     expect(
       getPlaceholderText({
         ...trustedAppEntry,
@@ -64,6 +64,6 @@ describe('Trusted Apps: Path placeholder text', () => {
         field: ConditionEntryField.PATH,
         type: 'wildcard',
       })
-    ).toEqual(placeholderText.windows.wildcard);
+    ).toEqual(placeholderText().windows.wildcard);
   });
 });
