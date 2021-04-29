@@ -79,8 +79,8 @@ export function useDocuments({
           },
         })
         .toPromise()
-        .then((resp) => {
-          setDocuments(resp.hits.hits as ElasticSearchHit[]);
+        .then(({ rawResponse }) => {
+          setDocuments(rawResponse.hits.hits as ElasticSearchHit[]);
           setFetchStatus(fetchStatuses.COMPLETE);
           setInspectorAdapters(newInspectorAdapters);
         })

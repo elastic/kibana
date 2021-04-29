@@ -30,13 +30,13 @@ async function fetch(
   searchSessionId: string
 ) {
   try {
-    const response = await searchSource
+    const { rawResponse } = await searchSource
       .fetch$({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
       })
       .toPromise();
-    const tabifiedData = tabifyAggResponse(chartAggConfigs, response);
+    const tabifiedData = tabifyAggResponse(chartAggConfigs, rawResponse);
     const dimensions = getDimensions(chartAggConfigs, data);
     if (!dimensions) {
       return;

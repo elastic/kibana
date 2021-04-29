@@ -36,9 +36,9 @@ export function useTotalHits({
       });
 
       searchSourceFetch$.subscribe({
-        next: (result) => {
-          subject.next({ state: 'success', total: result.hits.total as number });
-          return result.hits.total;
+        next: ({ rawResponse }) => {
+          subject.next({ state: 'success', total: rawResponse.hits.total as number });
+          return rawResponse.hits.total;
         },
         error: (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;

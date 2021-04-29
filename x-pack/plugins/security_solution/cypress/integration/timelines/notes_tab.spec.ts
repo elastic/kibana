@@ -41,8 +41,8 @@ describe('Timeline notes tab', () => {
           .click({ force: true })
           .then(() => {
             waitForEventsPanelToBeLoaded();
-            goToNotesTab();
             addNotesToTimeline(timeline.notes);
+            goToNotesTab();
           });
       });
   });

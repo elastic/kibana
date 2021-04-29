@@ -40,7 +40,8 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       const hasCapability =
         !this.actionContext ||
         !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
-      return object.meta.namespaceType === 'multiple' && hasCapability;
+      const { namespaceType, hiddenType } = object.meta;
+      return namespaceType === 'multiple' && !hiddenType && hasCapability;
     },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.isDataChanged = false;
