@@ -228,15 +228,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number, cellIdx: number = 2) {
+    public async getDocTableField(index: number, cellIdx: number = -1) {
       const isLegacyDefault = await this.useLegacyTable();
+      const usedDefaultCellIdx = isLegacyDefault ? 0 : 2;
+      const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
       if (isLegacyDefault) {
-        const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-        return await row.getVisibleText();
+        const fields = await find.allByCssSelector(
+          `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
+        );
+        return await fields[usedCellIdx].getVisibleText();
       }
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
-      return result[cellIdx];
+      return result[usedCellIdx];
     }
 
     public async skipToEndOfDocTable() {
