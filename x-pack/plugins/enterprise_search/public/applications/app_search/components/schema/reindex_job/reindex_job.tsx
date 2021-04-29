@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
-  // const { reindexJobId } = useParams() as { reindexJobId: string };
+  const { reindexJobId } = useParams() as { reindexJobId: string };
 
   return (
     <>
