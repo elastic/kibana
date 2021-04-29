@@ -18,7 +18,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe.only('Timeline notes tab', () => {
+describe('Timeline notes tab', () => {
   let timelineId: string | undefined;
 
   before(() => {

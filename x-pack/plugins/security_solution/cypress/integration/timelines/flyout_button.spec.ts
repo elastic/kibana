@@ -25,7 +25,7 @@ import {
 
 import { HOSTS_URL } from '../../urls/navigation';
 
-describe.only('timeline flyout button', () => {
+describe('timeline flyout button', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);

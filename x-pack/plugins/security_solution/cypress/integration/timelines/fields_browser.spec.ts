@@ -48,7 +48,7 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe.only('Fields Browser', () => {
+describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();

@@ -32,7 +32,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe.only('Open timeline', () => {
+describe('Open timeline', () => {
   let timelineId: string | null = null;
   before(() => {
     cleanKibana();

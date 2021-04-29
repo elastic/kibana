@@ -19,7 +19,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe.only('Timeline query tab', () => {
+describe('Timeline query tab', () => {
   let timelineId: string | null = null;
   before(() => {
     cleanKibana();

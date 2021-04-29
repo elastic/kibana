@@ -35,7 +35,7 @@ import {
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe.only('Timelines', (): void => {
+describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(OVERVIEW_URL);

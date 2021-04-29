@@ -14,7 +14,7 @@ import { TABLE_COLUMN_EVENTS_MESSAGE } from '../../screens/hosts/external_events
 import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { removeColumn } from '../../tasks/timeline';
 
-describe.only('persistent timeline', () => {
+describe('persistent timeline', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
