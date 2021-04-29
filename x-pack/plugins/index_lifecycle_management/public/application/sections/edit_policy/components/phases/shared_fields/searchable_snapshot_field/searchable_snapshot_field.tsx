@@ -34,7 +34,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         title: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.title',
           {
-            defaultMessage: 'Fully-mounted index',
+            defaultMessage: 'Searchable snapshot',
           }
         ),
         description: (
@@ -48,7 +48,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         ),
         toggleLabel: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.toggleLabel',
-          { defaultMessage: 'Create fully-mounted index' }
+          { defaultMessage: 'Convert to fully-mounted index' }
         ),
       };
 
@@ -58,7 +58,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         title: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title',
           {
-            defaultMessage: 'Partially-mounted index',
+            defaultMessage: 'Searchable snapshot',
           }
         ),
         description: (
@@ -74,7 +74,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         ),
         toggleLabel: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.toggleLabel',
-          { defaultMessage: 'Create partially-mounted index' }
+          { defaultMessage: 'Convert to partially-mounted index' }
         ),
       };
   }
@@ -257,7 +257,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink, read only and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
+                'Force merge, shrink, read only and freeze actions are not allowed when converting data to a fully-mounted index in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
