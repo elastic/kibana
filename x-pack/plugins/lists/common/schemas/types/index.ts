@@ -15,6 +15,7 @@ export * from './default_namespace';
 export * from './entries';
 export * from './entry_match';
 export * from './entry_match_any';
+export * from './entry_match_wildcard';
 export * from './entry_list';
 export * from './entry_exists';
 export * from './entry_nested';
