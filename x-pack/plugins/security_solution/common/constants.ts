@@ -184,6 +184,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
   '.servicenow',
   '.jira',
