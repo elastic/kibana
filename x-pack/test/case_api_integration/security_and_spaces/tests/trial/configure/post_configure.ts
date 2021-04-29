@@ -46,9 +46,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create a configuration with mapping', async () => {
-      const connector = await createConnector(supertest, {
-        ...getServiceNowConnector(),
-        config: { apiUrl: servicenowSimulatorURL },
+      const connector = await createConnector({
+        supertest,
+        req: {
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        },
       });
 
       actionsRemover.add('default', connector.id, 'action', 'actions');

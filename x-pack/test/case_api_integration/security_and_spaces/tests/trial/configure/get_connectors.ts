@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getResilientConnector())
         .expect(200);
 
-      const sir = await createConnector(supertest, getServiceNowSIRConnector());
+      const sir = await createConnector({ supertest, req: getServiceNowSIRConnector() });
 
       actionsRemover.add('default', sir.id, 'action', 'actions');
       actionsRemover.add('default', snConnector.id, 'action', 'actions');
