@@ -18,8 +18,7 @@ interface LogEntry {
   type: string;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/32240
-describe.skip('cli invalid config support', function () {
+describe('cli invalid config support', function () {
   it(
     'exits with statusCode 64 and logs a single line when config is invalid',
     function () {
