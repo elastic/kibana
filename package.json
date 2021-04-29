@@ -121,7 +121,7 @@
     "@hapi/inert": "^6.0.3",
     "@hapi/podium": "^4.1.1",
     "@hapi/wreck": "^17.1.0",
-    "@kbn/ace": "link:packages/kbn-ace",
+    "@kbn/ace": "link:bazel-bin/packages/kbn-ace/npm_module",
     "@kbn/analytics": "link:packages/kbn-analytics",
     "@kbn/apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader/npm_module",
     "@kbn/apm-utils": "link:bazel-bin/packages/kbn-apm-utils/npm_module",
