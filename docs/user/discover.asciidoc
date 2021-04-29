@@ -171,7 +171,7 @@ that occurred before and after it.
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-hover of its name for filters and other controls.
+hover over its name for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
 <<discover-view-surrounding-documents, View surrounding documents>>.
