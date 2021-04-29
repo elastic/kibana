@@ -28,7 +28,7 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
     - lsb_release
     - tmux is recommended in case your ssh session is interrupted
     - "Cloud API access scopes": must have **read / write** scope for the Storage API
-6. Copy the entire `build_chromium` directory into a GCP storage bucket. To do this, use `gsutil rsync`:
+6. Copy the entire `build_chromium` directory from the `headless_shell_staging` bucket. To do this, use `gsutil rsync`:
    ```sh
    # This shows a preview of what would change by synchronizing the source scripts with the destination GCS bucket.
    # Remove the `-n` flag to enact the changes
