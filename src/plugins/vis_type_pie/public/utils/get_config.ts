@@ -40,8 +40,6 @@ export const getConfig = (
     config.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,
       maximumSection: Number.POSITIVE_INFINITY,
-      // valueFormatter: !visParams.labels.values ? () => '' : undefined,
-      valueFormatter: () => '',
     };
   }
 

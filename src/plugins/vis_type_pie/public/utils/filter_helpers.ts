@@ -36,13 +36,13 @@ export const getFilterClickData = (
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
       if (!columnId) return;
-      let condition = row[columnId] === layer.groupByRollup;
-      if (splitChartDimension) {
-        const value =
-          splitChartFormatter?.convert(row[splitChartDimension.id]) || row[splitChartDimension.id];
-        condition = condition && value === layer.smAccessorValue;
+      const isCurrentLayer = row[columnId] === layer.groupByRollup;
+      if (!splitChartDimension) {
+        return isCurrentLayer;
       }
-      return condition;
+      const value =
+        splitChartFormatter?.convert(row[splitChartDimension.id]) || row[splitChartDimension.id];
+      return isCurrentLayer && value === layer.smAccessorValue;
     })
   );
 

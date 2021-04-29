@@ -83,8 +83,9 @@ const PieOptions = (props: PieOptionsProps) => {
     const bwcLegendStateDefault = stateParams.addLegend == null ? false : stateParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-  const hasSplitChart = aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled);
-  const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled);
+  const hasSplitChart =
+    Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled)) ?? false;
+  const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   useEffect(() => {
     setLegendVisibility(legendUiStateValue);
@@ -130,7 +131,7 @@ const PieOptions = (props: PieOptionsProps) => {
                     })}
                     paramName="distinctColors"
                     value={stateParams.distinctColors}
-                    disabled={segments?.length <= 1 && !Boolean(hasSplitChart)}
+                    disabled={segments?.length <= 1 && !hasSplitChart}
                     setValue={setValue}
                     data-test-subj="visTypePiedistinctColorsSwitch"
                   />
@@ -214,11 +215,11 @@ const PieOptions = (props: PieOptionsProps) => {
             label={i18n.translate('visTypePie.editors.pie.labelPositionLabel', {
               defaultMessage: 'Label position',
             })}
-            disabled={!stateParams.labels.show || Boolean(hasSplitChart)}
+            disabled={!stateParams.labels.show || hasSplitChart}
             options={getLabelPositions}
             paramName="position"
             value={
-              Boolean(hasSplitChart)
+              hasSplitChart
                 ? LabelPositions.INSIDE
                 : stateParams.labels.position || LabelPositions.DEFAULT
             }

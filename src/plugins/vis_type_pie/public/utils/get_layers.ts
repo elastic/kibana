@@ -54,41 +54,40 @@ export const computeColor = (
         syncColors,
       }
     );
-  } else {
-    const seriesLayers: SeriesLayer[] = [];
-    let tempParent: typeof d | typeof d['parent'] = d;
-    while (tempParent.parent && tempParent.depth > 0) {
-      const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
-      const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
-      seriesLayers.unshift({
-        name: seriesName,
-        rankAtDepth: isSplitParentLayer
-          ? parentSeries.findIndex((name) => name === seriesName)
-          : tempParent.sortIndex,
-        totalSeriesAtDepth: isSplitParentLayer
-          ? parentSeries.length
-          : tempParent.parent.children.length,
-      });
-      tempParent = tempParent.parent;
-    }
-
-    let overwriteColor;
-    seriesLayers.forEach((layer) => {
-      if (Object.keys(overwriteColors).includes(layer.name)) {
-        overwriteColor = overwriteColors[layer.name];
-      }
-    });
-
-    if (overwriteColor) {
-      return lightenColor(overwriteColor, seriesLayers.length, columns.length);
-    }
-    return palettes?.get(visParams.palette.name).getColor(seriesLayers, {
-      behindText: visParams.labels.show,
-      maxDepth: columns.length,
-      totalSeries: rows.length,
-      syncColors,
-    });
   }
+  const seriesLayers: SeriesLayer[] = [];
+  let tempParent: typeof d | typeof d['parent'] = d;
+  while (tempParent.parent && tempParent.depth > 0) {
+    const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
+    const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
+    seriesLayers.unshift({
+      name: seriesName,
+      rankAtDepth: isSplitParentLayer
+        ? parentSeries.findIndex((name) => name === seriesName)
+        : tempParent.sortIndex,
+      totalSeriesAtDepth: isSplitParentLayer
+        ? parentSeries.length
+        : tempParent.parent.children.length,
+    });
+    tempParent = tempParent.parent;
+  }
+
+  let overwriteColor;
+  seriesLayers.forEach((layer) => {
+    if (Object.keys(overwriteColors).includes(layer.name)) {
+      overwriteColor = overwriteColors[layer.name];
+    }
+  });
+
+  if (overwriteColor) {
+    return lightenColor(overwriteColor, seriesLayers.length, columns.length);
+  }
+  return palettes?.get(visParams.palette.name).getColor(seriesLayers, {
+    behindText: visParams.labels.show,
+    maxDepth: columns.length,
+    totalSeries: rows.length,
+    syncColors,
+  });
 };
 
 export const getLayers = (
@@ -129,7 +128,7 @@ export const getLayers = (
         return String(d);
       },
       sortPredicate: ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
-        const params = col?.meta?.sourceParams?.params as SplitDimensionParams;
+        const params = col?.meta?.sourceParams?.params as SplitDimensionParams | undefined;
         const sort: string | undefined = params?.orderBy;
         // metric sorting
         if (sort !== '_key') {

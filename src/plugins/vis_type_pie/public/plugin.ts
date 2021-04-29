@@ -52,7 +52,7 @@ export class VisTypePiePlugin {
       };
       const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');
 
-      [createPieVisFn].forEach(expressions.registerFunction);
+      expressions.registerFunction(createPieVisFn);
       expressions.registerRenderer(
         getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
       );

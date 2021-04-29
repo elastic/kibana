@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AccessorFn, Accessor } from '@elastic/charts';
+import { AccessorFn } from '@elastic/charts';
 import { FieldFormatsStart } from '../../../data/public';
 import { DatatableColumn } from '../../../expressions/public';
 import { Dimension } from '../types';
 
-export const getComplexAccessor = (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) => (
-  splitDimension: Dimension
-): Accessor | AccessorFn | undefined => {
+export const getSplitDimensionAccessor = (
+  fieldFormats: FieldFormatsStart,
+  columns: DatatableColumn[]
+) => (splitDimension: Dimension): AccessorFn => {
   const formatter = fieldFormats.deserialize(splitDimension.format);
   const splitChartColumn = columns[splitDimension.accessor];
   const accessor = splitChartColumn.id;

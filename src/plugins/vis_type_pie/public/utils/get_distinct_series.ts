@@ -13,8 +13,8 @@ export const getDistinctSeries = (rows: DatatableRow[], buckets: Array<Partial<B
   const parentSeries: string[] = [];
   const allSeries: string[] = [];
   buckets.forEach(({ id }) => {
+    if (!id) return;
     rows.forEach((row) => {
-      if (!id) return;
       const name = row[id];
       if (!allSeries.includes(name)) {
         allSeries.push(name);

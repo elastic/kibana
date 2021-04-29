@@ -40,7 +40,7 @@ import {
   getFilterEventData,
   getConfig,
   getColumns,
-  getComplexAccessor,
+  getSplitDimensionAccessor,
 } from './utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
 
@@ -249,13 +249,16 @@ const PieComponent = (props: PieComponentProps) => {
   );
 
   const splitChartColumnAccessor = visParams.dimensions.splitColumn
-    ? getComplexAccessor(
+    ? getSplitDimensionAccessor(
         services.fieldFormats,
         visData.columns
       )(visParams.dimensions.splitColumn[0])
     : undefined;
   const splitChartRowAccessor = visParams.dimensions.splitRow
-    ? getComplexAccessor(services.fieldFormats, visData.columns)(visParams.dimensions.splitRow[0])
+    ? getSplitDimensionAccessor(
+        services.fieldFormats,
+        visData.columns
+      )(visParams.dimensions.splitRow[0])
     : undefined;
 
   const splitChartDimension = visParams.dimensions.splitColumn
