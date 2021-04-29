@@ -29,8 +29,8 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerting/common';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { SanitizedAlert } from '../../../../../alerting/common';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
@@ -270,9 +270,9 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: Alert<RuleParams>,
+  rule: SanitizedAlert<RuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: IRuleStatusSOAttributes
 ): FullResponseSchema => {
   return {
     // Alerting framework params
@@ -293,11 +293,11 @@ export const internalRuleToAPIResponse = (
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     actions: ruleActions?.actions ?? [],
     // Rule status
-    status: ruleStatus?.attributes.status ?? undefined,
-    status_date: ruleStatus?.attributes.statusDate ?? undefined,
-    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
-    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
-    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
-    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
+    status: ruleStatus?.status ?? undefined,
+    status_date: ruleStatus?.statusDate ?? undefined,
+    last_failure_at: ruleStatus?.lastFailureAt ?? undefined,
+    last_success_at: ruleStatus?.lastSuccessAt ?? undefined,
+    last_failure_message: ruleStatus?.lastFailureMessage ?? undefined,
+    last_success_message: ruleStatus?.lastSuccessMessage ?? undefined,
   };
 };

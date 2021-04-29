@@ -49,6 +49,7 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       const ids = body.ids;
       try {
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        // console.log(`${new Date().toISOString()} finding statuses bulk`);
         const statusesById = await ruleStatusClient.findBulk(ids);
         const failingRules = await getFailingRules(ids, alertsClient);
 

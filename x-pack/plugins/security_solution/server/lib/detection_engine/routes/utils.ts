@@ -20,6 +20,9 @@ import {
 import { AlertsClient } from '../../../../../alerting/server';
 import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
+import { chunk } from 'lodash';
+import { findRules } from '../rules/find_rules';
+import { RuleParams } from '../schemas/rule_schemas';
 
 export interface OutputError {
   message: string;
@@ -333,20 +336,14 @@ export const mergeStatuses = (
   } as RuleStatusResponse;
 };
 
-export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
 
 export const getFailingRules = async (
   ids: string[],
   alertsClient: AlertsClient
 ): Promise<GetFailingRulesResult> => {
   try {
-    const errorRules = await Promise.all(
-      ids.map(async (id) =>
-        alertsClient.get({
-          id,
-        })
-      )
-    );
+    const errorRules = await alertsClient.getBulk({ ids });
     return errorRules
       .filter((rule) => rule.executionStatus.status === 'error')
       .reduce<GetFailingRulesResult>((acc, failingRule) => {
