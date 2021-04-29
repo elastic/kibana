@@ -18,7 +18,7 @@ import { EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 import { CreateExceptionListItemSchema, transformNewItemOutput } from '../../../../shared_imports';
 import {
-  getCurrentListPageState,
+  getCurrentListPageDataState,
   getCurrentLocation,
   getListIsLoading,
   getListPageActiveState,
@@ -86,7 +86,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
         type: 'LoadingResourceState',
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
         // @ts-ignore
-        previousState: getCurrentListPageState(state),
+        previousState: getCurrentListPageDataState(state),
       },
     });
 

@@ -46,13 +46,15 @@ export const getCurrentListPageDataState: EventFiltersSelector<StoreState['listP
 export const getListApiSuccessResponse: EventFiltersSelector<
   Immutable<FoundExceptionListItemSchema> | undefined
 > = createSelector(getCurrentListPageDataState, (listPageData) => {
-  return (
-    (isLoadedResourceState(listPageData) && listPageData.data.content) ||
-    (isLoadingResourceState(listPageData) &&
-      isLoadedResourceState(listPageData.previousState) &&
-      listPageData.previousState.data.content) ||
-    undefined
-  );
+  if (isLoadedResourceState(listPageData)) {
+    return listPageData.data.content;
+  } else if (
+    isLoadingResourceState(listPageData) &&
+    isLoadedResourceState(listPageData.previousState)
+  ) {
+    return listPageData.previousState.data.content;
+  }
+  return undefined;
 });
 
 export const getListItems: EventFiltersSelector<
