@@ -22,8 +22,8 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
           body: indexMappings,
         } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
           index: request.params.query,
-          allow_no_indices: false,
           fields: '*',
+          allow_no_indices: false,
           include_defaults: true,
           filter_path: '*.mappings.*.mapping.*.type',
         });
