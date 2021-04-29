@@ -314,7 +314,7 @@ def buildOss(maxWorkers = '') {
 def buildXpack(maxWorkers = '') {
   notifyOnError {
     withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-      runbld("./test/scripts/jenkins_security_solution_cypress_chrome.sh", "Build X-Pack Kibana")
+      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
   }
 }
