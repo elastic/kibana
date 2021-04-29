@@ -87,7 +87,7 @@ export function esdocs(): ExpressionFunctionDefinition<
       ]);
 
       // Load ad-hoc to avoid adding to the page load bundle size
-      const squel = await import('squel');
+      const squel = await import('safe-squel');
 
       let query = squel.select({
         autoQuoteTableNames: true,
