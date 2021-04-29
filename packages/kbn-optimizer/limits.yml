@@ -69,7 +69,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 189428
   securityOss: 30806
-  securitySolution: 235402
+  securitySolution: 187863
   share: 99205
   snapshotRestore: 79176
   spaces: 389643
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   banners: 17946
   mapsEms: 26072
   timelines: 28613
+  cases: 162385
