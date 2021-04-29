@@ -11,32 +11,30 @@ import React, { FunctionComponent } from 'react';
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
-   * Disregards any `children` and renders an EuiEmptyPrompt filled with `pageHeader` items centered as the page body.
+   * Changes the template type depending on other props provided.
+   * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
+   * With `children` only: Uses `centeredBody`
+   * With `pageHeader` and `children`: Uses `centeredContent`
    */
-  isEmptyScreen?: boolean;
-  /**
-   * Used in conjunction with `isEmptyScreen` to render a custom React element in place of EuiEmptyPrompt.
-   */
-  emptyPrompt?: JSX.Element;
+  isEmptyState?: boolean;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   pageHeader,
   children,
-  isEmptyScreen,
-  emptyPrompt,
+  isEmptyState,
   restrictWidth = true,
   ...rest
 }) => {
   /**
    * An easy way to create the right content for empty pages
    */
-  if (isEmptyScreen) {
-    const { iconType, pageTitle, description, rightSideItems } = pageHeader ?? {};
-    template = 'centeredBody';
+  if (isEmptyState && pageHeader && !children) {
+    template = template ?? 'centeredBody';
+    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
     pageHeader = undefined;
-    emptyPrompt = emptyPrompt ?? (
+    children = (
       <EuiEmptyPrompt
         iconType={iconType}
         title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
@@ -44,16 +42,21 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
         actions={rightSideItems}
       />
     );
+  } else if (isEmptyState && pageHeader && children) {
+    template = template ?? 'centeredContent';
+  } else if (isEmptyState && !pageHeader) {
+    template = template ?? 'centeredBody';
   }
 
   return (
+    // @ts-ignore TODO: Fix disambiguous type for `template`
     <EuiPageTemplate
       template={template}
       pageHeader={pageHeader}
       restrictWidth={restrictWidth}
       {...rest}
     >
-      {isEmptyScreen ? emptyPrompt : children}
+      {children}
     </EuiPageTemplate>
   );
 };

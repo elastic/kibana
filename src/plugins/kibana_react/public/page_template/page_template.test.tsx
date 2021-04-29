@@ -15,7 +15,7 @@ describe('KibanaPageTemplate', () => {
   test('render default empty prompt', () => {
     const component = shallow(
       <KibanaPageTemplate
-        isEmptyScreen={true}
+        isEmptyState={true}
         pageHeader={{
           iconType: 'test',
           title: 'test',
@@ -27,18 +27,28 @@ describe('KibanaPageTemplate', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('render custom empty prompt', () => {
+  test('render custom empty prompt only', () => {
+    const component = shallow(
+      <KibanaPageTemplate isEmptyState={true}>
+        <EuiEmptyPrompt title={<h1>custom test</h1>} />
+      </KibanaPageTemplate>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('render custom empty prompt with page header', () => {
     const component = shallow(
       <KibanaPageTemplate
-        isEmptyScreen={true}
-        emptyPrompt={<EuiEmptyPrompt title={<h1>custom test</h1>} />}
+        isEmptyState={true}
         pageHeader={{
           iconType: 'test',
           title: 'test',
           description: 'test',
           rightSideItems: ['test'],
         }}
-      />
+      >
+        <EuiEmptyPrompt title={<h1>custom test</h1>} />
+      </KibanaPageTemplate>
     );
     expect(component).toMatchSnapshot();
   });

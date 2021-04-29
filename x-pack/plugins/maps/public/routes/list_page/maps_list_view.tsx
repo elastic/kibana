@@ -126,6 +126,7 @@ export function MapsListView() {
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
 
   return (
+    // @ts-ignore TODO: Missing `tableCaption`
     <TableListView
       headingId="mapsListingPage"
       rowHeader="title"

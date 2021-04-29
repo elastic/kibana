@@ -498,6 +498,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   render() {
+    const pageDTS = `${this.props.entityName}LandingPage`;
+
     if (!this.state.hasInitialFetchReturned) {
       return <></>;
     }
@@ -505,21 +507,22 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     if (!this.state.fetchError && this.hasNoItems()) {
       return (
         <KibanaPageTemplate
-          data-test-subj={this.props.entityName + 'LandingPage'}
+          data-test-subj={pageDTS}
           pageBodyProps={{
             'aria-labelledby': this.state.hasInitialFetchReturned
               ? this.props.headingId
               : undefined,
           }}
-          isEmptyScreen={true}
-          emptyPrompt={this.renderNoItemsMessage()}
-        />
+          isEmptyState={true}
+        >
+          {this.renderNoItemsMessage()}
+        </KibanaPageTemplate>
       );
     }
 
     return (
       <KibanaPageTemplate
-        data-test-subj={this.props.entityName + 'LandingPage'}
+        data-test-subj={pageDTS}
         pageHeader={{
           pageTitle: <span id={this.props.headingId}>{this.props.tableListTitle}</span>,
           rightSideItems: [this.renderCreateButton()],
