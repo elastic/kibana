@@ -10,7 +10,7 @@ import {
   KIBANA_STATS_TYPE_MONITORING,
 } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import Oppsy from 'oppsy';
+import Oppsy from '@hapi/oppsy';
 import { cloneDeep } from 'lodash';
 
 let bufferHadEvents = false;
