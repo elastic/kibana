@@ -41,7 +41,6 @@ import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
-import { getUiActions } from '../kibana_services';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
@@ -62,41 +61,6 @@ import { FieldGroups, FieldList } from './field_list';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
-}
-
-const supportedFieldTypes = new Set([
-  'string',
-  'number',
-  'boolean',
-  'date',
-  'ip',
-  'number_range',
-  'date_range',
-  'ip_range',
-  'histogram',
-  'document',
-]);
-
-const fieldTypeNames: Record<DataType, string> = {
-  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
-  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
-  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
-  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
-  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
-  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
-};
-
-const visualizeGeoFieldTrigger = getUiActions().getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
-if (visualizeGeoFieldTrigger) {
-  fieldTypeNames.geo_point = i18n.translate('xpack.lens.datatypes.geoPoint', {
-    defaultMessage: 'geo_point',
-  });
-  fieldTypeNames.geo_shape = i18n.translate('xpack.lens.datatypes.geoShape', {
-    defaultMessage: 'geo_shape',
-  });
-  supportedFieldTypes.add('geo_point');
-  supportedFieldTypes.add('geo_shape');
 }
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
@@ -135,6 +99,7 @@ export function IndexPatternDataPanel({
   showNoDataPopover,
   dropOntoWorkspace,
   hasSuggestionForField,
+  uiActions,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -247,6 +212,7 @@ export function IndexPatternDataPanel({
           existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
+          uiActions={uiActions}
         />
       )}
     </>
@@ -300,6 +266,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts,
   dropOntoWorkspace,
   hasSuggestionForField,
+  uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
   core: CoreStart;
@@ -323,6 +290,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isEmptyAccordionOpen: false,
     isMetaAccordionOpen: false,
   });
+
+  const fieldTypeNames: Record<DataType, string> = {
+    document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
+    string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
+    number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
+    boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
+    date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
+    ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
+    histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
+  };
+  const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
+  if (visualizeGeoFieldTrigger) {
+    fieldTypeNames.geo_point = i18n.translate('xpack.lens.datatypes.geoPoint', {
+      defaultMessage: 'geo_point',
+    });
+    fieldTypeNames.geo_shape = i18n.translate('xpack.lens.datatypes.geoShape', {
+      defaultMessage: 'geo_shape',
+    });
+  }
+
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
@@ -337,6 +324,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
+    const supportedFieldTypes = new Set([
+      'string',
+      'number',
+      'boolean',
+      'date',
+      'ip',
+      'number_range',
+      'date_range',
+      'ip_range',
+      'histogram',
+      'document',
+    ]);
+    if (visualizeGeoFieldTrigger) {
+      supportedFieldTypes.add('geo_point');
+      supportedFieldTypes.add('geo_shape');
+    }
+
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern.getFieldByName(field.name);
 
@@ -463,6 +467,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     existenceFetchTimeout,
     currentIndexPattern,
     existingFields,
+    visualizeGeoFieldTrigger,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
@@ -821,6 +826,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
             removeField={removeField}
+            uiActions={uiActions}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

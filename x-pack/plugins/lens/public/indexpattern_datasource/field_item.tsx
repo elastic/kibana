@@ -54,6 +54,7 @@ import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 
 import { debouncedComponent } from '../debounced_component';
@@ -76,6 +77,7 @@ export interface FieldItemProps {
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  uiActions: UiActionsStart;
 }
 
 interface State {
@@ -110,6 +112,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dropOntoWorkspace,
     editField,
     removeField,
+    uiActions,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
@@ -399,6 +402,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     removeField,
     hasSuggestionForField,
     hideDetails,
+    uiActions,
   } = props;
 
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -486,7 +490,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           })}
         </EuiText>
 
-        <VisualizeGeoFieldButton indexPatternId={indexPattern.id} fieldName={field.name} />
+        <VisualizeGeoFieldButton
+          uiActions={uiActions}
+          indexPatternId={indexPattern.id}
+          fieldName={field.name}
+        />
       </>
     );
   } else if (

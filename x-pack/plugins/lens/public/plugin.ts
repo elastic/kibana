@@ -54,7 +54,6 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
-import { setStartServices } from './kibana_services';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -235,7 +234,6 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
-    setStartServices(core, startDependencies);
     const frameStart = this.editorFrameService.start(core, startDependencies);
     this.createEditorFrame = frameStart.createInstance;
     // unregisters the Visualize action and registers the lens one

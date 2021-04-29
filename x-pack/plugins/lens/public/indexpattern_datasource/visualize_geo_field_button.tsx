@@ -8,15 +8,16 @@
 import React, { Component, MouseEvent } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getUiActions } from '../kibana_services';
 import {
   visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
+  UiActionsStart,
 } from '../../../../../src/plugins/ui_actions/public';
 
 interface Props {
   indexPatternId: string;
   fieldName: string;
+  uiActions: UiActionsStart;
 }
 
 interface State {
@@ -41,10 +42,13 @@ export class VisualizeGeoFieldButton extends Component<Props, State> {
   }
 
   async loadHref() {
-    const actions = await getUiActions().getTriggerCompatibleActions(VISUALIZE_GEO_FIELD_TRIGGER, {
-      indexPatternId: this.props.indexPatternId,
-      fieldName: this.props.fieldName,
-    });
+    const actions = await this.props.uiActions.getTriggerCompatibleActions(
+      VISUALIZE_GEO_FIELD_TRIGGER,
+      {
+        indexPatternId: this.props.indexPatternId,
+        fieldName: this.props.fieldName,
+      }
+    );
     if (!this._isMounted) {
       return;
     }
@@ -64,7 +68,7 @@ export class VisualizeGeoFieldButton extends Component<Props, State> {
   }
 
   onClick = (event: MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    getUiActions().getTrigger(visualizeGeoFieldTrigger).exec({
+    this.props.uiActions.getTrigger(visualizeGeoFieldTrigger).exec({
       indexPatternId: this.props.indexPatternId,
       fieldName: this.props.fieldName,
     });

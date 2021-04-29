@@ -53,6 +53,7 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -78,12 +79,14 @@ export function getIndexPatternDatasource({
   data,
   charts,
   indexPatternFieldEditor,
+  uiActions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
@@ -197,6 +200,7 @@ export function getIndexPatternDatasource({
             indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
             core={core}
+            uiActions={uiActions}
           />
         </I18nProvider>,
         domElement
