@@ -22,6 +22,9 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
   },
-  listPageActive: false,
-  listPage: { type: 'UninitialisedResourceState' },
+  listPage: {
+    active: false,
+    forceRefresh: false,
+    data: { type: 'UninitialisedResourceState' },
+  },
 });

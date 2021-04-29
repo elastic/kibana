@@ -29,12 +29,15 @@ export interface EventFiltersListPageState {
     submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
   };
   location: EventFiltersPageLocation;
-  listPageActive: boolean;
   /** State for the Event Filters List page */
-  listPage: AsyncResourceState<{
-    /** The query that was used to retrieve the data */
-    query: EventFiltersServiceGetListOptions;
-    /** The data retrieved from the API */
-    content: FoundExceptionListItemSchema;
-  }>;
+  listPage: {
+    active: boolean;
+    forceRefresh: boolean;
+    data: AsyncResourceState<{
+      /** The query that was used to retrieve the data */
+      query: EventFiltersServiceGetListOptions;
+      /** The data retrieved from the API */
+      content: FoundExceptionListItemSchema;
+    }>;
+  };
 }

@@ -21,10 +21,12 @@ import {
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
   EventFiltersListPageStateChanged,
+  EventFiltersListPageDataChanged,
 } from './action';
 
 import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
+import { getListPageIsActive } from './selector';
 
 type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -41,6 +43,7 @@ const isEventFiltersPageLocation = (location: Immutable<AppLocation>) => {
   );
 };
 
+// FIXME:PT might not need this. maybe delete
 const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateChanged> = (
   state,
   action
@@ -48,6 +51,20 @@ const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateCh
   return {
     ...state,
     listPage: action.payload,
+  };
+};
+
+const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDataChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      forceRefresh: false,
+      data: action.payload,
+    },
   };
 };
 
@@ -100,22 +117,35 @@ const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state
   return {
     ...state,
     entries: [action.payload.exception, ...state.entries],
+    // If we are on the List page, then force a refresh of data
+    listPage: getListPageIsActive(state)
+      ? {
+          ...state.listPage,
+          forceRefresh: true,
+        }
+      : state.listPage,
   };
 };
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isEventFiltersPageLocation(action.payload)) {
     const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
-    return { ...state, location, listPageActive: true };
+    return {
+      ...state,
+      location,
+      listPage: {
+        ...state.listPage,
+        active: true,
+      },
+    };
   } else {
     // Reset the list page state if needed
-    if (state.listPageActive) {
-      const { listPageActive, listPage } = initialEventFiltersPageState();
+    if (state.listPage.active) {
+      const { listPage } = initialEventFiltersPageState();
 
       return {
         ...state,
         listPage,
-        listPageActive,
       };
     }
 
@@ -128,8 +158,6 @@ export const eventFiltersPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
-    case 'eventFiltersListPageStateChanged':
-      return handleEventFiltersListPageChanges(state, action);
     case 'eventFiltersInitForm':
       return eventFiltersInitForm(state, action);
     case 'eventFiltersChangeForm':
@@ -140,6 +168,16 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersCreateSuccess(state, action);
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+  }
+
+  // actions only handled if we're on the List Page
+  if (getListPageIsActive(state)) {
+    switch (action.type) {
+      case 'eventFiltersListPageStateChanged':
+        return handleEventFiltersListPageChanges(state, action);
+      case 'eventFiltersListPageDataChanged':
+        return handleEventFiltersListPageDataChanges(state, action);
+    }
   }
 
   return state;

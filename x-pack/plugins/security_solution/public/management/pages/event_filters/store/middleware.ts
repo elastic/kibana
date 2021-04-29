@@ -81,7 +81,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
 
   if (!isLoading && listDataNeedsRefresh(state)) {
     dispatch({
-      type: 'eventFiltersListPageStateChanged',
+      type: 'eventFiltersListPageDataChanged',
       payload: {
         type: 'LoadingResourceState',
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
@@ -102,7 +102,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
       const results = await eventFiltersService.getList(query);
 
       dispatch({
-        type: 'eventFiltersListPageStateChanged',
+        type: 'eventFiltersListPageDataChanged',
         payload: {
           type: 'LoadedResourceState',
           data: {
@@ -113,7 +113,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (
       });
     } catch (error) {
       dispatch({
-        type: 'eventFiltersListPageStateChanged',
+        type: 'eventFiltersListPageDataChanged',
         payload: {
           type: 'FailedResourceState',
           error: error.body || error,
@@ -135,7 +135,7 @@ export const createEventFiltersPageMiddleware = (
 
     // Middleware that only applies to the List Page for Event Filters
     if (getListPageActiveState(store.getState())) {
-      if (action.type === 'userChangedUrl') {
+      if (action.type === 'userChangedUrl' || action.type === 'eventFiltersCreateSuccess') {
         refreshListDataIfNeeded(store, eventFiltersService);
       }
     }

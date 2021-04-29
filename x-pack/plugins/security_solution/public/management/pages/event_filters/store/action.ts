@@ -14,6 +14,10 @@ export type EventFiltersListPageStateChanged = Action<'eventFiltersListPageState
   payload: EventFiltersListPageState['listPage'];
 };
 
+export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataChanged'> & {
+  payload: EventFiltersListPageState['listPage']['data'];
+};
+
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
     entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
@@ -43,6 +47,7 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 
 export type EventFiltersPageAction =
   | EventFiltersListPageStateChanged
+  | EventFiltersListPageDataChanged
   | EventFiltersCreateStart
   | EventFiltersInitForm
   | EventFiltersChangeForm
