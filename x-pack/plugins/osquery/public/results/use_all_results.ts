@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -51,7 +52,10 @@ export const useAllResults = ({
   skip = false,
   isLive = false,
 }: UseAllResults) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
   return useQuery(
     ['allActionResults', { actionId, activePage, direction, limit, sortField }],
@@ -82,6 +86,12 @@ export const useAllResults = ({
     {
       refetchInterval: isLive ? 1000 : false,
       enabled: !skip,
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.results.fetchError', {
+            defaultMessage: 'Error while fetching results',
+          }),
+        }),
     }
   );
 };

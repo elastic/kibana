@@ -36,7 +36,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, is
         content: (
           <>
             <EuiSpacer />
-            <ResultsTable actionId={actionId} isLive={isLive} />
+            <ResultsTable actionId={actionId} agentIds={agentIds} isLive={isLive} />
           </>
         ),
       },
