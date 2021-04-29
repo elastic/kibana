@@ -19,6 +19,7 @@ import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
+import { getUISettings } from './ui_settings';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -36,6 +37,7 @@ export class CanvasPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+    coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);

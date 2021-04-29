@@ -101,7 +101,7 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        const response = await nestedSearchSource
+        const { rawResponse: response } = await nestedSearchSource
           .fetch$({
             abortSignal,
             sessionId: searchSessionId,
