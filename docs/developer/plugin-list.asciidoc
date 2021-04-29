@@ -338,7 +338,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Experimental Feature
+|Case management in Kibana
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
