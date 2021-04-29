@@ -6,22 +6,36 @@
  */
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { i18n } from '@kbn/i18n';
+
+import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
+import { EnginesLogic } from '../engines';
 import { EnginesAPIResponse } from '../engines/types';
 
-interface SourceEnginesLogicValues {
+export interface SourceEnginesLogicValues {
   dataLoading: boolean;
   sourceEngines: EngineDetails[];
 }
 
+const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeEngineSuccessMessage',
+    {
+      defaultMessage: 'Engine {engineName} has been removed from this meta engine.',
+      values: { engineName },
+    }
+  );
+
 interface SourceEnginesLogicActions {
   fetchSourceEngines: () => void;
+  onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
   onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
+  removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
 }
 
 export const SourceEnginesLogic = kea<
@@ -30,7 +44,9 @@ export const SourceEnginesLogic = kea<
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
     fetchSourceEngines: true,
+    onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
+    removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -39,10 +55,13 @@ export const SourceEnginesLogic = kea<
         onSourceEnginesFetch: () => false,
       },
     ],
+
     sourceEngines: [
       [],
       {
         onSourceEnginesFetch: (_, { sourceEngines }) => sourceEngines,
+        onSourceEngineRemove: (sourceEngines, { sourceEngineNameToRemove }) =>
+          sourceEngines.filter((sourceEngine) => sourceEngine.name !== sourceEngineNameToRemove),
       },
     ],
   }),
@@ -80,6 +99,23 @@ export const SourceEnginesLogic = kea<
       };
 
       recursiveFetchSourceEngines();
+    },
+    removeSourceEngine: async ({ sourceEngineName }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        // the response doesn't contain anything we care about
+        await http.delete(
+          `/api/app_search/engines/${engineName}/source_engines/${sourceEngineName}`
+        );
+
+        actions.onSourceEngineRemove(sourceEngineName);
+        EngineLogic.actions.initializeEngine();
+        setSuccessMessage(REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE(sourceEngineName));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });
