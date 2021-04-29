@@ -252,6 +252,41 @@ describe('field level security', () => {
     expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
   });
 
+  test('does not query for available fields when a request is already in flight', async () => {
+    jest.useFakeTimers();
+
+    const testProps = {
+      ...props,
+      indexPrivilege: {
+        ...props.indexPrivilege,
+        names: ['foo', 'bar-*'],
+      },
+      indicesAPIClient: indicesAPIClientMock.create(),
+    };
+
+    testProps.indicesAPIClient.getFields.mockImplementation(async () => {
+      return new Promise((resolve) =>
+        setTimeout(() => {
+          resolve(['foo']);
+        }, 5000)
+      );
+    });
+
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    await nextTick();
+    expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
+    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
+    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
+
+    findTestSubject(wrapper, 'fieldInput0').simulate('focus');
+    jest.advanceTimersByTime(2000);
+    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
+
+    findTestSubject(wrapper, 'fieldInput0').simulate('focus');
+    jest.advanceTimersByTime(4000);
+    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
+  });
+
   test('queries for available fields when focusing the granted fields control', async () => {
     const testProps = {
       ...props,
