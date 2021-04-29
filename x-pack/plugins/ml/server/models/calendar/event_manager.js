@@ -6,7 +6,7 @@
 
 
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export class EventManager {
 

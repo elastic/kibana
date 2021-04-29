@@ -5,7 +5,7 @@
  */
 
 import { checkForErrors, sendNotification } from './notify';
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 
 describe('notifications/routes/send', () => {
 

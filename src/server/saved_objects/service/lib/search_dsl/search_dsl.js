@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';

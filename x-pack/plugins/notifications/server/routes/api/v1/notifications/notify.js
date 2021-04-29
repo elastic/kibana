@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 
 /**
  * Check the incoming request parameters to see if the action should be allowed to fire.

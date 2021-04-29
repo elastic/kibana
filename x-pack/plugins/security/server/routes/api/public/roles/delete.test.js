@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { initDeleteRolesApi } from './delete';
 
 const createMockServer = () => {

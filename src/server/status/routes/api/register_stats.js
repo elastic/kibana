@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import boom from 'boom';
+import boom from '@hapi/boom';
 import { i18n }  from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';

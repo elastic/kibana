@@ -19,7 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';

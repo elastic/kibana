@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 /**
  * Wraps ES errors into a Boom error response and returns it

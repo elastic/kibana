@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Hapi from 'hapi';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { initGetRolesApi } from './get';
 
 const application = 'kibana-.kibana';

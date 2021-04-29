@@ -839,7 +839,7 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
-"@hapi/boom@7.x.x":
+"@hapi/boom@7.x.x", "@hapi/boom@^7.4.11":
   version "7.4.11"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.11.tgz#37af8417eb9416aef3367aa60fa04a1a9f1fc262"
   integrity sha512-VSU/Cnj1DXouukYxxkes4nNJonCnlogHvIff1v1RVoN4xzkKhMXX+GRmb3NyH1iar10I9WFPDv2JPwfH3GaV0A==
@@ -1196,7 +1196,7 @@
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.20.tgz#f6363172add6f4eabb8cada53ca9af2781e8d6a1"
   integrity sha512-Wk41MVdF+cHBfVXj/ufUHJeO3BlIQr1McbHZANErMykaCWeDSZbH5erGjNBw2/3UlRdSxZbLfSuQTzFmPOYFsA==
 
-"@types/boom@*", "@types/boom@7.2.0", "@types/boom@^7.2.0":
+"@types/boom@*":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
   integrity sha512-HonbGsHFbskh9zRAzA6tabcw18mCOsSEOL2ibGAuVqk6e7nElcRmWO5L4UfIHpDbWBWw+eZYFdsQ1+MEGgpcVA==
@@ -1451,6 +1451,11 @@
     "@types/node" "*"
     "@types/podium" "*"
     "@types/shot" "*"
+
+"@types/hapi__boom@^7.4.1":
+  version "7.4.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.1.tgz#06439d7637245dcbe6dd6548d2a91f2c1243d80b"
+  integrity sha512-x/ZK824GomII7Yoei/nMoB46NQcSfGe0iVpZK3uUivxIAfUUSzRvu8RQO7ZkKapIgzgshHZc+GR+z/BQ8l2VLg==
 
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
@@ -4303,7 +4308,7 @@ boolbase@~1.0.0:
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha1-aN/1++YMUes3cl6p4+0xDcwed24=
 
-boom@7.x.x, boom@^7.1.0, boom@^7.3.0:
+boom@7.x.x, boom@^7.1.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.3.0.tgz#733a6d956d33b0b1999da3fe6c12996950d017b9"
   integrity sha512-Swpoyi2t5+GhOEGw8rEsKvTxFLIDiiKoUc2gsoV6Lyr43LHBIzch3k2MvYUs8RTROrIkVJ3Al0TkaOGjnb+B6A==

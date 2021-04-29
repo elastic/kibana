@@ -20,7 +20,7 @@
 import elasticsearch from 'elasticsearch';
 import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
 import toPath from 'lodash/internal/toPath';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import filterHeaders from './filter_headers';
 import { parseConfig } from './parse_config';

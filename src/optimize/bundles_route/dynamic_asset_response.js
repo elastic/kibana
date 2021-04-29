@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { open, fstat, createReadStream, close } from 'fs';
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { fromNode as fcb } from 'bluebird';
 
 import { getFileHash } from './file_hash';

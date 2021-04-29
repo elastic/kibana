@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { profileRoute } from './server/routes/profile';
 
 // License
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { checkLicense } from './server/lib/check_license';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 
