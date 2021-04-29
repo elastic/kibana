@@ -7,8 +7,6 @@
 
 import path from 'path';
 
-// We download zip files from a Kibana team GCS bucket named `headless_shell`
-
 interface PackageInfo {
   platform: string;
   architecture: string;
@@ -18,6 +16,7 @@ interface PackageInfo {
   binaryRelativePath: string;
 }
 
+// We download zip files from a Kibana team GCS bucket named `headless_shell`
 enum BaseUrl {
   custom = 'https://storage.googleapis.com/headless_shell',
 }
@@ -58,7 +57,7 @@ export class ChromiumArchivePaths {
     },
   ];
 
-  // temporary directory for unzipping the browser
+  // zip files get downloaded to a .chromium directory in the kibana root
   public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
 
   public find(platform: string, architecture: string) {
