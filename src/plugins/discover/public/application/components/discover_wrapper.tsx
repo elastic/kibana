@@ -296,6 +296,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
       searchSessionManager={searchSessionManager}
       shouldSearchOnPageLoad={shouldSearchOnPageLoad}
       useSavedSearch={useSavedSearch}
+      searchSource={savedSearch.searchSource}
     />
   );
 }

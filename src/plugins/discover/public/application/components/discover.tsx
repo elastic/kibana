@@ -42,7 +42,7 @@ import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { DiscoverChart } from './discover_chart';
-import { UseSavedSearch } from './use_fetch';
+import { UseSavedSearch } from './use_saved_search';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { getResultState } from '../helpers/get_result_state';
 import { AppState, GetStateReturn } from '../angular/discover_state';
