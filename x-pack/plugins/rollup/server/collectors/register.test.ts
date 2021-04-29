@@ -8,7 +8,7 @@
 import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerRollupUsageCollector } from './register';
 
-describe('registerVisualizationsCollector', () => {
+describe('registerRollupUsageCollector', () => {
   const mockIndex = 'mock_index';
 
   it('makes a usage collector and registers it`', () => {
