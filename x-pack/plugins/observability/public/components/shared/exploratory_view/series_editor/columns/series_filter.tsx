@@ -60,7 +60,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       flush="left"
       iconType="plus"
       onClick={() => {
-        setIsPopoverVisible(true);
+        setIsPopoverVisible((prevState) => !prevState);
       }}
       size="s"
     >
