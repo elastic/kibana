@@ -47,6 +47,7 @@ describe('AddSourceEnginesModal', () => {
   });
 
   it('calls closeAddSourceEnginesModal when the modal is closed', () => {
+    // expect(wrapper.find(EuiModal).prop('onClose')).toEqual(MOCK_ACTIONS.closeAddSourceEnginesModal);
     wrapper.find(EuiModal).simulate('close');
 
     expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
@@ -88,6 +89,12 @@ describe('AddSourceEnginesModal', () => {
       wrapper = shallow(<AddSourceEnginesModal />);
 
       expect(wrapper.find(EuiButton).prop('disabled')).toEqual(true);
+    });
+
+    it('calls addSourceEngines when clicked', () => {
+      wrapper.find(EuiButton).simulate('click');
+
+      expect(MOCK_ACTIONS.addSourceEngines).toHaveBeenCalled();
     });
   });
 });

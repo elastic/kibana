@@ -155,6 +155,11 @@ export const SourceEnginesLogic = kea<
     addSourceEngines: async ({ sourceEngineNames }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
+      // TODO this API endpoint throws an error everytime we submit a POST, something to do with
+      // source_engine_slugs being an array. I think Kibana tries to submit this as a JSON string
+      // but out API expects it to be more like a form submission
+      // working URL from standalone:
+      // http://localhost:3002/as/engines/meta-engine-1/source_engines/bulk_create?source_engine_slugs%5B%5D=source-engine-3&source_engine_slugs%5B%5D=source-engine-4
       try {
         // the response doesn't contain anything we care about
         await http.post(`/api/app_search/engines/${engineName}/source_engines/bulk_create`, {

@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
   EuiModalFooter,
   EuiModal,
   EuiModalBody,
@@ -20,7 +21,6 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
-  EuiComboBox,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
-  const { closeAddSourceEnginesModal, setSelectedEngineNamesToAdd } = useActions(
+  const { addSourceEngines, closeAddSourceEnginesModal, setSelectedEngineNamesToAdd } = useActions(
     SourceEnginesLogic
   );
   const { indexedEngines, selectedEngineNamesToAdd, sourceEngines } = useValues(SourceEnginesLogic);
@@ -73,7 +73,7 @@ export const AddSourceEnginesModal: React.FC = () => {
           <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>Cancel</EuiButtonEmpty>
           <EuiButton
             disabled={selectedEngineNamesToAdd.length === 0}
-            // onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
+            onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
             fill
           >
             Save
