@@ -86,6 +86,7 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entries: [createdEventFilterEntryMock()],
         form: {
           ...store.getState().form,
           submissionResourceState: {

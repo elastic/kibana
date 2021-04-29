@@ -63,7 +63,7 @@ export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
-export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
+export const NOTES_TAB_BUTTON = 'button[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_TEXT = '.euiMarkdownFormat';
 
