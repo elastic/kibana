@@ -893,6 +893,16 @@
     "@hapi/hoek" "9.x.x"
     fast-safe-stringify "2.x.x"
 
+"@hapi/h2o2@^8.3.2":
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-8.3.2.tgz#008a8f9ec3d9bba29077691aa9ec0ace93d4de80"
+  integrity sha512-2WkZq+QAkvYHWGqnUuG0stcVeGyv9T7bopBYnCJSUEuvBZlUf2BTX2JCVSKxsnTLOxCYwoC/aI4Rr0ZSRd2oVg==
+  dependencies:
+    "@hapi/boom" "7.x.x"
+    "@hapi/hoek" "8.x.x"
+    "@hapi/joi" "16.x.x"
+    "@hapi/wreck" "15.x.x"
+
 "@hapi/hoek@8.x.x", "@hapi/hoek@^8.2.4", "@hapi/hoek@^8.3.0", "@hapi/hoek@^8.3.1":
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.5.1.tgz#fde96064ca446dec8c55a8c2f130957b070c6e06"
@@ -991,6 +1001,15 @@
     "@hapi/bounce" "1.x.x"
     "@hapi/hoek" "8.x.x"
     "@hapi/joi" "16.x.x"
+
+"@hapi/wreck@15.x.x":
+  version "15.1.0"
+  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-15.1.0.tgz#7917cd25950ce9b023f7fd2bea6e2ef72c71e59d"
+  integrity sha512-tQczYRTTeYBmvhsek/D49En/5khcShaBEmzrAaDjMrFXKJRuF8xA8+tlq1ETLBFwGd6Do6g2OC74rt11kzawzg==
+  dependencies:
+    "@hapi/boom" "7.x.x"
+    "@hapi/bourne" "1.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/wreck@^16.0.1":
   version "16.0.1"
@@ -10605,16 +10624,6 @@ gulplog@^1.0.0:
   integrity sha1-4oxNRdBey77YGDY86PnFkmIp/+U=
   dependencies:
     glogg "^1.0.0"
-
-h2o2@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.2.0.tgz#ead6a855f40cf8fbe67986751b5e2ff8a87aa643"
-  integrity sha512-TwWWSk1tMg03VkSKQTrTSXWKogmpYts5Uj5W6GN9CedFJY5EtL5vz2nndd9s5qxxSMP6Wj8jyGrj/6qV9d4KDg==
-  dependencies:
-    boom "7.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
-    wreck "14.x.x"
 
 handle-thing@^2.0.0:
   version "2.0.1"
