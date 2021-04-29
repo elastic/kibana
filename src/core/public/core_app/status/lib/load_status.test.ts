@@ -133,6 +133,18 @@ describe('response processing', () => {
     expect(data.name).toEqual('My computer');
   });
 
+  test('throws when a non-503 occurs which contains an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 500 };
+    error.body = mockedResponse;
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
   test('includes the plugin statuses', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.statuses).toEqual([
