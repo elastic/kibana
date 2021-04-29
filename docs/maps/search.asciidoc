@@ -4,7 +4,7 @@
 
 Search across your Elasticsearch layers to focus in on just the data you want.
 
-Layers requesting data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search request>>.
+Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search request>>.
 Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
 Layers requesting data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
