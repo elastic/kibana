@@ -7,11 +7,8 @@
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
       "@emotion/core": [
-        "node_modules/@emotion/react"
+        "typings/@emotion"
       ],
-      "emotion-theming": [
-        "node_modules/@emotion/react"
-      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

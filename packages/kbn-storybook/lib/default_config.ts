@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import * as path from 'path';
 import { StorybookConfig } from '@storybook/core/types';
 
+const toPath = (_path: string) => path.join(process.cwd(), _path);
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx'],
@@ -22,6 +24,19 @@ export const defaultConfig: StorybookConfig = {
 
     config.node = { fs: 'empty' };
 
-    return config;
+    const emotion11CompatibleConfig = {
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config.resolve?.alias,
+          '@emotion/core': toPath('node_modules/@emotion/react'),
+          '@emotion/styled': toPath('node_modules/@emotion/styled'),
+          'emotion-theming': toPath('node_modules/@emotion/react'),
+        },
+      },
+    };
+
+    return emotion11CompatibleConfig;
   },
 };
