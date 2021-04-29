@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './errors';
-export * from './log_source_configuration';
-export * from './resolved_log_source_configuration';
+export class ResolveLogSourceConfigurationError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'ResolveLogSourceConfigurationError';
+  }
+}

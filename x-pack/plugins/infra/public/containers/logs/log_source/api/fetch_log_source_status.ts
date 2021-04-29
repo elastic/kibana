@@ -15,7 +15,26 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 export const callFetchLogSourceStatusAPI = async (sourceId: string, fetch: HttpHandler) => {
   const response = await fetch(getLogSourceStatusPath(sourceId), {
     method: 'GET',
+  }).catch((error) => {
+    throw new FetchLogSourceStatusConfigurationError(
+      `Failed to fetch status for log source "${sourceId}": ${error}`,
+      error
+    );
   });
 
-  return decodeOrThrow(getLogSourceStatusSuccessResponsePayloadRT)(response);
+  return decodeOrThrow(
+    getLogSourceStatusSuccessResponsePayloadRT,
+    (message: string) =>
+      new FetchLogSourceStatusConfigurationError(
+        `Failed to decode status for log source "${sourceId}": ${message}`
+      )
+  )(response);
 };
+
+export class FetchLogSourceStatusConfigurationError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'FetchLogSourceStatusConfigurationError';
+  }
+}

@@ -26,7 +26,26 @@ export const callPatchLogSourceConfigurationAPI = async (
         data: patchedProperties,
       })
     ),
+  }).catch((error) => {
+    throw new PatchLogSourceConfigurationError(
+      `Failed to update log source configuration "${sourceId}": ${error}`,
+      error
+    );
   });
 
-  return decodeOrThrow(patchLogSourceConfigurationSuccessResponsePayloadRT)(response);
+  return decodeOrThrow(
+    patchLogSourceConfigurationSuccessResponsePayloadRT,
+    (message: string) =>
+      new PatchLogSourceConfigurationError(
+        `Failed to decode log source configuration "${sourceId}": ${message}`
+      )
+  )(response);
 };
+
+export class PatchLogSourceConfigurationError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'PatchLogSourceConfigurationError';
+  }
+}
