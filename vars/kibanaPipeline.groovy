@@ -322,12 +322,14 @@ def buildXpack(maxWorkers = '', uploadArtifacts = false) {
       runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
 
-    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-      bash("""
-        cd "${env.WORKSPACE}"
-        gsutil -q -m cp 'kibana-default.tar.gz' '${getBuildArtifactBucket()}/'
-        gsutil -q -m cp 'kibana-default-plugins.tar.gz' '${getBuildArtifactBucket()}/'
-      """, "Upload Default Build artifacts to GCS")
+    if (uploadArtifacts) {
+      withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+        bash("""
+          cd "${env.WORKSPACE}"
+          gsutil -q -m cp 'kibana-default.tar.gz' '${getBuildArtifactBucket()}/'
+          gsutil -q -m cp 'kibana-default-plugins.tar.gz' '${getBuildArtifactBucket()}/'
+        """, "Upload Default Build artifacts to GCS")
+      }
     }
   }
 }

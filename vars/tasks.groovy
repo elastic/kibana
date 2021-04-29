@@ -54,9 +54,10 @@ def xpackCiGroupDocker() {
     workers.ci(name: 'xpack-cigroups-docker', size: 'm', ramDisk: true) {
       kibanaPipeline.downloadDefaultBuildArtifacts()
       kibanaPipeline.bash("""
-        mkdir -p ../kibana-build-xpack
-        tar -xzf ../kibana-default.tar.gz -C "../kibana-build-xpack" --strip=1
-        tar -xzf ../kibana-default-plugins.tar.gz
+        cd '${env.WORKSPACE}'
+        mkdir -p kibana-build-xpack
+        tar -xzf kibana-default.tar.gz -C kibana-build-xpack --strip=1
+        tar -xzf kibana-default-plugins.tar.gz -C kibana
       """, "Extract Default Build artifacts")
       kibanaPipeline.xpackCiGroupProcess('Docker', true)()
     }
