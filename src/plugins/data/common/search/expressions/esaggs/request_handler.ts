@@ -159,7 +159,7 @@ export const handleRequest = async ({
 
   inspectorAdapters.requests?.reset();
 
-  const response = await requestSearchSource
+  const { rawResponse: response } = await requestSearchSource
     .fetch$({
       abortSignal,
       sessionId: searchSessionId,

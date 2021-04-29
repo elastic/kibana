@@ -18,7 +18,7 @@ import {
   AssociationType,
   CaseResponse,
   CasesResponse,
-} from '../../../common/api';
+} from '../../../common';
 import {
   connectorMappingsServiceMock,
   createCaseServiceMock,

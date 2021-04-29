@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { buildCaseUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 
 export function initDeleteSubCasesApi({

@@ -23,6 +23,30 @@ const preconfiguredActionSchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
+const customHostSettingsSchema = schema.object({
+  url: schema.string({ minLength: 1 }),
+  smtp: schema.maybe(
+    schema.object({
+      ignoreTLS: schema.maybe(schema.boolean()),
+      requireTLS: schema.maybe(schema.boolean()),
+    })
+  ),
+  tls: schema.maybe(
+    schema.object({
+      rejectUnauthorized: schema.maybe(schema.boolean()),
+      certificateAuthoritiesFiles: schema.maybe(
+        schema.oneOf([
+          schema.string({ minLength: 1 }),
+          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        ])
+      ),
+      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
+    })
+  ),
+});
+
+export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
@@ -50,6 +74,7 @@ export const configSchema = schema.object({
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
+  customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   cleanupFailedExecutionsTask: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     cleanupInterval: schema.duration({ defaultValue: '5m' }),
