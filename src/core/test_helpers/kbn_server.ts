@@ -40,15 +40,6 @@ const DEFAULTS_SETTINGS = {
   migrations: { skip: false },
 };
 
-const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
-  elasticsearch: {
-    hosts: [esTestConfig.getUrl()],
-    username: kibanaServerTestUser.username,
-    password: kibanaServerTestUser.password,
-  },
-};
-
 export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {}
@@ -109,6 +100,15 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @returns {Root}
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
+    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
+    elasticsearch: {
+      hosts: [esTestConfig.getUrl()],
+      username: kibanaServerTestUser.username,
+      password: kibanaServerTestUser.password,
+    },
+  };
+
   return createRootWithSettings(
     defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
     cliArgs
