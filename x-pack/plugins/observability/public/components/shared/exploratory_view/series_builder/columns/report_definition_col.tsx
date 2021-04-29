@@ -29,8 +29,6 @@ function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefini
   return null;
 }
 
-const MaxWidthStyle = { maxWidth: 250 };
-
 export function ReportDefinitionCol({
   dataViewSeries,
   seriesId,
@@ -89,14 +87,14 @@ export function ReportDefinitionCol({
           </EuiFlexItem>
         ))}
       {(hasOperationType || columnType === 'operation') && (
-        <EuiFlexItem style={MaxWidthStyle}>
+        <EuiFlexItem>
           <OperationTypeSelect
             seriesId={seriesId}
             defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem style={MaxWidthStyle}>
+      <EuiFlexItem>
         <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} />
       </EuiFlexItem>
     </FlexGroup>
