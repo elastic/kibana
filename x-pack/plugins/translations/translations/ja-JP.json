@@ -20298,7 +20298,6 @@
     "xpack.securitySolution.topN.closeButtonLabel": "閉じる",
     "xpack.securitySolution.topN.rawEventsSelectLabel": "未加工イベント",
     "xpack.securitySolution.trustedapps.aboutInfo": "パフォーマンスを改善したり、ホストで実行されている他のアプリケーションとの競合を解消したりするには、信頼できるアプリケーションを追加します。信頼できるアプリケーションは、Endpoint Securityを実行しているホストに適用されます。",
-    "xpack.securitySolution.trustedapps.card.operator.includes": "is",
     "xpack.securitySolution.trustedapps.card.removeButtonLabel": "削除",
     "xpack.securitySolution.trustedapps.create.conditionFieldValueRequiredMsg": "[{row}] フィールドエントリには値が必要です",
     "xpack.securitySolution.trustedapps.create.conditionRequiredMsg": "1つ以上のフィールド定義が必要です",
