@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -20,6 +20,7 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
+  EuiComboBox,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -27,7 +28,15 @@ import { i18n } from '@kbn/i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
-  const { closeAddSourceEnginesModal } = useActions(SourceEnginesLogic);
+  const { closeAddSourceEnginesModal, setSelectedEngineNamesToAdd } = useActions(
+    SourceEnginesLogic
+  );
+  const { indexedEngines, selectedEngineNamesToAdd, sourceEngines } = useValues(SourceEnginesLogic);
+
+  const sourceEngineNames = sourceEngines.map((sourceEngine) => sourceEngine.name);
+  const selectableEngineNames = indexedEngines
+    .map((engine) => engine.name)
+    .filter((engineName) => !sourceEngineNames.includes(engineName));
 
   const MODAL_TITLE = i18n.translate(
     'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.title',
@@ -52,18 +61,18 @@ export const AddSourceEnginesModal: React.FC = () => {
         <EuiModalBody>
           <EuiText>{MODAL_DESCRIPTION}</EuiText>
           <EuiSpacer />
-          {/* <EuiComboBox
+          <EuiComboBox
             options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
             selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
             onChange={(options) =>
               setSelectedEngineNamesToAdd(options.map((option) => option.label))
             }
-          /> */}
+          />
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>Cancel</EuiButtonEmpty>
           <EuiButton
-            // disabled={selectedEngineNamesToAdd.length === 0}
+            disabled={selectedEngineNamesToAdd.length === 0}
             // onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
             fill
           >

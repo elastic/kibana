@@ -35,10 +35,11 @@ export const SourceEngines: React.FC = () => {
   const {
     myRole: { canManageMetaEngineSourceEngines },
   } = useValues(AppLogic);
-  const { fetchSourceEngines } = useActions(SourceEnginesLogic);
+  const { fetchIndexedEngines, fetchSourceEngines } = useActions(SourceEnginesLogic);
   const { addSourceEnginesModalOpen, dataLoading } = useValues(SourceEnginesLogic);
 
   useEffect(() => {
+    fetchIndexedEngines();
     fetchSourceEngines();
   }, []);
 

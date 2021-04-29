@@ -17,8 +17,42 @@ import { EnginesAPIResponse } from '../engines/types';
 export interface SourceEnginesLogicValues {
   addSourceEnginesModalOpen: boolean;
   dataLoading: boolean;
+  indexedEngines: EngineDetails[];
+  selectedEngineNamesToAdd: string[];
   sourceEngines: EngineDetails[];
 }
+
+const fetchEngines = (path: string, onComplete: (engines: EngineDetails[]) => void, query = {}) => {
+  const { http } = HttpLogic.values;
+
+  let enginesAccumulator: EngineDetails[] = [];
+
+  // We need to recursively fetch all source engines because we put the data
+  // into an EuiInMemoryTable to enable searching
+  const recursiveFetchEngines = async (page = 1) => {
+    try {
+      const { meta, results }: EnginesAPIResponse = await http.get(path, {
+        query: {
+          'page[current]': page,
+          'page[size]': 25,
+          ...query,
+        },
+      });
+
+      enginesAccumulator = [...enginesAccumulator, ...results];
+
+      if (page >= meta.page.total_pages) {
+        onComplete(enginesAccumulator);
+      } else {
+        recursiveFetchEngines(page + 1);
+      }
+    } catch (e) {
+      flashAPIErrors(e);
+    }
+  };
+
+  recursiveFetchEngines();
+};
 
 const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
   i18n.translate(
@@ -31,6 +65,7 @@ const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
 
 interface SourceEnginesLogicActions {
   closeAddSourceEnginesModal: () => void;
+  fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
   onSourceEnginesFetch: (
@@ -38,6 +73,10 @@ interface SourceEnginesLogicActions {
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
   openAddSourceEnginesModal: () => void;
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
+  setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
+  setSelectedEngineNamesToAdd: (
+    selectedEngineNamesToAdd: string[]
+  ) => { selectedEngineNamesToAdd: string[] };
 }
 
 export const SourceEnginesLogic = kea<
@@ -46,11 +85,14 @@ export const SourceEnginesLogic = kea<
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
     closeAddSourceEnginesModal: true,
+    fetchIndexedEngines: true,
     fetchSourceEngines: true,
     onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
     openAddSourceEnginesModal: true,
     removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
+    setIndexedEngines: (indexedEngines) => ({ indexedEngines }),
+    setSelectedEngineNamesToAdd: (selectedEngineNamesToAdd) => ({ selectedEngineNamesToAdd }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -66,6 +108,19 @@ export const SourceEnginesLogic = kea<
         closeAddSourceEnginesModal: () => false,
       },
     ],
+    indexedEngines: [
+      [],
+      {
+        setIndexedEngines: (_, { indexedEngines }) => indexedEngines,
+      },
+    ],
+    selectedEngineNamesToAdd: [
+      [],
+      {
+        closeAddSourceEnginesModal: () => [],
+        setSelectedEngineNamesToAdd: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
+      },
+    ],
     sourceEngines: [
       [],
       {
@@ -77,38 +132,16 @@ export const SourceEnginesLogic = kea<
   }),
   listeners: ({ actions }) => ({
     fetchSourceEngines: () => {
-      const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      let enginesAccumulator: EngineDetails[] = [];
-
-      // We need to recursively fetch all source engines because we put the data
-      // into an EuiInMemoryTable to enable searching
-      const recursiveFetchSourceEngines = async (page = 1) => {
-        try {
-          const { meta, results }: EnginesAPIResponse = await http.get(
-            `/api/app_search/engines/${engineName}/source_engines`,
-            {
-              query: {
-                'page[current]': page,
-                'page[size]': 25,
-              },
-            }
-          );
-
-          enginesAccumulator = [...enginesAccumulator, ...results];
-
-          if (page >= meta.page.total_pages) {
-            actions.onSourceEnginesFetch(enginesAccumulator);
-          } else {
-            recursiveFetchSourceEngines(page + 1);
-          }
-        } catch (e) {
-          flashAPIErrors(e);
-        }
-      };
-
-      recursiveFetchSourceEngines();
+      fetchEngines(`/api/app_search/engines/${engineName}/source_engines`, (engines) =>
+        actions.onSourceEnginesFetch(engines)
+      );
+    },
+    fetchIndexedEngines: () => {
+      fetchEngines('/api/app_search/engines', (engines) => actions.setIndexedEngines(engines), {
+        type: 'indexed',
+      });
     },
     removeSourceEngine: async ({ sourceEngineName }) => {
       const { http } = HttpLogic.values;

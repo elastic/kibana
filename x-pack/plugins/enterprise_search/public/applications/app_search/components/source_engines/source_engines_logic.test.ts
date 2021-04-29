@@ -18,6 +18,7 @@ import { SourceEnginesLogic } from './source_engines_logic';
 const DEFAULT_VALUES = {
   addSourceEnginesModalOpen: false,
   dataLoading: true,
+  selectedEngineNamesToAdd: [],
   sourceEngines: [],
 };
 
@@ -56,6 +57,18 @@ describe('SourceEnginesLogic', () => {
       SourceEnginesLogic.actions.openAddSourceEnginesModal();
 
       expect(SourceEnginesLogic.values.addSourceEnginesModalOpen).toEqual(true);
+    });
+
+    describe('setSelectedEngineNamesToAdd sets the selected engines', () => {
+      SourceEnginesLogic.actions.setSelectedEngineNamesToAdd([
+        'source-engine-1',
+        'source-engine-2',
+      ]);
+
+      expect(SourceEnginesLogic.values.selectedEngineNamesToAdd).toEqual([
+        'source-engine-1',
+        'source-engine-2',
+      ]);
     });
 
     describe('onSourceEnginesFetch', () => {

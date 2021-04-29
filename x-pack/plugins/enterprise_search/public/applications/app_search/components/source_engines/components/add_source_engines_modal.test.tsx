@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButtonEmpty, EuiModal } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiComboBox, EuiModal } from '@elastic/eui';
 
 import { EngineDetails } from '../../engine/types';
 
@@ -31,7 +31,9 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // SourceEnginesLogic
+  addSourceEngines: jest.fn(),
   closeAddSourceEnginesModal: jest.fn(),
+  setSelectedEngineNamesToAdd: jest.fn(),
 };
 
 describe('AddSourceEnginesModal', () => {
@@ -50,11 +52,42 @@ describe('AddSourceEnginesModal', () => {
     expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
   });
 
+  describe('combo box', () => {
+    it('has the proper options and selected options', () => {
+      expect(wrapper.find(EuiComboBox).prop('options')).toEqual([
+        { label: 'source-engine-2' },
+        { label: 'source-engine-3' },
+      ]);
+
+      expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
+        { label: 'source-engine-2' },
+      ]);
+    });
+
+    it('calls setSelectedEngineNamesToAdd when changed', () => {
+      wrapper.find(EuiComboBox).simulate('change', []);
+
+      expect(MOCK_ACTIONS.setSelectedEngineNamesToAdd).toHaveBeenCalled();
+    });
+  });
+
   describe('cancel button', () => {
     it('calls closeAddSourceEnginesModal when clicked', () => {
       wrapper.find(EuiButtonEmpty).simulate('click');
 
       expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
+    });
+  });
+
+  describe('save button', () => {
+    it('is disabled when user has selected no engines', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        selectedEngineNamesToAdd: [],
+      });
+      wrapper = shallow(<AddSourceEnginesModal />);
+
+      expect(wrapper.find(EuiButton).prop('disabled')).toEqual(true);
     });
   });
 });
