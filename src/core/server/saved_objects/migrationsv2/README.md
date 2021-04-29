@@ -1,65 +1,26 @@
 - [Introduction](#introduction)
 - [Algorithm steps](#algorithm-steps)
   - [INIT](#init)
-    - [Next action](#next-action)
-    - [New control state](#new-control-state)
   - [CREATE_NEW_TARGET](#create_new_target)
-    - [Next action](#next-action-1)
-    - [New control state](#new-control-state-1)
   - [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
-    - [Next action](#next-action-2)
-    - [New control state](#new-control-state-2)
   - [LEGACY_CREATE_REINDEX_TARGET](#legacy_create_reindex_target)
-    - [Next action](#next-action-3)
-    - [New control state](#new-control-state-3)
   - [LEGACY_REINDEX](#legacy_reindex)
-    - [Next action](#next-action-4)
-    - [New control state](#new-control-state-4)
   - [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
-    - [Next action](#next-action-5)
-    - [New control state](#new-control-state-5)
   - [LEGACY_DELETE](#legacy_delete)
-    - [Next action](#next-action-6)
-    - [New control state](#new-control-state-6)
+  - [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
   - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
-    - [Next action](#next-action-7)
-    - [New control state](#new-control-state-7)
   - [CREATE_REINDEX_TEMP](#create_reindex_temp)
-    - [Next action](#next-action-8)
-    - [New control state](#new-control-state-8)
   - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
-    - [Next action](#next-action-9)
-    - [New control state](#new-control-state-9)
   - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
-    - [Next action](#next-action-10)
-    - [New control state](#new-control-state-10)
   - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
-    - [Next action](#next-action-11)
-    - [New control state](#new-control-state-11)
   - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
-    - [Next action](#next-action-12)
-    - [New control state](#new-control-state-12)
   - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
-    - [Next action](#next-action-13)
-    - [New control state](#new-control-state-13)
   - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
-    - [Next action](#next-action-14)
-    - [New control state](#new-control-state-14)
   - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
-    - [Next action](#next-action-15)
-    - [New control state](#new-control-state-15)
   - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
-    - [Next action](#next-action-16)
-    - [New control state](#new-control-state-16)
   - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
-    - [Next action](#next-action-17)
-    - [New control state](#new-control-state-17)
   - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
-    - [Next action](#next-action-18)
-    - [New control state](#new-control-state-18)
   - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
-    - [Next action](#next-action-19)
-    - [New control state](#new-control-state-19)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -147,7 +108,7 @@ Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
 
 3. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
 and the migration source index is the index the `.kibana` alias points to.
-  → `SET_SOURCE_WRITE_BLOCK`
+  → `WAIT_FOR_YELLOW_SOURCE`
 
 4. If `.kibana` is a concrete index, we’re migrating from a legacy index
   → `LEGACY_SET_WRITE_BLOCK`
@@ -231,7 +192,16 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
    `index_not_found_exception` another instance has already completed this step.
   → `SET_SOURCE_WRITE_BLOCK`
 
+## WAIT_FOR_YELLOW_SOURCE
+### Next action
+`waitForIndexStatusYellow`
 
+Wait for the Elasticsearch cluster to be in "yellow" state. It means the index's primary shard is allocated and the index is ready for searching/indexing documents, but ES wasn't able to allocate the replicas. 
+We don't have as much data redundancy as we could have, but it's enough to start the migration.
+
+### New control state
+  → `SET_SOURCE_WRITE_BLOCK`
+  
 ## SET_SOURCE_WRITE_BLOCK
 ### Next action
 `setWriteBlock`
