@@ -14,7 +14,7 @@ describe('reference application routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/app_search/engines/{name}/search_settings/details', () => {
+  describe('GET /api/app_search/engines/{engineName}/search_settings/details', () => {
     const mockRouter = new MockRouter({
       method: 'get',
       path: '/api/app_search/engines/{engineName}/reference_application/field_config',
