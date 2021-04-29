@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { AssociationType, CommentAttributes, CommentRequest, CommentType } from '../../common/api';
+import { AssociationType, CommentAttributes, CommentRequest, CommentType } from '../../common';
 import { transformNewComment } from '../routes/api/utils';
 import { combineFilters, countAlerts, countAlertsForID, groupTotalAlertsByID } from './utils';
 
