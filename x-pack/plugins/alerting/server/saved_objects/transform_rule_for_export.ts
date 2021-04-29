@@ -12,14 +12,14 @@ import { RawAlert } from '../types';
 
 export function transformRulesForExport(
   rules: SavedObject[],
-  auditLogger: AuditLogger | undefined
+  auditLogger?: AuditLogger
 ): Array<SavedObject<RawAlert>> {
   return rules.map((rule) => transformRuleForExport(rule as SavedObject<RawAlert>, auditLogger));
 }
 
-export function transformRuleForExport(
+function transformRuleForExport(
   rule: SavedObject<RawAlert>,
-  auditLogger: AuditLogger | undefined
+  auditLogger?: AuditLogger
 ): SavedObject<RawAlert> {
   auditLogger?.log(
     alertAuditEvent({
