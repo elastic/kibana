@@ -8,7 +8,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiPanel, EuiTitle, EuiSpacer, EuiRange, EuiFormRow } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiRange,
+  EuiFormRow,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -112,16 +121,30 @@ const PieOptions = (props: PieOptionsProps) => {
         <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
           <>
-            <SwitchOption
-              label={i18n.translate('visTypePie.editors.pie.distinctColorsLabel', {
-                defaultMessage: 'Distinct colors per slice',
-              })}
-              paramName="distinctColors"
-              value={stateParams.distinctColors}
-              disabled={segments?.length <= 1 && !Boolean(hasSplitChart)}
-              setValue={setValue}
-              data-test-subj="visTypePiedistinctColorsSwitch"
-            />
+            <EuiFormRow>
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <SwitchOption
+                    label={i18n.translate('visTypePie.editors.pie.distinctColorsLabel', {
+                      defaultMessage: 'Distinct colors per slice',
+                    })}
+                    paramName="distinctColors"
+                    value={stateParams.distinctColors}
+                    disabled={segments?.length <= 1 && !Boolean(hasSplitChart)}
+                    setValue={setValue}
+                    data-test-subj="visTypePiedistinctColorsSwitch"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content="Enabled in case of multi-layer chart or multiple charts."
+                    position="top"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
             <SwitchOption
               label={i18n.translate('visTypePie.editors.pie.addLegendLabel', {
                 defaultMessage: 'Show legend',
