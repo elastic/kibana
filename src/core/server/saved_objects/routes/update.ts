@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { catchAndReturnBoomErrors } from './utils';
+import { SavedObjectsUpdateOptions } from "kibana/server";
 
 interface RouteDependencies {
   coreUsageData: CoreUsageDataSetup;
@@ -36,13 +37,14 @@ export const registerUpdateRoute = (router: IRouter, { coreUsageData }: RouteDep
               })
             )
           ),
+          upsert: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
-      const { attributes, version, references } = req.body;
-      const options = { version, references };
+      const { attributes, version, references, upsert } = req.body;
+      const options: SavedObjectsUpdateOptions = { version, references, upsert };
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});

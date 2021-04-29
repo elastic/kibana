@@ -96,6 +96,54 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.references).to.eql([]);
       });
 
+      it('handles upsert', async () => {
+        await supertest
+          .put(`/api/saved_objects/visualization/upserted-viz`)
+          .send({
+            attributes: {
+              title: 'foo',
+            },
+            upsert: {
+              description: 'upserted description',
+              version: 42,
+            },
+          })
+          .expect(200);
+
+        const { body: upserted } = await supertest
+          .get(`/api/saved_objects/visualization/upserted-viz`)
+          .expect(200);
+
+        expect(upserted.attributes).to.eql({
+          title: 'foo',
+          description: 'upserted description',
+          version: 42,
+        });
+
+        await supertest
+          .put(`/api/saved_objects/visualization/upserted-viz`)
+          .send({
+            attributes: {
+              title: 'foobar',
+            },
+            upsert: {
+              description: 'new upserted description',
+              version: 9000,
+            },
+          })
+          .expect(200);
+
+        const { body: notUpserted } = await supertest
+          .get(`/api/saved_objects/visualization/upserted-viz`)
+          .expect(200);
+
+        expect(notUpserted.attributes).to.eql({
+          title: 'foobar',
+          description: 'upserted description',
+          version: 42,
+        });
+      });
+
       describe('unknown id', () => {
         it('should return a generic 404', async () => {
           await supertest
