@@ -56,6 +56,7 @@ import {
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
+  TIMELINE_DATA_PROVIDERS,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -90,8 +91,11 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
 };
 
 export const goToNotesTab = () => {
-  cy.get(NOTES_TAB_BUTTON)
-    .pipe(($el) => $el.trigger('click'))
+  cy.root()
+    .pipe(($el) => {
+      $el.find(NOTES_TAB_BUTTON).trigger('click');
+      return $el.find(NOTES_TEXT_AREA);
+    })
     .should('be.visible');
 };
 
@@ -100,14 +104,20 @@ export const getNotePreviewByNoteId = (noteId: string) => {
 };
 
 export const goToQueryTab = () => {
-  cy.get(QUERY_TAB_BUTTON).click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(QUERY_TAB_BUTTON).trigger('click');
+      return $el.find(TIMELINE_DATA_PROVIDERS);
+    })
+    .should('be.visible');
 };
 
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click({ force: true });
-  cy.get(QUERY_TAB_BUTTON).click();
+  cy.get(ADD_NOTE_BUTTON).pipe(($el) => $el.trigger('click'));
+  cy.get(QUERY_TAB_BUTTON).pipe(($el) => $el.trigger('click'));
+  goToNotesTab();
 };
 
 export const addFilter = (filter: TimelineFilter) => {
@@ -159,7 +169,12 @@ export const closeOpenTimelineModal = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(CLOSE_TIMELINE_BTN).filter(':visible').trigger('click');
+      return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('not.be.visible');
 };
 
 export const createNewTimeline = () => {
@@ -207,9 +222,11 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string) => {
-  return cy
-    .get(TIMELINE_TITLE_BY_ID(timelineId))
-    .pipe(($el) => $el.trigger('click'))
+  cy.root()
+    .pipe(($el) => {
+      $el.find(TIMELINE_TITLE_BY_ID(timelineId)).trigger('click');
+      return $el.find(QUERY_TAB_BUTTON).find('.euiBadge');
+    })
     .should('be.visible');
 };
 
