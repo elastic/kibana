@@ -1428,7 +1428,7 @@
     semver "7.3.2"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-config-kibana@link:packages/elastic-eslint-config-kibana":
+"@elastic/eslint-config-kibana@link:bazel-bin/packages/elastic-eslint-config-kibana/npm_module":
   version "0.0.0"
   uid ""
 
