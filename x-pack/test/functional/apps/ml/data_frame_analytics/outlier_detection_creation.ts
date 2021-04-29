@@ -88,9 +88,9 @@ export default function ({ getService }: FtrProviderContext) {
           rowDetails: {
             jobDetails: [
               {
-                id: jobId,
                 section: 'state',
                 expectedEntries: {
+                  id: jobId,
                   state: 'stopped',
                   data_counts:
                     '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
