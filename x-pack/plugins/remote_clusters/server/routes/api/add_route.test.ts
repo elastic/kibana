@@ -24,7 +24,9 @@ import { handleEsError } from '../../shared_imports';
 
 import { register } from './add_route';
 
-const { createScopedClusterClient, createApiResponse } = elasticsearchServiceMock;
+import { ScopedClusterClientMock } from './types';
+
+const { createApiResponse } = elasticsearchServiceMock;
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -33,8 +35,6 @@ function createCoreRequestHandlerContextMock() {
     licensing: licensingMock.createRequestHandlerContext(),
   };
 }
-
-type ScopedClusterClientMock = ReturnType<typeof createScopedClusterClient>;
 
 const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
