@@ -11,7 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { IIndexingStatus } from '../types';
+import { IIndexingStatus } from '../schema/types';
 
 import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
