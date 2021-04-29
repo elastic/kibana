@@ -55,7 +55,7 @@ equivalent to what {es} provides.
 [[view-the-number-of-website-visitors]]
 === Create your first visualization
 
-Every time you build a visualization in *Lens*, you will follow these steps:
+Every time you build a visualization in *Lens*, you need to:
 
 * *Choose your visualization.* Do you know the type of visualization you'd like to use?
 If you do, select the type before dragging any fields. If you don't, you can change the
@@ -79,7 +79,7 @@ of the `clientip` field.
 . To select the visualization type, click *Bar vertical stacked* to open the chart type dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
+image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected, width=50%]
 
 . From the *Available fields* list, drag and drop `clientip` to the workspace panel.
 Lens selects *Unique count* because it is the only numeric function
@@ -127,7 +127,7 @@ quickly replace the time field by dragging and dropping on the workspace panel.
 To visualize the `bytes` field over time without choosing a visualization type or function:
 
 . From the *Available fields* list, drag and drop `bytes` onto the workspace panel to have *Lens* automatically
-create a chart. It will create a bar chart with two dimensions, *timestamp* and *Median of bytes*.
+create a chart. *Lens* creates a bar chart with two dimensions, *timestamp* and *Median of bytes*.
 
 . *Lens* automatically chooses a date interval. To zoom in on the data you want to view,
 click and drag your cursor across the bars. 
@@ -143,7 +143,7 @@ To change the visualization type, use one of the following ways:
 * Click the chart type icon above *Horizontal axis*, then click the line icon.
 
 Most users use the automatic time interval. You can increase and decrease
-the minimum interval that *Lens* will use, but you cannot decrease the interval
+the minimum interval that *Lens* uses, but you cannot decrease the interval
 below the {kib} advanced settings.  To set the minimum time interval:
 
 . In the editor, click *timestamp*.
@@ -196,11 +196,11 @@ You want to see the most frequent values of `request.keyword` on your website, r
 This means that you want to use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of
 being ranked by *Count of records*.
 
-. Starting with the default bar chart, drag the `clientip` field onto the *Vertical axis*.
-This will produce the `Unique count of clientip` metric. Do not drop the field into the main workspace,
-because the *Top values* function will be used instead.
+. From the *Available fields* list, drag and drop `clientip` onto the *Vertical axis*.
+*Lens* chooses the function for you when you drop onto a dimension, which is *Unique count* here.
+Do not drop the field into the main workspace because `clientip` will be added to the wrong axis.
 
-. Drag and drop `request.keyword` to the main workspace, and *Lens* will add `Top values of request.keyword`
+. Drag and drop `request.keyword` to the main workspace. *Lens* adds *Top values of request.keyword*
 to the *Horizontal axis*.
 +
 [role="screenshot"]
@@ -208,62 +208,84 @@ image::images/lens_end_to_end_2_1_1.png[Vertical bar chart with top values of re
 
 This chart is hard to read because the `request.keyword` field contains long text. You could try
 using one of the *Suggestions*, but the suggestions also have issues with long text. Instead, switch
-to a *Table* visualization:
+to the *Table* visualization.
 
-. Click *Bar vertical stacked* to open the chart switcher
-
-. Click *Table*
+Click *Bar vertical stacked*, then select *Table*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
 
-Customize the table even more:
+Next, customize the table.
 
-. Click *Top values of request.keyword*
+. Click the *Top values of request.keyword* dimension.
 
 .. Increase the *Number of values*. The maximum allowed value is 1000.
 
-.. In the *Display name* field, enter `Page URL`.
-
-. Click *Close*.
+.. In the *Display name* field, enter `Page URL`, then click *Close*.
 
 . Click *Save and return*.
 
-. Arrange the table panel so that it has its own row, but keep the default width of half the screen.
+. Move the table panel so that it has its own row, but do not change the size.
 
-. You do not need a panel title because the table columns are clearly labeled.
+NOTE: You do not need a panel title because the table columns are clearly labeled.
 
 [discrete]
 [[custom-ranges]]
-=== Compare the percentage of a subset to the whole
+=== Compare a subset of documents to all documents
 
-To compare a subset to the whole you need to create non-overlapping sets of documents that add up to 100%.
-For numeric data the *intervals* function is the best option, while for all other data types *filters* is
-recommended. Use a proportion chart to display the values as a percentage of the sum. Lens has 5 types of proportion charts:
+To compare a field on subset of documents to all documents, you need to select two or more sets of documents that add up to 100%.
+For this example, we are comparing documents where the `bytes` field is under 10 Kb to documents where `bytes` is over 10 Kb,
+which are two sets that do not overlap.
+
+Use *Intervals* to select documents based on the number range of a field. Use *Filters* when your criteria
+is not numeric, or when your query needs multiple clauses.
+
+Use a proportion chart to display the values as a percentage of the sum of all values. Lens has 5 types of proportion charts:
 pie, donut, treemap, percentage bar and percentage area.
 
-To determine if your users transfer more small files versus large files, create two non-overlapping intervals. Start
-with a bar chart and then switch to a pie chart to display as percentage:
+To determine if your users transfer more `bytes` from small files versus large files,
+configure dimensions with *Intervals* and *Sum*, then switch to a pie chart to display as a percentage:
 
 . From the *Available fields* list, drag and drop `bytes` to *Vertical axis* in the editor.
 
-. Click *Median of bytes* and then select *Sum* instead. Then *Close*.
+. Click *Median of bytes*, select *Sum*, then click *Close*.
 
 . From the *Available fields* list, drag and drop `bytes` to *Break down by* in the editor, then specify the file size ranges.
 
-.. Click `bytes`.
+.. In the editor, click *bytes*.
+
+.. Click *Create custom ranges*, enter the following, then press Return:
+
+* *Ranges* &mdash; `0` -> `10240`
+
+* *Label* &mdash; `Below 10KB`
+
+.. Click *Add range*, enter the following, then press Return:
+
+* *Ranges* &mdash; `10240` -> `+∞`
+
+* *Label* &mdash; `Above 10KB`
++
+[role="screenshot"]
+image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
+
+.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
+
+. From the *Chart Type* dropdown, select *Pie*.
+
+. Click *Save and return*.
 
 [discrete]
 [[histogram]]
-=== View the numeric distribution in a histogram
+=== View a the distribution of a number field
 
-Use the *intervals* function in *Lens* to see an evenly spaced numeric distribution.
-For logs data, this might be used to find the best time to shut down your website for maintenance.
-To create a numeric histogram showing total traffic per hour:
+Knowing the distribution of a number helps to find patterns. For example, you could
+look at the website traffic per hour to find the best time to do routine maintenance.
+Use *Intervals* to see an evenly spaced distribution of a number field.
 
 . From the *Available fields* list, drag and drop `bytes` to *Vertical axis* in the editor.
 
-. Click *Median of bytes* and choose the *Sum* function instead.
+. Click *Median of bytes*, then select *Sum*.
 
 . In the *Display name* field, enter `Transferred bytes`.
 
@@ -278,7 +300,7 @@ image::images/lens_end_to_end_5_2.png[Create custom ranges]
 
 . Click *Save and return*.
 
-. Shrink the panel size, then drag it to the first row next to the *Median of bytes* panel. There
+. Decrease the panel size, then drag and drop it to the first row next to the `Median of bytes` panel. There
 should be four panels in a row.
 
 . You do not need a panel title because the axis labels are self-explanatory.
@@ -288,8 +310,8 @@ should be four panels in a row.
 === Create a multi-level chart
 
 *Lens* lets you use multiple functions in the data table and proportion charts. For example,
-to create a chart which breaks down the traffic sources and user geography, use the *filters*
-function and *top values* function:
+to create a chart that breaks down the traffic sources and user geography, use *Filters* and
+*Top values*.
 
 . Click *Bar vertical stacked*, then select *Treemap*.
 
@@ -319,7 +341,7 @@ function and *top values* function:
 
 .. Click *Close*.
 
-Then add the next break down by geography:
+Add the next break down by geography:
 
 . From the *Available fields* list, drag and drop *geo.src* to the main workspace.
 
