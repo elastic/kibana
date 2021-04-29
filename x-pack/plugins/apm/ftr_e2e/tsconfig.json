@@ -1,11 +1,15 @@
 {
   "extends": "../../../../../tsconfig.base.json",
+  "exclude": [
+    "tmp"
+  ],
+  "include": [
+    "./**/*"
+  ],
   "compilerOptions": {
     "types": [
-      "cypress"
+      "cypress",
+      "node"
     ]
-  },
-  "include": [
-    "**/*.ts"
-  ]
+  }
 }
