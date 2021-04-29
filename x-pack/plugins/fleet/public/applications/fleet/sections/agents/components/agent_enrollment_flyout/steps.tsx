@@ -51,14 +51,19 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId,
   setSelectedPolicyId,
   setIsFleetServerPolicySelected,
+  excludeFleetServer,
 }: {
   agentPolicies?: AgentPolicy[];
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedPolicyId?: (policyId: string) => void;
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
+  excludeFleetServer?: boolean;
 }) => {
   const regularAgentPolicies = Array.isArray(agentPolicies)
-    ? agentPolicies.filter((policy) => policy && !policy.is_managed)
+    ? agentPolicies.filter(
+        (policy) =>
+          policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+      )
     : [];
 
   const onAgentPolicyChange = useCallback(
