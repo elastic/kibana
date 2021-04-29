@@ -19,27 +19,16 @@ import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const LogEntryRatePageContent = memo(() => {
-  const {
-    hasFailedLoading,
-    isLoading,
-    isUninitialized,
-    loadSource,
-    latestLoadSourceFailures,
-  } = useLogSourceContext();
-
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -93,11 +82,7 @@ export const LogEntryRatePageContent = memo(() => {
     }
   }, JOB_STATUS_POLLING_INTERVAL);
 
-  if (isLoading || isUninitialized) {
-    return <SourceLoadingPage />;
-  } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
-  } else if (!hasLogAnalysisCapabilites) {
+  if (!hasLogAnalysisCapabilites) {
     return <SubscriptionSplashContent />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
