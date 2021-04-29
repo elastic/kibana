@@ -128,4 +128,18 @@ export function registerEnginesRoutes({
       path: '/as/engines/:name/source_engines/bulk_create',
     })
   );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}/source_engines/{source_engine_name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          source_engine_name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/source_engines/:source_engine_name',
+    })
+  );
 }
