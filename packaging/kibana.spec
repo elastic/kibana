@@ -71,6 +71,8 @@ mkdir -p %{buildroot}/usr/local/www/probe/
 ln -sf /usr/local/%{name}-%{kibana_version}-linux-x86_64 %{buildroot}/usr/local/www/probe/%{name}-%{kibana_version}-linux-x86_64
 
 %post
+# Disable the kibana.service first to clean up old dependency symlinks
+/usr/bin/systemctl disable kibana.service
 /usr/bin/systemctl enable kibana.service
 
 if [ -f "/usr/local/%{name}-%{kibana_version}-linux-x64/resources/visualization:Top-10-Dest-Ports-By-Flow-Count.json" ]
