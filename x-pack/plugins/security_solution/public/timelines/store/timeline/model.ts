@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
@@ -32,21 +34,21 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 export type ColumnId = string;
 
 /** The specification of a column header */
-export interface ColumnHeaderOptions {
+export type ColumnHeaderOptions = Pick<
+  EuiDataGridColumn,
+  'display' | 'displayAsText' | 'id' | 'initialWidth'
+> & {
   aggregatable?: boolean;
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string;
   example?: string;
   format?: string;
-  id: ColumnId;
-  label?: string;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;
   type?: string;
-  width: number;
-}
+};
 
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
