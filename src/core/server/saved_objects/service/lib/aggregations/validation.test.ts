@@ -16,6 +16,12 @@ const mockMappings = {
     updated_at: {
       type: 'date',
     },
+    references: {
+      type: 'nested',
+      properties: {
+        id: 'keyword',
+      },
+    },
     foo: {
       properties: {
         title: {
@@ -175,6 +181,40 @@ describe('validateAndConvertAggregations', () => {
                   field: 'alert.actions.actionTypeId',
                 },
               },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('validates a nested root aggregations', () => {
+    expect(
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            nested: {
+              path: 'alert.references',
+            },
+            aggregations: {
+              aggName2: {
+                terms: { field: 'alert.references.id' },
+              },
+            },
+          },
+        },
+        mockMappings
+      )
+    ).toEqual({
+      aggName: {
+        nested: {
+          path: 'references',
+        },
+        aggregations: {
+          aggName2: {
+            terms: {
+              field: 'references.id',
             },
           },
         },

@@ -7,12 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import isEmpty from 'lodash';
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 
 export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: RouteDeps) {
   router.get(
@@ -27,27 +25,17 @@ export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: Rout
     async (context, request, response) => {
       try {
         const alertId = request.params.alert_id;
-        if (isEmpty(alertId)) {
-          throw Boom.badRequest(
-            'The `alertId` is not valid'
-          );
+        if (alertId == null || (alertId != null && alertId === '')) {
+          throw Boom.badRequest('The `alertId` is not valid');
         }
         const client = context.core.savedObjects.client;
         const comments = await caseService.getCaseIdsByAlertId({
           client,
-          alertId
+          alertId,
         });
 
-
         return response.ok({
-          body: comments.saved_objects.reduce<string[]>((acc, c) => {
-            c.references.forEach(r => {
-              if (r.type === CASE_SAVED_OBJECT && !acc.includes(r.id)) {
-                acc.push(r.id)
-              }
-            })
-            return acc;
-          }, [])
+          body: comments.aggregations?.references.caseIds.buckets.map((b) => b.key),
         });
       } catch (error) {
         logger.error(

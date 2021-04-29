@@ -18,6 +18,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
@@ -34,6 +35,7 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
+  GetCaseIdsByAlertIdAggs,
 } from '../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
@@ -225,7 +227,9 @@ export interface CaseServiceSetup {
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
-  getCaseIdsByAlertId(args: GetCaseIdsByAlertIdArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getCaseIdsByAlertId(
+    args: GetCaseIdsByAlertIdArgs
+  ): Promise<SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
@@ -907,59 +911,33 @@ export class CaseService implements CaseServiceSetup {
 
   public async getCaseIdsByAlertId({
     client,
-    alertId
-  }: GetCaseIdsByAlertIdArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
-
-
-    //TRY THAT
+    alertId,
+  }: GetCaseIdsByAlertIdArgs): Promise<
+    SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+  > {
     let caseIdsAggs: Record<string, AggregationContainer> = {};
-    try {
-      caseIdsAggs = {
-        "references": {
-          nested: {
-            path: "references"
+    caseIdsAggs = {
+      references: {
+        nested: {
+          path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          caseIds: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            },
           },
-          aggregations: {
-            caseIds: {
-              terms: {
-                field: "references.id"
-              }
-            }
-          }
-        }
-      };
-      const aggsResponse = await client.find({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: [],
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: caseIdsAggs,
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
-      });
-      console.log('aggs', JSON.stringify(aggsResponse.aggregations, null, 2));
-    } catch { }
-
-
-
-
-
-    // get the total number of comments that are in ES then we'll grab them all in one go
-    const stats = await client.find({
+        },
+      },
+    };
+    return client.find({
       type: CASE_COMMENT_SAVED_OBJECT,
       fields: [],
       page: 1,
       perPage: 1,
       sortField: defaultSortField,
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
-    });
-
-    return client.find({
-      type: CASE_COMMENT_SAVED_OBJECT,
-      page: 1,
-      perPage: stats.total,
-      sortField: defaultSortField,
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: ${alertId}`
+      aggs: caseIdsAggs,
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
     });
   }
 
