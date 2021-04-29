@@ -21,6 +21,7 @@ import { SearchUILogic } from './search_ui_logic';
 
 export const SearchUI: React.FC = () => {
   const { initializeData } = useActions(SearchUILogic);
+
   useEffect(() => {
     initializeData();
   }, []);
