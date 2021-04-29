@@ -9,11 +9,21 @@
  * Schema types
  */
 
-export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
+export enum SchemaType {
+  Text = 'text',
+  Number = 'number',
+  Geolocation = 'geolocation',
+  Date = 'date',
+}
 // Certain API endpoints will use these internal type names, which map to the external names above
-export type InternalSchemaTypes = 'string' | 'float' | 'location' | 'date';
+export enum InternalSchemaType {
+  String = 'string',
+  Float = 'float',
+  Location = 'location',
+  Date = 'date',
+}
 
-export type Schema = Record<string, SchemaTypes>;
+export type Schema = Record<string, SchemaType>;
 
 /**
  * Schema conflict types
@@ -21,7 +31,7 @@ export type Schema = Record<string, SchemaTypes>;
 
 // This is a mapping of schema field types ("text", "number", "geolocation", "date")
 // to the names of source engines which utilize that type
-export type SchemaConflictFieldTypes = Record<SchemaTypes, string[]>;
+export type SchemaConflictFieldTypes = Record<SchemaType, string[]>;
 
 export interface SchemaConflict {
   fieldTypes: SchemaConflictFieldTypes;
