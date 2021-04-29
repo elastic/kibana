@@ -15,6 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 
+import { AddSourceEnginesButton } from './components/add_source_engines_button';
+import { AddSourceEnginesModal } from './components/add_source_engines_modal';
 import { SourceEnginesTable } from './components/source_engines_table';
 
 import { SourceEngines } from '.';
@@ -25,9 +27,14 @@ const MOCK_ACTIONS = {
 };
 
 const MOCK_VALUES = {
+  // AppLogic
+  myRole: {
+    canManageMetaEngineSourceEngines: true,
+  },
   // SourceEnginesLogic
   dataLoading: false,
   sourceEngines: [],
+  addSourceEnginesModalOpen: false,
 };
 
 describe('SourceEngines', () => {
@@ -43,6 +50,28 @@ describe('SourceEngines', () => {
 
       expect(wrapper.find(Loading)).toHaveLength(1);
     });
+
+    it('hides the add source engines button is the user does not have permissions', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        myRole: {
+          canManageMetaEngineSourceEngines: false,
+        },
+      });
+      const wrapper = shallow(<SourceEngines />);
+
+      expect(wrapper.find(AddSourceEnginesButton)).toHaveLength(0);
+    });
+
+    it('shows the add source engines modal', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        addSourceEnginesModalOpen: true,
+      });
+      const wrapper = shallow(<SourceEngines />);
+
+      expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(1);
+    });
   });
 
   describe('happy-path states', () => {
@@ -56,6 +85,14 @@ describe('SourceEngines', () => {
     it('renders and calls a function to initialize data', () => {
       expect(wrapper.find(SourceEnginesTable)).toHaveLength(1);
       expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
+    });
+
+    it('contains a button to add source engines', () => {
+      expect(wrapper.find(AddSourceEnginesButton)).toHaveLength(1);
+    });
+
+    it('hides the add source engines modal by default', () => {
+      expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(0);
     });
   });
 });
