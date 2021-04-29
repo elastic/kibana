@@ -180,6 +180,24 @@ export const newRule: CustomRule = {
   maxSignals: 100,
 };
 
+export const unmappedRule: CustomRule = {
+  customQuery: '*:*',
+  index: ['unmapped*'],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
 export const existingRule: CustomRule = {
   customQuery: 'host.name: *',
   name: 'Rule 1',
