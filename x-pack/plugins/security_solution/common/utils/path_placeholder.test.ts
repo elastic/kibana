@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPlaceholderText, placeholderText } from './path_placeholder';
+import { getPlaceholderTextByOSType, getPlaceholderText } from './path_placeholder';
 import { ConditionEntryField, OperatingSystem, TrustedAppEntryTypes } from '../endpoint/types';
 
 const trustedAppEntry = {
@@ -16,54 +16,54 @@ const trustedAppEntry = {
 
 describe('Trusted Apps: Path placeholder text', () => {
   it('returns no placeholder text when field IS NOT PATH', () => {
-    expect(getPlaceholderText({ ...trustedAppEntry })).toEqual(undefined);
+    expect(getPlaceholderTextByOSType({ ...trustedAppEntry })).toEqual(undefined);
   });
 
   it('returns a placeholder text when field IS PATH', () => {
-    expect(getPlaceholderText({ ...trustedAppEntry, field: ConditionEntryField.PATH })).toEqual(
-      placeholderText().others.exact
-    );
+    expect(
+      getPlaceholderTextByOSType({ ...trustedAppEntry, field: ConditionEntryField.PATH })
+    ).toEqual(getPlaceholderText().others.exact);
   });
 
-  it('returns LINUX/MAC equivalent placholder when field IS PATH', () => {
+  it('returns LINUX/MAC equivalent placeholder when field IS PATH', () => {
     expect(
-      getPlaceholderText({
+      getPlaceholderTextByOSType({
         ...trustedAppEntry,
         os: OperatingSystem.MAC,
         field: ConditionEntryField.PATH,
       })
-    ).toEqual(placeholderText().others.exact);
+    ).toEqual(getPlaceholderText().others.exact);
   });
 
-  it('returns LINUX/MAC equivalent placholder text when field IS PATH and WILDCARD operator is selected', () => {
+  it('returns LINUX/MAC equivalent placeholder text when field IS PATH and WILDCARD operator is selected', () => {
     expect(
-      getPlaceholderText({
+      getPlaceholderTextByOSType({
         ...trustedAppEntry,
         os: OperatingSystem.LINUX,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
       })
-    ).toEqual(placeholderText().others.wildcard);
+    ).toEqual(getPlaceholderText().others.wildcard);
   });
 
-  it('returns WINDOWS equivalent placholder text when field IS PATH', () => {
+  it('returns WINDOWS equivalent placeholder text when field IS PATH', () => {
     expect(
-      getPlaceholderText({
+      getPlaceholderTextByOSType({
         ...trustedAppEntry,
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
       })
-    ).toEqual(placeholderText().windows.exact);
+    ).toEqual(getPlaceholderText().windows.exact);
   });
 
   it('returns WINDOWS equivalent placeholder text when field IS PATH and WILDCARD operator is selected', () => {
     expect(
-      getPlaceholderText({
+      getPlaceholderTextByOSType({
         ...trustedAppEntry,
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
       })
-    ).toEqual(placeholderText().windows.wildcard);
+    ).toEqual(getPlaceholderText().windows.wildcard);
   });
 });

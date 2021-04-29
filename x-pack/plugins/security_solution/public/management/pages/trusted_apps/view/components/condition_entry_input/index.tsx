@@ -31,7 +31,7 @@ import {
   OPERATOR_TITLES,
 } from '../../translations';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
-import { getPlaceholderText } from '../../../../../../../common/utils/path_placeholder';
+import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;
@@ -193,7 +193,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
-              placeholder={getPlaceholderText({
+              placeholder={getPlaceholderTextByOSType({
                 os,
                 field: entry.field,
                 type: entry.type,

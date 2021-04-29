@@ -7,7 +7,7 @@
 
 import { ConditionEntryField, OperatingSystem, TrustedAppEntryTypes } from '../endpoint/types';
 
-export const placeholderText = () => ({
+export const getPlaceholderText = () => ({
   windows: {
     wildcard: 'C:\\sample\\**\\*',
     exact: 'C:\\sample\\path.exe',
@@ -18,7 +18,7 @@ export const placeholderText = () => ({
   },
 });
 
-export const getPlaceholderText = ({
+export const getPlaceholderTextByOSType = ({
   os,
   field,
   type,
@@ -30,14 +30,14 @@ export const getPlaceholderText = ({
   if (field === ConditionEntryField.PATH) {
     if (os === OperatingSystem.WINDOWS) {
       if (type === 'wildcard') {
-        return placeholderText().windows.wildcard;
+        return getPlaceholderText().windows.wildcard;
       }
-      return placeholderText().windows.exact;
+      return getPlaceholderText().windows.exact;
     } else {
       if (type === 'wildcard') {
-        return placeholderText().others.wildcard;
+        return getPlaceholderText().others.wildcard;
       }
-      return placeholderText().others.exact;
+      return getPlaceholderText().others.exact;
     }
   }
 };
