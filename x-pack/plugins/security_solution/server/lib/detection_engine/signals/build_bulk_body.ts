@@ -18,19 +18,17 @@ import {
 import { buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { SERVER_APP_ID } from '../../../../common/constants';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 
 // format search_after result for signals index.
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
-  doc: SignalSourceHit,
-  owner: typeof SERVER_APP_ID
+  doc: SignalSourceHit
 ): SignalHit => {
   const rule = buildRuleWithOverrides(ruleSO, doc._source!);
   const signal: Signal = {
-    ...buildSignal([doc], rule, owner),
+    ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
   const event = buildEventTypeSignal(doc);

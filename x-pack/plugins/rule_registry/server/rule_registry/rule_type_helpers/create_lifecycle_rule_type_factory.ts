@@ -168,8 +168,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
               ...alertData,
               '@timestamp': timestamp,
               'event.kind': 'state',
-              // 'owner': ''
-              // 'kibana.rac.alert.id': alertId,
+              'kibana.rac.alert.id': alertId,
             };
 
             const isNew = !state.trackedAlerts[alertId];

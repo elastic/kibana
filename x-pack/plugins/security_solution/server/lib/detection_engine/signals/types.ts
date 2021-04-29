@@ -211,7 +211,6 @@ export interface Signal {
   };
   original_time?: string;
   original_event?: SearchTypes;
-  owner?: string;
   status: Status;
   threshold_result?: ThresholdResult;
   original_signal?: SearchTypes;

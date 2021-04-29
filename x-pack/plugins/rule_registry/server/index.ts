@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
-export { RuleRegistryPluginSetupContract } from './plugin';
+export { RacPluginSetupContract } from './plugin';
 export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
 export { FieldMapOf } from './types';
 export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
