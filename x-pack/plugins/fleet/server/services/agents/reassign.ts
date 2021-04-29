@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { AgentReassignmentError } from '../../errors';
+import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import {
   getAgentDocuments,
@@ -56,14 +56,14 @@ export async function reassignAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
+    throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
     );
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
+    throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
     );
   }

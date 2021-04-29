@@ -9,7 +9,7 @@ pageLoadAssetSize:
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 413500
+  core: 414000
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -69,7 +69,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 189428
   securityOss: 30806
-  securitySolution: 235402
+  securitySolution: 187863
   share: 99061
   snapshotRestore: 79032
   spaces: 387915
@@ -92,7 +92,7 @@ pageLoadAssetSize:
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 155203
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   banners: 17946
   mapsEms: 26072
   timelines: 28613
+  cases: 162385

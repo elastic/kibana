@@ -42,19 +42,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
-    });
-
     it('allows adding custom label to existing fields', async function () {
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
-      await fieldEditor.setCustomLabel('megabytes');
+      await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('megabytes');
-      expect((await PageObjects.discover.getAllFieldNames()).includes('megabytes')).to.be(true);
+      expect((await PageObjects.discover.getAllFieldNames()).includes(customLabel)).to.be(true);
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
 
     it('allows creation of a new field', async function () {

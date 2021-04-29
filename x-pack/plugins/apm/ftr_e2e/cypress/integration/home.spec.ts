@@ -9,6 +9,9 @@ import archives_metadata from '../fixtures/es_archiver/archives_metadata';
 const { start, end } = archives_metadata['apm_8.0.0'];
 
 describe('Home page', () => {
+  before(() => {
+    cy.loginAsSuperUser();
+  });
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     const baseUrl = url.format({
       pathname: '/app/apm',
