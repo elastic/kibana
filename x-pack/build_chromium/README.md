@@ -32,7 +32,7 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    ```sh
    # This shows a preview of what would change by synchronizing the source scripts with the destination GCS bucket.
    # Remove the `-n` flag to enact the changes
-   gsutil rsync -n -r x-pack/build_chromium gs://headless_shell_staging/build_chromium
+   gsutil -m rsync -n -r x-pack/build_chromium gs://headless_shell_staging/build_chromium
    ```
 
 ## Build Script Usage
