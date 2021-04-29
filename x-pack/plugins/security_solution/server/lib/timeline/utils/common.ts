@@ -14,14 +14,14 @@ import { schema } from '@kbn/config-schema';
 import { isObject } from 'lodash/fp';
 
 import { KibanaRequest } from 'src/core/server';
-import { SetupPlugins } from '../../../plugin';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../../../../security/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: SecuritySolutionRequestHandlerContext,
-  security: SetupPlugins['security'],
+  security: SecurityPluginStart | SecurityPluginSetup | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
   const savedObjectsClient = context.core.savedObjects.client;

@@ -452,6 +452,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
+        Ext: {
+          isolated: false,
+        },
       },
       Endpoint: {
         status: EndpointStatus.enrolled,

@@ -6,3 +6,4 @@
  */
 
 export * from './artifacts';
+export { GetAgentIDsForEndpoints } from './lookup_agent';

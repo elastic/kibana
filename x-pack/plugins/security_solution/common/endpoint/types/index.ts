@@ -222,6 +222,9 @@ export interface Host {
   mac: string[];
   architecture: string;
   os: OSFields;
+  Ext: {
+    isolated?: boolean;
+  };
 }
 
 /**
