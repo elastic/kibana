@@ -126,7 +126,7 @@ export const singleBulkCreate = async ({
     buildBulkBody(ruleSO, doc, SERVER_APP_ID),
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
+  const { body: response } = await services.scopedClusterClient.asInternalUser.bulk({
     index: signalsIndex,
     refresh,
     body: bulkBody,
