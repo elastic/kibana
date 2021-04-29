@@ -25,6 +25,7 @@ import {
   ID_TOGGLE_FIELD,
   NOTES_TAB_BUTTON,
   NOTES_TEXT_AREA,
+  NOTE_BY_NOTE_ID,
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
   REMOVE_COLUMN,
@@ -113,10 +114,15 @@ export const goToQueryTab = () => {
 };
 
 export const addNotesToTimeline = (notes: string) => {
+  cy.intercept('PATCH', '/api/note').as('addNote');
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
   cy.get(ADD_NOTE_BUTTON).pipe(($el) => $el.trigger('click'));
-  cy.get(QUERY_TAB_BUTTON).pipe(($el) => $el.trigger('click'));
+  cy.wait('@addNote').then(({ response }) => {
+    cy.wrap(response!.statusCode).should('eql', 200);
+    cy.get(NOTE_BY_NOTE_ID(response.body.data.persistNote.note.noteId)).should('be.visible');
+  });
+  goToQueryTab();
   goToNotesTab();
 };
 
@@ -178,9 +184,14 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON)
+    .filter(':visible')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE)
+    .eq(0)
+    .pipe(($el) => $el.trigger('click'));
 };
 
 export const createNewTimelineTemplate = () => {
