@@ -17,7 +17,6 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
-// TODO: Uncomment and add more routes as we migrate them
 import {
   ENGINES_PATH,
   ENGINE_ANALYTICS_PATH,
@@ -50,7 +49,7 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
-      // canViewEngineDocuments,
+      canViewEngineDocuments,
       // canViewEngineSchema,
       // canViewEngineCrawler,
       canViewMetaEngineSourceEngines,
@@ -93,12 +92,16 @@ export const EngineRouter: React.FC = () => {
           <AnalyticsRouter />
         </Route>
       )}
-      <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
-        <DocumentDetail />
-      </Route>
-      <Route path={ENGINE_DOCUMENTS_PATH}>
-        <Documents />
-      </Route>
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
+          <DocumentDetail />
+        </Route>
+      )}
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENTS_PATH}>
+          <Documents />
+        </Route>
+      )}
       {canManageEngineCurations && (
         <Route path={ENGINE_CURATIONS_PATH}>
           <CurationsRouter />
