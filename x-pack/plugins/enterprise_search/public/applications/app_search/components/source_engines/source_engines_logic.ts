@@ -12,6 +12,7 @@ import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
+import { EnginesLogic } from '../engines';
 import { EnginesAPIResponse } from '../engines/types';
 
 export interface SourceEnginesLogicValues {
@@ -63,11 +64,25 @@ const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
     }
   );
 
+const ADD_SOURCE_ENGINES_SUCCESS_MESSAGE = (sourceEngineNames: string[]) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeEngineSuccessMessage',
+    {
+      defaultMessage:
+        '{sourceEnginesCount, plural, one {# engine} other {# engines}} has been added to this meta engine.',
+      values: { sourceEnginesCount: sourceEngineNames.length },
+    }
+  );
+
 interface SourceEnginesLogicActions {
+  addSourceEngines: (sourceEngineNames: string[]) => { sourceEngineNames: string[] };
   closeAddSourceEnginesModal: () => void;
   fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
+  onSourceEnginesAdd: (
+    sourceEnginesToAdd: EngineDetails[]
+  ) => { sourceEnginesToAdd: EngineDetails[] };
   onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
@@ -84,10 +99,12 @@ export const SourceEnginesLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
+    addSourceEngines: (sourceEngineNames) => ({ sourceEngineNames }),
     closeAddSourceEnginesModal: true,
     fetchIndexedEngines: true,
     fetchSourceEngines: true,
     onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
+    onSourceEnginesAdd: (sourceEnginesToAdd) => ({ sourceEnginesToAdd }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
     openAddSourceEnginesModal: true,
     removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
@@ -124,6 +141,10 @@ export const SourceEnginesLogic = kea<
     sourceEngines: [
       [],
       {
+        onSourceEnginesAdd: (sourceEngines, { sourceEnginesToAdd }) => [
+          ...sourceEngines,
+          ...sourceEnginesToAdd,
+        ],
         onSourceEnginesFetch: (_, { sourceEngines }) => sourceEngines,
         onSourceEngineRemove: (sourceEngines, { sourceEngineNameToRemove }) =>
           sourceEngines.filter((sourceEngine) => sourceEngine.name !== sourceEngineNameToRemove),
@@ -131,6 +152,30 @@ export const SourceEnginesLogic = kea<
     ],
   }),
   listeners: ({ actions }) => ({
+    addSourceEngines: async ({ sourceEngineNames }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      try {
+        // the response doesn't contain anything we care about
+        await http.post(`/api/app_search/engines/${engineName}/source_engines/bulk_create`, {
+          query: {
+            source_engine_slugs: sourceEngineNames,
+          },
+        });
+
+        const sourceEnginesToAdd = EnginesLogic.values.engines.filter(({ name }) =>
+          sourceEngineNames.includes(name)
+        );
+
+        actions.onSourceEnginesAdd(sourceEnginesToAdd);
+        setSuccessMessage(ADD_SOURCE_ENGINES_SUCCESS_MESSAGE(sourceEngineNames));
+        EngineLogic.actions.initializeEngine();
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.closeAddSourceEnginesModal();
+      }
+    },
     fetchSourceEngines: () => {
       const { engineName } = EngineLogic.values;
 

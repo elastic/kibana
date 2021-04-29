@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  setMockValues,
+} from '../../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -14,6 +19,19 @@ import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
 
 import { SourceEnginesLogic } from './source_engines_logic';
+
+jest.mock('../engines', () => ({
+  EnginesLogic: {
+    values: {
+      engines: [
+        { name: 'source-engine-1' },
+        { name: 'source-engine-2' },
+        { name: 'source-engine-3' },
+        { name: 'source-engine-4' },
+      ] as EngineDetails[],
+    },
+  },
+}));
 
 const DEFAULT_VALUES = {
   addSourceEnginesModalOpen: false,
@@ -34,6 +52,12 @@ describe('SourceEnginesLogic', () => {
 
   it('initializes with default values', () => {
     expect(SourceEnginesLogic.values).toEqual(DEFAULT_VALUES);
+  });
+
+  describe('selectors', () => {
+    describe('sourceEnginesDictionary', () => {
+      it('should be derived from source engines', () => {});
+    });
   });
 
   describe('actions', () => {
@@ -88,6 +112,28 @@ describe('SourceEnginesLogic', () => {
 
       it('sets dataLoading to false', () => {
         expect(SourceEnginesLogic.values.dataLoading).toEqual(false);
+      });
+    });
+
+    describe('onSourceEnginesAdd', () => {
+      it('adds to existing source engines', () => {
+        mount({
+          sourceEngines: [
+            { name: 'source-engine-1' },
+            { name: 'source-engine-2' },
+          ] as EngineDetails[],
+        });
+        SourceEnginesLogic.actions.onSourceEnginesAdd([
+          { name: 'source-engine-3' },
+          { name: 'source-engine-4' },
+        ] as EngineDetails[]);
+
+        expect(SourceEnginesLogic.values.sourceEngines).toEqual([
+          { name: 'source-engine-1' },
+          { name: 'source-engine-2' },
+          { name: 'source-engine-3' },
+          { name: 'source-engine-4' },
+        ]);
       });
     });
 
@@ -189,6 +235,84 @@ describe('SourceEnginesLogic', () => {
           // Second and final page
           { name: 'source-engine-2' },
         ]);
+      });
+    });
+
+    describe('addSourceEngines', () => {
+      describe('happy path', () => {
+        it('calls the bulkCreateLocoMocoEngineSourceEnginesPath endpoint then onSourceEnginesAdd', async () => {
+          jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesAdd');
+          http.post.mockReturnValueOnce(Promise.resolve());
+
+          SourceEnginesLogic.actions.addSourceEngines(['source-engine-3', 'source-engine-4']);
+          await nextTick();
+
+          expect(http.post).toHaveBeenCalledWith(
+            '/api/app_search/engines/some-engine/source_engines/bulk_create',
+            {
+              query: { source_engine_slugs: ['source-engine-3', 'source-engine-4'] },
+            }
+          );
+          expect(SourceEnginesLogic.actions.onSourceEnginesAdd).toHaveBeenCalledWith([
+            {
+              name: 'source-engine-3',
+            },
+            {
+              name: 'source-engine-4',
+            },
+          ]);
+        });
+
+        it('re-initializes the engine', async () => {
+          jest.spyOn(EngineLogic.actions, 'initializeEngine');
+          http.post.mockReturnValueOnce(Promise.resolve());
+
+          SourceEnginesLogic.actions.addSourceEngines([]);
+          await nextTick();
+
+          expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledWith();
+        });
+
+        it('shows a success message', async () => {
+          http.post.mockReturnValueOnce(Promise.resolve());
+
+          SourceEnginesLogic.actions.addSourceEngines([]);
+          await nextTick();
+
+          expect(setSuccessMessage).toHaveBeenCalledTimes(1);
+        });
+
+        it('closes the modal', async () => {
+          jest.spyOn(SourceEnginesLogic.actions, 'closeAddSourceEnginesModal');
+          http.post.mockReturnValueOnce(Promise.resolve());
+
+          SourceEnginesLogic.actions.addSourceEngines([]);
+          await nextTick();
+
+          expect(SourceEnginesLogic.actions.closeAddSourceEnginesModal).toHaveBeenCalled();
+        });
+      });
+
+      describe('unhappy path', () => {
+        it('display a flash message on error', async () => {
+          http.post.mockReturnValueOnce(Promise.reject());
+          mount();
+
+          SourceEnginesLogic.actions.fetchSourceEngines();
+          await nextTick();
+
+          expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        });
+
+        it('closes the modal', async () => {
+          jest.spyOn(SourceEnginesLogic.actions, 'closeAddSourceEnginesModal');
+          http.post.mockReturnValueOnce(Promise.reject());
+
+          SourceEnginesLogic.actions.addSourceEngines([]);
+          await nextTick();
+
+          expect(SourceEnginesLogic.actions.closeAddSourceEnginesModal).toHaveBeenCalled();
+        });
       });
     });
 
