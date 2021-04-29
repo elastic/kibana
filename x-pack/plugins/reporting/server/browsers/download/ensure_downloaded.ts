@@ -49,9 +49,7 @@ async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLeve
             try {
               const downloadedChecksum = await download(url, path, logger);
               if (downloadedChecksum !== archiveChecksum) {
-                invalidChecksums.push(
-                  `${url} => ${path} [${downloadedChecksum} vs ${archiveChecksum}]`
-                );
+                invalidChecksums.push(`${url} => ${path}`);
               }
             } catch (err) {
               const message = new Error(`Failed to download ${url}`);
@@ -69,6 +67,7 @@ async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLeve
           )}`
         );
         logger.error(err);
+        throw err;
       }
     })
   );

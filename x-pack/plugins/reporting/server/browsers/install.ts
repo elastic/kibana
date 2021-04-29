@@ -46,6 +46,11 @@ export function installBrowser(
 
       await del(chromiumPath);
       await extract(archive, chromiumPath);
+
+      const reCheck = await md5(binaryChecksum);
+      if (reCheck !== pkg.binaryChecksum) {
+        throw new Error(`Extracted browser checksum is incorrect!`);
+      }
     }
 
     logger.debug(`Browser executable: ${binaryPath}`);
