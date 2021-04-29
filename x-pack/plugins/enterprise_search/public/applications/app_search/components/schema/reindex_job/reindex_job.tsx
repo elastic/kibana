@@ -20,16 +20,15 @@ interface Props {
 }
 
 export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
-  const { reindexJobId } = useParams() as { reindexJobId: string };
+  // const { reindexJobId } = useParams() as { reindexJobId: string };
 
   return (
     <>
       <SetPageChrome
         trail={[
           ...schemaBreadcrumb,
-          i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.reindexJob.breadcrumb', {
-            defaultMessage: 'Reindex job: {reindexJobId}',
-            values: { reindexJobId },
+          i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.reindexErrorsBreadcrumb', {
+            defaultMessage: 'Reindex errors',
           }),
         ]}
       />
