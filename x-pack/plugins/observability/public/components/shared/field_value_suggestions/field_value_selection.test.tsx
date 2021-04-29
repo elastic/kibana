@@ -17,7 +17,7 @@ describe('FieldValueSelection', () => {
         label="Service name"
         values={['elastic co frontend', 'apm server', 'opbean python']}
         onChange={() => {}}
-        value={''}
+        selectedValue={[]}
         loading={false}
         setQuery={() => {}}
       />
@@ -33,7 +33,7 @@ describe('FieldValueSelection', () => {
         label="Service name"
         values={['elastic co frontend', 'apm server', 'opbean python']}
         onChange={() => {}}
-        value={''}
+        selectedValue={[]}
         loading={false}
         setQuery={() => {}}
       />
