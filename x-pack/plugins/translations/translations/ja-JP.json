@@ -4436,7 +4436,6 @@
     "visTypeTimeseries.timeseries.optionsTab.dataLabel": "データ",
     "visTypeTimeseries.timeseries.optionsTab.displayGridLabel": "グリッドを表示",
     "visTypeTimeseries.timeseries.optionsTab.ignoreGlobalFilterLabel": "グローバルフィルターを無視しますか？",
-    "visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel": "夏時間を無視しますか？",
     "visTypeTimeseries.timeseries.optionsTab.legendPositionLabel": "凡例の配置",
     "visTypeTimeseries.timeseries.optionsTab.panelFilterLabel": "パネルフィルター",
     "visTypeTimeseries.timeseries.optionsTab.panelOptionsButtonLabel": "パネルオプション",

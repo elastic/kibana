@@ -229,19 +229,20 @@ export class TimeseriesPanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel"
-                    defaultMessage="Ignore daylight time?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel',
+                    {
+                      defaultMessage: 'Ignore daylight time?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_daylight_time}
+                    name="ignore_daylight_time"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  data-test-subj="timeseriesIgnoreDaylightTime"
-                  value={model.ignore_daylight_time}
-                  name="ignore_daylight_time"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
