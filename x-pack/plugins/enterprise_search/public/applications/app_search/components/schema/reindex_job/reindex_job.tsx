@@ -39,7 +39,7 @@ export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
         )}
       />
       <FlashMessages />
-      <EuiPageContentBody>TODO: 404s?</EuiPageContentBody>
+      <EuiPageContentBody>{reindexJobId}</EuiPageContentBody>
     </>
   );
 };
