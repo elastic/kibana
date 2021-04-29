@@ -12,10 +12,10 @@ import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
-import { EnginesLogic } from '../engines';
 import { EnginesAPIResponse } from '../engines/types';
 
 export interface SourceEnginesLogicValues {
+  addSourceEnginesModalOpen: boolean;
   dataLoading: boolean;
   sourceEngines: EngineDetails[];
 }
@@ -30,11 +30,13 @@ const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
   );
 
 interface SourceEnginesLogicActions {
+  closeAddSourceEnginesModal: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
   onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
+  openAddSourceEnginesModal: () => void;
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
 }
 
@@ -43,9 +45,11 @@ export const SourceEnginesLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
+    closeAddSourceEnginesModal: true,
     fetchSourceEngines: true,
     onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
+    openAddSourceEnginesModal: true,
     removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
   }),
   reducers: () => ({
@@ -55,7 +59,13 @@ export const SourceEnginesLogic = kea<
         onSourceEnginesFetch: () => false,
       },
     ],
-
+    addSourceEnginesModalOpen: [
+      false,
+      {
+        openAddSourceEnginesModal: () => true,
+        closeAddSourceEnginesModal: () => false,
+      },
+    ],
     sourceEngines: [
       [],
       {
