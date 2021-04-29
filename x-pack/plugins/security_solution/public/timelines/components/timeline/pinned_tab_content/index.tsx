@@ -199,8 +199,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
-  const pinnedTabControlColumns = [defaultControlColumn];
-
   return (
     <>
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
@@ -232,7 +230,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={pinnedTabControlColumns}
+                leadingControlColumns={[defaultControlColumn]}
                 trailingControlColumns={[]}
               />
             </StyledEuiFlyoutBody>

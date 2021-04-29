@@ -22,6 +22,7 @@ import { timelineActions } from '../../../../store/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { defaultControlColumn } from '../control_columns';
+import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -272,6 +273,29 @@ describe('ColumnHeaders', () => {
           ],
         })
       );
+    });
+    test('Does not render the default leading action column header and renders a custom trailing header', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={mockDefaultHeaders}
+            isSelectAllChecked={false}
+            onSelectAll={jest.fn()}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={mockSort}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
+            leadingControlColumns={[]}
+            trailingControlColumns={testTrailingControlColumns}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.exists('[data-test-subj="field-browser"]')).toBeFalsy();
+      expect(wrapper.exists('[data-test-subj="test-header-action-cell"]')).toBeTruthy();
     });
   });
 });

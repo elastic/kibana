@@ -273,8 +273,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
-  const queryTabControlColumns = [defaultControlColumn];
-
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -347,7 +345,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={queryTabControlColumns}
+                leadingControlColumns={[defaultControlColumn]}
                 trailingControlColumns={[]}
               />
             </StyledEuiFlyoutBody>
