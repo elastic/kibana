@@ -428,7 +428,7 @@
     "@cypress/webpack-preprocessor": "^5.6.0",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/apm-rum-react": "^1.2.5",
-    "@elastic/eslint-config-kibana": "link:packages/elastic-eslint-config-kibana",
+    "@elastic/eslint-config-kibana": "link:bazel-bin/packages/elastic-eslint-config-kibana/npm_module",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.0.0",
