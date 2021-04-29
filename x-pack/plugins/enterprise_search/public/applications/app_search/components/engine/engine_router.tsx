@@ -135,7 +135,7 @@ export const EngineRouter: React.FC = () => {
       {canViewMetaEngineSourceEngines && (
         <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
           <SourceEngines />
-          </Route>
+        </Route>
       )}
       <Route>
         <SetPageChrome trail={getEngineBreadcrumbs()} />
