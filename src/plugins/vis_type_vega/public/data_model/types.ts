@@ -16,13 +16,10 @@ import { EsQueryParser } from './es_query_parser';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
-export type RuntimeFields = estypes.RuntimeFields;
-
 interface Body {
   aggs?: Record<string, estypes.AggregationContainer>;
   query?: Query;
   timeout?: string;
-  runtime_mappings?: RuntimeFields;
 }
 
 interface Coordinate {

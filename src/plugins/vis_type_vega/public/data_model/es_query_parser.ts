@@ -22,7 +22,6 @@ import {
   EsQueryRequest,
   Query,
   ContextVarsObject,
-  RuntimeFields,
 } from './types';
 
 const TIMEFILTER: string = '%timefilter%';
@@ -35,6 +34,8 @@ const FILTER_CLAUSE: string = '%dashboard_context-filter_clause%';
 const LEGACY_CONTEXT: string = '%context_query%';
 const CONTEXT: string = '%context%';
 const TIMEFIELD: string = '%timefield%';
+
+const { indexPatterns } = getData();
 
 const getRequestName = (request: EsQueryRequest, index: number) =>
   request.dataObject.name ||
@@ -206,14 +207,16 @@ export class EsQueryParser {
   async populateData(requests: EsQueryRequest[]) {
     const esSearches = [];
 
-    for (const [index, request] of requests.entries()) {
-      const [indexPattern] = await getData().indexPatterns.find(request.url.index);
-      const runtimeFields = indexPattern?.getComputedFields().runtimeFields ?? {};
+    for (const [requestIndex, request] of requests.entries()) {
+      const indexPatternTitle = request.url.index;
+      const indexPattern = (await indexPatterns.find(indexPatternTitle)).find(
+        (index) => index.title === indexPatternTitle
+      );
 
       esSearches.push({
         ...request.url,
-        name: getRequestName(request, index),
-        runtimeFields: runtimeFields as RuntimeFields,
+        name: getRequestName(request, requestIndex),
+        runtimeFields: indexPattern?.getComputedFields().runtimeFields,
       });
     }
 
