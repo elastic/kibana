@@ -61,7 +61,7 @@ ts_project(
   deps = DEPS,
   declaration = True,
   declaration_map = True,
-  incremental = False,
+  incremental = True,
   out_dir = "target",
   source_map = True,
   root_dir = "src",
