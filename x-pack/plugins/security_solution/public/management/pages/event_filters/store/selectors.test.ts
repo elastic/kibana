@@ -6,9 +6,11 @@
  */
 
 import { initialEventFiltersPageState } from './builders';
-import { getFormEntry, getFormHasError } from './selector';
+import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
+import { EventFiltersPageLocation } from '../state';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 const initialState = initialEventFiltersPageState();
 
@@ -53,13 +55,24 @@ describe('selectors', () => {
       };
       expect(getFormHasError(state)).toBeTruthy();
     });
-    it('returns true when entry with item error and name error', () => {
+    it('returns true when entry with os error', () => {
+      const state = {
+        ...initialState,
+        form: {
+          ...initialState.form,
+          hasOSError: true,
+        },
+      };
+      expect(getFormHasError(state)).toBeTruthy();
+    });
+    it('returns true when entry with item error, name error and os error', () => {
       const state = {
         ...initialState,
         form: {
           ...initialState.form,
           hasItemsError: true,
           hasNameError: true,
+          hasOSError: true,
         },
       };
       expect(getFormHasError(state)).toBeTruthy();
@@ -72,9 +85,25 @@ describe('selectors', () => {
           ...initialState.form,
           hasItemsError: false,
           hasNameError: false,
+          hasOSError: false,
         },
       };
       expect(getFormHasError(state)).toBeFalsy();
+    });
+  });
+  describe('getCurrentLocation()', () => {
+    it('returns current locations', () => {
+      const expectedLocation: EventFiltersPageLocation = {
+        show: 'create',
+        page_index: MANAGEMENT_DEFAULT_PAGE,
+        page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+        filter: 'filter',
+      };
+      const state = {
+        ...initialState,
+        location: expectedLocation,
+      };
+      expect(getCurrentLocation(state)).toBe(expectedLocation);
     });
   });
 });

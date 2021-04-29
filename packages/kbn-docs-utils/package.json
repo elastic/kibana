@@ -13,7 +13,6 @@
     "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/config": "link:../kbn-config",
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
+    "@kbn/config": "link:../kbn-config"
   }
 }
