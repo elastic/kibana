@@ -16,6 +16,7 @@ const allowedExperimentalValues = Object.freeze({
   metricsEntitiesEnabled: false,
   eventFilteringEnabled: false,
   hostIsolationEnabled: false,
+  ruleRegistryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

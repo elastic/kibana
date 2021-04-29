@@ -9,23 +9,22 @@ import v4 from 'uuid/v4';
 
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
+import { baseRuleFieldMap, BaseRuleFieldMap, OutputOfFieldMap } from '../../../common';
 import { RuleParams, RuleType } from '../../types';
-import { DefaultFieldMap, defaultFieldMap } from '../defaults/field_map';
-import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
 import { RuleRegistry } from '..';
 
 type PersistenceAlertPersistenceService<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TActionVariable extends ActionVariable
 > = (
   alerts: Array<OutputOfFieldMap<TFieldMap>>
 ) => Array<AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>>;
 
-type PersistenceAlertQueryService<TFieldMap extends DefaultFieldMap> = (
+type PersistenceAlertQueryService<TFieldMap extends BaseRuleFieldMap> = (
   query: ESSearchRequest
 ) => Promise<Array<OutputOfFieldMap<TFieldMap>>>;
 
-type CreatePersistenceRuleType<TFieldMap extends DefaultFieldMap> = <
+type CreatePersistenceRuleType<TFieldMap extends BaseRuleFieldMap> = <
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable
 >(
@@ -41,12 +40,12 @@ type CreatePersistenceRuleType<TFieldMap extends DefaultFieldMap> = <
 ) => RuleType<TFieldMap, TRuleParams, TActionVariable>;
 
 export function createPersistenceRuleTypeFactory<
-  TRuleRegistry extends RuleRegistry<DefaultFieldMap>
+  TRuleRegistry extends RuleRegistry<BaseRuleFieldMap>
 >(): TRuleRegistry extends RuleRegistry<infer TFieldMap>
   ? CreatePersistenceRuleType<TFieldMap>
   : never;
 
-export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<DefaultFieldMap> {
+export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<BaseRuleFieldMap> {
   return (type) => {
     return {
       ...type,
@@ -55,7 +54,7 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
           services: { scopedClusterClient, scopedRuleRegistryClient, alertInstanceFactory, logger },
         } = options;
 
-        const currentAlerts: Array<OutputOfFieldMap<DefaultFieldMap>> = [];
+        const currentAlerts: Array<OutputOfFieldMap<BaseRuleFieldMap>> = [];
         const timestamp = options.startedAt.toISOString();
 
         const state = await type.executor({
@@ -68,12 +67,12 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
             },
             findAlerts: async (query) => {
               const { body } = await scopedClusterClient.asCurrentUser.search<
-                OutputOfFieldMap<DefaultFieldMap>
+                OutputOfFieldMap<BaseRuleFieldMap>
               >({
                 ...query,
                 body: {
                   ...query.body,
-                  _source: Object.keys(defaultFieldMap),
+                  _source: Object.keys(baseRuleFieldMap),
                 },
                 ignore_unavailable: true,
               });

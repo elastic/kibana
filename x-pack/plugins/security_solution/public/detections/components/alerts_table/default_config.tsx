@@ -74,7 +74,41 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
         // },
 ];
 
+export const alertsDefaultModel: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns,
+  showCheckboxes: true,
+  excludedRowRendererIds: Object.values(RowRendererId),
+};
+
 export const requiredFieldsForActions = [
+  '@timestamp',
+  'signal.status',
+  'signal.group.id',
+  'signal.original_time',
+  'signal.rule.building_block_type',
+  'signal.rule.filters',
+  'signal.rule.from',
+  'signal.rule.language',
+  'signal.rule.query',
+  'signal.rule.name',
+  'signal.rule.to',
+  'signal.rule.id',
+  'signal.rule.index',
+  'signal.rule.type',
+  'signal.original_event.kind',
+  'signal.original_event.module',
+  // Endpoint exception fields
+  'file.path',
+  'file.Ext.code_signature.subject_name',
+  'file.Ext.code_signature.trusted',
+  'file.hash.sha256',
+  'host.os.family',
+  'event.code',
+];
+
+// TODO: Once we are past experimental phase this code should be removed
+export const requiredFieldsForActionsRuleRegistry = [
   'alert.id',
   '@timestamp',
   'event.kind',
@@ -91,9 +125,17 @@ export const requiredFieldsForActions = [
   'tags',
 ];
 
-export const alertsDefaultModel: SubsetTimelineModel = {
+export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = requiredFieldsForActionsRuleRegistry.map<ColumnHeaderOptions>(
+  (field) => ({
+    columnHeaderType: defaultColumnHeaderType,
+    id: field,
+    width: 120,
+  })
+);
+
+export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
   ...timelineDefaults,
-  columns,
+  columns: alertsHeadersRuleRegistry,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
 };

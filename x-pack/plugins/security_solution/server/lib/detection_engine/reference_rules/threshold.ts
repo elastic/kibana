@@ -13,11 +13,8 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '../../../../../../../src/core/server';
 
 import { AlertServices } from '../../../../../alerting/server';
-import {
-  DefaultFieldMap,
-  OutputOfFieldMap,
-  createPersistenceRuleTypeFactory,
-} from '../../../../../rule_registry/server';
+import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../../../rule_registry/common';
+import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SecurityRuleRegistry } from '../../../plugin';
 import { SignalSearchResponse, ThresholdSignalHistory } from '../signals/types';
@@ -32,7 +29,7 @@ import { BuildRuleMessage } from '../signals/rule_messages';
 
 const createSecurityThresholdRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
 
-type AlertType = OutputOfFieldMap<DefaultFieldMap>;
+type AlertType = OutputOfFieldMap<BaseRuleFieldMap>;
 
 interface Rule {
   id: string;

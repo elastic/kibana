@@ -10,12 +10,9 @@ import v4 from 'uuid/v4';
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
+import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../../../rule_registry/common';
 
-import {
-  DefaultFieldMap,
-  OutputOfFieldMap,
-  createPersistenceRuleTypeFactory,
-} from '../../../../../rule_registry/server';
+import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { SecurityRuleRegistry } from '../../../plugin';
@@ -23,7 +20,7 @@ import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 
 const createSecurityEQLRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
 
-type AlertType = OutputOfFieldMap<DefaultFieldMap>;
+type AlertType = OutputOfFieldMap<BaseRuleFieldMap>;
 
 export const eqlAlertType = createSecurityEQLRuleType({
   id: EQL_ALERT_TYPE_ID,

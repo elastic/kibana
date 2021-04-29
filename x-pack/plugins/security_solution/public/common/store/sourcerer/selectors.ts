@@ -82,15 +82,14 @@ export const getAllExistingIndexNamesSelector = () => {
 };
 
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-const ALERTS_AS_DATA_INDEX = '*alerts-security-solution*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
   const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
     const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
     return selectedPatterns.some((index) => index === 'logs-*')
-      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX, ALERTS_AS_DATA_INDEX]
-      : [...selectedPatterns, ALERTS_AS_DATA_INDEX];
+      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+      : selectedPatterns;
   });
 
   const getIndexPattern = memoizeOne(

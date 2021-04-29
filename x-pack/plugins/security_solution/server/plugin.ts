@@ -27,11 +27,8 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
-import {
-  ecsFieldMap,
-  pickWithPatterns,
-  RuleRegistryPluginSetupContract,
-} from '../../rule_registry/server';
+import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/common';
+import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -171,6 +168,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    this.setupPlugins = plugins;
 
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
