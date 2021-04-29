@@ -74,6 +74,7 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
+      fullWidth
       prepend="Calculation"
       data-test-subj="operationTypeSelect"
       compressed
