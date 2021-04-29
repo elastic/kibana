@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { esArchiverLoad } from '../tasks/es_archiver';
-
 describe('Home page', () => {
   before(() => {
-    cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
+    cy.loginAsSuperUser();
   });
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
-    // esArchiverLoad('apm_8.0.0');
     cy.visit('/app/apm');
 
     cy.url().should(

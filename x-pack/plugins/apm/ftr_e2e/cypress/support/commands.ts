@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+Cypress.Commands.add('loginAsReadOnlyUser', () => {
+  cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
+});
+
+Cypress.Commands.add('loginAsSuperUser', () => {
+  cy.loginAs({ username: 'elastic', password: 'changeme' });
+});
+
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
