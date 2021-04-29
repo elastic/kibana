@@ -89,6 +89,7 @@ export const EventFiltersListPage = memo(() => {
       commentsAccordionId: '',
       onEditException: handleItemEdit,
       onDeleteException: handleItemDelete,
+      showModified: true,
     }),
     [handleItemDelete, handleItemEdit]
   );

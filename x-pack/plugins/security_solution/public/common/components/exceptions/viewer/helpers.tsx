@@ -72,7 +72,8 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
  * @param exceptionItem an ExceptionItem
  */
 export const getDescriptionListContent = (
-  exceptionItem: ExceptionListItemSchema
+  exceptionItem: ExceptionListItemSchema,
+  includeModified: boolean = false
 ): DescriptionListItem[] => {
   const details = [
     {
@@ -87,6 +88,18 @@ export const getDescriptionListContent = (
       title: i18n.CREATED_BY,
       value: exceptionItem.created_by,
     },
+    ...(includeModified
+      ? [
+          {
+            title: i18n.DATE_MODIFIED,
+            value: moment(exceptionItem.updated_at).format('MMMM Do YYYY @ HH:mm:ss'),
+          },
+          {
+            title: i18n.MODIFIED_BY,
+            value: exceptionItem.updated_by,
+          },
+        ]
+      : []),
     {
       title: i18n.DESCRIPTION,
       value: exceptionItem.description,

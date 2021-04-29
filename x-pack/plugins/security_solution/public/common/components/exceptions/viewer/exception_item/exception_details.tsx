@@ -38,16 +38,18 @@ const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
 
 const ExceptionDetailsComponent = ({
   showComments,
+  showModified = false,
   onCommentsClick,
   exceptionItem,
 }: {
   showComments: boolean;
+  showModified?: boolean;
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
 }): JSX.Element => {
   const descriptionListItems = useMemo(
-    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem),
-    [exceptionItem]
+    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem, showModified),
+    [exceptionItem, showModified]
   );
 
   const commentsSection = useMemo((): JSX.Element => {
