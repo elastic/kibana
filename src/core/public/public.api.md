@@ -911,11 +911,6 @@ export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
     getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
-    getSaved$: <T = any>() => Observable<{
-        key: string;
-        newValue: T;
-        oldValue: T;
-    }>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -926,7 +921,6 @@ export interface IUiSettingsClient {
     isDeclared: (key: string) => boolean;
     isDefault: (key: string) => boolean;
     isOverridden: (key: string) => boolean;
-    overrideLocalDefault: (key: string, newDefault: any) => void;
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
 import { useUrlStorage } from './use_url_storage';
@@ -25,7 +26,7 @@ export const getFiltersFromDefs = (
   const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
     return {
       field,
-      values: [value],
+      values: value,
     };
   }) as UrlFilter[];
 
@@ -46,7 +47,7 @@ export const useLensAttributes = ({
   const { indexPattern } = useAppIndexPatternContext();
 
   return useMemo(() => {
-    if (!indexPattern || !reportType) {
+    if (!indexPattern || !reportType || isEmpty(reportDefinitions)) {
       return null;
     }
 
