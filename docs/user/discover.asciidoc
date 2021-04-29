@@ -173,9 +173,9 @@ image:images/document-table-expanded.png[Table view with document expanded]
 hover of its name for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
-<<discover-document-context, View surrounding documents>>.
+<<discover-view-surrounding-documents, View surrounding documents>>.
 
-. For direct access to a particular document, click **View single document**.
+. For direct access to a particular document, click **<<discover-view-single-document,View single document>>**.
 +
 You can bookmark this document and share the link.
 
@@ -243,7 +243,7 @@ the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/discover/context.asciidoc[]
+include::{kib-repo-dir}/discover/view-document.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
