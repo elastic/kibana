@@ -857,7 +857,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         });
       });
 
-      it('when duplicating reference type column, the referenced columns get duplicated too', () => {
+      it('when duplicating fullReference column, the referenced columns get duplicated too', () => {
         (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
         const testState: IndexPatternPrivateState = {
           ...state,
@@ -919,7 +919,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         });
       });
 
-      it('when duplicating reference type column, the multiple referenced columns get duplicated too', () => {
+      it('when duplicating fullReference column, the multiple referenced columns get duplicated too', () => {
         (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
         (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
         const testState: IndexPatternPrivateState = {
@@ -991,7 +991,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         });
       });
 
-      it('when duplicating reference type column, the referenced columns get duplicated recursively', () => {
+      it('when duplicating fullReference column, the referenced columns get duplicated recursively', () => {
         (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
         (generateId as jest.Mock).mockReturnValueOnce(`innerRef1Copy`);
         (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
@@ -1084,6 +1084,61 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         });
+      });
+
+      it('when duplicating fullReference column onto exisitng column, the state will not get modified', () => {
+        (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'ref1', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['ref1'],
+                },
+                ref1: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+                col2: {
+                  label: 'Minimum',
+                  dataType: 'number',
+                  isBucketed: false,
+
+                  // Private
+                  operationType: 'min',
+                  sourceField: 'bytes',
+                  customLabel: true,
+                },
+              },
+            },
+          },
+        };
+        const referenceDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: referenceDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'col2',
+        });
+
+        expect(setState).toHaveBeenCalledWith(testState);
       });
 
       it('sets correct order in group when reordering a column in group', () => {

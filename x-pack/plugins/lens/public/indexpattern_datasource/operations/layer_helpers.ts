@@ -69,6 +69,9 @@ function copyReferencesRecursively(
   columnId: string
 ) {
   if ('references' in sourceColumn) {
+    if (columns[columnId]) {
+      return columns;
+    }
     sourceColumn?.references.forEach((ref, index) => {
       // TODO: Add an option to assign IDs without generating the new one
       const newId = generateId();
