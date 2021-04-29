@@ -35,8 +35,6 @@ const LEGACY_CONTEXT: string = '%context_query%';
 const CONTEXT: string = '%context%';
 const TIMEFIELD: string = '%timefield%';
 
-const { indexPatterns } = getData();
-
 const getRequestName = (request: EsQueryRequest, index: number) =>
   request.dataObject.name ||
   i18n.translate('visTypeVega.esQueryParser.unnamedRequest', {
@@ -205,6 +203,7 @@ export class EsQueryParser {
    * @returns {Promise<void>}
    */
   async populateData(requests: EsQueryRequest[]) {
+    const { indexPatterns } = getData();
     const esSearches = [];
 
     for (const [requestIndex, request] of requests.entries()) {
