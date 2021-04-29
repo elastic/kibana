@@ -18,7 +18,7 @@
  */
 
 import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
+import HapiStaticFiles from '@hapi/inert';
 import HapiProxy from 'h2o2';
 
 const plugins = [HapiTemplates, HapiStaticFiles, HapiProxy];
