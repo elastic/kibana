@@ -32,7 +32,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
-  const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
+  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
 
   const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
 
