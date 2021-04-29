@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
+
 // @ts-ignore
 import { compile } from 'vega-lite/build/vega-lite';
 
@@ -155,5 +157,26 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
     ]);
+  });
+
+  it('should escape special characters', () => {
+    const data = [{ ['x.a']: 1, ['y[a]']: 1 }];
+
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      data,
+      ['x.a', 'y[a]'],
+      euiThemeLight,
+      undefined,
+      'the-color-field',
+      LEGEND_TYPES.NOMINAL
+    );
+
+    // column values should be escaped
+    expect(vegaLiteSpec.repeat).toEqual({
+      column: ['x\\.a', 'y\\[a\\]'],
+      row: ['y\\[a\\]', 'x\\.a'],
+    });
+    // raw data should not be escaped
+    expect(vegaLiteSpec.spec.data.values).toEqual(data);
   });
 });
