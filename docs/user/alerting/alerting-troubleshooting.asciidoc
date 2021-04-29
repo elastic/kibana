@@ -69,3 +69,168 @@ Configuration options are available to specialize connections to TLS servers,
 including ignoring server certificate validation, and providing certificate
 authority data to verify servers using custom certificates.  For more details, 
 see <<action-settings,Action settings>>.
+
+[float]
+[[rules-long-execution-time]]
+=== Identify long running rules
+
+The following query can help you identify rules that are taking a long time to execute and may be impacting the overall health of your deployment.
+
+Query for a list of rule ids, bucketed by their execution times:
+
+[source,sh]
+--------------------------------------------------
+$ GET /.kibana-event-log*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-1d", <1>
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "term": {
+            "event.action": {
+              "value": "execute"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "ruleIdsByExecutionDuration": {
+      "histogram": {
+        "field": "event.duration",
+        "interval": 10000000000 <2>
+      },
+      "aggs": {
+        "ruleId": {
+          "nested": {
+            "path": "kibana.saved_objects"
+          },
+          "aggs": {
+            "ruleId": {
+              "terms": {
+                "field": "kibana.saved_objects.id",
+                "size": 10 <3>
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+<1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
+<2> Execution durations are stored as nanoseconds. This interval buckets the duration into 10 second intervals. Update this value to change the granularity of the buckets.
+<3> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
+
+This query returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+  "took" : 322,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 204,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  },
+  "aggregations" : {
+    "ruleIdsByExecutionDuration" : {
+      "buckets" : [
+        {
+          "key" : 0.0, <1>
+          "doc_count" : 320,
+          "ruleId" : {
+            "doc_count" : 320,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [
+                {
+                  "key" : "1923ada0-a8f3-11eb-a04b-13d723cdfdc5",
+                  "doc_count" : 140
+                },
+                {
+                  "key" : "15415ecf-cdb0-4fef-950a-f824bd277fe4",
+                  "doc_count" : 130
+                },
+                {
+                  "key" : "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+                  "doc_count" : 50
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key" : 1.0E10,
+          "doc_count" : 0,
+          "ruleId" : {
+            "doc_count" : 0,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [ ]
+            }
+          }
+        },
+        {
+          "key" : 2.0E10,
+          "doc_count" : 0,
+          "ruleId" : {
+            "doc_count" : 0,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [ ]
+            }
+          }
+        },
+        {
+          "key" : 3.0E10, <2>
+          "doc_count" : 6,
+          "ruleId" : {
+            "doc_count" : 6,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [
+                {
+                  "key" : "41893910-6bca-11eb-9e0d-85d233e3ee35",
+                  "doc_count" : 6
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+--------------------------------------------------
+<1> Most rule execution durations fall within the first bucket (0 - 10 seconds).
+<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` has taken between 30 and 40 seconds to execute.
+
+We can use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that are taking a long time to execute.
