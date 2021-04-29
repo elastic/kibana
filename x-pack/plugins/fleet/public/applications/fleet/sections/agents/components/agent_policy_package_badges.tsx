@@ -50,16 +50,22 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
     return [...uniquePackages.values()];
   }, [agentPolicy]);
 
+  const showFleetServerWarning = useMemo(
+    () => excludeFleetServer && packages?.some((pkg) => pkg.name === FLEET_SERVER_PACKAGE),
+    [packages, excludeFleetServer]
+  );
+
+  const collectedIntegrationsCount = useMemo(
+    () =>
+      packages
+        ? packages.filter((pkg) => !excludeFleetServer || pkg.name !== FLEET_SERVER_PACKAGE).length
+        : 0,
+    [packages, excludeFleetServer]
+  );
+
   if (!agentPolicy || !packages) {
     return null;
   }
-
-  const showFleetServerWarning =
-    excludeFleetServer && packages.some((pkg) => pkg.name === FLEET_SERVER_PACKAGE);
-
-  const collectedIntegrationsCount = packages.filter(
-    (pkg) => !excludeFleetServer || pkg.name !== FLEET_SERVER_PACKAGE
-  ).length;
 
   return (
     <>
@@ -115,8 +121,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
             title={i18n.translate(
               'xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning',
               {
-                defaultMessage:
-                  'The Fleet Server integration will not collect data in standalone mode.',
+                defaultMessage: 'Fleet Server will not be enabled in standalone mode.',
               }
             )}
           />
