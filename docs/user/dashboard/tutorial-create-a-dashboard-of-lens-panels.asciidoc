@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Tutorial: Build your first dashboard
+== Build your first dashboard
 
 Learn the most common ways to build a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
@@ -13,76 +13,77 @@ image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
 [[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
-If you are working with your own data, you should already have an <<index-patterns, index pattern>>.
-To install the sample logs that contain fake website traffic:
+Install the sample web logs data that you'll use to create your dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. On the {kib} *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
 
 Then create a new dashboard:
 
-. Open the main menu, click *Dashboard*.
+. Open the main menu, then click *Dashboard*.
 
 . Click *Create dashboard*.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
-You don't need to save the dashboard while it's in draft mode.
-
 [float]
 [[open-and-set-up-lens]]
-=== Open and set up Lens
+=== Open Lens and get familiar with the data
 
-*Lens* is the visualization builder recommended for most users.
-With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as
-*Lens* uses heuristics to apply the fields and create a visualization for you.
+. On the dashboard, click *Create visualization*.
 
-. From the dashboard, click *Create visualization*.
+. Make sure the *kibana_sample_data_logs* index appears. You might need to select
+a different index pattern from the dropdown:
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_1.png[Dashboard create visualization button]
+image::images/lens_end_to_end_1_2.png[Lens index pattern selector, width=50%]
 
-. Make sure the *kibana_sample_data_logs* index appears. You may need to select
-a different index pattern from the menu:
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2.png[Lens index pattern selector]
+This tutorial uses `Records`, timestamp`, `bytes`, `clientip`, and `referer.keyword`.
+To see the most frequent values of a field, click the field name to view a summary.
+
+The main elements of *Lens* are named:
+
+Workspace panel:: Displays your visualization. You can drag and drop onto this area.
+Dimensions:: Each dimension is a function with extra options. Dimensions are grouped
+for each visualization type, for example the *Vertical axis* is a group that allows
+multiple dimensions. Each dimension starts empty with the label *Drop a field or click to add*.
+Functions:: There are two main types of functions: *buckets* and *metrics*, which are
+equivalent to what {es} provides.
 
 [discrete]
 [[view-the-number-of-website-visitors]]
-=== Build your first visualization
+=== Create your first visualization
 
 Every time you build a visualization in *Lens*, you will follow these steps:
 
-. Do you know which chart type you'd like to use? If you do, select the type before
-dragging any fields. If you don't, you can change the chart types after configuring your functions.
+* *Choose your visualization.* Do you know the type of visualization you'd like to use?
+If you do, select the type before dragging any fields. If you don't, you can change the
+visualization type after configuring your functions.
 
-. Do you know exactly which functions you want? If so, click the dimension and
-configure it manually.
+* *Choose your field.* Do you know the dimension group you want to use the field in? If you do,
+drag and drop the field from the field list to your chosen dimension and Lens will pick a function for you.
+If you don't, drag and drop the field onto the workspace panel. Skip this step if you are
+using the *Filters* function.
 
-. Do you want to use a specific field in a chart, but aren't sure which function? Drag the field
-to a specific dimension and Lens will pick a function for you.
+* *Edit and delete.* To change the function or styling options, click the dimension to open
+the configuration panel. To delete a specific dimension, close the configuration panel and click
+the delete button. To reset the entire visualization, click *Reset layer*.
 
-. Do you want to use a specific field, but want Lens to assign it automatically? Drag the field
-onto the main Lens workspace and it will get added to your chart.
+To put this into practice, pick a field you want to analyze, such as `clientip`. If you want
+to analyze only this field, you can use *Metric* to show a big number.
+The only number function that you can use with `clientip` is *Unique count*.
+*Unique count*, also known as cardinality, approximates the number of unique values
+of the `clientip` field.
 
-. Don't like your chart? Delete a specific dimension or reset the entire chart.
-
-To put this into practice, pick a field like `clientip` which you want to analyze. If you want
-to analyze only this field, you can use the *metric* chart type to show a big number.
-The only number function that you can use with `clientip` is the *unique count* function
-You know that the *unique count* function, also known as cardinality, will get an approximate count
-of the unique IP addresses in the data. Putting this together, build a metric chart:
-
-. Click *Bar vertical stacked* to open the chart type dropdown, then select *Metric*.
+. To select the visualization type, click *Bar vertical stacked* to open the chart type dropdown, then select *Metric*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
 
-. From the *Available fields* list, drag and drop *clientip* to the main workspace.
-Lens will select the unique count function because it is the only numeric function
-that works for IP addresses. You could also drag *clientip* onto
+. From the *Available fields* list, drag and drop `clientip` to the workspace panel.
+Lens selects *Unique count* because it is the only numeric function
+that works for IP addresses. You can also drag and drop `clientip` onto
 the empty dimension for the same result.
 +
 [role="screenshot"]
@@ -97,8 +98,9 @@ image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 [role="screenshot"]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
-. Click *Save and return*. You will return to the dashboard, where you can customize
-the newly added panel:
+. Click *Save and return*.
+
+. Customize the newly added panel:
 
 .. Drag the bottom corner of the panel until the metric takes up one quarter of the screen
 width. The row for the metric will have 4 items on it later.
@@ -107,9 +109,9 @@ width. The row for the metric will have 4 items on it later.
 
 . Click *Save* on the dashboard menu
 
-. Enter the title "Logs dashboard"
+. In the *Title* field, enter `Logs dashboard`.
 
-. Check the *Store time with dashboard* box, then click *Save*
+. Select *Store time with dashboard* box, then click *Save*.
 
 . After the dashboard refreshes, click *Edit* again.
 
@@ -117,82 +119,88 @@ width. The row for the metric will have 4 items on it later.
 [[mixed-multiaxis]]
 === View a metric over time
 
-If your index pattern has a default time field, *Lens* will add that field automatically
-when you drag a numeric field onto the workspace panel. This is a helpful shortcut.
-If your data has multiple time fields you can drag to replace the previous time field.
+*Lens* has two shortcuts that simplify viewing metrics over time. 
+If you drag and drop a numeric field to the workspace panel, *Lens* adds the default
+time field from the index pattern. If the *Date histogram* function is being used,
+quickly replace the time field by dragging and dropping on the workspace panel.
 
-For this example, you want to visualize the `bytes` field over time, but you may not have
-chosen a specific function yet:
+To visualize the `bytes` field over time without choosing a visualization type or function:
 
-. Drag `bytes` from the field list to the workspace panel to have *Lens* automatically
-create a chart. It will create a bar chart using the *median of bytes* as the metric.
+. From the *Available fields* list, drag and drop `bytes` onto the workspace panel to have *Lens* automatically
+create a chart. It will create a bar chart with two dimensions, *timestamp* and *Median of bytes*.
 
-. *Lens* chooses a date interval automatically. To zoom in on the data you want to view,
+. *Lens* automatically chooses a date interval. To zoom in on the data you want to view,
 click and drag your cursor across the bars. 
 
 [role="screenshot"]
 image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
 
-Bar charts are a good default chart, but for this metric a line chart is more appropriate.
-Switch to a line chart one of three ways:
+To emphasize the change in *Median of bytes* over time, use a line chart.
+To change the visualization type, use one of the following ways:
 
-* Click the line chart that appears under *Suggestions*
-* Click *Bar vertical stacked* and choose the *Line* chart type
-* Click the chart type icon above *Horizontal axis*
+* From the *Suggestions*, click the line chart.
+* Click *Bar vertical stacked*, then select *Line*.
+* Click the chart type icon above *Horizontal axis*, then click the line icon.
 
-The default interval that *Lens* has chosen is 3 hours. To customize the time interval:
+Most users use the automatic time interval. You can increase and decrease
+the minimum interval that *Lens* will use, but you cannot decrease the interval
+below the {kib} advanced settings.  To set the minimum time interval:
 
 . In the editor, click *timestamp*.
 
+. Click *How it works* to learn about the *Lens* minimum interval
+
 . Select *Customize time interval*.
 
-. Change the *Minimum interval* to `1 days`, then click *Close*.
+. Increase the *Minimum interval* to `1 days`, then click *Close*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_1.png[Customize time interval]
 
-You can also decrease the time interval with a more advanced guide on <<custom-time-interval, small time intervals in Lens>>.
+To save space on the dashboard, so to save space, hide the vertical and horizontal
+axis labels.
 
-This chart will be displayed in a small space in the dashboard, so to save space, hide the vertical and horizontal
-axis labels:
-
-. In the toolbar next to *Line* click the *Left axis* icon, then deselect *Show*.
+. Open the *Left axis* menu, then deselect *Show*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_4_3.png[Turn off axis name]
 
-. Click the *Bottom axis* icon, then deselect *Show*.
+. Open the *Bottom axis* menu, then deselect *Show*.
 
 . Click *Save and return*
 
-. Arrange the panel so that it is in the same row as the *Metric* visualization. The two should
+. On the dashboard, move the panel so that it is in the same row as the *Metric* visualization panel. The two should
 take up half the screen width.
 
-. Add a panel title to explain the visualization, which is necessary because you removed the axis labels.
+. Add a panel title to explain the panel, which is necessary because you removed the axis labels.
 
-.. Click the gear icon and choose *Edit panel title*.
+.. Open the panel menu and choose *Edit panel title*.
 
-.. Enter "Median of bytes" as the panel title, then click *Save*.
+.. In the *Title* field, enter `Median of bytes`, then click *Save*.
 
-. Click *Save* on the entire dashboard.
+. In the toolbar, click *Save*.
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
-=== View the most frequent values
+=== View the top values of a field
 
-When you drag a text or IP address field into the *Lens* workspace you will see
-the most frequent values of that field using the *top values* function. The values
-are ranked based on another metric like *Count of records*. Only exact matches count:
-`win 10` and `win xp` are distinct.
+The *Top values* function ranks the unique values of a field by another dimension.
+The values are the most frequent when ranked by a *Count* dimension.
+The values are the largest when ranked by a *Sum* dimension.
 
-For this tutorial, you have decided to see the most frequently viewed URLs on your website
-ranked by the `Unique count of clientip` metric, but you have not yet determined which chart type to use.
+When you drag and drop a text or IP address field onto the workspace panel,
+*Lens* adds a *Top values* function ranked by *Count of records* to show the most frequent values.
+
+For this tutorial, you have picked a field and function, but not a visualization type.
+You want to see the most frequent values of `request.keyword` on your website, ranked by the unique visitors.
+This means that you want to use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of
+being ranked by *Count of records*.
 
 . Starting with the default bar chart, drag the `clientip` field onto the *Vertical axis*.
 This will produce the `Unique count of clientip` metric. Do not drop the field into the main workspace,
-because the *top values* function will be used instead.
+because the *Top values* function will be used instead.
 
-. Drag and drop `request.keyword` to the main workspace, and *Lens* will add `Top value of request.keyword`
+. Drag and drop `request.keyword` to the main workspace, and *Lens* will add `Top values of request.keyword`
 to the *Horizontal axis*.
 +
 [role="screenshot"]
