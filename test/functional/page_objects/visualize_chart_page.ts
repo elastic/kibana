@@ -411,10 +411,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    public async openLegendOptionColors(name: string, chartSelector = xyChartSelector) {
+    public async openLegendOptionColors(name: string, chartSelector: string) {
       await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
-        if (await this.isNewLibraryChart(chartSelector)) {
+        if (
+          (await this.isNewLibraryChart(xyChartSelector)) ||
+          (await this.isNewLibraryChart(pieChartSelector))
+        ) {
           const chart = await find.byCssSelector(chartSelector);
           const legendItemColor = await chart.findByCssSelector(
             `[data-ech-series-name="${name}"] .echLegendItem__color`
