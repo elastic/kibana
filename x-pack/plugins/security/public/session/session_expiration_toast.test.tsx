@@ -22,7 +22,7 @@ describe('createSessionExpirationToast', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
-      canBeExtendedByMs: 60 * 1000,
+      canBeExtended: true,
     });
     const onExtend = jest.fn();
     const onClose = jest.fn();
@@ -46,7 +46,7 @@ describe('SessionExpirationTitle', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
-      canBeExtendedByMs: 60 * 1000,
+      canBeExtended: true,
     });
 
     const { getByText } = render(
@@ -63,7 +63,7 @@ describe('SessionExpirationBody', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
-      canBeExtendedByMs: 60 * 1000,
+      canBeExtended: true,
     });
     const onExtend = jest.fn().mockReturnValue(new Promise(() => {}));
 
@@ -81,7 +81,7 @@ describe('SessionExpirationBody', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
-      canBeExtendedByMs: 0,
+      canBeExtended: false,
     });
     const onExtend = jest.fn();
 

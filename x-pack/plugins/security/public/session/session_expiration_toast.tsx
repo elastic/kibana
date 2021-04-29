@@ -28,7 +28,7 @@ export const SessionExpirationTitle: FunctionComponent<SessionExpirationTitlePro
 }) => {
   const state = useObservable(sessionState$);
 
-  if (!state) {
+  if (!state || !state.expiresInMs) {
     return null;
   }
 
@@ -64,7 +64,7 @@ export const SessionExpirationBody: FunctionComponent<SessionExpirationBodyProps
     return null;
   }
 
-  if (state.canBeExtendedByMs > 0) {
+  if (state.canBeExtended) {
     return (
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>

@@ -7,6 +7,7 @@
 
 import { coreMock } from 'src/core/public/mocks';
 
+import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
 import {
   EXTENSION_THROTTLE_MS,
@@ -31,7 +32,7 @@ jest.spyOn(document, 'removeEventListener');
 const nowMock = jest.spyOn(Date, 'now');
 const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
-function createSessionTimeout(expiresInMs = 60 * 60 * 1000) {
+function createSessionTimeout(expiresInMs = 60 * 60 * 1000, canBeExtended = true) {
   const { notifications, http } = coreMock.createSetup();
   const toast = Symbol();
   notifications.toasts.add.mockReturnValue(toast as any);
@@ -39,15 +40,11 @@ function createSessionTimeout(expiresInMs = 60 * 60 * 1000) {
   const tenant = 'test';
   const sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
 
-  const now = Date.now();
   http.fetch.mockResolvedValue({
-    now,
-    idleTimeout: expiresInMs,
-    idleTimeoutExpiration: now + expiresInMs,
-    lifespan: null,
-    lifespanExpiration: null,
+    expiresInMs,
+    canBeExtended,
     provider: { type: 'basic', name: 'basic1' },
-  });
+  } as SessionInfo);
 
   return { sessionTimeout, sessionExpired, notifications, http };
 }
@@ -213,7 +210,7 @@ describe('SessionTimeout', () => {
     sessionTimeout['channel']!.onmessage!({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
-      canBeExtendedByMs: 60 * 1000,
+      canBeExtended: true,
     });
 
     jest.advanceTimersByTime(30 * 1000);

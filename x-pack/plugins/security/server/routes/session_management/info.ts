@@ -17,16 +17,17 @@ export function defineSessionInfoRoutes({ router, getSession, config }: RouteDef
     async (_context, request, response) => {
       const sessionValue = await getSession().get(request);
       if (sessionValue) {
-        const timeouts = config.session.getExpirationTimeouts(sessionValue.provider);
+        const expirationTime =
+          sessionValue.idleTimeoutExpiration && sessionValue.lifespanExpiration
+            ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)
+            : sessionValue.idleTimeoutExpiration || sessionValue.lifespanExpiration;
+
         return response.ok({
           body: {
-            // We can't rely on the client's system clock, so in addition to returning expiration timestamps, we also return
-            // the current server time -- that way the client can calculate the relative time to expiration.
-            now: Date.now(),
-            idleTimeout: timeouts.idleTimeout ? timeouts.idleTimeout.asMilliseconds() : null,
-            idleTimeoutExpiration: sessionValue.idleTimeoutExpiration,
-            lifespan: timeouts.lifespan ? timeouts.lifespan.asMilliseconds() : null,
-            lifespanExpiration: sessionValue.lifespanExpiration,
+            expiresInMs: expirationTime ? expirationTime - Date.now() : null,
+            canBeExtended:
+              sessionValue.idleTimeoutExpiration !== null &&
+              expirationTime !== sessionValue.lifespanExpiration,
             provider: sessionValue.provider,
           } as SessionInfo,
         });

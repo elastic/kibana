@@ -50,10 +50,8 @@ export const EXTENSION_THROTTLE_MS = 60 * 1000;
  */
 export const SESSION_ROUTE = '/internal/security/session';
 
-export interface SessionState {
+export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
   lastExtensionTime: number;
-  expiresInMs: number;
-  canBeExtendedByMs: number;
 }
 
 export class SessionTimeout {
@@ -64,8 +62,8 @@ export class SessionTimeout {
 
   private sessionState$ = new BehaviorSubject<SessionState>({
     lastExtensionTime: 0,
-    expiresInMs: 0,
-    canBeExtendedByMs: 0,
+    expiresInMs: null,
+    canBeExtended: false,
   });
   private subscription?: Subscription;
 
@@ -101,8 +99,8 @@ export class SessionTimeout {
   public stop() {
     const nextState = {
       lastExtensionTime: 0,
-      expiresInMs: 0,
-      canBeExtendedByMs: 0,
+      expiresInMs: null,
+      canBeExtended: false,
     };
     this.toggleEventHandlers(nextState);
     this.resetTimers(nextState);
@@ -173,10 +171,11 @@ export class SessionTimeout {
     this.stopWarningTimer = this.stopWarningTimer?.();
     this.stopLogoutTimer = this.stopLogoutTimer?.();
 
-    if (expiresInMs) {
+    if (expiresInMs !== null) {
       const refreshTimeout = expiresInMs - GRACE_PERIOD_MS - WARNING_MS - SESSION_CHECK_MS;
       const warningTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS - WARNING_MS, 0);
       const logoutTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS, 0);
+
       // 1. Refresh session info before displaying any warnings
       if (refreshTimeout > 0) {
         this.stopRefreshTimer = startTimer(this.fetchSessionInfo, refreshTimeout);
@@ -193,8 +192,8 @@ export class SessionTimeout {
     }
   };
 
-  private toggleEventHandlers = ({ expiresInMs, canBeExtendedByMs }: SessionState) => {
-    if (expiresInMs) {
+  private toggleEventHandlers = ({ expiresInMs, canBeExtended }: SessionState) => {
+    if (expiresInMs !== null) {
       if (!this.channel) {
         // Subscribe to a broadcast channel for session timeout messages.
         // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
@@ -206,7 +205,7 @@ export class SessionTimeout {
 
       // Monitor activity if session can be extended. No need to do it if idleTimeout hasn't been
       // configured.
-      if (canBeExtendedByMs && !this.stopActivityMonitor) {
+      if (canBeExtended && !this.stopActivityMonitor) {
         this.stopActivityMonitor = monitorActivity(this.handleUserActivity);
       }
 
@@ -244,30 +243,15 @@ export class SessionTimeout {
   private fetchSessionInfo = async (extend = false) => {
     this.isExtending = true;
     try {
-      const sessionInfo = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
+      const { expiresInMs, canBeExtended } = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
         method: extend ? 'POST' : 'GET',
         asSystemRequest: !extend,
       });
 
-      let expiresInMs = 0;
-      let canBeExtendedByMs = sessionInfo.idleTimeout || 0;
-
-      const { now, idleTimeoutExpiration, lifespanExpiration } = sessionInfo;
-      if (idleTimeoutExpiration) {
-        expiresInMs = idleTimeoutExpiration - now;
-      }
-      if (
-        lifespanExpiration &&
-        (idleTimeoutExpiration === null || lifespanExpiration <= idleTimeoutExpiration)
-      ) {
-        expiresInMs = lifespanExpiration - now;
-        canBeExtendedByMs = 0;
-      }
-
       const nextState = {
         lastExtensionTime: Date.now(),
         expiresInMs,
-        canBeExtendedByMs,
+        canBeExtended,
       };
       this.sessionState$.next(nextState);
       if (this.channel) {
