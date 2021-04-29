@@ -27,9 +27,7 @@
     "yarn": "^1.21.1"
   },
   "devDependencies": {
-    "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
     "@kbn/es": "link:../packages/kbn-es",
-    "@kbn/expect": "link:../packages/kbn-expect",
     "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
     "@kbn/storybook": "link:../packages/kbn-storybook",
     "@kbn/test": "link:../packages/kbn-test"

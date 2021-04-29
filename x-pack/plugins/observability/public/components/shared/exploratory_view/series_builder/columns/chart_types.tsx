@@ -94,6 +94,7 @@ export function XYChartTypesSelect({
 
   return (
     <EuiSuperSelect
+      fullWidth
       compressed
       prepend="Chart type"
       valueOfSelected={value}
