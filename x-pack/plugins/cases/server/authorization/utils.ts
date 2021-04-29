@@ -19,8 +19,8 @@ export const getOwnersFilter = (savedObjectType: string, owners: string[]): Kuer
 };
 
 export const combineFilterWithAuthorizationFilter = (
-  filter: KueryNode | undefined,
-  authorizationFilter: KueryNode | undefined
+  filter?: KueryNode,
+  authorizationFilter?: KueryNode
 ) => {
   if (!filter && !authorizationFilter) {
     return;
@@ -49,9 +49,7 @@ export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean
   return true;
 };
 
-export const includeFieldsRequiredForAuthentication = (
-  fields: string[] | undefined
-): string[] | undefined => {
+export const includeFieldsRequiredForAuthentication = (fields?: string[]): string[] | undefined => {
   if (fields === undefined) {
     return;
   }

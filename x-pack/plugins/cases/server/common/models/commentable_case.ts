@@ -120,7 +120,6 @@ export class CommentableCase {
   }
 
   private get owner(): string {
-    // TODO: check for subCase?.attributes.owner here
     return this.collection.attributes.owner;
   }
 

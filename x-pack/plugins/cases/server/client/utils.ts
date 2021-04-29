@@ -180,7 +180,7 @@ export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode |
 /**
  * Creates a KueryNode from a string expression. Returns undefined if the expression is undefined.
  */
-export function stringToKueryNode(expression: string | undefined): KueryNode | undefined {
+export function stringToKueryNode(expression?: string): KueryNode | undefined {
   if (!expression) {
     return;
   }
