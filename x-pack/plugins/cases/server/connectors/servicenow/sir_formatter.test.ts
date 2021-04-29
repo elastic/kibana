@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseResponse } from '../../../common/api';
+import { CaseResponse } from '../../../common';
 import { serviceNowSIRExternalServiceFormatter } from './sir_formatter';
 
 describe('ITSM formatter', () => {
