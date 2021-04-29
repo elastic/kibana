@@ -12,8 +12,5 @@
     "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
     "watch": "yarn build --watch"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
