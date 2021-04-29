@@ -66,5 +66,9 @@ export default ({ getService }: FtrProviderContext): void => {
         count_in_progress_cases: 1,
       });
     });
+
+    describe('rbac', () => {
+      // TODO:
+    });
   });
 };

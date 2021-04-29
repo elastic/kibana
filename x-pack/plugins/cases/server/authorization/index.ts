@@ -222,4 +222,13 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
+  // stats operations
+  [ReadOperations.GetCaseStatuses]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'find-case-statuses',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };

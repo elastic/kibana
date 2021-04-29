@@ -27,6 +27,7 @@ import {
   excess,
   ContextTypeUserRt,
   AlertCommentRequestRt,
+  OWNER_FIELD,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import { AuditEvent } from '../../../security/server';
@@ -157,7 +158,7 @@ export const combineAuthorizedAndOwnerFilter = (
 ): KueryNode | undefined => {
   const ownerFilter = buildFilter({
     filters: owner,
-    field: 'owner',
+    field: OWNER_FIELD,
     operator: 'or',
     type: savedObjectType,
   });
@@ -241,7 +242,7 @@ export const constructQueryOptions = ({
     operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
-  const ownerFilter = buildFilter({ filters: owner ?? [], field: 'owner', operator: 'or' });
+  const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
 
   switch (caseType) {
     case CaseType.individual: {
@@ -570,9 +571,14 @@ interface OwnerEntity {
   id: string;
 }
 
+/**
+ * Function callback for making sure the found saved objects are of the authorized owner
+ */
+export type EnsureSOAuthCallback = (entities: OwnerEntity[]) => void;
+
 interface AuthFilterHelpers {
   filter?: KueryNode;
-  ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => void;
+  ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
   logSuccessfulAuthorization: () => void;
 }
 

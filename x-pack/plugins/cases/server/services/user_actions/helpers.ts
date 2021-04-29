@@ -17,6 +17,7 @@ import {
   User,
   UserActionFieldType,
   SubCaseAttributes,
+  OWNER_FIELD,
 } from '../../../common/api';
 import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
@@ -157,7 +158,7 @@ const userActionFieldsAllowed: UserActionField = [
   'status',
   'settings',
   'sub_case',
-  'owner',
+  OWNER_FIELD,
 ];
 
 interface CaseSubIDs {

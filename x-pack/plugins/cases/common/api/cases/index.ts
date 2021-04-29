@@ -11,3 +11,8 @@ export * from './comment';
 export * from './status';
 export * from './user_actions';
 export * from './sub_case';
+
+/**
+ * The field used for authorization in various entities within cases.
+ */
+export const OWNER_FIELD = 'owner';

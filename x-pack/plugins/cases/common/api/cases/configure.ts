@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 import { UserRT } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
 import { OmitProp } from '../runtime_types';
+import { OWNER_FIELD } from '.';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
@@ -17,10 +18,12 @@ const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-b
 const CasesConfigureBasicRt = rt.type({
   connector: CaseConnectorRt,
   closure_type: ClosureTypeRT,
-  owner: rt.string,
+  [OWNER_FIELD]: rt.string,
 });
 
-const CasesConfigureBasicWithoutOwnerRt = rt.type(OmitProp(CasesConfigureBasicRt.props, 'owner'));
+const CasesConfigureBasicWithoutOwnerRt = rt.type(
+  OmitProp(CasesConfigureBasicRt.props, OWNER_FIELD)
+);
 
 export const CasesConfigureRequestRt = CasesConfigureBasicRt;
 export const CasesConfigurePatchRt = rt.intersection([
@@ -45,12 +48,12 @@ export const CaseConfigureResponseRt = rt.intersection([
     id: rt.string,
     version: rt.string,
     error: rt.union([rt.string, rt.null]),
-    owner: rt.string,
+    [OWNER_FIELD]: rt.string,
   }),
 ]);
 
 export const GetConfigureFindRequestRt = rt.partial({
-  owner: rt.union([rt.array(rt.string), rt.string]),
+  [OWNER_FIELD]: rt.union([rt.array(rt.string), rt.string]),
 });
 
 export const CaseConfigureRequestParamsRt = rt.type({

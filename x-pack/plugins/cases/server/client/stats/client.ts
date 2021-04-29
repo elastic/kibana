@@ -7,8 +7,9 @@
 
 import { CasesClientArgs } from '..';
 import { CasesStatusResponse, CasesStatusResponseRt, caseStatuses } from '../../../common/api';
+import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, getAuthorizationFilter } from '../utils';
 
 /**
  * Statistics API contract.
@@ -30,18 +31,33 @@ async function getStatusTotalsByType({
   savedObjectsClient: soClient,
   caseService,
   logger,
+  authorization,
+  auditLogger,
 }: CasesClientArgs): Promise<CasesStatusResponse> {
   try {
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      operation: Operations.getCaseStatuses,
+      auditLogger,
+    });
+
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({ status });
+        const statusQuery = constructQueryOptions({ status, authorizationFilter });
         return caseService.findCaseStatusStats({
           soClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
+          ensureSavedObjectsAreAuthorized,
         });
       }),
     ]);
+
+    logSuccessfulAuthorization();
 
     return CasesStatusResponseRt.encode({
       count_open_cases: openCases,

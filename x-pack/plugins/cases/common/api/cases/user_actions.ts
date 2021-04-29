@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { OWNER_FIELD } from '.';
 
 import { UserRT } from '../user';
 
@@ -22,7 +23,7 @@ const UserActionFieldTypeRt = rt.union([
   rt.literal('status'),
   rt.literal('settings'),
   rt.literal('sub_case'),
-  rt.literal('owner'),
+  rt.literal(OWNER_FIELD),
 ]);
 const UserActionFieldRt = rt.array(UserActionFieldTypeRt);
 const UserActionRt = rt.union([

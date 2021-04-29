@@ -32,6 +32,7 @@ import {
   caseTypeField,
   CasesFindRequest,
   CaseStatuses,
+  OWNER_FIELD,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -48,6 +49,8 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
+import { EnsureSOAuthCallback } from '../../client/utils';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 interface PushedArgs {
   pushed_at: string;
@@ -298,9 +301,11 @@ export class CaseService {
     soClient,
     caseOptions,
     subCaseOptions,
+    ensureSavedObjectsAreAuthorized,
   }: {
     soClient: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptionsKueryNode;
+    ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
     const casesStats = await this.findCases({
@@ -337,11 +342,16 @@ export class CaseService {
       soClient,
       options: {
         ...caseOptions,
-        fields: [caseTypeField],
+        fields: includeFieldsRequiredForAuthentication([caseTypeField]),
         page: 1,
         perPage: casesStats.total,
       },
     });
+
+    // make sure that the retrieved cases were correctly filtered by owner
+    ensureSavedObjectsAreAuthorized(
+      cases.saved_objects.map((caseInfo) => ({ id: caseInfo.id, owner: caseInfo.attributes.owner }))
+    );
 
     const caseIds = cases.saved_objects
       .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
@@ -922,7 +932,7 @@ export class CaseService {
       this.log.debug(`Attempting to GET all reporters`);
       const firstReporters = await soClient.find({
         type: CASE_SAVED_OBJECT,
-        fields: ['created_by', 'owner'],
+        fields: ['created_by', OWNER_FIELD],
         page: 1,
         perPage: 1,
         filter: cloneDeep(filter),
@@ -930,7 +940,7 @@ export class CaseService {
 
       return await soClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
-        fields: ['created_by', 'owner'],
+        fields: ['created_by', OWNER_FIELD],
         page: 1,
         perPage: firstReporters.total,
         filter: cloneDeep(filter),
@@ -949,7 +959,7 @@ export class CaseService {
       this.log.debug(`Attempting to GET all cases`);
       const firstTags = await soClient.find({
         type: CASE_SAVED_OBJECT,
-        fields: ['tags', 'owner'],
+        fields: ['tags', OWNER_FIELD],
         page: 1,
         perPage: 1,
         filter: cloneDeep(filter),
@@ -957,7 +967,7 @@ export class CaseService {
 
       return await soClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
-        fields: ['tags', 'owner'],
+        fields: ['tags', OWNER_FIELD],
         page: 1,
         perPage: firstTags.total,
         filter: cloneDeep(filter),
