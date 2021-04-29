@@ -83,8 +83,7 @@ const PieOptions = (props: PieOptionsProps) => {
     const bwcLegendStateDefault = stateParams.addLegend == null ? false : stateParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-  const hasSplitChart =
-    Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled)) ?? false;
+  const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   useEffect(() => {
