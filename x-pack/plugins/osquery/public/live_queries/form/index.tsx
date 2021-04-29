@@ -12,13 +12,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
 
-import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
+import { UseField, Form, FormData, useForm, useFormData, FIELD_TYPES } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../queries/edit/tabs';
+import { queryFieldValidation } from '../../common/validations';
+import { fieldValidators } from '../../shared_imports';
 
 const FORM_ID = 'liveQueryForm';
+
+export const MAX_QUERY_LENGTH = 2000;
 
 interface LiveQueryFormProps {
   defaultValue?: Partial<FormData> | undefined;
@@ -50,9 +54,27 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   );
 
+  const formSchema = {
+    query: {
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: fieldValidators.maxLengthField({
+            length: MAX_QUERY_LENGTH,
+            message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+              defaultMessage: 'Query is too large (max {maxLength} characters)',
+              values: { maxLength: MAX_QUERY_LENGTH },
+            }),
+          }),
+        },
+        { validator: queryFieldValidation },
+      ],
+    },
+  };
+
   const { form } = useForm({
     id: FORM_ID,
-    // schema: formSchema,
+    schema: formSchema,
     onSubmit: (payload) => {
       return mutateAsync(payload);
     },
@@ -60,10 +82,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       stripEmptyFields: false,
     },
     defaultValue: defaultValue ?? {
-      query: {
-        id: null,
-        query: '',
-      },
+      query: '',
     },
   });
 
@@ -85,16 +104,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [agentSelection]
   );
 
-  const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
+  const queryValueProvided = useMemo(() => !!query?.length, [query]);
 
   const queryStatus = useMemo(() => {
     if (!agentSelected) return 'disabled';
-    if (isError) return 'danger';
+    if (isError || !form.getFields().query.isValid) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 
     return 'incomplete';
-  }, [agentSelected, isError, isLoading, isSuccess]);
+  }, [agentSelected, isError, isLoading, isSuccess, form]);
 
   const resultsStatus = useMemo(() => (queryStatus === 'complete' ? 'incomplete' : 'disabled'), [
     queryStatus,
