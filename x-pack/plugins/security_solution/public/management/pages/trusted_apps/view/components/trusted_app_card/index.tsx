@@ -31,7 +31,7 @@ import {
   ENTRY_PROPERTY_TITLES,
   CARD_DELETE_BUTTON_LABEL,
   CONDITION_FIELD_TITLE,
-  OPERATOR_TITLE,
+  OPERATOR_TITLES,
   CARD_EDIT_BUTTON_LABEL,
 } from '../../translations';
 
@@ -45,7 +45,7 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     truncateText: true,
     textOnly: true,
     width: '30%',
-    render(field: Entry['field'], entry: Entry) {
+    render(field: Entry['field'], _entry: Entry) {
       return CONDITION_FIELD_TITLE[field];
     },
   },
@@ -55,8 +55,8 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     sortable: false,
     truncateText: true,
     width: '20%',
-    render(field: Entry['operator'], entry: Entry) {
-      return OPERATOR_TITLE[field];
+    render(_field: Entry['operator'], entry: Entry) {
+      return entry.type === 'wildcard' ? OPERATOR_TITLES.matches : OPERATOR_TITLES.is;
     },
   },
   {
