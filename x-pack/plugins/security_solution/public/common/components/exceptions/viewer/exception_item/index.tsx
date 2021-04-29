@@ -36,6 +36,7 @@ export interface ExceptionItemProps {
   commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showName?: boolean;
   /* Should the Modified by/on data be shown on the card */
   showModified?: boolean;
 }
@@ -47,6 +48,7 @@ const ExceptionItemComponent = ({
   onDeleteException,
   onEditException,
   showModified = false,
+  showName = false,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -90,6 +92,7 @@ const ExceptionItemComponent = ({
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
               showModified={showModified}
+              showName={showName}
             />
             <ExceptionEntries
               disableDelete={disableDelete}

@@ -70,12 +70,23 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
  * Formats ExceptionItem details for description list component
  *
  * @param exceptionItem an ExceptionItem
+ * @param includeModified if modified information should be included
+ * @param includeName if the Name should be included
  */
 export const getDescriptionListContent = (
   exceptionItem: ExceptionListItemSchema,
-  includeModified: boolean = false
+  includeModified: boolean = false,
+  includeName: boolean = false
 ): DescriptionListItem[] => {
   const details = [
+    ...(includeName
+      ? [
+          {
+            title: i18n.NAME,
+            value: exceptionItem.name,
+          },
+        ]
+      : []),
     {
       title: i18n.OPERATING_SYSTEM,
       value: formatOperatingSystems(exceptionItem.os_types),

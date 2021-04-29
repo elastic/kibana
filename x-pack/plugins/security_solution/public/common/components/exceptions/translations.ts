@@ -46,6 +46,10 @@ export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptions.crea
   defaultMessage: 'Created by',
 });
 
+export const NAME = i18n.translate('xpack.securitySolution.exceptions.nameLabel', {
+  defaultMessage: 'Name',
+});
+
 export const DATE_MODIFIED = i18n.translate('xpack.securitySolution.exceptions.dateModifiedLabel', {
   defaultMessage: 'Date modified',
 });

@@ -90,6 +90,7 @@ export const EventFiltersListPage = memo(() => {
       onEditException: handleItemEdit,
       onDeleteException: handleItemDelete,
       showModified: true,
+      showName: true,
     }),
     [handleItemDelete, handleItemEdit]
   );
