@@ -572,7 +572,6 @@ class TimeseriesChartIntl extends Component {
       showAnnotations,
       showForecast,
       showModelBounds,
-
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
@@ -641,7 +640,7 @@ class TimeseriesChartIntl extends Component {
       let yMax = 0;
 
       let combinedData = data;
-      if (focusForecastData !== undefined && focusForecastData.length > 0) {
+      if (showForecast && focusForecastData !== undefined && focusForecastData.length > 0) {
         combinedData = data.concat(focusForecastData);
       }
 
@@ -969,7 +968,6 @@ class TimeseriesChartIntl extends Component {
       contextForecastData,
       modelPlotEnabled,
       annotationData,
-      showAnnotations,
     } = this.props;
     const data = contextChartData;
 
@@ -985,8 +983,10 @@ class TimeseriesChartIntl extends Component {
       contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
     each(combinedData, (item) => {
-      valuesRange.min = Math.min(item.value, valuesRange.min);
-      valuesRange.max = Math.max(item.value, valuesRange.max);
+      const lowerBound = item.lower ?? Number.MAX_VALUE;
+      const upperBound = item.upper ?? Number.MIN_VALUE;
+      valuesRange.min = Math.min(item.value, lowerBound, valuesRange.min);
+      valuesRange.max = Math.max(item.value, upperBound, valuesRange.max);
     });
     let dataMin = valuesRange.min;
     let dataMax = valuesRange.max;
@@ -1022,9 +1022,7 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
-    const brushChartHeight = showAnnotations
-      ? cxtChartHeight + swlHeight + annotationHeight
-      : cxtChartHeight + swlHeight;
+    const brushChartHeight = cxtChartHeight + swlHeight + annotationHeight;
 
     // Add borders left and right.
     borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);
@@ -1099,7 +1097,7 @@ class TimeseriesChartIntl extends Component {
     const ctxAnnotations = cxtGroup
       .select('.mlContextAnnotations')
       .selectAll('g.mlContextAnnotation')
-      .data(showAnnotations && annotationData ? annotationData : [], (d) => d._id || '');
+      .data(annotationData, (d) => d._id || '');
 
     ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
 
@@ -1144,7 +1142,6 @@ class TimeseriesChartIntl extends Component {
         return width;
       });
 
-    ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
     ctxAnnotationRects.exit().remove();
 
     // Create the path elements for the forecast value line and bounds area.
