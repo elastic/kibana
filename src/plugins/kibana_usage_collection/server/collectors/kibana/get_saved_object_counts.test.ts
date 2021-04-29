@@ -9,13 +9,11 @@
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
-export function mockGetSavedObjectsCounts(params: any) {
+export function mockGetSavedObjectsCounts<TBody>(params: TBody) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   esClient.search.mockResolvedValue(
     // @ts-expect-error we only care about the response body
-    {
-      body: { ...params },
-    }
+    { body: { ...params } }
   );
   return esClient;
 }

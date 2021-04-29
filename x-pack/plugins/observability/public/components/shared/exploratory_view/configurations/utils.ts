@@ -19,6 +19,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     breakdown,
     filters,
     reportDefinitions,
+    dataType,
     ...restSeries
   } = series;
 
@@ -29,6 +30,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.BREAK_DOWN]: breakdown,
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
+    [URL_KEYS.DATA_TYPE]: dataType,
     ...restSeries,
   };
 }
@@ -48,10 +50,18 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
   );
 }
 
-export function buildPhraseFilter(field: string, value: any, indexPattern: IIndexPattern) {
+export function buildPhraseFilter(field: string, value: string, indexPattern: IIndexPattern) {
   const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildPhrasesFilter(field: string, value: string[], indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
   }
   return [];
 }
