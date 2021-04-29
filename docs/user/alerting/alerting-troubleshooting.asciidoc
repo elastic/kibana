@@ -53,3 +53,19 @@ Alerting and action tasks are identified by their type.
 When diagnosing issues related to Alerting, focus on the tasks that begin with `alerting:` and `actions:`.
 
 For more details on monitoring and diagnosing task execution in Task Manager, see <<task-manager-health-monitoring>>.
+
+[float]
+[[connector-tls-settings]]
+=== Connectors have TLS errors when executing actions
+
+*Problem*:
+
+When executing actions, a connector gets a TLS socket error when connecting to
+the server.
+
+*Resolution*:
+
+Configuration options are available to specialize connections to TLS servers,
+including ignoring server certificate validation, and providing certificate
+authority data to verify servers using custom certificates.  For more details, 
+see <<action-settings,Action settings>>.
