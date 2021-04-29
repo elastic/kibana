@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
@@ -31,7 +31,9 @@ export const getLegendActions = (
     const [isfilterable, setIsfilterable] = useState(true);
     const filterData = getFilterEventData(pieSeries);
 
-    (async () => setIsfilterable(await canFilter(filterData, actions)))();
+    useEffect(() => {
+      (async () => setIsfilterable(await canFilter(filterData, actions)))();
+    }, [filterData]);
 
     if (!isfilterable || !filterData) {
       return null;

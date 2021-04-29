@@ -54,7 +54,7 @@ export class VisTypeVislibPlugin
       // Register only non-replaced vis types
       convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
-      [createVisTypeVislibVisFn()].forEach(expressions.registerFunction);
+      expressions.registerFunction(createVisTypeVislibVisFn());
     } else {
       // Register all vis types
       visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);

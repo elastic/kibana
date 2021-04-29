@@ -122,7 +122,7 @@ export const getLayers = (
             defaultMessage: '(empty)',
           });
         }
-        if (col?.meta?.params) {
+        if (col.format) {
           return formatter.deserialize(col.format).convert(d) ?? '';
         }
         return String(d);
