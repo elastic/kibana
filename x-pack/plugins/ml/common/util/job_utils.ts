@@ -235,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'not a viewable time series job',
+      defaultMessage: 'it is not a viewable time series job',
     });
   }
 }
