@@ -54,8 +54,7 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
 
 /**
  * For all the mapping types, add each with their names below and grouped with
- * key values. If a mapping is duplicated because more than one transform shares it,
- * that will be ok as we will not installs the mapping twice.
+ * key values.
  */
 export const installableMappings: Record<ModuleNames, Mappings[]> = {
   [ModuleNames.hostSummaryMetrics]: [hostMetricsMapping],
