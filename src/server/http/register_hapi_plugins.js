@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import HapiTemplates from 'vision';
+import HapiTemplates from '@hapi/vision';
 import HapiStaticFiles from '@hapi/inert';
 import HapiProxy from 'h2o2';
 
