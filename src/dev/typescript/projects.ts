@@ -26,7 +26,7 @@ export const PROJECTS = [
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/ftr_e2e/tsconfig.json'), {
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/ftr_e2e/cypress/tsconfig.json'), {
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
