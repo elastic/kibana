@@ -62,7 +62,7 @@ export const OPERATING_SYSTEM = i18n.translate(
 );
 
 export const OPERATING_SYSTEM_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.operatingSystemLabel',
+  'xpack.securitySolution.exceptions.operatingSystemFullLabel',
   {
     defaultMessage: 'Operating System',
   }
