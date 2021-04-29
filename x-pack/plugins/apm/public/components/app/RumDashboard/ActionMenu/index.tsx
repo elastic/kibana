@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   createExploratoryViewUrl,
@@ -21,6 +26,14 @@ const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
   defaultMessage: 'Analyze data',
 });
 
+const ANALYZE_MESSAGE = i18n.translate(
+  'xpack.apm.analyzeDataButtonLabel.message',
+  {
+    defaultMessage:
+      'EXPERIMENTAL - Analyze Data allows to select and filter result data in any dimensions and look for the cause or impact of performance problems.',
+  }
+);
+
 export function UXActionMenu({
   appMountParameters,
 }: {
@@ -32,7 +45,7 @@ export function UXActionMenu({
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom } = urlParams;
 
-  const syntheticExploratoryViewLink = createExploratoryViewUrl(
+  const uxExploratoryViewLink = createExploratoryViewUrl(
     {
       'ux-series': {
         dataType: 'ux',
@@ -52,13 +65,15 @@ export function UXActionMenu({
         style={{ paddingRight: 20 }}
       >
         <EuiFlexItem>
-          <EuiButtonEmpty
-            href={syntheticExploratoryViewLink}
-            color="primary"
-            iconType="visBarVerticalStacked"
-          >
-            {ANALYZE_DATA}
-          </EuiButtonEmpty>
+          <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+            <EuiButtonEmpty
+              href={uxExploratoryViewLink}
+              color="primary"
+              iconType="visBarVerticalStacked"
+            >
+              {ANALYZE_DATA}
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </HeaderMenuPortal>

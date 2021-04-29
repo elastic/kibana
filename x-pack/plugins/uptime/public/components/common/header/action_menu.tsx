@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -24,6 +24,11 @@ const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
 
 const ANALYZE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
   defaultMessage: 'Analyze data',
+});
+
+const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
+  defaultMessage:
+    'EXPERIMENTAL - Analyze Data allows to select and filter result data in any dimensions and look for the cause or impact of performance problems.',
 });
 
 export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => {
@@ -45,13 +50,15 @@ export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMoun
     <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
       <EuiFlexGroup alignItems="flexEnd" responsive={false} style={{ paddingRight: 20 }}>
         <EuiFlexItem>
-          <EuiButtonEmpty
-            href={syntheticExploratoryViewLink}
-            color="primary"
-            iconType="visBarVerticalStacked"
-          >
-            {ANALYZE_DATA}
-          </EuiButtonEmpty>
+          <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+            <EuiButtonEmpty
+              href={syntheticExploratoryViewLink}
+              color="primary"
+              iconType="visBarVerticalStacked"
+            >
+              {ANALYZE_DATA}
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
