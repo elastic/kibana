@@ -29,6 +29,7 @@ import {
   EuiFieldNumber,
   EuiProgress,
   EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
@@ -102,6 +103,7 @@ export const SearchExamplesApp = ({
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
     setRawResponse(response.rawResponse);
@@ -241,7 +243,7 @@ export const SearchExamplesApp = ({
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const res = await searchSource.fetch$().toPromise();
+      const { rawResponse: res } = await searchSource.fetch$().toPromise();
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
@@ -269,6 +271,7 @@ export const SearchExamplesApp = ({
   };
 
   const onPartialResultsClickHandler = () => {
+    setSelectedTab(1);
     const req = {
       params: {
         n: fibonacciN,
@@ -326,7 +329,7 @@ export const SearchExamplesApp = ({
     doSearchSourceSearch(withOtherBucket);
   };
 
-  const reqTabs = [
+  const reqTabs: EuiTabbedContentTab[] = [
     {
       id: 'request',
       name: <EuiText data-test-subj="requestTab">Request</EuiText>,
@@ -643,7 +646,11 @@ export const SearchExamplesApp = ({
             </EuiFlexItem>
 
             <EuiFlexItem style={{ width: '60%' }}>
-              <EuiTabbedContent tabs={reqTabs} />
+              <EuiTabbedContent
+                tabs={reqTabs}
+                selectedTab={reqTabs[selectedTab]}
+                onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

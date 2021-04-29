@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
+      await testSubjects.click('/search');
     });
 
     it('should update a progress bar', async () => {
