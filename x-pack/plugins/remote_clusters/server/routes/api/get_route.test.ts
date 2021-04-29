@@ -48,6 +48,13 @@ describe('GET remote clusters', () => {
   let remoteInfoMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['remoteInfo'];
   let getSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['getSettings'];
 
+  const createMockRequest = () =>
+    httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: API_BASE_PATH,
+      headers: { authorization: 'foo' },
+    });
+
   const createMockRouteDependencies = () => ({
     router: httpServiceMock.createRouter(),
     getLicenseStatus: () => ({ valid: true }),
@@ -107,11 +114,7 @@ describe('GET remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: API_BASE_PATH,
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -138,11 +141,7 @@ describe('GET remote clusters', () => {
       getSettingsMockFn.mockResolvedValueOnce(createApiResponse({ body: {} as any }));
       remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: API_BASE_PATH,
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -166,11 +165,7 @@ describe('GET remote clusters', () => {
     test('returns an error if failure to get cluster settings', async () => {
       getSettingsMockFn.mockRejectedValueOnce(error);
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: API_BASE_PATH,
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 

@@ -59,6 +59,21 @@ describe('ADD remote clusters', () => {
     },
   });
 
+  const createMockRequest = (
+    body: Record<string, any> = {
+      name: 'test',
+      seeds: ['127.0.0.1:9300'],
+      mode: 'sniff',
+      skipUnavailable: false,
+    }
+  ) =>
+    httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: API_BASE_PATH,
+      body,
+      headers: { authorization: 'foo' },
+    });
+
   beforeEach(() => {
     mockContext = xpackMocks.createRequestHandlerContext();
     scopedClusterClientMock = mockContext.core.elasticsearch.client;
@@ -98,17 +113,7 @@ describe('ADD remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'post',
-        path: API_BASE_PATH,
-        body: {
-          name: 'test',
-          seeds: ['127.0.0.1:9300'],
-          mode: 'sniff',
-          skipUnavailable: false,
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -163,17 +168,12 @@ describe('ADD remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'post',
-        path: API_BASE_PATH,
-        body: {
-          name: 'test',
-          proxyAddress: '127.0.0.1:9300',
-          mode: 'proxy',
-          skipUnavailable: false,
-          serverName: 'foobar',
-        },
-        headers: { authorization: 'foo' },
+      const mockRequest = createMockRequest({
+        name: 'test',
+        proxyAddress: '127.0.0.1:9300',
+        mode: 'proxy',
+        skipUnavailable: false,
+        serverName: 'foobar',
       });
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
@@ -222,17 +222,7 @@ describe('ADD remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'post',
-        path: API_BASE_PATH,
-        body: {
-          name: 'test',
-          seeds: ['127.0.0.1:9300'],
-          skipUnavailable: false,
-          mode: 'sniff',
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -249,17 +239,7 @@ describe('ADD remote clusters', () => {
       remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
       putSettingsMockFn.mockResolvedValueOnce(createApiResponse({ body: {} as any }));
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'post',
-        path: API_BASE_PATH,
-        body: {
-          name: 'test',
-          seeds: ['127.0.0.1:9300'],
-          skipUnavailable: false,
-          mode: 'sniff',
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 

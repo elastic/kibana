@@ -46,6 +46,19 @@ describe('UPDATE remote clusters', () => {
   let remoteInfoMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['remoteInfo'];
   let putSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['putSettings'];
 
+  const createMockRequest = (
+    body: Record<string, any> = { seeds: ['127.0.0.1:9300'], skipUnavailable: true, mode: 'sniff' }
+  ) =>
+    httpServerMock.createKibanaRequest({
+      method: 'put',
+      path: `${API_BASE_PATH}/{name}`,
+      params: {
+        name: 'test',
+      },
+      body,
+      headers: { authorization: 'foo' },
+    });
+
   const createMockRouteDependencies = () => ({
     router: httpServiceMock.createRouter(),
     getLicenseStatus: () => ({ valid: true }),
@@ -110,15 +123,7 @@ describe('UPDATE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: `${API_BASE_PATH}/{name}`,
-        params: {
-          name: 'test',
-        },
-        body: { seeds: ['127.0.0.1:9300'], skipUnavailable: true, mode: 'sniff' },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -195,21 +200,13 @@ describe('UPDATE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: `${API_BASE_PATH}/{name}`,
-        params: {
-          name: 'test',
-        },
-        body: {
-          proxyAddress: '127.0.0.1:9300',
-          skipUnavailable: true,
-          mode: 'proxy',
-          hasDeprecatedProxySetting: true,
-          serverName: '',
-          proxySocketConnections: 18,
-        },
-        headers: { authorization: 'foo' },
+      const mockRequest = createMockRequest({
+        proxyAddress: '127.0.0.1:9300',
+        skipUnavailable: true,
+        mode: 'proxy',
+        hasDeprecatedProxySetting: true,
+        serverName: '',
+        proxySocketConnections: 18,
       });
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
@@ -257,18 +254,10 @@ describe('UPDATE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: `${API_BASE_PATH}/{name}`,
-        params: {
-          name: 'test',
-        },
-        body: {
-          seeds: ['127.0.0.1:9300'],
-          skipUnavailable: false,
-          mode: 'sniff',
-        },
-        headers: { authorization: 'foo' },
+      const mockRequest = createMockRequest({
+        seeds: ['127.0.0.1:9300'],
+        skipUnavailable: false,
+        mode: 'sniff',
       });
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
@@ -304,18 +293,10 @@ describe('UPDATE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: `${API_BASE_PATH}/{name}`,
-        params: {
-          name: 'test',
-        },
-        body: {
-          seeds: ['127.0.0.1:9300'],
-          skipUnavailable: false,
-          mode: 'sniff',
-        },
-        headers: { authorization: 'foo' },
+      const mockRequest = createMockRequest({
+        seeds: ['127.0.0.1:9300'],
+        skipUnavailable: false,
+        mode: 'sniff',
       });
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);

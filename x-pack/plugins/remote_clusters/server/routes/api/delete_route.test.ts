@@ -46,6 +46,25 @@ describe('DELETE remote clusters', () => {
   let getSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['getSettings'];
   let putSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['putSettings'];
 
+  const createMockRequest = (
+    body: Record<string, any> = {
+      name: 'test',
+      proxyAddress: '127.0.0.1:9300',
+      mode: 'proxy',
+      skipUnavailable: false,
+      serverName: 'foobar',
+    }
+  ) =>
+    httpServerMock.createKibanaRequest({
+      method: 'delete',
+      path: `${API_BASE_PATH}/{nameOrNames}`,
+      params: {
+        nameOrNames: 'test',
+      },
+      body,
+      headers: { authorization: 'foo' },
+    });
+
   const createMockRouteDependencies = () => ({
     router: httpServiceMock.createRouter(),
     getLicenseStatus: () => ({ valid: true }),
@@ -115,21 +134,7 @@ describe('DELETE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'delete',
-        path: `${API_BASE_PATH}/{nameOrNames}`,
-        params: {
-          nameOrNames: 'test',
-        },
-        body: {
-          name: 'test',
-          proxyAddress: '127.0.0.1:9300',
-          mode: 'proxy',
-          skipUnavailable: false,
-          serverName: 'foobar',
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -183,21 +188,7 @@ describe('DELETE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'delete',
-        path: `${API_BASE_PATH}/{nameOrNames}`,
-        params: {
-          nameOrNames: 'test',
-        },
-        body: {
-          name: 'test',
-          proxyAddress: '127.0.0.1:9300',
-          mode: 'proxy',
-          skipUnavailable: false,
-          serverName: 'foobar',
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -286,21 +277,7 @@ describe('DELETE remote clusters', () => {
         })
       );
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'delete',
-        path: `${API_BASE_PATH}/{nameOrNames}`,
-        params: {
-          nameOrNames: 'test',
-        },
-        body: {
-          name: 'test',
-          proxyAddress: '127.0.0.1:9300',
-          mode: 'proxy',
-          skipUnavailable: false,
-          serverName: 'foobar',
-        },
-        headers: { authorization: 'foo' },
-      });
+      const mockRequest = createMockRequest();
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
