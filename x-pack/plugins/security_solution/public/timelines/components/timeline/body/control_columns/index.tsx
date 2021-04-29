@@ -26,7 +26,6 @@ export type RowCellRender =
 interface AdditionalControlColumnProps {
   ariaRowindex: number;
   actionsColumnWidth: number;
-  additionalActions?: JSX.Element[];
   columnValues: string;
   checked: boolean;
   onRowSelected: OnRowSelected;
