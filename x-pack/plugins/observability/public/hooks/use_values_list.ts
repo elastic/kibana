@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, merge } from 'lodash';
+import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { IndexPattern } from '../../../../../src/plugins/data/common';
@@ -98,7 +98,7 @@ export const useValuesList = ({
 
     if (keepHistory && query) {
       setValues((prevState) => {
-        return merge(newValues, prevState);
+        return union(newValues, prevState);
       });
     } else {
       setValues(newValues);
