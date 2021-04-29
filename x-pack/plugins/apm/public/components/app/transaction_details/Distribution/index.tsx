@@ -145,7 +145,7 @@ export function TransactionDistribution({
       return (
         <CustomTooltip
           {...props}
-          hasSamples={isEmpty(selectedDistribution?.samples)}
+          isSamplesEmpty={isEmpty(selectedDistribution?.samples)}
           serie={serie}
           timeFormatter={timeFormatter}
         />

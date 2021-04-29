@@ -15,12 +15,12 @@ import { formatYLong, IChartPoint } from './';
 export function CustomTooltip(
   props: TooltipInfo & {
     serie?: IChartPoint;
-    hasSamples: boolean;
+    isSamplesEmpty: boolean;
     timeFormatter: TimeFormatter;
   }
 ) {
   const theme = useTheme();
-  const { values, header, serie, hasSamples, timeFormatter } = props;
+  const { values, header, serie, isSamplesEmpty, timeFormatter } = props;
   const { color, value } = values[0];
 
   let headerTitle = `${timeFormatter(header?.value)}`;
@@ -52,7 +52,7 @@ export function CustomTooltip(
           </div>
         </div>
       </>
-      {hasSamples && (
+      {isSamplesEmpty && (
         <div style={{ padding: theme.eui.paddingSizes.xs, display: 'flex' }}>
           <EuiIcon type="iInCircle" />
           <EuiText size="xs">
