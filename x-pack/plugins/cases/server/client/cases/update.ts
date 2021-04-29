@@ -38,7 +38,7 @@ import {
   AssociationType,
   CommentAttributes,
   User,
-} from '../../../common/api';
+} from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
   getCaseToUpdate,
