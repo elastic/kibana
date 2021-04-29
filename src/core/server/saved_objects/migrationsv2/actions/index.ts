@@ -457,16 +457,14 @@ export interface ReadWithPit {
 export const readWithPit = (
   client: ElasticsearchClient,
   pitId: string,
-  /* When reading we use a source query to exclude saved objects types which
-   * are no longer used. These saved objects will still be kept in the outdated
-   * index for backup purposes, but won't be available in the upgraded index.
-   */
-  unusedTypesQuery: Option.Option<estypes.QueryContainer>,
+  query: estypes.QueryContainer | undefined,
   batchSize: number,
-  searchAfter?: number[]
+  searchAfter?: number[],
+  seqNoPrimaryTerm?: boolean
 ): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> => () => {
   return client
     .search<SavedObjectsRawDoc>({
+      seq_no_primary_term: seqNoPrimaryTerm,
       body: {
         // Sort fields are required to use searchAfter
         sort: {
@@ -479,8 +477,7 @@ export const readWithPit = (
         // Improve performance by not calculating the total number of hits
         // matching the query.
         track_total_hits: false,
-        // Exclude saved object types
-        query: Option.isSome(unusedTypesQuery) ? unusedTypesQuery.value : undefined,
+        query,
       },
     })
     .then((response) => {
@@ -569,7 +566,7 @@ export const reindex = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: Option.Option<estypes.QueryContainer>
+  unusedTypesQuery: estypes.QueryContainer | undefined
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -584,10 +581,7 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
-            () => undefined,
-            (query) => query
-          )(unusedTypesQuery),
+          query: unusedTypesQuery,
         },
         dest: {
           index: targetIndex,
@@ -997,6 +991,8 @@ interface SearchForOutdatedDocumentsOptions {
  * Search for outdated saved object documents with the provided query. Will
  * return one batch of documents. Searching should be repeated until no more
  * outdated documents can be found.
+ *
+ * Used for testing only
  */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
