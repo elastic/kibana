@@ -50,7 +50,6 @@
           "lineNumber": 23
         },
         "tags": [
-          "Link",
           "constructor"
         ],
         "returnComment": [],
@@ -63,7 +62,7 @@
         "type": "Interface",
         "label": "TrackApplicationViewProps",
         "description": [
-          "\nProps to provide to the {@Link TrackApplicationView} component."
+          "\nProps to provide to the {@link TrackApplicationView} component."
         ],
         "tags": [
           "public"
