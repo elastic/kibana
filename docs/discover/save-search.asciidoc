@@ -13,9 +13,8 @@ image::discover/images/saved-search.png[Example of Discover's save search option
 A saved search stores the query text, filters, and
 current view of *Discover*&mdash;the columns selected in the document table,
 the sort order, and the index pattern.
-Saved searches are different from <<save-load-delete-query,saved queries>>, which store
-query text, filters, and the time filter, and are available in any app with a query bar.
-
+Saved searches are different from <<save-load-delete-query,saved queries>>, which
+are primarily used for storing query text and are available in any app with a query bar.
 
 [role="xpack"]
 [[discover-read-only-access]]
