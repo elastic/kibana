@@ -20,6 +20,14 @@ export const getFormEntry = (
   return state.form.entry;
 };
 
+export const getNewComment = (state: EventFiltersListPageState): string => {
+  return state.form.newComment;
+};
+
+export const getHasNameError = (state: EventFiltersListPageState): boolean => {
+  return state.form.hasNameError;
+};
+
 export const getFormHasError = (state: EventFiltersListPageState): boolean => {
   return state.form.hasItemsError || state.form.hasNameError || state.form.hasOSError;
 };

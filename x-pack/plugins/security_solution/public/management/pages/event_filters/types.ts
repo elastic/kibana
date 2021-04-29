@@ -20,6 +20,7 @@ export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
   form: {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
+    newComment: string;
     hasNameError: boolean;
     hasItemsError: boolean;
     hasOSError: boolean;

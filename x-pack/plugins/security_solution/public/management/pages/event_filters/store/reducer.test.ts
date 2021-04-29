@@ -37,9 +37,10 @@ describe('reducer', () => {
     it('change form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
+      const newComment = 'new comment';
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersChangeForm',
-        payload: { entry: { ...entry, name: nameChanged } },
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
       });
 
       expect(result).toStrictEqual({
@@ -50,6 +51,7 @@ describe('reducer', () => {
             ...entry,
             name: nameChanged,
           },
+          newComment,
           hasNameError: false,
           submissionResourceState: {
             type: 'UninitialisedResourceState',

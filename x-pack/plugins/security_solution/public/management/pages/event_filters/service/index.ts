@@ -14,6 +14,7 @@ export interface EventFiltersService {
   addEventFilters(
     exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema>;
+  getOne(id: string): Promise<ExceptionListItemSchema>;
 }
 export class EventFiltersHttpService implements EventFiltersService {
   private listHasBeenCreated: boolean;
@@ -42,6 +43,15 @@ export class EventFiltersHttpService implements EventFiltersService {
   async addEventFilters(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
     return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
+    });
+  }
+
+  async getOne(id: string) {
+    return (await this.httpWrapper()).get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
     });
   }
 }

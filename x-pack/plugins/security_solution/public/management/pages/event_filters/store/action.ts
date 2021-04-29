@@ -15,12 +15,19 @@ export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   };
 };
 
+export type EventFiltersInitFormFromId = Action<'eventFiltersInitFormFromId'> & {
+  payload: {
+    id: string;
+  };
+};
+
 export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
   payload: {
     entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
     hasNameError?: boolean;
     hasItemsError?: boolean;
     hasOSError?: boolean;
+    newComment?: string;
   };
 };
 
@@ -39,6 +46,7 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 export type EventFiltersPageAction =
   | EventFiltersCreateStart
   | EventFiltersInitForm
+  | EventFiltersInitFormFromId
   | EventFiltersChangeForm
   | EventFiltersCreateStart
   | EventFiltersCreateSuccess

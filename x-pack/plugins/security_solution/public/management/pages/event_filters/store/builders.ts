@@ -15,6 +15,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasNameError: false,
     hasItemsError: false,
     hasOSError: false,
+    newComment: '',
     submissionResourceState: { type: 'UninitialisedResourceState' },
   },
   location: {

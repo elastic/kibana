@@ -18,6 +18,7 @@ export const EventFiltersListPage = memo(() => {
   const location = useEventFiltersSelector(getCurrentLocation);
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
+  const exceptionId = location.id;
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -52,7 +53,9 @@ export const EventFiltersListPage = memo(() => {
       {/* <PaginatedContent />*/}
       {/* TODO: Display this only when list is empty (there are no endpoint events) */}
       <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
-      {showFlyout ? <EventFiltersFlyout onCancel={handleCancelButtonClick} /> : null}
+      {showFlyout ? (
+        <EventFiltersFlyout onCancel={handleCancelButtonClick} id={exceptionId} />
+      ) : null}
     </AdministrationListPage>
   );
 });

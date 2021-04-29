@@ -6,7 +6,13 @@
  */
 
 import { initialEventFiltersPageState } from './builders';
-import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
+import {
+  getFormEntry,
+  getFormHasError,
+  getCurrentLocation,
+  getNewComment,
+  getHasNameError,
+} from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 import { EventFiltersPageLocation } from '../types';
@@ -29,6 +35,31 @@ describe('selectors', () => {
         },
       };
       expect(getFormEntry(state)).toBe(entry);
+    });
+  });
+  describe('getHasNameError()', () => {
+    it('returns false when there is no entry', () => {
+      expect(getHasNameError(initialState)).toBeFalsy();
+    });
+    it('returns true when entry with name error', () => {
+      const state = {
+        ...initialState,
+        form: {
+          ...initialState.form,
+          hasNameError: true,
+        },
+      };
+      expect(getHasNameError(state)).toBeTruthy();
+    });
+    it('returns false when entry with no name error', () => {
+      const state = {
+        ...initialState,
+        form: {
+          ...initialState.form,
+          hasNameError: false,
+        },
+      };
+      expect(getHasNameError(state)).toBeFalsy();
     });
   });
   describe('getFormHasError()', () => {
@@ -104,6 +135,25 @@ describe('selectors', () => {
         location: expectedLocation,
       };
       expect(getCurrentLocation(state)).toBe(expectedLocation);
+    });
+  });
+  describe('getNewComment()', () => {
+    it('returns new comment', () => {
+      const newComment = 'this is a new comment';
+      const state = {
+        ...initialState,
+        form: {
+          ...initialState.form,
+          newComment,
+        },
+      };
+      expect(getNewComment(state)).toBe(newComment);
+    });
+    it('returns empty comment', () => {
+      const state = {
+        ...initialState,
+      };
+      expect(getNewComment(state)).toBe('');
     });
   });
 });

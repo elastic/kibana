@@ -71,6 +71,8 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
           : state.form.hasNameError,
       hasOSError:
         action.payload.hasOSError !== undefined ? action.payload.hasOSError : state.form.hasOSError,
+      newComment:
+        action.payload.newComment !== undefined ? action.payload.newComment : state.form.newComment,
     },
   };
 };

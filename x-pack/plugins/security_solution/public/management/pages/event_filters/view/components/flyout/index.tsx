@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
-import { Ecs } from '../../../../../../../common/ecs';
 import { EventFiltersForm } from '../form';
 import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
 import {
@@ -33,11 +32,11 @@ import {
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 
 export interface EventFiltersFlyoutProps {
-  data?: Ecs;
+  id?: string;
   onCancel(): void;
 }
 
-export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(({ data, onCancel }) => {
+export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(({ onCancel, id }) => {
   useEventFiltersNotification();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const formHasError = useEventFiltersSelector(getFormHasError);
@@ -56,12 +55,19 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(({ dat
     }
   }, [creationSuccessful, onCancel, dispatch]);
 
-  // Initialize the store with the event passed as prop to allow render the form. It acts as componentDidMount
+  // Initialize the store with the id passed as prop to allow render the form. It acts as componentDidMount
   useEffect(() => {
-    dispatch({
-      type: 'eventFiltersInitForm',
-      payload: { entry: getInitialExceptionFromEvent(data) },
-    });
+    if (id) {
+      dispatch({
+        type: 'eventFiltersInitFormFromId',
+        payload: { id },
+      });
+    } else {
+      dispatch({
+        type: 'eventFiltersInitForm',
+        payload: { entry: getInitialExceptionFromEvent() },
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -35,6 +35,10 @@ const eventFiltersCreate = async (
     });
 
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
+    if (store.getState().form.newComment) {
+      if (!sanitizedEntry.comments) sanitizedEntry.comments = [];
+      sanitizedEntry.comments.push({ comment: store.getState().form.newComment });
+    }
 
     const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
     store.dispatch({
@@ -62,6 +66,31 @@ const eventFiltersCreate = async (
   }
 };
 
+const eventFiltersLoadByid = async (
+  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
+  eventFiltersService: EventFiltersService,
+  id: string
+) => {
+  const submissionResourceState = store.getState().form.submissionResourceState;
+  try {
+    // TODO: Try to get the entry from the list before perform API call
+    const entry = await eventFiltersService.getOne(id);
+    store.dispatch({
+      type: 'eventFiltersInitForm',
+      payload: { entry },
+    });
+  } catch (error) {
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+      },
+    });
+  }
+};
+
 export const createEventFiltersPageMiddleware = (
   eventFiltersService: EventFiltersService
 ): ImmutableMiddleware<EventFiltersListPageState, AppAction> => {
@@ -70,6 +99,8 @@ export const createEventFiltersPageMiddleware = (
 
     if (action.type === 'eventFiltersCreateStart') {
       await eventFiltersCreate(store, eventFiltersService);
+    } else if (action.type === 'eventFiltersInitFormFromId') {
+      await eventFiltersLoadByid(store, eventFiltersService, action.payload.id);
     }
   };
 };
