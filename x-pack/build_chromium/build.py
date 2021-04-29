@@ -81,9 +81,7 @@ runcmd('mkdir out/headless')
 print('Adding target_cpu to args')
 argsgn_file_out = path.abspath('out/headless/args.gn')
 runcmd('cp ' + argsgn_file + ' ' + argsgn_file_out)
-f = open(argsgn_file_out, 'a')
-f.write('\rtarget_cpu = "' + arch_name + '"\r')
-f.close()
+runcmd('echo \'target_cpu="' + arch_name + '"\' >> ' + argsgn_file_out)
 
 runcmd('gn gen out/headless')
 
