@@ -37,7 +37,6 @@ export interface ExceptionItemProps {
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   showName?: boolean;
-  /* Should the Modified by/on data be shown on the card */
   showModified?: boolean;
 }
 
