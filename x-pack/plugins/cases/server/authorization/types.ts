@@ -59,11 +59,30 @@ export enum WriteOperations {
  * Defines the structure for a case API route.
  */
 export interface OperationDetails {
+  /**
+   * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
+   */
   type: EcsEventType;
-  name: ReadOperations | WriteOperations;
+  /**
+   * The name of the operation to authorize against for the privilege check.
+   * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   */
+  name: string;
+  /**
+   * The ECS `event.action` field, should be in the form of <operation>-<entity> e.g get-comment, find-cases
+   */
   action: string;
+  /**
+   * The verbs that are associated with this type of operation, these should line up with the event type e.g. creating, created, create etc
+   */
   verbs: Verbs;
+  /**
+   * The readable name of the entity being operated on e.g. case, comment, configurations (make it plural if it reads better that way etc)
+   */
   docType: string;
+  /**
+   * The actual saved object type of the entity e.g. cases, cases-comments
+   */
   savedObjectType: string;
 }
 

@@ -49,6 +49,16 @@ const EVENT_TYPES: Record<string, EcsEventType> = {
 };
 
 /**
+ * These values need to match the respective values in this file: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ * These are shared between find, get, get all, and delete/delete all
+ * There currently isn't a use case for a user to delete one comment but not all or differentiating between get, get all,
+ * and find operations from a privilege stand point.
+ */
+const DELETE_COMMENT_OPERATION = 'deleteComment';
+const ACCESS_COMMENT_OPERATION = 'getComment';
+const ACCESS_CASE_OPERATION = 'getCase';
+
+/**
  * Database constant for ECS category for use for audit logging.
  */
 export const DATABASE_CATEGORY: EcsEventCategory[] = ['database'];
@@ -117,7 +127,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetCase]: {
     type: EVENT_TYPES.access,
-    name: ReadOperations.GetCase,
+    name: ACCESS_CASE_OPERATION,
     action: 'get-case',
     verbs: accessVerbs,
     docType: 'case',
@@ -125,7 +135,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.FindCases]: {
     type: EVENT_TYPES.access,
-    name: ReadOperations.FindCases,
+    name: ACCESS_CASE_OPERATION,
     action: 'find-cases',
     verbs: accessVerbs,
     docType: 'cases',
@@ -158,7 +168,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [WriteOperations.DeleteAllComments]: {
     type: EVENT_TYPES.deletion,
-    name: WriteOperations.DeleteAllComments,
+    name: DELETE_COMMENT_OPERATION,
     action: 'delete-all-comments',
     verbs: deleteVerbs,
     docType: 'comments',
@@ -166,7 +176,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [WriteOperations.DeleteComment]: {
     type: EVENT_TYPES.deletion,
-    name: WriteOperations.DeleteComment,
+    name: DELETE_COMMENT_OPERATION,
     action: 'delete-comment',
     verbs: deleteVerbs,
     docType: 'comments',
@@ -182,7 +192,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetComment]: {
     type: EVENT_TYPES.access,
-    name: ReadOperations.GetComment,
+    name: ACCESS_COMMENT_OPERATION,
     action: 'get-comment',
     verbs: accessVerbs,
     docType: 'comments',
@@ -190,7 +200,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetAllComments]: {
     type: EVENT_TYPES.access,
-    name: ReadOperations.GetAllComments,
+    name: ACCESS_COMMENT_OPERATION,
     action: 'get-all-comment',
     verbs: accessVerbs,
     docType: 'comments',
@@ -198,7 +208,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.FindComments]: {
     type: EVENT_TYPES.access,
-    name: ReadOperations.FindComments,
+    name: ACCESS_COMMENT_OPERATION,
     action: 'find-comments',
     verbs: accessVerbs,
     docType: 'comments',
