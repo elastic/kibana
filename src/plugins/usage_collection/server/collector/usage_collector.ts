@@ -23,6 +23,8 @@ export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> exte
 > {
   constructor(
     log: Logger,
+    // Needed because it doesn't affect on anything here but being explicit creates a lot of pain down the line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collectorOptions: UsageCollectorOptions<TFetchReturn, any, ExtraOptions>
   ) {
     super(log, collectorOptions);
