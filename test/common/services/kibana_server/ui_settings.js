@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import { get } from 'lodash';
 
 const MINUTE = 60 * 1000;

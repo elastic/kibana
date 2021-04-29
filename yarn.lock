@@ -853,6 +853,13 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
+"@hapi/boom@8.x.x":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-8.0.1.tgz#13f1f2f2a3abfb0787c79e35e238c8aff6aa1661"
+  integrity sha512-SnBM2GzEYEA6AGFKXBqNLWXR3uNBui0bkmklYXX1gYtevVhDTy2uakwkSauxvIWMtlANGRhzChYg95If3FWCwA==
+  dependencies:
+    "@hapi/hoek" "8.x.x"
+
 "@hapi/bounce@1.x.x":
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@hapi/bounce/-/bounce-1.3.2.tgz#3b096bb02f67de6115e6e4f0debc390be5a86bad"
@@ -984,6 +991,15 @@
     "@hapi/bounce" "1.x.x"
     "@hapi/hoek" "8.x.x"
     "@hapi/joi" "16.x.x"
+
+"@hapi/wreck@^16.0.1":
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-16.0.1.tgz#95cd013b8166db17be88837d6d0a880d8e7cd6b3"
+  integrity sha512-fL6IwZ5nk1jBMLBPugt72u23rw8KnnyupLor7TZihgvAXTulxJprUe9YiCLuGbKsEBh2qDo31ixvLCSaxC2+xQ==
+  dependencies:
+    "@hapi/boom" "8.x.x"
+    "@hapi/bourne" "1.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
@@ -22996,7 +23012,7 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
-wreck@14.x.x, wreck@^14.2.0:
+wreck@14.x.x:
   version "14.2.0"
   resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.2.0.tgz#0064a5b930fc675f57830c1fd28342da1a70b0fc"
   integrity sha512-NFFft3SMgqrJbXEVfYifh+QDWFxni+98/I7ut7rLbz3F0XOypluHsdo3mdEYssGSirMobM3fGlqhyikbWKDn2Q==

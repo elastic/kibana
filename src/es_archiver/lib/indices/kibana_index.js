@@ -22,7 +22,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
-import wreck from 'wreck';
+import wreck from '@hapi/wreck';
 
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../ui/ui_exports';
