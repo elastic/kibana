@@ -466,7 +466,7 @@ describe('disable button', () => {
     expect(enableAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('should bring back error banner after re-enable if previously dismissed', async () => {
+  it('should reset error banner dismissal after re-enabling the alert', async () => {
     const alert = mockAlert({
       enabled: true,
       executionStatus: {
