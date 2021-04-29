@@ -14,7 +14,7 @@ const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml')
 
 interface LogEntry {
   message: string;
-  tags: string[];
+  tags?: string[];
   type: string;
 }
 
@@ -39,7 +39,7 @@ describe('cli invalid config support', function () {
           .split('\n')
           .filter(Boolean)
           .map((line) => JSON.parse(line) as LogEntry)
-          .filter((line) => line.tags.includes('fatal'))
+          .filter((line) => line.tags?.includes('fatal'))
           .map((obj) => ({
             ...obj,
             pid: '## PID ##',
