@@ -634,13 +634,20 @@ export const getAllUserAction = async (
   return userActions;
 };
 
-export const updateCase = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  params: CasesPatchRequest,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse[]> => {
+export const updateCase = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  params: CasesPatchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse[]> => {
   const { body: cases } = await supertest
-    .patch(CASES_URL)
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);

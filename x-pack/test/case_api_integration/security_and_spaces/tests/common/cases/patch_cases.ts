@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
@@ -18,6 +18,7 @@ import {
 } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
+  getPostCaseRequest,
   postCaseReq,
   postCaseResp,
   postCollectionReq,
@@ -34,6 +35,7 @@ import {
   getAllUserAction,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
+  findCases,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -46,6 +48,16 @@ import {
   createRule,
   getQuerySignalIds,
 } from '../../../../../detection_engine_api_integration/utils';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -61,14 +73,17 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('happy path', () => {
       it('should patch a case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCases = await updateCase(supertest, {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              title: 'new title',
-            },
-          ],
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
         });
 
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
@@ -81,14 +96,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should closes the case correctly', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCases = await updateCase(supertest, {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: CaseStatuses.closed,
-            },
-          ],
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
         });
 
         const userActions = await getAllUserAction(supertest, postedCase.id);
@@ -116,14 +134,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should change the status of case to in-progress correctly', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCases = await updateCase(supertest, {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: CaseStatuses['in-progress'],
-            },
-          ],
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
         });
 
         const userActions = await getAllUserAction(supertest, postedCase.id);
@@ -150,19 +171,22 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should patch a case with new connector', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCases = await updateCase(supertest, {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              connector: {
-                id: 'jira',
-                name: 'Jira',
-                type: ConnectorTypes.jira,
-                fields: { issueType: 'Task', priority: null, parent: null },
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                connector: {
+                  id: 'jira',
+                  name: 'Jira',
+                  type: ConnectorTypes.jira,
+                  fields: { issueType: 'Task', priority: null, parent: null },
+                },
               },
-            },
-          ],
+            ],
+          },
         });
 
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
@@ -186,23 +210,43 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        await updateCase(supertest, {
-          cases: [
-            {
-              id: patchedCase.id,
-              version: patchedCase.version,
-              type: CaseType.collection,
-            },
-          ],
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: patchedCase.id,
+                version: patchedCase.version,
+                type: CaseType.collection,
+              },
+            ],
+          },
         });
       });
     });
 
     describe('unhappy path', () => {
-      it('404s when case is not there', async () => {
-        await updateCase(
+      it('400s when attempting to change the owner of a case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
           supertest,
-          {
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                owner: 'observabilityFixture',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('404s when case is not there', async () => {
+        await updateCase({
+          supertest,
+          params: {
             cases: [
               {
                 id: 'not-real',
@@ -211,14 +255,14 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          404
-        );
+          expectedHttpCode: 404,
+        });
       });
 
       it('400s when id is missing', async () => {
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               // @ts-expect-error
               {
@@ -227,15 +271,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('406s when fields are identical', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -244,14 +288,14 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          406
-        );
+          expectedHttpCode: 406,
+        });
       });
 
       it('400s when version is missing', async () => {
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               // @ts-expect-error
               {
@@ -260,16 +304,16 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
       it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
         const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -278,15 +322,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('406s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -296,15 +340,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          406
-        );
+          expectedHttpCode: 406,
+        });
       });
 
       it('400s when bad data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -314,15 +358,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when unsupported status sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -332,15 +376,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when bad connector type sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -350,15 +394,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when bad connector sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -374,15 +418,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       it('409s when version does not match', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -392,8 +436,8 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          409
-        );
+          expectedHttpCode: 409,
+        });
       });
 
       it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
@@ -403,9 +447,9 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentAlertReq,
         });
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: patchedCase.id,
@@ -414,16 +458,16 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed delete these tests
       it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -432,16 +476,16 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
       it.skip("should 400 when attempting to update a collection case's status", async () => {
         const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase(
+        await updateCase({
           supertest,
-          {
+          params: {
             cases: [
               {
                 id: postedCase.id,
@@ -450,8 +494,8 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          400
-        );
+          expectedHttpCode: 400,
+        });
       });
     });
 
@@ -562,12 +606,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // it updates alert status when syncAlerts is turned on
           // turn on the sync settings
-          await updateCase(supertest, {
-            cases: updatedIndWithStatus.map((caseInfo) => ({
-              id: caseInfo.id,
-              version: caseInfo.version,
-              settings: { syncAlerts: true },
-            })),
+          await updateCase({
+            supertest,
+            params: {
+              cases: updatedIndWithStatus.map((caseInfo) => ({
+                id: caseInfo.id,
+                version: caseInfo.version,
+                settings: { syncAlerts: true },
+              })),
+            },
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
@@ -682,14 +729,17 @@ export default ({ getService }: FtrProviderContext): void => {
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
-          await updateCase(supertest, {
-            cases: [
-              {
-                id: updatedIndWithStatus[0].id,
-                version: updatedIndWithStatus[0].version,
-                settings: { syncAlerts: true },
-              },
-            ],
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: updatedIndWithStatus[0].id,
+                  version: updatedIndWithStatus[0].version,
+                  settings: { syncAlerts: true },
+                },
+              ],
+            },
           });
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -750,14 +800,17 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await es.indices.refresh({ index: alert._index });
-          await updateCase(supertest, {
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: CaseStatuses['in-progress'],
-              },
-            ],
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
           });
 
           // force a refresh on the index that the signal is stored in so that we can search for it and get the correct
@@ -804,14 +857,17 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          await updateCase(supertest, {
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: CaseStatuses['in-progress'],
-              },
-            ],
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
           });
 
           const { body: updatedAlert } = await supertest
@@ -855,25 +911,31 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Update the status of the case with sync alerts off
-          const caseStatusUpdated = await updateCase(supertest, {
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: CaseStatuses['in-progress'],
-              },
-            ],
+          const caseStatusUpdated = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
           });
 
           // Turn sync alerts on
-          await updateCase(supertest, {
-            cases: [
-              {
-                id: caseStatusUpdated[0].id,
-                version: caseStatusUpdated[0].version,
-                settings: { syncAlerts: true },
-              },
-            ],
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseStatusUpdated[0].id,
+                  version: caseStatusUpdated[0].version,
+                  settings: { syncAlerts: true },
+                },
+              ],
+            },
           });
 
           // refresh the index because syncAlerts was set to true so the alert's status should have been updated
@@ -916,25 +978,31 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Turn sync alerts off
-          const caseSettingsUpdated = await updateCase(supertest, {
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                settings: { syncAlerts: false },
-              },
-            ],
+          const caseSettingsUpdated = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  settings: { syncAlerts: false },
+                },
+              ],
+            },
           });
 
           // Update the status of the case with sync alerts off
-          await updateCase(supertest, {
-            cases: [
-              {
-                id: caseSettingsUpdated[0].id,
-                version: caseSettingsUpdated[0].version,
-                status: CaseStatuses['in-progress'],
-              },
-            ],
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: caseSettingsUpdated[0].id,
+                  version: caseSettingsUpdated[0].version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
           });
 
           const { body: updatedAlert } = await supertest
@@ -944,6 +1012,224 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+        });
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should update a case when the user has the correct permissions', async () => {
+        const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, {
+          user: secOnly,
+          space: 'space1',
+        });
+
+        const patchedCases = await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
+          auth: { user: secOnly, space: 'space1' },
+        });
+
+        expect(patchedCases[0].owner).to.eql('securitySolutionFixture');
+      });
+
+      it('should update multiple cases when the user has the correct permissions', async () => {
+        const [case1, case2, case3] = await Promise.all([
+          createCase(supertestWithoutAuth, postCaseReq, 200, {
+            user: superUser,
+            space: 'space1',
+          }),
+          createCase(supertestWithoutAuth, postCaseReq, 200, {
+            user: superUser,
+            space: 'space1',
+          }),
+          createCase(supertestWithoutAuth, postCaseReq, 200, {
+            user: superUser,
+            space: 'space1',
+          }),
+        ]);
+
+        const patchedCases = await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: case1.id,
+                version: case1.version,
+                title: 'new title',
+              },
+              {
+                id: case2.id,
+                version: case2.version,
+                title: 'new title',
+              },
+              {
+                id: case3.id,
+                version: case3.version,
+                title: 'new title',
+              },
+            ],
+          },
+          auth: { user: secOnly, space: 'space1' },
+        });
+
+        expect(patchedCases[0].owner).to.eql('securitySolutionFixture');
+        expect(patchedCases[1].owner).to.eql('securitySolutionFixture');
+        expect(patchedCases[2].owner).to.eql('securitySolutionFixture');
+      });
+
+      it('should not update a case when the user does not have the correct ownership', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observabilityFixture' }),
+          200,
+          { user: obsOnly, space: 'space1' }
+        );
+
+        await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
+          auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      it('should not update any cases when the user does not have the correct ownership', async () => {
+        const [case1, case2, case3] = await Promise.all([
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+        ]);
+
+        await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: case1.id,
+                version: case1.version,
+                title: 'new title',
+              },
+              {
+                id: case2.id,
+                version: case2.version,
+                title: 'new title',
+              },
+              {
+                id: case3.id,
+                version: case3.version,
+                title: 'new title',
+              },
+            ],
+          },
+          auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+
+        const resp = await findCases({ supertest, auth: { user: superUser, space: 'space1' } });
+        expect(resp.cases.length).to.eql(3);
+        // the update should have failed and none of the title should have been changed
+        expect(resp.cases[0].title).to.eql(postCaseReq.title);
+        expect(resp.cases[1].title).to.eql(postCaseReq.title);
+        expect(resp.cases[2].title).to.eql(postCaseReq.title);
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT update a case`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          await updateCase({
+            supertest: supertestWithoutAuth,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: 'new title',
+                },
+              ],
+            },
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should NOT create a case in a space with no permissions', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
         });
       });
     });

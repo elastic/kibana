@@ -47,6 +47,7 @@ export enum WriteOperations {
   CreateCase = 'createCase',
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
+  PushCase = 'pushCase',
   CreateComment = 'createComment',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',

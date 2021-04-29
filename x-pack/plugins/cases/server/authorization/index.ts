@@ -91,6 +91,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [WriteOperations.PushCase]: {
+    type: EVENT_TYPES.change,
+    name: WriteOperations.PushCase,
+    action: 'push-case',
+    verbs: updateVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [WriteOperations.CreateConfiguration]: {
     type: EVENT_TYPES.creation,
     name: WriteOperations.CreateConfiguration,

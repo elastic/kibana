@@ -26,6 +26,7 @@ const writeOperations: string[] = [
   'createCase',
   'deleteCase',
   'updateCase',
+  'pushCase',
   'createComment',
   'deleteAllComments',
   'deleteComment',

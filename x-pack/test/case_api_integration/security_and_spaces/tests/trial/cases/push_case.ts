@@ -198,14 +198,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('unhappy path = 409s when case is closed', async () => {
       const { postedCase, connector } = await createCaseWithConnector();
-      await updateCase(supertest, {
-        cases: [
-          {
-            id: postedCase.id,
-            version: postedCase.version,
-            status: CaseStatuses.closed,
-          },
-        ],
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
       });
 
       await pushCase(supertest, postedCase.id, connector.id, 409);
