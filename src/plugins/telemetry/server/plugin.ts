@@ -45,6 +45,9 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
+/**
+ * Server's setup exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginSetup {
   /**
    * Resolves into the telemetry Url used to send telemetry.
@@ -53,6 +56,9 @@ export interface TelemetryPluginSetup {
   getTelemetryUrl: () => Promise<URL>;
 }
 
+/**
+ * Server's start exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
