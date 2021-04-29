@@ -11,8 +11,5 @@
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build",
     "kbn:watch": "node scripts/build --watch"
-  },
-  "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
