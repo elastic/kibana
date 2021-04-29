@@ -22,6 +22,7 @@ import {
   EventFiltersCreateSuccess,
   EventFiltersListPageStateChanged,
   EventFiltersListPageDataChanged,
+  EventFiltersListPageDataExistsChanged,
 } from './action';
 
 import { EventFiltersListPageState } from '../state';
@@ -64,6 +65,19 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
       ...state.listPage,
       forceRefresh: false,
       data: action.payload,
+    },
+  };
+};
+
+const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      dataExist: action.payload,
     },
   };
 };
@@ -177,6 +191,8 @@ export const eventFiltersPageReducer: StateReducer = (
         return handleEventFiltersListPageChanges(state, action);
       case 'eventFiltersListPageDataChanged':
         return handleEventFiltersListPageDataChanges(state, action);
+      case 'eventFiltersListPageDataExistsChanged':
+        return handleEventFiltersListPageDataExistChanges(state, action);
     }
   }
 
