@@ -16,8 +16,6 @@ import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
 import { IndexNameFormProps } from '../../../../../file_upload/public';
 
-export const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
-
 interface State {
   indexName: string;
   indexError: string;
@@ -27,6 +25,8 @@ interface State {
 }
 
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
+  private _isMounted: boolean = false;
+
   state: State = {
     indexName: '',
     indexError: '',
@@ -36,13 +36,20 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   };
 
   componentDidMount() {
+    this._isMounted = true;
     this._loadIndexNameFormComponent();
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   async _loadIndexNameFormComponent() {
-    this.setState({
-      indexNameFormComponent: await getFileUpload().getIndexNameFormComponent(),
-    });
+    if (this._isMounted) {
+      this.setState({
+        indexNameFormComponent: await getFileUpload().getIndexNameFormComponent(),
+      });
+    }
   }
 
   async componentDidUpdate() {

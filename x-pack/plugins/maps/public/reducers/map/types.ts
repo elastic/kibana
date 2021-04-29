@@ -35,9 +35,7 @@ export type MapContext = {
   filters: Filter[];
   refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
-  vectorLayerIndexName: string;
   drawState?: DrawState;
-  editModeActive: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };

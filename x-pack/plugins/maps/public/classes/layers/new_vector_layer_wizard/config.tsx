@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { NewVectorLayerEditor } from './index';
-import { ADD_VECTOR_DRAWING_LAYER } from './wizard';
 import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
 import { getFileUpload } from '../../../kibana_services';
+
+const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [],
