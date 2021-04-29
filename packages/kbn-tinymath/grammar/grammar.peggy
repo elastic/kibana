@@ -43,8 +43,16 @@ Literal "literal"
 // Quoted variables are interpreted as strings
 // but unquoted variables are more restrictive
 Variable
-  = _ Quote chars:(ValidChar / Space)* Quote _ {
+  = _ [\'] chars:(ValidChar / Space / [\"])* [\'] _ {
     return {
+      type: 'variable',
+      value: chars.join(''),
+      location: simpleLocation(location()),
+      text: text()
+    };
+  }
+  / _ [\"] chars:(ValidChar / Space / [\'])* [\"] _ {
+      return {
       type: 'variable',
       value: chars.join(''),
       location: simpleLocation(location()),
@@ -103,10 +111,9 @@ Argument_List "arguments"
   }
 
 String
-  = [\"] value:(ValidChar)+ [\"] { return value.join(''); }
-  / [\'] value:(ValidChar)+ [\'] { return value.join(''); }
-  / value:(ValidChar)+ { return value.join(''); }
-
+  = '"' chars:("\\\"" { return "\""; } / [^"])* '"' { return chars.join(''); }
+  / "'" chars:("\\\'" { return "\'"; } / [^'])* "'" { return chars.join(''); }
+  / chars:(ValidChar)+ { return chars.join(''); }
 
 Argument
  = name:[a-zA-Z_]+ _ '=' _ value:(Number / String) _ {

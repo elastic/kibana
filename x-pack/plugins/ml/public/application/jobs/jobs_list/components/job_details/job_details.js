@@ -55,6 +55,8 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
+      const { showFullDetails, refreshJobList } = this.props;
+
       const {
         general,
         customUrl,
@@ -71,9 +73,8 @@ export class JobDetailsUI extends Component {
         jobTimingStats,
         datafeedTimingStats,
         alertRules,
-      } = extractJobDetails(job, basePath);
+      } = extractJobDetails(job, basePath, refreshJobList);
 
-      const { showFullDetails, refreshJobList } = this.props;
       const tabs = [
         {
           id: 'job-settings',

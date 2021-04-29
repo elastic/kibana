@@ -19,6 +19,7 @@ import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
+import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
@@ -101,6 +102,14 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders a documents view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineDocuments: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(Documents)).toHaveLength(1);
+    expect(wrapper.find(DocumentDetail)).toHaveLength(1);
   });
 
   it('renders a synonyms view', () => {
