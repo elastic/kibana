@@ -50,6 +50,7 @@ export const useQueryAlerts = <Hit, Aggs>({
     refetch: null,
   });
   const [loading, setLoading] = useState(false);
+  console.log('Query', query);
 
   useEffect(() => {
     let isSubscribed = true;

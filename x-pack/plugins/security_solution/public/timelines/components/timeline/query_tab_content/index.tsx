@@ -21,6 +21,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
@@ -198,6 +199,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: string;
     language: KueryFilterQueryKind;
   } = { query: kqlQueryExpression, language: 'kuery' };
+  const { addError } = useAppToasts();
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -207,6 +209,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     filters,
     kqlQuery,
     kqlMode,
+    addError,
   });
 
   const isBlankTimeline: boolean =

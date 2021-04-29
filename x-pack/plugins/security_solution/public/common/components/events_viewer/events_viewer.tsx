@@ -49,9 +49,13 @@ import {
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
-import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import {
+  defaultControlColumn,
+  ControlColumnProps,
+} from '../../../timelines/components/timeline/body/control_columns';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -171,6 +175,8 @@ const EventsViewerComponent: React.FC<Props> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     dispatch(timelineActions.updateIsLoading({ id, isLoading: isQueryLoading }));
@@ -203,6 +209,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     kqlQuery: query,
     kqlMode,
     isEventViewer: true,
+    addError,
   });
 
   const canQueryTimeline = useMemo(

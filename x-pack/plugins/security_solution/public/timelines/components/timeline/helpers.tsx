@@ -32,6 +32,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
+import { UseAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));
 
@@ -152,6 +153,7 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
   isEventViewer,
+  addError,
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
@@ -161,27 +163,57 @@ export const combineQueries = ({
   kqlQuery: Query;
   kqlMode: string;
   isEventViewer?: boolean;
+  addError: UseAppToasts['addError'];
 }): { filterQuery: string } | null => {
+  const handleError = (error: Error) => {
+    addError(error, { title: error.name });
+  };
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery:
+        convertToBuildEsQuery({
+          config,
+          queries: [kuery],
+          indexPattern,
+          filters,
+          handleError,
+        }) || '',
     };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery: convertToBuildEsQuery({
+        config,
+        queries: [kuery],
+        indexPattern,
+        filters,
+        handleError,
+      }),
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery: convertToBuildEsQuery({
+        config,
+        queries: [kuery],
+        indexPattern,
+        filters,
+        handleError,
+      }),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery:
+        convertToBuildEsQuery({
+          config,
+          queries: [kuery],
+          indexPattern,
+          filters,
+          handleError,
+        }) || '',
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -190,7 +222,13 @@ export const combineQueries = ({
     kqlQuery.query as string
   )})`;
   return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    filterQuery: convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+      handleError,
+    }),
   };
 };
 

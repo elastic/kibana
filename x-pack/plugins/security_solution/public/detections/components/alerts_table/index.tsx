@@ -104,7 +104,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   } = useSourcererScope(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
-  const { addWarning } = useAppToasts();
+  const { addWarning, addError } = useAppToasts();
+  const { initializeTimeline, setSelectAll } = useManageTimeline();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
@@ -125,11 +126,22 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           kqlQuery: globalQuery,
           kqlMode: globalQuery.language,
           isEventViewer: true,
+          addError,
         });
       }
       return null;
     },
-    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+    [
+      browserFields,
+      defaultFilters,
+      globalFilters,
+      globalQuery,
+      indexPatterns,
+      kibana,
+      to,
+      from,
+      addError,
+    ]
   );
 
   const setEventsLoadingCallback = useCallback(
