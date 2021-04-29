@@ -26,13 +26,13 @@ export const Schema: React.FC = () => {
         rightSideItems={[
           <EuiButton fill>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.synonyms.updateSchemaButtonLabel',
+              'xpack.enterpriseSearch.appSearch.engine.schema.updateSchemaButtonLabel',
               { defaultMessage: 'Update types' }
             )}
           </EuiButton>,
           <EuiButton color="secondary">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.synonyms.createSchemaFieldButtonLabel',
+              'xpack.enterpriseSearch.appSearch.engine.schema.createSchemaFieldButtonLabel',
               { defaultMessage: 'Create a schema field' }
             )}
           </EuiButton>,
