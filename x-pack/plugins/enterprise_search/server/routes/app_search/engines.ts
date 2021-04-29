@@ -112,4 +112,20 @@ export function registerEnginesRoutes({
       path: '/as/engines/:name/source_engines',
     })
   );
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/source_engines/bulk_create',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        query: schema.object({
+          source_engine_slugs: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/source_engines/bulk_create',
+    })
+  );
 }
