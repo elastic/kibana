@@ -17,13 +17,13 @@ import {
 } from '../../../../../../src/core/server/mocks';
 
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { register } from './get_route';
 import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { handleEsError } from '../../shared_imports';
 
+import { register } from './get_route';
 import { ScopedClusterClientMock } from './types';
 
 const { createApiResponse } = elasticsearchServiceMock;
