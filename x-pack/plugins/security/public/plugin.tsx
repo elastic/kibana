@@ -27,7 +27,6 @@ import type { ConfigType } from './config';
 import { ManagementService } from './management';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
-import type { ISessionTimeout } from './session';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 
 export interface PluginSetupDependencies {
@@ -53,7 +52,7 @@ export class SecurityPlugin
       PluginSetupDependencies,
       PluginStartDependencies
     > {
-  private sessionTimeout!: ISessionTimeout;
+  private sessionTimeout!: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();

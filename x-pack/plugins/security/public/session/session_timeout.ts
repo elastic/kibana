@@ -50,11 +50,6 @@ export const EXTENSION_THROTTLE_MS = 60 * 1000;
  */
 export const SESSION_ROUTE = '/internal/security/session';
 
-export interface ISessionTimeout {
-  start(): void;
-  stop(): void;
-}
-
 export interface SessionState {
   lastExtensionTime: number;
   expiresInMs: number;
@@ -104,13 +99,13 @@ export class SessionTimeout {
   }
 
   public stop() {
-    const disabled = {
+    const nextState = {
       lastExtensionTime: 0,
       expiresInMs: 0,
       canBeExtendedByMs: 0,
     };
-    this.toggleEventHandlers(disabled);
-    this.resetTimers(disabled);
+    this.toggleEventHandlers(nextState);
+    this.resetTimers(nextState);
     this.subscription?.unsubscribe();
   }
 
@@ -127,7 +122,7 @@ export class SessionTimeout {
    */
   private handleHttpRequest = (fetchOptions: HttpFetchOptionsWithPath) => {
     // Ignore requests to external URLs
-    if (!fetchOptions.path.startsWith('/')) {
+    if (fetchOptions.path.indexOf('://') !== -1) {
       return;
     }
 
@@ -146,19 +141,10 @@ export class SessionTimeout {
       return;
     }
 
-    // Only mark session as extended if not a system request
+    // Extend session unless we're dealing with a system request
     if (httpResponse.fetchOptions.asSystemRequest === false) {
-      const currentState = this.sessionState$.getValue();
-      if (currentState.canBeExtendedByMs) {
-        const nextState = {
-          ...currentState,
-          lastExtensionTime: Date.now(),
-          expiresInMs: currentState.canBeExtendedByMs,
-        };
-        this.sessionState$.next(nextState);
-        if (this.channel) {
-          this.channel.postMessage(nextState);
-        }
+      if (this.shouldExtend()) {
+        this.fetchSessionInfo(true);
       }
     }
   };
@@ -182,9 +168,7 @@ export class SessionTimeout {
     }
   };
 
-  public resetTimers = ({ expiresInMs }: SessionState) => {
-    console.log('resetTimers', expiresInMs);
-
+  private resetTimers = ({ expiresInMs }: SessionState) => {
     this.stopRefreshTimer = this.stopRefreshTimer?.();
     this.stopWarningTimer = this.stopWarningTimer?.();
     this.stopLogoutTimer = this.stopLogoutTimer?.();
@@ -193,7 +177,6 @@ export class SessionTimeout {
       const refreshTimeout = expiresInMs - GRACE_PERIOD_MS - WARNING_MS - SESSION_CHECK_MS;
       const warningTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS - WARNING_MS, 0);
       const logoutTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS, 0);
-
       // 1. Refresh session info before displaying any warnings
       if (refreshTimeout > 0) {
         this.stopRefreshTimer = startTimer(this.fetchSessionInfo, refreshTimeout);
@@ -259,7 +242,6 @@ export class SessionTimeout {
   }
 
   private fetchSessionInfo = async (extend = false) => {
-    console.log('>>> fetchSessionInfo', extend);
     this.isExtending = true;
     try {
       const sessionInfo = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
@@ -323,7 +305,11 @@ export class SessionTimeout {
  * executed.
  * @returns Function to stop the timer.
  */
-function startTimer(callback: () => void, timeout: number, updater?: (id: NodeJS.Timeout) => void) {
+export function startTimer(
+  callback: () => void,
+  timeout: number,
+  updater?: (id: NodeJS.Timeout) => void
+) {
   // Max timeout is the largest possible 32-bit signed integer or 2,147,483,647 or 0x7fffffff.
   const maxTimeout = 0x7fffffff;
   let timeoutID: NodeJS.Timeout;
@@ -344,7 +330,7 @@ function startTimer(callback: () => void, timeout: number, updater?: (id: NodeJS
  * @returns Function to remove all event handlers from window.
  */
 function monitorActivity(callback: () => void) {
-  const eventTypes = ['mousemove', 'mousedown', 'wheel', 'touchstart', 'keydown', 'resize'];
+  const eventTypes = ['mousemove', 'mousedown', 'wheel', 'touchstart', 'keydown'];
   for (const eventType of eventTypes) {
     window.addEventListener(eventType, callback);
   }
