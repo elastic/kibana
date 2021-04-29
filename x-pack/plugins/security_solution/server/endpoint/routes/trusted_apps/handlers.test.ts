@@ -66,8 +66,8 @@ const NEW_TRUSTED_APP: NewTrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
   ],
 };
 
@@ -83,8 +83,8 @@ const TRUSTED_APP: TrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
   ],
 };
 

@@ -7,29 +7,42 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import {
+  createActionRequestBodySchema,
+  CreateActionRequestBodySchema,
+} from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/action',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
-      },
-      options: {
-        tags: ['access:osquery', 'access:osquery_write'],
+        body: buildRouteValidation<
+          typeof createActionRequestBodySchema,
+          CreateActionRequestBodySchema
+        >(createActionRequestBodySchema),
       },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const soClient = context.core.savedObjects.client;
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(esClient, osqueryContext, agentSelection);
+      const selectedAgents = await parseAgentSelection(
+        esClient,
+        soClient,
+        osqueryContext,
+        agentSelection
+      );
+
+      if (!selectedAgents.length) {
+        throw new Error('No agents found for selection, aborting.');
+      }
 
       const action = {
         action_id: uuid.v4(),
@@ -39,10 +52,8 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         input_type: 'osquery',
         agents: selectedAgents,
         data: {
-          // @ts-expect-error update validation
-          id: request.body.query.id ?? uuid.v4(),
-          // @ts-expect-error update validation
-          query: request.body.query.query,
+          id: uuid.v4(),
+          query: request.body.query,
         },
       };
       const actionResponse = await esClient.index<{}, {}>({

@@ -49,14 +49,15 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs.slice(oldState.logs.length).forEach((log) => {
-      const getLogger = (level: keyof Logger) => {
-        if (level === 'error') {
-          return logger[level] as Logger['error'];
-        }
-        return logger[level] as Logger['info'];
-      };
-      getLogger(log.level)(logMessagePrefix + log.message);
+    newState.logs.slice(oldState.logs.length).forEach(({ message, level }) => {
+      switch (level) {
+        case 'error':
+          return logger.error(logMessagePrefix + message);
+        case 'info':
+          return logger.info(logMessagePrefix + message);
+        default:
+          throw new Error(`unexpected log level ${level}`);
+      }
     });
   }
 
