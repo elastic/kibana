@@ -176,7 +176,11 @@ export const PaginatedContent = memo(
       const Item = ItemComponent as ComponentType<ReturnType<typeof itemComponentProps>>;
 
       if (items.length) {
-        return items.map((item) => {
+        // Cast here is to get around the fact that TS does not seem to be able to narrow the types down when the only
+        // difference is that the array might be Readonly. The error output is:
+        // `...has signatures, but none of those signatures are compatible with each other.`
+        // Can read more about it here: https://github.com/microsoft/TypeScript/issues/33591
+        return (items as T[]).map((item) => {
           let key: Key;
 
           if (itemId) {

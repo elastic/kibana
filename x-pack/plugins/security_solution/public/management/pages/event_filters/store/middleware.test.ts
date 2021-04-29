@@ -24,6 +24,7 @@ const initialState: EventFiltersListPageState = initialEventFiltersPageState();
 
 const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
   addEventFilters: jest.fn(),
+  getList: jest.fn(),
 });
 
 const createStoreSetup = (eventFiltersService: EventFiltersService) => {
