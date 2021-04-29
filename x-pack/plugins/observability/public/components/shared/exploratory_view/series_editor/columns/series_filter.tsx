@@ -60,7 +60,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       flush="left"
       iconType="plus"
       onClick={() => {
-        setIsPopoverVisible(true);
+        setIsPopoverVisible((prevState) => !prevState);
       }}
       size="s"
     >
@@ -131,7 +131,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
             onClick={() => {
               setSeries(seriesId, { ...urlSeries, filters: undefined });
             }}
-            size="xs"
+            size="s"
           >
             {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
               defaultMessage: 'Clear filters',
