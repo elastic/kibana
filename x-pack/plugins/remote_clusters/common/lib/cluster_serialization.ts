@@ -17,7 +17,7 @@ export interface ClusterInfoEs {
   mode?: 'proxy' | 'sniff';
   connected?: boolean;
   num_nodes_connected?: number;
-  max_connections_per_cluster: string | number;
+  max_connections_per_cluster?: string | number;
   initial_connect_timeout: string | number;
   skip_unavailable?: boolean;
   transport?: {
@@ -43,8 +43,8 @@ export interface Cluster {
   transportPingSchedule?: string;
   transportCompress?: boolean;
   connectedNodesCount?: number;
-  maxConnectionsPerCluster?: number;
-  initialConnectTimeout?: string;
+  maxConnectionsPerCluster?: string | number;
+  initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
 }
