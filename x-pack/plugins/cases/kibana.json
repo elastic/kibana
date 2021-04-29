@@ -2,12 +2,13 @@
   "configPath": ["xpack", "cases"],
   "id": "cases",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["actions", "securitySolution"],
+  "extraPublicDirs": ["common"],
+  "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "kibanaUtils", "triggersActionsUi"],
   "optionalPlugins": [
     "spaces",
     "security"
   ],
   "server": true,
-  "ui": false,
+  "ui": true,
   "version": "8.0.0"
 }

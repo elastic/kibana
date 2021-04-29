@@ -10,10 +10,11 @@ import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { AllControlStates, State } from './types';
-import { createInitialState } from './model';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { LoggerAdapter } from '../../logging/logger_adapter';
+import { AllControlStates, State } from './types';
+import { createInitialState } from './model';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 describe('migrationsStateActionMachine', () => {
@@ -146,6 +147,37 @@ describe('migrationsStateActionMachine', () => {
       }
     `);
   });
+
+  // see https://github.com/elastic/kibana/issues/98406
+  it('correctly logs state transition when using a logger adapter', async () => {
+    const underlyingLogger = mockLogger.get();
+    const logger = new LoggerAdapter(underlyingLogger);
+
+    await expect(
+      migrationStateActionMachine({
+        initialState,
+        logger,
+        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        next,
+        client: esClient,
+      })
+    ).resolves.toEqual(expect.anything());
+
+    const allLogs = loggingSystemMock.collect(mockLogger);
+    const stateTransitionLogs = allLogs.info
+      .map((call) => call[0])
+      .filter((log) => log.match('control state'));
+
+    expect(stateTransitionLogs).toMatchInlineSnapshot(`
+      Array [
+        "[.my-so-index] Log from LEGACY_REINDEX control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from DONE control state",
+      ]
+    `);
+  });
+
   it('resolves when reaching the DONE state', async () => {
     await expect(
       migrationStateActionMachine({

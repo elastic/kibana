@@ -68,7 +68,7 @@ export const RedirectToNodeLogs = ({
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 
   const searchString = flowRight(
-    replaceLogFilterInQueryString(filter),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
