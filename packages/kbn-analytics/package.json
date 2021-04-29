@@ -12,8 +12,5 @@
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --source-maps",
     "kbn:watch": "node scripts/build --source-maps --watch"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
