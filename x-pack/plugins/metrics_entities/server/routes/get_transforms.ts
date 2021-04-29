@@ -12,7 +12,7 @@ import { getMetricsEntitiesClient } from './utils/get_metrics_entities_client';
 
 /**
  * Returns all transforms from all modules
- * TODO: Add support for specific modules
+ * TODO: Add support for specific modules and prefix
  * @param router The router to get the collection of transforms
  */
 export const getTransforms = (router: IRouter): void => {
@@ -20,7 +20,7 @@ export const getTransforms = (router: IRouter): void => {
     {
       path: METRICS_ENTITIES_TRANSFORMS,
       // TODO: Add the validation instead of false
-      // TODO: Add the namespace and the key and the type
+      // TODO: Add the prefix and module support
       validate: false,
     },
     async (context, _, response) => {

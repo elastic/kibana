@@ -21,7 +21,6 @@ export const postTransforms = (router: IRouter): void => {
   router.post(
     {
       path: METRICS_ENTITIES_TRANSFORMS,
-      // TODO: Add the namespace and the key and the type
       validate: {
         // TODO: Add the validation instead of allowing handler to have access to raw non-validated in runtime
         body: schema.object({}, { unknowns: 'allow' }),

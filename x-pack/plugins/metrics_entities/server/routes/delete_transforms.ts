@@ -23,7 +23,6 @@ export const deleteTransforms = (router: IRouter): void => {
   router.post(
     {
       path: `${METRICS_ENTITIES_TRANSFORMS}/_delete`,
-      // TODO: Add the namespace
       validate: {
         // TODO: Add the validation instead of allowing handler to have access to raw non-validated in runtime
         body: schema.object({}, { unknowns: 'allow' }),
