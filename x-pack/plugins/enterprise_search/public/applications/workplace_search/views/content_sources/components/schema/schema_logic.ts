@@ -18,7 +18,12 @@ import {
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { IndexJob, Schema, SchemaType } from '../../../../../shared/schema/types';
+import {
+  IndexJob,
+  FieldCoercionErrors,
+  Schema,
+  SchemaType,
+} from '../../../../../shared/schema/types';
 import { TOperation } from '../../../../../shared/types';
 import { AppLogic } from '../../../../app_logic';
 import { OptionValue } from '../../../../types';
@@ -96,15 +101,6 @@ interface SchemaResponseProps {
 
 export interface SchemaInitialData extends SchemaResponseProps {
   sourceId: string;
-}
-
-interface FieldCoercionError {
-  external_id: string;
-  error: string;
-}
-
-export interface FieldCoercionErrors {
-  [key: string]: FieldCoercionError[];
 }
 
 interface SchemaChangeErrorsProps {
