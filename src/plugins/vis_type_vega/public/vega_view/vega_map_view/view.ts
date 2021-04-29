@@ -183,7 +183,7 @@ export class VegaMapView extends VegaBaseView {
 
   protected async _initViewCustomizations() {
     const vegaView = new View(
-      parse(injectMapPropsIntoSpec(this._parser.spec), null, { ast: true }),
+      parse(injectMapPropsIntoSpec(this._parser.spec), undefined, { ast: true }),
       this._vegaViewConfig
     );
 

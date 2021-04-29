@@ -30,7 +30,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
   useEffect(() => {
     const vgSpec = compile(vegaSpec).spec;
 
-    const view = new View(parse(vgSpec, null, { ast: true }), { expr: expressionInterpreter })
+    const view = new View(parse(vgSpec, undefined, { ast: true }), { expr: expressionInterpreter })
       .logLevel(Warn)
       .renderer('canvas')
       .tooltip(new Handler().call)
