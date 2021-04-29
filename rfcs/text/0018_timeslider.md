@@ -13,9 +13,9 @@ A timeslider is a UI component that allows users to intuitively navigate through
 
 This RFC proposes adding a timeslider control to the Maps application. 
 
-It proposes a two phased for roll-out in the Maps application. The [design proposal](#2-detailed-design) focuses on the first phase.
+It proposes a two phased roll-out in the Maps application. The [design proposal](#2-detailed-design) focuses on the first phase.
 
-Since the a timeslider UI is relevant for other Kibana apps, the implementation should be portable. We propose to implement the control as a React-component 
+Since the timeslider UI is relevant for other Kibana apps, the implementation should be portable. We propose to implement the control as a React-component 
 without implicit dependencies on Kibana-state or Maps-state.
 
 The RFC details the integration of this control in Maps. It includes specific consideration to how timeslider affects data-refresh in the context of Maps.
@@ -84,7 +84,7 @@ Any change to `timeslice`, either by dragging the handles of the timeslider, or 
 
 Since the initial use is inside Maps, the initial location of this React-component is inside the Maps plugin, `x-pack/plugins/maps/public/timeslider`.
 
-Nonetheless, this UI-component should be easily "copy-pastable" to another location.
+Nonetheless, this UI-component should be easily "cut-and-pastable" to another location.
 
 ### 2.2.2 Internals
 
@@ -126,8 +126,8 @@ Enabling the Timeslider will automatically retrigger refresh of _all_ time-based
 
 The Layer-TOC will indicate which layer is currently "time-filtered" by the timeslider.
 
-On a layer-per-layer basis, users will be able to explicitly opt-out if they should be governed by the timeslider or not. 
-This is relevant for having users add contextual layers that should _not_ depend on the `timeslice` (e.g. the entire trajectory of a vehicle), with layers that _do_ have to be governed by the `timeslice` selection (e.g. the actual location of that vehicle along the track within that `timeslice`).
+On a layer-per-layer basis, users will be able to explicitly opt-out if they should be governed by the timerange or not. This is an existing toggle in Maps already.
+This is relevant for having users add contextual layers that should _not_ depend on the time.
 
 
 #### 2.3.3 Omitting timeslider on a dashboard
@@ -175,7 +175,7 @@ Aggregated data can be cached on the client, so toggling between timeslices can 
 The main technique here is for layers to use `.mvt`-data format to request data. Tiled-based data can be cached client-side
 
 We do _not_ propose _pre-fetching_ of aggregated data in this initial phase of the Maps timeslider effort. There is a couple reasons:
-- Based on the intended user-interactions for timeslider, because a user can flexible select a `timeslice` of arbitrary widths, it would be really hard to determine how to determine which timeslices to aggregate up front.
+- Based on the intended user-interactions for timeslider, because a user can flexibly select a `timeslice` of arbitrary widths, it would be really hard to determine how to determine which timeslices to aggregate up front.
 - Maps already strains the maximum bucket sizes it can retrieve from Elasticsearch. Cluster/grid-layers often push up to 10k or more buckets, and terms-aggregations for choropleth maps also is going up to 10k buckets. Prefetching this for timeslices (e.g. say x10 timeslices) would easily exceed the default bucket limit sizes of Elasticsearch.
 
 
@@ -188,8 +188,8 @@ Any optimizations would not only affect timeslider users, but support all intera
 
 The main effort to support efficient data-fetch in a maps-context is to use `.mvt` as the default data format ([https://github.com/elastic/kibana/issues/79868](https://github.com/elastic/kibana/issues/79868)). This is a stack-wide effort in collaboration with the Elasticsearch team ([https://github.com/elastic/elasticsearch/issues/58696](https://github.com/elastic/elasticsearch/issues/58696), which will add `.mvt` as a core response format to Elasticsearch.
 
-Growing the use of `mvt` in Maps will help with both pre-fetching and client-side caching:
-- mvt is a binary format which allows more data can be packed inside a response, as compared to Json. Multiple tiles are patched together, so this introduces a form of parallelization as well. Due to growing the amount of data inside a single tile, and due to the parallelization, Maps has a pathway to increase the number of features that can be time-filtered.
+Growing the use of `mvt`([https://docs.mapbox.com/vector-tiles/reference/](https://docs.mapbox.com/vector-tiles/reference/)) in Maps will help with both pre-fetching and client-side caching:
+- mvt is a binary format which allows more data to be packed inside", as compared to Json. Multiple tiles are patched together, so this introduces a form of parallelization as well. Due to growing the amount of data inside a single tile, and due to the parallelization, Maps has a pathway to increase the number of features that can be time-filtered.
 - Because vector tiles have fixed extents and scales (defined by a `{x}/{y}/{scale}`-tuple), this type of data-fetching allows tiles to be cached on the client. This cache can be the implicit browser disc-cache, or the transient in-mem cache of mapbox-gl. Using mvt thus provides a pathway for fast toggling back&forth between timeslices, without round-trips to fetch data.
 
 
@@ -208,7 +208,7 @@ End-users who need to view a dashboard with a long-running background search wil
 This below is a forward looking section. It is a proposal of how the Timeslider-UI can be exposed as an Embeddable, when that time should come.
 
 We expect a few steps:
-- This would require the extraction of the timeslider React-component out of Maps into a separate plugin. As outlined above, this migration should be fairly straightforward, a "copy paste".
+- This would require the extraction of the timeslider React-component out of Maps into a separate plugin. As outlined above, this migration should be fairly straightforward, a "cut and paste".
 - It would require the creation of a `TimesliderEmbeddable` which wraps this UI-component.
 - It would also require the introduction of a new piece of embeddable-state, `Timeslice`, which can be controlled by the `TimesliderEmbeddable`. 
 We believe it is important to keep `timeslice` and `timerange` separate, as individual apps and other embeddables will have different mechanism to efficiently fetch data and respond to changes in `timeslice` and/or `timerange`.
