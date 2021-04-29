@@ -4458,10 +4458,16 @@
               "properties": {
                 "total": {
                   "type": "long"
+                },
+                "lens_total": {
+                  "type": "long"
                 }
               }
             },
             "total": {
+              "type": "long"
+            },
+            "lens_total": {
               "type": "long"
             }
           }
