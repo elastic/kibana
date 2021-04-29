@@ -98,7 +98,7 @@ export const DataDrivenColumns = React.memo<Props>(
           onKeyDown={onKeyDown}
           role="button"
           tabIndex={0}
-          width={header.width}
+          width={header.initialWidth}
         >
           <EventsTdContent data-test-subj="cell-container">
             <>
