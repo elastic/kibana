@@ -8,16 +8,17 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeBlock,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   FetchLogSourceConfigurationError,
   FetchLogSourceStatusError,
-  PatchLogSourceConfigurationError,
   ResolveLogSourceConfigurationError,
 } from '../../../common/log_sources';
 import { useLinkProps } from '../../hooks/use_link_props';
@@ -50,7 +51,10 @@ export const LogSourceErrorPage: React.FC<{
               />
             </p>
             {errors.map((error) => (
-              <LogSourceErrorMessage error={error} />
+              <React.Fragment key={error.name}>
+                <LogSourceErrorMessage error={error} />
+                <EuiSpacer />
+              </React.Fragment>
             ))}
           </>
         }
@@ -74,15 +78,64 @@ export const LogSourceErrorPage: React.FC<{
 };
 
 const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
-  if (error instanceof FetchLogSourceConfigurationError) {
-    return <EuiCodeBlock key={error.name} className="eui-textLeft">{`${error}`}</EuiCodeBlock>;
-  } else if (error instanceof PatchLogSourceConfigurationError) {
-    return <EuiCodeBlock key={error.name} className="eui-textLeft">{`${error}`}</EuiCodeBlock>;
+  if (error instanceof ResolveLogSourceConfigurationError) {
+    return (
+      <LogSourceErrorCallout
+        title={
+          <FormattedMessage
+            id="xpack.infra.logSourceErrorPage.resolveLogSourceConfigurationErrorTitle"
+            defaultMessage="Failed to resolve the log source configuration"
+          />
+        }
+      >
+        {error.cause instanceof SavedObjectNotFound ? (
+          // the SavedObjectNotFound error message contains broken markup
+          <FormattedMessage
+            id="xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage"
+            defaultMessage="Failed to locate that {savedObjectType}: {savedObjectId}"
+            values={{
+              savedObjectType: error.cause.savedObjectType,
+              savedObjectId: error.cause.savedObjectId,
+            }}
+          />
+        ) : (
+          `${error.cause?.message ?? error.message}`
+        )}
+      </LogSourceErrorCallout>
+    );
+  } else if (error instanceof FetchLogSourceConfigurationError) {
+    return (
+      <LogSourceErrorCallout
+        title={
+          <FormattedMessage
+            id="xpack.infra.logSourceErrorPage.fetchLogSourceConfigurationErrorTitle"
+            defaultMessage="Failed to load the log source configuration"
+          />
+        }
+      >
+        {`${error.cause?.message ?? error.message}`}
+      </LogSourceErrorCallout>
+    );
   } else if (error instanceof FetchLogSourceStatusError) {
-    return <EuiCodeBlock key={error.name} className="eui-textLeft">{`${error}`}</EuiCodeBlock>;
-  } else if (error instanceof ResolveLogSourceConfigurationError) {
-    return <EuiCodeBlock key={error.name} className="eui-textLeft">{`${error}`}</EuiCodeBlock>;
+    return (
+      <LogSourceErrorCallout
+        title={
+          <FormattedMessage
+            id="xpack.infra.logSourceErrorPage.fetchLogSourceStatusErrorTitle"
+            defaultMessage="Failed to determine the status of the log source"
+          />
+        }
+      >
+        {`${error.cause?.message ?? error.message}`}
+      </LogSourceErrorCallout>
+    );
   } else {
-    return <EuiCodeBlock key={error.name} className="eui-textLeft">{`${error}`}</EuiCodeBlock>;
+    return <LogSourceErrorCallout title={error.name}>{`${error.message}`}</LogSourceErrorCallout>;
   }
 };
+
+const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
+  <EuiCallOut className="eui-textLeft" color="danger" iconType="alert" title={title}>
+    <p>{children}</p>
+  </EuiCallOut>
+);
