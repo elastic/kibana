@@ -13,7 +13,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, timeline } from '../../objects/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Export timelines', () => {
+describe.only('Export timelines', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');

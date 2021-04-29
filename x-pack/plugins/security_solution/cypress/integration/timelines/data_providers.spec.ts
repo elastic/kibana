@@ -30,7 +30,7 @@ import { addDataProvider, closeTimeline, createNewTimeline } from '../../tasks/t
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../tasks/common';
 
-describe('timeline data providers', () => {
+describe.only('timeline data providers', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);

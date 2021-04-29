@@ -13,18 +13,12 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import {
-  addNotesToTimeline,
-  closeTimeline,
-  goToNotesTab,
-  openTimelineById,
-  waitForEventsPanelToBeLoaded,
-} from '../../tasks/timeline';
+import { addNotesToTimeline, closeTimeline, openTimelineById } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-describe('Timeline notes tab', () => {
+describe.only('Timeline notes tab', () => {
   let timelineId: string | undefined;
 
   before(() => {

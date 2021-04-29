@@ -14,7 +14,7 @@ import { executeTimelineKQL } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
-describe('timeline search or filter KQL bar', () => {
+describe.only('timeline search or filter KQL bar', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
