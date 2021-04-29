@@ -410,6 +410,7 @@ export function LayerPanel(
 
       <DimensionContainer
         isOpen={!!activeId}
+        isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
           if (layerDatasource.updateStateOnCloseDimension) {

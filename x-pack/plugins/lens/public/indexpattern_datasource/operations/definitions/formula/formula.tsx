@@ -664,9 +664,13 @@ function FormulaEditor({
               color="text"
               flush="right"
             >
-              {i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-                defaultMessage: 'View full screen',
-              })}
+              {isFullscreen
+                ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
+                    defaultMessage: 'Close full screen',
+                  })
+                : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+                    defaultMessage: 'View full screen',
+                  })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -822,38 +826,37 @@ function FormulaHelp({
   );
 
   return (
-    <div style={{ height: 250, overflow: 'auto', width: 678 }}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiSelectable
-            options={helpItems}
-            singleSelection={true}
-            searchable
-            onChange={(newOptions) => {
-              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
-              if (!chosenType) {
-                setSelectedFunction(undefined);
-              } else {
-                setSelectedFunction(chosenType.label);
-              }
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            {selectedFunction ? (
-              helpItems.find(({ label }) => label === selectedFunction)?.description
-            ) : (
-              <Markdown
-                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                  defaultMessage: `
+    <EuiFlexGroup style={{ overflow: 'auto', width: 'calc(50vw)' }}>
+      <EuiFlexItem>
+        <EuiSelectable
+          options={helpItems}
+          singleSelection={true}
+          searchable
+          onChange={(newOptions) => {
+            const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+            if (!chosenType) {
+              setSelectedFunction(undefined);
+            } else {
+              setSelectedFunction(chosenType.label);
+            }
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s">
+          {selectedFunction ? (
+            helpItems.find(({ label }) => label === selectedFunction)?.description
+          ) : (
+            <Markdown
+              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -888,15 +891,14 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                  description:
-                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-                })}
-              />
-            )}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+                description:
+                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+              })}
+            />
+          )}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

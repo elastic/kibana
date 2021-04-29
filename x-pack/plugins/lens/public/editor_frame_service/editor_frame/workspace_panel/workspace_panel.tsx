@@ -76,6 +76,7 @@ export interface WorkspacePanelProps {
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
+  isFullscreen: boolean;
 }
 
 interface WorkspaceState {
@@ -127,6 +128,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   title,
   visualizeTriggerFieldContext,
   suggestionForDraggedField,
+  isFullscreen,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -338,6 +340,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
+  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
+
   return (
     <WorkspacePanelWrapper
       title={title}
@@ -348,9 +352,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
+      isFullscreen={isFullscreen}
     >
       <DragDrop
-        className="lnsWorkspacePanel__dragDrop"
+        className={classNames('lnsWorkspacePanel__dragDrop', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
+        })}
         dataTestSubj="lnsWorkspace"
         draggable={false}
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
@@ -358,10 +366,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderVisualization()}
-          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
-        </EuiPageContentBody>
+        {isFullscreen ? (
+          element
+        ) : (
+          <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+            {element}
+          </EuiPageContentBody>
+        )}
       </DragDrop>
     </WorkspacePanelWrapper>
   );

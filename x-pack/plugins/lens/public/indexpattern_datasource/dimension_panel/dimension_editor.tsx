@@ -579,7 +579,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      {operationSupportMatrix.operationWithoutField.has('formula') ? (
+      {isFullscreen ? (
+        tabs[1].content
+      ) : operationSupportMatrix.operationWithoutField.has('formula') ? (
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={
@@ -592,7 +594,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               selectedTab.id === 'quickFunctions' &&
               selectedColumn?.operationType === 'formula'
             ) {
-              // Temporary switch to quick function ui
               setQuickFunction(true);
             } else if (selectedColumn?.operationType !== 'formula') {
               setQuickFunction(false);
@@ -616,7 +617,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         quickFunctions
       )}
 
-      {!currentFieldIsInvalid && (
+      {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section">
           {!incompleteInfo && selectedColumn && (
             <LabelInput
@@ -647,7 +648,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!incompleteInfo && !hideGrouping && (
+          {!isFullscreen && !incompleteInfo && !hideGrouping && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
@@ -658,7 +659,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {selectedColumn &&
+          {!isFullscreen &&
+          selectedColumn &&
           (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector
               selectedColumn={selectedColumn}

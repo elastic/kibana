@@ -40,7 +40,13 @@ export function FrameLayout(props: FrameLayoutProps) {
             {props.dataPanel}
           </section>
         ) : null}
-        <section className="lnsFrameLayout__pageBody" aria-labelledby="workspaceId">
+        <section
+          className={classNames('lnsFrameLayout__pageBody', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'lnsFrameLayout__pageBody--fullscreen': props.isFullscreen,
+          })}
+          aria-labelledby="workspaceId"
+        >
           <EuiScreenReaderOnly>
             <h2 id="workspaceId">
               {i18n.translate('xpack.lens.section.workspaceLabel', {

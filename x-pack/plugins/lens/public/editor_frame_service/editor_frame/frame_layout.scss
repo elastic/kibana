@@ -70,6 +70,10 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   &:first-child {
     padding-left: $euiSize;
   }
+
+  &.lnsFrameLayout__pageBody--fullscreen {
+    padding: 0;
+  }
 }
 
 .lnsFrameLayout__sidebar {

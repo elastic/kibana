@@ -62,6 +62,10 @@
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
   }
+
+  &.lnsWorkspacePanel__dragDrop--fullscreen {
+    border: none;
+  }
 }
 
 .lnsWorkspacePanel__emptyContent {
