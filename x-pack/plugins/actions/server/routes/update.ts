@@ -8,10 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { RewriteResponseCase } from './rewrite_request_case';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -26,11 +25,13 @@ const bodySchema = schema.object({
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
+  isMissingSecrets,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
 });
 
 export const updateActionRoute = (

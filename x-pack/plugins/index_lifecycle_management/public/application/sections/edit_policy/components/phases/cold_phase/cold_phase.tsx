@@ -8,13 +8,14 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useConfigurationIssues } from '../../../form';
+import { useConfiguration } from '../../../form';
 import {
   DataTierAllocationField,
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
   FreezeField,
+  ReadonlyField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
@@ -29,7 +30,7 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
@@ -37,6 +38,9 @@ export const ColdPhase: FunctionComponent = () => {
 
       {/* Freeze section */}
       {!isUsingSearchableSnapshotInHotPhase && <FreezeField phase="cold" />}
+
+      {/* Readonly section */}
+      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="cold" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField

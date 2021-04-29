@@ -92,12 +92,7 @@ export const OauthApplication: React.FC = () => {
   };
 
   const licenseModal = (
-    <EuiModal
-      className="oauth-platinum-modal"
-      maxWidth={500}
-      onClose={closeLicenseModal}
-      data-test-subj="LicenseModal"
-    >
+    <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
       <EuiModalBody>
         <EuiSpacer size="xl" />
         <LicenseBadge />

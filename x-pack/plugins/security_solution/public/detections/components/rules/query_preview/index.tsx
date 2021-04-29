@@ -32,6 +32,7 @@ import { formatDate } from '../../../../common/components/super_date_picker';
 import { State, queryPreviewReducer } from './reducer';
 import { isNoisy } from './helpers';
 import { PreviewCustomQueryHistogram } from './custom_histogram';
+import { FieldValueThreshold } from '../threshold_input';
 
 const Select = styled(EuiSelect)`
   width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
@@ -56,16 +57,7 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold =
-  | {
-      field: string | string[] | undefined;
-      value: number;
-      cardinality?: {
-        field: string[];
-        value: number;
-      };
-    }
-  | undefined;
+export type Threshold = FieldValueThreshold | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;

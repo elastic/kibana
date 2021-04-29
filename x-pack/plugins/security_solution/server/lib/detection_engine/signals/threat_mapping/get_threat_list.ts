@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
   GetThreatListOptions,
   SortWithTieBreaker,
   ThreatListCountOptions,
-  ThreatListItem,
+  ThreatListDoc,
 } from './types';
 
 /**
@@ -21,7 +21,7 @@ import {
 export const MAX_PER_PAGE = 9000;
 
 export const getThreatList = async ({
-  callCluster,
+  esClient,
   query,
   language,
   index,
@@ -34,7 +34,7 @@ export const getThreatList = async ({
   listClient,
   buildRuleMessage,
   logger,
-}: GetThreatListOptions): Promise<SearchResponse<ThreatListItem>> => {
+}: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
@@ -52,8 +52,9 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const response: SearchResponse<ThreatListItem> = await callCluster('search', {
+  const { body: response } = await esClient.search<ThreatListDoc>({
     body: {
+      // @ts-expect-error ESBoolQuery is not assignale to QueryContainer
       query: queryFilter,
       fields: [
         {
@@ -69,7 +70,7 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index,
     size: calculatedPerPage,
   });
@@ -108,7 +109,7 @@ export const getSortWithTieBreaker = ({
 };
 
 export const getThreatListCount = async ({
-  callCluster,
+  esClient,
   query,
   language,
   threatFilters,
@@ -122,13 +123,12 @@ export const getThreatListCount = async ({
     index,
     exceptionItems
   );
-  const response: {
-    count: number;
-  } = await callCluster('count', {
+  const { body: response } = await esClient.count({
     body: {
+      // @ts-expect-error ESBoolQuery is not assignale to QueryContainer
       query: queryFilter,
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index,
   });
   return response.count;

@@ -28,9 +28,9 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     selectedActionType,
   ]);
   return (
-    <EuiFlexGroup data-test-subj="static-mappings" alignItems="center">
+    <EuiFlexGroup data-test-subj="static-mappings" alignItems="center" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup component="span" justifyContent="spaceBetween">
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem component="span" grow={false}>
             <EuiCode data-test-subj="field-mapping-source">{securitySolutionField}</EuiCode>
           </EuiFlexItem>
@@ -40,7 +40,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup component="span" justifyContent="spaceBetween">
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem component="span" grow={false}>
             {isLoading ? (
               <EuiLoadingSpinner size="m" />

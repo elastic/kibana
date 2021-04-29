@@ -11,8 +11,8 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { PreviewResult } from '../common/types';
 import { MetricExpressionParams } from './types';
@@ -21,7 +21,7 @@ import { evaluateAlert } from './lib/evaluate_alert';
 const MAX_ITERATIONS = 50;
 
 interface PreviewMetricThresholdAlertParams {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   params: {
     criteria: MetricExpressionParams[];
     groupBy: string | undefined | string[];
@@ -43,7 +43,7 @@ export const previewMetricThresholdAlert: (
   precalculatedNumberOfGroups?: number
 ) => Promise<PreviewResult[]> = async (
   {
-    callCluster,
+    esClient,
     params,
     config,
     lookback,
@@ -79,7 +79,7 @@ export const previewMetricThresholdAlert: (
 
   // Get a date histogram using the bucket interval and the lookback interval
   try {
-    const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
+    const alertResults = await evaluateAlert(esClient, params, config, timeframe);
     const groups = Object.keys(first(alertResults)!);
 
     // Now determine how to interpolate this histogram based on the alert interval
@@ -174,7 +174,7 @@ export const previewMetricThresholdAlert: (
       // If there's too much data on the first request, recursively slice the lookback interval
       // until all the data can be retrieved
       const basePreviewParams = {
-        callCluster,
+        esClient,
         params,
         config,
         lookback,
@@ -187,7 +187,7 @@ export const previewMetricThresholdAlert: (
       // If this is still the first iteration, try to get the number of groups in order to
       // calculate max buckets. If this fails, just estimate based on 1 group
       const currentAlertResults = !precalculatedNumberOfGroups
-        ? await evaluateAlert(callCluster, params, config)
+        ? await evaluateAlert(esClient, params, config)
         : [];
       const numberOfGroups =
         precalculatedNumberOfGroups ?? Math.max(Object.keys(first(currentAlertResults)!).length, 1);

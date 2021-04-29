@@ -1,5 +1,5 @@
 {
-  "id": "case",
+  "id": "cases",
   "client": {
     "classes": [],
     "functions": [],
@@ -31,13 +31,7 @@
             },
             "signature": [
               "() => ",
-              {
-                "pluginId": "cases",
-                "scope": "server",
-                "docId": "kibCasePluginApi",
-                "section": "def-server.CasesClient",
-                "text": "CasesClient"
-              }
+              "CasesClient"
             ]
           }
         ],

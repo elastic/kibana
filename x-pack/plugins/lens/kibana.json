@@ -15,7 +15,8 @@
     "uiActions",
     "embeddable",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "indexPatternFieldEditor"
   ],
   "optionalPlugins": [
     "usageCollection",
@@ -34,6 +35,7 @@
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",
-    "embeddable"
+    "embeddable",
+    "usageCollection"
   ]
 }

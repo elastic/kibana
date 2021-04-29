@@ -35,12 +35,12 @@ export class History {
   // be triggered from different places in the app. The alternative would be to store
   // this in state so that we hook into the React model, but it would require loading history
   // every time the application starts even if a user is not going to view history.
-  change(listener: (reqs: any[]) => void) {
+  change(listener: (reqs: unknown[]) => void) {
     const subscription = this.changeEmitter.subscribe(listener);
     return () => subscription.unsubscribe();
   }
 
-  addToHistory(endpoint: string, method: string, data: any) {
+  addToHistory(endpoint: string, method: string, data?: string) {
     const keys = this.getHistoryKeys();
     keys.splice(0, MAX_NUMBER_OF_HISTORY_ITEMS); // only maintain most recent X;
     keys.forEach((key) => {
@@ -59,7 +59,7 @@ export class History {
     this.changeEmitter.next(this.getHistory());
   }
 
-  updateCurrentState(content: any) {
+  updateCurrentState(content: string) {
     const timestamp = new Date().getTime();
     this.storage.set('editor_state', {
       time: timestamp,

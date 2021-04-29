@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_BASE_PATH } from '../../common/constants';
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
@@ -16,7 +17,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
 
   router.get(
     {
-      path: '/api/upgrade_assistant/status',
+      path: `${API_BASE_PATH}/status`,
       validate: false,
     },
     versionCheckHandlerWrapper(

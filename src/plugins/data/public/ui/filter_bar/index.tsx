@@ -17,3 +17,12 @@ export const FilterLabel = (props: FilterLabelProps) => (
     <LazyFilterLabel {...props} />
   </React.Suspense>
 );
+
+import type { FilterItemProps } from './filter_item';
+
+const LazyFilterItem = React.lazy(() => import('./filter_item'));
+export const FilterItem = (props: FilterItemProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterItem {...props} />
+  </React.Suspense>
+);

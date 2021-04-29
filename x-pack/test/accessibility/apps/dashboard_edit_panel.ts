@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const PANEL_TITLE = 'Visualization PieChart';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/92114
-  describe.skip('Dashboard Edit Panel', () => {
+  describe('Dashboard Edit Panel', () => {
     before(async () => {
       await esArchiver.load('dashboard/drilldowns');
       await esArchiver.loadIfNeeded('logstash_functional');

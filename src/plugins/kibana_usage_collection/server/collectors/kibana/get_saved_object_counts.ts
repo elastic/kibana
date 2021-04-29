@@ -58,6 +58,7 @@ export async function getSavedObjectsCounts(
   };
   const { body } = await esClient.search(savedObjectCountSearchParams);
   const buckets: Array<{ key: string; doc_count: number }> =
+    // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
     body.aggregations?.types?.buckets || [];
 
   // Initialise the object with all zeros for all the types

@@ -1820,3 +1820,30 @@ describe('#closePointInTime', () => {
     expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('#createPointInTimeFinder', () => {
+  it('redirects request to underlying base client with default dependencies', () => {
+    const options = { type: ['a', 'b'], search: 'query' };
+    wrapper.createPointInTimeFinder(options);
+
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+      client: wrapper,
+    });
+  });
+
+  it('redirects request to underlying base client with custom dependencies', () => {
+    const options = { type: ['a', 'b'], search: 'query' };
+    const dependencies = {
+      client: {
+        find: jest.fn(),
+        openPointInTimeForType: jest.fn(),
+        closePointInTime: jest.fn(),
+      },
+    };
+    wrapper.createPointInTimeFinder(options, dependencies);
+
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
+  });
+});

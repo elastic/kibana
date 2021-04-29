@@ -11,6 +11,7 @@
 
   .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
     border-left: none;
+    padding: 0;
   }
 
   .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
@@ -38,6 +39,10 @@
 
 .dscTable__flyoutHeader {
   white-space: nowrap;
+}
+
+.dscTable__flyoutDocumentNavigation {
+  justify-content: flex-end;
 }
 
 // We only truncate if the cell is not a control column.
@@ -77,4 +82,11 @@
 
 .dscDiscoverGrid__descriptionListDescription {
   word-break: normal !important;
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  // EUI issue to hide 'of' text https://github.com/elastic/eui/issues/4654
+  .dscTable__flyoutDocumentNavigation .euiPagination__compressedText {
+    display: none;
+  }
 }

@@ -19,12 +19,13 @@ import {
   EuiLink,
   EuiPageContentBody,
 } from '@elastic/eui';
-import { CoreStart, CoreSetup } from 'kibana/public';
+import { CoreStart, ApplicationStart } from 'kibana/public';
 import {
   DataPublicPluginStart,
   ExecutionContextSearch,
   TimefilterContract,
 } from 'src/plugins/data/public';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -42,7 +43,6 @@ import {
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   UiActionsStart,
@@ -51,8 +51,8 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { getOriginalRequestErrorMessage } from '../../error_helper';
-import { validateDatasourceAndVisualization } from '../state_helpers';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
 export interface WorkspacePanelProps {
@@ -71,7 +71,7 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
-  core: CoreStart | CoreSetup;
+  core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
@@ -139,6 +139,27 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[activeVisualizationId]
     : null;
 
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+  );
+
+  const missingRefsErrors = missingIndexPatterns.length
+    ? [
+        {
+          shortMessage: '',
+          longMessage: i18n.translate('xpack.lens.indexPattern.missingIndexPattern', {
+            defaultMessage:
+              'The {count, plural, one {index pattern} other {index patterns}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
+            values: {
+              count: missingIndexPatterns.length,
+              indexpatterns: missingIndexPatterns.join(', '),
+            },
+          }),
+        },
+      ]
+    : [];
+
   // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
   // and to prevent race conditions it is ok to leave them there.
 
@@ -157,7 +178,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const expression = useMemo(
     () => {
-      if (!configurationValidationError?.length) {
+      if (!configurationValidationError?.length && !missingRefsErrors.length) {
         try {
           const ast = buildExpression({
             visualization: activeVisualization,
@@ -310,8 +331,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationError }}
+        localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
+        application={core.application}
       />
     );
   };
@@ -331,7 +353,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
         draggable={false}
-        dropType={suggestionForDraggedField ? 'field_add' : undefined}
+        dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
@@ -345,7 +367,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
-export const InnerVisualizationWrapper = ({
+export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
   timefilter,
@@ -354,6 +376,7 @@ export const InnerVisualizationWrapper = ({
   localState,
   ExpressionRendererComponent,
   dispatch,
+  application,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -363,8 +386,10 @@ export const InnerVisualizationWrapper = ({
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+    missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
+  application: ApplicationStart;
 }) => {
   const context: ExecutionContextSearch = useMemo(
     () => ({
@@ -406,7 +431,7 @@ export const InnerVisualizationWrapper = ({
           .map(({ longMessage }) => (
             <p
               key={longMessage}
-              className="eui-textBreakAll"
+              className="eui-textBreakWord"
               data-test-subj="configuration-failure-error"
             >
               {longMessage}
@@ -439,11 +464,57 @@ export const InnerVisualizationWrapper = ({
             actions={showExtraErrorsAction}
             body={
               <>
-                <p className="eui-textBreakAll" data-test-subj="configuration-failure-error">
+                <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
                   {localState.configurationValidationError[0].longMessage}
                 </p>
 
                 {showExtraErrors}
+              </>
+            }
+            iconColor="danger"
+            iconType="alert"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (localState.missingRefsErrors?.length) {
+    // Check for access to both Management app && specific indexPattern section
+    const { management: isManagementEnabled } = application.capabilities.navLinks;
+    const isIndexPatternManagementEnabled =
+      application.capabilities.management.kibana.indexPatterns;
+    return (
+      <EuiFlexGroup data-test-subj="configuration-failure">
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            actions={
+              isManagementEnabled && isIndexPatternManagementEnabled ? (
+                <RedirectAppLinks application={application}>
+                  <a
+                    href={application.getUrlForApp('management', {
+                      path: '/kibana/indexPatterns/create',
+                    })}
+                    data-test-subj="configuration-failure-reconfigure-indexpatterns"
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
+                      defaultMessage: `Recreate it in the index pattern management page`,
+                    })}
+                  </a>
+                </RedirectAppLinks>
+              ) : null
+            }
+            body={
+              <>
+                <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.indexPatternNotFound"
+                    defaultMessage="Index pattern not found"
+                  />
+                </p>
+                <p className="eui-textBreakWord lnsSelectableErrorMessage">
+                  {localState.missingRefsErrors[0].longMessage}
+                </p>
               </>
             }
             iconColor="danger"
@@ -491,14 +562,19 @@ export const InnerVisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const visibleErrorMessages = errorsFromRequest.length
+            ? errorsFromRequest
+            : errorMessage
+            ? [errorMessage]
+            : [];
 
           return (
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiEmptyPrompt
                   actions={
-                    visibleErrorMessage ? (
+                    visibleErrorMessages.length && !localState.expandError ? (
                       <EuiButtonEmpty
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
@@ -522,9 +598,13 @@ export const InnerVisualizationWrapper = ({
                         />
                       </p>
 
-                      {localState.expandError ? (
-                        <p className="eui-textBreakAll">{visibleErrorMessage}</p>
-                      ) : null}
+                      {localState.expandError
+                        ? visibleErrorMessages.map((visibleErrorMessage) => (
+                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                              {visibleErrorMessage}
+                            </p>
+                          ))
+                        : null}
                     </>
                   }
                   iconColor="danger"
@@ -538,5 +618,3 @@ export const InnerVisualizationWrapper = ({
     </div>
   );
 };
-
-export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

@@ -11,9 +11,8 @@ import { shallow } from 'enzyme';
 
 import { SchemaTypes } from '../../../../shared/types';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon, ValueBadge } from '../components';
 import { Boost, BoostType, SearchField } from '../types';
-import { ValueBadge } from '../value_badge';
 
 import { RelevanceTuningItem } from './relevance_tuning_item';
 
@@ -25,6 +24,7 @@ describe('RelevanceTuningItem', () => {
       {
         factor: 2,
         type: BoostType.Value,
+        value: [''],
       },
     ],
     field: {
@@ -54,6 +54,7 @@ describe('RelevanceTuningItem', () => {
           {
             factor: 2,
             type: BoostType.Value,
+            value: [''],
           },
           {
             factor: 3,

@@ -148,3 +148,5 @@ export const cleanKibana = () => {
 
   esArchiverResetKibana();
 };
+
+export const scrollToBottom = () => cy.scrollTo('bottom');

@@ -27,6 +27,10 @@ import type { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
+  getRequestOriginalURL: (
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) => string;
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
@@ -113,10 +117,11 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
+      // @ts-expect-error @elastic/elasticsearch `AuthenticateResponse` type doesn't define `authentication_type` and `enabled`.
       (
         await this.options.client
           .asScoped({ headers: { ...request.headers, ...authHeaders } })
-          .asCurrentUser.security.authenticate<AuthenticationInfo>()
+          .asCurrentUser.security.authenticate()
       ).body
     );
   }

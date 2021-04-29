@@ -9,6 +9,7 @@ import { NodesChangedAlert } from './nodes_changed_alert';
 import { ALERT_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -106,7 +107,7 @@ describe('NodesChangedAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

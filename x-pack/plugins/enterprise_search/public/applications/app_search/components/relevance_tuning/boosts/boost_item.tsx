@@ -9,10 +9,9 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexItem, EuiAccordion, EuiFlexGroup, EuiHideFor } from '@elastic/eui';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon, ValueBadge } from '../components';
 import { BOOST_TYPE_TO_DISPLAY_MAP } from '../constants';
 import { Boost } from '../types';
-import { ValueBadge } from '../value_badge';
 
 import { BoostItemContent } from './boost_item_content';
 import { getBoostSummary } from './get_boost_summary';
@@ -32,6 +31,7 @@ export const BoostItem: React.FC<Props> = ({ id, boost, index, name }) => {
       id={id}
       className="boosts__item"
       buttonContentClassName="boosts__itemButton"
+      initialIsOpen={!!boost.newBoost}
       buttonContent={
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>

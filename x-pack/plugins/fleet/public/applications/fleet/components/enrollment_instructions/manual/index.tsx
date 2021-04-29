@@ -10,12 +10,11 @@ import styled from 'styled-components';
 import { EuiText, EuiSpacer, EuiLink, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EnrollmentAPIKey } from '../../../types';
+import type { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
-  kibanaUrl: string;
+  fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
-  kibanaCASha256?: string;
 }
 
 // Otherwise the copy button is over the text
@@ -23,14 +22,15 @@ const CommandCode = styled.pre({
   overflow: 'scroll',
 });
 
+function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
+}
+
 export const ManualInstructions: React.FunctionComponent<Props> = ({
-  kibanaUrl,
   apiKey,
-  kibanaCASha256,
+  fleetServerHosts,
 }) => {
-  const enrollArgs = `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
-    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
-  }`;
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
   const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
 
@@ -85,6 +85,27 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                   defaultMessage="Elastic Agent docs"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
+          defaultMessage="If you are having trouble connecting, see our {link}."
+          values={{
+            link: (
+              <EuiLink
+                target="_blank"
+                external
+                href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                  defaultMessage="troubleshooting guide"
                 />
               </EuiLink>
             ),

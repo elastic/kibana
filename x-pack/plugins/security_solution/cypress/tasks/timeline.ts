@@ -90,7 +90,9 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
 };
 
 export const goToNotesTab = () => {
-  return cy.get(NOTES_TAB_BUTTON).click({ force: true });
+  cy.get(NOTES_TAB_BUTTON)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
 };
 
 export const getNotePreviewByNoteId = (noteId: string) => {
@@ -162,6 +164,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.wait(300);
   cy.get(CREATE_NEW_TIMELINE).click();
 };
 
@@ -204,7 +207,7 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string) => {
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click({ force: true });
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).pipe(($el) => $el.trigger('click'));
 };
 
 export const pinFirstEvent = () => {

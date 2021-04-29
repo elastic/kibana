@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useUiTracker } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -62,10 +63,12 @@ function getSelectOptions({
   start,
   end,
   rangeTo,
+  comparisonEnabled,
 }: {
   start?: string;
   end?: string;
   rangeTo?: string;
+  comparisonEnabled?: boolean;
 }) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
@@ -111,6 +114,7 @@ function getSelectOptions({
     comparisonType: TimeRangeComparisonType.PeriodBefore,
     start,
     end,
+    comparisonEnabled,
   });
 
   const dateFormat = getDateFormat({
@@ -132,13 +136,19 @@ function getSelectOptions({
 }
 
 export function TimeComparison() {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isMedium, isLarge } = useBreakPoints();
   const {
     urlParams: { start, end, comparisonEnabled, comparisonType, rangeTo },
   } = useUrlParams();
 
-  const selectOptions = getSelectOptions({ start, end, rangeTo });
+  const selectOptions = getSelectOptions({
+    start,
+    end,
+    rangeTo,
+    comparisonEnabled,
+  });
 
   // Sets default values
   if (comparisonEnabled === undefined || comparisonType === undefined) {
@@ -181,9 +191,17 @@ export function TimeComparison() {
             })}
             checked={comparisonEnabled}
             onChange={() => {
+              const nextComparisonEnabledValue = !comparisonEnabled;
+              if (nextComparisonEnabledValue === false) {
+                trackApmEvent({
+                  metric: 'time_comparison_disabled',
+                });
+              }
               urlHelpers.push(history, {
                 query: {
-                  comparisonEnabled: Boolean(!comparisonEnabled).toString(),
+                  comparisonEnabled: Boolean(
+                    nextComparisonEnabledValue
+                  ).toString(),
                 },
               });
             }}
@@ -191,6 +209,9 @@ export function TimeComparison() {
         </PrependContainer>
       }
       onChange={(e) => {
+        trackApmEvent({
+          metric: `time_comparison_type_change_${e.target.value}`,
+        });
         urlHelpers.push(history, {
           query: {
             comparisonType: e.target.value,

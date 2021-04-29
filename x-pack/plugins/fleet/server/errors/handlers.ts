@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import Boom, { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type Boom from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
+import { errors as LegacyESErrors } from 'elasticsearch';
+
 import type {
-  RequestHandlerContext,
   IKibanaResponse,
   KibanaResponseFactory,
+  RequestHandlerContext,
 } from 'src/core/server';
-import { errors as LegacyESErrors } from 'elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { KibanaRequest } from 'src/core/server';
 
 import { appContextService } from '../services';
 
 import {
-  IngestManagerError,
-  RegistryError,
-  PackageNotFoundError,
-  AgentPolicyNameExistsError,
-  PackageUnsupportedMediaTypeError,
-  ConcurrentInstallOperationError,
   AgentNotFoundError,
+  AgentPolicyNameExistsError,
+  ConcurrentInstallOperationError,
+  IngestManagerError,
+  PackageNotFoundError,
+  PackageUnsupportedMediaTypeError,
+  RegistryError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -58,10 +59,6 @@ interface LegacyESClientError {
 export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
   return error instanceof LegacyESErrors._Abstract;
 };
-
-export function isESClientError(error: unknown): error is ResponseError {
-  return error instanceof ResponseError;
-}
 
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {

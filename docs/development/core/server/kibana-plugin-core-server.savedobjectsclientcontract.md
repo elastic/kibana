@@ -8,7 +8,7 @@ Saved Objects is Kibana's data persisentence mechanism allowing plugins to use E
 
 \#\# SavedObjectsClient errors
 
-Since the SavedObjectsClient has its hands in everything we are a little paranoid about the way we present errors back to application code. Ideally, all errors will be either:
+Since the SavedObjectsClient has its hands in everything we are a little paranoid about the way we present errors back to to application code. Ideally, all errors will be either:
 
 1. Caused by bad implementation (ie. undefined is not a function) and as such unpredictable 2. An error that has been classified and decorated appropriately by the decorators in [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md)
 

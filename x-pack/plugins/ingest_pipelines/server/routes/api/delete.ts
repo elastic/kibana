@@ -23,7 +23,7 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { names } = req.params;
       const pipelineNames = names.split(',');
 
@@ -34,14 +34,16 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
 
       await Promise.all(
         pipelineNames.map((pipelineName) => {
-          return callAsCurrentUser('ingest.deletePipeline', { id: pipelineName })
+          return clusterClient.asCurrentUser.ingest
+            .deletePipeline({ id: pipelineName })
             .then(() => response.itemsDeleted.push(pipelineName))
-            .catch((e) =>
+            .catch((e) => {
               response.errors.push({
+                error: e?.meta?.body?.error ?? e,
+                status: e?.meta?.body?.status,
                 name: pipelineName,
-                error: e,
-              })
-            );
+              });
+            });
         })
       );
 

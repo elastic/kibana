@@ -86,6 +86,8 @@ export function QueryLanguageSwitcher({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       repositionOnScroll
+      ownFocus={true}
+      initialFocus={'[role="switch"]'}
     >
       <EuiPopoverTitle>
         <FormattedMessage
@@ -94,7 +96,7 @@ export function QueryLanguageSwitcher({
         />
       </EuiPopoverTitle>
       <div style={{ width: '350px' }}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"

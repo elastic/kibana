@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import fetch, { FetchError, Response } from 'node-fetch';
-import type { RequestInit } from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
+import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';

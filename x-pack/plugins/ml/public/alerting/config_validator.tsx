@@ -5,40 +5,35 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval } from '../../common/util/parse_interval';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../common/constants/states';
-import { resolveBucketSpanInSeconds } from '../../common/util/job_utils';
+import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 
 interface ConfigValidatorProps {
   alertInterval: string;
   jobConfigs: CombinedJobWithStats[];
+  alertParams: MlAnomalyDetectionAlertParams;
 }
 
 /**
  * Validated alert configuration
  */
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
-  ({ jobConfigs = [], alertInterval }) => {
-    const resultBucketSpanInSeconds = useMemo(
-      () => resolveBucketSpanInSeconds(jobConfigs.map((v) => v.analysis_config.bucket_span)),
-      [jobConfigs]
-    );
-
-    const resultBucketSpanString =
-      resultBucketSpanInSeconds % 60 === 0
-        ? `${resultBucketSpanInSeconds / 60}m`
-        : `${resultBucketSpanInSeconds}s`;
-
+  ({ jobConfigs = [], alertInterval, alertParams }) => {
     if (jobConfigs.length === 0) return null;
 
     const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
 
-    const isAlertIntervalTooHigh = resultBucketSpanInSeconds < alertIntervalInSeconds;
+    const lookbackIntervalInSeconds =
+      !!alertParams.lookbackInterval && parseInterval(alertParams.lookbackInterval)?.asSeconds();
+
+    const isAlertIntervalTooHigh =
+      lookbackIntervalInSeconds && lookbackIntervalInSeconds < alertIntervalInSeconds;
 
     const jobWithoutStartedDatafeed = jobConfigs
       .filter((job) => job.datafeed_config.state !== DATAFEED_STATE.STARTED)
@@ -66,9 +61,9 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                  defaultMessage="The check interval is greater than the maximum bucket span of the selected jobs. Reduce it to {resultBucketSpan} to avoid excessive delay in receiving notifications."
+                  defaultMessage="The check interval is greater than the lookback interval. Reduce it to {lookbackInterval} to avoid potentially missing notifications."
                   values={{
-                    resultBucketSpan: resultBucketSpanString,
+                    lookbackInterval: alertParams.lookbackInterval,
                   }}
                 />
               </li>

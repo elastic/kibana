@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
@@ -14,7 +14,7 @@ import { calculateScrollMath } from './calculate_scroll_math';
 import { getSearchAfterScroll } from './get_search_after_scroll';
 
 interface ScrollToStartPageOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   filter: Filter;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -27,7 +27,7 @@ interface ScrollToStartPageOptions {
 }
 
 export const scrollToStartPage = async ({
-  callCluster,
+  esClient,
   filter,
   hopSize,
   currentIndexPosition,
@@ -58,7 +58,7 @@ export const scrollToStartPage = async ({
     };
   } else if (hops > 0) {
     const scroll = await getSearchAfterScroll({
-      callCluster,
+      esClient,
       filter,
       hopSize,
       hops,
@@ -69,7 +69,7 @@ export const scrollToStartPage = async ({
     });
     if (scroll.validSearchAfterFound && leftOverAfterHops > 0) {
       return getSearchAfterScroll({
-        callCluster,
+        esClient,
         filter,
         hopSize: leftOverAfterHops,
         hops: 1,
@@ -83,7 +83,7 @@ export const scrollToStartPage = async ({
     }
   } else {
     return getSearchAfterScroll({
-      callCluster,
+      esClient,
       filter,
       hopSize: leftOverAfterHops,
       hops: 1,

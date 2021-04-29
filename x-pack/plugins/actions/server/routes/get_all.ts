@@ -7,18 +7,20 @@
 
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionsRequestHandlerContext, FindActionResult } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { RewriteResponseCase } from './rewrite_request_case';
 
 const rewriteBodyRes: RewriteResponseCase<FindActionResult[]> = (results) => {
-  return results.map(({ actionTypeId, isPreconfigured, referencedByCount, ...res }) => ({
-    ...res,
-    connector_type_id: actionTypeId,
-    is_preconfigured: isPreconfigured,
-    referenced_by_count: referencedByCount,
-  }));
+  return results.map(
+    ({ actionTypeId, isPreconfigured, referencedByCount, isMissingSecrets, ...res }) => ({
+      ...res,
+      connector_type_id: actionTypeId,
+      is_preconfigured: isPreconfigured,
+      referenced_by_count: referencedByCount,
+      is_missing_secrets: isMissingSecrets,
+    })
+  );
 };
 
 export const getAllActionRoute = (

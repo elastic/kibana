@@ -7,7 +7,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -19,7 +19,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 
-import {
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
   BasicStatsPayload,
@@ -29,8 +29,9 @@ import {
   StatsCollectionConfig,
   UsageStatsPayload,
   StatsCollectionContext,
+  UnencryptedStatsGetterConfig,
+  EncryptedStatsGetterConfig,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
@@ -41,7 +42,7 @@ interface TelemetryCollectionPluginsDepsSetup {
 export class TelemetryCollectionManagerPlugin
   implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart> {
   private readonly logger: Logger;
-  private collectionStrategy: CollectionStrategy<any> | undefined;
+  private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
   private elasticsearchClient?: IClusterClient;
@@ -216,6 +217,8 @@ export class TelemetryCollectionManagerPlugin
     }));
   };
 
+  private async getStats(config: UnencryptedStatsGetterConfig): Promise<UsageStatsPayload[]>;
+  private async getStats(config: EncryptedStatsGetterConfig): Promise<string[]>;
   private async getStats(config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -233,7 +236,7 @@ export class TelemetryCollectionManagerPlugin
               return usageData;
             }
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            return await encryptTelemetry(usageData, {
               useProdKey: this.isDistributable,
             });
           }

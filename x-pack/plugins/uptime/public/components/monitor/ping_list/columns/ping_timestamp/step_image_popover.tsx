@@ -38,7 +38,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   isImagePopoverOpen,
 }) => (
   <EuiPopover
-    anchorPosition="upCenter"
+    anchorPosition="leftDown"
     button={
       <StepImage
         allowFullScreen={true}
@@ -52,6 +52,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
       />
     }
     isOpen={isImagePopoverOpen}
+    closePopover={() => {}}
   >
     <EuiImage
       alt={fullSizeImageAlt}

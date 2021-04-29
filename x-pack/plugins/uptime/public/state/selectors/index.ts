@@ -35,8 +35,6 @@ export const selectPingHistogram = ({ ping }: AppState) => ping;
 
 export const selectPingList = ({ pingList }: AppState) => pingList;
 
-export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
-
 export const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities;
 
 export const hasMLFeatureSelector = createSelector(

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getConfigMock, agentMock } from './get_apm_config.test.mocks';
+import { getConfigurationMock, agentMock } from './get_apm_config.test.mocks';
 import { getApmConfig } from './get_apm_config';
 
 const defaultApmConfig = {
@@ -16,28 +16,28 @@ const defaultApmConfig = {
 
 describe('getApmConfig', () => {
   beforeEach(() => {
-    getConfigMock.mockReturnValue(defaultApmConfig);
+    getConfigurationMock.mockReturnValue(defaultApmConfig);
   });
 
   afterEach(() => {
-    getConfigMock.mockReset();
+    getConfigurationMock.mockReset();
     agentMock.currentTransaction = null;
   });
 
   it('returns null if apm is disabled', () => {
-    getConfigMock.mockReturnValue({
+    getConfigurationMock.mockReturnValue({
       active: false,
     });
     expect(getApmConfig('/path')).toBeNull();
 
-    getConfigMock.mockReturnValue(undefined);
+    getConfigurationMock.mockReturnValue(undefined);
     expect(getApmConfig('/path')).toBeNull();
   });
 
   it('calls `getConfig` with the correct parameters', () => {
     getApmConfig('/path');
 
-    expect(getConfigMock).toHaveBeenCalledWith('kibana-frontend');
+    expect(getConfigurationMock).toHaveBeenCalledWith('kibana-frontend');
   });
 
   it('returns the configuration from the `getConfig` call', () => {

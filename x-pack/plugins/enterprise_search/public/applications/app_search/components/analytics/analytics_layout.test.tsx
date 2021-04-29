@@ -19,7 +19,7 @@ import { Loading } from '../../../shared/loading';
 import { LogRetentionCallout } from '../log_retention';
 
 import { AnalyticsLayout } from './analytics_layout';
-import { AnalyticsHeader, AnalyticsUnavailable } from './components';
+import { AnalyticsHeader } from './components';
 
 describe('AnalyticsLayout', () => {
   const { history } = mockKibanaValues;
@@ -27,7 +27,6 @@ describe('AnalyticsLayout', () => {
   const values = {
     history,
     dataLoading: false,
-    analyticsUnavailable: false,
   };
   const actions = {
     loadAnalyticsData: jest.fn(),
@@ -60,13 +59,6 @@ describe('AnalyticsLayout', () => {
     const wrapper = shallow(<AnalyticsLayout title="" />);
 
     expect(wrapper.type()).toEqual(Loading);
-  });
-
-  it('renders an unavailable component if analytics are unavailable', () => {
-    setMockValues({ ...values, analyticsUnavailable: true });
-    const wrapper = shallow(<AnalyticsLayout title="" />);
-
-    expect(wrapper.type()).toEqual(AnalyticsUnavailable);
   });
 
   describe('data loading', () => {

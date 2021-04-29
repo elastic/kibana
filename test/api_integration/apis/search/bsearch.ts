@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 when index type is provided in OSS', async () => {
+      it('should return 400 when index type is provided in "es" strategy', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -129,6 +129,9 @@ export default function ({ getService }: FtrProviderContext) {
                     },
                   },
                 },
+              },
+              options: {
+                strategy: 'es',
               },
             },
           ],
@@ -151,11 +154,14 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
         });
-        it('should return 400 for Painless error', async () => {
+        it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
           const resp = await supertest.post(`/internal/bsearch`).send({
             batch: [
               {
                 request: painlessErrReq,
+                options: {
+                  strategy: 'es',
+                },
               },
             ],
           });

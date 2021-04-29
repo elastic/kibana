@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -35,45 +35,46 @@ export const OrganizationStats: React.FC = () => {
           defaultMessage="Usage statistics"
         />
       }
-      headerSpacer="m"
     >
-      <EuiFlexGrid columns={isFederatedAuth ? 2 : 4}>
-        <StatisticCard
-          title={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
-            { defaultMessage: 'Shared sources' }
+      <EuiPanel color="subdued" hasShadow={false}>
+        <EuiFlexGrid columns={isFederatedAuth ? 2 : 4}>
+          <StatisticCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
+              { defaultMessage: 'Shared sources' }
+            )}
+            count={sourcesCount}
+            actionPath={SOURCES_PATH}
+          />
+          {!isFederatedAuth && (
+            <>
+              <StatisticCard
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.organizationStats.invitations',
+                  { defaultMessage: 'Invitations' }
+                )}
+                count={pendingInvitationsCount}
+                actionPath={USERS_PATH}
+              />
+              <StatisticCard
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.organizationStats.activeUsers',
+                  { defaultMessage: 'Active users' }
+                )}
+                count={accountsCount}
+                actionPath={USERS_PATH}
+              />
+            </>
           )}
-          count={sourcesCount}
-          actionPath={SOURCES_PATH}
-        />
-        {!isFederatedAuth && (
-          <>
-            <StatisticCard
-              title={i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.organizationStats.invitations',
-                { defaultMessage: 'Invitations' }
-              )}
-              count={pendingInvitationsCount}
-              actionPath={USERS_PATH}
-            />
-            <StatisticCard
-              title={i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.organizationStats.activeUsers',
-                { defaultMessage: 'Active users' }
-              )}
-              count={accountsCount}
-              actionPath={USERS_PATH}
-            />
-          </>
-        )}
-        <StatisticCard
-          title={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',
-            { defaultMessage: 'Private sources' }
-          )}
-          count={personalSourcesCount}
-        />
-      </EuiFlexGrid>
+          <StatisticCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',
+              { defaultMessage: 'Private sources' }
+            )}
+            count={personalSourcesCount}
+          />
+        </EuiFlexGrid>
+      </EuiPanel>
     </ContentSection>
   );
 };

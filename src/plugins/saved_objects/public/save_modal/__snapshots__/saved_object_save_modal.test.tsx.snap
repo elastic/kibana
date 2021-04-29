@@ -7,6 +7,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
   onClose={[Function]}
 >
   <form
+    className="euiModal__flex"
     onSubmit={[Function]}
   >
     <EuiModalHeader>
@@ -103,6 +104,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
   onClose={[Function]}
 >
   <form
+    className="euiModal__flex"
     onSubmit={[Function]}
   >
     <EuiModalHeader>
@@ -199,6 +201,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
   onClose={[Function]}
 >
   <form
+    className="euiModal__flex"
     onSubmit={[Function]}
   >
     <EuiModalHeader>
@@ -295,6 +298,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
   onClose={[Function]}
 >
   <form
+    className="euiModal__flex"
     onSubmit={[Function]}
   >
     <EuiModalHeader>

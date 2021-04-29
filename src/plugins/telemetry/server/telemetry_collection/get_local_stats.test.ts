@@ -7,6 +7,7 @@
  */
 
 import { merge, omit } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -19,50 +20,49 @@ import { StatsCollectionConfig } from '../../../telemetry_collection_manager/ser
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   usageCollection.bulkFetch = jest.fn().mockResolvedValue(kibanaUsage);
-  usageCollection.toObject = jest.fn().mockImplementation((data: any) => data);
+  usageCollection.toObject = jest.fn().mockImplementation((data) => data);
   return usageCollection;
 }
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
-function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
+function mockGetLocalStats<ClusterInfo, ClusterStats>(
+  clusterInfo: ClusterInfo,
+  clusterStats: ClusterStats
+) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   esClient.info.mockResolvedValue(
     // @ts-expect-error we only care about the response body
-    {
-      body: { ...clusterInfo },
-    }
+    { body: { ...clusterInfo } }
   );
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue(
+  esClient.nodes.usage.mockResolvedValue({
     // @ts-expect-error we only care about the response body
-    {
-      body: {
-        cluster_name: 'testCluster',
-        nodes: {
-          some_node_id: {
-            timestamp: 1588617023177,
-            since: 1588616945163,
-            rest_actions: {
-              nodes_usage_action: 1,
-              create_index_action: 1,
-              document_get_action: 1,
-              search_action: 19,
-              nodes_info_action: 36,
+    body: {
+      cluster_name: 'testCluster',
+      nodes: {
+        some_node_id: {
+          timestamp: 1588617023177,
+          since: 1588616945163,
+          rest_actions: {
+            nodes_usage_action: 1,
+            create_index_action: 1,
+            document_get_action: 1,
+            search_action: 19,
+            nodes_info_action: 36,
+          },
+          aggregations: {
+            scripted_metric: {
+              other: 7,
             },
-            aggregations: {
-              terms: {
-                bytes: 2,
-              },
-              scripted_metric: {
-                other: 7,
-              },
+            terms: {
+              bytes: 2,
             },
           },
         },
       },
-    }
-  );
+    },
+  });
   // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
   // @ts-expect-error we only care about the response body
@@ -71,8 +71,8 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
 }
 
 function mockStatsCollectionConfig(
-  clusterInfo: any,
-  clusterStats: any,
+  clusterInfo: unknown,
+  clusterStats: unknown,
   kibana: {}
 ): StatsCollectionConfig {
   return {
@@ -114,13 +114,13 @@ describe('get_local_stats', () => {
       },
     },
   ];
-  const clusterStats = {
+  const clusterStats = ({
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
     indices: { totally: 456 },
     nodes: { yup: 'abc' },
     random: 123,
-  };
+  } as unknown) as estypes.ClusterStatsResponse;
 
   const kibana = {
     kibana: {
@@ -188,7 +188,7 @@ describe('get_local_stats', () => {
   describe('handleLocalStats', () => {
     it('returns expected object without xpack or kibana data', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,
@@ -205,7 +205,7 @@ describe('get_local_stats', () => {
 
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,

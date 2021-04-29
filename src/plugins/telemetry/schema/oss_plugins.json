@@ -24,6 +24,81 @@
         }
       }
     },
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kql": {
       "properties": {
         "optInCount": {
@@ -3879,6 +3954,137 @@
             }
           }
         },
+        "osquery": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "security_account": {
           "properties": {
             "appId": {
@@ -6370,6 +6576,34 @@
         }
       }
     },
+    "cloud_provider": {
+      "properties": {
+        "name": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The name of the cloud provider"
+          }
+        },
+        "vm_type": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The VM instance type"
+          }
+        },
+        "region": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The cloud provider region"
+          }
+        },
+        "zone": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The availability zone within the region"
+          }
+        }
+      }
+    },
     "core": {
       "properties": {
         "config": {
@@ -6639,6 +6873,40 @@
                       }
                     }
                   }
+                },
+                "securityResponseHeaders": {
+                  "properties": {
+                    "strictTransportSecurity": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The strictTransportSecurity response header, \"NULL\" if disabled."
+                      }
+                    },
+                    "xContentTypeOptions": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The xContentTypeOptions response header, \"NULL\" if disabled."
+                      }
+                    },
+                    "referrerPolicy": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The referrerPolicy response header, \"NULL\" if disabled."
+                      }
+                    },
+                    "permissionsPolicyConfigured": {
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if the permissionsPolicy response header has been configured."
+                      }
+                    },
+                    "disableEmbedding": {
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if security headers to disable embedding have been configured."
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -6675,10 +6943,10 @@
                     "description": "Maximum size of the payload in bytes of saved objects that can be imported."
                   }
                 },
-                "maxImportExportSizeBytes": {
+                "maxImportExportSize": {
                   "type": "long",
                   "_meta": {
-                    "description": "Maximum size in bytes of saved object that can be imported or exported."
+                    "description": "Maximum count of saved objects that can be imported or exported."
                   }
                 }
               }
@@ -7478,6 +7746,12 @@
             "description": "Default value of the setting was changed."
           }
         },
+        "banners:textContent": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
         "visualize:enableLabs": {
           "type": "boolean",
           "_meta": {
@@ -7688,6 +7962,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "discover:maxDocFieldsDisplayed": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "defaultColumns": {
           "type": "array",
           "items": {
@@ -7698,12 +7978,6 @@
           }
         },
         "context:defaultSize": {
-          "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "discover:aggs:terms:size": {
           "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
@@ -8028,6 +8302,42 @@
           }
         },
         "apm:enableServiceOverview": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:placement": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:textColor": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:backgroundColor": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:presentation:timeToPresent": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:canvas:enable_ui": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -9169,6 +9479,53 @@
         }
       }
     },
+    "usage_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "domainId": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Domain name of the metric (ie plugin name)."
+                }
+              },
+              "counterName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the counter that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "telemetry": {
       "properties": {
         "opt_in_status": {
@@ -9323,6 +9680,16 @@
             "enabled": {
               "type": "long"
             }
+          }
+        }
+      }
+    },
+    "vis_type_timeseries": {
+      "properties": {
+        "timeseries_use_last_value_mode_total": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB visualizations using \"last value\" as a time range"
           }
         }
       }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
+
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
@@ -134,10 +136,15 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
 export const TIMELINE_URL = '/api/timeline';
+export const TIMELINES_URL = '/api/timelines';
+export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
+
+export const NOTE_URL = '/api/note';
+export const PINNED_EVENT_URL = '/api/pinned_event';
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -171,7 +178,6 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 /*
   Rule notifications options
 */
-export const ENABLE_CASE_CONNECTOR = true;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',

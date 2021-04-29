@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
+invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unkn
 
 <b>Returns:</b>
 
-`Promise<any>`
+`Observable<any>`
 

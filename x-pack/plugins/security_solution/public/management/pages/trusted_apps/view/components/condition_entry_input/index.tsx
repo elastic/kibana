@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -23,7 +24,13 @@ import {
   OperatingSystem,
 } from '../../../../../../../common/endpoint/types';
 
-import { CONDITION_FIELD_TITLE, ENTRY_PROPERTY_TITLES, OPERATOR_TITLE } from '../../translations';
+import {
+  CONDITION_FIELD_DESCRIPTION,
+  CONDITION_FIELD_TITLE,
+  ENTRY_PROPERTY_TITLES,
+  OPERATOR_TITLE,
+} from '../../translations';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;
@@ -70,23 +77,33 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useCallback((suffix: string) => dataTestSubj && `${dataTestSubj}-${suffix}`, [
-      dataTestSubj,
-    ]);
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+      const getDropdownDisplay = (field: ConditionEntryField) => (
+        <>
+          {CONDITION_FIELD_TITLE[field]}
+          <EuiText size="xs" color="subdued">
+            {CONDITION_FIELD_DESCRIPTION[field]}
+          </EuiText>
+        </>
+      );
+
       return [
         {
+          dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
           value: ConditionEntryField.HASH,
         },
         {
+          dropdownDisplay: getDropdownDisplay(ConditionEntryField.PATH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
         },
         ...(os === OperatingSystem.WINDOWS
           ? [
               {
+                dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
                 value: ConditionEntryField.SIGNER,
               },

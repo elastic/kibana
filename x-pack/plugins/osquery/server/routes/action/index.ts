@@ -7,7 +7,8 @@
 
 import { IRouter } from '../../../../../../src/core/server';
 import { createActionRoute } from './create_action_route';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const initActionRoutes = (router: IRouter) => {
-  createActionRoute(router);
+export const initActionRoutes = (router: IRouter, context: OsqueryAppContext) => {
+  createActionRoute(router, context);
 };

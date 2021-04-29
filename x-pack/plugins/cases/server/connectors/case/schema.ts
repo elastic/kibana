@@ -56,10 +56,20 @@ const ResilientFieldsSchema = schema.object({
   severityCode: schema.nullable(schema.string()),
 });
 
-const ServiceNowFieldsSchema = schema.object({
+const ServiceNowITSMFieldsSchema = schema.object({
   impact: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
+});
+
+const ServiceNowSIRFieldsSchema = schema.object({
+  destIp: schema.nullable(schema.boolean()),
+  sourceIp: schema.nullable(schema.boolean()),
+  malwareHash: schema.nullable(schema.boolean()),
+  malwareUrl: schema.nullable(schema.boolean()),
+  priority: schema.nullable(schema.string()),
   category: schema.nullable(schema.string()),
   subcategory: schema.nullable(schema.string()),
 });
@@ -69,6 +79,7 @@ const NoneFieldsSchema = schema.nullable(schema.object({}));
 const ReducedConnectorFieldsSchema: { [x: string]: any } = {
   '.jira': JiraFieldsSchema,
   '.resilient': ResilientFieldsSchema,
+  '.servicenow-sir': ServiceNowSIRFieldsSchema,
 };
 
 export const ConnectorProps = {
@@ -78,6 +89,7 @@ export const ConnectorProps = {
     schema.literal('.servicenow'),
     schema.literal('.jira'),
     schema.literal('.resilient'),
+    schema.literal('.servicenow-sir'),
     schema.literal('.none'),
   ]),
   // Chain of conditional schemes
@@ -92,7 +104,7 @@ export const ConnectorProps = {
     schema.conditional(
       schema.siblingRef('type'),
       '.servicenow',
-      ServiceNowFieldsSchema,
+      ServiceNowITSMFieldsSchema,
       NoneFieldsSchema
     )
   ),

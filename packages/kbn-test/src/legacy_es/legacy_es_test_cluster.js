@@ -12,9 +12,9 @@ import { get, toPath } from 'lodash';
 import { Cluster } from '@kbn/es';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
+import { Client } from '@elastic/elasticsearch';
 
 import { KIBANA_ROOT } from '../';
-import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
 
@@ -102,8 +102,8 @@ export function createLegacyEsTestCluster(options = {}) {
      * Returns an ES Client to the configured cluster
      */
     getClient() {
-      return new legacyElasticsearch.Client({
-        host: this.getUrl(),
+      return new Client({
+        node: this.getUrl(),
       });
     }
 

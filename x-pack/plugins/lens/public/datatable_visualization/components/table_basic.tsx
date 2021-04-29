@@ -38,6 +38,7 @@ import {
   createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
+  createTransposeColumnFilterHandler,
 } from './table_actions';
 
 export const DataContext = React.createContext<DataContextType>({});
@@ -82,6 +83,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const firstTableRef = useRef(firstLocalTable);
   firstTableRef.current = firstLocalTable;
 
+  const untransposedDataRef = useRef(props.untransposedData);
+  untransposedDataRef.current = props.untransposedData;
+
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
   const { getType, dispatchEvent, renderMode, formatFactory } = props;
@@ -124,6 +128,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     firstTableRef,
     onClickValue,
   ]);
+
+  const handleTransposedColumnClick = useMemo(
+    () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),
+    [onClickValue, untransposedDataRef]
+  );
 
   const bucketColumns = useMemo(
     () =>
@@ -172,6 +181,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         bucketColumns,
         firstLocalTable,
         handleFilterClick,
+        handleTransposedColumnClick,
         isReadOnlySorted,
         columnConfig,
         visibleColumns,
@@ -183,6 +193,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       bucketColumns,
       firstLocalTable,
       handleFilterClick,
+      handleTransposedColumnClick,
       isReadOnlySorted,
       columnConfig,
       visibleColumns,

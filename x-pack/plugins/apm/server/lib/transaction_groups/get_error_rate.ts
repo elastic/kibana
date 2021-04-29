@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
 
 import {
@@ -40,21 +41,25 @@ export async function getErrorRate({
   transactionName,
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   environment?: string;
   kuery?: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<{
   noHits: boolean;
   transactionErrorRate: Coordinate[];
   average: number | null;
 }> {
   return withApmSpan('get_transaction_group_error_rate', async () => {
-    const { start, end, apmEventClient } = setup;
+    const { apmEventClient } = setup;
 
     const transactionNamefilter = transactionName
       ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -128,4 +133,68 @@ export async function getErrorRate({
 
     return { noHits, transactionErrorRate, average };
   });
+}
+
+export async function getErrorRatePeriods({
+  environment,
+  kuery,
+  serviceName,
+  transactionType,
+  transactionName,
+  setup,
+  searchAggregatedTransactions,
+  comparisonStart,
+  comparisonEnd,
+}: {
+  environment?: string;
+  kuery?: string;
+  serviceName: string;
+  transactionType?: string;
+  transactionName?: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+}) {
+  const { start, end } = setup;
+  const commonProps = {
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+  };
+
+  const currentPeriodPromise = getErrorRate({ ...commonProps, start, end });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getErrorRate({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        })
+      : { noHits: true, transactionErrorRate: [], average: null };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  const firtCurrentPeriod = currentPeriod.transactionErrorRate.length
+    ? currentPeriod.transactionErrorRate
+    : undefined;
+
+  return {
+    currentPeriod,
+    previousPeriod: {
+      ...previousPeriod,
+      transactionErrorRate: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: firtCurrentPeriod,
+        previousPeriodTimeseries: previousPeriod.transactionErrorRate,
+      }),
+    },
+  };
 }

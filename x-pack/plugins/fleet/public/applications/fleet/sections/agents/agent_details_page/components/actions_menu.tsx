@@ -9,12 +9,12 @@ import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Agent } from '../../../../types';
+import type { Agent } from '../../../../types';
 import { useCapabilities, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
@@ -45,7 +45,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout agents={[agent]} onClose={onClose} />
+          <AgentReassignAgentPolicyModal agents={[agent]} onClose={onClose} />
         </EuiPortal>
       )}
       {isUnenrollModalOpen && (

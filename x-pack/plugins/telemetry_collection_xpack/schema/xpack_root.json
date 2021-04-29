@@ -5,6 +5,9 @@
         "uid": {
           "type": "keyword"
         },
+        "hkey": {
+          "type": "long"
+        },
         "issue_date": {
           "type": "date"
         },

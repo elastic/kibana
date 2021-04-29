@@ -8,7 +8,6 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 
 /**
  * Fetch data for the monitor page title.
@@ -26,10 +25,10 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
 > = async ({ uptimeEsClient, monitorId, dateStart, dateEnd }) => {
-  const sortOptions: SortOptions = [
+  const sortOptions = [
     {
       '@timestamp': {
-        order: 'desc',
+        order: 'desc' as const,
       },
     },
   ];

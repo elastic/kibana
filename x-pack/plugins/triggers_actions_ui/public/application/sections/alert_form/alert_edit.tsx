@@ -100,9 +100,9 @@ export const AlertEdit = ({
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{alertName}'",
+            defaultMessage: "Updated '{ruleName}'",
             values: {
-              alertName: newAlert.name,
+              ruleName: newAlert.name,
             },
           })
         );
@@ -121,7 +121,7 @@ export const AlertEdit = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
-            defaultMessage: 'Cannot update alert.',
+            defaultMessage: 'Cannot update rule.',
           })
       );
     }
@@ -139,7 +139,7 @@ export const AlertEdit = ({
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit alert"
+                defaultMessage="Edit rule"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
             </h3>
@@ -157,7 +157,7 @@ export const AlertEdit = ({
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
-                      { defaultMessage: 'This alert has actions that are disabled' }
+                      { defaultMessage: 'This rule has actions that are disabled' }
                     )}
                   />
                   <EuiSpacer />

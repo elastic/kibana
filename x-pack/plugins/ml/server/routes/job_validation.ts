@@ -27,10 +27,7 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes(
-  { router, mlLicense, routeGuard }: RouteInitialization,
-  version: string
-) {
+export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInitialization) {
   function calculateModelMemoryLimit(
     client: IScopedClusterClient,
     mlClient: MlClient,
@@ -191,12 +188,10 @@ export function jobValidationRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        // version corresponds to the version used in documentation links.
         const resp = await validateJob(
           client,
           mlClient,
           request.body,
-          version,
           mlLicense.isSecurityEnabled() === false
         );
 

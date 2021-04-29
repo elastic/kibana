@@ -39,8 +39,11 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export type ReportingStart = object;
-export type ReportingSetup = object;
+export interface ReportingSetup {
+  usesUiCapabilities: () => boolean;
+}
+
+export type ReportingStart = ReportingSetup;
 
 /*
  * Internal Types
@@ -83,13 +86,16 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
+export interface ExportTypeDefinition<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
@@ -97,8 +103,9 @@ export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnTy
 /**
  * @internal
  */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
 }
 
 /**

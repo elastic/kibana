@@ -148,7 +148,7 @@ export const ACCESS_TOKEN_LABEL = i18n.translate(
 );
 
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
-  defaultMessage: 'ID',
+  defaultMessage: 'Source Identifier',
 });
 
 export const LEARN_CUSTOM_FEATURES_BUTTON = i18n.translate(
@@ -257,6 +257,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -295,14 +302,36 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsTitle',
+  {
+    defaultMessage: 'Sync Diagnostics',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsDescription',
+  {
+    defaultMessage:
+      'Retrieve relevant diagnostics data for troubleshooting active synchronization processes.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
+  {
+    defaultMessage: 'Download diagnostics data',
   }
 );
 

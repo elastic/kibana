@@ -19,7 +19,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
-    { "path": "../maps_legacy/tsconfig.json" },
+    { "path": "../maps_ems/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../home/tsconfig.json" },

@@ -7,10 +7,18 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
+
+export type MigrationLogLevel = 'error' | 'info';
+
+export interface MigrationLog {
+  level: MigrationLogLevel;
+  message: string;
+}
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -37,7 +45,39 @@ export interface BaseState extends ControlState {
   readonly outdatedDocumentsQuery: Record<string, unknown>;
   readonly retryCount: number;
   readonly retryDelay: number;
-  readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
+  /**
+   * How many times to retry a step that fails with retryable_es_client_error
+   * such as a statusCode: 503 or a snapshot_in_progress_exception.
+   *
+   * We don't want to immediately crash Kibana and cause a reboot for these
+   * intermittent. However, if we're still receiving e.g. a 503 after 10 minutes
+   * this is probably not just a temporary problem so we stop trying and exit
+   * with a fatal error.
+   *
+   * Because of the exponential backoff the total time we will retry such errors
+   * is:
+   * max_retry_time = 2+4+8+16+32+64*(RETRY_ATTEMPTS-5) + ACTION_DURATION*RETRY_ATTEMPTS
+   *
+   * For RETRY_ATTEMPTS=15 (default), ACTION_DURATION=0
+   * max_retry_time = 11.7 minutes
+   */
+  readonly retryAttempts: number;
+
+  /**
+   * The number of documents to fetch from Elasticsearch server to run migration over.
+   *
+   * The higher the value, the faster the migration process will be performed since it reduces
+   * the number of round trips between Kibana and Elasticsearch servers.
+   * For the migration speed, we have to pay the price of increased memory consumption.
+   *
+   * Since batchSize defines the number of documents, not their size, it might happen that
+   * Elasticsearch fails a request with circuit_breaking_exception when it retrieves a set of
+   * saved objects of significant size.
+   *
+   * In this case, you should set a smaller batchSize value and restart the migration process again.
+   */
+  readonly batchSize: number;
+  readonly logs: MigrationLog[];
   /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
@@ -57,6 +97,11 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be available in the upgraded index.
+   */
+  readonly unusedTypesQuery: Option.Option<estypes.QueryContainer>;
 }
 
 export type InitState = BaseState & {
@@ -91,6 +136,13 @@ export type FatalState = BaseState & {
   readonly reason: string;
 };
 
+export interface WaitForYellowSourceState extends BaseState {
+  /** Wait for the source index to be yellow before requesting it. */
+  readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
@@ -113,21 +165,29 @@ export type CreateReindexTempState = PostInitState & {
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexSourceToTempState = PostInitState & {
-  /** Reindex documents from the source index into the target index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
+export interface ReindexSourceToTempOpenPit extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
   readonly sourceIndex: Option.Some<string>;
-};
+}
 
-export type ReindexSourceToTempWaitForTaskState = PostInitState & {
-  /**
-   * Wait until reindexing documents from the source index into the target
-   * index has completed
-   */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK';
-  readonly sourceIndex: Option.Some<string>;
-  readonly reindexSourceToTargetTaskId: string;
-};
+export interface ReindexSourceToTempRead extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
+
+export interface ReindexSourceToTempClosePit extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
+  readonly sourceIndexPitId: string;
+}
+
+export interface ReindexSourceToTempIndex extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
 
 export type SetTempWriteBlock = PostInitState & {
   /**
@@ -253,11 +313,14 @@ export type State =
   | FatalState
   | InitState
   | DoneState
+  | WaitForYellowSourceState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempState
-  | ReindexSourceToTempWaitForTaskState
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndex
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -278,3 +341,5 @@ export type AllControlStates = State['controlState'];
  * 'FATAL' and 'DONE').
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
+
+export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;

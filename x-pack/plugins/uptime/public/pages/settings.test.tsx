@@ -4,10 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-import { isValidCertVal } from './settings';
+import { isValidCertVal, SettingsPage } from './settings';
+import { render } from '../lib/helper/rtl_helpers';
+import { fireEvent, waitFor } from '@testing-library/dom';
+import { act } from 'react-dom/test-utils';
+import * as alertApi from '../state/api/alerts';
 
 describe('settings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/97067
+  describe.skip('form', () => {
+    beforeAll(() => {
+      jest.spyOn(alertApi, 'fetchActionTypes').mockImplementation(async () => [
+        {
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          id: '.slack',
+          minimumLicenseRequired: 'gold',
+          name: 'Slack',
+        },
+      ]);
+    });
+
+    it('handles no spaces error', async () => {
+      const { getByText, getByTestId } = render(<SettingsPage />);
+
+      expect(getByText('heartbeat-8*,synthetics-*'));
+
+      fireEvent.input(getByTestId('heartbeat-indices-input-loaded'), {
+        target: { value: 'heartbeat-8*, synthetics-*' },
+      });
+
+      await waitFor(() => expect(getByText('Index names must not contain space')));
+    });
+
+    it('it show select a connector flyout', async () => {
+      const { getByText, getByTestId } = render(<SettingsPage />);
+
+      expect(getByText('heartbeat-8*,synthetics-*'));
+
+      act(() => {
+        fireEvent.click(getByTestId('createConnectorButton'));
+      });
+      await waitFor(() => expect(getByText('Select a connector')));
+    });
+  });
+
   describe('isValidCertVal', () => {
     it('handles NaN values', () => {
       expect(isValidCertVal(NaN)).toMatchInlineSnapshot(`"Must be a number."`);

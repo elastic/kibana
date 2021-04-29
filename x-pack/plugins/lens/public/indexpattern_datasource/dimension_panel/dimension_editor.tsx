@@ -32,6 +32,7 @@ import {
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
+  DEFAULT_TIME_SCALE,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -41,7 +42,9 @@ import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
+import { setTimeScaling, TimeScaling } from './time_scaling';
+import { defaultFilter, Filtering, setFilter } from './filtering';
+import { AdvancedOptions } from './advanced_options';
 
 const operationPanels = getOperationDisplay();
 
@@ -116,6 +119,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern,
     hideGrouping,
     dateRange,
+    dimensionGroups,
   } = props;
   const services = {
     data: props.data,
@@ -155,6 +159,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
       .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
   }, [fieldByOperation, operationWithoutField]);
 
+  const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
@@ -173,6 +179,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         indexPattern: currentIndexPattern,
         field: currentField || undefined,
         filterOperations: props.filterOperations,
+        visualizationGroups: dimensionGroups,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
@@ -250,6 +257,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
               indexPattern: currentIndexPattern,
               columnId,
               op: operationType,
+              visualizationGroups: dimensionGroups,
+              targetGroup: props.groupId,
             });
             setStateWrapper(newLayer);
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
@@ -265,6 +274,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId,
                   op: operationType,
                   field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: props.groupId,
                 })
               );
             } else {
@@ -275,6 +286,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId,
                   op: operationType,
                   field: undefined,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: props.groupId,
                 })
               );
             }
@@ -297,6 +310,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             field: hasField(selectedColumn)
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
+            visualizationGroups: dimensionGroups,
           });
           setStateWrapper(newLayer);
         },
@@ -363,6 +377,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     uiSettings: props.uiSettings,
                     currentColumn: state.layers[layerId].columns[columnId],
                   })}
+                  dimensionGroups={dimensionGroups}
                   {...services}
                 />
               );
@@ -424,6 +439,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
                     field: currentIndexPattern.getFieldByName(choice.field),
+                    visualizationGroups: dimensionGroups,
+                    targetGroup: props.groupId,
                   })
                 );
               }}
@@ -446,11 +463,63 @@ export function DimensionEditor(props: DimensionEditorProps) {
         )}
 
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <TimeScaling
-            selectedColumn={selectedColumn}
-            columnId={columnId}
-            layer={state.layers[layerId]}
-            updateLayer={setStateWrapper}
+          <AdvancedOptions
+            options={[
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
+                  defaultMessage: 'Normalize by unit',
+                }),
+                dataTestSubj: 'indexPattern-time-scaling-enable',
+                onClick: () => {
+                  setStateWrapper(
+                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
+                  );
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].timeScalingMode &&
+                    operationDefinitionMap[selectedColumn.operationType].timeScalingMode !==
+                      'disabled' &&
+                    Object.values(state.layers[layerId].columns).some(
+                      (col) => col.operationType === 'date_histogram'
+                    ) &&
+                    !selectedColumn.timeScale
+                ),
+                inlineElement: (
+                  <TimeScaling
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                  />
+                ),
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+                  defaultMessage: 'Filter by',
+                }),
+                dataTestSubj: 'indexPattern-filter-by-enable',
+                onClick: () => {
+                  setFilterByOpenInitally(true);
+                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].filterable &&
+                    !selectedColumn.filter
+                ),
+                inlineElement:
+                  operationDefinitionMap[selectedColumn.operationType].filterable &&
+                  selectedColumn.filter ? (
+                    <Filtering
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isInitiallyOpen={filterByOpenInitially}
+                    />
+                  ) : null,
+              },
+            ]}
           />
         )}
       </div>
@@ -473,7 +542,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         [columnId]: {
                           ...selectedColumn,
                           label: value,
-                          customLabel: true,
+                          customLabel:
+                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                              selectedColumn,
+                              state.indexPatterns[state.layers[layerId].indexPatternId],
+                              state.layers[layerId].columns
+                            ) !== value,
                         },
                       },
                     },

@@ -61,7 +61,7 @@ export async function getStats(
 
   // `map` to get the raw types
   const visSummaries: VisSummary[] = esResponse.hits.hits.map((hit) => {
-    const spacePhrases = hit._id.split(':');
+    const spacePhrases = hit._id.toString().split(':');
     const lastUpdated: string = get(hit, '_source.updated_at');
     const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
     const visualization = get(hit, '_source.visualization', { visState: '{}' });

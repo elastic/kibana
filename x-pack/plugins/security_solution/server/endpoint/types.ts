@@ -11,6 +11,7 @@ import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 import { HostMetadata, MetadataQueryStrategyVersions } from '../../common/endpoint/types';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 /**
  * The context for Endpoint apps.
@@ -18,6 +19,7 @@ import { HostMetadata, MetadataQueryStrategyVersions } from '../../common/endpoi
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<ConfigType>;
+  experimentalFeatures: ExperimentalFeatures;
 
   /**
    * Object readiness is tied to plugin start method

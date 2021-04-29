@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -50,7 +51,7 @@ import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
-import { AuditLogger, EventOutcome } from '../../../security/server';
+import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -100,7 +101,7 @@ export interface FindOptions extends IndexType {
   defaultSearchOperator?: 'AND' | 'OR';
   searchFields?: string[];
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SortOrder;
   hasReference?: {
     type: string;
     id: string;
@@ -124,7 +125,7 @@ interface IndexType {
   [key: string]: unknown;
 }
 
-interface AggregateResult {
+export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
 }
 
@@ -156,7 +157,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
   data: {
     name: string;
@@ -169,7 +170,7 @@ interface UpdateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface GetAlertInstanceSummaryParams {
+export interface GetAlertInstanceSummaryParams {
   id: string;
   dateStart?: string;
 }
@@ -228,7 +229,7 @@ export class AlertsClient {
   public async create<Params extends AlertTypeParams = never>({
     data,
     options,
-  }: CreateOptions<Params>): Promise<Alert<Params>> {
+  }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
@@ -259,9 +260,14 @@ export class AlertsClient {
     );
     const username = await this.getUserName();
 
-    const createdAPIKey = data.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = data.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
 
     this.validateActions(alertType, data.actions);
 
@@ -292,7 +298,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -597,7 +603,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -670,7 +676,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UPDATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -726,9 +732,16 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const createdAPIKey = attributes.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = attributes.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
+    }
+
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -836,12 +849,21 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(
+        `Error updating API key for rule: could not create API key - ${error.message}`
+      );
+    }
+
     const updateAttributes = this.updateMeta({
       ...attributes,
-      ...this.apiKeyAsAlertAttributes(
-        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-        username
-      ),
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
@@ -849,7 +871,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UPDATE_API_KEY,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -934,7 +956,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.ENABLE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -943,13 +965,20 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+
+      let createdAPIKey = null;
+      try {
+        createdAPIKey = await this.createAPIKey(
+          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+        );
+      } catch (error) {
+        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
+      }
+
       const updateAttributes = this.updateMeta({
         ...attributes,
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
+        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
       });
@@ -1035,7 +1064,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.DISABLE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1111,7 +1140,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.MUTE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1172,7 +1201,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UNMUTE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
     );
@@ -1233,7 +1262,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.MUTE_INSTANCE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
     );
@@ -1299,7 +1328,7 @@ export class AlertsClient {
     this.auditLogger?.log(
       alertAuditEvent({
         action: AlertAuditAction.UNMUTE_INSTANCE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
     );

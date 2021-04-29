@@ -143,12 +143,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
         results: {
           hits: {
             total: { value: 1, relation: 'eq' },
-            max_score: null,
+            max_score: undefined,
             hits: [
               {
                 _index: 'auditbeat-7.8.0-2020.11.23-000004',
                 _id: 'wRCuOnYB7WTwW_GluxL8',
-                _score: null,
+                _score: undefined,
                 _source: {
                   host: {
                     hostname: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
@@ -188,12 +188,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631609876537',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     destination: {
                       geo: {
@@ -217,12 +217,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631609876537',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     destination: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                   },
@@ -244,12 +244,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631486500511',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     source: {
                       geo: {
@@ -273,12 +273,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631486500511',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                   },

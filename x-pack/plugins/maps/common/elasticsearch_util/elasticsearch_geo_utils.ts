@@ -23,7 +23,7 @@ import {
   LAT_INDEX,
 } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { Filter, FILTERS } from '../../../../../src/plugins/data/common';
+import { Filter, FilterMeta, FILTERS } from '../../../../../src/plugins/data/common';
 import { MapExtent } from '../descriptor_types';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
@@ -49,6 +49,12 @@ interface GeoShapeQueryBody {
   indexed_shape?: PreIndexedShape;
 }
 
+// Index signature explicitly states that anything stored in an object using a string conforms to the structure
+// problem is that Elasticsearch signature also allows for other string keys to conform to other structures, like 'ignore_unmapped'
+// Use intersection type to exclude certain properties from the index signature
+// https://basarat.gitbook.io/typescript/type-system/index-signatures#excluding-certain-properties-from-the-index-signature
+type GeoShapeQuery = { ignore_unmapped: boolean } & { [geoFieldName: string]: GeoShapeQueryBody };
+
 export type GeoFilter = Filter & {
   geo_bounding_box?: {
     [geoFieldName: string]: ESBBox;
@@ -57,9 +63,7 @@ export type GeoFilter = Filter & {
     distance: string;
     [geoFieldName: string]: Position | { lat: number; lon: number } | string;
   };
-  geo_shape?: {
-    [geoFieldName: string]: GeoShapeQueryBody;
-  };
+  geo_shape?: GeoShapeQuery;
 };
 
 export interface PreIndexedShape {
@@ -365,39 +369,27 @@ export function createSpatialFilterWithGeometry({
   geometryLabel,
   indexPatternId,
   geoFieldName,
-  geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
-  preIndexedShape?: PreIndexedShape;
+  preIndexedShape?: PreIndexedShape | null;
   geometry: Polygon;
   geometryLabel: string;
   indexPatternId: string;
   geoFieldName: string;
-  geoFieldType: ES_GEO_FIELD_TYPE;
   relation: ES_SPATIAL_RELATIONS;
-}) {
-  ensureGeoField(geoFieldType);
-
-  const isGeoPoint = geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-
-  const relationLabel = isGeoPoint
-    ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
-        defaultMessage: 'in',
-      })
-    : getEsSpatialRelationLabel(relation);
-  const meta = {
+}): GeoFilter {
+  const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     key: geoFieldName,
-    alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
+    alias: `${geoFieldName} ${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
+    disabled: false,
   };
 
   const shapeQuery: GeoShapeQueryBody = {
-    // geo_shape query with geo_point field only supports intersects relation
-    relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
+    relation,
   };
-
   if (preIndexedShape) {
     shapeQuery.indexed_shape = preIndexedShape;
   } else {
@@ -406,6 +398,9 @@ export function createSpatialFilterWithGeometry({
 
   return {
     meta,
+    // Currently no way to create an object with exclude property from index signature
+    // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
+    // @ts-expect-error
     geo_shape: {
       ignore_unmapped: true,
       [geoFieldName]: shapeQuery,
@@ -425,8 +420,8 @@ export function createDistanceFilterWithMeta({
   geoFieldName: string;
   indexPatternId: string;
   point: Position;
-}) {
-  const meta = {
+}): GeoFilter {
+  const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
@@ -441,6 +436,7 @@ export function createDistanceFilterWithMeta({
             pointLabel: point.join(', '),
           },
         }),
+    disabled: false,
   };
 
   return {

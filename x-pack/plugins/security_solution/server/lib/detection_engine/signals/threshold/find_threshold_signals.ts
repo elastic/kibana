@@ -8,10 +8,9 @@
 import { set } from '@elastic/safer-lodash-set';
 
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -20,7 +19,7 @@ import {
 import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
-import { SignalSearchResponse } from '../types';
+import type { SignalSearchResponse } from '../types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -29,7 +28,7 @@ interface FindThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
-  threshold: Threshold;
+  threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
 }
@@ -56,7 +55,7 @@ export const findThresholdSignals = async ({
         sort: [
           {
             [timestampOverride ?? '@timestamp']: {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],
@@ -88,7 +87,7 @@ export const findThresholdSignals = async ({
       : {}),
   };
 
-  const thresholdFields = normalizeThresholdField(threshold.field);
+  const thresholdFields = threshold.field;
 
   // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
@@ -137,10 +136,10 @@ export const findThresholdSignals = async ({
     to,
     services,
     logger,
+    // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
     pageSize: 1,
     sortOrder: 'desc',
     buildRuleMessage,
-    excludeDocsWithTimestampOverride: false,
   });
 };

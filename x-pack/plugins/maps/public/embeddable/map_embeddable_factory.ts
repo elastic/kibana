@@ -11,7 +11,6 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
-import '../index.scss';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { MapByReferenceInput, MapEmbeddableInput, MapByValueInput } from './types';

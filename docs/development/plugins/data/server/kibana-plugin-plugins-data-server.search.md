@@ -14,7 +14,7 @@ search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean;
         } | {
             display: string;
             val: string;
@@ -36,8 +36,6 @@ search: {
         toAbsoluteDates: typeof toAbsoluteDates;
         calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
-    getResponseInspectorStats: typeof getResponseInspectorStats;
     tabifyAggResponse: typeof tabifyAggResponse;
     tabifyGetColumns: typeof tabifyGetColumns;
 }

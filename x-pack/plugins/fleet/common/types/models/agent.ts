@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
+import type {
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+} from '../../constants';
 
 import type { FullAgentPolicy } from './agent_policy';
 
@@ -32,8 +36,7 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  // INTERNAL* actions are mean to interupt long polling calls these actions will not be distributed to the agent
-  | 'INTERNAL_POLICY_REASSIGN';
+  | 'POLICY_REASSIGN';
 
 export interface NewAgentAction {
   type: AgentActionType;

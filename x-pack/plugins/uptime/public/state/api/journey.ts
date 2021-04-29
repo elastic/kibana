@@ -8,6 +8,7 @@
 import { apiService } from './utils';
 import { FetchJourneyStepsParams } from '../actions/journey';
 import {
+  Ping,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types';
@@ -32,6 +33,22 @@ export async function fetchJourneysFailedSteps({
     { checkGroups },
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
+}
+
+export async function fetchLastSuccessfulStep({
+  monitorId,
+  timestamp,
+  stepIndex,
+}: {
+  monitorId: string;
+  timestamp: string;
+  stepIndex: number;
+}): Promise<Ping> {
+  return (await apiService.get(`/api/uptime/synthetics/step/success/`, {
+    monitorId,
+    timestamp,
+    stepIndex,
+  })) as Ping;
 }
 
 export async function getJourneyScreenshot(imgSrc: string) {

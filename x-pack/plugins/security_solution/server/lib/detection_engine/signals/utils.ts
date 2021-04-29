@@ -9,9 +9,11 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
+import { SortResults } from '@elastic/elasticsearch/api/types';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -27,7 +29,6 @@ import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../..
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
-  BulkResponse,
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -42,6 +43,15 @@ import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
+import {
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -155,18 +165,20 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
-  services.callCluster('transport.request', {
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      index: [
-        {
-          names: indices ?? [],
-          privileges: ['read'],
-        },
-      ],
-    },
-  });
+  (
+    await services.scopedClusterClient.asCurrentUser.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: indices ?? [],
+            privileges: ['read'],
+          },
+        ],
+      },
+    })
+  ).body as Privilege;
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -205,7 +217,11 @@ export const getListsClient = ({
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const listClient = lists.getListClient(
+    services.scopedClusterClient.asCurrentUser,
+    spaceId,
+    updatedByUser ?? 'elastic'
+  );
   const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
@@ -220,7 +236,7 @@ export const getExceptions = async ({
 }: {
   client: ExceptionListClient;
   lists: ListArray;
-}): Promise<ExceptionListItemSchema[] | undefined> => {
+}): Promise<ExceptionListItemSchema[]> => {
   if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
@@ -402,7 +418,7 @@ export const makeFloatString = (num: number): string => Number(num).toFixed(2);
  * @returns The aggregated example as shown above.
  */
 export const errorAggregator = (
-  response: BulkResponse,
+  response: estypes.BulkResponse,
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
@@ -562,7 +578,7 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -573,7 +589,8 @@ export const lastValidDate = ({
     const timestampValue =
       lastRecord.fields != null && lastRecord.fields[timestamp] != null
         ? lastRecord.fields[timestamp][0]
-        : lastRecord._source[timestamp];
+        : // @ts-expect-error @elastic/elasticsearch _source is optional
+          lastRecord._source[timestamp];
     const lastTimestamp =
       typeof timestampValue === 'string' || typeof timestampValue === 'number'
         ? timestampValue
@@ -593,7 +610,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -615,6 +632,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
 
 export const createSearchAfterReturnType = ({
   success,
+  warning,
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
@@ -623,6 +641,7 @@ export const createSearchAfterReturnType = ({
   errors,
 }: {
   success?: boolean | undefined;
+  warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
@@ -632,6 +651,7 @@ export const createSearchAfterReturnType = ({
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
+    warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
@@ -666,6 +686,7 @@ export const mergeReturns = (
   return searchAfters.reduce((prev, next) => {
     const {
       success: existingSuccess,
+      warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
@@ -676,6 +697,7 @@ export const mergeReturns = (
 
     const {
       success: newSuccess,
+      warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
@@ -686,6 +708,7 @@ export const mergeReturns = (
 
     return {
       success: existingSuccess && newSuccess,
+      warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
@@ -724,6 +747,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total: newShards.total + existingShards.total,
         successful: newShards.successful + existingShards.successful,
         failed: newShards.failed + existingShards.failed,
+        // @ts-expect-error @elastic/elaticsearch skipped is optional in ShardStatistics
         skipped: newShards.skipped + existingShards.skipped,
         failures: [
           ...(existingShards.failures != null ? existingShards.failures : []),
@@ -735,7 +759,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total:
           createTotalHitsFromSearchResult({ searchResult: prev }) +
           createTotalHitsFromSearchResult({ searchResult: next }),
-        max_score: Math.max(newHits.max_score, existingHits.max_score),
+        max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },
     };
@@ -745,7 +769,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
 export const createTotalHitsFromSearchResult = ({
   searchResult,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: { hits: { total: number | { value: number } } };
 }): number => {
   const totalHits =
     typeof searchResult.hits.total === 'number'
@@ -810,4 +834,38 @@ export const getThresholdTermsHash = (
         .join(',')
     )
     .digest('hex');
+};
+
+export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
+  params.type === 'threshold';
+export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
+  params.type === 'query';
+export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
+  params.type === 'saved_query';
+export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
+  params.type === 'threat_match';
+export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
+  params.type === 'machine_learning';
+
+/**
+ * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
+ * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
+ * unmapped in the provided index
+ *
+ * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+ *
+ * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
+ * @param sortIds SortResults | undefined
+ * @returns SortResults
+ */
+export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    // haven't determined when we would receive a null value for a sort id
+    // but in case we do, default to sending the stringified Java max_int
+    if (sortId == null || sortId === '' || sortId >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
 };

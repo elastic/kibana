@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -25,7 +26,6 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
-import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
@@ -183,6 +183,7 @@ export async function getLatencyPeriods({
   latencyAggregationType,
   comparisonStart,
   comparisonEnd,
+  kuery,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -192,6 +193,7 @@ export async function getLatencyPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
+  kuery?: string;
 }) {
   const { start, end } = setup;
   const options = {
@@ -200,6 +202,7 @@ export async function getLatencyPeriods({
     transactionName,
     setup,
     searchAggregatedTransactions,
+    kuery,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({

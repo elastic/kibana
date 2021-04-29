@@ -10,7 +10,7 @@ import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AGENT_STATUSES, getColorForAgentStatus } from '../../services/agent_status';
-import { SimplifiedAgentStatus } from '../../../../types';
+import type { SimplifiedAgentStatus } from '../../../../types';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   &.ingest-agent-status-bar {

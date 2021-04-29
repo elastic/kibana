@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 
 import { Error } from '../../../components';
-import { AgentPolicy, PackageInfo, PackagePolicy, GetPackagesResponse } from '../../../types';
+import type { AgentPolicy, PackageInfo, PackagePolicy, GetPackagesResponse } from '../../../types';
 import {
   useGetOneAgentPolicy,
   useGetPackages,

@@ -9,18 +9,16 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { CollectedUsage, ReportedUsage } from './register';
 interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
 }
-type ESResponse = SearchResponse<SearchTelemetry>;
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     const config = await config$.pipe(first()).toPromise();
-    const { body: esResponse } = await esClient.search<ESResponse>(
+    const { body: esResponse } = await esClient.search<SearchTelemetry>(
       {
         index: config.kibana.index,
         body: {
@@ -37,7 +35,7 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
         averageDuration: null,
       };
     }
-    const { successCount, errorCount, totalDuration } = esResponse.hits.hits[0]._source[
+    const { successCount, errorCount, totalDuration } = esResponse.hits.hits[0]._source![
       'search-telemetry'
     ];
     const averageDuration = totalDuration / successCount;

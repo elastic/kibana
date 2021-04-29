@@ -29,7 +29,11 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   class ElasticChart {
-    public async getCanvas() {
+    public async getCanvas(dataTestSubj?: string) {
+      if (dataTestSubj) {
+        const chart = await this.getChart(dataTestSubj);
+        return await chart.findByClassName('echCanvasRenderer');
+      }
       return await find.byCssSelector('.echChart canvas:last-of-type');
     }
 

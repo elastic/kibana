@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 
-import { PackageInfo, PackageListItem } from '../../../types';
+import type { PackageInfo, PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 

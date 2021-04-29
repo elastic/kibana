@@ -543,6 +543,7 @@ exports[`discover sidebar field details footer renders properly 1`] = `
         "_source",
       ],
       "popularizeField": [Function],
+      "setFieldFormat": [Function],
       "stubSetFieldFormat": [Function],
       "timeFieldName": "time",
       "title": "logstash-*",

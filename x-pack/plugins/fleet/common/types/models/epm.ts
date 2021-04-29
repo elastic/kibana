@@ -9,7 +9,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 
-import {
+import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
@@ -30,7 +30,12 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export interface DefaultPackagesInstallationError {
+  installType: InstallType;
+  error: Error;
+}
+
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
@@ -50,6 +55,8 @@ export enum KibanaAssetType {
   indexPattern = 'index_pattern',
   map = 'map',
   lens = 'lens',
+  securityRule = 'security_rule',
+  mlModule = 'ml_module',
 }
 
 /*
@@ -62,6 +69,8 @@ export enum KibanaSavedObjectType {
   indexPattern = 'index-pattern',
   map = 'map',
   lens = 'lens',
+  mlModule = 'ml-module',
+  securityRule = 'security-rule',
 }
 
 export enum ElasticsearchAssetType {
@@ -274,6 +283,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -286,7 +296,6 @@ export enum RegistryVarsEntryKeys {
   os = 'os',
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape

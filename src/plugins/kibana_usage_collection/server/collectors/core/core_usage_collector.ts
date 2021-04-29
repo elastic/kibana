@@ -238,6 +238,38 @@ export function getCoreUsageCollector(
               },
             },
           },
+          securityResponseHeaders: {
+            strictTransportSecurity: {
+              type: 'keyword',
+              _meta: {
+                description: 'The strictTransportSecurity response header, "NULL" if disabled.',
+              },
+            },
+            xContentTypeOptions: {
+              type: 'keyword',
+              _meta: {
+                description: 'The xContentTypeOptions response header, "NULL" if disabled.',
+              },
+            },
+            referrerPolicy: {
+              type: 'keyword',
+              _meta: { description: 'The referrerPolicy response header, "NULL" if disabled.' },
+            },
+            permissionsPolicyConfigured: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if the permissionsPolicy response header has been configured.',
+              },
+            },
+            disableEmbedding: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if security headers to disable embedding have been configured.',
+              },
+            },
+          },
         },
 
         logging: {
@@ -269,11 +301,10 @@ export function getCoreUsageCollector(
                 'Maximum size of the payload in bytes of saved objects that can be imported.',
             },
           },
-          maxImportExportSizeBytes: {
+          maxImportExportSize: {
             type: 'long',
             _meta: {
-              description:
-                'Maximum size in bytes of saved object that can be imported or exported.',
+              description: 'Maximum count of saved objects that can be imported or exported.',
             },
           },
         },

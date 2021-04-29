@@ -31,6 +31,7 @@ import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface UptimeAppColors {
   danger: string;
@@ -96,12 +97,20 @@ const Application = (props: UptimeAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
+  const storage = new Storage(window.localStorage);
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
         <ReduxProvider store={store}>
           <KibanaContextProvider
-            services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
+            services={{
+              ...core,
+              ...plugins,
+              storage,
+              data: startPlugins.data,
+              triggersActionsUi: startPlugins.triggersActionsUi,
+            }}
           >
             <Router history={appMountParameters.history}>
               <EuiThemeProvider darkMode={darkMode}>
@@ -109,7 +118,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <EuiPage data-test-subj="uptimeApp">
                           <RedirectAppLinks application={core.application}>
                             <main>
                               <UptimeAlertsFlyoutWrapper />

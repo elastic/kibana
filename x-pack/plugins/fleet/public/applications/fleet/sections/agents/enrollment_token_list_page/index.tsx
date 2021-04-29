@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiBasicTable,
@@ -17,7 +18,6 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiText,
-  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
@@ -31,7 +31,7 @@ import {
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
-import { EnrollmentAPIKey } from '../../../types';
+import type { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
@@ -242,8 +242,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '70px',
       render: (_: any, apiKey: EnrollmentAPIKey) => {
+        const agentPolicy = agentPolicies.find((c) => c.id === apiKey.policy_id);
+        const canUnenroll = apiKey.active && !agentPolicy?.is_managed;
         return (
-          apiKey.active && (
+          canUnenroll && (
             <DeleteButton
               apiKey={apiKey}
               refresh={() => enrollmentAPIKeysRequest.resendRequest()}

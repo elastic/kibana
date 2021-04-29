@@ -40,7 +40,8 @@ jest.mock('../../containers/use_update_comment');
 jest.mock('./user_action_timestamp');
 
 const patchComment = jest.fn();
-describe('UserActionTree ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/96362
+describe.skip('UserActionTree ', () => {
   const sampleData = {
     content: 'what a great comment update',
   };

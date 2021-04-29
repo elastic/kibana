@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from '../../../../../../typings/elasticsearch';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';
 
@@ -35,10 +38,13 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<GetJourneyStepsParams
               'monitor.check_group': checkGroups,
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
-    sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
+    sort: asMutableArray([
+      { 'synthetics.step.index': { order: 'asc' } },
+      { '@timestamp': { order: 'asc' } },
+    ] as const),
     _source: {
       excludes: ['synthetics.blob'],
     },
@@ -47,7 +53,7 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<GetJourneyStepsParams
 
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  return (result.hits.hits.map((h) => {
+  return ((result.hits.hits as Array<SearchHit<Ping>>).map((h) => {
     const source = h._source as Ping & { '@timestamp': string };
     return {
       ...source,

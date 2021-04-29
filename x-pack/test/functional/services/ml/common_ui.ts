@@ -10,6 +10,8 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
@@ -18,6 +20,7 @@ interface SetValueOptions {
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
 export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -204,6 +207,43 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         expectedValue,
         `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
       );
+    },
+
+    async disableAntiAliasing() {
+      await canvasElement.disableAntiAliasing();
+    },
+
+    async resetAntiAliasing() {
+      await canvasElement.resetAntiAliasing();
+    },
+
+    async assertColorsInCanvasElement(
+      dataTestSubj: string,
+      expectedColorStats: CanvasElementColorStats,
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          expectedColorStats,
+          exclude,
+          percentageThreshold,
+          channelTolerance,
+          valueTolerance
+        );
+
+        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            expectedColorStats
+          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
+        );
+      });
     },
   };
 }

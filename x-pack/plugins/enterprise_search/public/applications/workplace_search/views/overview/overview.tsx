@@ -54,13 +54,8 @@ export const Overview: React.FC = () => {
     initializeOverview();
   }, [initializeOverview]);
 
-  // TODO: Remove div wrapper once the Overview page is using the full Layout
   if (dataLoading) {
-    return (
-      <div style={{ height: '90vh' }}>
-        <Loading />
-      </div>
-    );
+    return <Loading />;
   }
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;

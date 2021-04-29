@@ -8,6 +8,9 @@
 export { SavedObjectsErrorHelpers, SavedObjectsClientProvider, SavedObjectsUtils } from './lib';
 export type {
   SavedObjectsRepository,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,

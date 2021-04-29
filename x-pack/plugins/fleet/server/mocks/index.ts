@@ -10,6 +10,7 @@ import {
   savedObjectsServiceMock,
   coreMock,
 } from '../../../../../src/core/server/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
@@ -17,9 +18,13 @@ import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
 
+// Export all mocks from artifacts
+export * from '../services/artifacts/mocks';
+
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
+    data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     security: securityMock.createStart(),

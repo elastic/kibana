@@ -14,6 +14,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
   const retry = getService('retry');
   const log = getService('log');
   const inspector = getService('inspector');
+  const monacoEditor = getService('monacoEditor');
   const { header } = getPageObjects(['header']);
 
   class TileMapPage {
@@ -39,8 +40,9 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailRequest');
+      await find.byCssSelector('.react-monaco-editor-container');
 
-      return await inspector.getCodeEditorValue();
+      return await monacoEditor.getCodeEditorValue(1);
     }
 
     public async getMapBounds(): Promise<object> {

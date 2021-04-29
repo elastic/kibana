@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SortOptions } from '../../../../../typings/elasticsearch/aggregations';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -48,7 +47,7 @@ export function getErrorGroups({
       serviceName,
     });
 
-    const order: SortOptions = sortByLatestOccurrence
+    const order = sortByLatestOccurrence
       ? {
           max_timestamp: sortDirection,
         }

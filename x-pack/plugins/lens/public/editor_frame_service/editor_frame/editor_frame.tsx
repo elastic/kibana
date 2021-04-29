@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useReducer, useState, useCallback } from 'react';
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
@@ -40,7 +40,7 @@ export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
   palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;
-  core: CoreSetup | CoreStart;
+  core: CoreStart;
   plugins: EditorFrameStartPlugins;
   dateRange: {
     fromDate: string;

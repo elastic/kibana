@@ -33,9 +33,15 @@ export interface MetadataRequestContext {
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
-  ['online', HostStatus.ONLINE],
+  ['online', HostStatus.HEALTHY],
   ['offline', HostStatus.OFFLINE],
-  ['unenrolling', HostStatus.UNENROLLING],
+  ['inactive', HostStatus.INACTIVE],
+  ['unenrolling', HostStatus.UPDATING],
+  ['enrolling', HostStatus.UPDATING],
+  ['updating', HostStatus.UPDATING],
+  ['warning', HostStatus.UNHEALTHY],
+  ['error', HostStatus.UNHEALTHY],
+  ['degraded', HostStatus.UNHEALTHY],
 ]);
 
 /**
@@ -76,6 +82,7 @@ export const getMetadataListRequestHandler = function (
 
     const unenrolledAgentIds = await findAllUnenrolledAgentIds(
       agentService,
+      endpointAppContext.service.getPackagePolicyService()!,
       context.core.savedObjects.client,
       context.core.elasticsearch.client.asCurrentUser
     );
@@ -257,7 +264,7 @@ export async function enrichHostMetadata(
   metadataRequestContext: MetadataRequestContext,
   metadataQueryStrategyVersion: MetadataQueryStrategyVersions
 ): Promise<HostInfo> {
-  let hostStatus = HostStatus.ERROR;
+  let hostStatus = HostStatus.UNHEALTHY;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
   const log = metadataRequestContext.logger;
   try {
@@ -276,7 +283,7 @@ export async function enrichHostMetadata(
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
-    hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
+    hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.UNHEALTHY;
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
       log.warn(`agent with id ${elasticAgentId} not found`);

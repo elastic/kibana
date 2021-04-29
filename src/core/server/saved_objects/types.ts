@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -79,7 +80,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SortOrder;
   /**
    * An array of fields to include in the results
    * @example
@@ -93,7 +94,7 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: unknown[];
+  searchAfter?: estypes.Id[];
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -115,6 +116,28 @@ export interface SavedObjectsFindOptions {
    */
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
+  /**
+   * A record of aggregations to perform.
+   * The API currently only supports a limited set of metrics and bucket aggregation types.
+   * Additional aggregation types can be contributed to Core.
+   *
+   * @example
+   * Aggregating on SO attribute field
+   * ```ts
+   * const aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @example
+   * Aggregating on SO root field
+   * ```ts
+   * const aggs = { latest_update: { max: { field: 'dashboard.updated_at' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @alpha
+   */
+  aggs?: Record<string, estypes.AggregationContainer>;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved

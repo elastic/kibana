@@ -119,6 +119,8 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
           '!moving_avg',
           '!cumulative_sum',
           '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

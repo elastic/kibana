@@ -38,19 +38,42 @@ describe('<EditPolicy /> hot phase validation', () => {
   });
 
   describe('rollover', () => {
-    test(`doesn't allow no max size, no max age and no max docs`, async () => {
+    test(`doesn't allow no max primary shard size, no max index size, no max age, no max docs`, async () => {
       const { actions } = testBed;
 
       await actions.hot.toggleDefaultRollover(false);
       expect(actions.hot.hasRolloverSettingRequiredCallout()).toBeFalsy();
 
-      await actions.hot.setMaxSize('');
+      await actions.hot.setMaxPrimaryShardSize('');
       await actions.hot.setMaxAge('');
       await actions.hot.setMaxDocs('');
+      await actions.hot.setMaxSize('');
 
       runTimers();
 
       expect(actions.hot.hasRolloverSettingRequiredCallout()).toBeTruthy();
+    });
+
+    test(`doesn't allow -1 for max primary shard size`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxPrimaryShardSize('-1');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+    });
+
+    test(`doesn't allow 0 for max primary shard size`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxPrimaryShardSize('0');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow -1 for max size`, async () => {
@@ -97,6 +120,17 @@ describe('<EditPolicy /> hot phase validation', () => {
       actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
+    test(`doesn't allow decimals for max age`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxAge('5.5');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
+    });
+
     test(`doesn't allow -1 for max docs`, async () => {
       const { actions } = testBed;
 
@@ -117,6 +151,17 @@ describe('<EditPolicy /> hot phase validation', () => {
       runTimers();
 
       actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+    });
+
+    test(`doesn't allow decimals for max docs`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxDocs('5.5');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
     });
   });
 

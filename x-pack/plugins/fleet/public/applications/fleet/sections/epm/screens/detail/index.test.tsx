@@ -10,21 +10,25 @@ import { Route } from 'react-router-dom';
 import { act, cleanup } from '@testing-library/react';
 
 import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
-import {
+import type {
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetStatsResponse,
 } from '../../../../../../../common/types/rest_spec';
-import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
+import type {
+  DetailViewPanelName,
+  KibanaAssetType,
+} from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   epmRouteService,
   fleetSetupRouteService,
   packagePolicyRouteService,
 } from '../../../../../../../common/services';
-import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
+import type { MockedFleetStartServices, TestRenderer } from '../../../../mock';
+import { createTestRendererMock } from '../../../../mock';
 
 import { Detail } from './index';
 

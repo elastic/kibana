@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, LegacyCallAPIOptions } from 'kibana/server';
+import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
   AlertType,
@@ -32,7 +32,6 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
@@ -55,12 +54,6 @@ interface AlertOptions {
   fetchClustersRange?: number;
   accessorKey?: string;
 }
-
-type CallCluster = (
-  endpoint: string,
-  clientParams?: Record<string, unknown> | undefined,
-  options?: LegacyCallAPIOptions | undefined
-) => Promise<any>;
 
 const defaultAlertOptions = (): AlertOptions => {
   return {
@@ -123,7 +116,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert<AlertTypeParams>> {
+  ): Promise<SanitizedAlert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -233,29 +226,15 @@ export class BaseAlert {
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const useCallCluster =
-      Globals.app.monitoringCluster?.callAsInternalUser || services.callCluster;
-    const callCluster = async (
-      endpoint: string,
-      clientParams?: Record<string, unknown>,
-      options?: LegacyCallAPIOptions
-    ) => {
-      return await mbSafeQuery(async () => useCallCluster(endpoint, clientParams, options));
-    };
-    const availableCcs = Globals.app.config.ui.ccs.enabled
-      ? await fetchAvailableCcs(callCluster)
-      : [];
-    const clusters = await this.fetchClusters(
-      callCluster,
-      params as CommonAlertParams,
-      availableCcs
-    );
-    const data = await this.fetchData(params, callCluster, clusters, availableCcs);
+    const esClient = services.scopedClusterClient.asCurrentUser;
+    const availableCcs = Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(esClient) : [];
+    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
+    const data = await this.fetchData(params, esClient, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
   }
 
   protected async fetchClusters(
-    callCluster: CallCluster,
+    esClient: ElasticsearchClient,
     params: CommonAlertParams,
     ccs?: string[]
   ) {
@@ -264,7 +243,7 @@ export class BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
     }
     if (!params.limit) {
-      return await fetchClusters(callCluster, esIndexPattern);
+      return await fetchClusters(esClient, esIndexPattern);
     }
     const limit = parseDuration(params.limit);
     const rangeFilter = this.alertOptions.fetchClustersRange
@@ -275,12 +254,12 @@ export class BaseAlert {
           },
         }
       : undefined;
-    return await fetchClusters(callCluster, esIndexPattern, rangeFilter);
+    return await fetchClusters(esClient, esIndexPattern, rangeFilter);
   }
 
   protected async fetchData(
     params: CommonAlertParams | unknown,
-    callCluster: CallCluster,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<Array<AlertData & unknown>> {

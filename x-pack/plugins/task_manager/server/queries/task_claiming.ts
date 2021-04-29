@@ -27,13 +27,11 @@ import {
 } from '../task_events';
 
 import {
-  asUpdateByQuery,
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
   asPinnedQuery,
   matchesClauses,
-  SortOptions,
 } from './query_clauses';
 
 import {
@@ -50,6 +48,7 @@ import {
   correctVersionConflictsForContinuation,
   TaskStore,
   UpdateByQueryResult,
+  SearchOpts,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 
@@ -375,21 +374,21 @@ export class TaskClaiming {
     // the score seems to favor newer documents rather than older documents, so
     // if there are not pinned tasks being queried, we do NOT want to sort by score
     // at all, just by runAt/retryAt.
-    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     if (claimTasksById && claimTasksById.length) {
       sort.unshift('_score');
     }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const result = await this.taskStore.updateByQuery(
-      asUpdateByQuery({
+      {
         query: matchesClauses(
           claimTasksById && claimTasksById.length
             ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
             : queryForScheduledTasks,
           filterDownBy(InactiveTasks)
         ),
-        update: updateFieldsAndMarkAsFailed(
+        script: updateFieldsAndMarkAsFailed(
           {
             ownerId: this.taskStore.taskManagerId,
             retryAt: claimOwnershipUntil,
@@ -400,7 +399,7 @@ export class TaskClaiming {
           pick(this.taskMaxAttempts, taskTypesToClaim)
         ),
         sort,
-      }),
+      },
       {
         max_docs: size,
       }

@@ -65,6 +65,42 @@ export function registerCurationsRoutes({
 
   router.get(
     {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+        body: schema.object({
+          query: schema.string(),
+          queries: schema.arrayOf(schema.string()),
+          promoted: schema.arrayOf(schema.string()),
+          hidden: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.get(
+    {
       path: '/api/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
@@ -77,6 +113,23 @@ export function registerCurationsRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/curations/find_or_create',
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/app_search/engines/{engineName}/curation_search',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        query: schema.object({
+          query: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:engineName/search.json',
     })
   );
 }

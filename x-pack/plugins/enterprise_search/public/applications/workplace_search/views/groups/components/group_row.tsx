@@ -91,7 +91,7 @@ export const GroupRow: React.FC<Group> = ({
           </div>
         </EuiTableRowCell>
       )}
-      <EuiTableRowCell>
+      <EuiTableRowCell align="right">
         <strong>
           <EuiLinkTo to={getGroupPath(id)}>
             <EuiIcon type="pencil" />

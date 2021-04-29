@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -15,7 +15,7 @@ import { deleteIndex } from './delete_index';
 import { cleanKibanaIndices } from './kibana_index';
 
 export function createDeleteIndexStream(
-  client: Client,
+  client: KibanaClient,
   stats: Stats,
   log: ToolingLog,
   kibanaPluginIds: string[]

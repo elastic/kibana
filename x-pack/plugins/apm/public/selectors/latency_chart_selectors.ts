@@ -65,7 +65,7 @@ function getPreviousPeriodTimeseries({
   return {
     data: previousPeriod.latencyTimeseries ?? [],
     type: 'area',
-    color: theme.eui.euiColorLightestShade,
+    color: theme.eui.euiColorMediumShade,
     title: i18n.translate(
       'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
       { defaultMessage: 'Previous period' }

@@ -26,6 +26,7 @@ import {
 import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { AgentService } from '../../../../../fleet/server/services';
@@ -171,6 +172,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -201,6 +203,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({

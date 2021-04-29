@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 
 import { SO_SEARCH_LIMIT } from '../../../../constants';
-import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
+import type { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useStartServices } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 

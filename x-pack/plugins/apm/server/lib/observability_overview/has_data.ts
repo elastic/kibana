@@ -9,7 +9,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../helpers/setup_request';
 
-export function hasData({ setup }: { setup: Setup }) {
+export function getHasData({ setup }: { setup: Setup }) {
   return withApmSpan('observability_overview_has_apm_data', async () => {
     const { apmEventClient } = setup;
     try {

@@ -21,7 +21,14 @@ import { TimeRange } from '../../../common';
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
     if (prop === 'parentAggs') delete obj[prop];
-    else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+    else if (typeof obj[prop] === 'object') {
+      const hasParentAggsKey = 'parentAggs' in obj[prop];
+      removeParentAggs(obj[prop]);
+      // delete object if parentAggs was the last key
+      if (hasParentAggsKey && Object.keys(obj[prop]).length === 0) {
+        delete obj[prop];
+      }
+    }
   }
 }
 
@@ -36,6 +43,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
+  hierarchical?: boolean;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -57,6 +65,9 @@ export type IAggConfigs = AggConfigs;
 export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
+  public timeFields?: string[];
+  public hierarchical?: boolean = false;
+
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
@@ -72,8 +83,13 @@ export class AggConfigs {
 
     this.aggs = [];
     this.indexPattern = indexPattern;
+    this.hierarchical = opts.hierarchical;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
+  }
+
+  setTimeFields(timeFields: string[] | undefined) {
+    this.timeFields = timeFields;
   }
 
   setTimeRange(timeRange: TimeRange) {
@@ -162,12 +178,12 @@ export class AggConfigs {
     return true;
   }
 
-  toDsl(hierarchical: boolean = false): Record<string, any> {
+  toDsl(): Record<string, any> {
     const dslTopLvl = {};
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
-    if (hierarchical) {
+    if (this.hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = this.aggs
         .filter(function (agg) {
@@ -193,10 +209,12 @@ export class AggConfigs {
           // advance the cursor and nest under the previous agg, or
           // put it on the same level if the previous agg doesn't accept
           // sub aggs
-          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
+          dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
         }
 
-        const dsl = (dslLvlCursor[config.id] = config.toDsl(this));
+        const dsl = config.type.hasNoDslParams
+          ? config.toDsl(this)
+          : (dslLvlCursor[config.id] = config.toDsl(this));
         let subAggs: any;
 
         parseParentAggs(dslLvlCursor, dsl);
@@ -206,6 +224,11 @@ export class AggConfigs {
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
 
+        if (subAggs) {
+          _.each(subAggs, (agg) => {
+            parseParentAggs(subAggs, agg);
+          });
+        }
         if (subAggs && nestedMetrics) {
           nestedMetrics.forEach((agg: any) => {
             subAggs[agg.config.id] = agg.dsl;

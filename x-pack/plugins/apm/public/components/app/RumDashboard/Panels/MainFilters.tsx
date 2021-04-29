@@ -38,6 +38,7 @@ export function MainFilters() {
     [start, end]
   );
 
+  const rumServiceNames = data?.rumServices ?? [];
   const { isSmall } = useBreakPoints();
 
   // on mobile we want it to take full width
@@ -48,7 +49,7 @@ export function MainFilters() {
       <EuiFlexItem grow={false}>
         <ServiceNameFilter
           loading={status !== 'success'}
-          serviceNames={data ?? []}
+          serviceNames={rumServiceNames}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={envStyle}>

@@ -7,12 +7,15 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
   EuiModal,
   EuiPageContent,
   EuiPageContentBody,
@@ -42,10 +45,12 @@ export const TransformManagement: FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [transforms, setTransforms] = useState<TransformListRow[]>([]);
+  const [transformNodes, setTransformNodes] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
   const getTransforms = useGetTransforms(
     setTransforms,
+    setTransformNodes,
     setErrorMessage,
     setIsInitialized,
     blockRefresh
@@ -111,15 +116,32 @@ export const TransformManagement: FC = () => {
         </EuiTitle>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          <TransformStatsBar transformsList={transforms} />
-          <EuiSpacer size="s" />
-          <TransformList
-            errorMessage={errorMessage}
-            isInitialized={isInitialized}
-            onCreateTransform={onOpenModal}
-            transforms={transforms}
-            transformsLoading={transformsLoading}
-          />
+          {!isInitialized && <EuiLoadingContent lines={2} />}
+          {isInitialized && (
+            <>
+              <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
+              <EuiSpacer size="s" />
+              {typeof errorMessage !== 'undefined' && (
+                <EuiCallOut
+                  title={i18n.translate('xpack.transform.list.errorPromptTitle', {
+                    defaultMessage: 'An error occurred getting the transform list.',
+                  })}
+                  color="danger"
+                  iconType="alert"
+                >
+                  <pre>{JSON.stringify(errorMessage)}</pre>
+                </EuiCallOut>
+              )}
+              {typeof errorMessage === 'undefined' && (
+                <TransformList
+                  onCreateTransform={onOpenModal}
+                  transformNodes={transformNodes}
+                  transforms={transforms}
+                  transformsLoading={transformsLoading}
+                />
+              )}
+            </>
+          )}
         </EuiPageContentBody>
       </EuiPageContent>
       {isSearchSelectionVisible && (

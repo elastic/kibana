@@ -12,7 +12,10 @@ import { PanelSchema } from '../../../../common/types';
 import { buildProcessorFunction } from '../build_processor_function';
 // @ts-expect-error
 import { processors } from '../response_processors/series';
-import { createFieldsFetcher, FieldsFetcherServices } from './../helpers/fields_fetcher';
+import {
+  createFieldsFetcher,
+  FieldsFetcherServices,
+} from '../../search_strategies/lib/fields_fetcher';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(

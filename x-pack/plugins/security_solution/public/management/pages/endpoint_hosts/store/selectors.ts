@@ -99,6 +99,15 @@ export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
   state.policyResponse && state.policyResponse['@timestamp'];
 
 /**
+ * Returns the Endpoint Package Policy Revision number, which correlates to the `applied_policy_version`
+ * property on the endpoint policy response message.
+ * @param state
+ */
+export const policyResponseAppliedRevision = (state: Immutable<EndpointState>): string => {
+  return String(state.policyResponse?.Endpoint.policy.applied.endpoint_policy_version || '');
+};
+
+/**
  * Returns the response configurations from the endpoint after a user modifies a policy.
  */
 export const policyResponseConfigurations: (
@@ -231,7 +240,7 @@ export const showView: (state: EndpointState) => 'policy_response' | 'details' =
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
   (state) => state.hostStatus,
   (hostStatus) => {
-    return hostStatus ? hostStatus : HostStatus.ERROR;
+    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
 );
 

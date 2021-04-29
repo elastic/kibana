@@ -9,33 +9,33 @@
 import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
-export interface NodeAggregation {
+export interface NodeUsageAggregation {
   [key: string]: number;
 }
 
 // we set aggregations as an optional type because it was only added in v7.8.0
-export interface NodeObj {
+export interface NodeUsage {
   node_id?: string;
-  timestamp: number;
+  timestamp: number | string;
   since: number;
   rest_actions: {
     [key: string]: number;
   };
   aggregations?: {
-    [key: string]: NodeAggregation;
+    [key: string]: NodeUsageAggregation;
   };
 }
 
 export interface NodesFeatureUsageResponse {
   cluster_name: string;
   nodes: {
-    [key: string]: NodeObj;
+    [key: string]: NodeUsage;
   };
 }
 
 export type NodesUsageGetter = (
   esClient: ElasticsearchClient
-) => Promise<{ nodes: NodeObj[] | Array<{}> }>;
+) => Promise<{ nodes: NodeUsage[] | Array<{}> }>;
 /**
  * Get the nodes usage data from the connected cluster.
  *
@@ -46,9 +46,10 @@ export type NodesUsageGetter = (
 export async function fetchNodesUsage(
   esClient: ElasticsearchClient
 ): Promise<NodesFeatureUsageResponse> {
-  const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
+  const { body } = await esClient.nodes.usage({
     timeout: TIMEOUT,
   });
+  // @ts-expect-error TODO: Does the client parse `timestamp` to a Date object? Expected a number
   return body;
 }
 
@@ -60,7 +61,7 @@ export async function fetchNodesUsage(
 export const getNodesUsage: NodesUsageGetter = async (esClient) => {
   const result = await fetchNodesUsage(esClient);
   const transformedNodes = Object.entries(result?.nodes || {}).map(([key, value]) => ({
-    ...(value as NodeObj),
+    ...(value as NodeUsage),
     node_id: key,
   }));
   return { nodes: transformedNodes };

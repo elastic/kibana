@@ -11,7 +11,6 @@ import { IHttpFetchError } from 'src/core/public';
 import { InvalidNodeError } from './invalid_node';
 import { DocumentTitle } from '../../../../components/document_title';
 import { ErrorPageBody } from '../../../error';
-
 interface Props {
   name: string;
   error: IHttpFetchError;
@@ -30,13 +29,11 @@ export const PageError = ({ error, name }: Props) => {
           })
         }
       />
-      {
-        (error.body.statusCode = 404 ? (
-          <InvalidNodeError nodeName={name} />
-        ) : (
-          <ErrorPageBody message={error.message} />
-        ))
-      }
+      {error.body?.statusCode === 404 ? (
+        <InvalidNodeError nodeName={name} />
+      ) : (
+        <ErrorPageBody message={error.message} />
+      )}
     </>
   );
 };

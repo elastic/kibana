@@ -94,6 +94,14 @@ describe('DataPanel', () => {
       expect(wrapper.find(LoadingOverlay)).toHaveLength(1);
     });
 
+    it('passes hasBorder', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+      expect(wrapper.prop('hasBorder')).toBeFalsy();
+
+      wrapper.setProps({ hasBorder: true });
+      expect(wrapper.prop('hasBorder')).toBeTruthy();
+    });
+
     it('passes class names', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} className="testing" />);
 

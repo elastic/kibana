@@ -26,7 +26,8 @@ export const startActionNameText = i18n.translate(
 
 export const isStartActionDisabled = (
   items: TransformListRow[],
-  canStartStopTransform: boolean
+  canStartStopTransform: boolean,
+  transformNodes: number
 ) => {
   // Disable start for batch transforms which have completed.
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
@@ -36,15 +37,24 @@ export const isStartActionDisabled = (
   );
 
   return (
-    !canStartStopTransform || completedBatchTransform || startedTransform || items.length === 0
+    !canStartStopTransform ||
+    completedBatchTransform ||
+    startedTransform ||
+    items.length === 0 ||
+    transformNodes === 0
   );
 };
 
 export interface StartActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
+  transformNodes: number;
 }
-export const StartActionName: FC<StartActionNameProps> = ({ items, forceDisable }) => {
+export const StartActionName: FC<StartActionNameProps> = ({
+  items,
+  forceDisable,
+  transformNodes,
+}) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const isBulkAction = items.length > 1;
 
@@ -89,7 +99,7 @@ export const StartActionName: FC<StartActionNameProps> = ({ items, forceDisable 
     );
   }
 
-  const actionIsDisabled = isStartActionDisabled(items, canStartStopTransform);
+  const actionIsDisabled = isStartActionDisabled(items, canStartStopTransform, transformNodes);
 
   let content: string | undefined;
   if (actionIsDisabled && items.length > 0) {

@@ -17,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { HttpFetchError } from '../../../../../src/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -145,7 +146,7 @@ const indexPattern2 = ({
           agg: 'histogram',
           interval: 1000,
         },
-        avg: {
+        average: {
           agg: 'avg',
         },
         max: {
@@ -186,7 +187,11 @@ const sampleIndexPatterns = {
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      if (!result.fields) {
+        result.fields = [];
+      }
+      return result;
     }),
     getIdsWithTitle: jest.fn(async () => {
       return [
@@ -565,7 +570,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield',
             },
           },
@@ -578,7 +583,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield2',
             },
           },
@@ -691,7 +696,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -819,7 +824,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -873,6 +878,7 @@ describe('loader', () => {
         foo: 'bar',
         isFirstExistenceFetch: false,
         existenceFetchFailed: false,
+        existenceFetchTimeout: false,
         existingFields: {
           '1': { ip1_field_1: true, ip1_field_2: true },
           '2': { ip2_field_1: true, ip2_field_2: true },
@@ -953,6 +959,56 @@ describe('loader', () => {
       }) as IndexPatternPrivateState;
 
       expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existenceFetchTimeout).toEqual(false);
+      expect(newState.existingFields['1']).toEqual({
+        field1: true,
+        field2: true,
+      });
+    });
+
+    it('should set all fields to available and existence error flag if the request times out', async () => {
+      const setState = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(
+            new HttpFetchError(
+              'timeout',
+              'name',
+              ({} as unknown) as Request,
+              ({ status: 408 } as unknown) as Response
+            )
+          );
+        });
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: '1',
+            title: '1',
+            hasRestrictions: false,
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(false);
+      expect(newState.existenceFetchTimeout).toEqual(true);
       expect(newState.existingFields['1']).toEqual({
         field1: true,
         field2: true,

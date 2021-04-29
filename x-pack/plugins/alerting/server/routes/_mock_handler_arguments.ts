@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory, ILegacyClusterClient } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
-    esClient = elasticsearchServiceMock.createLegacyClusterClient(),
     getFrameworkHealth,
+    areApiKeysEnabled,
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
-    esClient?: jest.Mocked<ILegacyClusterClient>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
+    areApiKeysEnabled?: () => Promise<boolean>;
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -37,13 +36,13 @@ export function mockHandlerArguments(
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
-      core: { elasticsearch: { legacy: { client: esClient } } },
       alerting: {
         listTypes,
         getAlertsClient() {
           return alertsClient || alertsClientMock.create();
         },
         getFrameworkHealth,
+        areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
       },
     } as unknown) as AlertingRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,

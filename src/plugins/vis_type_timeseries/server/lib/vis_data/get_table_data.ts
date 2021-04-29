@@ -16,9 +16,9 @@ import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
-import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
-import { createFieldsFetcher } from './helpers/fields_fetcher';
-import { extractFieldLabel } from '../../../common/calculate_label';
+
+import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
+import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
@@ -32,12 +32,12 @@ export async function getTableData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndexPattern = panel.index_pattern;
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    panelIndexPattern
+    panelIndex
   );
 
   if (!strategy) {
@@ -49,15 +49,17 @@ export async function getTableData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
+
+  const extractFields = createFieldsFetcher(req, {
     indexPatternsService: services.indexPatternsService,
+    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    searchStrategy,
+    capabilities,
   });
 
-  const extractFields = createFieldsFetcher(req, { requestContext, searchStrategy, capabilities });
-
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && indexPatternObject?.title) {
-      const fields = await extractFields(indexPatternObject.title);
+    if (panel.pivot_id && panelIndex.indexPattern?.id) {
+      const fields = await extractFields({ id: panelIndex.indexPattern.id });
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
@@ -66,7 +68,6 @@ export async function getTableData(
 
   const meta = {
     type: panel.type,
-    pivot_label: panel.pivot_label || (await calculatePivotLabel()),
     uiRestrictions: capabilities.uiRestrictions,
   };
 
@@ -75,15 +76,18 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      indexPatternObject,
+      panelIndex,
       capabilities,
       services.uiSettings
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
-        body,
-        index: panelIndexPattern,
+        body: {
+          ...body,
+          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+        },
+        index: panelIndex.indexPatternString,
       },
     ]);
 
@@ -99,10 +103,11 @@ export async function getTableData(
 
     return {
       ...meta,
+      pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body) {
       err.response = err.body;
 
       return {
@@ -110,5 +115,6 @@ export async function getTableData(
         ...handleErrorResponse(panel)(err),
       };
     }
+    return meta;
   }
 }

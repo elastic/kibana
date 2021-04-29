@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  DATA_TELEMETRY_ID,
-  DataTelemetryIndex,
-  DataTelemetryPayload,
-  buildDataTelemetryPayload,
-} from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
+export { DATA_TELEMETRY_ID, buildDataTelemetryPayload } from './get_data_telemetry';
+export type { DataTelemetryIndex, DataTelemetryPayload } from './get_data_telemetry';
+export { getLocalStats } from './get_local_stats';
+export type { TelemetryLocalStats } from './get_local_stats';
+export type { NodeUsage, NodeUsageAggregation } from './get_nodes_usage';
 export { getClusterUuids } from './get_cluster_stats';
 export { registerCollection } from './register_collection';

@@ -11,7 +11,6 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'maps', 'visualize']);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
@@ -37,9 +36,8 @@ export default function ({ getPageObjects, getService }) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickCreateNewLink();
-        await await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-        await PageObjects.visualize.clickMapsApp();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickVisType('maps');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.maps.waitForLayersToLoad();
       });

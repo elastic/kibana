@@ -105,15 +105,6 @@ export class MonitoringPlugin
       core.elasticsearch.legacy.createClient
     ));
 
-    // Start our license service which will ensure
-    // the appropriate licenses are present
-    this.licenseService = new LicenseService().setup({
-      licensing: plugins.licensing,
-      monitoringClient: cluster,
-      config,
-      log: this.log,
-    });
-
     Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
     const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
@@ -147,7 +138,6 @@ export class MonitoringPlugin
     // Always create the bulk uploader
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
     const bulkUploader = (this.bulkUploader = initBulkUploader({
-      elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
       opsMetrics$: core.metrics.getOpsMetrics$(),
@@ -165,34 +155,6 @@ export class MonitoringPlugin
       },
     }));
 
-    // If collection is enabled, start it
-    const kibanaCollectionEnabled = config.kibana.collection.enabled;
-    if (kibanaCollectionEnabled) {
-      // Do not use `this.licenseService` as that looks at the monitoring cluster
-      // whereas we want to check the production cluster here
-      if (plugins.licensing) {
-        plugins.licensing.license$.subscribe((license: any) => {
-          // use updated xpack license info to start/stop bulk upload
-          const mainMonitoring = license.getFeature('monitoring');
-          const monitoringBulkEnabled =
-            mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
-          if (monitoringBulkEnabled) {
-            bulkUploader.start();
-          } else {
-            bulkUploader.handleNotEnabled();
-          }
-        });
-      } else {
-        kibanaMonitoringLog.warn(
-          'Internal collection for Kibana monitoring is disabled due to missing license information.'
-        );
-      }
-    } else {
-      kibanaMonitoringLog.info(
-        'Internal collection for Kibana monitoring is disabled per configuration.'
-      );
-    }
-
     // If the UI is enabled, then we want to register it so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
@@ -201,7 +163,6 @@ export class MonitoringPlugin
         config,
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
-        this.licenseService,
         this.cluster,
         plugins
       );
@@ -224,13 +185,52 @@ export class MonitoringPlugin
     };
   }
 
-  start() {}
+  async start(core: CoreStart, { licensing }: PluginsStart) {
+    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    // Start our license service which will ensure
+    // the appropriate licenses are present
+    this.licenseService = new LicenseService().setup({
+      licensing,
+      monitoringClient: this.cluster,
+      config,
+      log: this.log,
+    });
+
+    // If collection is enabled, start it
+    const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
+    const kibanaCollectionEnabled = config.kibana.collection.enabled;
+    if (kibanaCollectionEnabled) {
+      // Do not use `this.licenseService` as that looks at the monitoring cluster
+      // whereas we want to check the production cluster here
+      if (this.bulkUploader && licensing) {
+        licensing.license$.subscribe((license: any) => {
+          // use updated xpack license info to start/stop bulk upload
+          const mainMonitoring = license.getFeature('monitoring');
+          const monitoringBulkEnabled =
+            mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
+          if (monitoringBulkEnabled) {
+            this.bulkUploader?.start(core.elasticsearch.client.asInternalUser);
+          } else {
+            this.bulkUploader?.handleNotEnabled();
+          }
+        });
+      } else {
+        kibanaMonitoringLog.warn(
+          'Internal collection for Kibana monitoring is disabled due to missing license information.'
+        );
+      }
+    } else {
+      kibanaMonitoringLog.info(
+        'Internal collection for Kibana monitoring is disabled per configuration.'
+      );
+    }
+  }
 
   stop() {
     if (this.cluster) {
       this.cluster.close();
     }
-    if (this.licenseService) {
+    if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();
     }
     this.bulkUploader?.stop();
@@ -276,7 +276,6 @@ export class MonitoringPlugin
     config: MonitoringConfig,
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
-    licenseService: MonitoringLicenseService,
     cluster: ILegacyCustomClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
@@ -334,6 +333,7 @@ export class MonitoringPlugin
               }
             },
             server: {
+              log: this.log,
               route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
@@ -343,7 +343,9 @@ export class MonitoringPlugin
               },
               plugins: {
                 monitoring: {
-                  info: licenseService,
+                  info: {
+                    getLicenseService: () => this.licenseService,
+                  },
                 },
                 elasticsearch: {
                   getCluster: (name: string) => ({

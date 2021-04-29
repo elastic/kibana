@@ -326,6 +326,7 @@ export class Field extends PureComponent<FieldProps> {
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
               {...a11yProps}
+              name={`advancedSetting-editField-${name}-editor`}
               mode={type}
               theme="textmate"
               value={currentValue}

@@ -145,7 +145,6 @@ Array [
     <EuiAvatar
       color="#AA6556"
       data-test-subj="space-avatar-default"
-      imageUrl=""
       initials="D"
       initialsLength={2}
       name="Default"
@@ -159,7 +158,6 @@ Array [
         style={
           Object {
             "backgroundColor": "#AA6556",
-            "backgroundImage": "none",
             "color": "#000000",
           }
         }
@@ -187,7 +185,6 @@ Array [
     <EuiAvatar
       color="#DA8B45"
       data-test-subj="space-avatar-custom-1"
-      imageUrl=""
       initials="C1"
       initialsLength={2}
       name="Custom 1"
@@ -201,7 +198,6 @@ Array [
         style={
           Object {
             "backgroundColor": "#DA8B45",
-            "backgroundImage": "none",
             "color": "#000000",
           }
         }
@@ -232,7 +228,6 @@ Array [
     <EuiAvatar
       color="#ABCDEF"
       data-test-subj="space-avatar-custom-2"
-      imageUrl=""
       initials="LG"
       initialsLength={2}
       name="Custom 2"
@@ -246,7 +241,6 @@ Array [
         style={
           Object {
             "backgroundColor": "#ABCDEF",
-            "backgroundImage": "none",
             "color": "#000000",
           }
         }

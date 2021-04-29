@@ -70,22 +70,34 @@ describe('SecurityNavControlService', () => {
               aria-expanded="false"
               aria-haspopup="true"
               aria-label="Account menu"
-              class="euiHeaderSectionItem__button"
+              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
               data-test-subj="userMenuButton"
               type="button"
             >
-              <div
-                aria-label="some-user"
-                class="euiAvatar euiAvatar--s euiAvatar--user"
-                style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
-                title="some-user"
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
               >
                 <span
-                  aria-hidden="true"
+                  class="euiButtonEmpty__text"
                 >
-                  s
+                  <span
+                    class="euiHeaderSectionItemButton__content"
+                  >
+                    <div
+                      aria-label="some-user"
+                      class="euiAvatar euiAvatar--s euiAvatar--user"
+                      style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
+                      title="some-user"
+                    >
+                      <span
+                        aria-hidden="true"
+                      >
+                        s
+                      </span>
+                    </div>
+                  </span>
                 </span>
-              </div>
+              </span>
             </button>
           </div>
         </div>
@@ -178,16 +190,19 @@ describe('SecurityNavControlService', () => {
   });
 
   describe(`#start`, () => {
-    it('should return functions to register and retrieve user menu links', () => {
-      const license$ = new BehaviorSubject<ILicense>(validLicense);
+    let navControlService: SecurityNavControlService;
+    beforeEach(() => {
+      const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
-      const navControlService = new SecurityNavControlService();
+      navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         authc: securityMock.createSetup().authc,
         logoutUrl: '/some/logout/url',
       });
+    });
 
+    it('should return functions to register and retrieve user menu links', () => {
       const coreStart = coreMock.createStart();
       const navControlServiceStart = navControlService.start({ core: coreStart });
       expect(navControlServiceStart).toHaveProperty('getUserMenuLinks$');
@@ -195,15 +210,6 @@ describe('SecurityNavControlService', () => {
     });
 
     it('should register custom user menu links to be displayed in the nav controls', (done) => {
-      const license$ = new BehaviorSubject<ILicense>(validLicense);
-
-      const navControlService = new SecurityNavControlService();
-      navControlService.setup({
-        securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-        authc: securityMock.createSetup().authc,
-        logoutUrl: '/some/logout/url',
-      });
-
       const coreStart = coreMock.createStart();
       const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
       const userMenuLinks$ = getUserMenuLinks$();
@@ -231,15 +237,6 @@ describe('SecurityNavControlService', () => {
     });
 
     it('should retrieve user menu links sorted by order', (done) => {
-      const license$ = new BehaviorSubject<ILicense>(validLicense);
-
-      const navControlService = new SecurityNavControlService();
-      navControlService.setup({
-        securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-        authc: securityMock.createSetup().authc,
-        logoutUrl: '/some/logout/url',
-      });
-
       const coreStart = coreMock.createStart();
       const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
       const userMenuLinks$ = getUserMenuLinks$();
@@ -304,6 +301,80 @@ describe('SecurityNavControlService', () => {
         `);
         done();
       });
+    });
+
+    it('should allow adding a custom profile link', () => {
+      const coreStart = coreMock.createStart();
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const userMenuLinks$ = getUserMenuLinks$();
+
+      addUserMenuLinks([
+        { label: 'link3', href: 'path-to-link3', iconType: 'empty', order: 3 },
+        { label: 'link1', href: 'path-to-link1', iconType: 'empty', order: 1, setAsProfile: true },
+      ]);
+
+      const onUserMenuLinksHandler = jest.fn();
+      userMenuLinks$.subscribe(onUserMenuLinksHandler);
+
+      expect(onUserMenuLinksHandler).toHaveBeenCalledTimes(1);
+      expect(onUserMenuLinksHandler).toHaveBeenCalledWith([
+        { label: 'link1', href: 'path-to-link1', iconType: 'empty', order: 1, setAsProfile: true },
+        { label: 'link3', href: 'path-to-link3', iconType: 'empty', order: 3 },
+      ]);
+    });
+
+    it('should not allow adding more than one custom profile link', () => {
+      const coreStart = coreMock.createStart();
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const userMenuLinks$ = getUserMenuLinks$();
+
+      expect(() => {
+        addUserMenuLinks([
+          {
+            label: 'link3',
+            href: 'path-to-link3',
+            iconType: 'empty',
+            order: 3,
+            setAsProfile: true,
+          },
+          {
+            label: 'link1',
+            href: 'path-to-link1',
+            iconType: 'empty',
+            order: 1,
+            setAsProfile: true,
+          },
+        ]);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Only one custom profile link can be passed at a time (found 2)"`
+      );
+
+      // Adding a single custom profile link.
+      addUserMenuLinks([
+        { label: 'link3', href: 'path-to-link3', iconType: 'empty', order: 3, setAsProfile: true },
+      ]);
+
+      expect(() => {
+        addUserMenuLinks([
+          {
+            label: 'link1',
+            href: 'path-to-link1',
+            iconType: 'empty',
+            order: 1,
+            setAsProfile: true,
+          },
+        ]);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Only one custom profile link can be set. A custom profile link named link3 (path-to-link3) already exists"`
+      );
+
+      const onUserMenuLinksHandler = jest.fn();
+      userMenuLinks$.subscribe(onUserMenuLinksHandler);
+
+      expect(onUserMenuLinksHandler).toHaveBeenCalledTimes(1);
+      expect(onUserMenuLinksHandler).toHaveBeenCalledWith([
+        { label: 'link3', href: 'path-to-link3', iconType: 'empty', order: 3, setAsProfile: true },
+      ]);
     });
   });
 });

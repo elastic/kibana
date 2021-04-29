@@ -11,6 +11,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -71,6 +72,9 @@ export interface App<HistoryLocationState = unknown> {
     tooltip?: string;
     updater$?: Observable<AppUpdater>;
 }
+
+// @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
 
 // @public
 export interface AppCategory {
@@ -431,6 +435,8 @@ export interface CoreStart {
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
+    deprecations: DeprecationsServiceStart;
+    // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
@@ -471,6 +477,14 @@ export class CoreSystem {
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
+// @public
+export interface DeprecationsServiceStart {
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
+}
+
 // @public (undocumented)
 export interface DocLinksStart {
     // (undocumented)
@@ -479,6 +493,9 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly canvas: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -558,7 +575,10 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly overview: string;
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -570,11 +590,13 @@ export interface DocLinksStart {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly upgradeAssistant: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
@@ -582,9 +604,10 @@ export interface DocLinksStart {
         };
         readonly query: {
             readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuerySyntax: string;
+            readonly percolate: string;
+            readonly queryDsl: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -595,6 +618,7 @@ export interface DocLinksStart {
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -611,7 +635,9 @@ export interface DocLinksStart {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
+            simulatePipeline: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -634,7 +660,17 @@ export interface DocLinksStart {
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
+}
+
+// Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface DomainDeprecationDetails extends DeprecationsDetails {
+    // (undocumented)
+    domainId: string;
 }
 
 export { EnvironmentMode }
@@ -875,11 +911,6 @@ export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
     getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
-    getSaved$: <T = any>() => Observable<{
-        key: string;
-        newValue: T;
-        oldValue: T;
-    }>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -890,7 +921,6 @@ export interface IUiSettingsClient {
     isDeclared: (key: string) => boolean;
     isDefault: (key: string) => boolean;
     isOverridden: (key: string) => boolean;
-    overrideLocalDefault: (key: string, newDefault: any) => void;
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
@@ -902,6 +932,7 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
 //
 // @public
 export interface NavigateToAppOptions {
+    openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
     state?: unknown;
@@ -1070,6 +1101,16 @@ export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLin
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
+// Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ResolveDeprecationResponse = {
+    status: 'ok';
+} | {
+    status: 'fail';
+    reason: string;
+};
+
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1183,7 +1224,7 @@ export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
     delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
-    find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -1203,6 +1244,8 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
+    // @alpha
+    aggs?: Record<string, estypes.AggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -1223,12 +1266,12 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1243,7 +1286,9 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 // @public
-export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown> extends SavedObjectsBatchResponse<T> {
+    // (undocumented)
+    aggregations?: A;
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1581,6 +1626,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:164:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -22,9 +22,9 @@ const schemaValuesSchema = schema.recordOf(
 );
 
 const pageSchema = schema.object({
-  current: schema.number(),
-  size: schema.number(),
-  total_pages: schema.number(),
+  current: schema.nullable(schema.number()),
+  size: schema.nullable(schema.number()),
+  total_pages: schema.nullable(schema.number()),
   total_results: schema.number(),
 });
 
@@ -193,6 +193,9 @@ export function registerAccountSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
@@ -398,6 +401,25 @@ export function registerAccountSourceReindexJobStatusRoute({
   );
 }
 
+export function registerAccountSourceDownloadDiagnosticsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:sourceId/download_diagnostics',
+    })
+  );
+}
+
 // Org routes
 export function registerOrgSourcesRoute({
   router,
@@ -538,6 +560,9 @@ export function registerOrgSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
@@ -744,6 +769,25 @@ export function registerOrgSourceReindexJobStatusRoute({
   );
 }
 
+export function registerOrgSourceDownloadDiagnosticsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:sourceId/download_diagnostics',
+    })
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -857,9 +901,14 @@ export function registerOauthConnectorParamsRoute({
       validate: {
         query: schema.object({
           kibana_host: schema.string(),
-          code: schema.string(),
+          code: schema.maybe(schema.string()),
           session_state: schema.maybe(schema.string()),
+          authuser: schema.maybe(schema.string()),
+          prompt: schema.maybe(schema.string()),
+          hd: schema.maybe(schema.string()),
+          scope: schema.maybe(schema.string()),
           state: schema.string(),
+          oauth_token: schema.maybe(schema.string()),
           oauth_verifier: schema.maybe(schema.string()),
         }),
       },
@@ -889,6 +938,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceSchemasRoute(dependencies);
   registerAccountSourceReindexJobRoute(dependencies);
   registerAccountSourceReindexJobStatusRoute(dependencies);
+  registerAccountSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -904,6 +954,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceSchemasRoute(dependencies);
   registerOrgSourceReindexJobRoute(dependencies);
   registerOrgSourceReindexJobStatusRoute(dependencies);
+  registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
   registerOauthConnectorParamsRoute(dependencies);

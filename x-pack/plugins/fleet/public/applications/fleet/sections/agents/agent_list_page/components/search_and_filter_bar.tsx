@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AgentPolicy } from '../../../../types';
+import type { AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
 

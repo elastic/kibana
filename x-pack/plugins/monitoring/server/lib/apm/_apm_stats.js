@@ -24,6 +24,7 @@ export const apmAggFilterPath = [
   'aggregations.min_mem_rss_total.value',
   'aggregations.max_mem_rss_total.value',
   'aggregations.max_mem_total_total.value',
+  'aggregations.versions.buckets',
 ];
 
 export const apmUuidsAgg = (maxBucketSize) => ({
@@ -31,6 +32,11 @@ export const apmUuidsAgg = (maxBucketSize) => ({
     cardinality: {
       field: 'beats_stats.beat.uuid',
       precision_threshold: 10000,
+    },
+  },
+  versions: {
+    terms: {
+      field: 'beats_stats.beat.version',
     },
   },
   ephemeral_ids: {
@@ -94,18 +100,20 @@ export const apmUuidsAgg = (maxBucketSize) => ({
 });
 
 export const apmAggResponseHandler = (response) => {
-  const apmTotal = get(response, 'aggregations.total.value', null);
+  const apmTotal = get(response, 'aggregations.total.value', 0);
 
-  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
-  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
-  const memRssMax = get(response, 'aggregations.max_mem_rss_total.value', null);
-  const memRssMin = get(response, 'aggregations.min_mem_rss_total.value', null);
-  const memTotal = get(response, 'aggregations.max_mem_total_total.value', null);
+  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', 0);
+  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', 0);
+  const memRssMax = get(response, 'aggregations.max_mem_rss_total.value', 0);
+  const memRssMin = get(response, 'aggregations.min_mem_rss_total.value', 0);
+  const memTotal = get(response, 'aggregations.max_mem_total_total.value', 0);
+  const versions = get(response, 'aggregations.versions.buckets', []).map(({ key }) => key);
 
   return {
     apmTotal,
     totalEvents: getDiffCalculation(eventsTotalMax, eventsTotalMin),
     memRss: getDiffCalculation(memRssMax, memRssMin),
     memTotal,
+    versions,
   };
 };

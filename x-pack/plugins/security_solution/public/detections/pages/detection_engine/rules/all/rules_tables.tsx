@@ -106,7 +106,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       },
     } = useKibana();
 
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable>(null);
 
     const [defaultAutoRefreshSetting] = useUiSetting$<{
       on: boolean;

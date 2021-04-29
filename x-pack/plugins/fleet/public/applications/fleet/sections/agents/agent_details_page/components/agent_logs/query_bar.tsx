@@ -8,10 +8,8 @@
 import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  QueryStringInput,
-  IFieldType,
-} from '../../../../../../../../../../../src/plugins/data/public';
+import type { IFieldType } from '../../../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../../../../../hooks';
 
 import {

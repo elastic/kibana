@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-utils';
+import { delay } from 'bluebird';
 import { FtrProviderContext } from './../functional/ftr_provider_context';
 
 const baseSimulationPath = 'src/test/scala/org/kibanaLoadTest/simulation';
@@ -51,28 +52,13 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
-    await procs.run('mvn: clean compile', {
-      cmd: 'mvn',
-      args: [
-        '-Dmaven.wagon.http.retryHandler.count=3',
-        '-Dmaven.test.failure.ignore=true',
-        '-q',
-        'clean',
-        'compile',
-      ],
-      cwd: gatlingProjectRootPath,
-      env: {
-        ...process.env,
-      },
-      wait: true,
-    });
-    for (const simulationClass of simulationClasses) {
+    for (let i = 0; i < simulationClasses.length; i++) {
       await procs.run('gatling: test', {
         cmd: 'mvn',
         args: [
           'gatling:test',
           '-q',
-          `-Dgatling.simulationClass=${simulationPackage}.${simulationClass}`,
+          `-Dgatling.simulationClass=${simulationPackage}.${simulationClasses[i]}`,
         ],
         cwd: gatlingProjectRootPath,
         env: {
@@ -80,6 +66,10 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
         },
         wait: true,
       });
+      // wait a minute between simulations, skip for the last one
+      if (i < simulationClasses.length - 1) {
+        await delay(60 * 1000);
+      }
     }
   });
 }

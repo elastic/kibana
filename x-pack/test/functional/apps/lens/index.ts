@@ -16,8 +16,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.load('logstash_functional');
+      await esArchiver.load('lens/basic');
     });
 
     after(async () => {
@@ -31,6 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table'));
+      loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./colors'));

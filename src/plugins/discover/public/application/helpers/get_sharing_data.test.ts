@@ -6,64 +6,160 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from 'kibana/public';
-import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
-import { IUiSettingsClient } from 'kibana/public';
+import { Capabilities, IUiSettingsClient } from 'kibana/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
+  let mockConfig: IUiSettingsClient;
+
+  beforeEach(() => {
+    mockConfig = ({
+      get: (key: string) => {
+        if (key === SORT_DEFAULT_ORDER_SETTING) {
+          return 'desc';
+        }
+        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+          return false;
+        }
+        return false;
+      },
+    } as unknown) as IUiSettingsClient;
+  });
+
   test('returns valid data for sharing', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [],
+        "searchSource": Object {
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_score": "desc",
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('returns valid data for sharing when columns are selected', async () => {
     const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
     const result = await getSharingData(
       searchSourceMock,
-      { columns: [] },
-      ({
-        get: (key: string) => {
-          if (key === SORT_DEFAULT_ORDER_SETTING) {
-            return 'desc';
-          }
-          return false;
-        },
-      } as unknown) as IUiSettingsClient,
-      () => Promise.resolve({})
+      { columns: ['column_a', 'column_b'] },
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "conflictedTypesFields": Array [],
-        "fields": Array [],
-        "indexPatternId": "the-index-pattern-id",
-        "metaFields": Array [
-          "_index",
-          "_score",
+        "columns": Array [
+          "column_a",
+          "column_b",
         ],
-        "searchRequest": Object {
-          "body": Object {
-            "_source": Object {},
-            "fields": Array [],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [],
-                "must": Array [],
-                "must_not": Array [],
-                "should": Array [],
-              },
+        "searchSource": Object {
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_score": "desc",
             },
-            "runtime_mappings": Object {},
-            "script_fields": Object {},
-            "sort": Array [
-              Object {
-                "_score": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-            "stored_fields": Array [
-              "*",
-            ],
-          },
-          "index": "the-index-pattern-title",
+          ],
+        },
+      }
+    `);
+  });
+
+  test('fields have prepended timeField', async () => {
+    const index = { ...indexPatternMock } as IndexPattern;
+    index.timeFieldName = 'cool-timefield';
+
+    const searchSourceMock = createSearchSourceMock({ index });
+    const result = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+      },
+      mockConfig
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "cool-timefield",
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
+        "searchSource": Object {
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_doc": "desc",
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('fields conditionally do not have prepended timeField', async () => {
+    mockConfig = ({
+      get: (key: string) => {
+        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+          return true;
+        }
+        return false;
+      },
+    } as unknown) as IUiSettingsClient;
+
+    const index = { ...indexPatternMock } as IndexPattern;
+    index.timeFieldName = 'cool-timefield';
+
+    const searchSourceMock = createSearchSourceMock({ index });
+    const result = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+      },
+      mockConfig
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
+        "searchSource": Object {
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_doc": false,
+            },
+          ],
         },
       }
     `);

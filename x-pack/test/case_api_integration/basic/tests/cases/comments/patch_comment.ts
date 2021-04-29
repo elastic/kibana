@@ -39,7 +39,28 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesUserActions(es);
     });
 
-    describe('sub case comments', () => {
+    it('should return a 400 when the subCaseId parameter is passed', async () => {
+      const { body } = await supertest
+        .patch(`${CASES_URL}/case-id}/comments?subCaseId=value`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          id: 'id',
+          version: 'version',
+          type: CommentType.alert,
+          alertId: 'test-id',
+          index: 'test-index',
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain('subCaseId');
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    describe.skip('sub case comments', () => {
       let actionID: string;
       before(async () => {
         actionID = await createCaseAction(supertest);

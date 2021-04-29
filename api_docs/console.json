@@ -46,7 +46,7 @@
         "lineNumber": 18
       },
       "signature": [
-        "{ addProcessorDefinition: (processor: any) => void; }"
+        "{ addProcessorDefinition: (processor: unknown) => void; }"
       ],
       "lifecycle": "start",
       "initialIsOpen": true

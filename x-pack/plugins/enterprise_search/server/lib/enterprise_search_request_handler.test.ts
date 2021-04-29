@@ -198,6 +198,18 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
     });
+
+    it('works if response contains no json data', async () => {
+      EnterpriseSearchAPI.mockReturn();
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+      await makeAPICall(requestHandler);
+
+      expect(responseMock.custom).toHaveBeenCalledWith({
+        statusCode: 200,
+        headers: mockExpectedResponseHeaders,
+      });
+    });
   });
 
   describe('error responses', () => {
@@ -456,10 +468,12 @@ const EnterpriseSearchAPI = {
       ...expectedParams,
     });
   },
-  mockReturn(response: object, options?: any) {
+  mockReturn(response?: object, options?: any) {
     fetchMock.mockImplementation(() => {
       const headers = Object.assign({}, mockExpectedResponseHeaders, options?.headers);
-      return Promise.resolve(new Response(JSON.stringify(response), { ...options, headers }));
+      return Promise.resolve(
+        new Response(response ? JSON.stringify(response) : undefined, { ...options, headers })
+      );
     });
   },
   mockReturnError() {

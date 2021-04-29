@@ -6,7 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { CoreVitalProps, HeaderMenuPortalProps } from './types';
+import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
+import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
 
@@ -24,6 +25,16 @@ export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
   return (
     <Suspense fallback={null}>
       <HeaderMenuPortalLazy {...props} />
+    </Suspense>
+  );
+}
+
+const FieldValueSuggestionsLazy = lazy(() => import('./field_value_suggestions/index'));
+
+export function FieldValueSuggestions(props: FieldValueSuggestionsProps) {
+  return (
+    <Suspense fallback={null}>
+      <FieldValueSuggestionsLazy {...props} />
     </Suspense>
   );
 }

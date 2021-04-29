@@ -31,13 +31,7 @@
               "lineNumber": 20
             },
             "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.Mount",
-                "text": "Mount"
-              }
+              "Mount"
             ]
           },
           {
@@ -81,6 +75,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementApp.Unnamed.$1",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -163,19 +158,14 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.Unnamed.$1",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
                 "signature": [
                   "Pick<Pick<",
-                  {
-                    "pluginId": "management",
-                    "scope": "public",
-                    "docId": "kibManagementPluginApi",
-                    "section": "def-public.CreateManagementItemArgs",
-                    "text": "CreateManagementItemArgs"
-                  },
-                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"id\" | \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  "CreateManagementItemArgs",
+                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "description": [],
                 "source": {
@@ -204,7 +194,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"id\" | \"title\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
+              ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -216,6 +206,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.registerApp.$1",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -228,7 +219,7 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"id\" | \"title\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "description": [],
                 "source": {
@@ -262,6 +253,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.getApp.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -555,13 +547,7 @@
               "lineNumber": 14
             },
             "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.Mount",
-                "text": "Mount"
-              }
+              "Mount"
             ]
           },
           {
@@ -641,13 +627,7 @@
             "lineNumber": 14
           },
           "signature": [
-            {
-              "pluginId": "management",
-              "scope": "public",
-              "docId": "kibManagementPluginApi",
-              "section": "def-public.SectionsServiceSetup",
-              "text": "SectionsServiceSetup"
-            }
+            "SectionsServiceSetup"
           ]
         }
       ],

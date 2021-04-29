@@ -8,7 +8,14 @@
 import './layer_panel.scss';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
@@ -18,9 +25,9 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { RemoveLayerButton } from './remove_layer_button';
-import { EmptyDimensionButton } from './empty_dimension_button';
-import { DimensionButton } from './dimension_button';
-import { DraggableDimensionButton } from './draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DimensionButton } from './buttons/dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 
 const initialActiveDimensionState = {
@@ -151,6 +158,8 @@ export function LayerPanel(
         columnId,
         layerId: targetLayerId,
         filterOperations,
+        dimensionGroups: groups,
+        groupId,
         dropType,
       });
       if (dropResult) {
@@ -159,6 +168,7 @@ export function LayerPanel(
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
+          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
         });
 
         if (typeof dropResult === 'object') {
@@ -254,7 +264,26 @@ export function LayerPanel(
                     : 'lnsLayerPanel__row lnsLayerPanel__row--notSupportsMoreColumns'
                 }
                 fullWidth
-                label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
+                label={
+                  <div className="lnsLayerPanel__groupLabel">
+                    {group.groupLabel}
+                    {group.groupTooltip && (
+                      <>
+                        {' '}
+                        <EuiIconTip
+                          color="subdued"
+                          content={group.groupTooltip}
+                          iconProps={{
+                            className: 'eui-alignTop',
+                          }}
+                          position="top"
+                          size="s"
+                          type="questionInCircle"
+                        />
+                      </>
+                    )}
+                  </div>
+                }
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}
@@ -281,6 +310,7 @@ export function LayerPanel(
                           accessorIndex={accessorIndex}
                           columnId={columnId}
                           group={group}
+                          groups={groups}
                           groupIndex={groupIndex}
                           key={columnId}
                           layerDatasourceDropProps={layerDatasourceDropProps}
@@ -325,6 +355,7 @@ export function LayerPanel(
                                 nativeProps={{
                                   ...layerDatasourceConfigProps,
                                   columnId: accessorConfig.columnId,
+                                  groupId: group.groupId,
                                   filterOperations: group.filterOperations,
                                 }}
                               />
@@ -338,6 +369,7 @@ export function LayerPanel(
                     <EmptyDimensionButton
                       group={group}
                       groupIndex={groupIndex}
+                      groups={groups}
                       layerId={layerId}
                       layerIndex={layerIndex}
                       layerDatasource={layerDatasource}
@@ -365,6 +397,7 @@ export function LayerPanel(
                 onRemoveLayer={onRemoveLayer}
                 layerIndex={layerIndex}
                 isOnlyLayer={isOnlyLayer}
+                activeVisualization={activeVisualization}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -396,6 +429,8 @@ export function LayerPanel(
                   ...layerDatasourceConfigProps,
                   core: props.core,
                   columnId: activeId,
+                  groupId: activeGroup.groupId,
+                  hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
                   setState: (

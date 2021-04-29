@@ -6,6 +6,7 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -78,7 +79,7 @@ export class LicenseExpirationAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -86,7 +87,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(callCluster, clusters, esIndexPattern);
+    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

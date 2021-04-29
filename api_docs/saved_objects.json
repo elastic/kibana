@@ -136,17 +136,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectFinderUi.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "props",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "savedObjects",
-                    "scope": "public",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectFinderUiProps",
-                    "text": "SavedObjectFinderUiProps"
-                  }
+                  "SavedObjectFinderUiProps"
                 ],
                 "description": [],
                 "source": {
@@ -220,11 +215,11 @@
       {
         "id": "def-public.SavedObjectLoader",
         "type": "Class",
-        "tags": [],
-        "label": "SavedObjectLoader",
-        "description": [
-          "\nThe SavedObjectLoader class provides some convenience functions\nto load and save one kind of saved objects (specified in the constructor).\n\nIt is based on the SavedObjectClient which implements loading and saving\nin an abstract, type-agnostic way. If possible, use SavedObjectClient directly\nto avoid pulling in extra functionality which isn't used."
+        "tags": [
+          "deprecated"
         ],
+        "label": "SavedObjectLoader",
+        "description": [],
         "children": [
           {
             "tags": [],
@@ -234,7 +229,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             }
           },
           {
@@ -245,7 +240,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             }
           },
           {
@@ -256,7 +251,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "signature": [
               "Record<string, string>"
@@ -272,6 +267,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.$1",
                 "type": "Any",
                 "label": "SavedObjectClass",
                 "isRequired": true,
@@ -281,10 +277,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 39
+                  "lineNumber": 40
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.$2",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -297,12 +294,12 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 }
               }
             ],
@@ -310,7 +307,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             }
           },
           {
@@ -325,6 +322,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.get.$1",
                 "type": "CompoundType",
                 "label": "opts",
                 "isRequired": false,
@@ -334,7 +332,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 60
+                  "lineNumber": 61
                 }
               }
             ],
@@ -342,7 +340,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             }
           },
           {
@@ -355,6 +353,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.urlFor.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -364,7 +363,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 68
+                  "lineNumber": 69
                 }
               }
             ],
@@ -372,7 +371,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             }
           },
           {
@@ -385,6 +384,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.delete.$1",
                 "type": "CompoundType",
                 "label": "ids",
                 "isRequired": true,
@@ -394,7 +394,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 72
+                  "lineNumber": 73
                 }
               }
             ],
@@ -402,7 +402,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             }
           },
           {
@@ -411,13 +411,7 @@
             "label": "mapHitSource",
             "signature": [
               "(source: Record<string, unknown>, id: string, references?: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => Record<string, unknown>"
             ],
             "description": [
@@ -425,6 +419,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$1",
                 "type": "Object",
                 "label": "source",
                 "isRequired": true,
@@ -434,10 +429,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 92
+                  "lineNumber": 93
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -447,27 +443,22 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 93
+                  "lineNumber": 94
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$3",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 94
+                  "lineNumber": 95
                 }
               }
             ],
@@ -477,7 +468,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             }
           },
           {
@@ -486,13 +477,7 @@
             "label": "mapSavedObjectApiHits",
             "signature": [
               "({ attributes, id, references, }: { attributes: Record<string, unknown>; id: string; references?: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; }) => Record<string, unknown>"
             ],
             "description": [
@@ -500,7 +485,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }",
+                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences",
                 "type": "Object",
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
                 "tags": [],
@@ -508,13 +493,13 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.attributes",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.attributes",
                     "type": "Object",
                     "label": "attributes",
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 113
+                      "lineNumber": 114
                     },
                     "signature": [
                       "Record<string, unknown>"
@@ -522,40 +507,34 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.id",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.id",
                     "type": "string",
                     "label": "id",
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 114
+                      "lineNumber": 115
                     }
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.references",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.references",
                     "type": "Array",
                     "label": "references",
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 115
+                      "lineNumber": 116
                     },
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "common",
-                        "docId": "kibCorePluginApi",
-                        "section": "def-common.SavedObjectReference",
-                        "text": "SavedObjectReference"
-                      },
+                      "SavedObjectReference",
                       "[] | undefined"
                     ]
                   }
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 112
+                  "lineNumber": 113
                 }
               }
             ],
@@ -565,7 +544,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             }
           },
           {
@@ -586,6 +565,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -595,10 +575,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 152
+                  "lineNumber": 153
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.find.$2",
                 "type": "CompoundType",
                 "label": "sizeOrOptions",
                 "isRequired": true,
@@ -615,7 +596,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 152
+                  "lineNumber": 153
                 }
               }
             ],
@@ -623,20 +604,22 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 152
+              "lineNumber": 153
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-          "lineNumber": 32
+          "lineNumber": 33
         },
         "initialIsOpen": false
       },
       {
         "id": "def-public.SavedObjectSaveModal",
         "type": "Class",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectSaveModal",
         "description": [],
         "signature": [
@@ -671,7 +654,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 72
+                  "lineNumber": 73
                 }
               },
               {
@@ -682,7 +665,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 73
+                  "lineNumber": 74
                 }
               },
               {
@@ -693,7 +676,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 }
               },
               {
@@ -704,7 +687,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 75
+                  "lineNumber": 76
                 }
               },
               {
@@ -715,7 +698,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 76
+                  "lineNumber": 77
                 }
               },
               {
@@ -726,7 +709,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 77
+                  "lineNumber": 78
                 }
               }
             ],
@@ -734,7 +717,7 @@
             "label": "state",
             "source": {
               "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 71
+              "lineNumber": 72
             }
           },
           {
@@ -750,13 +733,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-          "lineNumber": 69
+          "lineNumber": 70
         },
         "initialIsOpen": false
       }
@@ -775,7 +758,7 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
         ],
@@ -784,6 +767,7 @@
         ],
         "children": [
           {
+            "id": "def-public.checkForDuplicateTitle.$1",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -796,7 +780,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "description": [],
             "source": {
@@ -805,6 +789,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$2",
             "type": "boolean",
             "label": "isTitleDuplicateConfirmed",
             "isRequired": true,
@@ -818,6 +803,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$3",
             "type": "Function",
             "label": "onTitleDuplicate",
             "isRequired": false,
@@ -831,18 +817,13 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$4",
             "type": "Object",
             "label": "services",
             "isRequired": true,
             "signature": [
               "Pick<",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectKibanaServices",
-                "text": "SavedObjectKibanaServices"
-              },
+              "SavedObjectKibanaServices",
               ", \"savedObjectsClient\" | \"overlays\">"
             ],
             "description": [],
@@ -865,6 +846,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getSavedObjectFinder.$1",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -884,6 +866,7 @@
             }
           },
           {
+            "id": "def-public.getSavedObjectFinder.$2",
             "type": "Object",
             "label": "uiSettings",
             "isRequired": true,
@@ -944,7 +927,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.isErrorNonFatal.error",
+            "id": "def-public.isErrorNonFatal.$1.error",
             "type": "Object",
             "label": "error",
             "tags": [],
@@ -952,7 +935,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.isErrorNonFatal.error.message",
+                "id": "def-public.isErrorNonFatal.$1.error.message",
                 "type": "string",
                 "label": "message",
                 "description": [],
@@ -996,6 +979,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SavedObjectSaveModalOrigin.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -1046,7 +1030,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1068,17 +1052,12 @@
         ],
         "children": [
           {
+            "id": "def-public.saveWithConfirmation.$1",
             "type": "Object",
             "label": "source",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ],
             "description": [
               "- serialized version of this object what will be indexed into elasticsearch."
@@ -1089,14 +1068,14 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.savedObject",
+            "id": "def-public.saveWithConfirmation.$2.savedObject",
             "type": "Object",
             "label": "savedObject",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-public.saveWithConfirmation.savedObject.getEsType",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.getEsType",
                 "type": "Function",
                 "label": "getEsType",
                 "signature": [
@@ -1113,7 +1092,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.title",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.title",
                 "type": "string",
                 "label": "title",
                 "description": [],
@@ -1124,7 +1103,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.displayName",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.displayName",
                 "type": "string",
                 "label": "displayName",
                 "description": [],
@@ -1140,6 +1119,7 @@
             }
           },
           {
+            "id": "def-public.saveWithConfirmation.$3",
             "type": "Object",
             "label": "options",
             "isRequired": true,
@@ -1161,7 +1141,7 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.services",
+            "id": "def-public.saveWithConfirmation.$4.services",
             "type": "Object",
             "label": "services",
             "tags": [],
@@ -1169,7 +1149,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.savedObjectsClient",
+                "id": "def-public.saveWithConfirmation.$4.services.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "description": [],
@@ -1186,12 +1166,12 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ]
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.overlays",
+                "id": "def-public.saveWithConfirmation.$4.services.overlays",
                 "type": "Object",
                 "label": "overlays",
                 "description": [],
@@ -1238,6 +1218,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.showSaveModal.$1",
             "type": "Object",
             "label": "saveModal",
             "isRequired": true,
@@ -1251,6 +1232,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.$2",
             "type": "Function",
             "label": "I18nContext",
             "isRequired": true,
@@ -1264,6 +1246,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.$3",
             "type": "Function",
             "label": "Wrapper",
             "isRequired": false,
@@ -1517,7 +1500,9 @@
         "type": "Interface",
         "label": "SavedObject",
         "description": [],
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "children": [
           {
             "tags": [],
@@ -1527,25 +1512,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "signature": [
               "() => { attributes: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               "; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ]
           },
@@ -1557,7 +1530,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "signature": [
               "Record<string, unknown>"
@@ -1571,7 +1544,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "signature": [
               "(resp: Record<string, any>) => Promise<",
@@ -1593,7 +1566,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 28
+              "lineNumber": 29
             }
           },
           {
@@ -1604,17 +1577,11 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "signature": [
               "(opts: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectCreationOpts",
-                "text": "SavedObjectCreationOpts"
-              },
+              "SavedObjectCreationOpts",
               ") => Record<string, unknown>"
             ]
           },
@@ -1626,7 +1593,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "signature": [
               "any"
@@ -1640,7 +1607,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "signature": [
               "(() => Promise<{}>) | undefined"
@@ -1654,7 +1621,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "signature": [
               "() => void"
@@ -1668,7 +1635,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "signature": [
               "() => string"
@@ -1682,7 +1649,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "signature": [
               "() => string"
@@ -1696,7 +1663,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "signature": [
               "() => string"
@@ -1710,7 +1677,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "signature": [
               "((id?: string | undefined) => Promise<",
@@ -1732,7 +1699,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "signature": [
               "string | undefined"
@@ -1746,7 +1713,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "signature": [
               "(() => Promise<",
@@ -1768,7 +1735,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             }
           },
           {
@@ -1779,7 +1746,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "signature": [
               "() => boolean"
@@ -1793,7 +1760,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             }
           },
           {
@@ -1804,7 +1771,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -1818,7 +1785,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "signature": [
               "(saveOptions: ",
@@ -1840,7 +1807,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 44
+              "lineNumber": 45
             },
             "signature": [
               "Pick<",
@@ -1862,7 +1829,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "signature": [
               {
@@ -1883,7 +1850,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             }
           },
           {
@@ -1894,7 +1861,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             }
           },
           {
@@ -1905,23 +1872,17 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | undefined"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -1940,7 +1901,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 78
+              "lineNumber": 79
             },
             "signature": [
               "((savedObject: ",
@@ -1970,7 +1931,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 79
+              "lineNumber": 80
             },
             "signature": [
               "any"
@@ -1984,25 +1945,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             },
             "signature": [
               "((opts: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectAttributesAndRefs",
-                "text": "SavedObjectAttributesAndRefs"
-              },
+              "SavedObjectAttributesAndRefs",
               ") => ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectAttributesAndRefs",
-                "text": "SavedObjectAttributesAndRefs"
-              },
+              "SavedObjectAttributesAndRefs",
               ") | undefined"
             ]
           },
@@ -2014,7 +1963,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             },
             "signature": [
               "(<T extends ",
@@ -2026,13 +1975,7 @@
                 "text": "SavedObject"
               },
               ">(object: T, references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => void) | undefined"
             ]
           },
@@ -2044,7 +1987,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "signature": [
               "string | undefined"
@@ -2058,7 +2001,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "signature": [
               "(() => void) | undefined"
@@ -2072,7 +2015,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 84
+              "lineNumber": 85
             },
             "signature": [
               {
@@ -2093,7 +2036,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -2107,7 +2050,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -2121,7 +2064,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 87
+              "lineNumber": 88
             },
             "signature": [
               "string | undefined"
@@ -2135,7 +2078,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "signature": [
               "boolean | Pick<",
@@ -2157,7 +2100,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 89
+              "lineNumber": 90
             },
             "signature": [
               "string | undefined"
@@ -2166,7 +2109,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 76
+          "lineNumber": 77
         },
         "initialIsOpen": false
       },
@@ -2446,6 +2389,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getIconForSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2491,6 +2435,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getTooltipForSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2536,6 +2481,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.showSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2599,7 +2545,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "signature": [
               "boolean | undefined"
@@ -2613,7 +2559,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "signature": [
               "boolean | undefined"
@@ -2627,7 +2573,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "signature": [
               "(() => void) | undefined"
@@ -2641,7 +2587,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "signature": [
               "boolean | undefined"
@@ -2650,7 +2596,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 51
+          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -2819,14 +2765,16 @@
       "tags": [],
       "children": [
         {
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.SavedObjectsStart.SavedObjectClass",
           "type": "Object",
           "label": "SavedObjectClass",
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 26
+            "lineNumber": 27
           },
           "signature": [
             "new (raw: Record<string, any>) => ",
@@ -2840,14 +2788,16 @@
           ]
         },
         {
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.SavedObjectsStart.settings",
           "type": "Object",
           "label": "settings",
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 27
+            "lineNumber": 29
           },
           "signature": [
             "{ getPerPage: () => number; getListingLimit: () => number; }"

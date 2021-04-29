@@ -16,6 +16,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedReferenceOperation } from './operations/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -170,6 +171,7 @@ describe('IndexPattern Data Source', () => {
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -472,36 +474,42 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
-    it('should add the suffix to the remap column id if provided by the operation', async () => {
+    it('should wrap filtered metrics in filtered metric aggregation', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['def', 'abc'],
+            columnOrder: ['col1', 'col2', 'col3'],
             columns: {
-              abc: {
-                label: '23rd percentile',
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+                filter: {
+                  language: 'kuery',
+                  query: 'bytes > 5',
+                },
+              },
+              col2: {
+                label: 'Average of bytes',
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'percentile',
-                params: {
-                  percentile: 23,
-                },
+                operationType: 'average',
+                timeScale: 'h',
               },
-              def: {
-                label: 'Terms',
-                dataType: 'string',
+              col3: {
+                label: 'Date',
+                dataType: 'date',
                 isBucketed: true,
-                operationType: 'terms',
-                sourceField: 'source',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
                 params: {
-                  size: 5,
-                  orderBy: {
-                    type: 'alphabetical',
-                  },
-                  orderDirection: 'asc',
+                  interval: 'auto',
                 },
               },
             },
@@ -512,11 +520,75 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(Object.keys(JSON.parse(ast.chain[1].arguments.idMap[0] as string))).toEqual([
-        'col-0-def',
-        // col-1 is the auto naming of esasggs, abc is the specified column id, .23 is the generated suffix
-        'col-1-abc.23',
-      ]);
+      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "customBucket": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "filter": Array [
+                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                          ],
+                          "id": Array [
+                            "col1-filter",
+                          ],
+                          "schema": Array [
+                            "bucket",
+                          ],
+                        },
+                        "function": "aggFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "customMetric": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1-metric",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "id": Array [
+                  "col1",
+                ],
+                "schema": Array [
+                  "metric",
+                ],
+              },
+              "function": "aggFilteredMetric",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
 
     it('should add time_scale and format function if time scale is set and supported', async () => {
@@ -540,7 +612,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
@@ -716,7 +788,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 isBucketed: false,
                 sourceField: 'timefield',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               col2: {
                 label: 'Date',
@@ -766,7 +838,7 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   isBucketed: false,
                   sourceField: 'timefield',
-                  operationType: 'cardinality',
+                  operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
@@ -787,6 +859,44 @@ describe('IndexPattern Data Source', () => {
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[2]).toEqual('mock');
+      });
+
+      it('should keep correct column mapping keys with reference columns present', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'unique_count',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+          'col-0-col1': expect.objectContaining({
+            id: 'col1',
+          }),
+        });
       });
     });
   });
@@ -1064,7 +1174,7 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Foo',
-                    operationType: 'avg',
+                    operationType: 'average',
                     sourceField: 'bytes',
                   },
                 },
@@ -1091,7 +1201,7 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: {
-              col1: { operationType: 'avg' as const },
+              col1: { operationType: 'average' as const },
               col2: { operationType: 'sum' as const },
             },
           },

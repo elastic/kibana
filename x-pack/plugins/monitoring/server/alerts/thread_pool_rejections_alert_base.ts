@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -66,7 +67,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -78,7 +79,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       Globals.app.config.ui.max_bucket_size,

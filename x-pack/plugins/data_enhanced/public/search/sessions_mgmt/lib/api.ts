@@ -15,7 +15,7 @@ import {
   ISessionsClient,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { ACTION } from '../components/actions';
 import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
 import { SessionsConfigSchema } from '..';
@@ -25,6 +25,7 @@ type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 function getActions(status: SearchSessionStatus) {
   const actions: ACTION[] = [];
   actions.push(ACTION.INSPECT);
+  actions.push(ACTION.RENAME);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
     actions.push(ACTION.DELETE);
@@ -198,6 +199,25 @@ export class SearchSessionsMgmtAPI {
       this.deps.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
           defaultMessage: 'Failed to extend the search session!',
+        }),
+      });
+    }
+  }
+
+  // Change the user-facing name of a search session
+  public async sendRename(id: string, newName: string): Promise<void> {
+    try {
+      await this.sessionsClient.rename(id, newName);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.rename', {
+          defaultMessage: 'The search session was renamed',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.renameError', {
+          defaultMessage: 'Failed to rename the search session',
         }),
       });
     }

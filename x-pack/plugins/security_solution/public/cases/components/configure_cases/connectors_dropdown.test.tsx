@@ -41,6 +41,7 @@ describe('ConnectorsDropdown', () => {
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -65,6 +66,7 @@ describe('ConnectorsDropdown', () => {
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -87,6 +89,7 @@ describe('ConnectorsDropdown', () => {
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -109,6 +112,7 @@ describe('ConnectorsDropdown', () => {
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -131,6 +135,7 @@ describe('ConnectorsDropdown', () => {
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}

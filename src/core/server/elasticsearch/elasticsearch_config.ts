@@ -7,10 +7,10 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
@@ -144,32 +144,32 @@ export const configSchema = schema.object({
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, log) => {
+  (settings, fromPath, addDeprecation) => {
     const es = settings[fromPath];
     if (!es) {
       return settings;
     }
     if (es.username === 'elastic') {
-      log(
-        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+      });
     } else if (es.username === 'kibana') {
-      log(
-        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+      });
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+      });
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+      });
     } else if (es.logQueries === true) {
-      log(
-        `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`,
+      });
     }
     return settings;
   },

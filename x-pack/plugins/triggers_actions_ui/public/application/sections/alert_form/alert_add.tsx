@@ -154,9 +154,9 @@ const AlertAdd = ({
       const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created alert "{alertName}"',
+          defaultMessage: 'Created rule "{ruleName}"',
           values: {
-            alertName: newAlert.name,
+            ruleName: newAlert.name,
           },
         })
       );
@@ -165,7 +165,7 @@ const AlertAdd = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-            defaultMessage: 'Cannot create alert.',
+            defaultMessage: 'Cannot create rule.',
           })
       );
     }
@@ -183,7 +183,7 @@ const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create alert"
+                defaultMessage="Create rule"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
             </h3>

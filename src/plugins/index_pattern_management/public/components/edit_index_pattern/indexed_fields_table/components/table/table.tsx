@@ -157,6 +157,16 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
+const runtimeIconTipTitle = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
+  { defaultMessage: 'Runtime field' }
+);
+
+const runtimeIconTipText = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipText',
+  { defaultMessage: 'This field exists on the index pattern only.' }
+);
+
 interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
@@ -164,52 +174,58 @@ interface IndexedFieldProps {
   deleteField: (fieldName: string) => void;
 }
 
+export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
+  <span>
+    {field.name}
+    {field.info && field.info.length ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="questionInCircle"
+          color="primary"
+          aria-label={additionalInfoAriaLabel}
+          content={field.info.map((info: string, i: number) => (
+            <div key={i}>{info}</div>
+          ))}
+        />
+      </span>
+    ) : null}
+    {timeFieldName === field.name ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="clock"
+          color="primary"
+          aria-label={primaryTimeAriaLabel}
+          content={primaryTimeTooltip}
+        />
+      </span>
+    ) : null}
+    {!field.isMapped && field.hasRuntime ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="indexRuntime"
+          title={runtimeIconTipTitle}
+          content={<span>{runtimeIconTipText}</span>}
+        />
+      </span>
+    ) : null}
+    {field.customLabel && field.customLabel !== field.name ? (
+      <div>
+        <EuiToolTip content={labelDescription}>
+          <EuiBadge iconType="flag" iconSide="left">
+            {field.customLabel}
+          </EuiBadge>
+        </EuiToolTip>
+      </div>
+    ) : null}
+  </span>
+);
+
 export class Table extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
-  }
-
-  renderFieldName(name: string, field: IndexedFieldItem) {
-    const { indexPattern } = this.props;
-
-    return (
-      <span>
-        {field.name}
-        {field.info && field.info.length ? (
-          <span>
-            &nbsp;
-            <EuiIconTip
-              type="questionInCircle"
-              color="primary"
-              aria-label={additionalInfoAriaLabel}
-              content={field.info.map((info: string, i: number) => (
-                <div key={i}>{info}</div>
-              ))}
-            />
-          </span>
-        ) : null}
-        {indexPattern.timeFieldName === name ? (
-          <span>
-            &nbsp;
-            <EuiIconTip
-              type="clock"
-              color="primary"
-              aria-label={primaryTimeAriaLabel}
-              content={primaryTimeTooltip}
-            />
-          </span>
-        ) : null}
-        {field.customLabel && field.customLabel !== field.name ? (
-          <div>
-            <EuiToolTip content={labelDescription}>
-              <EuiBadge iconType="flag" iconSide="left">
-                {field.customLabel}
-              </EuiBadge>
-            </EuiToolTip>
-          </div>
-        ) : null}
-      </span>
-    );
   }
 
   renderFieldType(type: string, isConflict: boolean) {
@@ -234,7 +250,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField, deleteField } = this.props;
+    const { items, editField, deleteField, indexPattern } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -248,7 +264,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         dataType: 'string',
         sortable: true,
         render: (value: string, field: IndexedFieldItem) => {
-          return this.renderFieldName(value, field);
+          return renderFieldName(field, indexPattern.timeFieldName);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',

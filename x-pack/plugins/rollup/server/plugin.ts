@@ -19,24 +19,15 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies, RollupHandlerContext } from './types';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
-import { isEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
-
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  // Extend the elasticsearchJs client with additional endpoints.
-  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-
-  return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
-}
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -82,21 +73,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
-      'rollup',
-      async (context, request) => {
-        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-        return {
-          client: this.rollupEsClient.asScoped(request),
-        };
-      }
-    );
-
     registerApiRoutes({
       router: http.createRouter(),
       license: this.license,
       lib: {
-        isEsError,
+        handleEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
       },
@@ -113,11 +94,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         value: true,
         description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
           defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
+              which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],
         schema: schema.boolean(),
+        requiresPageReload: true,
       },
     });
 

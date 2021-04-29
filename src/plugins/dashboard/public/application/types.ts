@@ -25,6 +25,7 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../services/data';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
 import { DashboardPanelStorage } from './lib';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { VisualizationsStart } from '../../../visualizations/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -83,4 +84,5 @@ export interface DashboardAppServices {
   savedObjectsClient: SavedObjectsClientContract;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  visualizations: VisualizationsStart;
 }

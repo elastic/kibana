@@ -37,8 +37,11 @@ interface Props {
 }
 
 export function AlertsSection({ alerts }: Props) {
-  const { core } = usePluginContext();
+  const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
+  const href = config.unsafe.alertingExperience.enabled
+    ? '/app/observability/alerts'
+    : '/app/management/insightsAndAlerting/triggersActions/alerts';
 
   const filterOptions = uniqBy(alerts, (alert) => alert.consumer).map(({ consumer }) => ({
     value: consumer,
@@ -51,7 +54,7 @@ export function AlertsSection({ alerts }: Props) {
         defaultMessage: 'Alerts',
       })}
       appLink={{
-        href: '/app/management/insightsAndAlerting/triggersActions/alerts',
+        href,
         label: i18n.translate('xpack.observability.overview.alert.appLink', {
           defaultMessage: 'Manage alerts',
         }),

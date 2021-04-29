@@ -14,13 +14,13 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
-import { getAgent, listAgents, removeSOAttributes } from './crud';
+import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(esClient, agentId);
+  const agent = await getAgentById(esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
@@ -55,17 +55,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  const [all, online, error, offline, updating] = await pMap(
+  const [all, allActive, online, error, offline, updating] = await pMap(
     [
-      undefined,
+      undefined, // All agents, including inactive
+      undefined, // All active agents
       AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
-    (kuery) =>
-      listAgents(esClient, {
-        showInactive: false,
+    (kuery, index) =>
+      getAgentsByKuery(esClient, {
+        showInactive: index === 0,
         perPage: 0,
         page: 1,
         kuery: joinKuerys(
@@ -84,7 +85,8 @@ export async function getAgentStatusForAgentPolicy(
 
   return {
     events: await getEventsCount(soClient, agentPolicyId),
-    total: all.total,
+    total: allActive.total,
+    inactive: all.total - allActive.total,
     online: online.total,
     error: error.total,
     offline: offline.total,

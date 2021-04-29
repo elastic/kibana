@@ -20,6 +20,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createSavedSearchesLoader.$1",
             "type": "Object",
             "label": "{ savedObjectsClient, savedObjects }",
             "isRequired": true,
@@ -38,6 +39,25 @@
         "source": {
           "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
           "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.loadSharingDataHelpers",
+        "type": "Function",
+        "label": "loadSharingDataHelpers",
+        "signature": [
+          "() => Promise<typeof ",
+          "src/plugins/discover/public/application/helpers/get_sharing_data",
+          ">"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/discover/public/shared/index.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -430,13 +450,7 @@
               "lineNumber": 20
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[]"
             ]
           },
@@ -451,13 +465,7 @@
               "lineNumber": 21
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverGridSettings",
-                "text": "DiscoverGridSettings"
-              }
+              "DiscoverGridSettings"
             ]
           },
           {
@@ -720,13 +728,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[] | undefined"
             ]
           }
@@ -788,33 +790,21 @@
           "label": "docViews",
           "description": [],
           "source": {
-            "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 75
+            "path": "src/plugins/discover/public/plugin.tsx",
+            "lineNumber": 76
           },
           "signature": [
             "{ addDocView(docViewRaw: ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInput",
-              "text": "DocViewInput"
-            },
+            "DocViewInput",
             " | ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInputFn",
-              "text": "DocViewInputFn"
-            },
+            "DocViewInputFn",
             "): void; }"
           ]
         }
       ],
       "source": {
-        "path": "src/plugins/discover/public/plugin.ts",
-        "lineNumber": 74
+        "path": "src/plugins/discover/public/plugin.tsx",
+        "lineNumber": 75
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -833,8 +823,8 @@
           "label": "savedSearchLoader",
           "description": [],
           "source": {
-            "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 86
+            "path": "src/plugins/discover/public/plugin.tsx",
+            "lineNumber": 87
           },
           "signature": [
             {
@@ -855,8 +845,8 @@
             "\n`share` plugin URL generator for Discover app. Use it to generate links into\nDiscover application, example:\n\n```ts\nconst url = await plugins.discover.urlGenerator.createUrl({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```"
           ],
           "source": {
-            "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 104
+            "path": "src/plugins/discover/public/plugin.tsx",
+            "lineNumber": 105
           },
           "signature": [
             {
@@ -871,8 +861,8 @@
         }
       ],
       "source": {
-        "path": "src/plugins/discover/public/plugin.ts",
-        "lineNumber": 85
+        "path": "src/plugins/discover/public/plugin.tsx",
+        "lineNumber": 86
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -894,28 +884,13 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-common.AGGS_TERMS_SIZE_SETTING",
-        "type": "string",
-        "label": "AGGS_TERMS_SIZE_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 11
-        },
-        "signature": [
-          "\"discover:aggs:terms:size\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
         "type": "string",
         "label": "CONTEXT_DEFAULT_SIZE_SETTING",
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "signature": [
           "\"context:defaultSize\""
@@ -930,7 +905,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 17
+          "lineNumber": 16
         },
         "signature": [
           "\"context:step\""
@@ -945,7 +920,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 18
+          "lineNumber": 17
         },
         "signature": [
           "\"context:tieBreakerFields\""
@@ -975,7 +950,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 14
+          "lineNumber": 13
         },
         "signature": [
           "\"doc_table:hideTimeColumn\""
@@ -990,7 +965,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "signature": [
           "\"doc_table:legacy\""
@@ -1005,7 +980,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "signature": [
           "\"fields:popularLimit\""
@@ -1020,7 +995,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 20
+          "lineNumber": 19
         },
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
@@ -1050,7 +1025,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 21
+          "lineNumber": 20
         },
         "signature": [
           "\"discover:searchFieldsFromSource\""
@@ -1065,7 +1040,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"discover:searchOnPageLoad\""
@@ -1080,7 +1055,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 12
+          "lineNumber": 11
         },
         "signature": [
           "\"discover:sort:defaultOrder\""

@@ -68,7 +68,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     const { find } = setup({ ...defaultProps, field });
 
-    expect(find('flyoutTitle').text()).toBe(`Edit ${field.name} field`);
+    expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
     expect(find('typeField').props().value).toBe(field.type);
     expect(find('scriptField').props().value).toBe(field.script.source);
@@ -140,7 +140,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         find,
         component,
         form,
-        actions: { toggleFormRow },
+        actions: { toggleFormRow, changeFieldType },
       } = setup({ ...defaultProps, onSave });
 
       act(() => {
@@ -173,14 +173,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
 
       // Change the type and make sure it is forwarded
-      act(() => {
-        find('typeField').simulate('change', [
-          {
-            label: 'Other type',
-            value: 'other_type',
-          },
-        ]);
-      });
+      await changeFieldType('other_type', 'Other type');
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');

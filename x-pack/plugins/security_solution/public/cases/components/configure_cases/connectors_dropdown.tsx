@@ -34,7 +34,7 @@ const EuiIconExtended = styled(EuiIcon)`
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
       </EuiFlexItem>
@@ -77,7 +77,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           {
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
                     type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}

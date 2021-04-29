@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -14,13 +15,11 @@ import {
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiInMemoryTable,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
-import { DataStream } from '../../../types';
+import type { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';

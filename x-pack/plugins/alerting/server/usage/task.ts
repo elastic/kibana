@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
+import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
@@ -65,17 +65,21 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = (...args: Parameters<LegacyAPICaller>) => {
-      return core.getStartServices().then(([{ elasticsearch: { legacy: { client } } }]) =>
-        client.callAsInternalUser(...args)
+    const getEsClient = () =>
+      core.getStartServices().then(
+        ([
+          {
+            elasticsearch: { client },
+          },
+        ]) => client.asInternalUser
       );
-    };
 
     return {
       async run() {
+        const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(callCluster, kibanaIndex),
-          getTotalCountInUse(callCluster, kibanaIndex),
+          getTotalCountAggregations(esClient, kibanaIndex),
+          getTotalCountInUse(esClient, kibanaIndex),
         ])
           .then(([totalCountAggregations, totalInUse]) => {
             return {

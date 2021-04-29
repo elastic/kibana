@@ -425,8 +425,9 @@ export class IndexPatternsService {
             runtimeField: value,
             aggregatable: true,
             searchable: true,
-            count: 0,
             readFromDocValues: false,
+            customLabel: spec.fieldAttrs?.[key]?.customLabel,
+            count: spec.fieldAttrs?.[key]?.count,
           };
         }
       }
@@ -534,6 +535,9 @@ export class IndexPatternsService {
     });
     indexPattern.id = response.id;
     this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    if (this.savedObjectsCache) {
+      this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
+    }
     return indexPattern;
   }
 

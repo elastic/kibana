@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AddConfigDeprecation } from '@kbn/config';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
@@ -35,7 +36,6 @@ import { ClusterStateParams } from 'elasticsearch';
 import { ClusterStatsParams } from 'elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
-import { ConfigDeprecationLogger } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigOptions } from 'elasticsearch';
 import { ConfigPath } from '@kbn/config';
@@ -49,7 +49,13 @@ import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
+import { Ecs } from '@kbn/logging';
+import { EcsEventCategory } from '@kbn/logging';
+import { EcsEventKind } from '@kbn/logging';
+import { EcsEventOutcome } from '@kbn/logging';
+import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -141,7 +147,6 @@ import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
-import { Server } from '@hapi/hapi';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
@@ -167,6 +172,11 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
+
+export { AddConfigDeprecation }
+
+// @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
 
 // @public
 export interface AppCategory {
@@ -296,7 +306,7 @@ export class BasePath {
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
+export function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs): Promise<void>;
 
 // @public
 export interface Capabilities {
@@ -361,7 +371,7 @@ export const config: {
             healthCheck: import("@kbn/config-schema").ObjectType<{
                 delay: Type<import("moment").Duration>;
             }>;
-            ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
+            ignoreVersionMismatch: import("@kbn/config-schema/target/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
@@ -373,13 +383,14 @@ export { ConfigDeprecation }
 
 export { ConfigDeprecationFactory }
 
-export { ConfigDeprecationLogger }
-
 export { ConfigDeprecationProvider }
 
 export { ConfigPath }
 
 export { ConfigService }
+
+// @internal
+export type ConfigUsageData = Record<string, any | any[]>;
 
 // @public
 export interface ContextSetup {
@@ -442,6 +453,13 @@ export interface CoreConfigUsageData {
             supportedProtocols: string[];
             clientAuthentication: 'none' | 'optional' | 'required';
         };
+        securityResponseHeaders: {
+            strictTransportSecurity: string;
+            xContentTypeOptions: string;
+            referrerPolicy: string;
+            permissionsPolicyConfigured: boolean;
+            disableEmbedding: boolean;
+        };
     };
     // (undocumented)
     logging: {
@@ -452,7 +470,7 @@ export interface CoreConfigUsageData {
     savedObjects: {
         customIndex: boolean;
         maxImportPayloadBytes: number;
-        maxImportExportSizeBytes: number;
+        maxImportExportSize: number;
     };
 }
 
@@ -489,6 +507,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
+    // (undocumented)
+    deprecations: DeprecationsServiceSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
@@ -549,6 +569,8 @@ export interface CoreUsageData extends CoreUsageStats {
 
 // @internal
 export interface CoreUsageDataStart {
+    // (undocumented)
+    getConfigsUsageData(): Promise<ConfigUsageData>;
     getCoreUsageData(): Promise<CoreUsageData>;
 }
 
@@ -755,6 +777,8 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
+    readonly disableEmbedding: boolean;
+    // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
@@ -767,6 +791,7 @@ export class CspConfig implements ICspConfig {
 // @public
 export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
     body?: T;
+    bypassErrorFormat?: boolean;
     headers?: ResponseHeaders;
     // (undocumented)
     statusCode: number;
@@ -829,10 +854,38 @@ export interface DeprecationInfo {
     url: string;
 }
 
+// Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface DeprecationsDetails {
+    // (undocumented)
+    correctiveActions: {
+        api?: {
+            path: string;
+            method: 'POST' | 'PUT';
+            body?: {
+                [key: string]: any;
+            };
+        };
+        manualSteps?: string[];
+    };
+    // (undocumented)
+    documentationUrl?: string;
+    level: 'warning' | 'critical' | 'fetch_error';
+    // (undocumented)
+    message: string;
+}
+
 // @public
 export interface DeprecationSettings {
     docLinksKey: string;
     message: string;
+}
+
+// @public
+export interface DeprecationsServiceSetup {
+    // (undocumented)
+    registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
 // @public
@@ -846,6 +899,16 @@ export interface DiscoveredPlugin {
     readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+export { Ecs }
+
+export { EcsEventCategory }
+
+export { EcsEventKind }
+
+export { EcsEventOutcome }
+
+export { EcsEventType }
 
 // @public
 export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
@@ -938,6 +1001,16 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
     state: T;
 };
 
+// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface GetDeprecationsContext {
+    // (undocumented)
+    esClient: IScopedClusterClient;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+}
+
 // @public (undocumented)
 export interface GetResponse<T> {
     // (undocumented)
@@ -1009,6 +1082,7 @@ export interface HttpResourcesServiceToolkit {
 // @public
 export interface HttpResponseOptions {
     body?: HttpResponsePayload;
+    bypassErrorFormat?: boolean;
     headers?: ResponseHeaders;
 }
 
@@ -1073,6 +1147,7 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 
 // @public
 export interface ICspConfig {
+    readonly disableEmbedding: boolean;
     readonly header: string;
     readonly rules: string[];
     readonly strict: boolean;
@@ -1177,6 +1252,12 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
 // @public (undocumented)
 export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
+// @public (undocumented)
+export interface ISavedObjectsPointInTimeFinder {
+    close: () => Promise<void>;
+    find: () => AsyncGenerator<SavedObjectsFindResponse>;
+}
+
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
@@ -1258,7 +1339,7 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -1538,20 +1619,6 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     close(): void;
     }
 
-// @internal @deprecated
-export interface LegacyConfig {
-    // (undocumented)
-    get<T>(key?: string): T;
-    // (undocumented)
-    has(key: string): boolean;
-    // (undocumented)
-    set(key: string, value: any): void;
-    // Warning: (ae-forgotten-export) The symbol "LegacyVars" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    set(config: LegacyVars): void;
-}
-
 // @public @deprecated (undocumented)
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
@@ -1587,30 +1654,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
 
-// @public @deprecated (undocumented)
-export interface LegacyServiceSetupDeps {
-    // Warning: (ae-forgotten-export) The symbol "LegacyCoreSetup" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    core: LegacyCoreSetup;
-    // (undocumented)
-    plugins: Record<string, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "UiPlugins" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    uiPlugins: UiPlugins;
-}
-
-// @public @deprecated (undocumented)
-export interface LegacyServiceStartDeps {
-    // Warning: (ae-forgotten-export) The symbol "LegacyCoreStart" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    core: LegacyCoreStart;
-    // (undocumented)
-    plugins: Record<string, unknown>;
-}
-
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -1643,6 +1686,13 @@ export { LogLevel }
 export { LogMeta }
 
 export { LogRecord }
+
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type MakeUsageFromSchema<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
+};
 
 // @public
 export interface MetricsServiceSetup {
@@ -1830,6 +1880,7 @@ export interface PluginConfigDescriptor<T = any> {
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
     };
+    exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
 
@@ -1904,6 +1955,16 @@ export type RedirectResponseOptions = HttpResponseOptions & {
         location: string;
     };
 };
+
+// Warning: (ae-missing-release-tag) "RegisterDeprecationsConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface RegisterDeprecationsConfig {
+    // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
+}
 
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
@@ -2219,13 +2280,14 @@ export class SavedObjectsClient {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
-    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     openPointInTimeForType(type: string | string[], options?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
@@ -2320,6 +2382,15 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
+
+// @public (undocumented)
+export interface SavedObjectsCreatePointInTimeFinderDependencies {
+    // (undocumented)
+    client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
+}
+
+// @public (undocumented)
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
@@ -2473,6 +2544,8 @@ export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjec
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
+    // @alpha
+    aggs?: Record<string, estypes.AggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -2491,12 +2564,12 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -2511,7 +2584,9 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 // @public
-export interface SavedObjectsFindResponse<T = unknown> {
+export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+    // (undocumented)
+    aggregations?: A;
     // (undocumented)
     page: number;
     // (undocumented)
@@ -2527,7 +2602,7 @@ export interface SavedObjectsFindResponse<T = unknown> {
 // @public (undocumented)
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
     score: number;
-    sort?: unknown[];
+    sort?: string[];
 }
 
 // @public
@@ -2718,11 +2793,12 @@ export interface SavedObjectsIncrementCounterField {
 }
 
 // @public (undocumented)
-export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsIncrementCounterOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
+    upsertAttributes?: Attributes;
 }
 
 // @public
@@ -2736,7 +2812,7 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
     // (undocumented)
-    error: (msg: string, meta: LogMeta) => void;
+    error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
@@ -2811,17 +2887,18 @@ export class SavedObjectsRepository {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
-    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions<T>): Promise<SavedObject<T>>;
     openPointInTimeForType(type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
@@ -2940,7 +3017,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 
 // @public (undocumented)
 export class SavedObjectsUtils {
-    static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
+    static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;
     static generateId(): string;
     static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
@@ -3189,10 +3266,10 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
-// src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:289:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:394:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/http/router/response.ts:301:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:326:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:326:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:329:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:434:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

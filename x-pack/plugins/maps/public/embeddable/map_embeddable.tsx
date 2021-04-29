@@ -93,6 +93,7 @@ export class MapEmbeddable
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
+  private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
@@ -118,6 +119,7 @@ export class MapEmbeddable
       parent
     );
 
+    this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
@@ -404,6 +406,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
     }
@@ -424,6 +427,9 @@ export class MapEmbeddable
   }
 
   _handleStoreChanges() {
+    if (!this._isActive) {
+      return;
+    }
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
 

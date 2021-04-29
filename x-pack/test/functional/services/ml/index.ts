@@ -18,7 +18,6 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
-import { MachineLearningDataFrameAnalyticsCanvasElementProvider } from './data_frame_analytics_canvas_element';
 import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
@@ -46,6 +45,9 @@ import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 import { MachineLearningAlertingProvider } from './alerting';
+import { SwimLaneProvider } from './swim_lane';
+import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
+import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -56,6 +58,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
+
+  const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
+  const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
+    context,
+    commonUI,
+    dashboardJobSelectionTable
+  );
+
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
@@ -63,12 +73,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
-  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
+  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
+    context,
+    commonUI
+  );
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
-  const dataFrameAnalyticsCanvasElement = MachineLearningDataFrameAnalyticsCanvasElementProvider(
-    context
-  );
 
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
@@ -97,6 +107,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const swimLane = SwimLaneProvider(context);
 
   return {
     anomaliesTable,
@@ -107,13 +118,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     commonConfig,
     commonUI,
     customUrls,
+    dashboardJobSelectionTable,
+    dashboardEmbeddables,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
     dataFrameAnalyticsResults,
     dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
-    dataFrameAnalyticsCanvasElement,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
@@ -136,6 +148,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    swimLane,
     testExecution,
     testResources,
   };

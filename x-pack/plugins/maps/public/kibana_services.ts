@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { CoreStart } from 'kibana/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
-import { MapsConfigType } from '../config';
-import { MapsPluginStartDependencies } from './plugin';
-import { EMSSettings } from '../common/ems_settings';
-import { PaletteRegistry } from '../../../../src/plugins/charts/public';
+import type { CoreStart } from 'kibana/public';
+import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
+import type { MapsConfigType } from '../config';
+import type { MapsPluginStartDependencies } from './plugin';
+import type { EMSSettings } from '../common/ems_settings';
+import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -26,9 +25,7 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
-export const getFileUploadComponent = async () => {
-  return await pluginsStart.fileUpload.getFileUploadComponent();
-};
+export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
 export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
@@ -62,9 +59,9 @@ export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsLegacyConfig;
-export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
+// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
+let kibanaCommonConfig: MapsEmsConfig;
+export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
 let emsSettings: EMSSettings;
@@ -77,8 +74,22 @@ export const getEMSSettings = () => {
 
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
 
-export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
-export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
+export const getRegionmapLayers = () => {
+  const config = getKibanaCommonConfig();
+  if (config.regionmap && config.regionmap.layers) {
+    return config.regionmap.layers;
+  } else {
+    return [];
+  }
+};
+export const getTilemap = () => {
+  const config = getKibanaCommonConfig();
+  if (config.tilemap) {
+    return config.tilemap;
+  } else {
+    return {};
+  }
+};
 
 export const getShareService = () => pluginsStart.share;
 

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -19,12 +19,11 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
-const ActionGroupId = 'query matched';
-const ConditionMetAlertInstanceId = 'query matched';
+export const ActionGroupId = 'query matched';
+export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
@@ -157,7 +156,7 @@ export function getAlertType(
     const { alertId, name, services, params, state } = options;
     const previousTimestamp = state.latestTimestamp;
 
-    const callCluster = services.callCluster;
+    const esClient = services.scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -173,7 +172,7 @@ export function getAlertType(
     // of the alert, the latestTimestamp will be used to gate the query in order to
     // avoid counting a document multiple times.
 
-    let timestamp: string | undefined = previousTimestamp;
+    let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
     const filter = timestamp
       ? {
           bool: {
@@ -187,7 +186,7 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                              [params.timeField]: { lte: timestamp },
                             },
                           },
                         ],
@@ -215,55 +214,70 @@ export function getAlertType(
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const searchResult: ESSearchResponse<unknown, {}> = await callCluster('search', query);
+    const { body: searchResult } = await esClient.search(query);
 
-    if (searchResult.hits.hits.length > 0) {
-      const numMatches = searchResult.hits.total.value;
-      logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
+    logger.debug(
+      `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
+    );
 
-      // apply the alert condition
-      const conditionMet = compareFn(numMatches, params.threshold);
+    const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
 
-      if (conditionMet) {
-        const humanFn = i18n.translate(
-          'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
-          {
-            defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
-            values: {
-              thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
-              threshold: params.threshold.join(' and '),
-            },
-          }
-        );
+    // apply the alert condition
+    const conditionMet = compareFn(numMatches, params.threshold);
 
-        const baseContext: EsQueryAlertActionContext = {
-          date: new Date().toISOString(),
-          value: numMatches,
-          conditions: humanFn,
-          hits: searchResult.hits.hits,
-        };
-
-        const actionContext = addMessages(options, baseContext, params);
-        const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
-        alertInstance
-          // store the params we would need to recreate the query that led to this alert instance
-          .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
-          .scheduleActions(ActionGroupId, actionContext);
-
-        // update the timestamp based on the current search results
-        const firstHitWithSort = searchResult.hits.hits.find(
-          (hit: ESSearchHit) => hit.sort != null
-        );
-        const lastTimestamp = firstHitWithSort?.sort;
-        if (lastTimestamp != null && lastTimestamp.length > 0) {
-          timestamp = lastTimestamp[0];
+    if (conditionMet) {
+      const humanFn = i18n.translate(
+        'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
+        {
+          defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
+          values: {
+            thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
+            threshold: params.threshold.join(' and '),
+          },
         }
+      );
+
+      const baseContext: EsQueryAlertActionContext = {
+        date: new Date().toISOString(),
+        value: numMatches,
+        conditions: humanFn,
+        hits: searchResult.hits.hits,
+      };
+
+      const actionContext = addMessages(options, baseContext, params);
+      const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
+      alertInstance
+        // store the params we would need to recreate the query that led to this alert instance
+        .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
+        .scheduleActions(ActionGroupId, actionContext);
+
+      // update the timestamp based on the current search results
+      const firstValidTimefieldSort = getValidTimefieldSort(
+        searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+      );
+      if (firstValidTimefieldSort) {
+        timestamp = firstValidTimefieldSort;
       }
     }
 
     return {
       latestTimestamp: timestamp,
     };
+  }
+}
+
+function getValidTimefieldSort(sortValues: Array<string | number | null> = []): undefined | string {
+  for (const sortValue of sortValues) {
+    const sortDate = tryToParseAsDate(sortValue);
+    if (sortDate) {
+      return sortDate;
+    }
+  }
+}
+function tryToParseAsDate(sortValue?: string | number | null): undefined | string {
+  const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
+  if (sortDate && !isNaN(sortDate)) {
+    return new Date(sortDate).toISOString();
   }
 }
 

@@ -14,6 +14,7 @@ import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
 import { InspectButton } from './inspect_button';
 import { ACTION, OnActionComplete } from './types';
+import { RenameButton } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
@@ -51,6 +52,13 @@ export const getAction = (
             onActionComplete={onActionComplete}
           />
         ),
+      };
+
+    case ACTION.RENAME:
+      return {
+        iconType: 'pencil',
+        textColor: 'default',
+        label: <RenameButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     default:

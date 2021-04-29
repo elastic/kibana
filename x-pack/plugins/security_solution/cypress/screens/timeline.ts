@@ -63,7 +63,7 @@ export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
-export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
+export const NOTES_TAB_BUTTON = 'button[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_TEXT = '.euiMarkdownFormat';
 
@@ -113,6 +113,8 @@ export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
+
+export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 

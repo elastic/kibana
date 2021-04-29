@@ -25,8 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('dashboard unsaved listing', () => {
     const addSomePanels = async () => {
       // add an area chart by value
-      await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.visualize.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
       await PageObjects.visualize.clickAreaChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.saveVisualizationAndReturn();
@@ -132,8 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
 
       // add another panel so we can delete it later
-      await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.visualize.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
       await PageObjects.visualize.clickAreaChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.saveVisualizationExpectSuccess('Wildvis', {

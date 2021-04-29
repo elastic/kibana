@@ -68,7 +68,7 @@ module.exports = {
   ],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jest-environment-jsdom-thirteen',
+  testEnvironment: 'jest-environment-jsdom',
 
   // The glob patterns Jest uses to detect test files
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
@@ -107,4 +107,7 @@ module.exports = {
     '!**/*.d.ts',
     '!**/index.{js,ts}',
   ],
+
+  // A custom resolver to preserve symlinks by default
+  resolver: '<rootDir>/packages/kbn-test/target/jest/setup/preserve_symlinks_resolver.js',
 };

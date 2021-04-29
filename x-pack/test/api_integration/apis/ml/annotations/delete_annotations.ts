@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
       for (let i = 0; i < testSetupJobConfigs.length; i++) {
         const job = testSetupJobConfigs[i];
         const annotationToIndex = testSetupAnnotations[i];
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(job);
         await ml.api.indexAnnotation(annotationToIndex);
       }

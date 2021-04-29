@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema, ObjectType, Type } from '@kbn/config-schema';
-import { get } from 'lodash';
+import type { ObjectType, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { set } from '@elastic/safer-lodash-set';
+import { get, merge } from 'lodash';
 import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
 
 /**
@@ -38,6 +39,11 @@ function isOneOfCandidate(
  * @param value
  */
 function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
+  // We need to check the pass_through type on top of everything
+  if ((value as { type: 'pass_through' }).type === 'pass_through') {
+    return schema.any();
+  }
+
   if ('properties' in value) {
     const { DYNAMIC_KEY, ...properties } = value.properties;
     const schemas: Array<Type<unknown>> = [objectSchemaToConfigSchema({ properties })];
@@ -48,8 +54,6 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   } else {
     const valueType = value.type; // Copied in here because of TS reasons, it's not available in the `default` case
     switch (value.type) {
-      case 'pass_through':
-        return schema.any();
       case 'boolean':
         return schema.boolean();
       case 'keyword':
@@ -77,9 +81,11 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
 }
 
 function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): ObjectType {
+  const objectEntries = Object.entries(objectSchema.properties);
+
   return schema.object(
     Object.fromEntries(
-      Object.entries(objectSchema.properties).map(([key, value]) => {
+      objectEntries.map(([key, value]) => {
         try {
           return [key, schema.maybe(valueSchemaToConfigSchema(value))];
         } catch (err) {
@@ -119,11 +125,19 @@ export function assertTelemetryPayload(
   stats: unknown
 ): void {
   const fullSchema = telemetrySchema.root;
+
+  const mergedPluginsSchema = merge(
+    {},
+    get(fullSchema, 'properties.stack_stats.properties.kibana.properties.plugins'),
+    telemetrySchema.plugins
+  );
+
   set(
     fullSchema,
     'properties.stack_stats.properties.kibana.properties.plugins',
-    telemetrySchema.plugins
+    mergedPluginsSchema
   );
+
   const ossTelemetryValidationSchema = convertSchemaToConfigSchema(fullSchema);
 
   // Run @kbn/config-schema validation to the entire payload
