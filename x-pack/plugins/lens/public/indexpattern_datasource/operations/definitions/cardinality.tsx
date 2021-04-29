@@ -71,6 +71,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   filterable: true,
+  shiftable: true,
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   buildColumn({ field, previousColumn }) {
     return {
@@ -81,6 +82,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

@@ -10,7 +10,12 @@ import moment from 'moment';
 import _, { cloneDeep, isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { Aggregate, FiltersAggregate, FiltersBucketItem } from '@elastic/elasticsearch/api/types';
+import {
+  Aggregate,
+  Bucket,
+  FiltersAggregate,
+  FiltersBucketItem,
+} from '@elastic/elasticsearch/api/types';
 
 import { IEsSearchResponse, ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
@@ -49,6 +54,8 @@ export interface AggConfigsOptions {
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
+
+type GenericBucket = Bucket & { [property: string]: Aggregate };
 
 /**
  * @name AggConfigs
@@ -354,6 +361,19 @@ export class AggConfigs {
     return timeShifts;
   }
 
+  hasTimeShifts(): boolean {
+    const timeShifts: Record<string, moment.Duration> = {};
+    this.getAll()
+      .filter((agg) => agg.schema === 'metric')
+      .map((agg) => agg.getTimeShift())
+      .forEach((timeShift) => {
+        if (timeShift) {
+          timeShifts[String(timeShift.asMilliseconds())] = timeShift;
+        }
+      });
+    return Object.keys(timeShifts).length > 0;
+  }
+
   isTimeShiftSplitAgg(aggConfig: AggConfig) {
     // TODO - probably abstract this in an optional flag on the agg config instead of hard-coding the relationship here
     const hasDateHistograms = this.getAll().some((agg) => agg.type.name === 'date_histogram');
@@ -372,41 +392,70 @@ export class AggConfigs {
     const transformedRawResponse = cloneDeep(response.rawResponse);
     const aggCursor = transformedRawResponse.aggregations!;
 
-    // TODO: Add a "context" param here which keeps track of at which level of the response we are
-    const mergeObject = (target: any, source: any, shiftKey: string) => {
+    const bucketAggs = this.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
+
+    const mergeAggLevel = (
+      target: GenericBucket,
+      source: GenericBucket,
+      shiftKey: string,
+      aggIndex: number
+    ) => {
       Object.entries(source).forEach(([key, val]) => {
-        if (typeof val !== 'object') {
-          if (key === 'doc_count') {
-            target[`doc_count_${shiftKey}`] = val;
-          } else {
-            target[key] = val;
-          }
+        // copy over doc count into special key
+        if (typeof val === 'number' && key === 'doc_count') {
+          target[`doc_count_${shiftKey}`] = val;
+        } else if (typeof val !== 'object') {
+          // other meta keys not of interest
+          return;
         } else {
+          // a sub-agg
           const agg = this.byId(key);
           if (agg && agg.type.type === 'metrics') {
             const timeShift = agg.getTimeShift();
-            if (!timeShift || String(timeShift.asMilliseconds()) !== shiftKey) {
-              // this is a metric from another time shift, do not copy over
-              return;
+            if (timeShift && String(timeShift.asMilliseconds()) === shiftKey) {
+              // this is a metric from the current time shift, copy it over
+              target[key] = source[key];
+            }
+          } else if (agg === bucketAggs[aggIndex]) {
+            // expected next bucket sub agg
+            const subAggregate = val as Aggregate;
+            const baseSubAggregate = target[key] as Aggregate;
+            // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
+            const buckets = ('buckets' in subAggregate ? subAggregate.buckets : undefined) as
+              | GenericBucket[]
+              | Record<string, GenericBucket>
+              | undefined;
+            const baseBuckets = ('buckets' in baseSubAggregate
+              ? baseSubAggregate.buckets
+              : undefined) as GenericBucket[] | Record<string, GenericBucket> | undefined;
+            // merge
+            if (isArray(buckets) && isArray(baseBuckets)) {
+              buckets.forEach((bucket, index) =>
+                mergeAggLevel(baseBuckets[index], bucket, shiftKey, aggIndex + 1)
+              );
+            } else if (baseBuckets && buckets && !isArray(baseBuckets)) {
+              Object.entries(buckets).forEach(([bucketKey, bucket]) =>
+                mergeAggLevel(baseBuckets[bucketKey], bucket, shiftKey, aggIndex + 1)
+              );
             }
           }
-          if (!target[key]) {
-            target[key] = {};
-          }
-          mergeObject(target[key], source[key], shiftKey);
         }
       });
     };
-    const transformTimeShift = (cursor: Record<string, Aggregate>): undefined => {
+    const transformTimeShift = (cursor: Record<string, Aggregate>, aggIndex: number): undefined => {
       if (cursor.time_offset_split) {
         const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate).buckets as Record<
           string,
           FiltersBucketItem
         >;
         const subTree = timeShiftedBuckets['0'];
-        // TODO pull in metrics from other buckets
-        Object.entries(timeShifts).forEach(([key, shift]) => {
-          mergeObject(subTree, timeShiftedBuckets[key], key);
+        Object.keys(timeShifts).forEach((key) => {
+          mergeAggLevel(
+            subTree as GenericBucket,
+            timeShiftedBuckets[key] as GenericBucket,
+            key,
+            aggIndex
+          );
         });
 
         delete cursor.time_offset_split;
@@ -420,13 +469,15 @@ export class AggConfigs {
           return;
         }
         if (isArray(subAgg.buckets)) {
-          subAgg.buckets.forEach(transformTimeShift);
+          subAgg.buckets.forEach((bucket) => transformTimeShift(bucket, aggIndex + 1));
         } else {
-          Object.values(subAgg.buckets).forEach(transformTimeShift);
+          Object.values(subAgg.buckets).forEach((bucket) =>
+            transformTimeShift(bucket, aggIndex + 1)
+          );
         }
       });
     };
-    transformTimeShift(aggCursor);
+    transformTimeShift(aggCursor, 0);
     return {
       ...response,
       rawResponse: transformedRawResponse,

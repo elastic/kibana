@@ -231,6 +231,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   timeScalingMode?: TimeScalingMode;
   filterable?: boolean;
+  shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
 }

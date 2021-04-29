@@ -52,6 +52,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   }),
   input: 'field',
   filterable: true,
+  shiftable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -88,6 +89,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),

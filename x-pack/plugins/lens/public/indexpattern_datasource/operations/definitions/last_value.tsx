@@ -162,6 +162,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -169,6 +170,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     };
   },
   filterable: true,
+  shiftable: true,
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
       id: columnId,

@@ -90,6 +90,7 @@ export const movingAverageOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params: {
         window: 5,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -121,6 +122,7 @@ export const movingAverageOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  shiftable: true,
 };
 
 function MovingAverageParamEditor({

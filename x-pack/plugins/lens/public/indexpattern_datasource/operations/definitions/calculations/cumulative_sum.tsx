@@ -86,6 +86,7 @@ export const cumulativeSumOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -111,4 +112,5 @@ export const cumulativeSumOperation: OperationDefinition<
     )?.join(', ');
   },
   filterable: true,
+  shiftable: true,
 };

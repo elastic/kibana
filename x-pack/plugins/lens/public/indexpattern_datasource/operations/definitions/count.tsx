@@ -62,6 +62,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -89,4 +90,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
+  shiftable: true,
 };

@@ -92,6 +92,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
+      timeShift: previousColumn?.timeShift,
       filter: previousColumn?.filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -118,4 +119,5 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
+  shiftable: true,
 };

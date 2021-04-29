@@ -82,6 +82,7 @@ export const derivativeOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -108,4 +109,5 @@ export const derivativeOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  shiftable: true,
 };
