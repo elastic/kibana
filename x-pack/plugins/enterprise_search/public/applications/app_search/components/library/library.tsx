@@ -10,13 +10,13 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
+  EuiButtonIconColor,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -79,21 +79,15 @@ export const Library: React.FC = () => {
       title: 'Fill this action button',
       onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
       iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
-      iconColor: 'primary',
+      iconColor: 'primary' as EuiButtonIconColor,
     },
   ];
 
   return (
     <>
       <SetPageChrome trail={['Library']} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Library</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle="Library" />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>
@@ -228,7 +222,7 @@ export const Library: React.FC = () => {
             <h3>With custom actions and a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} actions={actions} shouldLinkToDetailPage />
+          <Result {...props} actions={actions} shouldLinkToDetailPage showScore isMetaEngine />
           <EuiSpacer />
 
           <EuiSpacer />

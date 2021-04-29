@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createFailingAlert() {
     return await createAlert({
-      alertTypeId: 'test.failing',
+      rule_type_id: 'test.failing',
       schedule: { interval: '30s' },
     });
   }
@@ -48,6 +48,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .expect(200);
     objectRemover.add(createdAction.id, 'action', 'actions');
     return createdAction;
+  }
+
+  async function muteAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_mute_all`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
+  }
+
+  async function disableAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_disable`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
   }
 
   async function refreshAlertsList() {
@@ -128,37 +142,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitchAfterDisable = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitchAfterDisable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'disableSwitch',
+        'true'
+      );
     });
 
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
+      await disableAlert(createdAlert.id);
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'disableSwitch',
+        'false'
+      );
     });
 
     it('should mute single alert', async () => {
@@ -169,38 +173,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'muteSwitch',
+        'true'
+      );
     });
 
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
+      await muteAlert(createdAlert.id);
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'muteSwitch',
+        'false'
+      );
     });
 
     it('should delete single alert', async () => {
@@ -444,7 +438,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         actions: [
           {
             id: action.id,
-            actionTypeId: '.slack',
             group: 'default',
             params: { level: 'info', message: 'gfghfhg' },
           },

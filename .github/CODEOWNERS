@@ -53,11 +53,13 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
+/src/plugins/index_pattern_field_editor @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services
@@ -77,6 +79,7 @@
 
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
@@ -105,7 +108,6 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 
@@ -117,18 +119,23 @@
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
-/x-pack/test/functional/apps/ml/  @elastic/ml-ui
-/x-pack/test/functional/services/ml/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
+/x-pack/test/accessibility/apps/ml_embeddables_in_dashboard.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
+/x-pack/test/functional/apps/ml/  @elastic/ml-ui
+/x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
+/x-pack/test/functional/services/ml/  @elastic/ml-ui
+/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
+/x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
+
 # ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
+/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
-/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
-/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
-
-/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 
 # Maps
@@ -137,9 +144,10 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
-#CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
 
@@ -156,8 +164,8 @@
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
+/packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
-/src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
@@ -192,9 +200,8 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-legacy-logging/ @elastic/kibana-core
-/src/legacy/server/config/ @elastic/kibana-core
-/src/legacy/server/http/ @elastic/kibana-core
-/src/legacy/server/logging/ @elastic/kibana-core
+/packages/kbn-crypto/ @elastic/kibana-core
+/packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/status_page/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
@@ -204,9 +211,6 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/legacy/server/config/ @elastic/kibana-core
-#CC# /src/legacy/server/http/ @elastic/kibana-core
-#CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
 #CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
@@ -270,7 +274,7 @@
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
 /docs/user/alerting/ @elastic/kibana-alerting-services
-/docs/management/alerting/ @elastic/kibana-alerting-services
+/docs/management/connectors/ @elastic/kibana-alerting-services
 #CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
@@ -310,6 +314,7 @@
 /x-pack/plugins/console_extensions/  @elastic/es-ui
 /x-pack/plugins/grokdebugger/  @elastic/es-ui
 /x-pack/plugins/index_management/  @elastic/es-ui
+/x-pack/plugins/license_api_guard/  @elastic/es-ui
 /x-pack/plugins/license_management/  @elastic/es-ui
 /x-pack/plugins/painless_lab/  @elastic/es-ui
 /x-pack/plugins/remote_clusters/  @elastic/es-ui
@@ -338,6 +343,7 @@
 
 # Security Solution sub teams
 /x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 

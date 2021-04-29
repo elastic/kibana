@@ -6,6 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -42,7 +43,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { EditorFrameStart } from './types';
+import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
@@ -62,6 +63,7 @@ export interface LensPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -96,11 +98,16 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
   canUseEditor: () => boolean;
+
+  /**
+   * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
+   */
+  getXyVisTypes: () => Promise<VisualizationType[]>;
 }
 
 export class LensPlugin {
@@ -134,6 +141,7 @@ export class LensPlugin {
       visualizations,
       charts,
       globalSearch,
+      usageCollection,
     }: LensPluginSetupDependencies
   ) {
     this.attributeService = async () => {
@@ -148,6 +156,7 @@ export class LensPlugin {
         embeddable,
         charts,
         expressions,
+        usageCollection,
       },
       this.attributeService
     );
@@ -238,8 +247,9 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
-        if (input.timeRange) {
+      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
+        // for openInNewTab, we set the time range in url via getEditPath below
+        if (input.timeRange && !openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
@@ -247,7 +257,8 @@ export class LensPlugin {
           core.application.currentAppId$
         );
         transfer.navigateToEditor('lens', {
-          path: getEditPath(undefined),
+          openInNewTab,
+          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
           state: {
             originatingApp: '',
             valueInput: input,
@@ -256,6 +267,10 @@ export class LensPlugin {
       },
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize?.show);
+      },
+      getXyVisTypes: async () => {
+        const { visualizationTypes } = await import('./xy_visualization/types');
+        return visualizationTypes;
       },
     };
   }

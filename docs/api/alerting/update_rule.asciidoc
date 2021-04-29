@@ -1,0 +1,138 @@
+[[update-rule-api]]
+=== Update rule API
+++++
+<titleabbrev>Update rule</titleabbrev>
+++++
+
+Update the attributes for an existing rule.
+
+WARNING: This API supports <<token-api-authentication>> only.
+
+[[update-rule-api-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/alerting/rule/<id>`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
+
+[[update-rule-api-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the rule that you want to update.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[update-rule-api-request-body]]
+==== Request body
+
+`name`::
+  (Required, string) A name to reference and search.
+
+`tags`::
+  (Optional, string array) A list of keywords to reference and search.
+
+`schedule`::
+  (Required, object) When to run this rule. Use one of the available schedule formats.
++
+._Schedule Formats_.
+[%collapsible%open]
+=====
+A schedule uses a key: value format.  {kib} currently supports the _Interval format_ , which specifies the interval in seconds, minutes, hours, or days at which to execute the rule.
+
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+=====
+
+`throttle`::
+  (Optional, string) How often this rule should fire the same actions. This will prevent the rule from sending out the same notification over and over. For example, if a rule with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.
+
+`notify_when`::
+  (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`.
+
+`params`::
+  (Required, object) The parameters to pass to the rule type executor `params` value. This will also validate against the rule type params validator, if defined.
+
+`actions`::
+  (Optional, object array) An array of the following action objects.
++
+.Properties of the action objects:
+[%collapsible%open]
+=====
+  `group`:::
+    (Required, string) Grouping actions is recommended for escalations for different types of alerts. If you don't need this, set the value to `default`.
+
+  `id`:::
+    (Required, string) The ID of the action that saved object executes.
+
+  `params`:::
+    (Required, object) The map to the `params` that the <<action-types,connector type>> will receive. `params` are handled as Mustache templates and passed a default set of context.
+=====
+
+
+[[update-rule-api-response-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[update-rule-api-example]]
+==== Example
+
+Update a rule with ID `ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74` with a different name:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/alerting/rule/ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+
+{
+  "notify_when": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
+  },
+  "schedule": {
+    "interval": "1m"
+  },
+  "actions": [],
+  "tags": [],
+  "name": "new name",
+  "throttle": null,
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74",
+  "notify_when": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
+  },
+  "consumer": "alerts",
+  "rule_type_id": "test.rule.type",
+  "schedule": {
+    "interval": "1m"
+  },
+  "actions": [],
+  "tags": [],
+  "name": "new name",
+  "enabled": true,
+  "throttle": null,
+  "api_key_owner": "elastic",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "updated_at": "2021-02-10T05:37:19.086Z",
+  "created_at": "2021-02-10T05:37:19.086Z",
+  "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
+  "execution_status": {
+    "last_execution_date": "2021-02-10T17:55:14.262Z",
+    "status": "ok"
+  }
+}
+--------------------------------------------------

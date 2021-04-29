@@ -17,7 +17,7 @@ import { Header } from '../../../components/header';
 import { ColumnarPage, PageContent } from '../../../components/page';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
-import { Source } from '../../../containers/source';
+import { Source } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';

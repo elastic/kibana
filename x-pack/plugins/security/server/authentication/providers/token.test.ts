@@ -50,6 +50,7 @@ describe('TokenAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+        // @ts-expect-error not full interface
         securityMock.createApiResponse({
           body: {
             access_token: tokenPair.accessToken,

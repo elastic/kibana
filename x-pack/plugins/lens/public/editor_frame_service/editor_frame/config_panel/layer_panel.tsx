@@ -25,9 +25,9 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { RemoveLayerButton } from './remove_layer_button';
-import { EmptyDimensionButton } from './empty_dimension_button';
-import { DimensionButton } from './dimension_button';
-import { DraggableDimensionButton } from './draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DimensionButton } from './buttons/dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 
 const initialActiveDimensionState = {

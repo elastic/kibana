@@ -140,7 +140,7 @@ export const Schema: React.FC = () => {
             <SchemaFieldsTable />
           </>
         ) : (
-          <EuiPanel>
+          <EuiPanel hasShadow={false} color="subdued">
             <EuiEmptyPrompt
               iconType="managementApp"
               title={<h2>{SCHEMA_EMPTY_SCHEMA_TITLE}</h2>}

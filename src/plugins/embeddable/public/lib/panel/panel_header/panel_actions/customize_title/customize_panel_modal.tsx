@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
+import React, { Component, FormEvent } from 'react';
 
 import {
   EuiFormRow,
@@ -72,80 +72,87 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
       <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.panelTitleInputText'}>
         <EuiOutsideClickDetector onOutsideClick={this.props.cancel}>
           <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="euiModal__flex">
-            <EuiModalHeader>
-              <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
-                <h2 id={titleId}>Customize panel</h2>
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
+            <form
+              onSubmit={(event: FormEvent) => {
+                event.preventDefault();
+                this.save();
+              }}
+            >
+              <EuiModalHeader>
+                <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
+                  <h2 id={titleId}>Customize panel</h2>
+                </EuiModalHeaderTitle>
+              </EuiModalHeader>
 
-            <EuiModalBody>
-              <EuiFormRow>
-                <EuiSwitch
-                  checked={!this.state.hideTitle}
-                  data-test-subj="customizePanelHideTitle"
-                  id="hideTitle"
-                  label={
-                    <FormattedMessage
-                      defaultMessage="Show panel title"
-                      id="embeddableApi.customizePanel.modal.showTitle"
-                    />
-                  }
-                  onChange={this.onHideTitleToggle}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate(
-                  'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
-                  {
-                    defaultMessage: 'Panel title',
-                  }
-                )}
-              >
-                <EuiFieldText
-                  id="panelTitleInput"
-                  className="panelTitleInputText"
-                  data-test-subj="customEmbeddablePanelTitleInput"
-                  name="min"
-                  type="text"
-                  disabled={this.state.hideTitle}
-                  value={this.state.title || ''}
-                  onChange={(e) => this.setState({ title: e.target.value })}
-                  aria-label={i18n.translate(
-                    'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
+              <EuiModalBody>
+                <EuiFormRow>
+                  <EuiSwitch
+                    checked={!this.state.hideTitle}
+                    data-test-subj="customizePanelHideTitle"
+                    id="hideTitle"
+                    label={
+                      <FormattedMessage
+                        defaultMessage="Show panel title"
+                        id="embeddableApi.customizePanel.modal.showTitle"
+                      />
+                    }
+                    onChange={this.onHideTitleToggle}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
                     {
-                      defaultMessage: 'Enter a custom title for your panel',
+                      defaultMessage: 'Panel title',
                     }
                   )}
-                  append={
-                    <EuiButtonEmpty
-                      data-test-subj="resetCustomEmbeddablePanelTitle"
-                      onClick={this.reset}
-                      disabled={this.state.hideTitle}
-                    >
-                      <FormattedMessage
-                        id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
-                        defaultMessage="Reset"
-                      />
-                    </EuiButtonEmpty>
-                  }
-                />
-              </EuiFormRow>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => this.props.cancel()}>
-                <FormattedMessage
-                  id="embeddableApi.customizePanel.modal.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
+                >
+                  <EuiFieldText
+                    id="panelTitleInput"
+                    className="panelTitleInputText"
+                    data-test-subj="customEmbeddablePanelTitleInput"
+                    name="min"
+                    type="text"
+                    disabled={this.state.hideTitle}
+                    value={this.state.title || ''}
+                    onChange={(e) => this.setState({ title: e.target.value })}
+                    aria-label={i18n.translate(
+                      'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
+                      {
+                        defaultMessage: 'Enter a custom title for your panel',
+                      }
+                    )}
+                    append={
+                      <EuiButtonEmpty
+                        data-test-subj="resetCustomEmbeddablePanelTitle"
+                        onClick={this.reset}
+                        disabled={this.state.hideTitle}
+                      >
+                        <FormattedMessage
+                          id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
+                          defaultMessage="Reset"
+                        />
+                      </EuiButtonEmpty>
+                    }
+                  />
+                </EuiFormRow>
+              </EuiModalBody>
+              <EuiModalFooter>
+                <EuiButtonEmpty onClick={() => this.props.cancel()}>
+                  <FormattedMessage
+                    id="embeddableApi.customizePanel.modal.cancel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
 
-              <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
-                <FormattedMessage
-                  id="embeddableApi.customizePanel.modal.saveButtonTitle"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiModalFooter>
+                <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
+                  <FormattedMessage
+                    id="embeddableApi.customizePanel.modal.saveButtonTitle"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiModalFooter>
+            </form>
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>

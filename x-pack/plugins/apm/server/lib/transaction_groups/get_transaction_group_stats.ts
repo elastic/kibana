@@ -6,9 +6,9 @@
  */
 
 import { merge } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { AggregationInputMap } from '../../../../../../typings/elasticsearch';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -23,8 +23,8 @@ type BucketKey = string | Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
-  TInputMap extends AggregationInputMap
->(request: TRequestBase, aggs: TInputMap) {
+  TAggregationMap extends Record<string, estypes.AggregationContainer>
+>(request: TRequestBase, aggs: TAggregationMap) {
   return merge({}, request, {
     body: {
       aggs: {
@@ -71,11 +71,13 @@ export function getCounts({ request, setup }: MetricParams) {
       transaction_type: {
         top_metrics: {
           sort: {
-            '@timestamp': 'desc',
+            '@timestamp': 'desc' as const,
           },
-          metrics: {
-            field: TRANSACTION_TYPE,
-          } as const,
+          metrics: [
+            {
+              field: TRANSACTION_TYPE,
+            } as const,
+          ],
         },
       },
     });

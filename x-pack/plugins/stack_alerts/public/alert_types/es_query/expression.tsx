@@ -23,6 +23,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -38,6 +40,10 @@ import { parseDuration } from '../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
+
+function totalHitsToNumber(total: estypes.HitsMetadata['total']): number {
+  return typeof total === 'number' ? total : total.value;
+}
 
 const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
@@ -191,7 +197,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         setTestQueryResult(
           i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
             defaultMessage: 'Query matched {count} documents in the last {window}.',
-            values: { count: hits.total, window },
+            values: { count: totalHitsToNumber(hits.total), window },
           })
         );
       } catch (err) {

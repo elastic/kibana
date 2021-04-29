@@ -65,10 +65,16 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { DeprecationsServiceStart } from './deprecations';
 
-export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
+export type {
+  PackageInfo,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  DomainDeprecationDetails,
+} from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type {
   AppCategory,
   UiSettingsParams,
@@ -184,6 +190,8 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
@@ -268,6 +276,8 @@ export interface CoreStart {
   uiSettings: IUiSettingsClient;
   /** {@link FatalErrorsStart} */
   fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values

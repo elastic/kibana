@@ -7,12 +7,28 @@
  */
 
 import expect from '@kbn/expect';
+import supertestAsPromised from 'supertest-as-promised';
+import { omit } from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SavedObject } from '../../../../src/core/server';
+import { basicUsageCounters } from './__fixtures__/usage_counters';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import { assertTelemetryPayload, flatKeys } from './utils';
+
+async function retrieveTelemetry(
+  supertest: supertestAsPromised.SuperTest<supertestAsPromised.Test>
+) {
+  const { body } = await supertest
+    .post('/api/telemetry/v2/clusters/_stats')
+    .set('kbn-xsrf', 'xxx')
+    .send({ unencrypted: true })
+    .expect(200);
+
+  expect(body.length).to.be(1);
+  return body[0];
+}
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -35,14 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       let stats: Record<string, any>;
 
       before('pull local stats', async () => {
-        const { body } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
-
-        expect(body.length).to.be(1);
-        stats = body[0];
+        stats = await retrieveTelemetry(supertest);
       });
 
       it('should pass the schema validation', () => {
@@ -78,6 +87,35 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.be.an('object');
+        // non-default kibana configs. Configs set at 'test/api_integration/config.js'.
+        expect(omit(stats.stack_stats.kibana.plugins.kibana_config_usage, 'server.port')).to.eql({
+          'elasticsearch.username': '[redacted]',
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.hosts': '[redacted]',
+          'elasticsearch.healthCheck.delay': 3600000,
+          'plugins.paths': '[redacted]',
+          'logging.json': false,
+          'server.xsrf.disableProtection': true,
+          'server.compression.referrerWhitelist': '[redacted]',
+          'server.maxPayload': 1679958,
+          'status.allowAnonymous': true,
+          'home.disableWelcomeScreen': true,
+          'data.search.aggs.shardDelay.enabled': true,
+          'security.showInsecureClusterWarning': false,
+          'telemetry.banner': false,
+          'telemetry.url': '[redacted]',
+          'telemetry.optInStatusUrl': '[redacted]',
+          'telemetry.optIn': false,
+          'newsfeed.service.urlRoot': '[redacted]',
+          'newsfeed.service.pathTemplate': '[redacted]',
+          'savedObjects.maxImportPayloadBytes': 10485760,
+          'savedObjects.maxImportExportSize': 10001,
+          'usageCollection.usageCounters.bufferDuration': 0,
+        });
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage['server.port']).to.be.a(
+          'number'
+        );
 
         // Testing stack_stats.data
         expect(stats.stack_stats.data).to.be.an('object');
@@ -141,22 +179,29 @@ export default function ({ getService }: FtrProviderContext) {
       before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
       after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
       it('returns ui counters aggregated by day', async () => {
-        const { body } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
-
-        expect(body.length).to.be(1);
-        const stats = body[0];
+        const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
+      });
+    });
+
+    describe('Usage Counters telemetry', () => {
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('saved_objects/usage_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('saved_objects/usage_counters')
+      );
+
+      it('returns usage counters aggregated by day', async () => {
+        const stats = await retrieveTelemetry(supertest);
+        expect(stats.stack_stats.kibana.plugins.usage_counters).to.eql(basicUsageCounters);
       });
     });
 
     describe('application usage limits', () => {
       function createSavedObject(viewId?: string) {
         return supertest
-          .post('/api/saved_objects/application_usage_transactional')
+          .post('/api/saved_objects/application_usage_daily')
           .send({
             attributes: {
               appId: 'test-app',
@@ -184,21 +229,14 @@ export default function ({ getService }: FtrProviderContext) {
           await Promise.all(
             savedObjectIds.map((savedObjectId) => {
               return supertest
-                .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
+                .delete(`/api/saved_objects/application_usage_daily/${savedObjectId}`)
                 .expect(200);
             })
           );
         });
 
         it('should return application_usage data', async () => {
-          const { body } = await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
-            .send({ unencrypted: true })
-            .expect(200);
-
-          expect(body.length).to.be(1);
-          const stats = body[0];
+          const stats = await retrieveTelemetry(supertest);
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
               appId: 'test-app',
@@ -237,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/api/saved_objects/_bulk_create')
             .send(
               new Array(10001).fill(0).map(() => ({
-                type: 'application_usage_transactional',
+                type: 'application_usage_daily',
                 attributes: {
                   appId: 'test-app',
                   minutesOnScreen: 1,
@@ -255,21 +293,13 @@ export default function ({ getService }: FtrProviderContext) {
           // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout
           await es.deleteByQuery({
             index: '.kibana',
-            body: { query: { term: { type: 'application_usage_transactional' } } },
+            body: { query: { term: { type: 'application_usage_daily' } } },
             conflicts: 'proceed',
           });
         });
 
-        // flaky https://github.com/elastic/kibana/issues/94513
-        it.skip("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
-          const { body } = await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
-            .send({ unencrypted: true })
-            .expect(200);
-
-          expect(body.length).to.be(1);
-          const stats = body[0];
+        it("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
+          const stats = await retrieveTelemetry(supertest);
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
               appId: 'test-app',

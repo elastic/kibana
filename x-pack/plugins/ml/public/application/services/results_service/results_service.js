@@ -14,6 +14,7 @@ import {
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -778,139 +779,6 @@ export function resultsServiceProvider(mlApiServices) {
       });
     },
 
-    // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
-    // for the specified job(s), time range, and record score threshold.
-    // influencers parameter must be an array, with each object in the array having 'fieldName'
-    // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
-    // so this returns record level results which have at least one of the influencers.
-    // Pass an empty array or ['*'] to search over all job IDs.
-    getRecordsForInfluencer(
-      jobIds,
-      influencers,
-      threshold,
-      earliestMs,
-      latestMs,
-      maxResults,
-      influencersFilterQuery
-    ) {
-      return new Promise((resolve, reject) => {
-        const obj = { success: true, records: [] };
-
-        // Build the criteria to use in the bool filter part of the request.
-        // Add criteria for the time range, record score, plus any specified job IDs.
-        const boolCriteria = [
-          {
-            range: {
-              timestamp: {
-                gte: earliestMs,
-                lte: latestMs,
-                format: 'epoch_millis',
-              },
-            },
-          },
-          {
-            range: {
-              record_score: {
-                gte: threshold,
-              },
-            },
-          },
-        ];
-
-        if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
-          let jobIdFilterStr = '';
-          each(jobIds, (jobId, i) => {
-            if (i > 0) {
-              jobIdFilterStr += ' OR ';
-            }
-            jobIdFilterStr += 'job_id:';
-            jobIdFilterStr += jobId;
-          });
-          boolCriteria.push({
-            query_string: {
-              analyze_wildcard: false,
-              query: jobIdFilterStr,
-            },
-          });
-        }
-
-        if (influencersFilterQuery !== undefined) {
-          boolCriteria.push(influencersFilterQuery);
-        }
-
-        // Add a nested query to filter for each of the specified influencers.
-        if (influencers.length > 0) {
-          boolCriteria.push({
-            bool: {
-              should: influencers.map((influencer) => {
-                return {
-                  nested: {
-                    path: 'influencers',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            match: {
-                              'influencers.influencer_field_name': influencer.fieldName,
-                            },
-                          },
-                          {
-                            match: {
-                              'influencers.influencer_field_values': influencer.fieldValue,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                };
-              }),
-              minimum_should_match: 1,
-            },
-          });
-        }
-
-        mlApiServices.results
-          .anomalySearch(
-            {
-              size: maxResults !== undefined ? maxResults : 100,
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        query_string: {
-                          query: 'result_type:record',
-                          analyze_wildcard: false,
-                        },
-                      },
-                      {
-                        bool: {
-                          must: boolCriteria,
-                        },
-                      },
-                    ],
-                  },
-                },
-                sort: [{ record_score: { order: 'desc' } }],
-              },
-            },
-            jobIds
-          )
-          .then((resp) => {
-            if (resp.hits.total.value > 0) {
-              each(resp.hits.hits, (hit) => {
-                obj.records.push(hit._source);
-              });
-            }
-            resolve(obj);
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      });
-    },
-
     // Queries Elasticsearch to obtain the record level results for the specified job and detector,
     // time range, record score threshold, and whether to only return results containing influencers.
     // An additional, optional influencer field name and value may also be provided.
@@ -1038,14 +906,6 @@ export function resultsServiceProvider(mlApiServices) {
       });
     },
 
-    // Queries Elasticsearch to obtain all the record level results for the specified job(s), time range,
-    // and record score threshold.
-    // Pass an empty array or ['*'] to search over all job IDs.
-    // Returned response contains a records property, which is an array of the matching results.
-    getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) {
-      return this.getRecordsForInfluencer(jobIds, [], threshold, earliestMs, latestMs, maxResults);
-    },
-
     // Queries Elasticsearch to obtain event rate data i.e. the count
     // of documents over time.
     // index can be a String, or String[], of index names to search.
@@ -1059,6 +919,7 @@ export function resultsServiceProvider(mlApiServices) {
       earliestMs,
       latestMs,
       intervalMs,
+      runtimeMappings,
       indicesOptions
     ) {
       return new Promise((resolve, reject) => {
@@ -1109,6 +970,12 @@ export function resultsServiceProvider(mlApiServices) {
                   },
                 },
               },
+              // Runtime fields only needed to support when query includes a runtime field
+              // even though the default timeField can be a search time runtime field
+              // because currently Kibana doesn't support that
+              ...(isPopulatedObject(runtimeMappings) && query
+                ? { runtime_mappings: runtimeMappings }
+                : {}),
             },
             ...(indicesOptions ?? {}),
           })
@@ -1232,7 +1099,11 @@ export function resultsServiceProvider(mlApiServices) {
           },
         };
 
-        if (metricFieldName !== undefined && metricFieldName !== '') {
+        if (
+          metricFieldName !== undefined &&
+          metricFieldName !== '' &&
+          typeof metricFunction === 'string'
+        ) {
           body.aggs.sample.aggs.byTime.aggs.entities.aggs = {};
 
           const metricAgg = {

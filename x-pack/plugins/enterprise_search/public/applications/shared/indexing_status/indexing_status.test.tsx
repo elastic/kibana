@@ -27,7 +27,7 @@ describe('IndexingStatus', () => {
   const props = {
     percentageComplete: 50,
     numDocumentsWithErrors: 1,
-    activeReindexJobId: 12,
+    activeReindexJobId: '12abc',
     viewLinkPath: '/path',
     statusPath: '/other_path',
     itemId: '1',

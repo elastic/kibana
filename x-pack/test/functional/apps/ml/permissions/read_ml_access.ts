@@ -137,10 +137,11 @@ export default function ({ getService }: FtrProviderContext) {
           description: 'Test calendar',
         });
         await ml.api.createCalendarEvents(calendarId, [
+          // @ts-expect-error not full interface
           {
             description: eventDescription,
-            start_time: 1513641600000,
-            end_time: 1513728000000,
+            start_time: '1513641600000',
+            end_time: '1513728000000',
           },
         ]);
 
@@ -299,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should display enabled DFA job view and action menu'
             );
             await ml.dataFrameAnalyticsTable.assertJobRowViewButtonEnabled(dfaJobId, true);
-            await ml.dataFrameAnalyticsTable.assertJowRowActionsMenuButtonEnabled(dfaJobId, true);
+            await ml.dataFrameAnalyticsTable.assertJobRowActionsMenuButtonEnabled(dfaJobId, true);
             await ml.dataFrameAnalyticsTable.assertJobActionViewButtonEnabled(dfaJobId, true);
 
             await ml.testExecution.logTestStep(

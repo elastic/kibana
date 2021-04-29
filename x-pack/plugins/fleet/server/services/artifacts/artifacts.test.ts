@@ -9,6 +9,8 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
+import type { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
@@ -30,6 +32,7 @@ import {
 } from './artifacts';
 
 import type { NewArtifact } from './types';
+import { newArtifactToElasticsearchProperties } from './mappings';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
@@ -84,9 +87,9 @@ describe('When using the artifacts services', () => {
 
       expect(esClientMock.create).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
-        id: expect.any(String),
+        id: `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`,
         body: {
-          ...newArtifact,
+          ...newArtifactToElasticsearchProperties(newArtifact),
           created: expect.any(String),
         },
         refresh: 'wait_for',
@@ -97,6 +100,14 @@ describe('When using the artifacts services', () => {
         id: expect.any(String),
         created: expect.any(String),
       });
+    });
+
+    it('should ignore 409 errors from elasticsearch', async () => {
+      const error = new ResponseError({ statusCode: 409 } as ApiResponse);
+      // Unclear why `mockRejectedValue()` has the params value type set to `never`
+      // @ts-expect-error
+      esClientMock.create.mockRejectedValue(error);
+      await expect(() => createArtifact(esClientMock, newArtifact)).not.toThrow();
     });
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
@@ -141,6 +152,7 @@ describe('When using the artifacts services', () => {
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         sort: 'created:asc',
+        ignore_unavailable: true,
         q: '',
         from: 0,
         size: 20,
@@ -173,6 +185,7 @@ describe('When using the artifacts services', () => {
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         sort: 'identifier:desc',
         q: 'packageName:endpoint',
+        ignore_unavailable: true,
         from: 450,
         size: 50,
       });

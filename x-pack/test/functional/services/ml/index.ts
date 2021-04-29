@@ -45,6 +45,9 @@ import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 import { MachineLearningAlertingProvider } from './alerting';
+import { SwimLaneProvider } from './swim_lane';
+import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
+import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -55,6 +58,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
+
+  const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
+  const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
+    context,
+    commonUI,
+    dashboardJobSelectionTable
+  );
+
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
@@ -96,6 +107,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const swimLane = SwimLaneProvider(context);
 
   return {
     anomaliesTable,
@@ -106,6 +118,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     commonConfig,
     commonUI,
     customUrls,
+    dashboardJobSelectionTable,
+    dashboardEmbeddables,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
@@ -134,6 +148,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    swimLane,
     testExecution,
     testResources,
   };

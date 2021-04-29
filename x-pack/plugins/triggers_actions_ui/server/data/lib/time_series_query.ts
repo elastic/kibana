@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { Logger, ElasticsearchClient } from 'kibana/server';
+import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -127,17 +128,17 @@ export async function timeSeriesQuery(
 
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
-  let esResult: SearchResponse<unknown>;
+  let esResult: estypes.SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
   // isn't as nice since it's a single long JSON line.
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = (await esClient.search<SearchResponse<unknown>>(esQuery, { ignore: [404] })).body;
+    esResult = (await esClient.search(esQuery, { ignore: [404] })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
-    logger.warn(`${logPrefix} error: ${err.message}`);
+    logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);
     return { results: [] };
   }
 
@@ -146,16 +147,16 @@ export async function timeSeriesQuery(
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 
-function getResultFromEs(
+export function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
-  esResult: SearchResponse<unknown>
+  esResult: estypes.SearchResponse<unknown>
 ): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
-  if (!isGroupAgg) {
-    const dateAgg = aggregations.dateAgg || {};
+  if (!isGroupAgg && aggregations.dateAgg) {
+    const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
@@ -164,6 +165,7 @@ function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   const result: TimeSeriesResult = {
     results: [],

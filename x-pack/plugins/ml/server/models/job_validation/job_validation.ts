@@ -13,7 +13,7 @@ import { getMessages, MessageId, JobValidationMessage } from '../../../common/co
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
-// @ts-expect-error
+// @ts-expect-error importing js file
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
@@ -64,7 +64,14 @@ export async function validateJob(
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field;
-        const timeRange = await fs.getTimeFieldRange(index, timeField, job.datafeed_config.query);
+        const timeRange = await fs.getTimeFieldRange(
+          index,
+          timeField,
+          job.datafeed_config.query,
+          job.datafeed_config.runtime_mappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          job.datafeed_config.indices_options
+        );
 
         duration = {
           start: timeRange.start.epoch,

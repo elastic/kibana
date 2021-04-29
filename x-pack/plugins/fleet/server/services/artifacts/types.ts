@@ -38,7 +38,18 @@ export interface Artifact extends NewArtifact {
 /**
  * The set of Properties in Artifact that are actually stored in the Artifact document defined by the schema
  */
-export type ArtifactElasticsearchProperties = Omit<Artifact, 'id'>;
+export type ArtifactElasticsearchProperties = Pick<
+  Artifact,
+  'identifier' | 'body' | 'created' | 'type' | 'relative_url'
+> & {
+  compression_algorithm: Artifact['compressionAlgorithm'];
+  encryption_algorithm: Artifact['encryptionAlgorithm'];
+  encoded_sha256: Artifact['encodedSha256'];
+  encoded_size: Artifact['encodedSize'];
+  decoded_sha256: Artifact['decodedSha256'];
+  decoded_size: Artifact['decodedSize'];
+  package_name: Artifact['packageName'];
+};
 
 export type ArtifactEncodedMetadata = Pick<
   Artifact,
@@ -66,9 +77,14 @@ export type ListArtifactsProps = Pick<ListWithKuery, 'perPage' | 'page' | 'kuery
  */
 export interface ArtifactsClientInterface {
   getArtifact(id: string): Promise<Artifact | undefined>;
+
   createArtifact(options: ArtifactsClientCreateOptions): Promise<Artifact>;
+
   deleteArtifact(id: string): Promise<void>;
-  listArtifacts(options?: ListWithKuery): Promise<ListResult<Artifact>>;
+
+  listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
+
   encodeContent(content: ArtifactsClientCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
+
   generateHash(content: string): string;
 }

@@ -9,10 +9,15 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 
 import type { Settings } from '../../types';
 
+import type { PackagePolicy } from '../../../common';
+
+import { migrateEndpointPackagePolicyToV7130 } from './security_solution';
+
 export const migrateSettingsToV7130: SavedObjectMigrationFn<
   Settings & {
     package_auto_upgrade: string;
     agent_auto_upgrade: string;
+    kibana_urls: string;
   },
   Settings
 > = (settingsDoc) => {
@@ -20,6 +25,27 @@ export const migrateSettingsToV7130: SavedObjectMigrationFn<
   delete settingsDoc.attributes.package_auto_upgrade;
   // @ts-expect-error
   delete settingsDoc.attributes.agent_auto_upgrade;
+  // @ts-expect-error
+  delete settingsDoc.attributes.kibana_urls;
+  // @ts-expect-error
+  delete settingsDoc.attributes.kibana_ca_sha256;
 
   return settingsDoc;
+};
+
+export const migratePackagePolicyToV7130: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+  packagePolicyDoc,
+  migrationContext
+) => {
+  let updatedPackagePolicyDoc = packagePolicyDoc;
+
+  // Endpoint specific migrations
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
+    updatedPackagePolicyDoc = migrateEndpointPackagePolicyToV7130(
+      packagePolicyDoc,
+      migrationContext
+    );
+  }
+
+  return updatedPackagePolicyDoc;
 };

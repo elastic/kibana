@@ -36,6 +36,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -44,12 +45,15 @@ import {
   SOURCE_CONFIG_LINK,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
+  SYNC_DIAGNOSTICS_TITLE,
+  SYNC_DIAGNOSTICS_DESCRIPTION,
+  SYNC_DIAGNOSTICS_BUTTON,
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -65,7 +69,6 @@ export const SourceSettings: React.FC = () => {
 
   useEffect(() => {
     getSourceConfigData(serviceType);
-    return resetSourceState;
   }, []);
 
   const {
@@ -81,6 +84,10 @@ export const SourceSettings: React.FC = () => {
   const showConfig = isOrganization && !isEmpty(configuredFields);
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
+
+  const diagnosticsPath = isOrganization
+    ? `/api/workplace_search/org/sources/${id}/download_diagnostics`
+    : `/api/workplace_search/account/sources/${id}/download_diagnostics`;
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -122,7 +129,7 @@ export const SourceSettings: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader title="Source settings" />
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>
@@ -167,6 +174,17 @@ export const SourceSettings: React.FC = () => {
           </EuiFormRow>
         </ContentSection>
       )}
+      <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
+        <EuiButton
+          target="_blank"
+          href={diagnosticsPath}
+          isLoading={buttonLoading}
+          data-test-subj="DownloadDiagnosticsButton"
+          download
+        >
+          {SYNC_DIAGNOSTICS_BUTTON}
+        </EuiButton>
+      </ContentSection>
       <ContentSection title={SOURCE_REMOVE_TITLE} description={SOURCE_REMOVE_DESCRIPTION}>
         <EuiButton
           isLoading={buttonLoading}

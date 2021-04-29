@@ -231,7 +231,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         rule_id: undefined,
         updated_at: undefined,
         updated_by: undefined,
-        enabled: rule.enabled,
+        enabled: false,
         immutable: undefined,
         last_success_at: undefined,
         last_success_message: undefined,

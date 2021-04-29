@@ -7,8 +7,7 @@
 
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerting/server';
 import {
@@ -23,7 +22,7 @@ export type LatestEntityLocation = GeoContainmentInstanceState;
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: SearchResponse<unknown> | undefined,
+  results: estypes.SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
 ): Map<string, LatestEntityLocation[]> {
@@ -164,7 +163,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     );
 
     // Start collecting data only on the first cycle
-    let currentIntervalResults: ApiResponse<SearchResponse<unknown>> | undefined;
+    let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
     if (!currIntervalStartTime) {
       log.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
@@ -177,6 +176,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     }
 
     const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
+      // @ts-expect-error body doesn't exist on currentIntervalResults
       currentIntervalResults?.body,
       params.dateField,
       params.geoField

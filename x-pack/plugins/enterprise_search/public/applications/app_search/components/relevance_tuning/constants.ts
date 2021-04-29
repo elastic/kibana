@@ -83,6 +83,7 @@ export const BOOST_TYPE_TO_ICON_MAP = {
 const EMPTY_VALUE_BOOST: ValueBoost = {
   type: BoostType.Value,
   factor: 1,
+  value: [''],
   newBoost: true,
   function: undefined,
   operation: undefined,

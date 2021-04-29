@@ -23,6 +23,7 @@ describe('fetchLogstashVersions', () => {
 
   it('fetch as expected', async () => {
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           index: {

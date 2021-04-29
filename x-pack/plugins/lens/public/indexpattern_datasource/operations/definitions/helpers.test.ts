@@ -31,7 +31,7 @@ describe('helpers', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
-          operationType: 'avg', // <= invalid
+          operationType: 'average', // <= invalid
           sourceField: 'timestamp',
         },
         createMockedIndexPattern()
@@ -46,7 +46,7 @@ describe('helpers', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'bytes',
         },
         createMockedIndexPattern()

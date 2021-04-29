@@ -9,7 +9,7 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { ApiScope, TextWithLinks } from '../types';
-import { getRelativePath } from './utils';
+import { getRelativePath, pathsOutsideScopes } from './utils';
 
 /**
  *
@@ -115,7 +115,7 @@ function getScopeFromPath(path: string, plugin: KibanaPlatformPlugin, log: Tooli
   } else if (path.startsWith(`${plugin.directory}/common/`)) {
     return ApiScope.COMMON;
   } else {
-    log.warning(`Unexpected path encountered ${path}`);
+    pathsOutsideScopes[path] = plugin.directory;
     return ApiScope.COMMON;
   }
 }

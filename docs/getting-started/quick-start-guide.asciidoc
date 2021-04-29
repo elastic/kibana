@@ -12,7 +12,7 @@ When you've finished, you'll know how to:
 [float]
 === Required privileges
 When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
-For more information, refer to {ref}/security-privileges.html[Security privileges].
+Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
 [float]
 [[set-up-on-cloud]]
@@ -141,3 +141,5 @@ For more information, refer to <<dashboard,Dashboard>>.
 If you are you ready to add your own data, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
 
 If you want to ingest your data, refer to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
+
+If you want to secure access to your data, refer to our guide on <<tutorial-secure-access-to-kibana, securing {kib}>>

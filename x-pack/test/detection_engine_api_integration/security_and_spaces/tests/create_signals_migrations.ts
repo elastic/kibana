@@ -99,6 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: migrationResults } = await es.search({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
+      // @ts-expect-error _source has unknown type
       const migratedSignal = migrationResults.hits.hits[0]._source.signal;
       expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
     });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CreateDocumentResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 
 import {
@@ -62,7 +61,7 @@ export const updateListItem = async ({
         ...elasticQuery,
       };
 
-      const { body: response } = await esClient.update<CreateDocumentResponse>({
+      const { body: response } = await esClient.update({
         ...decodeVersion(_version),
         body: {
           doc,

@@ -36,7 +36,20 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('case_connector', () => {
     let createdActionId = '';
 
-    it('should return 200 when creating a case action successfully', async () => {
+    it('should return 400 when creating a case action', async () => {
+      await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A case connector',
+          actionTypeId: '.case',
+          config: {},
+        })
+        .expect(400);
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should return 200 when creating a case action successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
@@ -70,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('create', () => {
+    describe.skip('create', () => {
       it('should respond with a 400 Bad Request when creating a case without title', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -500,7 +513,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('update', () => {
+    describe.skip('update', () => {
       it('should respond with a 400 Bad Request when updating a case without id', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -624,7 +637,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('addComment', () => {
+    describe.skip('addComment', () => {
       it('should respond with a 400 Bad Request when adding a comment to a case without caseId', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')

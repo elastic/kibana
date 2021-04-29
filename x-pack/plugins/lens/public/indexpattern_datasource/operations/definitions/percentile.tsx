@@ -51,6 +51,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     defaultMessage: 'Percentile',
   }),
   input: 'field',
+  filterable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -74,7 +75,10 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
   buildColumn: ({ field, previousColumn, indexPattern }) => {
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
+      previousColumn?.operationType === 'percentile' &&
+      previousColumn.params &&
+      'percentile' in previousColumn.params &&
+      previousColumn.params.percentile;
     const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
     return {
       label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
@@ -83,6 +87,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      filter: previousColumn?.filter,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -97,17 +102,16 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>('aggPercentiles', {
-      id: columnId,
-      enabled: true,
-      schema: 'metric',
-      field: column.sourceField,
-      percents: [column.params.percentile],
-    }).toAst();
-  },
-  getEsAggsSuffix: (column) => {
-    const value = column.params.percentile;
-    return `.${value}`;
+    return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
+      'aggSinglePercentile',
+      {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        field: column.sourceField,
+        percentile: column.params.percentile,
+      }
+    ).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),

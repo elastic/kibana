@@ -11,6 +11,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { CellValueElementProps } from '../cell_rendering';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
@@ -28,9 +30,9 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
-import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { RowRenderer } from './renderers/row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
@@ -44,6 +46,8 @@ interface OwnProps {
   isEventViewer?: boolean;
   sort: Sort[];
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
@@ -83,6 +87,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     onRuleChange,
     showCheckboxes,
     refetch,
+    renderCellValue,
+    rowRenderers,
     sort,
     tabType,
     totalPages,
@@ -141,7 +147,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (!excludedRowRendererIds) return rowRenderers;
 
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds]);
+    }, [excludedRowRendererIds, rowRenderers]);
 
     const actionsColumnWidth = useMemo(
       () =>
@@ -157,7 +163,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const columnWidths = useMemo(
       () =>
-        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
+        columnHeaders.reduce(
+          (totalWidth, header) => totalWidth + (header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH),
+          actionsColumnWidth
+        ),
       [actionsColumnWidth, columnHeaders]
     );
 
@@ -209,7 +218,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
               id={id}
@@ -219,6 +227,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRowSelected={onRowSelected}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
+              renderCellValue={renderCellValue}
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
@@ -244,6 +253,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.renderCellValue === nextProps.renderCellValue &&
+    prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.tabType === nextProps.tabType
 );

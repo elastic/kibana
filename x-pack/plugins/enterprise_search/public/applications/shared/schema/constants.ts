@@ -35,13 +35,6 @@ export const FIELD_NAME_MODAL_DESCRIPTION = i18n.translate(
   }
 );
 
-export const FIELD_NAME_MODAL_CANCEL = i18n.translate(
-  'xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.cancel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
 export const FIELD_NAME_MODAL_ADD_FIELD = i18n.translate(
   'xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.addField',
   {

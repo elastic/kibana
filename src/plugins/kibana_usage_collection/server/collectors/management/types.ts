@@ -18,6 +18,7 @@ export interface UsageStats {
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
+  'banners:textContent': string;
   /**
    * non-sensitive settings
    */
@@ -27,9 +28,11 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
+  'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -112,4 +115,9 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
+  'banners:placement': string;
+  'banners:textColor': string;
+  'banners:backgroundColor': string;
+  'labs:canvas:enable_ui': boolean;
+  'labs:presentation:timeToPresent': boolean;
 }

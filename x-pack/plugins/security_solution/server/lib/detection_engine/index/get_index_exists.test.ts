@@ -21,6 +21,7 @@ describe('get_index_exists', () => {
   test('it should return a true if you have _shards', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockReturnValue(
+      // @ts-expect-error not full interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     const indexExists = await getIndexExists(esClient, 'some-index');
@@ -30,6 +31,7 @@ describe('get_index_exists', () => {
   test('it should return a false if you do NOT have _shards', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockReturnValue(
+      // @ts-expect-error not full interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
     );
     const indexExists = await getIndexExists(esClient, 'some-index');

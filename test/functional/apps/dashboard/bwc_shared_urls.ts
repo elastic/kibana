@@ -81,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(0);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
       });
     });
 
@@ -96,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
@@ -115,6 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 

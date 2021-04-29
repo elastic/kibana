@@ -26,8 +26,6 @@ const defaultProps = {
   scalingType: SCALING_TYPES.LIMIT,
   supportsClustering: true,
   termFields: [],
-  topHitsSplitField: null,
-  topHitsSize: 1,
 };
 
 describe('scaling form', () => {
@@ -44,14 +42,6 @@ describe('scaling form', () => {
         supportsClustering={false}
         clusteringDisabledReason="Simulated clustering disabled"
       />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('should render top hits form when scaling type is TOP_HITS', async () => {
-    const component = shallow(
-      <ScalingForm {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />
     );
 
     expect(component).toMatchSnapshot();

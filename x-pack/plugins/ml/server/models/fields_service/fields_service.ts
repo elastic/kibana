@@ -14,6 +14,8 @@ import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { RuntimeMappings } from '../../../common/types/fields';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -183,6 +185,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -191,6 +194,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
@@ -212,6 +216,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     index: string[] | string,
     timeFieldName: string,
     query: any,
+    runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions
   ): Promise<{
     success: boolean;
@@ -239,15 +244,20 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
             },
           },
         },
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
       ...(indicesOptions ?? {}),
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
+      // @ts-expect-error incorrect search response type
       obj.start.epoch = aggregations.earliest.value;
+      // @ts-expect-error incorrect search response type
       obj.start.string = aggregations.earliest.value_as_string;
 
+      // @ts-expect-error incorrect search response type
       obj.end.epoch = aggregations.latest.value;
+      // @ts-expect-error incorrect search response type
       obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
@@ -397,6 +407,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -405,6 +416,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });

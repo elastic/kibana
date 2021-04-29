@@ -29,13 +29,7 @@ import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  getServices,
-  IndexPattern,
-  ISearchSource,
-} from '../../kibana_services';
+import { getServices, IndexPattern, ISearchSource } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import {
@@ -168,7 +162,7 @@ export class SearchEmbeddable
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(
-      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+      this.services.uiSettings.get('doc_table:legacy') ? searchTemplate : searchTemplateGrid
     )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
@@ -225,6 +219,8 @@ export class SearchEmbeddable
     searchScope.setSortOrder = (sort) => {
       this.updateInput({ sort });
     };
+
+    searchScope.isLoading = true;
 
     const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     searchScope.useNewFieldsApi = useNewFieldsApi;
@@ -321,41 +317,43 @@ export class SearchEmbeddable
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
-    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-      defaultMessage: 'Data',
-    });
-    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-    });
 
-    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
-      description,
-      searchSessionId,
-    });
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
-      inspectorRequest.json(body);
+    this.searchScope.$apply(() => {
+      this.searchScope!.isLoading = true;
     });
     this.updateOutput({ loading: true, error: undefined });
 
     try {
       // Make the request
-      const resp = await searchSource.fetch({
-        abortSignal: this.abortController.signal,
-        sessionId: searchSessionId,
-      });
+      const { rawResponse: resp } = await searchSource
+        .fetch$({
+          abortSignal: this.abortController.signal,
+          sessionId: searchSessionId,
+          inspector: {
+            adapter: this.inspectorAdapters.requests,
+            title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+              defaultMessage: 'Data',
+            }),
+            description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the search.',
+            }),
+          },
+        })
+        .toPromise();
       this.updateOutput({ loading: false, error: undefined });
-
-      // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
-        this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.totalHitCount = resp.hits.total as number;
+        this.searchScope!.isLoading = false;
       });
     } catch (error) {
       this.updateOutput({ loading: false, error });
+      this.searchScope.$apply(() => {
+        this.searchScope!.isLoading = false;
+      });
     }
   };
 

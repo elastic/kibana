@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../../../typings/elasticsearch';
+import { SearchHit } from '../../../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
@@ -75,9 +75,7 @@ export async function searchConfigurations({
       params
     );
 
-    const hit = resp.hits.hits[0] as
-      | ESSearchHit<AgentConfiguration>
-      | undefined;
+    const hit = resp.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;
 
     if (!hit) {
       return;

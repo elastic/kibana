@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { extractIndexPatterns } from '../../../common/extract_index_patterns';
-import { PanelSchema } from '../../../common/types';
-import {
-  VisTypeTimeseriesRequest,
-  VisTypeTimeseriesRequestHandlerContext,
-  VisTypeTimeseriesVisDataRequest,
-} from '../../types';
+import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
+import { FetchedIndexPattern } from '../../../common/types';
+
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];
 
@@ -27,13 +23,13 @@ export class SearchStrategyRegistry {
   async getViableStrategy(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string
+    fetchedIndexPattern: FetchedIndexPattern
   ) {
     for (const searchStrategy of this.strategies) {
       const { isViable, capabilities } = await searchStrategy.checkForViability(
         requestContext,
         req,
-        indexPattern
+        fetchedIndexPattern
       );
 
       if (isViable) {
@@ -43,15 +39,5 @@ export class SearchStrategyRegistry {
         };
       }
     }
-  }
-
-  async getViableStrategyForPanel(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesVisDataRequest,
-    panel: PanelSchema
-  ) {
-    const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern).join(',');
-
-    return this.getViableStrategy(requestContext, req, indexPattern);
   }
 }

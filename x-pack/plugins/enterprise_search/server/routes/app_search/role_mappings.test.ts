@@ -128,12 +128,7 @@ describe('role mappings routes', () => {
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = {
-          body: {
-            ...roleMappingBaseSchema,
-            id: '123',
-          },
-        };
+        const request = { body: roleMappingBaseSchema };
         mockRouter.shouldValidate(request);
       });
 

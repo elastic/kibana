@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import {
   sampleDocSearchResultsNoSortId,
   mockLogger,
@@ -12,7 +12,6 @@ import {
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { ShardError } from '../../types';
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -35,7 +34,7 @@ describe('singleSearchAfter', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchResult } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -45,7 +44,6 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -54,7 +52,7 @@ describe('singleSearchAfter', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -64,12 +62,11 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([]);
   });
   test('if singleSearchAfter will return an error array', async () => {
-    const errors: ShardError[] = [
+    const errors: estypes.ShardFailure[] = [
       {
         shard: 1,
         index: 'index-123',
@@ -105,7 +102,7 @@ describe('singleSearchAfter', () => {
       })
     );
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -115,21 +112,20 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
     ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortIds = ['1234567891111'];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsWithSortId()
       )
     );
     const { searchResult } = await singleSearchAfter({
-      searchAfterSortId,
+      searchAfterSortIds,
       index: [],
       from: 'now-360s',
       to: 'now',
@@ -139,18 +135,17 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
   test('if singleSearchAfter throws error', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortIds = ['1234567891111'];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
     await expect(
       singleSearchAfter({
-        searchAfterSortId,
+        searchAfterSortIds,
         index: [],
         from: 'now-360s',
         to: 'now',
@@ -160,7 +155,6 @@ describe('singleSearchAfter', () => {
         filter: undefined,
         timestampOverride: undefined,
         buildRuleMessage,
-        excludeDocsWithTimestampOverride: false,
       })
     ).rejects.toThrow('Fake Error');
   });

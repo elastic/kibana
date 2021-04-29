@@ -27,7 +27,7 @@ import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
-  filters: PartialFilter[] | undefined;
+  filters: unknown | undefined;
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;

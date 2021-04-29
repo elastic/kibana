@@ -26,16 +26,11 @@ export type {
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
 } from './authentication';
-export {
-  LegacyAuditLogger,
-  AuditLogger,
-  AuditEvent,
-  EventCategory,
-  EventType,
-  EventOutcome,
-} from './audit';
+export type { CheckPrivilegesPayload } from './authorization';
+export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
+export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -28,7 +29,7 @@ describe('fetchClusters', () => {
             },
           ],
         },
-      })
+      } as estypes.SearchResponse)
     );
     const index = '.monitoring-es-*';
     const result = await fetchClusters(esClient, index);
@@ -57,7 +58,7 @@ describe('fetchClusters', () => {
             },
           ],
         },
-      })
+      } as estypes.SearchResponse)
     );
     const index = '.monitoring-es-*';
     const result = await fetchClusters(esClient, index);

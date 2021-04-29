@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 import { Loading } from '../../../../shared/loading';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -42,12 +43,6 @@ const HEADER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerDescription',
   {
     defaultMessage: 'Calibrate relative document importance across group content sources.',
-  }
-);
-const HEADER_ACTION_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerActionText',
-  {
-    defaultMessage: 'Save',
   }
 );
 const ZERO_STATE_TITLE = i18n.translate(
@@ -96,7 +91,7 @@ export const GroupSourcePrioritization: React.FC = () => {
       fill
       onClick={saveGroupSourcePrioritization}
     >
-      {HEADER_ACTION_TEXT}
+      {SAVE_BUTTON_LABEL}
     </EuiButton>
   );
   const handleSliderChange = (

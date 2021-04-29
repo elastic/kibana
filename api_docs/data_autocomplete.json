@@ -324,7 +324,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
-          "lineNumber": 93
+          "lineNumber": 96
         },
         "signature": [
           "{ getQuerySuggestions: QuerySuggestionGetFn; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ValueSuggestionsGetFn; }"

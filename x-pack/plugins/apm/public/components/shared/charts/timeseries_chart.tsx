@@ -6,7 +6,7 @@
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   AreaSeries,
   Axis,
   Chart,
@@ -28,7 +28,11 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
+import {
+  Coordinate,
+  RectCoordinate,
+  TimeSeries,
+} from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
@@ -37,13 +41,15 @@ import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
+import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
+import { getAlertAnnotations } from './helper/get_alert_annotations';
 
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
   height?: number;
   onToggleLegend?: LegendItemListener;
-  timeseries: TimeSeries[];
+  timeseries: Array<TimeSeries<Coordinate>>;
   /**
    * Formatter for y-axis tick values
    */
@@ -58,8 +64,8 @@ interface Props {
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
   customTheme?: Record<string, unknown>;
+  alerts?: APMServiceAlert[];
 }
-
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -72,6 +78,7 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  alerts,
 }: Props) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
@@ -85,12 +92,10 @@ export function TimeseriesChart({
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-
   const isEmpty = isTimeseriesEmpty(timeseries);
-
   const annotationColor = theme.eui.euiColorSecondary;
-
   const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
+  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
@@ -111,7 +116,7 @@ export function TimeseriesChart({
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          xDomain={{ min, max }}
+          xDomain={xDomain}
           onLegendItemClick={(legend) => {
             if (onToggleLegend) {
               onToggleLegend(legend);
@@ -137,7 +142,7 @@ export function TimeseriesChart({
         {showAnnotations && (
           <LineAnnotation
             id="annotations"
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={annotations.map((annotation) => ({
               dataValue: annotation['@timestamp'],
               header: asAbsoluteDateTime(annotation['@timestamp']),
@@ -191,6 +196,10 @@ export function TimeseriesChart({
             style={{ fill: anomalyTimeseries.scores.color }}
           />
         )}
+        {getAlertAnnotations({
+          alerts,
+          theme,
+        })}
       </Chart>
     </ChartContainer>
   );

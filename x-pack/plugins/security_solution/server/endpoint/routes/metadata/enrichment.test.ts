@@ -54,7 +54,7 @@ describe('test document enrichment', () => {
       });
     });
 
-    it('should return host online for online agent', async () => {
+    it('should return host healthy for online agent', async () => {
       statusFn.mockImplementation(() => 'online');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -62,7 +62,7 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.ONLINE);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.HEALTHY);
     });
 
     it('should return host offline for offline agent', async () => {
@@ -76,7 +76,7 @@ describe('test document enrichment', () => {
       expect(enrichedHostList.host_status).toEqual(HostStatus.OFFLINE);
     });
 
-    it('should return host unenrolling for unenrolling agent', async () => {
+    it('should return host updating for unenrolling agent', async () => {
       statusFn.mockImplementation(() => 'unenrolling');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -84,10 +84,10 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.UNENROLLING);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.UPDATING);
     });
 
-    it('should return host error for degraded agent', async () => {
+    it('should return host unhealthy for degraded agent', async () => {
       statusFn.mockImplementation(() => 'degraded');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -95,10 +95,10 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.ERROR);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
-    it('should return host error for erroring agent', async () => {
+    it('should return host unhealthy for erroring agent', async () => {
       statusFn.mockImplementation(() => 'error');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -106,10 +106,10 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.ERROR);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
-    it('should return host error for warning agent', async () => {
+    it('should return host unhealthy for warning agent', async () => {
       statusFn.mockImplementation(() => 'warning');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -117,10 +117,10 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.ERROR);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
-    it('should return host error for invalid agent', async () => {
+    it('should return host unhealthy for invalid agent', async () => {
       statusFn.mockImplementation(() => 'asliduasofb');
 
       const enrichedHostList = await enrichHostMetadata(
@@ -128,7 +128,7 @@ describe('test document enrichment', () => {
         metaReqCtx,
         MetadataQueryStrategyVersions.VERSION_2
       );
-      expect(enrichedHostList.host_status).toEqual(HostStatus.ERROR);
+      expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
   });
 

@@ -12,7 +12,7 @@ import React from 'react';
 
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
-import { runActionColumnTests } from './shared_columns_tests';
+import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
 import { RecentQueriesTable } from './';
 

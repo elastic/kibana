@@ -12,10 +12,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-
 import { LoadingState, EmptyState } from './components';
-import { EnginesTable } from './engines_table';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
 import { EnginesOverview } from './';
 
@@ -41,6 +40,11 @@ describe('EnginesOverview', () => {
     },
     metaEnginesLoading: false,
     hasPlatinumLicense: false,
+    // AppLogic
+    myRole: { canManageEngines: false },
+    // MetaEnginesTableLogic
+    expandedSourceEngines: {},
+    conflictingEnginesSets: {},
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -90,61 +94,52 @@ describe('EnginesOverview', () => {
       setMockValues(valuesWithEngines);
     });
 
-    it('renders and calls the engines API', async () => {
+    it('renders and calls the engines API', () => {
       const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
       expect(actions.loadEngines).toHaveBeenCalled();
     });
 
-    it('renders a create engine button which takes users to the create engine page', () => {
-      const wrapper = shallow(<EnginesOverview />);
+    describe('when the user can manage/create engines', () => {
+      it('renders a create engine button which takes users to the create engine page', () => {
+        setMockValues({
+          ...valuesWithEngines,
+          myRole: { canManageEngines: true },
+        });
+        const wrapper = shallow(<EnginesOverview />);
 
-      expect(
-        wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
-      ).toEqual('/engine_creation');
+        expect(
+          wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
+        ).toEqual('/engine_creation');
+      });
     });
 
-    describe('when user has a platinum license', () => {
-      let wrapper: ShallowWrapper;
-
-      beforeEach(() => {
+    describe('when the account has a platinum license', () => {
+      it('renders a 2nd meta engines table & makes a 2nd meta engines call', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
         });
-        wrapper = shallow(<EnginesOverview />);
-      });
+        const wrapper = shallow(<EnginesOverview />);
 
-      it('renders a 2nd meta engines table ', async () => {
-        expect(wrapper.find(EnginesTable)).toHaveLength(2);
-      });
-
-      it('makes a 2nd meta engines call', () => {
+        expect(wrapper.find(MetaEnginesTable)).toHaveLength(1);
         expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
 
-      it('renders a create engine button which takes users to the create meta engine page', () => {
-        expect(
-          wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
-        ).toEqual('/meta_engine_creation');
-      });
+      describe('when the user can manage/create engines', () => {
+        it('renders a create engine button which takes users to the create meta engine page', () => {
+          setMockValues({
+            ...valuesWithEngines,
+            hasPlatinumLicense: true,
+            myRole: { canManageEngines: true },
+          });
+          const wrapper = shallow(<EnginesOverview />);
 
-      it('contains an EuiEmptyPrompt that takes users to the create meta when metaEngines is empty', () => {
-        setMockValues({
-          ...valuesWithEngines,
-          hasPlatinumLicense: true,
-          metaEngines: [],
+          expect(
+            wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
+          ).toEqual('/meta_engine_creation');
         });
-        wrapper = shallow(<EnginesOverview />);
-        const metaEnginesTable = wrapper.find(EnginesTable).last().dive();
-        const emptyPrompt = metaEnginesTable.dive().find(EuiEmptyPrompt).dive();
-
-        expect(
-          emptyPrompt
-            .find('[data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"]')
-            .prop('to')
-        ).toEqual('/meta_engine_creation');
       });
     });
 
@@ -152,7 +147,7 @@ describe('EnginesOverview', () => {
       const getTablePagination = (wrapper: ShallowWrapper) =>
         wrapper.find(EnginesTable).prop('pagination');
 
-      it('passes down page data from the API', async () => {
+      it('passes down page data from the API', () => {
         const wrapper = shallow(<EnginesOverview />);
         const pagination = getTablePagination(wrapper);
 
@@ -160,7 +155,7 @@ describe('EnginesOverview', () => {
         expect(pagination.pageIndex).toEqual(0);
       });
 
-      it('re-polls the API on page change', async () => {
+      it('re-polls the API on page change', () => {
         const wrapper = shallow(<EnginesOverview />);
 
         setMockValues({
@@ -178,7 +173,7 @@ describe('EnginesOverview', () => {
         expect(getTablePagination(wrapper).pageIndex).toEqual(50);
       });
 
-      it('calls onPagination handlers', async () => {
+      it('calls onPagination handlers', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
@@ -187,10 +182,10 @@ describe('EnginesOverview', () => {
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };
 
-        wrapper.find(EnginesTable).first().simulate('change', pageEvent);
+        wrapper.find(EnginesTable).simulate('change', pageEvent);
         expect(actions.onEnginesPagination).toHaveBeenCalledWith(1);
 
-        wrapper.find(EnginesTable).last().simulate('change', pageEvent);
+        wrapper.find(MetaEnginesTable).simulate('change', pageEvent);
         expect(actions.onMetaEnginesPagination).toHaveBeenCalledWith(1);
       });
     });

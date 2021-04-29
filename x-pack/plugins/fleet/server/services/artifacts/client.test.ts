@@ -25,7 +25,7 @@ describe('When using the Fleet Artifacts Client', () => {
     const singleHit = generateArtifactEsGetSingleHitMock();
 
     if (withInvalidArtifact) {
-      singleHit._source.packageName = 'not endpoint';
+      singleHit._source.package_name = 'not endpoint';
     }
 
     esClientMock.get.mockImplementation(() => {
@@ -129,7 +129,7 @@ describe('When using the Fleet Artifacts Client', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          q: '(packageName: "endpoint") AND identifier: one',
+          q: '(package_name: "endpoint") AND identifier: one',
         })
       );
     });
@@ -143,7 +143,7 @@ describe('When using the Fleet Artifacts Client', () => {
       });
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          q: '(packageName: "endpoint")',
+          q: '(package_name: "endpoint")',
         })
       );
     });

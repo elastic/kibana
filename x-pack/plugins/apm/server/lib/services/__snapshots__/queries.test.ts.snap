@@ -131,9 +131,11 @@ Array [
                 },
                 "sample": Object {
                   "top_metrics": Object {
-                    "metrics": Object {
-                      "field": "agent.name",
-                    },
+                    "metrics": Array [
+                      Object {
+                        "field": "agent.name",
+                      },
+                    ],
                     "sort": Object {
                       "@timestamp": "desc",
                     },
@@ -213,9 +215,11 @@ Array [
             },
             "latest": Object {
               "top_metrics": Object {
-                "metrics": Object {
-                  "field": "agent.name",
-                },
+                "metrics": Array [
+                  Object {
+                    "field": "agent.name",
+                  },
+                ],
                 "sort": Object {
                   "@timestamp": "desc",
                 },

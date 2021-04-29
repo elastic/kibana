@@ -30,7 +30,6 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
   description,
   action,
   headerChildren,
-  headerSpacer,
   testSubj,
 }) => (
   <div className={className} data-test-subj={testSubj}>
@@ -38,10 +37,9 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
       <>
         <ViewContentHeader title={title} titleSize="s" description={description} action={action} />
         {headerChildren}
-        {headerSpacer && <EuiSpacer size={headerSpacer} />}
       </>
     )}
     {children}
-    <EuiSpacer size={'xxl'} />
+    <EuiSpacer />
   </div>
 );

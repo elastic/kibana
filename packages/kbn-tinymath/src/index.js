@@ -7,7 +7,8 @@
  */
 
 const { get } = require('lodash');
-const { parse: parseFn } = require('./grammar');
+// eslint-disable-next-line import/no-unresolved
+const { parse: parseFn } = require('../grammar');
 const { functions: includedFunctions } = require('./functions');
 
 module.exports = { parse, evaluate, interpret };

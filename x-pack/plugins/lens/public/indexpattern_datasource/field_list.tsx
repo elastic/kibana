@@ -45,6 +45,7 @@ export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
+  existenceFetchTimeout,
   fieldProps,
   hasSyncedExistingFields,
   filter,
@@ -53,12 +54,14 @@ export const FieldList = React.memo(function FieldList({
   dropOntoWorkspace,
   hasSuggestionForField,
   editField,
+  removeField,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
   fieldProps: FieldItemSharedProps;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
   filter: {
     nameFilter: string;
     typeFilter: string[];
@@ -68,6 +71,7 @@ export const FieldList = React.memo(function FieldList({
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   editField?: (name: string) => void;
+  removeField?: (name: string) => void;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -144,6 +148,7 @@ export const FieldList = React.memo(function FieldList({
                   exists={exists(field)}
                   field={field}
                   editField={editField}
+                  removeField={removeField}
                   hideDetails={true}
                   key={field.name}
                   itemIndex={index}
@@ -169,6 +174,7 @@ export const FieldList = React.memo(function FieldList({
                 helpTooltip={fieldGroup.helpText}
                 exists={exists}
                 editField={editField}
+                removeField={removeField}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}
@@ -190,6 +196,7 @@ export const FieldList = React.memo(function FieldList({
                   );
                 }}
                 showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchTimeout={existenceFetchTimeout}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}

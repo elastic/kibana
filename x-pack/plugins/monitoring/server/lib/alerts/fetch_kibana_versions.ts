@@ -70,7 +70,7 @@ export async function fetchKibanaVersions(
                     field: 'kibana_stats.kibana.version',
                     size: 1,
                     order: {
-                      latest_report: 'desc',
+                      latest_report: 'desc' as const,
                     },
                   },
                   aggs: {

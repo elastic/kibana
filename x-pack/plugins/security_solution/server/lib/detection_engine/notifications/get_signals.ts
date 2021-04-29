@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SignalSearchResponse } from '../signals/types';
+import type { SignalSearchResponse, SignalSource } from '../signals/types';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsParams {
@@ -38,7 +38,7 @@ export const getSignals = async ({
     size,
   });
 
-  const { body: result } = await esClient.search<SignalSearchResponse>(query);
+  const { body: result } = await esClient.search<SignalSource>(query);
 
   return result;
 };

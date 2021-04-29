@@ -13,7 +13,7 @@ import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
-export interface AppValues {
+interface AppValues {
   ilmEnabled: boolean;
   configuredLimits: ConfiguredLimits;
   account: Account;

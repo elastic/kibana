@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
-      await es.cluster.put_settings({ body: disableCollection });
+      await es.cluster.putSettings({ body: disableCollection });
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
       const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {

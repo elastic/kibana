@@ -31,6 +31,7 @@ import { MetadataRequestContext } from './routes/metadata/handlers';
 // import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { LicenseService } from '../../common/license/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
+import { parseExperimentalConfigValue } from '../../common/experimental_features';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -42,6 +43,7 @@ export const createMockEndpointAppContext = (
     logFactory: loggingSystemMock.create(),
     config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
+    experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
   };
 };
 
@@ -54,6 +56,7 @@ export const createMockEndpointAppContextService = (
   return ({
     start: jest.fn(),
     stop: jest.fn(),
+    getExperimentalFeatures: jest.fn(),
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
@@ -84,6 +87,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 
@@ -106,6 +110,7 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },

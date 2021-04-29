@@ -55,6 +55,15 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('nbsp should be recognised as whitespace', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = fromKueryExpression('foo and\u00A0bar');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support "or" as a binary operator', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
@@ -315,6 +324,12 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should allow escaping of unicode sequences with a backslash', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('\\\\u00A0');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support double quoted strings that do not need escapes except for quotes', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       const actual = fromLiteralExpression('"\\():<>\\"*"');
@@ -324,6 +339,12 @@ describe('kuery AST API', () => {
     test('should support escaped backslashes inside quoted strings', () => {
       const expected = nodeTypes.literal.buildNode('\\');
       const actual = fromLiteralExpression('"\\\\"');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should support escaped unicode sequences inside quoted strings', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('"\\\\u00A0"');
       expect(actual).toEqual(expected);
     });
 

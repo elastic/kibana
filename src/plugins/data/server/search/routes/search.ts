@@ -10,7 +10,7 @@ import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '../../lib';
 import { reportServerError } from '../../../../kibana_utils/server';
-import type { DataPluginRouter } from '../../types';
+import type { DataPluginRouter } from '../types';
 
 export function registerSearchRoute(router: DataPluginRouter): void {
   router.post(

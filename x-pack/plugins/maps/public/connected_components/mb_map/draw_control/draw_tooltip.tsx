@@ -11,13 +11,12 @@ import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Map as MbMap } from 'mapbox-gl';
 import { DRAW_TYPE } from '../../../../common/constants';
-import { DrawState } from '../../../../common/descriptor_types';
 
 const noop = () => {};
 
 interface Props {
   mbMap: MbMap;
-  drawState: DrawState;
+  drawType: DRAW_TYPE;
 }
 
 interface State {
@@ -58,16 +57,16 @@ export class DrawTooltip extends Component<Props, State> {
     }
 
     let instructions;
-    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+    if (this.props.drawType === DRAW_TYPE.BOUNDS) {
       instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
         defaultMessage:
           'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
       });
-    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+    } else if (this.props.drawType === DRAW_TYPE.DISTANCE) {
       instructions = i18n.translate('xpack.maps.drawTooltip.distanceInstructions', {
         defaultMessage: 'Click to set point. Move mouse to adjust distance. Click to finish.',
       });
-    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+    } else if (this.props.drawType === DRAW_TYPE.POLYGON) {
       instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
         defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
       });

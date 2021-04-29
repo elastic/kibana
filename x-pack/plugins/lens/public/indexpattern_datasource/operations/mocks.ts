@@ -32,6 +32,7 @@ export const createMockedReferenceOperation = () => {
         references: args.referenceIds,
       };
     }),
+    filterable: true,
     isTransferable: jest.fn(),
     toExpression: jest.fn().mockReturnValue([]),
     getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),

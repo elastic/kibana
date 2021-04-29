@@ -45,6 +45,8 @@
 |  --- | --- |
 |  [AggFunctionsMapping](./kibana-plugin-plugins-data-server.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
+|  [AsyncSearchResponse](./kibana-plugin-plugins-data-server.asyncsearchresponse.md) |  |
+|  [AsyncSearchStatusResponse](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
@@ -109,5 +111,6 @@
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
+|  [SearchRequestHandlerContext](./kibana-plugin-plugins-data-server.searchrequesthandlercontext.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 

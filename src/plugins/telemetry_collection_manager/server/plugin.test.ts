@@ -9,7 +9,7 @@
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
-import { CollectionStrategyConfig, StatsGetterConfig } from './types';
+import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 function createCollectionStrategy(priority: number): jest.Mocked<CollectionStrategyConfig> {
@@ -87,6 +87,15 @@ describe('Telemetry Collection Manager', () => {
     });
 
     describe(`after start`, () => {
+      const basicStats: BasicStatsPayload = {
+        cluster_uuid: 'clusterUuid',
+        cluster_name: 'clusterName',
+        timestamp: new Date().toISOString(),
+        cluster_stats: {},
+        stack_stats: {},
+        version: 'version',
+      };
+
       beforeAll(() => {
         telemetryCollectionManager.start(coreMock.createStart());
       });
@@ -97,19 +106,59 @@ describe('Telemetry Collection Manager', () => {
       describe('unencrypted: false', () => {
         const config: StatsGetterConfig = { unencrypted: false };
 
-        test('getStats returns empty because clusterDetails returns empty, and the soClient is an instance of the TelemetrySavedObjectsClient', async () => {
-          collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
-          await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
-          expect(collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient).toBeInstanceOf(
-            TelemetrySavedObjectsClient
-          );
+        describe('getStats', () => {
+          test('returns empty because clusterDetails returns empty, and the soClient is an instance of the TelemetrySavedObjectsClient', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns encrypted payload', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([expect.any(String)]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
         });
-        test('getOptInStats returns empty', async () => {
-          collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
-          await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
-          expect(collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient).toBeInstanceOf(
-            TelemetrySavedObjectsClient
-          );
+
+        describe('getOptInStats', () => {
+          test('returns empty', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
+            await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns encrypted results for opt-in true', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([
+              expect.any(String),
+            ]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns encrypted results for opt-in false', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            await expect(setupApi.getOptInStats(false, config)).resolves.toStrictEqual([
+              expect.any(String),
+            ]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
         });
       });
       describe('unencrypted: true', () => {
@@ -118,19 +167,60 @@ describe('Telemetry Collection Manager', () => {
           request: httpServerMock.createKibanaRequest(),
         };
 
-        test('getStats returns empty because clusterDetails returns empty, and the soClient is not an instance of the TelemetrySavedObjectsClient', async () => {
-          collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
-          await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
-          expect(
-            collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-          ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+        describe('getStats', () => {
+          test('getStats returns empty because clusterDetails returns empty, and the soClient is not an instance of the TelemetrySavedObjectsClient', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+          test('returns encrypted payload (assumes opted-in when no explicitly opted-out)', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
+              { ...basicStats, collectionSource: 'test_collection' },
+            ]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
         });
-        test('getOptInStats returns empty', async () => {
-          collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
-          await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
-          expect(
-            collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-          ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+
+        describe('getOptInStats', () => {
+          test('returns empty', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
+            await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns results for opt-in true', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([
+              { cluster_uuid: 'clusterUuid', opt_in_status: true },
+            ]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns results for opt-in false', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            await expect(setupApi.getOptInStats(false, config)).resolves.toStrictEqual([
+              { cluster_uuid: 'clusterUuid', opt_in_status: false },
+            ]);
+            expect(
+              collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
+            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
         });
       });
     });

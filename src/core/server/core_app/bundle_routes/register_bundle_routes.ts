@@ -8,10 +8,10 @@
 
 import { join } from 'path';
 import { PackageInfo } from '@kbn/config';
+import { fromRoot } from '@kbn/utils';
 import { distDir as uiSharedDepsDistDir } from '@kbn/ui-shared-deps';
 import { IRouter } from '../../http';
 import { UiPlugins } from '../../plugins';
-import { fromRoot } from '../../utils';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
@@ -27,7 +27,7 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath, // serverBasePath
+  serverBasePath,
   uiPlugins,
   packageInfo,
 }: {
@@ -57,10 +57,10 @@ export function registerBundleRoutes({
     isDist,
   });
 
-  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir }]) => {
+  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/`,
+      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
+      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,

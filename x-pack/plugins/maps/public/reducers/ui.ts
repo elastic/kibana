@@ -11,8 +11,6 @@ import { getMapsCapabilities } from '../kibana_services';
 
 import {
   UPDATE_FLYOUT,
-  CLOSE_SET_VIEW,
-  OPEN_SET_VIEW,
   SET_IS_LAYER_TOC_OPEN,
   SET_FULL_SCREEN,
   SET_READ_ONLY,
@@ -33,7 +31,6 @@ export type MapUiState = {
   isFullScreen: boolean;
   isReadOnly: boolean;
   isLayerTOCOpen: boolean;
-  isSetViewOpen: boolean;
   openTOCDetails: string[];
 };
 
@@ -44,7 +41,6 @@ export const DEFAULT_MAP_UI_STATE = {
   isFullScreen: false,
   isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
-  isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
@@ -55,10 +51,6 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
-    case CLOSE_SET_VIEW:
-      return { ...state, isSetViewOpen: false };
-    case OPEN_SET_VIEW:
-      return { ...state, isSetViewOpen: true };
     case SET_IS_LAYER_TOC_OPEN:
       return { ...state, isLayerTOCOpen: action.isLayerTOCOpen };
     case SET_FULL_SCREEN:

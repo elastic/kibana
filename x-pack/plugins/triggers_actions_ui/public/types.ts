@@ -10,7 +10,13 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionType } from '../../actions/common';
+import {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+} from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
@@ -45,7 +51,13 @@ export {
   AlertNotifyWhenType,
   AlertTypeParams,
 };
-export { ActionType };
+export {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+};
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;

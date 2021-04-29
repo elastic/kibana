@@ -120,14 +120,14 @@ export async function fetchCpuUsageNodeStats(
                     usage_deriv: {
                       derivative: {
                         buckets_path: 'average_usage',
-                        gap_policy: 'skip',
+                        gap_policy: 'skip' as const,
                         unit: NORMALIZED_DERIVATIVE_UNIT,
                       },
                     },
                     periods_deriv: {
                       derivative: {
                         buckets_path: 'average_periods',
-                        gap_policy: 'skip',
+                        gap_policy: 'skip' as const,
                         unit: NORMALIZED_DERIVATIVE_UNIT,
                       },
                     },

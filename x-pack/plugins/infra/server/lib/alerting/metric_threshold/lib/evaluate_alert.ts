@@ -11,7 +11,7 @@ import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { InfraSource } from '../../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
@@ -127,6 +127,7 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
+        // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
         (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
@@ -147,7 +148,12 @@ const getMetric: (
       index,
     });
 
-    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
+    return {
+      [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
+        (result.aggregations! as unknown) as Aggregation,
+        aggType
+      ),
+    };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it

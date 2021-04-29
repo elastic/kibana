@@ -9,13 +9,13 @@ import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../
 import { contentSources } from '../../__mocks__/content_sources.mock';
 import { groups } from '../../__mocks__/groups.mock';
 import { users } from '../../__mocks__/users.mock';
+import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 import { GroupsLogic } from './groups_logic';
 
 // We need to mock out the debounced functionality

@@ -14,8 +14,13 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineTabs, TimelineType, TimelineId } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../../../common/hooks/use_selector');
 
@@ -28,6 +33,7 @@ jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action',
 });
 
 describe('EventColumnView', () => {
+  useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
 
   const props = {
@@ -56,6 +62,7 @@ describe('EventColumnView', () => {
     onRowSelected: jest.fn(),
     onUnPinEvent: jest.fn(),
     refetch: jest.fn(),
+    renderCellValue: DefaultCellRenderer,
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,

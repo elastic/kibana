@@ -14,6 +14,7 @@ export function MachineLearningNavigationProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -156,7 +157,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSingleMetricViewerViaAnomalyExplorer() {
-      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      // clicks the `Single Metric Viewer` icon on the button group to switch result views
       await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the single metric viewer page is visible
@@ -192,6 +193,26 @@ export function MachineLearningNavigationProvider({
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
+    },
+
+    /**
+     * Assert the active URL.
+     * @param expectedUrlPart - URL component excluding host
+     */
+    async assertCurrentURLContains(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to include ${expectedUrlPart}`
+      );
+    },
+
+    async assertCurrentURLNotContain(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.not.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
+      );
     },
   };
 }

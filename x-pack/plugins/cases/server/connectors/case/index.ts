@@ -8,12 +8,7 @@
 import { curry } from 'lodash';
 import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import {
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
-  CommentType,
-} from '../../../common/api';
+import { CasePatchRequest, CasePostRequest, CommentRequest, CommentType } from '../../../common';
 import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
@@ -27,6 +22,7 @@ import * as i18n from './translations';
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
 import { nullUser } from '../../common';
 import { createCaseError } from '../../common/error';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -70,6 +66,12 @@ async function executor(
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
+  if (!ENABLE_CASE_CONNECTOR) {
+    const msg = '[Action][Case] connector not supported';
+    logger.error(msg);
+    throw new Error(msg);
+  }
+
   const { actionId, params, services } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;

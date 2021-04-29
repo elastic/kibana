@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export enum OpenModal {
-  None,
-  ConfirmResetModal,
-  ConfirmSaveModal,
-}
+import { FieldValue } from '../result/types';
+
 export interface ServerFieldResultSetting {
   raw?:
     | {
@@ -34,4 +31,6 @@ export interface FieldResultSetting {
   snippetFallback: boolean;
 }
 
-export type FieldResultSettingObject = Record<string, FieldResultSetting>;
+export type FieldResultSettingObject = Record<string, FieldResultSetting | {}>;
+
+export type SampleSearchResponse = Record<string, FieldValue>;

@@ -12,6 +12,7 @@ import type {
   Logger,
   ILegacyCustomClusterClient,
   RequestHandlerContext,
+  ElasticsearchClient,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
@@ -92,7 +93,7 @@ export interface LegacyShimDependencies {
 export interface IBulkUploader {
   getKibanaStats: () => any;
   stop: () => void;
-  start: () => void;
+  start: (esClient: ElasticsearchClient) => void;
   handleNotEnabled: () => void;
 }
 
@@ -118,6 +119,7 @@ export interface LegacyRequest {
 }
 
 export interface LegacyServer {
+  log: Logger;
   route: (params: any) => void;
   config: () => {
     get: (key: string) => string | undefined;

@@ -24,6 +24,8 @@ import { toExpression, Ast } from '@kbn/interpreter/common';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import isEqual from 'fast-deep-equal';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { METRIC_TYPE } from '../../../../../../src/plugins/usage_collection/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -45,10 +47,13 @@ import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensTableRowContextMenuClickEvent,
+  LensBrushEvent,
+  LensFilterEvent,
+  LensTableRowContextMenuEvent,
 } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
-import { getEditPath, DOC_TYPE } from '../../../common';
+import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import type { ErrorMessage } from '../types';
@@ -63,6 +68,10 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  onBrushEnd?: (data: LensBrushEvent['data']) => void;
+  onLoad?: (isLoading: boolean) => void;
+  onFilter?: (data: LensFilterEvent['data']) => void;
+  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
 export type LensByValueInput = {
@@ -81,13 +90,14 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
-  editable: boolean;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
+  capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class Embeddable
@@ -103,6 +113,16 @@ export class Embeddable
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
+  private inputReloadSubscriptions: Subscription[];
+  private isDestroyed?: boolean;
+
+  private logError(type: 'runtime' | 'validation') {
+    this.deps.usageCollection?.reportUiCounter(
+      PLUGIN_ID,
+      METRIC_TYPE.COUNT,
+      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error'
+    );
+  }
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -120,7 +140,6 @@ export class Embeddable
       initialInput,
       {
         editApp: 'lens',
-        editable: deps.editable,
       },
       parent
     );
@@ -133,65 +152,79 @@ export class Embeddable
 
     const input$ = this.getInput$();
 
+    this.inputReloadSubscriptions = [];
+
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
-    input$
-      .pipe(
-        map((input) => input.enhancements?.dynamicActions),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.enhancements?.dynamicActions),
+          distinctUntilChanged((a, b) => isEqual(a, b)),
+          skip(1)
+        )
+        .subscribe((input) => {
+          this.reload();
+        })
+    );
 
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when dashboard view mode switches between "view/edit". This is
     // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
     // dashboard's mode is toggled.
-    input$
-      .pipe(
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.viewMode),
+          distinctUntilChanged(),
+          skip(1)
+        )
+        .subscribe((input) => {
+          // only reload if drilldowns are set
+          if (this.getInput().enhancements?.dynamicActions) {
+            this.reload();
+          }
+        })
+    );
 
     // Re-initialize the visualization if either the attributes or the saved object id changes
-    input$
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        await this.initializeSavedVis(input);
-        this.reload();
-      });
+
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          await this.initializeSavedVis(input);
+          this.reload();
+        })
+    );
 
     // Update search context and reload on changes related to search
-    this.getUpdated$()
-      .pipe(map(() => this.getInput()))
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            [a.filters, a.query, a.timeRange, a.searchSessionId],
-            [b.filters, b.query, b.timeRange, b.searchSessionId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        this.onContainerStateChanged(input);
-      });
+    this.inputReloadSubscriptions.push(
+      this.getUpdated$()
+        .pipe(map(() => this.getInput()))
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              [a.filters, a.query, a.timeRange, a.searchSessionId],
+              [b.filters, b.query, b.timeRange, b.searchSessionId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          this.onContainerStateChanged(input);
+        })
+    );
   }
 
   public supportedTriggers() {
@@ -222,7 +255,7 @@ export class Embeddable
       this.onFatalError(e);
       return false;
     });
-    if (!attributes) {
+    if (!attributes || this.isDestroyed) {
       return;
     }
     this.savedVis = {
@@ -233,6 +266,9 @@ export class Embeddable
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
     this.errors = errors;
     this.expression = ast ? toExpression(ast) : null;
+    if (errors) {
+      this.logError('validation');
+    }
     await this.initializeOutput();
     this.isInitialized = true;
   }
@@ -268,6 +304,10 @@ export class Embeddable
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
+    if (this.input.onLoad) {
+      // once onData$ is get's called from expression renderer, loading becomes false
+      this.input.onLoad(false);
+    }
   };
 
   /**
@@ -277,8 +317,11 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    if (!this.savedVis || !this.isInitialized) {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
+    }
+    if (this.input.onLoad) {
+      this.input.onLoad(true);
     }
     const input = this.getInput();
     render(
@@ -296,7 +339,10 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
-        canEdit={this.deps.editable && input.viewMode === 'edit'}
+        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+        onRuntimeError={() => {
+          this.logError('runtime');
+        }}
       />,
       domNode
     );
@@ -356,12 +402,19 @@ export class Embeddable
         data: event.data,
         embeddable: this,
       });
+
+      if (this.input.onBrushEnd) {
+        this.input.onBrushEnd(event.data);
+      }
     }
     if (isLensFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,
       });
+      if (this.input.onFilter) {
+        this.input.onFilter(event.data);
+      }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
@@ -372,11 +425,14 @@ export class Embeddable
         },
         true
       );
+      if (this.input.onTableRowClick) {
+        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+      }
     }
   };
 
   async reload() {
-    if (!this.savedVis || !this.isInitialized) {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     this.handleContainerStateChanged(this.input);
@@ -411,11 +467,19 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: this.savedVis.title,
+      editable: this.getIsEditable(),
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
+  }
+
+  private getIsEditable() {
+    return (
+      this.deps.capabilities.canSaveVisualizations ||
+      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
+    );
   }
 
   public inputIsRefType = (
@@ -445,6 +509,12 @@ export class Embeddable
 
   destroy() {
     super.destroy();
+    this.isDestroyed = true;
+    if (this.inputReloadSubscriptions.length > 0) {
+      this.inputReloadSubscriptions.forEach((reloadSub) => {
+        reloadSub.unsubscribe();
+      });
+    }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
     }

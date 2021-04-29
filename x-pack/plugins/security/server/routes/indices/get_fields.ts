@@ -10,20 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import type { RouteDefinitionParams } from '../index';
 
-interface FieldMappingResponse {
-  [indexName: string]: {
-    mappings: {
-      [fieldName: string]: {
-        mapping: {
-          [fieldName: string]: {
-            type: string;
-          };
-        };
-      };
-    };
-  };
-}
-
 export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
@@ -34,14 +20,12 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
       try {
         const {
           body: indexMappings,
-        } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping<FieldMappingResponse>(
-          {
-            index: request.params.query,
-            fields: '*',
-            allow_no_indices: false,
-            include_defaults: true,
-          }
-        );
+        } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
+          index: request.params.query,
+          fields: '*',
+          allow_no_indices: false,
+          include_defaults: true,
+        });
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
         // 1. Iterate over all matched indices.
@@ -52,7 +36,13 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
           new Set(
             Object.values(indexMappings).flatMap((indexMapping) => {
               return Object.keys(indexMapping.mappings).filter((fieldName) => {
-                const mappingValues = Object.values(indexMapping.mappings[fieldName].mapping);
+                const mappingValues = Object.values(
+                  // `FieldMapping` type from `TypeFieldMappings` --> `GetFieldMappingResponse` is not correct and
+                  // doesn't have any properties.
+                  (indexMapping.mappings[fieldName] as {
+                    mapping: Record<string, { type: string }>;
+                  }).mapping
+                );
                 const hasMapping = mappingValues.length > 0;
 
                 const isRuntimeField = hasMapping && mappingValues[0]?.type === 'runtime';

@@ -136,6 +136,9 @@
             "fieldFormatMap": {
               "type": "text"
             },
+            "runtimeFieldMap": {
+              "type": "text"
+            },
             "fields": {
               "type": "text"
             },

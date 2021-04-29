@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData } from '../lib/get_vis_data';
-import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { Framework } from '../plugin';
 import type { VisTypeTimeseriesRouter } from '../types';
@@ -32,14 +31,6 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
         return response.badRequest({
           body: error.message,
         });
-      }
-
-      try {
-        visPayloadSchema.validate(request.body);
-      } catch (error) {
-        framework.logger.debug(
-          `Request validation error: ${error.message}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
-        );
       }
 
       const results = await getVisData(requestContext, request, framework);

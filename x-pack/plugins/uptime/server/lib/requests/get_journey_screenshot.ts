@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
 
@@ -33,7 +34,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
               'synthetics.type': 'step/screenshot',
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
     aggs: {

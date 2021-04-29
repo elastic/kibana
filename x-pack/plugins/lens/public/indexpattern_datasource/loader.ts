@@ -17,7 +17,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './operations';
+import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
@@ -29,6 +29,7 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
+import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
@@ -47,6 +48,11 @@ export async function loadIndexPatterns({
 
   if (missingIds.length === 0) {
     return cache;
+  }
+
+  if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
+    // clear operations meta data cache because index pattern reference may change
+    memoizedGetAvailableOperationsByMetadata.cache.clear();
   }
 
   const allIndexPatterns = await Promise.allSettled(
@@ -103,7 +109,7 @@ export async function loadIndexPatterns({
             const restriction =
               typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
             if (restriction) {
-              restrictionsObj[agg] = restriction;
+              restrictionsObj[translateToOperationName(agg)] = restriction;
             }
           });
           if (Object.keys(restrictionsObj).length) {
@@ -439,16 +445,18 @@ export async function syncExistingFields({
       ...state,
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
+      existenceFetchTimeout: false,
       existingFields: emptinessInfo.reduce((acc, info) => {
         acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
         return acc;
       }, state.existingFields),
     }));
   } catch (e) {
-    // show all fields as available if fetch failed
+    // show all fields as available if fetch failed or timed out
     setState((state) => ({
       ...state,
-      existenceFetchFailed: true,
+      existenceFetchFailed: e.res?.status !== 408,
+      existenceFetchTimeout: e.res?.status === 408,
       existingFields: indexPatterns.reduce((acc, pattern) => {
         acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
         return acc;

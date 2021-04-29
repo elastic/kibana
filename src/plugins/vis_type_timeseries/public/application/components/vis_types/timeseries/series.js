@@ -209,7 +209,7 @@ TimeseriesSeriesUI.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   seriesQuantity: PropTypes.object,
 };
 

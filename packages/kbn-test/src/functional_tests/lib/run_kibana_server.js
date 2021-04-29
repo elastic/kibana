@@ -38,7 +38,7 @@ export async function runKibanaServer({ procs, config, options }) {
       ...extendNodeOptions(installDir),
     },
     cwd: installDir || KIBANA_ROOT,
-    wait: /http server running/,
+    wait: /\[Kibana\]\[http\] http server running/,
   });
 }
 
@@ -62,15 +62,11 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
-  const execArgv = process.execArgv || [];
 
   return pipe(
     serverArgs,
     (args) => (installDir ? args.filter((a) => a !== '--oss') : args),
-    (args) =>
-      installDir
-        ? [...buildArgs, ...args]
-        : [...execArgv, KIBANA_EXEC_PATH, ...sourceArgs, ...args],
+    (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
     (args) => args.concat(extraKbnOpts || [])
   );
 }

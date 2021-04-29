@@ -18,7 +18,7 @@ import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
-import { AnalyticsHeader, AnalyticsUnavailable } from './components';
+import { AnalyticsHeader } from './components';
 
 import { AnalyticsLogic } from './';
 
@@ -35,7 +35,7 @@ export const AnalyticsLayout: React.FC<Props> = ({
 }) => {
   const { history } = useValues(KibanaLogic);
   const { query } = useParams() as { query: string };
-  const { dataLoading, analyticsUnavailable } = useValues(AnalyticsLogic);
+  const { dataLoading } = useValues(AnalyticsLogic);
   const { loadAnalyticsData, loadQueryData } = useActions(AnalyticsLogic);
 
   useEffect(() => {
@@ -44,7 +44,6 @@ export const AnalyticsLayout: React.FC<Props> = ({
   }, [history.location.search]);
 
   if (dataLoading) return <Loading />;
-  if (analyticsUnavailable) return <AnalyticsUnavailable />;
 
   return (
     <>

@@ -1025,7 +1025,9 @@ describe('CredentialsLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('fetchCredentials', () => {
       const meta = {
         page: {

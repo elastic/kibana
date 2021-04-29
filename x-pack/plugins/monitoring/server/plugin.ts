@@ -138,7 +138,6 @@ export class MonitoringPlugin
     // Always create the bulk uploader
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
     const bulkUploader = (this.bulkUploader = initBulkUploader({
-      elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
       opsMetrics$: core.metrics.getOpsMetrics$(),
@@ -210,7 +209,7 @@ export class MonitoringPlugin
           const monitoringBulkEnabled =
             mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
           if (monitoringBulkEnabled) {
-            this.bulkUploader?.start();
+            this.bulkUploader?.start(core.elasticsearch.client.asInternalUser);
           } else {
             this.bulkUploader?.handleNotEnabled();
           }
@@ -231,7 +230,7 @@ export class MonitoringPlugin
     if (this.cluster) {
       this.cluster.close();
     }
-    if (this.licenseService) {
+    if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();
     }
     this.bulkUploader?.stop();
@@ -334,6 +333,7 @@ export class MonitoringPlugin
               }
             },
             server: {
+              log: this.log,
               route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {

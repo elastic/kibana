@@ -148,13 +148,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
       : headerValueFormatter &&
         (tooltip.detailedTooltip ? undefined : ({ value }: any) => headerValueFormatter(value));
 
+  const boundary = document.getElementById('app-fixed-viewport') ?? undefined;
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
         ...tooltip,
+        boundary,
         customTooltip: tooltip.detailedTooltip(headerFormatter),
         headerFormatter: undefined,
       }
-    : { ...tooltip, headerFormatter };
+    : { ...tooltip, boundary, headerFormatter };
 
   return (
     <Settings

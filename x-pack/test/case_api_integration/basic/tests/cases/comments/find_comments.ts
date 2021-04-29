@@ -111,7 +111,18 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    describe('sub case comments', () => {
+    it('should return a 400 when passing the subCaseId parameter', async () => {
+      const { body } = await supertest
+        .get(`${CASES_URL}/case-id/comments/_find?search=unique&subCaseId=value`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(400);
+
+      expect(body.message).to.contain('subCaseId');
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    describe.skip('sub case comments', () => {
       let actionID: string;
       before(async () => {
         actionID = await createCaseAction(supertest);

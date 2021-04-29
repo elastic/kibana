@@ -105,7 +105,9 @@ async function getIndicesFromPattern(
     return [];
   }
 
-  return (response.aggregations as IndiciesAggregation).indices.buckets.map((bucket) => bucket.key);
+  return ((response.aggregations as unknown) as IndiciesAggregation).indices.buckets.map(
+    (bucket) => bucket.key
+  );
 }
 
 async function getAliasesFromPattern(
@@ -118,14 +120,15 @@ async function getAliasesFromPattern(
   };
   const result: string[] = [];
 
-  const { body: response } = await esClient.indices.getAlias(params);
+  const response = await esClient.indices.getAlias(params);
+  const responseBody = response.body;
 
-  if (response.status === 404) {
+  if (response.statusCode === 404) {
     return result;
   }
 
-  for (const index of Object.keys(response)) {
-    const aliasRecord = response[index];
+  for (const index of Object.keys(responseBody)) {
+    const aliasRecord = responseBody[index];
     if (aliasRecord.aliases) {
       const aliases = Object.keys(aliasRecord.aliases);
       result.push(...aliases);

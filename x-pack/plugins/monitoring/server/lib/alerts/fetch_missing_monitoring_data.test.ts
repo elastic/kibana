@@ -56,6 +56,7 @@ describe('fetchMissingMonitoringData', () => {
     ];
 
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -114,6 +115,7 @@ describe('fetchMissingMonitoringData', () => {
       },
     ];
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {

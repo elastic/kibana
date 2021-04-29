@@ -102,7 +102,7 @@ export type SavedObjectsFieldMapping =
 
 /** @internal */
 export interface IndexMapping {
-  dynamic?: string;
+  dynamic?: boolean | 'strict';
   properties: SavedObjectsMappingProperties;
   _meta?: IndexMappingMeta;
 }

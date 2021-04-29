@@ -10,8 +10,6 @@ import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
 import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
-import { Job } from '../../common/types/anomaly_detection_jobs';
-import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
@@ -51,13 +49,13 @@ export function checksFactory(
     const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
 
     // load all non-space jobs and datafeeds
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
-      datafeeds: Datafeed[];
-    }>();
-    const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-      data_frame_analytics: DataFrameAnalyticsConfig[];
-    }>();
+    const { body: adJobs } = await client.asInternalUser.ml.getJobs();
+    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds();
+    const {
+      body: dfaJobs,
+    } = ((await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown) as {
+      body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
+    };
 
     const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {

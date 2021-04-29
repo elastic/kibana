@@ -69,13 +69,6 @@ export async function fetchIndexShardSize(
           },
           aggs: {
             over_threshold: {
-              filter: {
-                range: {
-                  'index_stats.primaries.store.size_in_bytes': {
-                    gt: threshold * gbMultiplier,
-                  },
-                },
-              },
               aggs: {
                 index: {
                   terms: {
@@ -88,14 +81,15 @@ export async function fetchIndexShardSize(
                         sort: [
                           {
                             timestamp: {
-                              order: 'desc',
-                              unmapped_type: 'long',
+                              order: 'desc' as const,
+                              unmapped_type: 'long' as const,
                             },
                           },
                         ],
                         _source: {
                           includes: [
                             '_index',
+                            'index_stats.shards.primaries',
                             'index_stats.primaries.store.size_in_bytes',
                             'source_node.name',
                             'source_node.uuid',
@@ -116,13 +110,14 @@ export async function fetchIndexShardSize(
 
   const { body: response } = await esClient.search(params);
   const stats: IndexShardSizeStats[] = [];
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
   const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
 
   if (!clusterBuckets.length) {
     return stats;
   }
-
+  const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
     const indexBuckets = clusterBucket.over_threshold.index.buckets;
     const clusterUuid = clusterBucket.key;
@@ -142,9 +137,25 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      const { size_in_bytes: shardSizeBytes } = indexStats?.primaries?.store!;
+      if (!indexStats || !indexStats.primaries) {
+        continue;
+      }
+
+      const { primaries: totalPrimaryShards } = indexStats.shards;
+      const { size_in_bytes: primaryShardSizeBytes = 0 } = indexStats.primaries.store || {};
+      if (!primaryShardSizeBytes || !totalPrimaryShards) {
+        continue;
+      }
+      /**
+       * We can only calculate the average primary shard size at this point, since we don't have
+       * data (in .monitoring-es* indices) to give us individual shards. This might change in the future
+       */
       const { name: nodeName, uuid: nodeId } = sourceNode;
-      const shardSize = +(shardSizeBytes! / gbMultiplier).toFixed(2);
+      const avgShardSize = primaryShardSizeBytes / totalPrimaryShards;
+      if (avgShardSize < thresholdBytes) {
+        continue;
+      }
+      const shardSize = +(avgShardSize / gbMultiplier).toFixed(2);
       stats.push({
         shardIndex,
         shardSize,

@@ -46,8 +46,6 @@ export interface IServiceSettings {
   getFileLayers(): Promise<FileLayer[]>;
   getUrlForRegionLayer(layer: FileLayer): Promise<string | undefined>;
   setQueryParams(params: { [p: string]: string }): void;
-  enableZoomMessage(): void;
-  disableZoomMessage(): void;
   getAttributesForTMSLayer(
     tmsServiceConfig: TmsLayer,
     isDesaturated: boolean,

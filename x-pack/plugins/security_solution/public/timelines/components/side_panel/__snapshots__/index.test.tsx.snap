@@ -95,7 +95,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                 >
                   <button
                     aria-label="close"
-                    className="euiButtonIcon euiButtonIcon--primary"
+                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                     disabled={false}
                     onClick={[Function]}
                     type="button"
@@ -262,7 +262,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -310,7 +310,7 @@ Array [
               >
                 <button
                   aria-label="Close this dialog"
-                  className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                  className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                   data-test-subj="euiFlyoutCloseButton"
                   disabled={false}
                   onClick={[Function]}
@@ -537,7 +537,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -580,7 +580,7 @@ Array [
             >
               <button
                 aria-label="Close this dialog"
-                className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
                 disabled={false}
                 onClick={[Function]}
@@ -806,7 +806,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -833,7 +833,7 @@ Array [
       >
         <button
           aria-label="Close this dialog"
-          className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
           disabled={false}
           onClick={[Function]}

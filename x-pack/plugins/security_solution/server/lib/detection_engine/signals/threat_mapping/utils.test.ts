@@ -51,6 +51,7 @@ describe('utils', () => {
     test('it should combine two results with success set to "true" if both are "true"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -61,6 +62,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -75,6 +77,7 @@ describe('utils', () => {
     test('it should combine two results with success set to "false" if one of them is "false"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -85,6 +88,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -99,6 +103,7 @@ describe('utils', () => {
     test('it should use the latest date if it is set in the new result', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -109,6 +114,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -123,6 +129,7 @@ describe('utils', () => {
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -133,6 +140,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -152,6 +160,7 @@ describe('utils', () => {
     test('it should combine errors together without duplicates', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -162,6 +171,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -272,6 +282,7 @@ describe('utils', () => {
     test('it should use the maximum found if given an empty array for newResults', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -281,6 +292,7 @@ describe('utils', () => {
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         lastLookBackDate: undefined,
@@ -295,6 +307,7 @@ describe('utils', () => {
     test('it should work with empty arrays for searchAfterTimes and bulkCreateTimes and createdSignals', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -304,6 +317,7 @@ describe('utils', () => {
       };
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: undefined,
@@ -313,6 +327,7 @@ describe('utils', () => {
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         lastLookBackDate: undefined,
@@ -328,6 +343,7 @@ describe('utils', () => {
     test('it should get the max of two new results and then combine the result with an existingResult correctly', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
@@ -337,6 +353,7 @@ describe('utils', () => {
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -346,6 +363,7 @@ describe('utils', () => {
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
@@ -356,6 +374,7 @@ describe('utils', () => {
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
@@ -371,6 +390,7 @@ describe('utils', () => {
     test('it should get the max of two new results and then combine the result with an existingResult correctly when the results are flipped around', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
@@ -380,6 +400,7 @@ describe('utils', () => {
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -389,6 +410,7 @@ describe('utils', () => {
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
@@ -399,6 +421,7 @@ describe('utils', () => {
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
@@ -414,6 +437,7 @@ describe('utils', () => {
     test('it should return the max date correctly if one date contains a null', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
@@ -423,6 +447,7 @@ describe('utils', () => {
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -432,6 +457,7 @@ describe('utils', () => {
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: null,
@@ -442,6 +468,7 @@ describe('utils', () => {
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'), // max lastLookBackDate
@@ -457,6 +484,7 @@ describe('utils', () => {
     test('it should combine two results with success set to "true" if both are "true"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -467,6 +495,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -481,6 +510,7 @@ describe('utils', () => {
     test('it should combine two results with success set to "false" if one of them is "false"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -491,6 +521,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -505,6 +536,7 @@ describe('utils', () => {
     test('it should use the latest date if it is set in the new result', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -515,6 +547,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -529,6 +562,7 @@ describe('utils', () => {
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -539,6 +573,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
@@ -558,6 +593,7 @@ describe('utils', () => {
     test('it should combine errors together without duplicates', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
@@ -568,6 +604,7 @@ describe('utils', () => {
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
+        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),

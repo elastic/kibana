@@ -28,11 +28,10 @@ export const postAgentUnenrollHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    if (request.body?.force === true) {
-      await AgentService.forceUnenrollAgent(soClient, esClient, request.params.agentId);
-    } else {
-      await AgentService.unenrollAgent(soClient, esClient, request.params.agentId);
-    }
+    await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
+      force: request.body?.force,
+      revoke: request.body?.revoke,
+    });
 
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
@@ -60,11 +59,18 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     : { kuery: request.body.agents };
 
   try {
-    await AgentService.unenrollAgents(soClient, esClient, {
+    const results = await AgentService.unenrollAgents(soClient, esClient, {
       ...agentOptions,
+      revoke: request.body?.revoke,
       force: request.body?.force,
     });
-    const body: PostBulkAgentUnenrollResponse = {};
+    const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
 
     return response.ok({ body });
   } catch (error) {

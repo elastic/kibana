@@ -14,8 +14,7 @@
         "label": "doTheFooFnThing",
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts#L9"
+          "lineNumber": 9
         },
         "tags": [],
         "returnComment": [],
@@ -33,8 +32,7 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts#L11"
+          "lineNumber": 11
         },
         "signature": [
           "() => \"foo\""
@@ -66,8 +64,7 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/foo/index.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/foo/index.ts#L9"
+          "lineNumber": 9
         },
         "signature": [
           "\"COMMON VAR!\""

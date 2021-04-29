@@ -230,6 +230,7 @@ export function IndexPatternDataPanel({
           onUpdateIndexPattern={onUpdateIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
         />
@@ -271,6 +272,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatternRefs,
   indexPatterns,
   existenceFetchFailed,
+  existenceFetchTimeout,
   query,
   dateRange,
   filters,
@@ -297,6 +299,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -314,7 +317,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     (type) => type in fieldTypeNames
   );
 
-  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
+  const fieldInfoUnavailable =
+    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
 
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
@@ -389,7 +393,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
-        hideDetails: fieldInfoUnavailable,
+        // Show details on timeout but not failure
+        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
           defaultMessage: `There are no available fields that contain data.`,
         }),
@@ -438,11 +443,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    existingFields,
-    currentIndexPattern,
     hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
+    existenceFetchTimeout,
+    currentIndexPattern,
+    existingFields,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
@@ -496,6 +502,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
   }, []);
 
+  const refreshFieldList = useCallback(async () => {
+    const newlyMappedIndexPattern = await loadIndexPatterns({
+      indexPatternsService: data.indexPatterns,
+      cache: {},
+      patterns: [currentIndexPattern.id],
+    });
+    onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+    // start a new session so all charts are refreshed
+    data.search.session.start();
+  }, [data, currentIndexPattern, onUpdateIndexPattern]);
+
   const editField = useMemo(
     () =>
       editPermission
@@ -509,17 +526,39 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               fieldName,
               onSave: async () => {
                 trackUiEvent(`save_field_${uiAction}`);
-                const newlyMappedIndexPattern = await loadIndexPatterns({
-                  indexPatternsService: data.indexPatterns,
-                  cache: {},
-                  patterns: [currentIndexPattern.id],
-                });
-                onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+                await refreshFieldList();
               },
             });
           }
         : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, onUpdateIndexPattern]
+    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, refreshFieldList]
+  );
+
+  const removeField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName: string) => {
+            trackUiEvent('open_field_delete_modal');
+            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+              ctx: {
+                indexPattern: indexPatternInstance,
+              },
+              fieldName,
+              onDelete: async () => {
+                trackUiEvent('delete_field');
+                await refreshFieldList();
+              },
+            });
+          }
+        : undefined,
+    [
+      currentIndexPattern.id,
+      data.indexPatterns,
+      editPermission,
+      indexPatternFieldEditor,
+      refreshFieldList,
+    ]
   );
 
   const addField = useMemo(
@@ -565,6 +604,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             gutterSize="s"
             alignItems="center"
             className="lnsInnerIndexPatternDataPanel__header"
+            responsive={false}
           >
             <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
@@ -761,10 +801,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
+            existenceFetchTimeout={existenceFetchTimeout}
             existFieldsInIndex={!!allFields.length}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
+            removeField={removeField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

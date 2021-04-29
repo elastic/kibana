@@ -25,7 +25,12 @@ import { previewMetricAnomalyAlert } from '../../lib/alerting/metric_anomaly/pre
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
-export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initAlertPreviewRoute = ({
+  framework,
+  sources,
+  getLogQueryFields,
+  configuration,
+}: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -52,6 +57,8 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
         sourceId || 'default'
       );
 
+      const compositeSize = configuration.inventory.compositeSize;
+
       try {
         switch (alertType) {
           case METRIC_THRESHOLD_ALERT_TYPE_ID: {
@@ -77,6 +84,11 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
+            const logQueryFields = await getLogQueryFields(
+              sourceId || 'default',
+              requestContext.core.savedObjects.client,
+              requestContext.core.elasticsearch.client.asCurrentUser
+            );
             const {
               nodeType,
               criteria,
@@ -87,6 +99,8 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               params: { criteria, filterQuery, nodeType },
               lookback,
               source,
+              logQueryFields,
+              compositeSize,
               alertInterval,
               alertThrottle,
               alertNotifyWhen,

@@ -9,7 +9,13 @@
         "label": "Plugin",
         "description": [],
         "signature": [
-          "Plugin",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
           " implements ",
           {
             "pluginId": "core",
@@ -19,9 +25,21 @@
             "text": "Plugin"
           },
           "<",
-          "PluginSetup",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginSetup",
+            "text": "PluginSetup"
+          },
           ", ",
-          "PluginStart",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginStart",
+            "text": "PluginStart"
+          },
           ", ",
           "SetupPlugins"
         ],
@@ -36,6 +54,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -52,7 +71,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 75
+                  "lineNumber": 79
                 }
               }
             ],
@@ -60,7 +79,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 75
+              "lineNumber": 79
             }
           },
           {
@@ -77,41 +96,30 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ", ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginStart",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
                 "text": "PluginStart"
               },
               ">, plugins: ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SetupPlugins",
-                "text": "SetupPlugins"
-              },
+              "SetupPlugins",
               ") => ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginSetup",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginSetup",
                 "text": "PluginSetup"
               }
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -124,19 +132,13 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
-                    "text": "StartPlugins"
-                  },
+                  "StartPlugins",
                   ", ",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.PluginStart",
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
                     "text": "PluginStart"
                   },
                   ">"
@@ -144,26 +146,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 103
                 }
               },
               {
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.SetupPlugins",
-                    "text": "SetupPlugins"
-                  }
+                  "SetupPlugins"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 103
                 }
               }
             ],
@@ -171,7 +168,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 98
+              "lineNumber": 103
             }
           },
           {
@@ -188,18 +185,13 @@
                 "text": "CoreStart"
               },
               ", plugins: ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ") => {}"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -215,26 +207,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 346
                 }
               },
               {
+                "id": "def-public.Plugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
-                    "text": "StartPlugins"
-                  }
+                  "StartPlugins"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 346
                 }
               }
             ],
@@ -242,7 +229,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 348
+              "lineNumber": 346
             }
           },
           {
@@ -258,13 +245,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 393
+              "lineNumber": 391
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 72
+          "lineNumber": 75
         },
         "initialIsOpen": false
       }
@@ -289,24 +276,18 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/security_solution/public/types.ts",
-            "lineNumber": 69
+            "lineNumber": 68
           },
           "signature": [
             "() => Promise<",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.ResolverPluginSetup",
-              "text": "ResolverPluginSetup"
-            },
+            "ResolverPluginSetup",
             ">"
           ]
         }
       ],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 68
+        "lineNumber": 67
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -320,7 +301,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 72
+        "lineNumber": 71
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -345,6 +326,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.AppClient.Unnamed.$1",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": true,
@@ -358,11 +340,12 @@
                 }
               },
               {
+                "id": "def-server.AppClient.Unnamed.$2",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
                 "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
                 ],
                 "description": [],
                 "source": {
@@ -408,7 +391,13 @@
         "label": "Plugin",
         "description": [],
         "signature": [
-          "Plugin",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           " implements ",
           {
             "pluginId": "core",
@@ -418,9 +407,21 @@
             "text": "Plugin"
           },
           "<",
-          "PluginSetup",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginSetup",
+            "text": "PluginSetup"
+          },
           ", ",
-          "PluginStart",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginStart",
+            "text": "PluginStart"
+          },
           ", ",
           "SetupPlugins"
         ],
@@ -435,6 +436,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Plugin.Unnamed.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -451,7 +453,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 144
+                  "lineNumber": 145
                 }
               }
             ],
@@ -459,7 +461,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 144
+              "lineNumber": 145
             }
           },
           {
@@ -476,34 +478,23 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ", ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginStart",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.PluginStart",
                 "text": "PluginStart"
               },
               ">, plugins: ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SetupPlugins",
-                "text": "SetupPlugins"
-              },
+              "SetupPlugins",
               ") => {}"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -516,19 +507,13 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
-                    "text": "StartPlugins"
-                  },
+                  "StartPlugins",
                   ", ",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.PluginStart",
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.PluginStart",
                     "text": "PluginStart"
                   },
                   ">"
@@ -536,26 +521,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 156
+                  "lineNumber": 157
                 }
               },
               {
+                "id": "def-server.Plugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.SetupPlugins",
-                    "text": "SetupPlugins"
-                  }
+                  "SetupPlugins"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 156
+                  "lineNumber": 157
                 }
               }
             ],
@@ -563,7 +543,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 156
+              "lineNumber": 157
             }
           },
           {
@@ -580,18 +560,13 @@
                 "text": "CoreStart"
               },
               ", plugins: ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ") => {}"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -607,26 +582,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 337
+                  "lineNumber": 338
                 }
               },
               {
+                "id": "def-server.Plugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
-                    "text": "StartPlugins"
-                  }
+                  "StartPlugins"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 337
+                  "lineNumber": 338
                 }
               }
             ],
@@ -634,7 +604,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 337
+              "lineNumber": 338
             }
           },
           {
@@ -650,13 +620,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 398
+              "lineNumber": 412
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 128
+          "lineNumber": 129
         },
         "initialIsOpen": false
       }
@@ -667,6 +637,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.buildRouteValidation.$1",
             "type": "Uncategorized",
             "label": "schema",
             "isRequired": true,
@@ -710,6 +681,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.buildSiemResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": true,
@@ -725,13 +697,7 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              },
+              "KibanaResponse",
               "<T>; badRequest: (options?: ",
               {
                 "pluginId": "core",
@@ -741,13 +707,7 @@
                 "text": "ErrorHttpResponseOptions"
               },
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              }
+              "KibanaResponse"
             ],
             "description": [],
             "source": {
@@ -795,18 +755,18 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.createBootstrapIndex.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
@@ -815,6 +775,7 @@
             }
           },
           {
+            "id": "def-server.createBootstrapIndex.$2",
             "type": "string",
             "label": "index",
             "isRequired": true,
@@ -829,9 +790,15 @@
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>, index: string) => Promise<unknown>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", index: string) => Promise<unknown>"
         ],
         "description": [],
         "label": "createBootstrapIndex",
@@ -848,28 +815,27 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.deleteAllIndex.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesDeleteParams",
-              ", Promise<any>>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 12
+              "lineNumber": 11
             }
           },
           {
+            "id": "def-server.deleteAllIndex.$2",
             "type": "string",
             "label": "pattern",
             "isRequired": true,
@@ -879,10 +845,11 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 13
+              "lineNumber": 12
             }
           },
           {
+            "id": "def-server.deleteAllIndex.$3",
             "type": "number",
             "label": "maxAttempts",
             "isRequired": true,
@@ -892,22 +859,26 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 14
+              "lineNumber": 13
             }
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesDeleteParams",
-          ", Promise<any>>, pattern: string, maxAttempts?: number) => Promise<boolean>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", pattern: string, maxAttempts?: number) => Promise<boolean>"
         ],
         "description": [],
         "label": "deleteAllIndex",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
         "tags": [],
         "returnComment": [],
@@ -918,18 +889,18 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.deletePolicy.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"DELETE\"; }, unknown>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
@@ -938,6 +909,7 @@
             }
           },
           {
+            "id": "def-server.deletePolicy.$2",
             "type": "string",
             "label": "policy",
             "isRequired": true,
@@ -952,9 +924,15 @@
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"DELETE\"; }, unknown>, policy: string) => Promise<unknown>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", policy: string) => Promise<unknown>"
         ],
         "description": [],
         "label": "deletePolicy",
@@ -971,28 +949,27 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.deleteTemplate.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesDeleteTemplateParams",
-              ", unknown>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-              "lineNumber": 12
+              "lineNumber": 10
             }
           },
           {
+            "id": "def-server.deleteTemplate.$2",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -1002,22 +979,26 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-              "lineNumber": 13
+              "lineNumber": 11
             }
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesDeleteTemplateParams",
-          ", unknown>, name: string) => Promise<unknown>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", name: string) => Promise<unknown>"
         ],
         "description": [],
         "label": "deleteTemplate",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-          "lineNumber": 11
+          "lineNumber": 9
         },
         "tags": [],
         "returnComment": [],
@@ -1028,18 +1009,18 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.getIndexExists.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
@@ -1048,6 +1029,7 @@
             }
           },
           {
+            "id": "def-server.getIndexExists.$2",
             "type": "string",
             "label": "index",
             "isRequired": true,
@@ -1057,14 +1039,20 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
-              "lineNumber": 15
+              "lineNumber": 12
             }
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>, index: string) => Promise<boolean>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", index: string) => Promise<boolean>"
         ],
         "description": [],
         "label": "getIndexExists",
@@ -1081,18 +1069,18 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.getPolicyExists.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"GET\"; }, unknown>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
@@ -1101,6 +1089,7 @@
             }
           },
           {
+            "id": "def-server.getPolicyExists.$2",
             "type": "string",
             "label": "policy",
             "isRequired": true,
@@ -1115,9 +1104,15 @@
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"GET\"; }, unknown>, policy: string) => Promise<boolean>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", policy: string) => Promise<boolean>"
         ],
         "description": [],
         "label": "getPolicyExists",
@@ -1134,28 +1129,27 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.getTemplateExists.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesExistsTemplateParams",
-              ", boolean>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-              "lineNumber": 12
+              "lineNumber": 11
             }
           },
           {
+            "id": "def-server.getTemplateExists.$2",
             "type": "string",
             "label": "template",
             "isRequired": true,
@@ -1165,22 +1159,26 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-              "lineNumber": 13
+              "lineNumber": 12
             }
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesExistsTemplateParams",
-          ", boolean>, template: string) => Promise<boolean>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", template: string) => Promise<boolean>"
         ],
         "description": [],
         "label": "getTemplateExists",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
         "tags": [],
         "returnComment": [],
@@ -1191,17 +1189,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.readPrivileges.$1",
             "type": "Function",
             "label": "callWithRequest",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
+              "CallWithRequest",
               "<{}, unknown>"
             ],
             "description": [],
@@ -1211,6 +1204,7 @@
             }
           },
           {
+            "id": "def-server.readPrivileges.$2",
             "type": "string",
             "label": "index",
             "isRequired": true,
@@ -1244,18 +1238,18 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.setPolicy.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
@@ -1264,6 +1258,7 @@
             }
           },
           {
+            "id": "def-server.setPolicy.$2",
             "type": "string",
             "label": "policy",
             "isRequired": true,
@@ -1277,11 +1272,12 @@
             }
           },
           {
-            "type": "Unknown",
+            "id": "def-server.setPolicy.$3",
+            "type": "Object",
             "label": "body",
             "isRequired": true,
             "signature": [
-              "unknown"
+              "Record<string, unknown>"
             ],
             "description": [],
             "source": {
@@ -1291,9 +1287,15 @@
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>, policy: string, body: unknown) => Promise<unknown>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", policy: string, body: Record<string, unknown>) => Promise<unknown>"
         ],
         "description": [],
         "label": "setPolicy",
@@ -1310,28 +1312,27 @@
         "type": "Function",
         "children": [
           {
-            "type": "Function",
-            "label": "callWithRequest",
+            "id": "def-server.setTemplate.$1",
+            "type": "CompoundType",
+            "label": "esClient",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesPutTemplateParams",
-              ", unknown>"
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 12
+              "lineNumber": 11
             }
           },
           {
+            "id": "def-server.setTemplate.$2",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -1341,35 +1342,40 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 13
+              "lineNumber": 12
             }
           },
           {
-            "type": "Unknown",
+            "id": "def-server.setTemplate.$3",
+            "type": "Object",
             "label": "body",
             "isRequired": true,
             "signature": [
-              "unknown"
+              "Record<string, unknown>"
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 14
+              "lineNumber": 13
             }
           }
         ],
         "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesPutTemplateParams",
-          ", unknown>, name: string, body: unknown) => Promise<unknown>"
+          "(esClient: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", name: string, body: Record<string, unknown>) => Promise<unknown>"
         ],
         "description": [],
         "label": "setTemplate",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
         "tags": [],
         "returnComment": [],
@@ -1380,15 +1386,14 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.transformError.$1",
             "type": "CompoundType",
             "label": "err",
             "isRequired": true,
             "signature": [
               "Error & Partial<",
               "ResponseError",
-              "<Record<string, any>, ",
-              "Context",
-              ">>"
+              "<Record<string, any>, unknown>>"
             ],
             "description": [],
             "source": {
@@ -1400,9 +1405,7 @@
         "signature": [
           "(err: Error & Partial<",
           "ResponseError",
-          "<Record<string, any>, ",
-          "Context",
-          ">>) => ",
+          "<Record<string, any>, unknown>>) => ",
           "OutputError"
         ],
         "description": [],
@@ -1437,10 +1440,10 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.AppClient",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.AppClient",
                 "text": "AppClient"
               }
             ]
@@ -1463,10 +1466,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/server/config.ts",
-          "lineNumber": 43
+          "lineNumber": 75
         },
         "signature": [
-          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
         ],
         "initialIsOpen": false
       }
@@ -1495,7 +1498,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 107
+        "lineNumber": 108
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1509,6 +1512,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.addIdToItem.$1",
             "type": "Uncategorized",
             "label": "item",
             "isRequired": true,
@@ -1540,6 +1544,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.DefaultArray.$1",
             "type": "Uncategorized",
             "label": "codec",
             "isRequired": true,
@@ -1581,6 +1586,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.exactCheck.$1",
             "type": "Unknown",
             "label": "original",
             "isRequired": true,
@@ -1594,6 +1600,7 @@
             }
           },
           {
+            "id": "def-common.exactCheck.$2",
             "type": "CompoundType",
             "label": "decoded",
             "isRequired": true,
@@ -1657,6 +1664,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.formatErrors.$1",
             "type": "Object",
             "label": "errors",
             "isRequired": true,
@@ -1690,6 +1698,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getPaths.$1",
             "type": "CompoundType",
             "label": "validation",
             "isRequired": true,
@@ -1726,166 +1735,11 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.migratePackagePolicyToV7110",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "packagePolicyDoc",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-              "lineNumber": 13
-            }
-          }
-        ],
-        "signature": [
-          "(packagePolicyDoc: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">"
-        ],
-        "description": [],
-        "label": "migratePackagePolicyToV7110",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-          "lineNumber": 12
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.migratePackagePolicyToV7120",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "packagePolicyDoc",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-              "lineNumber": 14
-            }
-          }
-        ],
-        "signature": [
-          "(packagePolicyDoc: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">"
-        ],
-        "description": [],
-        "label": "migratePackagePolicyToV7120",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-          "lineNumber": 13
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.removeExternalLinkText",
         "type": "Function",
         "children": [
           {
+            "id": "def-common.removeExternalLinkText.$1",
             "type": "string",
             "label": "str",
             "isRequired": true,
@@ -1919,6 +1773,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.removeIdFromItem.$1",
             "type": "Uncategorized",
             "label": "item",
             "isRequired": true,
@@ -1952,6 +1807,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validate.$1",
             "type": "Uncategorized",
             "label": "obj",
             "isRequired": true,
@@ -1965,6 +1821,7 @@
             }
           },
           {
+            "id": "def-common.validate.$2",
             "type": "Uncategorized",
             "label": "schema",
             "isRequired": true,
@@ -2000,6 +1857,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateEither.$1",
             "type": "Uncategorized",
             "label": "schema",
             "isRequired": true,
@@ -2009,10 +1867,11 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 30
+              "lineNumber": 43
             }
           },
           {
+            "id": "def-common.validateEither.$2",
             "type": "Uncategorized",
             "label": "obj",
             "isRequired": true,
@@ -2022,7 +1881,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 31
+              "lineNumber": 44
             }
           }
         ],
@@ -2037,7 +1896,7 @@
         "label": "validateEither",
         "source": {
           "path": "x-pack/plugins/security_solution/common/validate.ts",
-          "lineNumber": 29
+          "lineNumber": 42
         },
         "tags": [],
         "returnComment": [],

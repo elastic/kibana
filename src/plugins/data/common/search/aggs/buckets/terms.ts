@@ -8,7 +8,6 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -21,7 +20,6 @@ import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
   buildOtherBucketAgg,
@@ -103,36 +101,24 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        let request: ReturnType<RequestAdapter['start']> | undefined;
-        if (inspectorRequestAdapter) {
-          request = inspectorRequestAdapter.start(
-            i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-              defaultMessage: 'Other bucket',
-            }),
-            {
+        const { rawResponse: response } = await nestedSearchSource
+          .fetch$({
+            abortSignal,
+            sessionId: searchSessionId,
+            inspector: {
+              adapter: inspectorRequestAdapter,
+              title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+                defaultMessage: 'Other bucket',
+              }),
               description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
                 defaultMessage:
                   'This request counts the number of documents that fall ' +
                   'outside the criterion of the data buckets.',
               }),
-              searchSessionId,
-            }
-          );
-          nestedSearchSource.getSearchRequestBody().then((body) => {
-            request!.json(body);
-          });
-          request.stats(getRequestInspectorStats(nestedSearchSource));
-        }
+            },
+          })
+          .toPromise();
 
-        const response = await nestedSearchSource.fetch({
-          abortSignal,
-          sessionId: searchSessionId,
-        });
-        if (request) {
-          request
-            .stats(getResponseInspectorStats(response, nestedSearchSource))
-            .ok({ json: response });
-        }
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }
       if (aggConfig.params.missingBucket) {

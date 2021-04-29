@@ -27,6 +27,7 @@ export function useTransactionLatencyChartsFetcher() {
       transactionName,
       latencyAggregationType,
       comparisonType,
+      comparisonEnabled,
     },
   } = useUrlParams();
 
@@ -34,6 +35,7 @@ export function useTransactionLatencyChartsFetcher() {
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data, error, status } = useFetcher(

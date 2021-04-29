@@ -34,6 +34,7 @@ describe('update_list_item', () => {
     const options = getUpdateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const updatedList = await updateListItem({ ...options, esClient });

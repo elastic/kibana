@@ -19,6 +19,7 @@ import {
   setUISettings,
   setInjectedMetadata,
   setMapServiceSettings,
+  setDocLinks,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -96,5 +97,6 @@ export class VegaPlugin implements Plugin<void, void> {
     setNotifications(core.notifications);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
+    setDocLinks(core.docLinks);
   }
 }

@@ -41,17 +41,14 @@ const IsClusterSupported = ({ isSupported, children }) => {
  * completely
  */
 const IsAlertsSupported = (props) => {
-  const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
-  if (alertsMeta.enabled && clusterMeta.enabled) {
+  const { alertsMeta = { enabled: true } } = props.cluster.alerts;
+  if (alertsMeta.enabled) {
     return <span>{props.children}</span>;
   }
 
-  const message =
-    alertsMeta.message ||
-    clusterMeta.message ||
-    i18n.translate('xpack.monitoring.cluster.listing.unknownHealthMessage', {
-      defaultMessage: 'Unknown',
-    });
+  const message = i18n.translate('xpack.monitoring.cluster.listing.unknownHealthMessage', {
+    defaultMessage: 'Unknown',
+  });
 
   return (
     <EuiToolTip content={message} position="bottom">

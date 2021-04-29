@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import { CreateDocumentResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 
 import { encodeHitVersion } from '../utils/encode_hit_version';
@@ -73,7 +72,7 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const { body: response } = await esClient.index<CreateDocumentResponse>({
+  const { body: response } = await esClient.index({
     body,
     id,
     index: listIndex,

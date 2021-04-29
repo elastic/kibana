@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -30,7 +30,6 @@ import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives'
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
-import { SkipBottomButton } from './skip_bottom_button';
 import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
@@ -42,32 +41,38 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { InspectorSession } from '../../../../inspector/public';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
+const TimechartHeaderMemoized = React.memo(TimechartHeader);
+const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 
 export function Discover({
   fetch,
   fetchCounter,
   fetchError,
   fieldCounts,
+  fetchStatus,
   histogramData,
   hits,
   indexPattern,
   minimumVisibleRows,
-  onSkipBottomButtonClick,
   opts,
   resetQuery,
   resultState,
   rows,
   searchSource,
   state,
-  timeRange,
   unmappedFieldsConfig,
+  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -80,13 +85,16 @@ export function Discover({
   }, [state, opts]);
   const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
-  const { trackUiMetric, capabilities, indexPatterns } = services;
+  const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
+
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
-  const bucketInterval =
-    bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+  const bucketInterval = useMemo(() => {
+    const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
+    return bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  }, [opts.chartAggConfigs]);
+
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -99,6 +107,14 @@ export function Discover({
     },
     [opts]
   );
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    setBreadcrumbsTitle(savedSearch, chrome);
+    addHelpMenuToAppChrome(chrome, docLinks);
+  }, [savedSearch, chrome, docLinks]);
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>
@@ -117,7 +133,20 @@ export function Discover({
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-  }, [setExpandedDoc]);
+    const session = services.inspector.open(opts.inspectorAdapters, {
+      title: savedSearch.title,
+    });
+    setInspectorSession(session);
+  }, [setExpandedDoc, opts.inspectorAdapters, savedSearch, services.inspector]);
+
+  useEffect(() => {
+    return () => {
+      if (inspectorSession) {
+        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+        inspectorSession.close();
+      }
+    };
+  }, [inspectorSession]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
@@ -190,6 +219,12 @@ export function Discover({
     [opts, state]
   );
 
+  const onEditRuntimeField = () => {
+    if (refreshAppState) {
+      refreshAppState();
+    }
+  };
+
   const columns = useMemo(() => {
     if (!state.columns) {
       return [];
@@ -232,23 +267,27 @@ export function Discover({
                 trackUiMetric={trackUiMetric}
                 unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
+                onEditRuntimeField={onEditRuntimeField}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="s"
-                  onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                  buttonRef={collapseIcon}
-                />
+                <div>
+                  <EuiSpacer size="s" />
+                  <EuiButtonIcon
+                    iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                    iconSize="m"
+                    size="xs"
+                    onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                    data-test-subj="collapseSideBarButton"
+                    aria-controls="discover-sidebar"
+                    aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                    aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                      defaultMessage: 'Toggle sidebar',
+                    })}
+                    buttonRef={collapseIcon}
+                  />
+                </div>
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem className="dscPageContent__wrapper">
@@ -292,9 +331,9 @@ export function Discover({
                         </EuiFlexItem>
                         {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
-                            <TimechartHeader
+                            <TimechartHeaderMemoized
+                              data={opts.data}
                               dateFormat={opts.config.get('dateFormat')}
-                              timeRange={timeRange}
                               options={search.aggs.intervalOptions}
                               onChangeInterval={onChangeInterval}
                               stateInterval={state.interval || ''}
@@ -323,7 +362,6 @@ export function Discover({
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>
-                      {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
                     {!hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>
@@ -341,7 +379,7 @@ export function Discover({
                               className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
                               data-test-subj="discoverChart"
                             >
-                              <DiscoverHistogram
+                              <DiscoverHistogramMemoized
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
                               />
@@ -393,6 +431,7 @@ export function Discover({
                               columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
+                              isLoading={fetchStatus === 'loading'}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}

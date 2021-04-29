@@ -32,6 +32,7 @@ interface IndexingStatusValues {
 let pollingInterval: number;
 
 export const IndexingStatusLogic = kea<MakeLogicType<IndexingStatusValues, IndexingStatusActions>>({
+  path: ['enterprise_search', 'indexing_status_logic'],
   actions: {
     fetchIndexingStatus: ({ statusPath, onComplete }) => ({ statusPath, onComplete }),
     setIndexingStatus: ({ numDocumentsWithErrors, percentageComplete }) => ({
@@ -39,20 +40,20 @@ export const IndexingStatusLogic = kea<MakeLogicType<IndexingStatusValues, Index
       percentageComplete,
     }),
   },
-  reducers: {
+  reducers: ({ props }) => ({
     percentageComplete: [
-      100,
+      props.percentageComplete,
       {
         setIndexingStatus: (_, { percentageComplete }) => percentageComplete,
       },
     ],
     numDocumentsWithErrors: [
-      0,
+      props.numDocumentsWithErrors,
       {
         setIndexingStatus: (_, { numDocumentsWithErrors }) => numDocumentsWithErrors,
       },
     ],
-  },
+  }),
   listeners: ({ actions }) => ({
     fetchIndexingStatus: ({ statusPath, onComplete }: IndexingStatusProps) => {
       const { http } = HttpLogic.values;

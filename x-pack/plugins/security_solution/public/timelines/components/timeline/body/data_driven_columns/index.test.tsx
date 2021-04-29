@@ -9,10 +9,10 @@ import { shallow } from 'enzyme';
 
 import React from 'react';
 
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import '../../../../../common/mock/match_media';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
-import { columnRenderers } from '../renderers';
 
 import { DataDrivenColumns } from '.';
 
@@ -25,11 +25,11 @@ describe('Columns', () => {
         ariaRowindex={2}
         _id={mockTimelineData[0]._id}
         columnHeaders={headersSansTimestamp}
-        columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
         ecsData={mockTimelineData[0].ecs}
         hasRowRenderers={false}
         notesCount={0}
+        renderCellValue={DefaultCellRenderer}
         timelineId="test"
       />
     );

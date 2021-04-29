@@ -54,7 +54,9 @@ describe('DocumentDetailLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('getDocumentDetails', () => {
       it('will call an API endpoint and then store the result', async () => {
         const fields = [{ name: 'name', value: 'python', type: 'string' }];

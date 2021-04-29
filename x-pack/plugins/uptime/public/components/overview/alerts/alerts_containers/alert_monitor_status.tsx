@@ -5,30 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { isRight } from 'fp-ts/lib/Either';
-import {
-  selectMonitorStatusAlert,
-  overviewFiltersSelector,
-  snapshotDataSelector,
-  esKuerySelector,
-  selectedFiltersSelector,
-} from '../../../../state/selectors';
-import { AlertMonitorStatusComponent } from '../index';
-import {
-  fetchOverviewFilters,
-  setSearchTextAction,
-  setEsKueryString,
-  getSnapshotCountAction,
-} from '../../../../state/actions';
+import { overviewFiltersSelector, selectedFiltersSelector } from '../../../../state/selectors';
+import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
+import { fetchOverviewFilters, setSearchTextAction } from '../../../../state/actions';
 import {
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
 } from '../../../../../common/runtime_types';
-import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
-import { useUpdateKueryString } from '../../../../hooks';
+
+import { useSnapShotCount } from './use_snap_shot';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -63,27 +51,17 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   }, [alertParams, dispatch]);
 
   const overviewFilters = useSelector(overviewFiltersSelector);
-  const { locations } = useSelector(selectMonitorStatusAlert);
+
   useEffect(() => {
     if (alertParams.search) {
       dispatch(setSearchTextAction(alertParams.search));
     }
   }, [alertParams, dispatch]);
 
-  const { index_pattern: indexPattern } = useIndexPattern();
-
-  const { count, loading } = useSelector(snapshotDataSelector);
-  const esKuery = useSelector(esKuerySelector);
-  const [esFilters] = useUpdateKueryString(
-    indexPattern,
-    alertParams.search,
-    alertParams.filters === undefined || typeof alertParams.filters === 'string'
-      ? ''
-      : JSON.stringify(Array.from(Object.entries(alertParams.filters)))
-  );
-  useEffect(() => {
-    dispatch(setEsKueryString(esFilters ?? ''));
-  }, [dispatch, esFilters]);
+  const { count, loading } = useSnapShotCount({
+    query: alertParams.search,
+    filters: alertParams.filters,
+  });
 
   const isOldAlert = React.useMemo(
     () =>
@@ -92,15 +70,6 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       !isRight(GetMonitorAvailabilityParamsType.decode(alertParams)),
     [alertParams]
   );
-  useEffect(() => {
-    dispatch(
-      getSnapshotCountAction.get({
-        dateRangeStart: 'now-24h',
-        dateRangeEnd: 'now',
-        filters: esKuery,
-      })
-    );
-  }, [dispatch, esKuery]);
 
   const selectedFilters = useSelector(selectedFiltersSelector);
   useEffect(() => {
@@ -118,19 +87,14 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     }
   }, [alertParams, setAlertParams, selectedFilters]);
 
-  const { pathname } = useLocation();
-  const shouldUpdateUrl = useMemo(() => pathname.indexOf('app/uptime') !== -1, [pathname]);
-
   return (
     <AlertMonitorStatusComponent
       alertParams={alertParams}
       enabled={enabled}
       hasFilters={!!overviewFilters?.filters}
       isOldAlert={isOldAlert}
-      locations={locations || []}
       numTimes={numTimes}
       setAlertParams={setAlertParams}
-      shouldUpdateUrl={shouldUpdateUrl}
       snapshotCount={count.total}
       snapshotLoading={loading}
       timerange={timerange}

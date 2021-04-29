@@ -15,7 +15,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { ElasticsearchClient, SavedObjectsType } from 'src/core/server';
-import { SearchResponse } from '../../../../src/core/server/elasticsearch/client';
+
 import {
   DocumentMigrator,
   IndexMigrator,
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esClient.indices.putTemplate({
         name: 'migration_test_a_template',
         body: {
-          index_patterns: 'migration_test_a',
+          index_patterns: ['migration_test_a'],
           mappings: {
             dynamic: 'strict',
             properties: { baz: { type: 'text' } },
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esClient.indices.putTemplate({
         name: 'migration_a_template',
         body: {
-          index_patterns: index,
+          index_patterns: [index],
           mappings: {
             dynamic: 'strict',
             properties: { baz: { type: 'text' } },
@@ -735,6 +735,7 @@ async function migrateIndex({
     mappingProperties,
     batchSize: 10,
     log: getLogMock(),
+    setStatus: () => {},
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(typeRegistry),
@@ -744,7 +745,7 @@ async function migrateIndex({
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<SearchResponse<any>>({ index });
+  const { body } = await esClient.search<any>({ index });
 
   return body.hits.hits
     .map((h) => ({

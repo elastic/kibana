@@ -347,20 +347,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
   }
 
-  renderNoItemsMessage() {
-    if (this.props.noItemsFragment) {
-      return this.props.noItemsFragment;
-    } else {
-      return (
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
-          defaultMessage="No {entityNamePlural} available."
-          values={{ entityNamePlural: this.props.entityNamePlural }}
-        />
-      );
-    }
-  }
-
   renderToolsLeft() {
     const selection = this.state.selectedIds;
 
@@ -473,10 +459,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderListingOrEmptyState() {
-    if (!this.state.fetchError && this.hasNoItems()) {
-      return this.renderNoItemsMessage();
+    if (this.props.noItemsFragment && !this.state.fetchError && this.hasNoItems()) {
+      return this.props.noItemsFragment;
     }
-
     return this.renderListing();
   }
 

@@ -58,4 +58,6 @@ export {
   UseExceptionListItemsSuccess,
   addEndpointExceptionList,
   withOptionalSignal,
+  ExceptionBuilder,
+  transformNewItemOutput,
 } from '../../lists/public';

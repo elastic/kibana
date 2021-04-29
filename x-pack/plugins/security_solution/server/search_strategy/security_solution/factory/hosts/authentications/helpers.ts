@@ -8,7 +8,7 @@
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import {
   AuthenticationsEdges,
   AuthenticationHit,

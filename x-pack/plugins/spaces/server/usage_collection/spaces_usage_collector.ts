@@ -50,6 +50,7 @@ async function getSpacesUsage(
 
   let resp: SpacesAggregationResponse | undefined;
   try {
+    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
     ({ body: resp } = await esClient.search({
       index: kibanaIndex,
       body: {
@@ -179,50 +180,262 @@ export function getSpacesUsageCollector(
     type: 'spaces',
     isReady: () => true,
     schema: {
-      usesFeatureControls: { type: 'boolean' },
+      usesFeatureControls: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls.',
+        },
+      },
       disabledFeatures: {
         // "feature": number;
-        DYNAMIC_KEY: { type: 'long' },
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
         // Known registered features
-        stackAlerts: { type: 'long' },
-        actions: { type: 'long' },
-        enterpriseSearch: { type: 'long' },
-        fleet: { type: 'long' },
-        savedObjectsTagging: { type: 'long' },
-        indexPatterns: { type: 'long' },
-        discover: { type: 'long' },
-        canvas: { type: 'long' },
-        maps: { type: 'long' },
-        siem: { type: 'long' },
-        monitoring: { type: 'long' },
-        graph: { type: 'long' },
-        uptime: { type: 'long' },
-        savedObjectsManagement: { type: 'long' },
-        timelion: { type: 'long' },
-        dev_tools: { type: 'long' },
-        advancedSettings: { type: 'long' },
-        infrastructure: { type: 'long' },
-        visualize: { type: 'long' },
-        logs: { type: 'long' },
-        dashboard: { type: 'long' },
-        ml: { type: 'long' },
-        apm: { type: 'long' },
+        stackAlerts: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        actions: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        enterpriseSearch: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        fleet: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        savedObjectsTagging: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        indexPatterns: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        discover: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        canvas: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        maps: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        siem: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        monitoring: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        graph: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        uptime: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        savedObjectsManagement: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        timelion: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        dev_tools: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        advancedSettings: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        infrastructure: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        visualize: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        logs: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        dashboard: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        ml: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
+        apm: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have this feature disabled.',
+          },
+        },
       },
-      available: { type: 'boolean' },
-      enabled: { type: 'boolean' },
-      count: { type: 'long' },
-      'apiCalls.copySavedObjects.total': { type: 'long' },
-      'apiCalls.copySavedObjects.kibanaRequest.yes': { type: 'long' },
-      'apiCalls.copySavedObjects.kibanaRequest.no': { type: 'long' },
-      'apiCalls.copySavedObjects.createNewCopiesEnabled.yes': { type: 'long' },
-      'apiCalls.copySavedObjects.createNewCopiesEnabled.no': { type: 'long' },
-      'apiCalls.copySavedObjects.overwriteEnabled.yes': { type: 'long' },
-      'apiCalls.copySavedObjects.overwriteEnabled.no': { type: 'long' },
-      'apiCalls.resolveCopySavedObjectsErrors.total': { type: 'long' },
-      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes': { type: 'long' },
-      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': { type: 'long' },
-      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': { type: 'long' },
-      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': { type: 'long' },
+      available: {
+        type: 'boolean',
+        _meta: {
+          description: 'Indicates if the spaces feature is available in this installation.',
+        },
+      },
+      enabled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Indicates if the spaces feature is enabled in this installation.',
+        },
+      },
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'The number of spaces in this installation.',
+        },
+      },
+      'apiCalls.copySavedObjects.total': {
+        type: 'long',
+        _meta: {
+          description: 'The number of times the "Copy Saved Objects" API has been called.',
+        },
+      },
+      'apiCalls.copySavedObjects.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called via the Kibana client.',
+        },
+      },
+      'apiCalls.copySavedObjects.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called via an API consumer (e.g. curl).',
+        },
+      },
+      'apiCalls.copySavedObjects.createNewCopiesEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "createNewCopies" set to true.',
+        },
+      },
+      'apiCalls.copySavedObjects.createNewCopiesEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "createNewCopies" set to false.',
+        },
+      },
+      'apiCalls.copySavedObjects.overwriteEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "overwrite" set to true.',
+        },
+      },
+      'apiCalls.copySavedObjects.overwriteEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "overwrite" set to false.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.total': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called via the Kibana client.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called via an API consumer (e.g. curl).',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to true.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
+        },
+      },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
       const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;

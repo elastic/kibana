@@ -7,7 +7,7 @@
 
 import { PassThrough } from 'stream';
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
@@ -95,8 +95,9 @@ export const writeNextResponse = async ({
 export const getSearchAfterFromResponse = <T>({
   response,
 }: {
-  response: SearchResponse<T>;
+  response: estypes.SearchResponse<T>;
 }): string[] | undefined =>
+  // @ts-expect-error @elastic/elasticsearch SortResults contains null
   response.hits.hits.length > 0
     ? response.hits.hits[response.hits.hits.length - 1].sort
     : undefined;
@@ -115,7 +116,7 @@ export const getResponse = async ({
   listId,
   listItemIndex,
   size = SIZE,
-}: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
+}: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
   return ((
     await esClient.search<SearchEsListItemSchema>({
       body: {
@@ -131,11 +132,11 @@ export const getResponse = async ({
       index: listItemIndex,
       size,
     })
-  ).body as unknown) as SearchResponse<SearchEsListItemSchema>;
+  ).body as unknown) as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {
-  response: SearchResponse<SearchEsListItemSchema>;
+  response: estypes.SearchResponse<SearchEsListItemSchema>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }
@@ -148,6 +149,7 @@ export const writeResponseHitsToStream = ({
   const stringToAppendOrEmpty = stringToAppend ?? '';
 
   response.hits.hits.forEach((hit) => {
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const value = findSourceValue(hit._source);
     if (value != null) {
       stream.push(`${value}${stringToAppendOrEmpty}`);

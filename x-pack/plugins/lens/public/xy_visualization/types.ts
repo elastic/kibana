@@ -413,7 +413,11 @@ export interface XYArgs {
   };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  curveType?: XYCurveType;
+  hideEndzones?: boolean;
 }
+
+export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
 
 // Persisted parts of the state
 export interface XYState {
@@ -428,6 +432,8 @@ export interface XYState {
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  curveType?: XYCurveType;
+  hideEndzones?: boolean;
 }
 
 export type State = XYState;

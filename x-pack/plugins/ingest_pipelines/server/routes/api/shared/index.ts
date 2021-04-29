@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { isObjectWithKeys } from './is_object_with_keys';
+export { pipelineSchema } from './pipeline_schema';

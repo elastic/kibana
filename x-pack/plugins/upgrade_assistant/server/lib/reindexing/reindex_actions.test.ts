@@ -283,6 +283,7 @@ describe('ReindexActions', () => {
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({
           myIndex: {
             settings: { 'index.mySetting': '1' },

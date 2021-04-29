@@ -16,6 +16,7 @@ export interface ISearchOptions
 |  --- | --- | --- |
 |  [abortSignal](./kibana-plugin-plugins-data-server.isearchoptions.abortsignal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
 |  [indexPattern](./kibana-plugin-plugins-data-server.isearchoptions.indexpattern.md) | <code>IndexPattern</code> | Index pattern reference is used for better error messages |
+|  [inspector](./kibana-plugin-plugins-data-server.isearchoptions.inspector.md) | <code>IInspectorInfo</code> | Inspector integration options |
 |  [isRestore](./kibana-plugin-plugins-data-server.isearchoptions.isrestore.md) | <code>boolean</code> | Whether the session is restored (i.e. search requests should re-use the stored search IDs, rather than starting from scratch) |
 |  [isStored](./kibana-plugin-plugins-data-server.isearchoptions.isstored.md) | <code>boolean</code> | Whether the session is already saved (i.e. sent to background) |
 |  [legacyHitsTotal](./kibana-plugin-plugins-data-server.isearchoptions.legacyhitstotal.md) | <code>boolean</code> | Request the legacy format for the total number of hits. If sending <code>rest_total_hits_as_int</code> to something other than <code>true</code>, this should be set to <code>false</code>. |

@@ -67,6 +67,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+        `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
           'my-slack1': {
             actionTypeId: '.slack',

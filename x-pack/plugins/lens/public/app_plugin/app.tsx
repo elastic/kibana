@@ -14,6 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -37,6 +38,7 @@ import {
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
@@ -80,6 +82,8 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
+  const startSession = useCallback(() => data.search.session.start(), [data]);
+
   const [state, setState] = useState<LensAppState>(() => {
     return {
       query: data.query.queryString.getQuery(),
@@ -94,7 +98,7 @@ export function App({
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
-      searchSessionId: data.search.session.start(),
+      searchSessionId: startSession(),
     };
   });
 
@@ -176,7 +180,7 @@ export function App({
         setState((s) => ({
           ...s,
           filters: data.query.filterManager.getFilters(),
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
         trackUiEvent('app_filters_updated');
       },
@@ -186,21 +190,26 @@ export function App({
       next: () => {
         setState((s) => ({
           ...s,
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
       },
     });
 
     const autoRefreshSubscription = data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe({
-        next: () => {
+      .pipe(
+        tap(() => {
           setState((s) => ({
             ...s,
-            searchSessionId: data.search.session.start(),
+            searchSessionId: startSession(),
           }));
-        },
-      });
+        }),
+        switchMap((done) =>
+          // best way in lens to estimate that all panels are updated is to rely on search session service state
+          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
@@ -212,11 +221,29 @@ export function App({
       kbnUrlStateStorage
     );
 
+    const sessionSubscription = data.search.session
+      .getSession$()
+      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
+      .pipe(delay(0))
+      // then update if it didn't get updated yet
+      .subscribe((newSessionId) => {
+        if (newSessionId) {
+          setState((prevState) => {
+            if (prevState.searchSessionId !== newSessionId) {
+              return { ...prevState, searchSessionId: newSessionId };
+            } else {
+              return prevState;
+            }
+          });
+        }
+      });
+
     return () => {
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
       autoRefreshSubscription.unsubscribe();
+      sessionSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
@@ -227,6 +254,7 @@ export function App({
     data.query,
     history,
     initialContext,
+    startSession,
   ]);
 
   useEffect(() => {
@@ -531,7 +559,13 @@ export function App({
 
   const { TopNavMenu } = navigation.ui;
 
-  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    state.isSaveable && application.capabilities.visualize.save
+  );
+  const savingToDashboardPermitted = Boolean(
+    state.isSaveable && application.capabilities.dashboard?.showWriteControls
+  );
+
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -545,8 +579,10 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
+    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingPermitted,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -577,7 +613,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingPermitted && lastKnownDoc) {
+        if (savingToDashboardPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -597,7 +633,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingPermitted) {
+        if (savingToDashboardPermitted || savingToLibraryPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },
@@ -612,67 +648,66 @@ export function App({
   return (
     <>
       <div className="lnsApp">
-        <div className="lnsApp__header">
-          <TopNavMenu
-            setMenuMountPoint={setHeaderActionMenu}
-            config={topNavConfig}
-            showSearchBar={true}
-            showDatePicker={true}
-            showQueryBar={true}
-            showFilterBar={true}
-            indexPatterns={state.indexPatternsForTopNav}
-            showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-            savedQuery={state.savedQuery}
-            data-test-subj="lnsApp_topNav"
-            screenTitle={'lens'}
-            appName={'lens'}
-            onQuerySubmit={(payload) => {
-              const { dateRange, query } = payload;
-              const currentRange = data.query.timefilter.timefilter.getTime();
-              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-                data.query.timefilter.timefilter.setTime(dateRange);
-                trackUiEvent('app_date_change');
-              } else {
-                // Query has changed, renew the session id.
-                // Time change will be picked up by the time subscription
-                setState((s) => ({
-                  ...s,
-                  searchSessionId: data.search.session.start(),
-                }));
-                trackUiEvent('app_query_change');
-              }
+        <TopNavMenu
+          setMenuMountPoint={setHeaderActionMenu}
+          config={topNavConfig}
+          showSearchBar={true}
+          showDatePicker={true}
+          showQueryBar={true}
+          showFilterBar={true}
+          indexPatterns={state.indexPatternsForTopNav}
+          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+          savedQuery={state.savedQuery}
+          data-test-subj="lnsApp_topNav"
+          screenTitle={'lens'}
+          appName={'lens'}
+          onQuerySubmit={(payload) => {
+            const { dateRange, query } = payload;
+            const currentRange = data.query.timefilter.timefilter.getTime();
+            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+              data.query.timefilter.timefilter.setTime(dateRange);
+              trackUiEvent('app_date_change');
+            } else {
+              // Query has changed, renew the session id.
+              // Time change will be picked up by the time subscription
               setState((s) => ({
                 ...s,
-                query: query || s.query,
+                searchSessionId: startSession(),
               }));
-            }}
-            onSaved={(savedQuery) => {
-              setState((s) => ({ ...s, savedQuery }));
-            }}
-            onSavedQueryUpdated={(savedQuery) => {
-              const savedQueryFilters = savedQuery.attributes.filters || [];
-              const globalFilters = data.query.filterManager.getGlobalFilters();
-              data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-              setState((s) => ({
-                ...s,
-                savedQuery: { ...savedQuery }, // Shallow query for reference issues
-              }));
-            }}
-            onClearSavedQuery={() => {
-              data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-              setState((s) => ({
-                ...s,
-                savedQuery: undefined,
-                filters: data.query.filterManager.getGlobalFilters(),
-                query: data.query.queryString.getDefaultQuery(),
-              }));
-            }}
-            query={state.query}
-            dateRangeFrom={fromDate}
-            dateRangeTo={toDate}
-            indicateNoData={state.indicateNoData}
-          />
-        </div>
+              trackUiEvent('app_query_change');
+            }
+            setState((s) => ({
+              ...s,
+              query: query || s.query,
+            }));
+          }}
+          onSaved={(savedQuery) => {
+            setState((s) => ({ ...s, savedQuery }));
+          }}
+          onSavedQueryUpdated={(savedQuery) => {
+            const savedQueryFilters = savedQuery.attributes.filters || [];
+            const globalFilters = data.query.filterManager.getGlobalFilters();
+            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+            setState((s) => ({
+              ...s,
+              savedQuery: { ...savedQuery }, // Shallow query for reference issues
+              query: savedQuery.attributes.query,
+            }));
+          }}
+          onClearSavedQuery={() => {
+            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+            setState((s) => ({
+              ...s,
+              savedQuery: undefined,
+              filters: data.query.filterManager.getGlobalFilters(),
+              query: data.query.queryString.getDefaultQuery(),
+            }));
+          }}
+          query={state.query}
+          dateRangeFrom={fromDate}
+          dateRangeTo={toDate}
+          indicateNoData={state.indicateNoData}
+        />
         {(!state.isLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
@@ -697,6 +732,7 @@ export function App({
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}

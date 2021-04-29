@@ -10,6 +10,7 @@
 * <<enabling-ssl>>
 * <<load-balancing-es>>
 * <<load-balancing-kibana>>
+* <<accessing-load-balanced-kibana>>
 * <<high-availability>>
 * <<memory>>
 
@@ -56,6 +57,7 @@ protections.
 
 To do this, set `csp.strict` to `true` in your `kibana.yml`:
 
+[source,js]
 --------
 csp.strict: true
 --------
@@ -82,6 +84,7 @@ To use a local client node to load balance Kibana requests:
 . Install Elasticsearch on the same machine as Kibana.
 . Configure the node as a Coordinating only node. In `elasticsearch.yml`, set `node.data`, `node.master` and `node.ingest` to `false`:
 +
+[source,js]
 --------
 # 3. You want this node to be neither master nor data node nor ingest node, but
 #    to act as a "search load balancer" (fetching data from nodes,
@@ -94,11 +97,13 @@ node.ingest: false
 . Configure the client node to join your Elasticsearch cluster. In `elasticsearch.yml`, set the `cluster.name` to the
 name of your cluster.
 +
+[source,js]
 --------
 cluster.name: "my_cluster"
 --------
 . Check your transport and HTTP host configs in `elasticsearch.yml` under `network.host` and `transport.host`. The `transport.host` needs to be on the network reachable to the cluster members, the `network.host` is the network for the HTTP connection for Kibana (localhost:9200 by default).
 +
+[source,js]
 --------
 network.host: localhost
 http.port: 9200
@@ -110,6 +115,7 @@ transport.tcp.port: 9300 - 9400
 . Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.hosts` setting should be set to
 `["localhost:9200"]`.
 +
+[source,js]
 --------
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.hosts: ["http://localhost:9200"]
@@ -121,12 +127,14 @@ elasticsearch.hosts: ["http://localhost:9200"]
 To serve multiple Kibana installations behind a load balancer, you must change the configuration. See {kibana-ref}/settings.html[Configuring Kibana] for details on each setting.
 
 Settings unique across each Kibana instance:
+[source,js]
 --------
 server.uuid
 server.name
 --------
 
 Settings unique across each host (for example, running multiple installations on the same virtual machine):
+[source,js]
 --------
 logging.dest
 path.data
@@ -135,6 +143,7 @@ server.port
 --------
 
 Settings that must be the same:
+[source,js]
 --------
 xpack.security.encryptionKey //decrypting session information
 xpack.reporting.encryptionKey //decrypting reports
@@ -143,10 +152,23 @@ xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys // saved objects encr
 --------
 
 Separate configuration files can be used from the command line by using the `-c` flag:
+[source,js]
 --------
 bin/kibana -c config/instance1.yml
 bin/kibana -c config/instance2.yml
 --------
+
+[float]
+[[accessing-load-balanced-kibana]]
+=== Accessing multiple load-balanced {kib} clusters
+
+To access multiple load-balanced {kib} clusters from the same browser,
+set `xpack.security.cookieName` in the configuration.
+This avoids conflicts between cookies from the different {kib} instances.
+
+In each cluster, {kib} instances should have the same `cookieName`
+value. This will achieve seamless high availability and keep the session
+active in case of failure from the currently used instance.
 
 [float]
 [[high-availability]]
@@ -157,6 +179,7 @@ Kibana will transparently connect to an available node and continue operating.  
 Currently the Console application is limited to connecting to the first node listed.
 
 In kibana.yml:
+[source,js]
 --------
 elasticsearch.hosts:
   - http://elasticsearch1:9200
@@ -175,6 +198,7 @@ it may make sense to tweak limits to meet more specific requirements.
 You can modify this limit by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
 
 The option accepts a limit in MB:
+[source,js]
 --------
 --max-old-space-size=2048
 --------

@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
 
           expect(response.body.serviceCount).to.be(0);
-          expect(response.body.transactionCoordinates.length).to.be(0);
+          expect(response.body.transactionPerMinute.timeseries.length).to.be(0);
         });
       });
     }
@@ -50,14 +50,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         expect(response.body.serviceCount).to.be.greaterThan(0);
-        expect(response.body.transactionCoordinates.length).to.be.greaterThan(0);
+        expect(response.body.transactionPerMinute.timeseries.length).to.be.greaterThan(0);
 
         expectSnapshot(response.body.serviceCount).toMatchInline(`9`);
 
-        expectSnapshot(response.body.transactionCoordinates.length).toMatchInline(`31`);
+        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`64.8`);
+        expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`31`);
 
         expectSnapshot(
-          response.body.transactionCoordinates
+          response.body.transactionPerMinute.timeseries
             .slice(0, 5)
             .map(({ x, y }: { x: number; y: number }) => ({
               x: new Date(x).toISOString(),
@@ -67,23 +68,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "x": "2020-12-08T13:57:00.000Z",
-              "y": 0.166666666666667,
+              "y": 2,
             },
             Object {
               "x": "2020-12-08T13:58:00.000Z",
-              "y": 5.23333333333333,
+              "y": 61,
             },
             Object {
               "x": "2020-12-08T13:59:00.000Z",
-              "y": 4.4,
+              "y": 36,
             },
             Object {
               "x": "2020-12-08T14:00:00.000Z",
-              "y": 5.73333333333333,
+              "y": 75,
             },
             Object {
               "x": "2020-12-08T14:01:00.000Z",
-              "y": 4.33333333333333,
+              "y": 36,
             },
           ]
         `);

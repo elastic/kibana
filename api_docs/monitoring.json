@@ -27,7 +27,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "signature": [
               "() => any"
@@ -41,7 +41,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "signature": [
               "() => void"
@@ -55,10 +55,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "signature": [
-              "() => void"
+              "(esClient: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              ") => void"
             ]
           },
           {
@@ -69,7 +77,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "signature": [
               "() => void"
@@ -78,7 +86,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 92
+          "lineNumber": 93
         },
         "initialIsOpen": false
       }
@@ -111,9 +119,9 @@
           "lineNumber": 92
         },
         "signature": [
-          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
+          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; logs: Readonly<{} & { index: string; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
           "Duration",
-          "; }>; agent: Readonly<{} & { interval: string; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "; }>; agent: Readonly<{} & { interval: string; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
         "initialIsOpen": false
       }
@@ -134,7 +142,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 100
+            "lineNumber": 101
           },
           "signature": [
             "() => any"
@@ -143,7 +151,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 99
+        "lineNumber": 100
       },
       "lifecycle": "setup",
       "initialIsOpen": true

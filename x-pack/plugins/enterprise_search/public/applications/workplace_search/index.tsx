@@ -20,23 +20,23 @@ import { NotFound } from '../shared/not_found';
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
-  ALPHA_PATH,
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
+  SOURCE_ADDED_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   ROLE_MAPPINGS_PATH,
   SECURITY_PATH,
 } from './routes';
 import { SourcesRouter } from './views/content_sources';
+import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
 import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { Overview } from './views/overview';
-import { Overview as OverviewMVP } from './views/overview_mvp';
 import { RoleMappingsRouter } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
@@ -51,7 +51,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
@@ -64,11 +64,15 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
 
-  // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
-  const isOrganization = !pathname.match(personalSourceUrlRegex);
+  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+  const isOrganization = !pathname.match(personalSourceUrlRegex); // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
+
   setContext(isOrganization);
+
+  useEffect(() => {
+    setChromeIsVisible(isOrganization);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hasInitialized) {
@@ -82,8 +86,17 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      <Route path={SOURCE_ADDED_PATH}>
+        <SourceAdded />
+      </Route>
       <Route exact path="/">
-        {errorConnecting ? <ErrorState /> : <OverviewMVP />}
+        {errorConnecting ? (
+          <ErrorState />
+        ) : (
+          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+            <Overview />
+          </Layout>
+        )}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
@@ -97,11 +110,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           readOnlyMode={readOnlyMode}
         >
           <SourcesRouter />
-        </Layout>
-      </Route>
-      <Route path={ALPHA_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <Overview />
         </Layout>
       </Route>
       <Route path={GROUPS_PATH}>

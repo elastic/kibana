@@ -89,6 +89,73 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+/** Packages which should not be included within production code. */
+const DEV_PACKAGES = [
+  'kbn-babel-code-parser',
+  'kbn-dev-utils',
+  'kbn-cli-dev-mode',
+  'kbn-docs-utils',
+  'kbn-es*',
+  'kbn-eslint*',
+  'kbn-optimizer',
+  'kbn-plugin-generator',
+  'kbn-plugin-helpers',
+  'kbn-pm',
+  'kbn-storybook',
+  'kbn-telemetry-tools',
+  'kbn-test',
+];
+
+/** Directories (at any depth) which include dev-only code. */
+const DEV_DIRECTORIES = [
+  '.storybook',
+  '__tests__',
+  '__test__',
+  '__jest__',
+  '__fixtures__',
+  '__mocks__',
+  '__stories__',
+  'e2e',
+  'fixtures',
+  'ftr_e2e',
+  'integration_tests',
+  'manual_tests',
+  'mock',
+  'storybook',
+  'scripts',
+  'test',
+  'test-d',
+  'test_utils',
+  'test_utilities',
+  'test_helpers',
+  'tests_client_integration',
+];
+
+/** File patterns for dev-only code. */
+const DEV_FILE_PATTERNS = [
+  '*.mock.{js,ts,tsx}',
+  '*.test.{js,ts,tsx}',
+  '*.test.helpers.{js,ts,tsx}',
+  '*.stories.{js,ts,tsx}',
+  '*.story.{js,ts,tsx}',
+  '*.stub.{js,ts,tsx}',
+  'mock.{js,ts,tsx}',
+  '_stubs.{js,ts,tsx}',
+  '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
+  '{postcss,webpack}.config.js',
+];
+
+/** Glob patterns which describe dev-only code. */
+const DEV_PATTERNS = [
+  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
+  ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
+  'packages/kbn-interpreter/tasks/**/*',
+  'src/dev/**/*',
+  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
+  'x-pack/plugins/*/server/scripts/**/*',
+];
+
 module.exports = {
   root: true,
 
@@ -343,11 +410,7 @@ module.exports = {
                 errorMessage: `Common code can not import from server or public, use a common directory.`,
               },
               {
-                target: [
-                  'src/legacy/**/*',
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                ],
+                target: ['(src|x-pack)/plugins/**/(public|server)/**/*', 'examples/**/*'],
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
@@ -361,8 +424,6 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
-                  '!src/core/server/utils', // ts alias
-                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -375,7 +436,6 @@ module.exports = {
               },
               {
                 target: [
-                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
@@ -415,26 +475,13 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
+                from: ['plugins/**/*', 'src/plugins/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
-              },
-              {
-                from: ['src/legacy/ui/**/*', 'ui/**/*'],
-                target: [
-                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
-                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                ],
-                allowSameFolder: true,
-                errorMessage:
-                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
-                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
-                  'import those things once at the top level of your plugin and pass those down, just ' +
-                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -491,43 +538,17 @@ module.exports = {
     },
 
     /**
-     * Files that ARE NOT allowed to use devDependencies
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
      */
     {
-      files: ['x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            devDependencies: false,
-            peerDependencies: true,
-            packageDir: '.',
-          },
-        ],
-      },
-    },
-
-    /**
-     * Files that ARE allowed to use devDependencies
-     */
-    {
-      files: [
-        'packages/kbn-es/src/**/*.js',
-        'packages/kbn-interpreter/tasks/**/*.js',
-        'packages/kbn-interpreter/src/plugin/**/*.js',
-        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
-        'x-pack/**/*.test.js',
-        'x-pack/test_utils/**/*',
-        'x-pack/gulpfile.js',
-        'x-pack/plugins/apm/public/utils/testHelpers.js',
-        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
-      ],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: true,
+            /* Files that ARE allowed to use devDependencies */
+            devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
             packageDir: '.',
           },
@@ -1139,7 +1160,7 @@ module.exports = {
             pathGroups: [
               {
                 pattern:
-                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
                 group: 'unknown',
               },
               {
@@ -1357,6 +1378,10 @@ module.exports = {
             ],
             pathGroups: [
               {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
                 pattern: '{@kbn/**,src/**,kibana{,/**}}',
                 group: 'internal',
               },
@@ -1381,6 +1406,24 @@ module.exports = {
       },
     },
 
+    /**
+     * Do not allow `any`
+     */
+    {
+      files: [
+        'packages/kbn-analytics/**',
+        // 'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
     {
       files: [
         // core-team owned code
@@ -1416,22 +1459,6 @@ module.exports = {
           'error',
           {
             patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Single package.json rules, it tells eslint to ignore the child package.json files
-     * and look for dependencies declarations in the single and root level package.json
-     */
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: '.',
           },
         ],
       },

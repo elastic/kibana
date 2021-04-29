@@ -13,7 +13,7 @@ import {
 } from './search/mocks';
 import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
 import { createIndexPatternsStartMock } from './index_patterns/mocks';
-import { DataRequestHandlerContext } from './types';
+import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
   return {

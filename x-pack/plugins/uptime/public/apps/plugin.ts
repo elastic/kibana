@@ -27,13 +27,19 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { FleetStart } from '../../../fleet/public';
+import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
+import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  LazySyntheticsPolicyCreateExtension,
+  LazySyntheticsPolicyEditExtension,
+} from '../components/fleet_package';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
-  observability: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
@@ -41,6 +47,14 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  fleet?: FleetStart;
+}
+
+export interface UptimePluginServices extends Partial<CoreStart> {
+  embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  storage: IStorageWrapper;
 }
 
 export type ClientSetup = void;
@@ -68,18 +82,21 @@ export class UptimePlugin
 
       return UptimeDataHelper(coreStart);
     };
-    plugins.observability.dashboard.register({
-      appName: 'uptime',
-      hasData: async () => {
-        const dataHelper = await getUptimeDataHelper();
-        const status = await dataHelper.indexStatus();
-        return status.docCount > 0;
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUptimeDataHelper();
-        return await dataHelper.overviewData(params);
-      },
-    });
+
+    if (plugins.observability) {
+      plugins.observability.dashboard.register({
+        appName: 'synthetics',
+        hasData: async () => {
+          const dataHelper = await getUptimeDataHelper();
+          const status = await dataHelper.indexStatus();
+          return { hasData: status.docCount > 0, indices: status.indices };
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUptimeDataHelper();
+          return await dataHelper.overviewData(params);
+        },
+      });
+    }
 
     core.application.register({
       id: PLUGIN.ID,
@@ -132,6 +149,22 @@ export class UptimePlugin
         plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
+
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-create',
+        component: LazySyntheticsPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-edit',
+        component: LazySyntheticsPolicyEditExtension,
+      });
+    }
   }
 
   public stop(): void {}

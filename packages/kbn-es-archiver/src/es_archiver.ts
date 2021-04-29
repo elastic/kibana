@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 
@@ -20,14 +20,14 @@ import {
 } from './actions';
 
 interface Options {
-  client: Client;
+  client: KibanaClient;
   dataDir: string;
   log: ToolingLog;
   kbnClient: KbnClient;
 }
 
 export class EsArchiver {
-  private readonly client: Client;
+  private readonly client: KibanaClient;
   private readonly dataDir: string;
   private readonly log: ToolingLog;
   private readonly kbnClient: KbnClient;

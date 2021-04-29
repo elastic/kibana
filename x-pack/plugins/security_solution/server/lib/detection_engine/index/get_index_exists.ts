@@ -15,8 +15,10 @@ export const getIndexExists = async (
     const { body: response } = await esClient.search({
       index,
       size: 0,
-      terminate_after: 1,
       allow_no_indices: true,
+      body: {
+        terminate_after: 1,
+      },
     });
     return response._shards.total > 0;
   } catch (err) {

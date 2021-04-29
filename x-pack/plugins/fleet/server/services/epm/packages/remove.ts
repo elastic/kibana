@@ -32,13 +32,14 @@ export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
+  force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, esClient } = options;
+  const { savedObjectsClient, pkgkey, esClient, force } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false)
+  if (installation.removable === false && !force)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {
@@ -63,7 +64,7 @@ export async function removeInstallation(options: {
   // recreate or delete index patterns when a package is uninstalled
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
   // from the registry again and reinstall the index patterns
-  await installIndexPatterns(savedObjectsClient);
+  await installIndexPatterns({ savedObjectsClient, esClient });
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
@@ -78,6 +79,7 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
+// TODO: this is very much like deleteKibanaSavedObjectsAssets below
 function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
@@ -135,6 +137,7 @@ async function deleteTemplate(esClient: ElasticsearchClient, name: string): Prom
   }
 }
 
+// TODO: this is very much like deleteKibanaAssets above
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedRefs: AssetReference[]
@@ -152,6 +155,9 @@ export async function deleteKibanaSavedObjectsAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.warn(err);
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }

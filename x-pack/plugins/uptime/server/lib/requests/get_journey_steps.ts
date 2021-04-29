@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from 'typings/elasticsearch/search';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';
 
@@ -42,10 +45,13 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
               'monitor.check_group': checkGroup,
             },
           },
-        ],
+        ] as QueryContainer,
       },
     },
-    sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
+    sort: asMutableArray([
+      { 'synthetics.step.index': { order: 'asc' } },
+      { '@timestamp': { order: 'asc' } },
+    ] as const),
     _source: {
       excludes: ['synthetics.blob'],
     },
@@ -53,12 +59,12 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const screenshotIndexes: number[] = result.hits.hits
-    .filter((h) => (h?._source as Ping).synthetics?.type === 'step/screenshot')
-    .map((h) => (h?._source as Ping).synthetics?.step?.index as number);
+  const screenshotIndexes: number[] = (result.hits.hits as Array<SearchHit<Ping>>)
+    .filter((h) => h._source?.synthetics?.type === 'step/screenshot')
+    .map((h) => h._source?.synthetics?.step?.index as number);
 
-  return (result.hits.hits
-    .filter((h) => (h?._source as Ping).synthetics?.type !== 'step/screenshot')
+  return ((result.hits.hits as Array<SearchHit<Ping>>)
+    .filter((h) => h._source?.synthetics?.type !== 'step/screenshot')
     .map((h) => {
       const source = h._source as Ping & { '@timestamp': string };
       return {

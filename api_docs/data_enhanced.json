@@ -46,7 +46,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
-        "lineNumber": 40
+        "lineNumber": 38
       },
       "signature": [
         "void"
@@ -79,8 +79,10 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<void, void, SetupDependencies, ",
-          "StartDependencies",
+          "<void, void, ",
+          "DataEnhancedSetupDependencies",
+          ", ",
+          "DataEnhancedStartDependencies",
           ">"
         ],
         "children": [
@@ -94,6 +96,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -110,7 +113,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 48
+                  "lineNumber": 33
                 }
               }
             ],
@@ -118,7 +121,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 33
             }
           },
           {
@@ -135,18 +138,15 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              },
-              ", unknown>, deps: SetupDependencies) => void"
+              "DataEnhancedStartDependencies",
+              ", unknown>, deps: ",
+              "DataEnhancedSetupDependencies",
+              ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -159,32 +159,27 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStart",
-                    "text": "DataPluginStart"
-                  },
+                  "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               },
               {
+                "id": "def-server.EnhancedDataServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "deps",
                 "isRequired": true,
                 "signature": [
-                  "SetupDependencies"
+                  "DataEnhancedSetupDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               }
             ],
@@ -192,7 +187,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 38
             }
           },
           {
@@ -209,18 +204,13 @@
                 "text": "CoreStart"
               },
               ", { taskManager }: ",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.StartDependencies",
-                "text": "StartDependencies"
-              },
+              "DataEnhancedStartDependencies",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -236,26 +226,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               },
               {
+                "id": "def-server.EnhancedDataServerPlugin.start.$2",
                 "type": "Object",
                 "label": "{ taskManager }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.StartDependencies",
-                    "text": "StartDependencies"
-                  }
+                  "DataEnhancedStartDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               }
             ],
@@ -263,7 +248,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 80
             }
           },
           {
@@ -279,13 +264,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 101
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 42
+          "lineNumber": 27
         },
         "initialIsOpen": false
       }
@@ -335,6 +320,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.pollSearch.$1",
             "type": "Function",
             "label": "search",
             "isRequired": true,
@@ -348,6 +334,7 @@
             }
           },
           {
+            "id": "def-common.pollSearch.$2",
             "type": "Function",
             "label": "cancel",
             "isRequired": false,
@@ -361,6 +348,7 @@
             }
           },
           {
+            "id": "def-common.pollSearch.$3",
             "type": "Object",
             "label": "{ pollInterval = 1000, abortSignal }",
             "isRequired": true,
@@ -531,8 +519,8 @@
               "\nID of the async search request"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 72
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 80
             }
           },
           {
@@ -544,8 +532,8 @@
               "\nSearch strategy used to submit the search request"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 76
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 84
             }
           },
           {
@@ -557,8 +545,8 @@
               "\nstatus"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 80
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 88
             }
           },
           {
@@ -570,8 +558,8 @@
               "\nAn optional error. Set if status is set to error."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 84
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 92
             },
             "signature": [
               "string | undefined"
@@ -579,8 +567,8 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 68
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 76
         },
         "initialIsOpen": false
       },
@@ -598,8 +586,8 @@
             "label": "sessionId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 12
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 13
             }
           },
           {
@@ -611,8 +599,8 @@
               "\nUser-facing session name to be displayed in session management"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 16
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 17
             },
             "signature": [
               "string | undefined"
@@ -627,8 +615,8 @@
               "\nApp that created the session. e.g 'discover'"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 20
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 21
             },
             "signature": [
               "string | undefined"
@@ -643,8 +631,8 @@
               "\nCreation time of the session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 24
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 25
             }
           },
           {
@@ -656,8 +644,8 @@
               "\nLast touch time of the session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 28
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 29
             }
           },
           {
@@ -669,9 +657,25 @@
               "\nExpiration time of the session. Expiration itself is managed by Elasticsearch."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 32
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 33
             }
+          },
+          {
+            "tags": [],
+            "id": "def-common.SearchSessionSavedObjectAttributes.completed",
+            "type": "CompoundType",
+            "label": "completed",
+            "description": [
+              "\nTime of transition into completed state,\n\nCan be \"null\" in case already completed session\ntransitioned into in-progress session"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "string | null | undefined"
+            ]
           },
           {
             "tags": [],
@@ -682,14 +686,14 @@
               "\nstatus"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 36
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 44
             },
             "signature": [
               {
-                "pluginId": "dataEnhanced",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataEnhancedPluginApi",
+                "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SearchSessionStatus",
                 "text": "SearchSessionStatus"
               }
@@ -704,8 +708,8 @@
               "\nurlGeneratorId"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 40
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 48
             },
             "signature": [
               "string | undefined"
@@ -720,8 +724,8 @@
               "\nThe application state that was used to create the session.\nShould be used, for example, to re-load an expired search session."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 45
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 53
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -736,8 +740,8 @@
               "\nApplication state that should be used to restore the session.\nFor example, relative dates are conveted to absolute ones."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 50
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 58
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -752,15 +756,15 @@
               "\nMapping of search request hashes to their corresponsing info (async search id, etc.)"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 54
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 62
             },
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "dataEnhanced",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataEnhancedPluginApi",
+                "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SearchSessionRequestInfo",
                 "text": "SearchSessionRequestInfo"
               },
@@ -776,8 +780,8 @@
               "\nThis value is true if the session was actively stored by the user. If it is false, the session may be purged by the system."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 59
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 67
             }
           },
           {
@@ -789,8 +793,8 @@
               "\nThe realm type/name & username uniquely identifies the user who created this search session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 63
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 71
             },
             "signature": [
               "string | undefined"
@@ -803,8 +807,8 @@
             "label": "realmName",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 64
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 72
             },
             "signature": [
               "string | undefined"
@@ -817,8 +821,8 @@
             "label": "username",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 65
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 73
             },
             "signature": [
               "string | undefined"
@@ -826,8 +830,8 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 11
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -840,8 +844,8 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/status.ts",
-          "lineNumber": 8
+          "path": "src/plugins/data/common/search/session/status.ts",
+          "lineNumber": 9
         },
         "initialIsOpen": false
       }
@@ -903,9 +907,7 @@
           "lineNumber": 27
         },
         "signature": [
-          "IKibanaSearchResponse<ApiResponse<T, ",
-          "Context",
-          ">>"
+          "IKibanaSearchResponse<ApiResponse<T, unknown>>"
         ],
         "initialIsOpen": false
       },
@@ -916,8 +918,8 @@
         "label": "SEARCH_SESSION_TYPE",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 10
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 11
         },
         "signature": [
           "\"search-session\""

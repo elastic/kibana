@@ -62,7 +62,7 @@ const createTestCases = (overwrite: boolean) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const {
     addTests,

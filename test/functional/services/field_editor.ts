@@ -10,12 +10,17 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FieldEditorProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   class FieldEditor {
     public async setName(name: string) {
       await testSubjects.setValue('nameField > input', name);
+    }
+    public async enableCustomLabel() {
+      await testSubjects.setEuiSwitch('customLabelRow > toggle', 'check');
+    }
+    public async setCustomLabel(name: string) {
+      await testSubjects.setValue('customLabelRow > input', name);
     }
     public async enableValue() {
       await testSubjects.setEuiSwitch('valueRow > toggle', 'check');
@@ -33,10 +38,17 @@ export function FieldEditorProvider({ getService }: FtrProviderContext) {
       await browser.pressKeys(script);
     }
     public async save() {
-      await retry.try(async () => {
-        await testSubjects.click('fieldSaveButton');
-        await testSubjects.missingOrFail('fieldSaveButton', { timeout: 2000 });
-      });
+      await testSubjects.click('fieldSaveButton');
+    }
+
+    public async confirmSave() {
+      await testSubjects.setValue('saveModalConfirmText', 'change');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async confirmDelete() {
+      await testSubjects.setValue('deleteModalConfirmText', 'remove');
+      await testSubjects.click('confirmModalConfirmButton');
     }
   }
 

@@ -15,11 +15,16 @@ export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
 export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;
 
+export const TRUSTED_APPS_GET_API = '/api/endpoint/trusted_apps/{id}';
 export const TRUSTED_APPS_LIST_API = '/api/endpoint/trusted_apps';
 export const TRUSTED_APPS_CREATE_API = '/api/endpoint/trusted_apps';
+export const TRUSTED_APPS_UPDATE_API = '/api/endpoint/trusted_apps/{id}';
 export const TRUSTED_APPS_DELETE_API = '/api/endpoint/trusted_apps/{id}';
 export const TRUSTED_APPS_SUMMARY_API = '/api/endpoint/trusted_apps/summary';
 
 export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
 export const BASE_POLICY_ROUTE = `/api/endpoint/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+
+/** Host Isolation Routes */
+export const HOST_ISOLATION_CREATE_API = `/api/endpoint/isolate`;

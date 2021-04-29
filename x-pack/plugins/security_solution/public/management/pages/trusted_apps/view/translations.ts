@@ -10,8 +10,8 @@ import {
   TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntry,
   ConditionEntryField,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export { OS_TITLES } from '../../../common/translations';
@@ -52,14 +52,17 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
   ),
 };
 
-export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
-  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
+  is: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
     defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
+    defaultMessage: 'matches',
   }),
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
@@ -73,8 +76,17 @@ export const PROPERTY_TITLES: Readonly<
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
     defaultMessage: 'Created By',
   }),
+  updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
+    defaultMessage: 'Date Updated',
+  }),
+  updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
+    defaultMessage: 'Updated By',
+  }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',
+  }),
+  effectScope: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.effectScope', {
+    defaultMessage: 'Effect scope',
   }),
 };
 
@@ -120,6 +132,13 @@ export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
   }
 );
 
+export const CARD_EDIT_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.card.editButtonLabel',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
 export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.view.toggle.grid',
   {
@@ -133,10 +152,6 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
     defaultMessage: 'List view',
   }
 );
-
-export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
-  defaultMessage: 'No items found',
-});
 
 export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
   [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(

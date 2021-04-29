@@ -50,7 +50,7 @@ describe('<EditPolicy /> delete phase', () => {
     component.update();
 
     expect(actions.delete.isShown()).toBeFalsy();
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
     expect(actions.delete.isShown()).toBeTruthy();
   });
 
@@ -65,7 +65,7 @@ describe('<EditPolicy /> delete phase', () => {
     component.update();
 
     expect(actions.delete.hasMinAgeInput()).toBeFalsy();
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
     expect(actions.delete.hasMinAgeInput()).toBeTruthy();
   });
 

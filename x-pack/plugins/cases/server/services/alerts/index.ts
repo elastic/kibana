@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { UpdateAlertRequest } from '../../client/types';
 import { AlertInfo } from '../../common';
 import { createCaseError } from '../../common/error';
@@ -84,8 +84,9 @@ export class AlertService {
         return;
       }
 
-      const results = await scopedClusterClient.mget<AlertsResponse>({ body: { docs } });
+      const results = await scopedClusterClient.mget<Alert>({ body: { docs } });
 
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       return results.body;
     } catch (error) {
       throw createCaseError({

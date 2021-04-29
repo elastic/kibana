@@ -20,9 +20,11 @@ describe('find_list_item', () => {
     const options = getFindListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.count.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ count: 1 })
     );
     esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         _scroll_id: '123',
         _shards: getShardMock(),

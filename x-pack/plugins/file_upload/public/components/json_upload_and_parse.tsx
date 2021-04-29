@@ -12,10 +12,11 @@ import { getIndexPatternService } from '../kibana_services';
 import { GeoJsonUploadForm, OnFileSelectParameters } from './geojson_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
-import { FileUploadComponentProps } from '../lazy_load_bundle';
+import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoJsonImporter } from '../importer/geojson_importer';
 import { Settings } from '../../common';
+import { hasImportPermission } from '../api';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -31,6 +32,7 @@ function getWritingToIndexMsg(progress: number) {
 }
 
 interface State {
+  failedPermissionCheck: boolean;
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   importStatus: string;
   importResults?: ImportResults;
@@ -45,6 +47,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   private _isMounted = false;
 
   state: State = {
+    failedPermissionCheck: false,
     geoFieldType: ES_FIELD_TYPES.GEO_SHAPE,
     importStatus: '',
     indexName: '',
@@ -71,6 +74,26 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
 
   _import = async () => {
     if (!this._geojsonImporter) {
+      return;
+    }
+
+    //
+    // check permissions
+    //
+    const canImport = await hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+      indexName: this.state.indexName,
+    });
+    if (!this._isMounted) {
+      return;
+    }
+    if (!canImport) {
+      this.setState({
+        phase: PHASE.COMPLETE,
+        failedPermissionCheck: true,
+      });
+      this.props.onUploadError();
       return;
     }
 
@@ -111,8 +134,9 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     if (initializeImportResp.index === undefined || initializeImportResp.id === undefined) {
       this.setState({
         phase: PHASE.COMPLETE,
+        importResults: initializeImportResp,
       });
-      this.props.onIndexingError();
+      this.props.onUploadError();
       return;
     }
 
@@ -146,7 +170,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         }),
         phase: PHASE.COMPLETE,
       });
-      this.props.onIndexingError();
+      this.props.onUploadError();
       return;
     }
 
@@ -161,6 +185,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       }),
     });
     let indexPattern;
+    let results: FileUploadGeoResults | undefined;
     try {
       indexPattern = await getIndexPatternService().createAndSave(
         {
@@ -168,6 +193,23 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         },
         true
       );
+      if (!indexPattern.id) {
+        throw new Error('Index pattern id not provided');
+      }
+      const geoField = indexPattern.fields.find((field) =>
+        [ES_FIELD_TYPES.GEO_POINT as string, ES_FIELD_TYPES.GEO_SHAPE as string].includes(
+          field.type
+        )
+      );
+      if (!geoField) {
+        throw new Error('geo field not created in index pattern');
+      }
+      results = {
+        indexPatternId: indexPattern.id,
+        geoFieldName: geoField.name,
+        geoFieldType: geoField.type as ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE,
+        docCount: importResults.docCount !== undefined ? importResults.docCount : 0,
+      };
     } catch (error) {
       if (this._isMounted) {
         this.setState({
@@ -176,7 +218,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
           }),
           phase: PHASE.COMPLETE,
         });
-        this.props.onIndexingError();
+        this.props.onUploadError();
       }
       return;
     }
@@ -196,16 +238,13 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       phase: PHASE.COMPLETE,
       importStatus: '',
     });
-    this.props.onIndexingComplete({
-      indexDataResp: importResults,
-      indexPattern,
-    });
+    this.props.onUploadComplete(results!);
   };
 
   _onFileSelect = ({ features, importer, indexName, previewCoverage }: OnFileSelectParameters) => {
     this._geojsonImporter = importer;
 
-    this.props.onFileUpload(
+    this.props.onFileSelect(
       {
         type: 'FeatureCollection',
         features,
@@ -221,7 +260,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       this._geojsonImporter = undefined;
     }
 
-    this.props.onFileRemove();
+    this.props.onFileClear();
   };
 
   _onGeoFieldTypeSelect = (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => {
@@ -235,7 +274,11 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     });
 
     const isReadyToImport = !!name && error === undefined;
-    this.props.onIndexReady(isReadyToImport);
+    if (isReadyToImport) {
+      this.props.enableImportBtn();
+    } else {
+      this.props.disableImportBtn();
+    }
   };
 
   render() {
@@ -255,6 +298,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         <ImportCompleteView
           importResults={this.state.importResults}
           indexPatternResp={this.state.indexPatternResp}
+          indexName={this.state.indexName}
+          failedPermissionCheck={this.state.failedPermissionCheck}
         />
       );
     }
@@ -268,6 +313,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         onFileSelect={this._onFileSelect}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
+        onIndexNameValidationStart={this.props.disableImportBtn}
+        onIndexNameValidationEnd={this.props.enableImportBtn}
       />
     );
   }

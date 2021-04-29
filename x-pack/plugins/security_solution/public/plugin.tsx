@@ -63,16 +63,20 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
+import { SecuritySolutionUiConfigType } from './common/types';
+
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
+  private config: SecuritySolutionUiConfigType;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private detectionsUpdater$ = new Subject<AppUpdater>();
@@ -172,10 +176,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { overview: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
 
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -195,10 +198,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
 
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -218,9 +220,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -240,9 +241,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -262,9 +262,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -284,9 +283,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -306,9 +304,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -328,8 +325,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
     return {
       resolver: async () => {
@@ -453,7 +448,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
-        { composeLibs, createStore, createInitialState },
+        { createStore, createInitialState },
         kibanaIndexPatterns,
         {
           detections: detectionsSubPlugin,
@@ -486,8 +481,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         signal = { name: null };
       }
 
-      const { apolloClient } = composeLibs(coreStart);
-      const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+      const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
       const detectionsStart = detectionsSubPlugin.start(this.storage);
@@ -520,6 +514,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
+            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
           }
         ),
         {
@@ -528,7 +523,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.store.reducer,
           ...managementSubPluginStart.store.reducer,
         },
-        libs$.pipe(pluck('apolloClient')),
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAggregationResponsePart } from '../../../../../../../typings/elasticsearch/aggregations';
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -45,7 +45,7 @@ export function getTransactionDurationChartPreview({
             : []),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
-        ],
+        ] as QueryContainer[],
       },
     };
 
@@ -85,7 +85,7 @@ export function getTransactionDurationChartPreview({
       const x = bucket.key;
       const y =
         aggregationType === 'avg'
-          ? (bucket.agg as MetricsAggregationResponsePart).value
+          ? (bucket.agg as { value: number | null }).value
           : (bucket.agg as { values: Record<string, number | null> }).values[
               percentilesKey
             ];
