@@ -6,11 +6,15 @@
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
   position: absolute;
-  right: 0;
   left: 0;
-  top: 0;
-  bottom: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+  @include euiBreakpoint('l', 'xl') {
+    top: 0 !important;
+    height: 100% !important;
+  }
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiFlyout;
+  }
 }
 
 .lnsDimensionContainer__footer {
@@ -48,4 +52,8 @@
   &:focus {
     background-color: transparent;
   }
+}
+
+.lnsBody--overflowHidden {
+  overflow: hidden;
 }

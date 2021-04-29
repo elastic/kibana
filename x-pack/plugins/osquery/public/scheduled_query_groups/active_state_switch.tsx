@@ -35,11 +35,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const {
     http,
     notifications: { toasts },
-    application: {
-      capabilities: {
-        osquery: { save: hasSaveUICapabilities },
-      },
-    },
   } = useKibana().services;
   const [confirmationModal, setConfirmationModal] = useState(false);
 
@@ -124,7 +119,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
         checked={item.enabled}
-        disabled={!hasSaveUICapabilities || isLoading}
+        disabled={isLoading}
         showLabel={false}
         label=""
         onChange={handleToggleActiveClick}

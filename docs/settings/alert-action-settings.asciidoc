@@ -47,6 +47,88 @@ You can configure the following settings in the `kibana.yml` file.
   | A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections. +
   +
   Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
+ 
+| `xpack.actions.customHostSettings` {ess-icon} 
+  | A list of custom host settings to override existing global settings.
+  Defaults to an empty list. +
+  +
+  Each entry in the list must have a `url` property, to associate a connection
+  type (mail or https), hostname and port with the remaining options in the
+  entry.
+  +
+  In the following example, two custom host settings
+  are defined.  The first provides a custom host setting for mail server
+  `mail.example.com` using port 465 that supplies server certificate authorization
+  data from both a file and inline, and requires TLS for the
+  connection.  The second provides a custom host setting for https server
+  `webhook.example.com` which turns off server certificate authorization.
+
+|===
+
+[source,yaml]
+--
+xpack.actions.customHostSettings:
+  - url: smtp://mail.example.com:465
+    tls: 
+      certificateAuthoritiesFiles: [ 'one.crt' ]
+      certificateAuthoritiesData: |
+          -----BEGIN CERTIFICATE-----
+          ... multiple lines of certificate data here ...
+          -----END CERTIFICATE-----
+    smtp:
+      requireTLS: true
+  - url: https://webhook.example.com
+    tls: 
+      rejectUnauthorized: false
+--
+
+[cols="2*<"]
+|===
+
+| `xpack.actions.customHostSettings[n]`
+`.url` {ess-icon}
+  | A URL associated with this custom host setting.  Should be in the form of
+  `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the
+  port is not provided, 443 is used for `https` and 25 is used for
+  `smtp`.  The `smtp` URLs are used for the Email actions that use this
+  server, and the `https` URLs are used for actions which use `https` to
+  connect to services. +
+  +
+  Entries with `https` URLs can use the `tls` options, and entries with `smtp`
+  URLs can use both the `tls` and `smtp` options. +
+  +
+  No other URL values should be part of this URL, including paths,
+  query strings, and authentication information.  When an http or smtp request
+  is made as part of executing an action, only the protocol, hostname, and
+  port of the URL for that request are used to look up these configuration
+  values.
+
+| `xpack.actions.customHostSettings[n]`
+`.smtp.ignoreTLS` {ess-icon}
+  | A boolean value indicating that TLS must not be used for this connection.
+  The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+
+| `xpack.actions.customHostSettings[n]`
+`.smtp.requireTLS` {ess-icon}
+  | A boolean value indicating that TLS must be used for this connection.
+  The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+
+| `xpack.actions.customHostSettings[n]`
+`.tls.rejectUnauthorized` {ess-icon}
+  | A boolean value indicating whether to bypass server certificate validation.
+  Overrides the general `xpack.actions.rejectUnauthorized` configuration
+  for requests made for this hostname/port.
+
+| `xpack.actions.customHostSettings[n]`
+`.tls.certificateAuthoritiesFiles`
+  | A file name or list of file names of PEM-encoded certificate files to use
+  to validate the server.
+
+| `xpack.actions.customHostSettings[n]`
+`.tls.certificateAuthoritiesData` {ess-icon}
+  | The contents of a PEM-encoded certificate file, or multiple files appended
+  into a single string.  This configuration can be used for environments where
+  the files cannot be made available.  
 
 | `xpack.actions.enabledActionTypes` {ess-icon}
   | A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types. +
@@ -79,13 +161,18 @@ a|`xpack.actions.`
 | `xpack.actions.rejectUnauthorized` {ess-icon}
   | Set to `false` to bypass certificate validation for actions. Defaults to `true`. +
   +
-  As an alternative to setting both `xpack.actions.proxyRejectUnauthorizedCertificates` and `xpack.actions.rejectUnauthorized`, you can point the OS level environment variable `NODE_EXTRA_CA_CERTS` to a file that contains the root CAs needed to trust certificates.
+  As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
+  `xpack.actions.customHostSettings` to set TLS options for specific servers.
 
 | `xpack.actions.maxResponseContentLength` {ess-icon}
   | Specifies the max number of bytes of the http response for requests to external resources. Defaults to 1000000 (1MB).
 
 | `xpack.actions.responseTimeout` {ess-icon}
-  | Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as <count>[ms|s|m|h|d|w|M|Y], for example, '20m', '24h', '7d', '1w'. Defaults to 60s.
+  | Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as: +
+  +
+  `<count>[ms,s,m,h,d,w,M,Y]` +
+  +
+  For example, `20m`, `24h`, `7d`, `1w`. Defaults to `60s`.
 
 
 |===

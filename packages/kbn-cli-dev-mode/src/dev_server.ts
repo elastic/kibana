@@ -146,6 +146,7 @@ export class DevServer {
     const runServer = () =>
       usingServerProcess(this.script, this.argv, (proc) => {
         this.phase$.next('starting');
+        this.ready$.next(false);
 
         // observable which emits devServer states containing lines
         // logged to stdout/stderr, completes when stdio streams complete
