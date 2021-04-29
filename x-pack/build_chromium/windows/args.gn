@@ -25,3 +25,5 @@ is_component_build = false
 
 # Please, consult @elastic/kibana-security before changing/removing this option.
 use_kerberos = false
+
+# target_cpu is appended before build: "x64" or "arm64"
