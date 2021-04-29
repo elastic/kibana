@@ -11,11 +11,11 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
-
-import { EuiCodeBlock } from '@elastic/eui';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
+
+import { SourceEnginesTable } from './components/source_engines_table';
 
 import { SourceEngines } from '.';
 
@@ -25,6 +25,7 @@ const MOCK_ACTIONS = {
 };
 
 const MOCK_VALUES = {
+  // SourceEnginesLogic
   dataLoading: false,
   sourceEngines: [],
 };
@@ -45,11 +46,15 @@ describe('SourceEngines', () => {
   });
 
   describe('happy-path states', () => {
-    it('renders and calls a function to initialize data', () => {
-      setMockValues(MOCK_VALUES);
-      const wrapper = shallow(<SourceEngines />);
+    let wrapper: ShallowWrapper;
 
-      expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
+    beforeAll(() => {
+      setMockValues(MOCK_VALUES);
+      wrapper = shallow(<SourceEngines />);
+    });
+
+    it('renders and calls a function to initialize data', () => {
+      expect(wrapper.find(SourceEnginesTable)).toHaveLength(1);
       expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
     });
   });
