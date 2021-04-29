@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -25,6 +25,8 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
+// If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
