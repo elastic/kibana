@@ -153,7 +153,7 @@ describe('EngineRouter', () => {
 
     expect(wrapper.find(SourceEngines)).toHaveLength(1);
   });
-  
+
   it('renders a search ui view', () => {
     setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
     const wrapper = shallow(<EngineRouter />);
