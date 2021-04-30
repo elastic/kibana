@@ -23,7 +23,7 @@ import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import { getUiApi } from './ui_api';
 
-export interface PluginsSetup {
+interface PluginsSetup {
   spacesOss: SpacesOssPluginSetup;
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
@@ -31,12 +31,19 @@ export interface PluginsSetup {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
-export interface PluginsStart {
+interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
 }
 
+/**
+ * Setup contract for the spaces plugin.
+ */
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
+
+/**
+ * Start contract for the spaces plugin.
+ */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
