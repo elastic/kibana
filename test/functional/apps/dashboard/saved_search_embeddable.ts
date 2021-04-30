@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const marks = $('mark')
         .toArray()
         .map((mark) => $(mark).text());
-      expect(marks.length).to.be(11);
+      expect(marks.length).to.above(10);
     });
 
     it('removing a filter removes highlights', async function () {
