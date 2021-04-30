@@ -132,7 +132,7 @@ describe('middleware', () => {
   describe('load event filterby id', () => {
     it('init form with an entry loaded by id from API', async () => {
       service.getOne.mockResolvedValue(createdEventFilterEntryMock());
-      store.dispatch({ type: 'eventFiltersInitFormFromId', payload: { id: 'id' } });
+      store.dispatch({ type: 'eventFiltersInitFromId', payload: { id: 'id' } });
       await spyMiddleware.waitForAction('eventFiltersInitForm');
       expect(store.getState()).toStrictEqual({
         ...initialState,
@@ -147,7 +147,7 @@ describe('middleware', () => {
       service.getOne.mockRejectedValue({
         body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
       });
-      store.dispatch({ type: 'eventFiltersInitFormFromId', payload: { id: 'id' } });
+      store.dispatch({ type: 'eventFiltersInitFromId', payload: { id: 'id' } });
       await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,

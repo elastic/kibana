@@ -195,7 +195,7 @@ describe('Event filter flyout', () => {
   it('should dispatch action to init form store on mount with id', async () => {
     await act(async () => {
       render({ id: 'fakeId', type: 'edit' });
-      await waitForAction('eventFiltersInitFormFromId');
+      await waitForAction('eventFiltersInitFromId');
     });
 
     expect(mockedContext.store.getState().management.eventFilters.form.entry).not.toBeUndefined();

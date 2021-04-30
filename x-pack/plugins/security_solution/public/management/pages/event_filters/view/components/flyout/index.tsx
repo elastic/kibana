@@ -61,7 +61,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     useEffect(() => {
       if (type === 'edit' && !!id) {
         dispatch({
-          type: 'eventFiltersInitFormFromId',
+          type: 'eventFiltersInitFromId',
           payload: { id },
         });
       } else {

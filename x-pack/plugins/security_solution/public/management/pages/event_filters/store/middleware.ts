@@ -145,7 +145,7 @@ const eventFiltersUpdate = async (
   }
 };
 
-const eventFiltersLoadByid = async (
+const eventFiltersLoadById = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
   eventFiltersService: EventFiltersService,
   id: string
@@ -178,8 +178,8 @@ export const createEventFiltersPageMiddleware = (
 
     if (action.type === 'eventFiltersCreateStart') {
       await eventFiltersCreate(store, eventFiltersService);
-    } else if (action.type === 'eventFiltersInitFormFromId') {
-      await eventFiltersLoadByid(store, eventFiltersService, action.payload.id);
+    } else if (action.type === 'eventFiltersInitFromId') {
+      await eventFiltersLoadById(store, eventFiltersService, action.payload.id);
     } else if (action.type === 'eventFiltersUpdateStart') {
       await eventFiltersUpdate(store, eventFiltersService);
     }

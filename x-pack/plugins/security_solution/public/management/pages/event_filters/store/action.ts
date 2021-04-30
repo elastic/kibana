@@ -19,7 +19,7 @@ export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   };
 };
 
-export type EventFiltersInitFormFromId = Action<'eventFiltersInitFormFromId'> & {
+export type EventFiltersInitFromId = Action<'eventFiltersInitFromId'> & {
   payload: {
     id: string;
   };
@@ -51,7 +51,7 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 export type EventFiltersPageAction =
   | EventFiltersCreateStart
   | EventFiltersInitForm
-  | EventFiltersInitFormFromId
+  | EventFiltersInitFromId
   | EventFiltersChangeForm
   | EventFiltersCreateStart
   | EventFiltersUpdateStart
