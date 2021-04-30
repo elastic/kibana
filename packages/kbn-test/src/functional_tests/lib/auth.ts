@@ -9,14 +9,25 @@
 import fs from 'fs';
 import util from 'util';
 import { format as formatUrl } from 'url';
-
 import request from 'request';
-import { delay } from 'bluebird';
+import type { ToolingLog } from '@kbn/dev-utils';
 
 export const DEFAULT_SUPERUSER_PASS = 'changeme';
-
 const readFile = util.promisify(fs.readFile);
 
+function delay(delayMs: number) {
+  return new Promise((res) => setTimeout(res, delayMs));
+}
+
+interface UpdateCredentialsOptions {
+  port: number;
+  auth: string;
+  username: string;
+  password: string;
+  retries?: number;
+  protocol: string;
+  caCert?: Buffer | string;
+}
 async function updateCredentials({
   port,
   auth,
@@ -25,27 +36,28 @@ async function updateCredentials({
   retries = 10,
   protocol,
   caCert,
-}) {
-  const result = await new Promise((resolve, reject) =>
-    request(
-      {
-        method: 'PUT',
-        uri: formatUrl({
-          protocol: `${protocol}:`,
-          auth,
-          hostname: 'localhost',
-          port,
-          pathname: `/_security/user/${username}/_password`,
-        }),
-        json: true,
-        body: { password },
-        ca: caCert,
-      },
-      (err, httpResponse, body) => {
-        if (err) return reject(err);
-        resolve({ httpResponse, body });
-      }
-    )
+}: UpdateCredentialsOptions): Promise<void> {
+  const result = await new Promise<{ body: any; httpResponse: request.Response }>(
+    (resolve, reject) =>
+      request(
+        {
+          method: 'PUT',
+          uri: formatUrl({
+            protocol: `${protocol}:`,
+            auth,
+            hostname: 'localhost',
+            port,
+            pathname: `/_security/user/${username}/_password`,
+          }),
+          json: true,
+          body: { password },
+          ca: caCert,
+        },
+        (err, httpResponse, body) => {
+          if (err) return reject(err);
+          resolve({ httpResponse, body });
+        }
+      )
   );
 
   const { body, httpResponse } = result;
@@ -71,11 +83,25 @@ async function updateCredentials({
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
-export async function setupUsers({ log, esPort, updates, protocol = 'http', caPath }) {
+interface SetupUsersOptions {
+  log: ToolingLog;
+  esPort: number;
+  updates: Array<{ username: string; password: string; roles?: string[] }>;
+  protocol?: string;
+  caPath?: string;
+}
+
+export async function setupUsers({
+  log,
+  esPort,
+  updates,
+  protocol = 'http',
+  caPath,
+}: SetupUsersOptions): Promise<void> {
   // track the current credentials for the `elastic` user as
   // they will likely change as we apply updates
   let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
-  const caCert = caPath && (await readFile(caPath));
+  const caCert = caPath ? await readFile(caPath) : undefined;
 
   for (const { username, password, roles } of updates) {
     // If working with a built-in user, just change the password
@@ -95,6 +121,16 @@ export async function setupUsers({ log, esPort, updates, protocol = 'http', caPa
   }
 }
 
+interface InserUserOptions {
+  port: number;
+  auth: string;
+  username: string;
+  password: string;
+  roles?: string[];
+  retries?: number;
+  protocol: string;
+  caCert?: Buffer | string;
+}
 async function insertUser({
   port,
   auth,
@@ -104,27 +140,28 @@ async function insertUser({
   retries = 10,
   protocol,
   caCert,
-}) {
-  const result = await new Promise((resolve, reject) =>
-    request(
-      {
-        method: 'POST',
-        uri: formatUrl({
-          protocol: `${protocol}:`,
-          auth,
-          hostname: 'localhost',
-          port,
-          pathname: `/_security/user/${username}`,
-        }),
-        json: true,
-        body: { password, roles },
-        ca: caCert,
-      },
-      (err, httpResponse, body) => {
-        if (err) return reject(err);
-        resolve({ httpResponse, body });
-      }
-    )
+}: InserUserOptions): Promise<void> {
+  const result = await new Promise<{ body: any; httpResponse: request.Response }>(
+    (resolve, reject) =>
+      request(
+        {
+          method: 'POST',
+          uri: formatUrl({
+            protocol: `${protocol}:`,
+            auth,
+            hostname: 'localhost',
+            port,
+            pathname: `/_security/user/${username}`,
+          }),
+          json: true,
+          body: { password, roles },
+          ca: caCert,
+        },
+        (err, httpResponse, body) => {
+          if (err) return reject(err);
+          resolve({ httpResponse, body });
+        }
+      )
   );
 
   const { body, httpResponse } = result;
