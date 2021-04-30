@@ -11,9 +11,8 @@ import { shallow, mount } from 'enzyme';
 
 import { EuiFieldText, EuiModal, EuiSelect } from '@elastic/eui';
 
-import { NUMBER } from '../constants/field_types';
-
 import { FIELD_NAME_CORRECTED_PREFIX } from './constants';
+import { SchemaType } from './types';
 
 import { SchemaAddFieldModal } from './';
 
@@ -80,9 +79,11 @@ describe('SchemaAddFieldModal', () => {
 
   it('handles option change', () => {
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
-    wrapper.find(EuiSelect).simulate('change', { target: { value: NUMBER } });
+    wrapper.find(EuiSelect).simulate('change', { target: { value: SchemaType.Number } });
 
-    expect(wrapper.find('[data-test-subj="SchemaSelect"]').prop('value')).toEqual(NUMBER);
+    expect(wrapper.find('[data-test-subj="SchemaSelect"]').prop('value')).toEqual(
+      SchemaType.Number
+    );
   });
 
   it('handles form submission', () => {
