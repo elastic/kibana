@@ -1,0 +1,86 @@
+[[plugin-api-changes]]
+== Plugin API changes in 7.13
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} 7.13.
+
+Other versions: {kibana-ref-all}/7.12/plugin-api-changes.html[7.12] |
+{kibana-ref-all}/7.11/plugin-api-changes-7-11.html[7.11] |
+{kibana-ref-all}/7.10/breaking-changes-7.10.html#general-plugin-API-changes-7-10[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html#general-plugin-API-changes-79[7.9] |
+{kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8]
+
+[[breaking_plugin_v7.13.0_96350]]
+.Ensure LogMeta is ECS-compliant
+[%collapsible]
+====
+
+Core's logging system has been updated to ensure that logs using a JSON layout
+are compliant with https://www.elastic.co/guide/en/ecs/1.9/index.html[ECS].
+If you are using the optional `LogMeta` param in your plugin, check
+the ECS spec and ensure your meta conforms to ECS wherever possible.
+
+We've updated the `LogMeta` TypeScript interface
+to require ECS-friendly data. Should you need to log fields that do not fit
+within the ECS spec, you can provide a generic type parameter that accepts an
+interface that extends from the base `LogMeta`:
+
+```ts
+// plugins/my-plugin/server/plugin.ts
+
+import type { CoreSetup, LogMeta, Plugin, PluginInitializerContext } from 'src/core/server';
+
+interface MyPluginLogMeta extends LogMeta {
+  kibana: { myCustomField: string };
+}
+
+export class MyPlugin implements Plugin  {
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+  }
+
+  setup(core: CoreSetup) {
+    this.logger.warn<MyPluginLogMeta>('my log with custom meta', {
+      kibana: {
+        myCustomField: 'heya',
+      }
+    });
+  }
+}
+```
+
+*Refer to https://github.com/elastic/kibana/pull/96350[#96350]*
+
+====
+
+[[breaking_plugin_v7.13.0_83808]]
+.ES client uses new type definitions
+[%collapsible]
+====
+
+In the previous releases, the {kib} Platform provided an {es} client
+that didn't have any response typings out of the box.
+Going forward, the {es} client is provided with enhanced response type definitions.
+
+If your code already leverages the new {es} client, remove all type definitions
+imported from the legacy `elasticseach` client library and all
+manually maintained type definitions. Instead, use typings provided from the `@elastic/elasticsearch` client:
+
+```diff
+- import { SearchResponse } from 'elasticsearch';
++ import type { estypes } from '@elastic/elasticsearch';
+```
+Also, review all the `@elastic/elasticsearch` library type generics used in your code.
+Most of them are either unnecessary or should be refactored:
+
+```diff
+- const { body } = await client.search<MySearchResponse>(...)
++ const { body } = await client.search(...)
+```
+
+*Refer to https://github.com/elastic/kibana/pull/83808[#83808]*
+
+====

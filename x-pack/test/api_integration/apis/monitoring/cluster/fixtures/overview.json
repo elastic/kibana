@@ -115,7 +115,8 @@
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "isCcrEnabled": true,
   "isPrimary": true,
