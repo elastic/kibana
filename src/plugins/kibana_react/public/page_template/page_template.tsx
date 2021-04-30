@@ -25,8 +25,19 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   children,
   isEmptyState,
   restrictWidth = true,
+  bottomBar,
+  bottomBarProps,
   ...rest
 }) => {
+  // Needed for differentiating between union types
+  let localBottomBarProps = {};
+  if (template === 'default') {
+    localBottomBarProps = {
+      bottomBar,
+      bottomBarProps,
+    };
+  }
+
   /**
    * An easy way to create the right content for empty pages
    */
@@ -49,11 +60,11 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   }
 
   return (
-    // @ts-ignore TODO: Fix disambiguous type for `template`
     <EuiPageTemplate
       template={template}
       pageHeader={pageHeader}
       restrictWidth={restrictWidth}
+      {...localBottomBarProps}
       {...rest}
     >
       {children}

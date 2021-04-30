@@ -126,7 +126,6 @@ export function MapsListView() {
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
 
   return (
-    // @ts-ignore TODO: Missing `tableCaption`
     <TableListView
       headingId="mapsListingPage"
       rowHeader="title"
@@ -142,6 +141,9 @@ export function MapsListView() {
       })}
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
+      })}
+      tableCaption={i18n.translate('xpack.maps.mapListing.tableCaption', {
+        defaultMessage: 'Maps',
       })}
       tableListTitle={getAppTitle()}
       toastNotifications={getToasts()}
