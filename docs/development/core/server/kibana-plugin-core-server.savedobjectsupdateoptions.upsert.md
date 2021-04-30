@@ -4,7 +4,7 @@
 
 ## SavedObjectsUpdateOptions.upsert property
 
-If specified, will perform an upsert with given attributes during update if the document doesn't exist
+If specified, will be used to perform an upsert if the document doesn't exist
 
 <b>Signature:</b>
 

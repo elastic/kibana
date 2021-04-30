@@ -1208,7 +1208,6 @@ export class SavedObjectsRepository {
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: {
           ...upsert,
-          ...attributes,
         },
         updated_at: time,
       });

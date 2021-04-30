@@ -214,7 +214,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  /** If specified, will perform an upsert with given attributes during update if the document doesn't exist */
+  /** If specified, will be used to perform an upsert if the document doesn't exist */
   upsert?: Attributes;
 }
 

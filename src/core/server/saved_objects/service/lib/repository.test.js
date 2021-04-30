@@ -4340,8 +4340,8 @@ describe('SavedObjectsRepository', () => {
               upsert: expect.objectContaining({
                 type: 'index-pattern',
                 'index-pattern': {
+                  title: 'foo',
                   description: 'bar',
-                  title: 'Testing', // attributes prevail over upsertAttributes
                 },
               }),
             }),

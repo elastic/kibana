@@ -17,6 +17,6 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
 |  --- | --- | --- |
 |  [references](./kibana-plugin-core-server.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> | A reference to another saved object. |
 |  [refresh](./kibana-plugin-core-server.savedobjectsupdateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
-|  [upsert](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) | <code>Attributes</code> | If specified, will perform an upsert with given attributes during update if the document doesn't exist |
+|  [upsert](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) | <code>Attributes</code> | If specified, will be used to perform an upsert if the document doesn't exist |
 |  [version](./kibana-plugin-core-server.savedobjectsupdateoptions.version.md) | <code>string</code> | An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 

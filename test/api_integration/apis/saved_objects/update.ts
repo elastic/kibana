@@ -104,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'foo',
             },
             upsert: {
+              title: 'upserted title',
               description: 'upserted description',
-              version: 42,
             },
           })
           .expect(200);
@@ -115,9 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(upserted.attributes).to.eql({
-          title: 'foo',
+          title: 'upserted title',
           description: 'upserted description',
-          version: 42,
         });
 
         await supertest
@@ -140,7 +139,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(notUpserted.attributes).to.eql({
           title: 'foobar',
           description: 'upserted description',
-          version: 42,
         });
       });
 
