@@ -126,28 +126,26 @@ export class TaskScheduling {
     tasks: EphemeralTask[],
     options?: Record<string, unknown>
   ): Promise<RunNowResult[]> {
-    return new Promise(async () =>
-      Promise.allSettled(
-        tasks.map(
-          async (task): Promise<RunNowResult> => {
-            const id = uuid.v4();
-            const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-              ...options,
-              taskInstance: task,
+    return await Promise.all(
+      tasks.map(
+        async (task): Promise<RunNowResult> => {
+          const id = uuid.v4();
+          const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+            ...options,
+            taskInstance: task,
+          });
+          return new Promise(async (resolve, reject) => {
+            this.awaitTaskRunResult(id).then(resolve).catch(reject);
+            this.ephemeralTaskLifecycle.attemptToRun({
+              id,
+              scheduledAt: new Date(),
+              runAt: new Date(),
+              status: TaskStatus.Idle,
+              ownerId: this.taskManagerId,
+              ...modifiedTask,
             });
-            return new Promise(async (resolve, reject) => {
-              this.awaitTaskRunResult(id).then(resolve).catch(reject);
-              this.ephemeralTaskLifecycle.attemptToRun({
-                id,
-                scheduledAt: new Date(),
-                runAt: new Date(),
-                status: TaskStatus.Idle,
-                ownerId: this.taskManagerId,
-                ...modifiedTask,
-              });
-            });
-          }
-        )
+          });
+        }
       )
     );
   }

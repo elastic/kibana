@@ -57,6 +57,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  isEphemeral?: boolean;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {

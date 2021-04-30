@@ -187,6 +187,7 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
+      supportsEphemeralTasks: this.context.supportsEphemeralTasks,
     });
   }
 

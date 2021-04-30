@@ -83,7 +83,7 @@ export class TaskRunnerFactory {
         let actionId = taskParams ? (taskParams as Record<string, string>).actionId : undefined;
         let apiKey = taskParams ? (taskParams as Record<string, string>).apiKey : undefined;
         let references: SavedObjectReference[] = [];
-        if (!actionId) {
+        if (!taskParams) {
           const taskParamsSO = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
             ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
             actionTaskParamsId as string,
@@ -124,7 +124,8 @@ export class TaskRunnerFactory {
         try {
           executorResult = await actionExecutor.execute({
             params,
-            actionId,
+            actionId: actionId as string,
+            isEphemeral: Boolean(taskParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
           });
@@ -147,7 +148,7 @@ export class TaskRunnerFactory {
         }
 
         // Cleanup action_task_params object now that we're done with it
-        if (!actionId) {
+        if (!taskParams) {
           try {
             // If the request has reached this far we can assume the user is allowed to run clean up
             // We would idealy secure every operation but in order to support clean up of legacy alerts

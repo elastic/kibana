@@ -7,7 +7,10 @@
 
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import {
+  asSavedObjectExecutionSource,
+  PluginStartContract as ActionsPluginStartContract,
+} from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
@@ -50,6 +53,7 @@ export interface CreateExecutionHandlerOptions<
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
+  supportsEphemeralTasks: boolean;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -85,6 +89,7 @@ export function createExecutionHandler<
   eventLogger,
   request,
   alertParams,
+  supportsEphemeralTasks,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -143,10 +148,9 @@ export function createExecutionHandler<
       }));
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
-
-    // const promises = [];
-
     const tasks: EphemeralTask[] = [];
+
+    console.log({ actions })
 
     for (const action of actions) {
       if (
@@ -160,20 +164,20 @@ export function createExecutionHandler<
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-
-      // const promise = new Promise(async (resolve, reject) => {
-      //   try {
-      tasks.push({
-        taskType: `actions:${action.actionTypeId}`,
-        params: {
-          ...action.params,
-          taskParams: {
-            actionId: action.id,
-            apiKey,
-          },
-        },
-        state: {},
+      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+      await actionsClient.enqueueExecution({
+        id: action.id,
+        params: action.params,
+        spaceId,
+        apiKey: apiKey ?? null,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
       });
+
+      const all = await actionsClient.getAll();
+      console.log(`all ${action.id}`, JSON.stringify(all, null, 2))
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -198,28 +202,78 @@ export function createExecutionHandler<
           : `actionGroup: '${actionGroup}'`
       } action: ${actionLabel}`;
       eventLogger.logEvent(event);
-      // resolve(true);
-      // } catch (err) {
-      //   return reject(err);
-      // }
-      // });
-      // promises.push(promise);
-      // await actionsClient.executeEphemeralTask({
-      //   taskType: `actions:${action.actionTypeId}`,
-      //   params: {
-      //     ...action.params,
-      //     taskParams: {
-      //       actionId: action.id,
-      //       apiKey,
-      //     },
-      //   },
-      //   state: {},
-      // });
     }
+    return;
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-    await actionsClient.executeEphemeralTasks(tasks);
+    for (const action of actions) {
+      if (
+        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
+      ) {
+        logger.warn(
+          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+        continue;
+      }
 
-    // await Promise.all(promises);
+      // TODO would be nice  to add the action name here, but it's not available
+      const actionLabel = `${action.actionTypeId}:${action.id}`;
+
+      if (supportsEphemeralTasks) {
+        tasks.push({
+          taskType: `actions:${action.actionTypeId}`,
+          params: {
+            ...action.params,
+            taskParams: {
+              actionId: action.id,
+              apiKey,
+            },
+          },
+          state: {},
+        });
+      } else {
+        await actionsClient.enqueueExecution({
+          id: action.id,
+          params: action.params,
+          spaceId,
+          apiKey: apiKey ?? null,
+          source: asSavedObjectExecutionSource({
+            id: alertId,
+            type: 'alert',
+          }),
+        });
+      }
+
+      const all = await actionsClient.getAll();
+      console.log(`all ${action.id}`, JSON.stringify(all, null, 2))
+
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+      const event: IEvent = {
+        event: { action: EVENT_LOG_ACTIONS.executeAction },
+        kibana: {
+          alerting: {
+            instance_id: alertInstanceId,
+            action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
+          },
+          saved_objects: [
+            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+            { type: 'action', id: action.id, ...namespace },
+          ],
+        },
+      };
+
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
+      eventLogger.logEvent(event);
+    }
+
+    if (supportsEphemeralTasks && tasks.length) {
+      await actionsClient.executeEphemeralTasks(tasks);
+    }
   };
 }

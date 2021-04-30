@@ -41,6 +41,7 @@ export interface TaskRunnerContext {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   alertTypeRegistry: AlertTypeRegistry;
   kibanaBaseUrl: string | undefined;
+  supportsEphemeralTasks: boolean;
 }
 
 export class TaskRunnerFactory {

@@ -38,6 +38,7 @@ export interface ActionExecutorContext {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
@@ -67,6 +68,7 @@ export class ActionExecutor {
     params,
     request,
     source,
+    isEphemeral,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -144,6 +146,7 @@ export class ActionExecutor {
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
+        isEphemeral,
       });
     } catch (err) {
       rawResult = {

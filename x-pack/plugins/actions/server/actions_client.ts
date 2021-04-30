@@ -295,6 +295,11 @@ export class ActionsClient {
       };
     }
 
+    const all = await this.unsecuredSavedObjectsClient.find({ type: 'action' });
+    const all2 = await this.getAll();
+    console.log('all', JSON.stringify(all, null, 2))
+    console.log('all2', JSON.stringify(all2, null, 2))
+
     const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
 
     this.auditLogger?.log(
