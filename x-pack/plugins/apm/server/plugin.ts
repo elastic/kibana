@@ -17,6 +17,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { mapValues } from 'lodash';
+import { RuleDataClient } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -42,10 +43,6 @@ import {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
-import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
-import { apmRuleFieldMap } from '../common/rules/apm_rule_field_map';
-
-export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
 
 export class APMPlugin
   implements
@@ -124,20 +121,26 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...apmRuleRegistrySettings,
-      fieldMap: apmRuleFieldMap,
+    const getCoreStart = () =>
+      core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ruleDataClient = new RuleDataClient({
+      alias: plugins.ruleRegistry.getFullAssetName('apm'),
+      ready: async () => {
+        const coreStart = await getCoreStart();
+        return { clusterClient: coreStart.elasticsearch.client.asInternalUser };
+      },
     });
 
     registerRoutes({
       core: {
         setup: core,
-        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+        start: getCoreStart,
       },
       logger: this.logger,
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
-      apmRuleRegistry,
+      ruleDataClient,
       plugins: mapValues(plugins, (value, key) => {
         return {
           setup: value,
@@ -157,12 +160,16 @@ export class APMPlugin
         savedObjectsClient: await getInternalSavedObjectsClient(core),
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
-    registerApmAlerts({
-      registry: apmRuleRegistry,
-      ml: plugins.ml,
-      config$: mergedConfig$,
-      logger: this.logger!.get('rule'),
-    });
+
+    if (plugins.alerting) {
+      registerApmAlerts({
+        ruleDataClient,
+        alerting: plugins.alerting,
+        ml: plugins.ml,
+        config$: mergedConfig$,
+        logger: this.logger!.get('rule'),
+      });
+    }
 
     return {
       config$: mergedConfig$,
@@ -193,7 +200,6 @@ export class APMPlugin
           },
         });
       },
-      ruleRegistry: apmRuleRegistry,
     };
   }
 

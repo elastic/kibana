@@ -4,24 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Required } from 'utility-types';
-import { ObservabilityRuleRegistryClient } from '../../types';
+import {
+  ALERT_UUID,
+  TIMESTAMP,
+} from '../../../../rule_registry/common/technical_rule_data_field_names';
+import { RuleDataClient } from '../../../../rule_registry/server';
 import { kqlQuery, rangeQuery } from '../../utils/queries';
 
 export async function getTopAlerts({
-  ruleRegistryClient,
+  ruleDataClient,
   start,
   end,
   kuery,
   size,
 }: {
-  ruleRegistryClient: ObservabilityRuleRegistryClient;
+  ruleDataClient: RuleDataClient;
   start: number;
   end: number;
   kuery?: string;
   size: number;
 }) {
-  const response = await ruleRegistryClient.search({
+  const response = await ruleDataClient.getReader().search({
     body: {
       query: {
         bool: {
@@ -30,26 +33,17 @@ export async function getTopAlerts({
       },
       fields: ['*'],
       collapse: {
-        field: 'kibana.rac.alert.uuid',
+        field: ALERT_UUID,
       },
       size,
       sort: {
-        '@timestamp': 'desc',
+        [TIMESTAMP]: 'desc',
       },
       _source: false,
     },
   });
 
-  return response.events.map((event) => {
-    return event as Required<
-      typeof event,
-      | 'rule.id'
-      | 'rule.name'
-      | 'kibana.rac.alert.start'
-      | 'event.action'
-      | 'rule.category'
-      | 'rule.name'
-      | 'kibana.rac.alert.duration.us'
-    >;
+  return response.hits.hits.map((hit) => {
+    return hit.fields;
   });
 }

@@ -60,5 +60,3 @@ export { useChartTheme } from './hooks/use_chart_theme';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
-
-export { FormatterRuleRegistry } from './rules/formatter_rule_registry';

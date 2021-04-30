@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { TypeMapping } from '@elastic/elasticsearch/api/types';
 import { set } from '@elastic/safer-lodash-set';
-import { FieldMap } from '../../../common';
-import { Mappings } from '../types';
+import { FieldMap } from '../../common';
 
-export function mappingFromFieldMap(fieldMap: FieldMap): Mappings {
+export function mappingFromFieldMap(fieldMap: FieldMap): TypeMapping {
   const mappings = {
     dynamic: 'strict' as const,
     properties: {},

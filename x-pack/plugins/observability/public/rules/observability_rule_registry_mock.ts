@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { ObservabilityRuleRegistry } from '../plugin';
+import { ObservabilityRuleRegistry } from './create_observability_rule_registry';
 
 const createRuleRegistryMock = () => ({
-  registerType: () => {},
-  getTypeByRuleId: () => ({ format: () => ({ link: '/test/example' }) }),
-  create: () => createRuleRegistryMock(),
+  registerFormatter: () => {},
 });
 
 export const createObservabilityRuleRegistryMock = () =>
