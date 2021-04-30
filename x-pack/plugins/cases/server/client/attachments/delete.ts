@@ -13,6 +13,8 @@ import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common';
+import { ensureAuthorized } from '../utils';
+import { Operations } from '../../authorization';
 
 /**
  * Parameters for deleting all comments of a case or sub case.
@@ -45,6 +47,8 @@ export async function deleteAll(
     attachmentService,
     userActionService,
     logger,
+    authorization,
+    auditLogger,
   } = clientArgs;
 
   try {
@@ -55,6 +59,18 @@ export async function deleteAll(
       soClient,
       id,
       associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
+    });
+
+    if (comments.total <= 0) {
+      throw Boom.notFound(`No comments found for ${id}.`);
+    }
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      operation: Operations.deleteAllComments,
+      savedObjectIDs: comments.saved_objects.map((comment) => comment.id),
+      owners: comments.saved_objects.map((comment) => comment.attributes.owner),
     });
 
     await Promise.all(
@@ -101,6 +117,8 @@ export async function deleteComment(
     attachmentService,
     userActionService,
     logger,
+    authorization,
+    auditLogger,
   } = clientArgs;
 
   try {
@@ -116,6 +134,14 @@ export async function deleteComment(
     if (myComment == null) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: [myComment.attributes.owner],
+      savedObjectIDs: [myComment.id],
+      operation: Operations.deleteComment,
+    });
 
     const type = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
     const id = subCaseID ?? caseID;
@@ -146,7 +172,7 @@ export async function deleteComment(
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment in route case id: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
       error,
       logger,
     });

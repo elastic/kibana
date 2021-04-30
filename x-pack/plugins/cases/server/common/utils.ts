@@ -286,6 +286,7 @@ export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined)
 type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;
   createdDate: string;
+  owner: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;

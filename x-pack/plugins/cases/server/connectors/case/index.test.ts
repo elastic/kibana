@@ -753,6 +753,7 @@ describe('case connector', () => {
             comment: {
               comment: 'a comment',
               type: CommentType.user,
+              owner: 'securitySolution',
             },
           },
         };
@@ -773,6 +774,7 @@ describe('case connector', () => {
                 id: null,
                 name: null,
               },
+              owner: 'securitySolution',
             },
           },
         };
@@ -1134,6 +1136,7 @@ describe('case connector', () => {
                 username: 'awesome',
               },
               id: 'mock-comment',
+              owner: 'securitySolution',
               pushed_at: null,
               pushed_by: null,
               updated_at: null,
@@ -1157,6 +1160,7 @@ describe('case connector', () => {
             comment: {
               comment: 'a comment',
               type: CommentType.user,
+              owner: 'securitySolution',
             },
           },
         };

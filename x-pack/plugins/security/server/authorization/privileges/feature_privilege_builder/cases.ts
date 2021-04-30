@@ -14,7 +14,7 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 // x-pack/plugins/cases/server/authorization/index.ts
 const readOperations: string[] = [
   'getCase',
-  'findCases',
+  'getComment',
   'getTags',
   'getReporters',
   'findConfigurations',
@@ -23,6 +23,9 @@ const writeOperations: string[] = [
   'createCase',
   'deleteCase',
   'updateCase',
+  'createComment',
+  'deleteComment',
+  'updateComment',
   'createConfiguration',
   'updateConfiguration',
 ];

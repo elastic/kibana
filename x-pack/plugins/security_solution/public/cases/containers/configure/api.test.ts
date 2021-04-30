@@ -53,7 +53,7 @@ describe('Case Configuration API', () => {
   describe('fetch configuration', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(caseConfigurationResposeMock);
+      fetchMock.mockResolvedValue([caseConfigurationResposeMock]);
     });
 
     test('check url, method, signal', async () => {
@@ -106,13 +106,14 @@ describe('Case Configuration API', () => {
 
     test('check url, body, method, signal', async () => {
       await patchCaseConfigure(
+        '123',
         {
           connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
           version: 'WzHJ12',
         },
         abortCtrl.signal
       );
-      expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
+      expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/123', {
         body:
           '{"connector":{"id":"456","name":"My Connector 2","type":".none","fields":null},"version":"WzHJ12"}',
         method: 'PATCH',
@@ -122,6 +123,7 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await patchCaseConfigure(
+        '123',
         {
           connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
           version: 'WzHJ12',

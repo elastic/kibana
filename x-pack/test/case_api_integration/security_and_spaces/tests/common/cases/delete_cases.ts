@@ -61,14 +61,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it(`should delete a case's comments when that case gets deleted`, async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
       // ensure that we can get the comment before deleting the case
-      await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
+      await getComment({
+        supertest,
+        caseId: postedCase.id,
+        commentId: patchedCase.comments![0].id,
+      });
 
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
 
       // make sure the comment is now gone
-      await getComment(supertest, postedCase.id, patchedCase.comments![0].id, 404);
+      await getComment({
+        supertest,
+        caseId: postedCase.id,
+        commentId: patchedCase.comments![0].id,
+        expectedHttpCode: 404,
+      });
     });
 
     it('should create a user action when creating a case', async () => {

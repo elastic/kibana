@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -19,6 +19,17 @@ import {
   getComment,
 } from '../../../../common/lib/utils';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,14 +43,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should get a comment', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
-      const comment = await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      const comment = await getComment({
+        supertest,
+        caseId: postedCase.id,
+        commentId: patchedCase.comments![0].id,
+      });
 
       expect(comment).to.eql(patchedCase.comments![0]);
     });
 
     it('unhappy path - 404s when comment is not there', async () => {
-      await getComment(supertest, 'fake-id', 'fake-id', 404);
+      await getComment({
+        supertest,
+        caseId: 'fake-id',
+        commentId: 'fake-id',
+        expectedHttpCode: 404,
+      });
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
@@ -53,8 +77,91 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       it('should get a sub case comment', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        const comment = await getComment(supertest, caseInfo.id, caseInfo.comments![0].id);
+        const comment = await getComment({
+          supertest,
+          caseId: caseInfo.id,
+          commentId: caseInfo.comments![0].id,
+        });
         expect(comment.type).to.be(CommentType.generatedAlert);
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should get a comment when the user has the correct permissions', async () => {
+        const caseInfo = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const caseWithComment = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+          await getComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            commentId: caseWithComment.comments![0].id,
+            auth: { user, space: 'space1' },
+          });
+        }
+      });
+
+      it('should not get comment when the user does not have correct permissions', async () => {
+        const caseInfo = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const caseWithComment = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+          await getComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            commentId: caseWithComment.comments![0].id,
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        }
+      });
+
+      it('should NOT get a case in a space with no permissions', async () => {
+        const caseInfo = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space2' }
+        );
+
+        const caseWithComment = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space2' },
+        });
+
+        await getComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          commentId: caseWithComment.comments![0].id,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
       });
     });
   });

@@ -10,7 +10,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  Logger,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
@@ -20,11 +25,10 @@ import {
   CaseStatuses,
   CaseType,
   SubCaseAttributes,
-  CommentRequest,
   CaseResponse,
   User,
-  CommentRequestAlertType,
   AlertCommentRequestRt,
+  CommentRequest,
 } from '../../../common/api';
 import {
   buildCaseUserActionItem,
@@ -45,7 +49,8 @@ import {
   ENABLE_CASE_CONNECTOR,
 } from '../../../common/constants';
 
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { Operations } from '../../authorization';
 
 async function getSubCase({
   caseService,
@@ -106,27 +111,21 @@ async function getSubCase({
   return newSubCase;
 }
 
-interface AddCommentFromRuleArgs {
-  casesClientInternal: CasesClientInternal;
-  caseId: string;
-  comment: CommentRequestAlertType;
-  savedObjectsClient: SavedObjectsClientContract;
-  attachmentService: AttachmentService;
-  caseService: CaseService;
-  userActionService: CaseUserActionService;
-  logger: Logger;
-}
+const addGeneratedAlerts = async (
+  { caseId, comment }: AddArgs,
+  clientArgs: CasesClientArgs,
+  casesClientInternal: CasesClientInternal
+): Promise<CaseResponse> => {
+  const {
+    savedObjectsClient,
+    attachmentService,
+    caseService,
+    userActionService,
+    logger,
+    auditLogger,
+    authorization,
+  } = clientArgs;
 
-const addGeneratedAlerts = async ({
-  savedObjectsClient,
-  attachmentService,
-  caseService,
-  userActionService,
-  casesClientInternal,
-  caseId,
-  comment,
-  logger,
-}: AddCommentFromRuleArgs): Promise<CaseResponse> => {
   const query = pipe(
     AlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -141,6 +140,15 @@ const addGeneratedAlerts = async ({
 
   try {
     const createdDate = new Date().toISOString();
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: [comment.owner],
+      savedObjectIDs: [savedObjectID],
+      operation: Operations.createComment,
+    });
 
     const caseInfo = await caseService.getCase({
       soClient: savedObjectsClient,
@@ -181,7 +189,12 @@ const addGeneratedAlerts = async ({
     const {
       comment: newComment,
       commentableCase: updatedCase,
-    } = await commentableCase.createComment({ createdDate, user: userDetails, commentReq: query });
+    } = await commentableCase.createComment({
+      createdDate,
+      user: userDetails,
+      commentReq: query,
+      id: savedObjectID,
+    });
 
     if (
       (newComment.attributes.type === CommentType.alert ||
@@ -283,16 +296,20 @@ async function getCombinedCase({
   }
 }
 
-interface AddCommentArgs {
+/**
+ * The arguments needed for creating a new attachment to a case.
+ */
+export interface AddArgs {
   caseId: string;
   comment: CommentRequest;
 }
 
 export const addComment = async (
-  { caseId, comment }: AddCommentArgs,
+  addArgs: AddArgs,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CaseResponse> => {
+  const { comment, caseId } = addArgs;
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -305,6 +322,8 @@ export const addComment = async (
     attachmentService,
     user,
     logger,
+    authorization,
+    auditLogger,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -314,20 +333,21 @@ export const addComment = async (
       );
     }
 
-    return addGeneratedAlerts({
-      caseId,
-      comment,
-      casesClientInternal,
-      savedObjectsClient,
-      userActionService,
-      caseService,
-      attachmentService,
-      logger,
-    });
+    return addGeneratedAlerts(addArgs, clientArgs, casesClientInternal);
   }
 
   decodeCommentRequest(comment);
   try {
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      operation: Operations.createComment,
+      owners: [comment.owner],
+      savedObjectIDs: [savedObjectID],
+    });
+
     const createdDate = new Date().toISOString();
 
     const combinedCase = await getCombinedCase({
@@ -350,6 +370,7 @@ export const addComment = async (
       createdDate,
       user: userInfo,
       commentReq: query,
+      id: savedObjectID,
     });
 
     if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {

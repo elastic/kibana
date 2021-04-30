@@ -22,6 +22,8 @@ import {
   CasesStatusResponseRt,
   CasesStatusResponse,
   throwErrors,
+  CasesConfigurationsResponse,
+  CaseConfigurationsResponseRt,
   CasesConfigureResponse,
   CaseConfigureResponseRt,
   CaseUserActionsResponse,
@@ -92,6 +94,14 @@ export const decodeCasesResponse = (respCase?: CasesResponse) =>
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+
+// TODO: might need to refactor this
+export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+  return pipe(
+    CaseConfigurationsResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+};
 
 export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
   pipe(

@@ -137,8 +137,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         // post 2 comments
-        await createComment(supertest, postedCase.id, postCommentUserReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
 
         const cases = await findCases({ supertest });
         expect(cases).to.eql({
@@ -566,7 +570,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases', async () => {
         await Promise.all([
           // Create case owned by the security solution user
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
@@ -576,7 +580,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }
           ),
           // Create case owned by the observability user
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture' }),
             200,
@@ -651,7 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
         await Promise.all([
           // super user creates a case with owner securitySolutionFixture
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
@@ -661,7 +665,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }
           ),
           // super user creates a case with owner observabilityFixture
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture' }),
             200,
@@ -692,7 +696,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should NOT allow to pass a filter query parameter', async () => {
         await supertest
           .get(
-            `${CASES_URL}/_find?sortOrder=asc&filter=cases.attributes.owner=observabilityFixture`
+            `${CASES_URL}/_find?sortOrder=asc&filter=cases.attributes.owner:"observabilityFixture"`
           )
           .set('kbn-xsrf', 'true')
           .send()
@@ -725,7 +729,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respect the owner filter when having permissions', async () => {
         await Promise.all([
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
@@ -734,7 +738,7 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             }
           ),
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture' }),
             200,
@@ -762,7 +766,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         await Promise.all([
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
@@ -771,7 +775,7 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             }
           ),
-          await createCase(
+          createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'observabilityFixture' }),
             200,

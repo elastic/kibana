@@ -84,6 +84,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setMappings: result.current.setMappings,
         version: caseConfigurationCamelCaseResponseMock.version,
+        id: caseConfigurationCamelCaseResponseMock.id,
       });
     });
   });
@@ -286,6 +287,7 @@ describe('useConfigure', () => {
       Promise.resolve({
         ...caseConfigurationCamelCaseResponseMock,
         version: '',
+        id: '',
       })
     );
     const spyOnPostCaseConfigure = jest.spyOn(api, 'postCaseConfigure');

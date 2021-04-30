@@ -73,9 +73,7 @@ export const find = async (
               ? queryParams.searchFields
               : [queryParams.searchFields]
             : queryParams.searchFields,
-        fields: queryParams.fields
-          ? includeFieldsRequiredForAuthentication(queryParams.fields)
-          : queryParams.fields,
+        fields: includeFieldsRequiredForAuthentication(queryParams.fields),
       },
       subCaseOptions: caseQueries.subCase,
     });

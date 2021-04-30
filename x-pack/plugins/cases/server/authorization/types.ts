@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { EcsEventType, KibanaRequest } from 'kibana/server';
 import { KueryNode } from 'src/plugins/data/common';
-import { EventType } from '../../../security/server';
 import { Space } from '../../../spaces/server';
 
 /**
@@ -21,24 +20,37 @@ export interface Verbs {
 
 export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
-// TODO: we need to have an operation per entity route so I think we need to create a bunch like
-//  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
-
-// if you add a value here you'll likely also need to make changes here:
-// x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+/**
+ * Read operations for the cases APIs.
+ *
+ * NOTE: If you add a value here you'll likely also need to make changes here:
+ * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ */
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
+  GetComment = 'getComment',
+  GetAllComments = 'getAllComments',
+  FindComments = 'findComments',
   GetTags = 'getTags',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
 }
 
-// TODO: comments
+/**
+ * Write operations for the cases APIs.
+ *
+ * NOTE: If you add a value here you'll likely also need to make changes here:
+ * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ */
 export enum WriteOperations {
   CreateCase = 'createCase',
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
+  CreateComment = 'createComment',
+  DeleteAllComments = 'deleteAllComments',
+  DeleteComment = 'deleteComment',
+  UpdateComment = 'updateComment',
   CreateConfiguration = 'createConfiguration',
   UpdateConfiguration = 'updateConfiguration',
 }
@@ -47,11 +59,30 @@ export enum WriteOperations {
  * Defines the structure for a case API route.
  */
 export interface OperationDetails {
-  type: EventType;
-  name: ReadOperations | WriteOperations;
+  /**
+   * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
+   */
+  type: EcsEventType;
+  /**
+   * The name of the operation to authorize against for the privilege check.
+   * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   */
+  name: string;
+  /**
+   * The ECS `event.action` field, should be in the form of <operation>-<entity> e.g get-comment, find-cases
+   */
   action: string;
+  /**
+   * The verbs that are associated with this type of operation, these should line up with the event type e.g. creating, created, create etc
+   */
   verbs: Verbs;
+  /**
+   * The readable name of the entity being operated on e.g. case, comment, configurations (make it plural if it reads better that way etc)
+   */
   docType: string;
+  /**
+   * The actual saved object type of the entity e.g. cases, cases-comments
+   */
   savedObjectType: string;
 }
 

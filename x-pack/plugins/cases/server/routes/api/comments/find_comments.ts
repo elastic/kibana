@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
@@ -14,15 +12,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectFindOptionsRt, throwErrors } from '../../../../common/api';
+import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
-
-const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
-  subCaseId: rt.string,
-});
 
 export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
   router.get(
@@ -38,7 +31,7 @@ export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
     async (context, request, response) => {
       try {
         const query = pipe(
-          FindQueryParamsRt.decode(request.query),
+          excess(FindQueryParamsRt).decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 

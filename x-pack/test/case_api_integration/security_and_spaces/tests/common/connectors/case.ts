@@ -718,7 +718,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should add a comment of type alert', async () => {
-          // TODO: don't do all this stuff
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);

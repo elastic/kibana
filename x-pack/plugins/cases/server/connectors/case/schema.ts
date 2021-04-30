@@ -15,11 +15,13 @@ export const CaseConfigurationSchema = schema.object({});
 const ContextTypeUserSchema = schema.object({
   type: schema.literal(CommentType.user),
   comment: schema.string(),
+  owner: schema.string(),
 });
 
 const ContextTypeAlertGroupSchema = schema.object({
   type: schema.literal(CommentType.generatedAlert),
   alerts: schema.string(),
+  owner: schema.string(),
 });
 
 export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;
@@ -33,6 +35,7 @@ const ContextTypeAlertSchema = schema.object({
     id: schema.nullable(schema.string()),
     name: schema.nullable(schema.string()),
   }),
+  owner: schema.string(),
 });
 
 export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;

@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
 
@@ -27,6 +28,7 @@ export const CommentAttributesBasicRt = rt.type({
   ]),
   created_at: rt.string,
   created_by: UserRT,
+  owner: rt.string,
   pushed_at: rt.union([rt.string, rt.null]),
   pushed_by: rt.union([UserRT, rt.null]),
   updated_at: rt.union([rt.string, rt.null]),
@@ -42,6 +44,7 @@ export enum CommentType {
 export const ContextTypeUserRt = rt.type({
   comment: rt.string,
   type: rt.literal(CommentType.user),
+  owner: rt.string,
 });
 
 /**
@@ -57,6 +60,7 @@ export const AlertCommentRequestRt = rt.type({
     id: rt.union([rt.string, rt.null]),
     name: rt.union([rt.string, rt.null]),
   }),
+  owner: rt.string,
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
@@ -112,6 +116,12 @@ export const CommentsResponseRt = rt.type({
 
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
+export const FindQueryParamsRt = rt.partial({
+  ...SavedObjectFindOptionsRt.props,
+  subCaseId: rt.string,
+});
+
+export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;

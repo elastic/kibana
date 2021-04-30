@@ -19,6 +19,7 @@ const comments: Comment[] = [
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
     createdBy: { username: 'elastic' },
+    owner: 'securitySolution',
     rule: {
       id: null,
       name: null,
@@ -37,6 +38,7 @@ const comments: Comment[] = [
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
     createdBy: { username: 'elastic' },
+    owner: 'securitySolution',
     pushedAt: null,
     pushedBy: null,
     rule: {

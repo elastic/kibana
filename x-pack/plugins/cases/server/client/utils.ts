@@ -12,9 +12,10 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { EcsEventOutcome, SavedObjectsFindResponse } from 'kibana/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   CaseConnector,
   ESCasesConfigureAttributes,
@@ -28,7 +29,7 @@ import {
   AlertCommentRequestRt,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
-import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
+import { AuditEvent } from '../../../security/server';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
@@ -36,7 +37,7 @@ import {
   isCommentRequestTypeUser,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
-import { Authorization, OperationDetails } from '../authorization';
+import { Authorization, DATABASE_CATEGORY, ECS_OUTCOMES, OperationDetails } from '../authorization';
 import { AuditLogger } from '../../../security/server';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
@@ -118,21 +119,27 @@ export const addStatusFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+interface FilterField {
+  filters?: string | string[];
+  field: string;
+  operator: 'and' | 'or';
+  type?: string;
+}
+
 export const buildFilter = ({
   filters,
   field,
   operator,
   type = CASE_SAVED_OBJECT,
-}: {
-  filters: string | string[];
-  field: string;
-  operator: 'or' | 'and';
-  type?: string;
-}): KueryNode | null => {
+}: FilterField): KueryNode | undefined => {
+  if (filters === undefined) {
+    return;
+  }
+
   const filtersAsArray = Array.isArray(filters) ? filters : [filters];
 
   if (filtersAsArray.length === 0) {
-    return null;
+    return;
   }
 
   return nodeBuilder[operator](
@@ -140,23 +147,46 @@ export const buildFilter = ({
   );
 };
 
+/**
+ * Combines the authorized filters with the requested owners.
+ */
 export const combineAuthorizedAndOwnerFilter = (
   owner?: string[] | string,
   authorizationFilter?: KueryNode,
   savedObjectType?: string
 ): KueryNode | undefined => {
-  const filters = Array.isArray(owner) ? owner : owner != null ? [owner] : [];
   const ownerFilter = buildFilter({
-    filters,
+    filters: owner,
     field: 'owner',
     operator: 'or',
     type: savedObjectType,
   });
 
-  return authorizationFilter != null && ownerFilter != null
-    ? combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter)
-    : authorizationFilter ?? ownerFilter ?? undefined;
+  return combineFilterWithAuthorizationFilter(ownerFilter, authorizationFilter);
 };
+
+/**
+ * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined
+ * filters and return a KueryNode with the filters and'd together.
+ */
+export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode | undefined {
+  const filters = nodes.filter((node): node is KueryNode => node !== undefined);
+  if (filters.length <= 0) {
+    return;
+  }
+  return nodeBuilder.and(filters);
+}
+
+/**
+ * Creates a KueryNode from a string expression. Returns undefined if the expression is undefined.
+ */
+export function stringToKueryNode(expression?: string): KueryNode | undefined {
+  if (!expression) {
+    return;
+  }
+
+  return esKuery.fromKueryExpression(expression);
+}
 
 /**
  * Constructs the filters used for finding cases and sub cases.
@@ -238,10 +268,7 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null && caseFilters != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
       };
@@ -263,17 +290,11 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
         subCase: {
-          filter:
-            authorizationFilter != null && subCaseFilters != null
-              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
-              : subCaseFilters,
+          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
           sortField,
         },
       };
@@ -314,17 +335,11 @@ export const constructQueryOptions = ({
 
       return {
         case: {
-          filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
-              : caseFilters,
+          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
           sortField,
         },
         subCase: {
-          filter:
-            authorizationFilter != null && subCaseFilters != null
-              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
-              : subCaseFilters,
+          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
           sortField,
         },
       };
@@ -467,6 +482,52 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
 };
 
 /**
+ * Creates an AuditEvent describing the state of a request.
+ */
+function createAuditMsg({
+  operation,
+  outcome,
+  error,
+  savedObjectID,
+}: {
+  operation: OperationDetails;
+  savedObjectID?: string;
+  outcome?: EcsEventOutcome;
+  error?: Error;
+}): AuditEvent {
+  const doc =
+    savedObjectID != null
+      ? `${operation.savedObjectType} [id=${savedObjectID}]`
+      : `a ${operation.docType}`;
+  const message = error
+    ? `Failed attempt to ${operation.verbs.present} ${doc}`
+    : outcome === ECS_OUTCOMES.unknown
+    ? `User is ${operation.verbs.progressive} ${doc}`
+    : `User has ${operation.verbs.past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action: operation.action,
+      category: DATABASE_CATEGORY,
+      type: [operation.type],
+      outcome: outcome ?? (error ? ECS_OUTCOMES.failure : ECS_OUTCOMES.success),
+    },
+    ...(savedObjectID != null && {
+      kibana: {
+        saved_object: { type: operation.savedObjectType, id: savedObjectID },
+      },
+    }),
+    ...(error != null && {
+      error: {
+        code: error.name,
+        message: error.message,
+      },
+    }),
+  };
+}
+
+/**
  * Wraps the Authorization class' ensureAuthorized call in a try/catch to handle the audit logging
  * on a failure.
  */
@@ -483,12 +544,19 @@ export async function ensureAuthorized({
   authorization: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
 }) {
-  try {
-    return await authorization.ensureAuthorized(owners, operation);
-  } catch (error) {
+  const logSavedObjects = ({ outcome, error }: { outcome?: EcsEventOutcome; error?: Error }) => {
     for (const savedObjectID of savedObjectIDs) {
-      auditLogger?.log(createAuditMsg({ operation, error, savedObjectID }));
+      auditLogger?.log(createAuditMsg({ operation, outcome, error, savedObjectID }));
     }
+  };
+
+  try {
+    await authorization.ensureAuthorized(owners, operation);
+
+    // log that we're attempting an operation
+    logSavedObjects({ outcome: ECS_OUTCOMES.unknown });
+  } catch (error) {
+    logSavedObjects({ error });
     throw error;
   }
 }
@@ -500,6 +568,12 @@ export async function ensureAuthorized({
 interface OwnerEntity {
   owner: string;
   id: string;
+}
+
+interface AuthFilterHelpers {
+  filter?: KueryNode;
+  ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => void;
+  logSuccessfulAuthorization: () => void;
 }
 
 /**
@@ -514,7 +588,7 @@ export async function getAuthorizationFilter({
   operation: OperationDetails;
   authorization: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
-}) {
+}): Promise<AuthFilterHelpers> {
   try {
     const {
       filter,
@@ -539,50 +613,4 @@ export async function getAuthorizationFilter({
     auditLogger?.log(createAuditMsg({ error, operation }));
     throw error;
   }
-}
-
-/**
- * Creates an AuditEvent describing the state of a request.
- */
-export function createAuditMsg({
-  operation,
-  outcome,
-  error,
-  savedObjectID,
-}: {
-  operation: OperationDetails;
-  savedObjectID?: string;
-  outcome?: EventOutcome;
-  error?: Error;
-}): AuditEvent {
-  const doc =
-    savedObjectID != null
-      ? `${operation.savedObjectType} [id=${savedObjectID}]`
-      : `a ${operation.docType}`;
-  const message = error
-    ? `Failed attempt to ${operation.verbs.present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
-    ? `User is ${operation.verbs.progressive} ${doc}`
-    : `User has ${operation.verbs.past} ${doc}`;
-
-  return {
-    message,
-    event: {
-      action: operation.action,
-      category: EventCategory.DATABASE,
-      type: operation.type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
-    },
-    ...(savedObjectID != null && {
-      kibana: {
-        saved_object: { type: operation.savedObjectType, id: savedObjectID },
-      },
-    }),
-    ...(error != null && {
-      error: {
-        code: error.name,
-        message: error.message,
-      },
-    }),
-  };
 }

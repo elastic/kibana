@@ -28,6 +28,7 @@ export interface State extends ConnectorConfiguration {
   mappings: CaseConnectorMapping[];
   persistLoading: boolean;
   version: string;
+  id: string;
 }
 export type Action =
   | {
@@ -52,6 +53,10 @@ export type Action =
     }
   | {
       type: 'setVersion';
+      payload: string;
+    }
+  | {
+      type: 'setID';
       payload: string;
     }
   | {
@@ -84,6 +89,11 @@ export const configureCasesReducer = (state: State, action: Action) => {
       return {
         ...state,
         version: action.payload,
+      };
+    case 'setID':
+      return {
+        ...state,
+        id: action.payload,
       };
     case 'setCurrentConfiguration': {
       return {
@@ -145,6 +155,7 @@ export const initialState: State = {
   mappings: [],
   persistLoading: false,
   version: '',
+  id: '',
 };
 
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
@@ -206,6 +217,14 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
+  // TODO: refactor
+  const setID = useCallback((id: string) => {
+    dispatch({
+      payload: id,
+      type: 'setID',
+    });
+  }, []);
+
   const [, dispatchToaster] = useStateToaster();
   const isCancelledRefetchRef = useRef(false);
   const abortCtrlRefetchRef = useRef(new AbortController());
@@ -229,6 +248,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             setClosureType(res.closureType);
           }
           setVersion(res.version);
+          setID(res.id);
           setMappings(res.mappings);
 
           if (!state.firstLoad) {
@@ -278,14 +298,17 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const connectorObj = {
           connector,
           closure_type: closureType,
-          // TODO: use constant after https://github.com/elastic/kibana/pull/97646 is being merged
-          owner: 'securitySolution',
         };
 
         const res =
           state.version.length === 0
-            ? await postCaseConfigure(connectorObj, abortCtrlPersistRef.current.signal)
+            ? await postCaseConfigure(
+                // TODO: use constant after https://github.com/elastic/kibana/pull/97646 is being merged
+                { ...connectorObj, owner: 'securitySolution' },
+                abortCtrlPersistRef.current.signal
+              )
             : await patchCaseConfigure(
+                state.id,
                 {
                   ...connectorObj,
                   version: state.version,
@@ -299,6 +322,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             setClosureType(res.closureType);
           }
           setVersion(res.version);
+          setID(res.id);
           setMappings(res.mappings);
           if (setCurrentConfiguration != null) {
             setCurrentConfiguration({
@@ -340,6 +364,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       setMappings,
       setPersistLoading,
       setVersion,
+      setID,
       state,
     ]
   );

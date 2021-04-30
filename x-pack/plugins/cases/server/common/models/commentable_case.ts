@@ -119,6 +119,10 @@ export class CommentableCase {
     return this.subCase?.id;
   }
 
+  private get owner(): string {
+    return this.collection.attributes.owner;
+  }
+
   private buildRefsToCase(): SavedObjectReference[] {
     const subCaseSOType = SUB_CASE_SAVED_OBJECT;
     const caseSOType = CASE_SAVED_OBJECT;
@@ -244,10 +248,12 @@ export class CommentableCase {
     createdDate,
     user,
     commentReq,
+    id,
   }: {
     createdDate: string;
     user: User;
     commentReq: CommentRequest;
+    id: string;
   }): Promise<NewCommentResp> {
     try {
       if (commentReq.type === CommentType.alert) {
@@ -260,6 +266,10 @@ export class CommentableCase {
         }
       }
 
+      if (commentReq.owner !== this.owner) {
+        throw Boom.badRequest('The owner field of the comment must match the case');
+      }
+
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
           soClient: this.soClient,
@@ -270,6 +280,7 @@ export class CommentableCase {
             ...user,
           }),
           references: this.buildRefsToCase(),
+          id,
         }),
         this.update({ date: createdDate, user }),
       ]);

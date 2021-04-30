@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { EventType } from '../../../security/server';
-import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
+import { EcsEventCategory, EcsEventOutcome, EcsEventType } from 'kibana/server';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -37,13 +41,44 @@ const deleteVerbs: Verbs = {
   past: 'deleted',
 };
 
+const EVENT_TYPES: Record<string, EcsEventType> = {
+  creation: 'creation',
+  deletion: 'deletion',
+  change: 'change',
+  access: 'access',
+};
+
+/**
+ * These values need to match the respective values in this file: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+ * These are shared between find, get, get all, and delete/delete all
+ * There currently isn't a use case for a user to delete one comment but not all or differentiating between get, get all,
+ * and find operations from a privilege stand point.
+ */
+const DELETE_COMMENT_OPERATION = 'deleteComment';
+const ACCESS_COMMENT_OPERATION = 'getComment';
+const ACCESS_CASE_OPERATION = 'getCase';
+
+/**
+ * Database constant for ECS category for use for audit logging.
+ */
+export const DATABASE_CATEGORY: EcsEventCategory[] = ['database'];
+
+/**
+ * ECS Outcomes for audit logging.
+ */
+export const ECS_OUTCOMES: Record<string, EcsEventOutcome> = {
+  failure: 'failure',
+  success: 'success',
+  unknown: 'unknown',
+};
+
 /**
  * Definition of all APIs within the cases backend.
  */
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   // case operations
   [WriteOperations.CreateCase]: {
-    type: EventType.CREATION,
+    type: EVENT_TYPES.creation,
     name: WriteOperations.CreateCase,
     action: 'create-case',
     verbs: createVerbs,
@@ -51,7 +86,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.DeleteCase]: {
-    type: EventType.DELETION,
+    type: EVENT_TYPES.deletion,
     name: WriteOperations.DeleteCase,
     action: 'delete-case',
     verbs: deleteVerbs,
@@ -59,7 +94,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateCase]: {
-    type: EventType.CHANGE,
+    type: EVENT_TYPES.change,
     name: WriteOperations.UpdateCase,
     action: 'update-case',
     verbs: updateVerbs,
@@ -67,7 +102,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.CreateConfiguration]: {
-    type: EventType.CREATION,
+    type: EVENT_TYPES.creation,
     name: WriteOperations.CreateConfiguration,
     action: 'create-configuration',
     verbs: createVerbs,
@@ -75,31 +110,39 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateConfiguration]: {
-    type: EventType.CHANGE,
+    type: EVENT_TYPES.change,
     name: WriteOperations.UpdateConfiguration,
     action: 'update-configuration',
     verbs: updateVerbs,
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
+  [ReadOperations.FindConfigurations]: {
+    type: EVENT_TYPES.access,
+    name: ReadOperations.FindConfigurations,
+    action: 'find-configurations',
+    verbs: accessVerbs,
+    docType: 'case configurations',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
   [ReadOperations.GetCase]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.GetCase,
+    type: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
     action: 'get-case',
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.FindCases]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.FindCases,
+    type: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
     action: 'find-cases',
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetTags]: {
-    type: EventType.ACCESS,
+    type: EVENT_TYPES.access,
     name: ReadOperations.GetCase,
     action: 'get-tags',
     verbs: accessVerbs,
@@ -107,19 +150,68 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetReporters]: {
-    type: EventType.ACCESS,
+    type: EVENT_TYPES.access,
     name: ReadOperations.GetReporters,
     action: 'get-reporters',
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
-  [ReadOperations.FindConfigurations]: {
-    type: EventType.ACCESS,
-    name: ReadOperations.FindConfigurations,
-    action: 'find-configurations',
+  // comments operations
+  [WriteOperations.CreateComment]: {
+    type: EVENT_TYPES.creation,
+    name: WriteOperations.CreateComment,
+    action: 'create-comment',
+    verbs: createVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteAllComments]: {
+    type: EVENT_TYPES.deletion,
+    name: DELETE_COMMENT_OPERATION,
+    action: 'delete-all-comments',
+    verbs: deleteVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteComment]: {
+    type: EVENT_TYPES.deletion,
+    name: DELETE_COMMENT_OPERATION,
+    action: 'delete-comment',
+    verbs: deleteVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateComment]: {
+    type: EVENT_TYPES.change,
+    name: WriteOperations.UpdateComment,
+    action: 'update-comments',
+    verbs: updateVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetComment]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'get-comment',
     verbs: accessVerbs,
-    docType: 'case configurations',
-    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetAllComments]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'get-all-comment',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.FindComments]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'find-comments',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
 };

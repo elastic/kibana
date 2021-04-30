@@ -86,7 +86,8 @@ export const AddComment = React.memo(
           }
           postComment({
             caseId,
-            data: { ...data, type: CommentType.user },
+            // TODO: get plugin name
+            data: { ...data, type: CommentType.user, owner: 'securitySolution' },
             updateCase: onCommentPosted,
             subCaseId,
           });

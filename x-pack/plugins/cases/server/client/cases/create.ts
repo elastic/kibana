@@ -22,11 +22,10 @@ import {
   CaseType,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { createAuditMsg, ensureAuthorized, getConnectorFromConfiguration } from '../utils';
+import { ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-import { EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   flattenCaseSavedObject,
@@ -81,15 +80,6 @@ export const create = async (
       auditLogger,
       savedObjectIDs: [savedObjectID],
     });
-
-    // log that we're attempting to create a case
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.createCase,
-        outcome: EventOutcome.UNKNOWN,
-        savedObjectID,
-      })
-    );
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;

@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('pushes a comment appropriately', async () => {
       const { postedCase, connector } = await createCaseWithConnector();
-      await createComment(supertest, postedCase.id, postCommentUserReq);
+      await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
       const theCase = await pushCase(supertest, postedCase.id, connector.id);
 
       expect(theCase.comments![0].pushed_by).to.eql(defaultUser);

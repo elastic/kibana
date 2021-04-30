@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OperationDetails } from '.';
-import { AuditLogger, EventCategory, EventOutcome } from '../../../security/server';
+import { DATABASE_CATEGORY, ECS_OUTCOMES, OperationDetails } from '.';
+import { AuditLogger } from '../../../security/server';
 
 enum AuthorizationResult {
   Unauthorized = 'Unauthorized',
@@ -51,9 +51,9 @@ export class AuthorizationAuditLogger {
       message: `${username ?? 'unknown user'} ${message}`,
       event: {
         action: operation.action,
-        category: EventCategory.DATABASE,
-        type: operation.type,
-        outcome: EventOutcome.SUCCESS,
+        category: DATABASE_CATEGORY,
+        type: [operation.type],
+        outcome: ECS_OUTCOMES.success,
       },
       ...(username != null && {
         user: {
@@ -81,9 +81,9 @@ export class AuthorizationAuditLogger {
       message: `${username ?? 'unknown user'} ${message}`,
       event: {
         action: operation.action,
-        category: EventCategory.DATABASE,
-        type: operation.type,
-        outcome: EventOutcome.FAILURE,
+        category: DATABASE_CATEGORY,
+        type: [operation.type],
+        outcome: ECS_OUTCOMES.failure,
       },
       // add the user information if we have it
       ...(username != null && {

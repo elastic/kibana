@@ -157,6 +157,7 @@ const userActionFieldsAllowed: UserActionField = [
   'status',
   'settings',
   'sub_case',
+  'owner',
 ];
 
 interface CaseSubIDs {

@@ -189,6 +189,7 @@ describe('AddToCaseAction', () => {
         name: 'rule-name',
       },
       type: 'alert',
+      owner: 'securitySolution',
     });
   });
 
@@ -226,6 +227,7 @@ describe('AddToCaseAction', () => {
         name: 'rule-name',
       },
       type: 'alert',
+      owner: 'securitySolution',
     });
   });
 
@@ -257,6 +259,7 @@ describe('AddToCaseAction', () => {
         name: null,
       },
       type: 'alert',
+      owner: 'securitySolution',
     });
   });
 

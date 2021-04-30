@@ -5,11 +5,9 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import * as rt from 'io-ts';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import {
   AllCommentsResponse,
   AllCommentsResponseRt,
@@ -19,7 +17,7 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  SavedObjectFindOptionsRt,
+  FindQueryParams,
 } from '../../../common/api';
 import {
   checkEnabledCaseConnectorOrThrow,
@@ -31,13 +29,14 @@ import {
 import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
-
-const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
-  subCaseId: rt.string,
-});
-
-type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+import {
+  combineFilters,
+  ensureAuthorized,
+  getAuthorizationFilter,
+  stringToKueryNode,
+} from '../utils';
+import { Operations } from '../../authorization';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 export interface FindArgs {
   caseID: string;
@@ -60,14 +59,39 @@ export interface GetArgs {
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
-  { savedObjectsClient: soClient, caseService, logger }: CasesClientArgs
+  clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
+
   try {
     checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      auditLogger,
+      operation: Operations.findComments,
+    });
 
     const id = queryParams?.subCaseId ?? caseID;
     const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;
     const { filter, ...queryWithoutFilter } = queryParams ?? {};
+
+    // if the fields property was defined, make sure we include the 'owner' field in the response
+    const fields = includeFieldsRequiredForAuthentication(queryWithoutFilter.fields);
+
+    // combine any passed in filter property and the filter for the appropriate owner
+    const combinedFilter = combineFilters([stringToKueryNode(filter), authorizationFilter]);
+
     const args = queryParams
       ? {
           caseService,
@@ -80,8 +104,9 @@ export async function find(
             page: defaultPage,
             perPage: defaultPerPage,
             sortField: 'created_at',
-            filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
+            filter: combinedFilter,
             ...queryWithoutFilter,
+            fields,
           },
           associationType,
         }
@@ -93,11 +118,22 @@ export async function find(
             page: defaultPage,
             perPage: defaultPerPage,
             sortField: 'created_at',
+            filter: combinedFilter,
           },
           associationType,
         };
 
     const theComments = await caseService.getCommentsByAssociation(args);
+
+    ensureSavedObjectsAreAuthorized(
+      theComments.saved_objects.map((comment) => ({
+        owner: comment.attributes.owner,
+        id: comment.id,
+      }))
+    );
+
+    logSuccessfulAuthorization();
+
     return CommentsResponseRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
@@ -115,12 +151,26 @@ export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const { attachmentService, savedObjectsClient: soClient, logger } = clientArgs;
+  const {
+    attachmentService,
+    savedObjectsClient: soClient,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     const comment = await attachmentService.get({
       soClient,
       attachmentId: attachmentID,
+    });
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: [comment.attributes.owner],
+      savedObjectIDs: [comment.id],
+      operation: Operations.getComment,
     });
 
     return CommentResponseRt.encode(flattenCommentSavedObject(comment));
@@ -141,7 +191,13 @@ export async function getAll(
   { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { savedObjectsClient: soClient, caseService, logger } = clientArgs;
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     let comments: SavedObjectsFindResponse<CommentAttributes>;
@@ -155,11 +211,22 @@ export async function getAll(
       );
     }
 
+    const {
+      filter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      auditLogger,
+      operation: Operations.getAllComments,
+    });
+
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({
         soClient,
         id: subCaseID,
         options: {
+          filter,
           sortField: defaultSortField,
         },
       });
@@ -169,10 +236,17 @@ export async function getAll(
         id: caseID,
         includeSubCaseComments,
         options: {
+          filter,
           sortField: defaultSortField,
         },
       });
     }
+
+    ensureSavedObjectsAreAuthorized(
+      comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
+    );
+
+    logSuccessfulAuthorization();
 
     return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {

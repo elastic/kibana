@@ -15,8 +15,9 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/consta
 import { AttachmentService, CaseService } from '../../services';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequest, ensureAuthorized } from '../utils';
 import { createCaseError } from '../../common/error';
+import { Operations } from '../../authorization';
 
 export interface UpdateArgs {
   caseID: string;
@@ -89,6 +90,8 @@ export async function update(
     logger,
     user,
     userActionService,
+    authorization,
+    auditLogger,
   } = clientArgs;
 
   try {
@@ -120,8 +123,20 @@ export async function update(
       throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
     }
 
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      operation: Operations.updateComment,
+      savedObjectIDs: [myComment.id],
+      owners: [myComment.attributes.owner],
+    });
+
     if (myComment.attributes.type !== queryRestAttributes.type) {
       throw Boom.badRequest(`You cannot change the type of the comment.`);
+    }
+
+    if (myComment.attributes.owner !== queryRestAttributes.owner) {
+      throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
     const saveObjType = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;

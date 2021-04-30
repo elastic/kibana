@@ -178,6 +178,7 @@ export const transformConnectorComment = (
         alertId: ids,
         index: indices,
         rule,
+        owner: comment.owner,
       };
     } catch (e) {
       throw createCaseError({

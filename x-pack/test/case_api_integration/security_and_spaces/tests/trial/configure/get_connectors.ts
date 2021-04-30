@@ -14,6 +14,8 @@ import {
   getServiceNowConnector,
   getJiraConnector,
   getResilientConnector,
+  createConnector,
+  getServiceNowSIRConnector,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -38,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             service: '__json',
             from: 'bob@example.com',
@@ -62,6 +64,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getResilientConnector())
         .expect(200);
 
+      const sir = await createConnector(supertest, getServiceNowSIRConnector());
+
+      actionsRemover.add('default', sir.id, 'action', 'actions');
       actionsRemover.add('default', snConnector.id, 'action', 'actions');
       actionsRemover.add('default', emailConnector.id, 'action', 'actions');
       actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
@@ -72,6 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(connectors).to.eql([
         {
           id: jiraConnector.id,
@@ -102,6 +108,14 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             apiUrl: 'http://some.non.existent.com',
           },
+          isPreconfigured: false,
+          referencedByCount: 0,
+        },
+        {
+          id: sir.id,
+          actionTypeId: '.servicenow-sir',
+          name: 'ServiceNow Connector',
+          config: { apiUrl: 'http://some.non.existent.com' },
           isPreconfigured: false,
           referencedByCount: 0,
         },

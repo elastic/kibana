@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return a case with comments', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      await createComment(supertest, postedCase.id, postCommentUserReq);
+      await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
       const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
@@ -76,6 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
         pushed_at: null,
         pushed_by: null,
         updated_by: null,
+        owner: 'securitySolutionFixture',
       });
     });
 
@@ -127,9 +128,15 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
-        await createComment(supertestWithoutAuth, postedCase.id, postCommentUserReq, 200, {
-          user: secOnly,
-          space: 'space1',
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+          auth: {
+            user: secOnly,
+            space: 'space1',
+          },
         });
 
         const theCase = await getCase({
@@ -152,6 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_at: null,
           pushed_by: null,
           updated_by: null,
+          owner: 'securitySolutionFixture',
         });
       });
 

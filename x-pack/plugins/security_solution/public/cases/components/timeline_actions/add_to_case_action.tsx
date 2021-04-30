@@ -91,6 +91,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             id: rule?.id != null ? rule.id[0] : null,
             name: rule?.name != null ? rule.name[0] : null,
           },
+          // TODO: get plugin name
+          owner: 'securitySolution',
         },
         updateCase,
       });

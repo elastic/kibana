@@ -32,7 +32,6 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';
-import { EventOutcome } from '../../../../security/server';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
@@ -44,7 +43,6 @@ import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import {
   combineAuthorizedAndOwnerFilter,
-  createAuditMsg,
   ensureAuthorized,
   getAuthorizationFilter,
 } from '../utils';
@@ -276,15 +274,6 @@ async function update(
       savedObjectIDs: [configuration.id],
     });
 
-    // log that we're attempting to update a configuration
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.updateConfiguration,
-        outcome: EventOutcome.UNKNOWN,
-        savedObjectID: configuration.id,
-      })
-    );
-
     if (version !== configuration.version) {
       throw Boom.conflict(
         'This configuration has been updated. Please refresh before saving additional updates.'
@@ -425,15 +414,6 @@ async function create(
       auditLogger,
       savedObjectIDs: [savedObjectID],
     });
-
-    // log that we're attempting to create a configuration
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.createConfiguration,
-        outcome: EventOutcome.UNKNOWN,
-        savedObjectID,
-      })
-    );
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];

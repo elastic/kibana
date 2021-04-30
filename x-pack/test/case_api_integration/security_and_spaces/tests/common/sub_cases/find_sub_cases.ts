@@ -298,6 +298,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 { _id: `${i}`, _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
               ]),
               type: CommentType.generatedAlert,
+              owner: 'securitySolutionFixture',
             };
             responses.push(
               await createSubCase({

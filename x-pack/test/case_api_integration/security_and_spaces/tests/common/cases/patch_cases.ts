@@ -181,7 +181,11 @@ export default ({ getService }: FtrProviderContext): void => {
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
       it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
         await updateCase(supertest, {
           cases: [
             {
@@ -394,7 +398,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
         await updateCase(
           supertest,
           {
@@ -471,11 +479,16 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          const updatedInd1WithComment = await createComment(supertest, individualCase1.id, {
-            alertId: signalID,
-            index: defaultSignalsIndex,
-            rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+          const updatedInd1WithComment = await createComment({
+            supertest,
+            caseId: individualCase1.id,
+            params: {
+              alertId: signalID,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
           });
 
           const individualCase2 = await createCase(supertest, {
@@ -485,11 +498,16 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          const updatedInd2WithComment = await createComment(supertest, individualCase2.id, {
-            alertId: signalID2,
-            index: defaultSignalsIndex,
-            rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+          const updatedInd2WithComment = await createComment({
+            supertest,
+            caseId: individualCase2.id,
+            params: {
+              alertId: signalID2,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
@@ -604,18 +622,28 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          const updatedIndWithComment = await createComment(supertest, individualCase.id, {
-            alertId: signalIDInFirstIndex,
-            index: defaultSignalsIndex,
-            rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+          const updatedIndWithComment = await createComment({
+            supertest,
+            caseId: individualCase.id,
+            params: {
+              alertId: signalIDInFirstIndex,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
           });
 
-          const updatedIndWithComment2 = await createComment(supertest, updatedIndWithComment.id, {
-            alertId: signalIDInSecondIndex,
-            index: signalsIndex2,
-            rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+          const updatedIndWithComment2 = await createComment({
+            supertest,
+            caseId: updatedIndWithComment.id,
+            params: {
+              alertId: signalIDInSecondIndex,
+              index: signalsIndex2,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
@@ -706,14 +734,19 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const caseUpdated = await createComment(supertest, postedCase.id, {
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
+          const caseUpdated = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId: alert._id,
+              index: alert._index,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
             },
-            type: CommentType.alert,
           });
 
           await es.indices.refresh({ index: alert._index });
@@ -756,13 +789,18 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const caseUpdated = await createComment(supertest, postedCase.id, {
-            alertId: alert._id,
-            index: alert._index,
-            type: CommentType.alert,
-            rule: {
-              id: 'id',
-              name: 'name',
+          const caseUpdated = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId: alert._id,
+              index: alert._index,
+              type: CommentType.alert,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'securitySolutionFixture',
             },
           });
 
@@ -801,14 +839,19 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const caseUpdated = await createComment(supertest, postedCase.id, {
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
+          const caseUpdated = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId: alert._id,
+              index: alert._index,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
             },
-            type: CommentType.alert,
           });
 
           // Update the status of the case with sync alerts off
@@ -857,13 +900,18 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const caseUpdated = await createComment(supertest, postedCase.id, {
-            alertId: alert._id,
-            index: alert._index,
-            type: CommentType.alert,
-            rule: {
-              id: 'id',
-              name: 'name',
+          const caseUpdated = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId: alert._id,
+              index: alert._index,
+              type: CommentType.alert,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'securitySolutionFixture',
             },
           });
 

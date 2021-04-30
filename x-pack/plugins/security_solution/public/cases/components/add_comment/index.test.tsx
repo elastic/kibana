@@ -45,6 +45,7 @@ const defaultPostComment = {
 const sampleData: CommentRequest = {
   comment: 'what a cool comment',
   type: CommentType.user,
+  owner: 'securitySolution',
 };
 
 describe('AddComment ', () => {
