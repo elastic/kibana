@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, merge } from 'lodash';
+import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { IndexPattern } from '../../../../../src/plugins/data/common';
@@ -89,21 +89,21 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to]
+    [debouncedQuery, from, to, JSON.stringify(filters)]
   );
 
   useEffect(() => {
     const newValues =
       data?.aggregations?.values.buckets.map(({ key: value }) => value as string) ?? [];
 
-    if (keepHistory) {
+    if (keepHistory && query) {
       setValues((prevState) => {
-        return merge(newValues, prevState);
+        return union(newValues, prevState);
       });
     } else {
       setValues(newValues);
     }
-  }, [data, keepHistory, loading]);
+  }, [data, keepHistory, loading, query]);
 
   return { values, loading };
 };
