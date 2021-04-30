@@ -42,11 +42,11 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
     if (this.props.value) {
-      this._onIndexPatternSelect(this.props.value);
+      this._loadIndexPattern(this.props.value);
     }
   }
 
-  _onIndexPatternSelect = async (indexPatternId: string) => {
+  _loadIndexPattern = async (indexPatternId: string) => {
     if (!indexPatternId || indexPatternId.length === 0 || !this.props.indexPatternService) {
       return;
     }
@@ -58,14 +58,22 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       return;
     }
 
-    // method may be called again before 'get' returns
-    // ignore response when fetched index pattern does not match active index pattern
-    if (this._isMounted && indexPattern.id === indexPatternId) {
-      this.setState({
-        doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
-          return this.props.includedGeoTypes.includes(field.type);
-        }),
-      });
+    if (!this._isMounted || indexPattern.id !== indexPatternId) {
+      return;
+    }
+
+    this.setState({
+      doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
+        return this.props.includedGeoTypes.includes(field.type);
+      }),
+    });
+
+    return indexPattern;
+  };
+
+  _onIndexPatternSelect = async (indexPatternId: string) => {
+    const indexPattern = await this._loadIndexPattern(indexPatternId);
+    if (indexPattern) {
       this.props.onChange(indexPattern);
     }
   };
