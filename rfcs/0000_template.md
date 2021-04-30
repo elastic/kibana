@@ -30,7 +30,7 @@ What are the goals of this project? How will we know if it was successful?
 
 ## Proposal
 
-What are we doing to achieve those goals and solve the problem?
+What are we doing to achieve the goals and solve the problem?
 
 
 # Who is affected and how
