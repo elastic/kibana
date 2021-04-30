@@ -36,7 +36,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn } from '../body/control_columns';
+import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -198,6 +198,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
+
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
 
   return (
     <>
