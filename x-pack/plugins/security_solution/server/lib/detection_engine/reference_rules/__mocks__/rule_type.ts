@@ -16,10 +16,6 @@ export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<Record<string, any>>;
 
   const mockedConfig$ = of({
-    /* eslint-disable @typescript-eslint/naming-convention */
-    // 'apm_oss.errorIndices': 'apm-*',
-    // 'apm_oss.transactionIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
   } as ConfigType);
 
   const loggerMock = ({
@@ -42,7 +38,8 @@ export const createRuleTypeMocks = () => {
       bulkIndex: jest.fn(),
     },
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    alertWithLifecycle: jest.fn(),
+    findAlerts: jest.fn(), // TODO: does this stay?
+    alertWithPersistence: jest.fn(),
     logger: loggerMock,
   };
 
