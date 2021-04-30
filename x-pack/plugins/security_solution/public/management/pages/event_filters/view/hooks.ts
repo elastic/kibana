@@ -49,14 +49,14 @@ export const useEventFiltersNotification = () => {
 
   if (creationSuccessful && formEntry && !wasAlreadyHandled.has(formEntry)) {
     wasAlreadyHandled.add(formEntry);
-    if (formEntry.id) {
+    if (formEntry.item_id) {
       toasts.addSuccess(getUpdateSuccessMessage(formEntry));
     } else {
       toasts.addSuccess(getCreationSuccessMessage(formEntry));
     }
   } else if (actionError && !wasAlreadyHandled.has(actionError)) {
     wasAlreadyHandled.add(actionError);
-    if (formEntry && formEntry.id) {
+    if (formEntry && formEntry.item_id) {
       toasts.addDanger(getUpdateErrorMessage(actionError));
     } else if (formEntry) {
       toasts.addDanger(getCreationErrorMessage(actionError));

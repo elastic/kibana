@@ -6,7 +6,10 @@
  */
 
 import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
-import { ExceptionListItemSchema, UpdateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
@@ -16,7 +19,7 @@ import {
 
 export const getFormEntry = (
   state: EventFiltersListPageState
-): UpdateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
+): UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined => {
   return state.form.entry;
 };
 
