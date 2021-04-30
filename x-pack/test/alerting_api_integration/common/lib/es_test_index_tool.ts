@@ -62,29 +62,39 @@ export class ESTestIndexTool {
     return await this.es.indices.delete({ index: this.index, ignore: [404] });
   }
 
-  async search(source: string, reference: string) {
-    return await this.es.search({
+  async search(source: string, reference?: string) {
+    const body = reference
+      ? {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
+                  },
+                },
+                {
+                  term: {
+                    reference,
+                  },
+                },
+              ],
+            },
+          },
+        }
+      : {
+          query: {
+            term: {
+              source,
+            },
+          },
+        };
+    const params = {
       index: this.index,
       size: 1000,
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  source,
-                },
-              },
-              {
-                term: {
-                  reference,
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
+      body,
+    };
+    return await this.es.search(params);
   }
 
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {

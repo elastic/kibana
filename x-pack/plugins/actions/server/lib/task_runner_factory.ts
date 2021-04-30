@@ -73,10 +73,12 @@ export class TaskRunnerFactory {
 
     return {
       async run() {
-        const { spaceId, actionTaskParamsId, taskParams, ...rest } = taskInstance.params as Record<
+        const { actionTaskParamsId, taskParams, ...rest } = taskInstance.params as Record<
           string,
           string | Record<string, string>
         >;
+        const spaceId =
+          taskInstance.params.spaceId ?? (taskParams as Record<string, string>)?.spaceId;
         const namespace = spaceIdToNamespace(spaceId as string);
 
         let params = rest;

@@ -150,61 +150,6 @@ export function createExecutionHandler<
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
     const tasks: EphemeralTask[] = [];
 
-    console.log({ actions })
-
-    for (const action of actions) {
-      if (
-        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
-      ) {
-        logger.warn(
-          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
-        );
-        continue;
-      }
-
-      // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
-      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      await actionsClient.enqueueExecution({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey: apiKey ?? null,
-        source: asSavedObjectExecutionSource({
-          id: alertId,
-          type: 'alert',
-        }),
-      });
-
-      const all = await actionsClient.getAll();
-      console.log(`all ${action.id}`, JSON.stringify(all, null, 2))
-
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
-      const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
-        kibana: {
-          alerting: {
-            instance_id: alertInstanceId,
-            action_group_id: actionGroup,
-            action_subgroup: actionSubgroup,
-          },
-          saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
-          ],
-        },
-      };
-
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      } action: ${actionLabel}`;
-      eventLogger.logEvent(event);
-    }
-    return;
-
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     for (const action of actions) {
       if (
@@ -225,6 +170,7 @@ export function createExecutionHandler<
           params: {
             ...action.params,
             taskParams: {
+              spaceId,
               actionId: action.id,
               apiKey,
             },
@@ -243,9 +189,6 @@ export function createExecutionHandler<
           }),
         });
       }
-
-      const all = await actionsClient.getAll();
-      console.log(`all ${action.id}`, JSON.stringify(all, null, 2))
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 

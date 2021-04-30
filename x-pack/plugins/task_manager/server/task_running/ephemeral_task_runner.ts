@@ -191,7 +191,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       const validatedResult = this.validateResult(result);
       return this.processResult(validatedResult, stopTaskTimer());
     } catch (err) {
-      console.log({ err });
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       return this.processResult(
