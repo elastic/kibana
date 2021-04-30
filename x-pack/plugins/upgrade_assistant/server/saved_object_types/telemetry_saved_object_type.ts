@@ -29,6 +29,10 @@ export const telemetrySavedObjectType: SavedObjectsType = {
             type: 'long',
             null_value: 0,
           },
+          kibana: {
+            type: 'long',
+            null_value: 0,
+          },
         },
       },
       ui_reindex: {
