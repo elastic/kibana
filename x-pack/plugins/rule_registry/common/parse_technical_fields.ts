@@ -7,8 +7,8 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { runtimeTypeFromFieldMap } from '../../common';
-import { technicalRuleFieldMap } from '../assets/field_maps/technical_rule_field_map';
+import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
+import { runtimeTypeFromFieldMap } from './field_map';
 
 const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap);
 

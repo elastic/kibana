@@ -8,6 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '../../../../rule_registry/common/technical_rule_data_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -162,9 +166,8 @@ export function registerTransactionDurationAlertType({
                 : {}),
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-              'kibana.observability.evaluation.value': transactionDuration,
-              'kibana.observability.evaluation.threshold':
-                alertParams.threshold * 1000,
+              [ALERT_EVALUATION_VALUE]: transactionDuration,
+              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold * 1000,
             },
           })
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {

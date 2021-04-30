@@ -32,12 +32,13 @@ export interface RuleDataWriter {
 }
 
 export interface IRuleDataClient {
-  getReader(): RuleDataReader;
+  getReader(options?: { namespace?: string }): RuleDataReader;
   getWriter(options?: { namespace?: string }): RuleDataWriter;
   createOrUpdateWriteTarget(options: { namespace?: string }): Promise<void>;
 }
 
 export interface RuleDataClientConstructorOptions {
-  ready: () => Promise<{ clusterClient: ElasticsearchClient }>;
+  getClusterClient: () => Promise<ElasticsearchClient>;
+  ready: () => Promise<void>;
   alias: string;
 }

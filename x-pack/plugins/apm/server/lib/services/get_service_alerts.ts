@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '../../../../rule_registry/common/technical_rule_data_field_names';
 import { RuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
@@ -64,12 +65,13 @@ export async function getServiceAlerts({
       size: 100,
       fields: ['*'],
       collapse: {
-        field: 'kibana.rac.alert.uuid',
+        field: ALERT_UUID,
       },
       sort: {
         '@timestamp': 'desc',
       },
     },
+    allow_no_indices: true,
   });
 
   return response.hits.hits.map((hit) => hit.fields);

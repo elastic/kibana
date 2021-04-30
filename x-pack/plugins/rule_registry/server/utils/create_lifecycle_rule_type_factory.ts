@@ -29,7 +29,7 @@ import {
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
 import { AlertTypeWithExecutor } from '../types';
-import { ParsedTechnicalFields, parseTechnicalFields } from './parse_technical_fields';
+import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
 type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
@@ -71,7 +71,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
         state: previousState,
       } = options;
 
-      const ruleData = getRuleExecutorData(type, options);
+      const ruleExecutorData = getRuleExecutorData(type, options);
 
       const decodedState = wrappedStateRt.decode(previousState);
 
@@ -132,7 +132,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
                 filter: [
                   {
                     term: {
-                      [RULE_UUID]: ruleData[RULE_UUID],
+                      [RULE_UUID]: ruleExecutorData[RULE_UUID],
                     },
                   },
                   {
@@ -155,6 +155,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
               [TIMESTAMP]: 'desc' as const,
             },
           },
+          allow_no_indices: true,
         });
 
         hits.hits.forEach((hit) => {
@@ -176,6 +177,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
         const event: Mutable<ParsedTechnicalFields> = {
           ...alertData,
+          ...ruleExecutorData,
           [TIMESTAMP]: timestamp,
           [EVENT_KIND]: 'state',
           [ALERT_ID]: alertId,

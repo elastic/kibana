@@ -48,7 +48,7 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
     tags: [],
   },
   handler: async ({ ruleDataClient }) => {
-    const reader = ruleDataClient.getReader();
+    const reader = ruleDataClient.getReader({ namespace: 'observability' });
 
     return reader.getDynamicIndexPattern();
   },

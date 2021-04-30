@@ -52,12 +52,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const ruleDataClient = new RuleDataClient({
-      ready: async () => {
+      getClusterClient: async () => {
         const coreStart = await start();
-        return {
-          clusterClient: coreStart.elasticsearch.client.asInternalUser,
-        };
+        return coreStart.elasticsearch.client.asInternalUser;
       },
+      ready: () => Promise.resolve(),
       alias: plugins.ruleRegistry.getFullAssetName(),
     });
 

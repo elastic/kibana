@@ -41,6 +41,7 @@ export async function getTopAlerts({
       },
       _source: false,
     },
+    allow_no_indices: true,
   });
 
   return response.hits.hits.map((hit) => {

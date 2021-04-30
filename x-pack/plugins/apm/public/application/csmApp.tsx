@@ -12,6 +12,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
@@ -26,11 +27,7 @@ import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
-import {
-  ApmPluginSetupDeps,
-  ApmPluginStartDeps,
-  ApmRuleRegistry,
-} from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
@@ -77,14 +74,14 @@ export function CsmAppRoot({
   deps,
   config,
   corePlugins: { embeddable, maps },
-  apmRuleRegistry,
+  observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
-  apmRuleRegistry: ApmRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -94,7 +91,7 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
-    apmRuleRegistry,
+    observabilityRuleTypeRegistry,
   };
 
   return (
@@ -125,14 +122,14 @@ export const renderApp = ({
   appMountParameters,
   config,
   corePlugins,
-  apmRuleRegistry,
+  observabilityRuleTypeRegistry,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
-  apmRuleRegistry: ApmRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   const { element } = appMountParameters;
 
@@ -151,7 +148,7 @@ export const renderApp = ({
       deps={deps}
       config={config}
       corePlugins={corePlugins}
-      apmRuleRegistry={apmRuleRegistry}
+      observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
     />,
     element
   );

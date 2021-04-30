@@ -10,6 +10,5 @@
     "alerting",
     "triggersActionsUi"
   ],
-  "server": true,
-  "ui": true
+  "server": true
 }

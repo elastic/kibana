@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -29,17 +33,19 @@ import { registerDataHandler } from './data_handler';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
-import { createObservabilityRuleRegistry } from './rules/create_observability_rule_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -70,7 +76,9 @@ export class Plugin
 
     createCallObservabilityApi(coreSetup.http);
 
-    const observabilityRuleRegistry = createObservabilityRuleRegistry();
+    const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
+      pluginsSetup.triggersActionsUi.alertTypeRegistry
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -83,7 +91,7 @@ export class Plugin
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
-        observabilityRuleRegistry,
+        observabilityRuleTypeRegistry,
       });
     };
 
@@ -156,7 +164,7 @@ export class Plugin
 
     return {
       dashboard: { register: registerDataHandler },
-      ruleRegistry: observabilityRuleRegistry,
+      observabilityRuleTypeRegistry,
       isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
     };
   }
