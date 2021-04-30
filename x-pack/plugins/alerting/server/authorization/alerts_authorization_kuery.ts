@@ -10,6 +10,7 @@ import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerts_authorization';
 
+// pass in the field name instead of hardcoding `alert.attributes.alertTypeId` and `alertTypeId`
 export function asFiltersByAlertTypeAndConsumer(
   alertTypes: Set<RegistryAlertTypeWithAuth>
 ): KueryNode {
