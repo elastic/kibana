@@ -19,7 +19,7 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../../react_router_helpers';
+import { EuiLinkTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
 import { Schema, FieldCoercionErrors } from '../types';
@@ -36,15 +36,13 @@ import './schema_errors_accordion.scss';
 interface Props {
   fieldCoercionErrors: FieldCoercionErrors;
   schema: Schema;
-  itemId?: string;
-  getRoute?(itemId: string, externalId: string): string;
+  generateViewPath?(externalId: string): string;
 }
 
 export const SchemaErrorsAccordion: React.FC<Props> = ({
   fieldCoercionErrors,
   schema,
-  itemId,
-  getRoute,
+  generateViewPath,
 }) => (
   <>
     {Object.keys(fieldCoercionErrors).map((fieldName) => {
@@ -87,28 +85,22 @@ export const SchemaErrorsAccordion: React.FC<Props> = ({
             <EuiTableHeader>
               <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
-              <EuiTableHeaderCell />
+              {generateViewPath && <EuiTableHeaderCell aria-hidden />}
             </EuiTableHeader>
             <EuiTableBody>
               {errors.map((error) => {
                 const { external_id: id, error: errorMessage } = error;
-
-                const showViewButton = getRoute && itemId;
-                const documentPath = getRoute && itemId ? getRoute(itemId, error.external_id) : '';
-
-                const viewButton = showViewButton && (
-                  <EuiTableRowCell>
-                    <EuiButtonEmptyTo to={documentPath}>{ERROR_TABLE_VIEW_LINK}</EuiButtonEmptyTo>
-                  </EuiTableRowCell>
-                );
-
                 return (
                   <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
                     <EuiTableRowCell truncateText>
                       <TruncatedContent tooltipType="title" content={id} length={22} />
                     </EuiTableRowCell>
                     <EuiTableRowCell>{errorMessage}</EuiTableRowCell>
-                    {showViewButton ? viewButton : <EuiTableRowCell />}
+                    {generateViewPath && (
+                      <EuiTableRowCell>
+                        <EuiLinkTo to={generateViewPath(id)}>{ERROR_TABLE_VIEW_LINK}</EuiLinkTo>
+                      </EuiTableRowCell>
+                    )}
                   </EuiTableRow>
                 );
               })}
