@@ -109,6 +109,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   const sampleSize = ALERT_PREVIEW_SAMPLE_SIZE;
 
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
+  const [lastQueryInterval, setLastQueryInterval] = useState<string>();
   const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
   const [previewError, setPreviewError] = useState<Error | undefined>();
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
@@ -135,6 +136,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         sampleSize,
       });
       setPreviewResponse(response);
+      setLastQueryInterval(lookBehindInterval);
       setPreviewError(undefined);
     } catch (e) {
       setPreviewResponse(undefined);
@@ -220,10 +222,10 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 <strong>
                   <FormattedMessage
                     id="xpack.ml.previewAlert.previewMessage"
-                    defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
+                    defaultMessage="Contains {alertsCount, plural, one {# anomaly} other {# anomalies}} in the last {interval}."
                     values={{
                       alertsCount: previewResponse.count,
-                      interval: lookBehindInterval,
+                      interval: lastQueryInterval,
                     }}
                   />
                 </strong>
