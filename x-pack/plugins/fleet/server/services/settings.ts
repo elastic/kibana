@@ -29,6 +29,28 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   };
 }
 
+export async function settingsSetup(soClient: SavedObjectsClientContract) {
+  try {
+    const settings = await getSettings(soClient);
+    // Migration for < 7.13 Kibana
+    if (!settings.fleet_server_hosts || settings.fleet_server_hosts.length === 0) {
+      const defaultSettings = createDefaultSettings();
+      if (defaultSettings.fleet_server_hosts.length > 0) {
+        return saveSettings(soClient, {
+          fleet_server_hosts: defaultSettings.fleet_server_hosts,
+        });
+      }
+    }
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      const defaultSettings = createDefaultSettings();
+      return saveSettings(soClient, defaultSettings);
+    }
+
+    throw e;
+  }
+}
+
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>
