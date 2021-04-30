@@ -7,3 +7,4 @@
 
 export { SchemaAddFieldModal } from './schema_add_field_modal';
 export { SchemaExistingField } from './schema_existing_field';
+export { SchemaErrorsCallout } from './errors_callout';
