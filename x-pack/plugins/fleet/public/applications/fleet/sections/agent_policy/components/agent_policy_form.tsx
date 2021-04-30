@@ -284,7 +284,11 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiDescribedFormGroup>
-      {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed && !agentPolicy.is_default && !agentPolicy.is_default_fleet_server ? (
+      {isEditing &&
+      'id' in agentPolicy &&
+      !agentPolicy.is_managed &&
+      !agentPolicy.is_default &&
+      !agentPolicy.is_default_fleet_server ? (
         <EuiDescribedFormGroup
           title={
             <h4>
