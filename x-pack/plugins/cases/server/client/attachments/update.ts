@@ -181,6 +181,7 @@ export async function update(
             // myComment.attribute contains also CommentAttributesBasicRt attributes
             pick(Object.keys(queryRestAttributes), myComment.attributes)
           ),
+          owner: myComment.attributes.owner,
         }),
       ],
     });

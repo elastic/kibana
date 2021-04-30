@@ -17,6 +17,7 @@ const readOperations: string[] = [
   'getComment',
   'getTags',
   'getReporters',
+  'getUserActions',
   'findConfigurations',
 ];
 const writeOperations: string[] = [

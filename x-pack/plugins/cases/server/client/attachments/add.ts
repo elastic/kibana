@@ -105,6 +105,7 @@ async function getSubCase({
         subCaseId: newSubCase.id,
         fields: ['status', 'sub_case'],
         newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+        owner: newSubCase.attributes.owner,
       }),
     ],
   });
@@ -222,6 +223,7 @@ const addGeneratedAlerts = async (
           commentId: newComment.id,
           fields: ['comment'],
           newValue: JSON.stringify(query),
+          owner: newComment.attributes.owner,
         }),
       ],
     });
@@ -396,6 +398,7 @@ export const addComment = async (
           commentId: newComment.id,
           fields: ['comment'],
           newValue: JSON.stringify(query),
+          owner: newComment.attributes.owner,
         }),
       ],
     });

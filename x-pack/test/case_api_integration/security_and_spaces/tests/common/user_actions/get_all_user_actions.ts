@@ -9,14 +9,32 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { CommentType } from '../../../../../../plugins/cases/common/api';
-import { userActionPostResp, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
-  deleteConfiguration,
+  CaseResponse,
+  CaseStatuses,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
+import {
+  userActionPostResp,
+  postCaseReq,
+  postCommentUserReq,
+  getPostCaseRequest,
+} from '../../../../common/lib/mock';
+import {
+  deleteAllCaseItems,
+  createCase,
+  updateCase,
+  getCaseUserActions,
 } from '../../../../common/lib/utils';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -25,10 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_all_user_actions', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
-      await deleteComments(es);
-      await deleteConfiguration(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings, owner]`, async () => {
@@ -320,6 +335,60 @@ export default ({ getService }: FtrProviderContext): void => {
         type: CommentType.user,
         owner: 'securitySolutionFixture',
       });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      let caseInfo: CaseResponse;
+      beforeEach(async () => {
+        caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+          user: superUser,
+          space: 'space1',
+        });
+
+        await updateCase({
+          supertest: supertestWithoutAuth,
+          params: {
+            cases: [
+              {
+                id: caseInfo.id,
+                version: caseInfo.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+      });
+
+      it('should get the user actions for a case when the user has the correct permissions', async () => {
+        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+          const userActions = await getCaseUserActions({
+            supertest: supertestWithoutAuth,
+            caseID: caseInfo.id,
+            auth: { user, space: 'space1' },
+          });
+
+          expect(userActions.length).to.eql(2);
+        }
+      });
+
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`should 403 when requesting the user actions of a case with user ${
+          scenario.user.username
+        } with role(s) ${scenario.user.roles.join()} and space ${scenario.space}`, async () => {
+          await getCaseUserActions({
+            supertest: supertestWithoutAuth,
+            caseID: caseInfo.id,
+            auth: { user: scenario.user, space: scenario.space },
+            expectedHttpCode: 403,
+          });
+        });
+      }
     });
   });
 };

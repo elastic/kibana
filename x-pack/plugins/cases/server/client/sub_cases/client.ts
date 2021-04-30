@@ -105,16 +105,17 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
 
     await userActionService.bulkCreate({
       soClient,
-      actions: ids.map((id) =>
+      actions: subCases.saved_objects.map((subCase) =>
         buildCaseUserActionItem({
           action: 'delete',
           actionAt: deleteDate,
           actionBy: user,
           // if for some reason the sub case didn't have a reference to its parent, we'll still log a user action
           // but we won't have the case ID
-          caseId: subCaseIDToParentID.get(id) ?? '',
-          subCaseId: id,
+          caseId: subCaseIDToParentID.get(subCase.id) ?? '',
+          subCaseId: subCase.id,
           fields: ['sub_case', 'comment', 'status'],
+          owner: subCase.attributes.owner,
         })
       ),
     });

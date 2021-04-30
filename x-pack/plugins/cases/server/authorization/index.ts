@@ -10,6 +10,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
@@ -230,5 +231,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  // user actions operations
+  [ReadOperations.GetUserActions]: {
+    type: EVENT_TYPES.access,
+    name: ReadOperations.GetUserActions,
+    action: 'get-user-actions',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
 };

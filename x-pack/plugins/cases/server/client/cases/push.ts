@@ -216,6 +216,7 @@ export const push = async (
                   fields: ['status'],
                   newValue: CaseStatuses.closed,
                   oldValue: myCase.attributes.status,
+                  owner: myCase.attributes.owner,
                 }),
               ]
             : []),
@@ -226,6 +227,7 @@ export const push = async (
             caseId,
             fields: ['pushed'],
             newValue: JSON.stringify(externalService),
+            owner: myCase.attributes.owner,
           }),
         ],
       }),

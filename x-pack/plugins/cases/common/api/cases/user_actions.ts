@@ -42,6 +42,7 @@ const CaseUserActionBasicRT = rt.type({
   action_by: UserRT,
   new_value: rt.union([rt.string, rt.null]),
   old_value: rt.union([rt.string, rt.null]),
+  [OWNER_FIELD]: rt.string,
 });
 
 const CaseUserActionResponseRT = rt.intersection([

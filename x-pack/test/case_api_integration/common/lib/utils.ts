@@ -43,9 +43,10 @@ import {
   CasesConfigurePatch,
   CasesStatusResponse,
   CasesConfigurationsResponse,
+  CaseUserActionsResponse,
 } from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
@@ -653,6 +654,24 @@ export const updateCase = async ({
     .expect(expectedHttpCode);
 
   return cases;
+};
+
+export const getCaseUserActions = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionsResponse> => {
+  const { body: userActions } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return userActions;
 };
 
 export const deleteComment = async ({

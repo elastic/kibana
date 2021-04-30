@@ -134,12 +134,12 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
 
     await userActionService.bulkCreate({
       soClient,
-      actions: ids.map((id) =>
+      actions: cases.saved_objects.map((caseInfo) =>
         buildCaseUserActionItem({
           action: 'delete',
           actionAt: deleteDate,
           actionBy: user,
-          caseId: id,
+          caseId: caseInfo.id,
           fields: [
             'description',
             'status',
@@ -151,6 +151,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'comment',
             ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
           ],
+          owner: caseInfo.attributes.owner,
         })
       ),
     });

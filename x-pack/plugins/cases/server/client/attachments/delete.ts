@@ -95,6 +95,7 @@ export async function deleteAll(
           subCaseId: subCaseID,
           commentId: comment.id,
           fields: ['comment'],
+          owner: comment.attributes.owner,
         })
       ),
     });
@@ -167,6 +168,7 @@ export async function deleteComment(
           subCaseId: subCaseID,
           commentId: attachmentID,
           fields: ['comment'],
+          owner: myComment.attributes.owner,
         }),
       ],
     });

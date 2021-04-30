@@ -129,6 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
           case_id: `${postedCase.id}`,
           comment_id: null,
           sub_case_id: '',
+          owner: 'securitySolutionFixture',
         });
       });
 
@@ -166,6 +167,7 @@ export default ({ getService }: FtrProviderContext): void => {
           case_id: `${postedCase.id}`,
           comment_id: null,
           sub_case_id: '',
+          owner: 'securitySolutionFixture',
         });
       });
 

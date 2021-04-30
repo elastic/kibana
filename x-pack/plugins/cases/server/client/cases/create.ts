@@ -111,6 +111,7 @@ export const create = async (
           caseId: newCase.id,
           fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
           newValue: JSON.stringify(query),
+          owner: newCase.attributes.owner,
         }),
       ],
     });

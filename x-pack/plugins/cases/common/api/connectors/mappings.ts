@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { OWNER_FIELD } from '..';
+import { OWNER_FIELD } from '../cases/constants';
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),

@@ -14,6 +14,8 @@ import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../com
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common';
 import { CasesClientArgs } from '..';
+import { ensureAuthorized } from '../utils';
+import { Operations } from '../../authorization';
 
 interface GetParams {
   caseId: string;
@@ -24,7 +26,7 @@ export const get = async (
   { caseId, subCaseId }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsResponse> => {
-  const { savedObjectsClient, userActionService, logger } = clientArgs;
+  const { savedObjectsClient, userActionService, logger, authorization, auditLogger } = clientArgs;
 
   try {
     checkEnabledCaseConnectorOrThrow(subCaseId);
@@ -33,6 +35,14 @@ export const get = async (
       soClient: savedObjectsClient,
       caseId,
       subCaseId,
+    });
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: userActions.saved_objects.map((userAction) => userAction.attributes.owner),
+      savedObjectIDs: userActions.saved_objects.map((userAction) => userAction.id),
+      operation: Operations.getUserActions,
     });
 
     return CaseUserActionsResponseRt.encode(

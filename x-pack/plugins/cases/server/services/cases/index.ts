@@ -186,9 +186,11 @@ interface GetReportersArgs {
 const transformNewSubCase = ({
   createdAt,
   createdBy,
+  owner,
 }: {
   createdAt: string;
   createdBy: User;
+  owner: string;
 }): SubCaseAttributes => {
   return {
     closed_at: null,
@@ -198,6 +200,7 @@ const transformNewSubCase = ({
     status: CaseStatuses.open,
     updated_at: null,
     updated_by: null,
+    owner,
   };
 };
 
@@ -585,7 +588,8 @@ export class CaseService {
       this.log.debug(`Attempting to POST a new sub case`);
       return soClient.create<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
-        transformNewSubCase({ createdAt, createdBy }),
+        // ENABLE_CASE_CONNECTOR: populate the owner field correctly
+        transformNewSubCase({ createdAt, createdBy, owner: '' }),
         {
           references: [
             {

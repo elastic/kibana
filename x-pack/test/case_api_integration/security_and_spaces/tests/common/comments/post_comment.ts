@@ -151,6 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
           case_id: `${postedCase.id}`,
           comment_id: `${patchedCase.comments![0].id}`,
           sub_case_id: '',
+          owner: 'securitySolutionFixture',
         });
       });
     });
