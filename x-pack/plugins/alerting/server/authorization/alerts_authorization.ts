@@ -10,13 +10,18 @@ import { map, mapValues, fromPairs, has, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
-import { SecurityPluginSetup, AlertingActions } from '../../../security/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import { asFiltersByAlertTypeAndConsumer } from './alerts_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
+
+export enum AlertingAuthorizationTypes {
+  Rule = 'rule',
+  Alert = 'alert',
+}
 
 export enum ReadOperations {
   Get = 'get',
@@ -36,6 +41,12 @@ export enum WriteOperations {
   UnmuteAll = 'unmuteAll',
   MuteInstance = 'muteInstance',
   UnmuteInstance = 'unmuteInstance',
+}
+
+export interface EnsureAuthorizedOpts {
+  ruleTypeId: string;
+  consumer: string;
+  operation: ReadOperations | WriteOperations;
 }
 
 interface HasPrivileges {
@@ -58,6 +69,7 @@ export interface ConstructorOptions {
   auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
   privilegeName?: string;
+  authorizationType?: AlertingAuthorizationTypes;
 }
 
 export class AlertsAuthorization {
@@ -68,11 +80,7 @@ export class AlertsAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly privilegeName: string;
-  private readonly getAuthorizationString: (
-    alertTypeId: string,
-    consumer: string,
-    operation: string
-  ) => string;
+  private readonly alertingAuthorizationType: AlertingAuthorizationTypes;
 
   constructor({
     alertTypeRegistry,
@@ -82,18 +90,14 @@ export class AlertsAuthorization {
     auditLogger,
     getSpace,
     privilegeName,
+    authorizationType,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
     this.privilegeName = privilegeName ?? DEFAULT_PRIVILEGE_NAME;
-
-    const authorizationAction = get(
-      this.authorization!.actions,
-      this.privilegeName
-    ) as AlertingActions;
-    this.getAuthorizationString = authorizationAction.get;
+    this.alertingAuthorizationType = authorizationType ?? AlertingAuthorizationTypes.Rule;
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -140,20 +144,25 @@ export class AlertsAuthorization {
   // consumer determines the consumer/owner
   // operation enum needs to be passed in in the constructor
   // also pass in a type rule/alert to pass into the .get function???
-  public async ensureAuthorized(
-    alertTypeId: string,
-    consumer: string,
-    operation: ReadOperations | WriteOperations
-  ) {
+  public async ensureAuthorized({ ruleTypeId, consumer, operation }: EnsureAuthorizedOpts) {
     const { authorization } = this;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
-      const alertType = this.alertTypeRegistry.get(alertTypeId);
+      const ruleType = this.alertTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
-        // authorization.actions.alerting.get needs to be able to change
-        consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
-        producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
+        consumer: authorization.actions.alerting.get(
+          ruleTypeId,
+          consumer,
+          this.alertingAuthorizationType,
+          operation
+        ),
+        producer: authorization.actions.alerting.get(
+          ruleTypeId,
+          ruleType.producer,
+          this.alertingAuthorizationType,
+          operation
+        ),
       };
 
       // This needs to be feature flagged
@@ -165,7 +174,7 @@ export class AlertsAuthorization {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana:
-          shouldAuthorizeConsumer && consumer !== alertType.producer
+          shouldAuthorizeConsumer && consumer !== ruleType.producer
             ? [
                 // check for access at consumer level
                 requiredPrivilegesByScope.consumer,
@@ -191,7 +200,7 @@ export class AlertsAuthorization {
         throw Boom.forbidden(
           this.auditLogger.alertsAuthorizationFailure(
             username,
-            alertTypeId,
+            ruleTypeId,
             ScopeType.Consumer,
             consumer,
             operation
@@ -202,7 +211,7 @@ export class AlertsAuthorization {
       if (hasAllRequested) {
         this.auditLogger.alertsAuthorizationSuccess(
           username,
-          alertTypeId,
+          ruleTypeId,
           ScopeType.Consumer,
           consumer,
           operation
@@ -220,12 +229,12 @@ export class AlertsAuthorization {
         const [unauthorizedScopeType, unauthorizedScope] =
           shouldAuthorizeConsumer && unauthorizedScopes.consumer
             ? [ScopeType.Consumer, consumer]
-            : [ScopeType.Producer, alertType.producer];
+            : [ScopeType.Producer, ruleType.producer];
 
         throw Boom.forbidden(
           this.auditLogger.alertsAuthorizationFailure(
             username,
-            alertTypeId,
+            ruleTypeId,
             unauthorizedScopeType,
             unauthorizedScope,
             operation
@@ -236,7 +245,7 @@ export class AlertsAuthorization {
       throw Boom.forbidden(
         this.auditLogger.alertsAuthorizationFailure(
           '',
-          alertTypeId,
+          ruleTypeId,
           ScopeType.Consumer,
           consumer,
           operation
@@ -363,7 +372,12 @@ export class AlertsAuthorization {
           for (const operation of operations) {
             privilegeToAlertType.set(
               // this function needs to be swappable
-              this.authorization!.actions.alerting.get(alertType.id, feature, operation),
+              this.authorization!.actions.alerting.get(
+                alertType.id,
+                feature,
+                this.alertingAuthorizationType,
+                operation
+              ),
               [
                 alertType,
                 feature,
