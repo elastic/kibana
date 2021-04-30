@@ -29,6 +29,7 @@ import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
+import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -281,6 +282,18 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     return source.job_id;
   };
 
+  const getRecordKey = (source: AnomalyRecordDoc): string => {
+    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
+
+    const fieldName = getEntityFieldName(source);
+    const fieldValue = getEntityFieldValue(source);
+    const entity =
+      fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
+    alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
+
+    return alertInstanceKey;
+  };
+
   const getResultsFormatter = (resultType: AnomalyResultType) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
@@ -314,7 +327,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           return {
             ...h._source,
             score: h.fields.score[0],
-            unique_key: h.fields.unique_key[0],
+            unique_key: getRecordKey(h._source),
           };
         }) as RecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
