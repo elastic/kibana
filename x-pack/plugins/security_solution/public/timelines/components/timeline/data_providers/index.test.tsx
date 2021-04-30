@@ -71,5 +71,59 @@ describe('DataProviders', () => {
         'Drop anythinghighlightedhere to build anORquery+ Add field'
       );
     });
+
+    describe('resizable drop target', () => {
+      const manageTimelineForTesting = {
+        foo: {
+          ...getTimelineDefaults('test'),
+          filterManager,
+        },
+      };
+
+      test('it may be resized vertically via a resize handle', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'resize',
+          'vertical'
+        );
+      });
+
+      test('it never grows taller than one third (33%) of the view height', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'max-height',
+          '33vh'
+        );
+      });
+
+      test('it automatically displays scroll bars when the width or height of the data providers exceeds the drop target', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'overflow',
+          'auto'
+        );
+      });
+    });
   });
 });
