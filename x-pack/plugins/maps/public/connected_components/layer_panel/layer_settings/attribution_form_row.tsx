@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiTitle, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Attribution } from '../../../../common/descriptor_types';
@@ -21,57 +21,77 @@ interface Props {
 export function AttributionFormRow(props: Props) {
   function renderAttribution() {
     const layerDescriptor = props.layer.getDescriptor();
-    return layerDescriptor.attribution === undefined ? (
-      <AttributionPopover
-        onChange={props.onChange}
-        popoverButtonIcon="plusInCircleFilled"
-        popoverButtonLabel={i18n.translate('xpack.maps.attribution.addBtnLabel', {
-          defaultMessage: 'Add',
-        })}
-        label={''}
-        url={''}
-      />
-    ) : (
-      <div>
-        <EuiLink color="text" href={layerDescriptor.attribution.url} target="_blank">
-          {layerDescriptor.attribution.label}
-        </EuiLink>
-        <EuiFlexGrid>
-          <EuiFlexItem grow={false}>
-            <AttributionPopover
-              onChange={props.onChange}
-              popoverButtonIcon="pencil"
-              popoverButtonLabel={i18n.translate('xpack.maps.attribution.editBtnLabel', {
-                defaultMessage: 'Edit',
-              })}
-              label={layerDescriptor.attribution.label}
-              url={layerDescriptor.attribution.url}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => {
-                props.onChange();
-              }}
-              size="xs"
-              iconType="trash"
-            >
-              <FormattedMessage id="xpack.maps.attribution.clearBtnLabel" defaultMessage="Clear" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-      </div>
+
+    return (
+      <fieldset aria-labelledby="mapsLayerSettingsAttributionLegend">
+        <div className="mapAttributionFormRow">
+          <legend id="mapsLayerSettingsAttributionLegend" className="mapAttributionFormRow__legend">
+            {i18n.translate('xpack.maps.layerSettings.attributionLegend', {
+              defaultMessage: 'Attribution',
+            })}
+          </legend>
+
+          {layerDescriptor.attribution === undefined ? (
+            <div className="mapAttributionFormRow__field">
+              <AttributionPopover
+                onChange={props.onChange}
+                popoverButtonIcon="plusInCircleFilled"
+                popoverButtonLabel={i18n.translate('xpack.maps.attribution.addBtnLabel', {
+                  defaultMessage: 'Add attribution',
+                })}
+                popoverButtonAriaLabel={i18n.translate('xpack.maps.attribution.addBtnAriaLabel', {
+                  defaultMessage: 'Add attribution',
+                })}
+                popoverButtonClassName="mapAttributionFormRow__addButton"
+                label={''}
+                url={''}
+              />
+            </div>
+          ) : (
+            <div className="mapAttributionFormRow__field">
+              <EuiPanel color="subdued" paddingSize="s">
+                <EuiLink color="text" href={layerDescriptor.attribution.url} target="_blank">
+                  {layerDescriptor.attribution.label}
+                </EuiLink>
+              </EuiPanel>
+
+              <div className="mapAttributionFormRow__buttons">
+                <AttributionPopover
+                  onChange={props.onChange}
+                  popoverButtonIcon="pencil"
+                  popoverButtonAriaLabel={i18n.translate('xpack.maps.attribution.addBtnAriaLabel', {
+                    defaultMessage: 'Edit attribution',
+                  })}
+                  popoverButtonLabel={i18n.translate('xpack.maps.attribution.editBtnLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  label={layerDescriptor.attribution.label}
+                  url={layerDescriptor.attribution.url}
+                />
+
+                <EuiButtonEmpty
+                  onClick={() => {
+                    props.onChange();
+                  }}
+                  size="xs"
+                  iconType="trash"
+                  color="danger"
+                  aria-label={i18n.translate('xpack.maps.attribution.clearBtnAriaLabel', {
+                    defaultMessage: 'Clear attribution',
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.maps.attribution.clearBtnLabel"
+                    defaultMessage="Clear"
+                  />
+                </EuiButtonEmpty>
+              </div>
+            </div>
+          )}
+        </div>
+      </fieldset>
     );
   }
 
-  return props.layer.getSource().getAttributionProvider() ? null : (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.layerSettings.attributionLabel', {
-        defaultMessage: 'Attribution',
-      })}
-      display="columnCompressed"
-    >
-      {renderAttribution()}
-    </EuiFormRow>
-  );
+  return props.layer.getSource().getAttributionProvider() ? null : renderAttribution();
 }
