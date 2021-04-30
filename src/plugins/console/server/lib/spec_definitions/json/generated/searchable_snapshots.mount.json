@@ -1,0 +1,16 @@
+{
+  "searchable_snapshots.mount": {
+    "url_params": {
+      "master_timeout": "",
+      "wait_for_completion": "__flag__",
+      "storage": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}/_mount"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/searchable-snapshots-api-mount-snapshot.html"
+  }
+}

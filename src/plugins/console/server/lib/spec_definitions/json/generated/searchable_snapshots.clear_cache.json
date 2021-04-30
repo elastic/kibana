@@ -1,0 +1,23 @@
+{
+  "searchable_snapshots.clear_cache": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "index": []
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_searchable_snapshots/cache/clear",
+      "{indices}/_searchable_snapshots/cache/clear"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/searchable-snapshots-apis.html"
+  }
+}

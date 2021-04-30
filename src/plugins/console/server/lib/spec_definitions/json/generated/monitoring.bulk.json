@@ -1,0 +1,17 @@
+{
+  "monitoring.bulk": {
+    "url_params": {
+      "system_id": "",
+      "system_api_version": "",
+      "interval": ""
+    },
+    "methods": [
+      "POST",
+      "PUT"
+    ],
+    "patterns": [
+      "_monitoring/bulk"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html"
+  }
+}
