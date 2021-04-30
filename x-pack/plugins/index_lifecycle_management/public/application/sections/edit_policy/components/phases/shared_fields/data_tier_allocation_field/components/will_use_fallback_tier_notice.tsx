@@ -10,15 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
-
-const nodeRoleToFallbackTierMap: Partial<Record<DataTierRole, string>> = {
-  data_hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierHotLabel', {
-    defaultMessage: 'hot',
-  }),
-  data_warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierWarmLabel', {
-    defaultMessage: 'warm',
-  }),
-};
+import { nodeRoleToFallbackTierMap } from './node_role_to_fallback_tier_map';
 
 const i18nTexts = {
   warm: {
@@ -43,30 +35,15 @@ const i18nTexts = {
   },
 };
 
-const customizeWithNodeAttributeDescription = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.customizeWithNodeAttributeDescription',
-  {
-    defaultMessage:
-      'To allocate data to particular data nodes, use role-based allocation or configure custom node attributes in elasticsearch.yml.',
-  }
-);
-
 interface Props {
   phase: PhaseWithAllocation;
   targetNodeRole: DataTierRole;
-  isUsingNodeAttributes?: boolean;
 }
 
-export const WillUseFallbackTierNotice: FunctionComponent<Props> = ({
-  isUsingNodeAttributes,
-  phase,
-  targetNodeRole,
-}) => {
+export const WillUseFallbackTierNotice: FunctionComponent<Props> = ({ phase, targetNodeRole }) => {
   return (
     <EuiCallOut data-test-subj="willUseFallbackTierNotice" title={i18nTexts[phase].title}>
-      <p>{i18nTexts[phase].body(targetNodeRole)}</p>
-
-      {isUsingNodeAttributes && <p>{customizeWithNodeAttributeDescription}</p>}
+      {i18nTexts[phase].body(targetNodeRole)}
     </EuiCallOut>
   );
 };

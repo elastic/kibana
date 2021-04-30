@@ -5,34 +5,32 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
-  phase,
-}) => {
+export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () => {
   return (
     <EuiCallOut
-      data-test-subj="defaultToDataNodesNotice"
-      style={{ maxWidth: 400 }}
+      data-test-subj="noTiersAvailableUsingNodeAttributesNotice"
       title={noCustomAttributesTitle}
-      color="primary"
+      color="warning"
     >
       <p>
         {i18n.translate(
-          'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultToDataNodesDescription',
-          { defaultMessage: 'Data will be allocated to any available data node.' }
+          'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
+          {
+            defaultMessage: 'There are no available nodes for data allocation.',
+          }
         )}
       </p>
 
-      {nodeAllocationMigrationGuidance}
+      <p>{nodeAllocationMigrationGuidance}</p>
     </EuiCallOut>
   );
 };

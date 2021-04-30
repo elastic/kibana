@@ -10,22 +10,38 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PhaseWithAllocation } from '../../../../../../../../../common/types';
+import {
+  noCustomAttributesTitle,
+  nodeAllocationMigrationGuidance,
+} from './no_custom_attributes_messages';
 
 const i18nTexts = {
-  title: {
-    warm: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'Indices will be allocated to the warm tier' }
+  body: {
+    warm: (
+      <>
+        <p>
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableDescription',
+            { defaultMessage: 'Data will be allocated to the warm tier.' }
+          )}
+        </p>
+
+        {nodeAllocationMigrationGuidance}
+      </>
     ),
-    cold: i18n.translate(
-      'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'Indices will be allocated to the cold tier' }
+    cold: (
+      <>
+        <p>
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableDescription',
+            { defaultMessage: 'Data will be allocated to the cold tier.' }
+          )}
+        </p>
+
+        {nodeAllocationMigrationGuidance}
+      </>
     ),
   },
-  body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultToDataTiersDescription', {
-    defaultMessage:
-      'To control allocation with custom node attributes instead of the built-in node roles, configure node attributes in elasticsearch.yml.',
-  }),
 };
 
 export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
@@ -35,10 +51,10 @@ export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAlloc
     <EuiCallOut
       data-test-subj="defaultToDataTiersNotice"
       style={{ maxWidth: 400 }}
-      title={i18nTexts.title[phase]}
+      title={noCustomAttributesTitle}
       color="primary"
     >
-      {i18nTexts.body}
+      {i18nTexts.body[phase]}
     </EuiCallOut>
   );
 };

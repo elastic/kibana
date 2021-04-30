@@ -34,7 +34,6 @@ const i18nTexts = {
 
 interface Props {
   phase: PhaseWithAllocation;
-  isUsingNodeAttributes?: boolean;
 }
 
 export const NoTiersAvailableNotice: FunctionComponent<Props> = ({ phase }) => {

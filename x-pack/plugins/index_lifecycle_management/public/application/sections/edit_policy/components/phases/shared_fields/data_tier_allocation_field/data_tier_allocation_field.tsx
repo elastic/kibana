@@ -19,7 +19,9 @@ import { DataTierAllocationType } from '../../../../types';
 import {
   DataTierAllocation,
   WillUseFallbackTierNotice,
+  WillUseFallbackTierUsingNodeAttributesNotice,
   NoTiersAvailableNotice,
+  NoTiersAvailableUsingNodeAttributesNotice,
   DefaultToDataNodesNotice,
   DefaultToDataTiersNotice,
   CloudDataTierCallout,
@@ -133,7 +135,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             return (
               <>
                 <EuiSpacer size="s" />
-                <NoTiersAvailableNotice isUsingNodeAttributes phase={phase} />
+                <NoTiersAvailableUsingNodeAttributesNotice />
               </>
             );
           }
@@ -146,9 +148,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             return (
               <>
                 <EuiSpacer size="s" />
-                <WillUseFallbackTierNotice
-                  isUsingNodeAttributes
-                  phase={phase}
+                <WillUseFallbackTierUsingNodeAttributesNotice
                   targetNodeRole={allocationNodeRoleForPhase as DataTierRole}
                 />
               </>
