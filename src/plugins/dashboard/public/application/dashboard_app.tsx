@@ -57,9 +57,9 @@ export function DashboardApp({
   const dashboardAppState = useDashboardAppState({
     history,
     redirectTo,
-    embedSettings,
     savedDashboardId,
     kbnUrlStateStorage,
+    isEmbeddedExternally: Boolean(embedSettings),
   });
 
   // Clear search session when leaving dashboard route
@@ -110,7 +110,11 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          <DashboardTopNav redirectTo={redirectTo} dashboardAppState={dashboardAppState} />
+          <DashboardTopNav
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
           <div className="dashboardViewport">
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>

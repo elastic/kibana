@@ -234,7 +234,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async switchToEditMode() {
       log.debug('Switching to edit mode');
-      await testSubjects.click('dashboardEditMode');
+      if (await testSubjects.exists('dashboardEditMode')) {
+        // if the dashboard is not already in edit mode
+        await testSubjects.click('dashboardEditMode');
+      }
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
         const panels = await testSubjects.findAll('embeddablePanel', 2500);
@@ -250,22 +253,17 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickCancelOutOfEditMode(accept = true) {
       log.debug('clickCancelOutOfEditMode');
+      if (await this.getIsInViewMode()) return;
+      await retry.waitFor('leave edit mode button enabled', async () => {
+        const leaveEditModeButton = await testSubjects.find('dashboardViewOnlyMode');
+        const isDisabled = await leaveEditModeButton.getAttribute('disabled');
+        return !isDisabled;
+      });
       await testSubjects.click('dashboardViewOnlyMode');
       if (accept) {
-        const confirmation = await testSubjects.exists('dashboardDiscardConfirmKeep');
+        const confirmation = await testSubjects.exists('confirmModalTitleText');
         if (confirmation) {
-          await testSubjects.click('dashboardDiscardConfirmKeep');
-        }
-      }
-    }
-
-    public async clickDiscardChanges(accept = true) {
-      log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardViewOnlyMode');
-      if (accept) {
-        const confirmation = await testSubjects.exists('dashboardDiscardConfirmDiscard');
-        if (confirmation) {
-          await testSubjects.click('dashboardDiscardConfirmDiscard');
+          await PageObjects.common.clickConfirmOnModal();
         }
       }
     }

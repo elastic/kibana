@@ -13,7 +13,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { DashboardContainer } from '../embeddable';
 import { esFilters, Filter, Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
-import { setFullScreenMode, setPanels, setQuery } from '../state';
+import { setExpandedPanelId, setFullScreenMode, setPanels, setQuery } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
 import { DashboardBuildContext, DashboardContainerInput } from '../../types';
@@ -112,6 +112,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
+  }
+
+  if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {
+    dispatchDashboardStateChange(setExpandedPanelId(input.expandedPanelId));
   }
   dispatchDashboardStateChange(setFullScreenMode(input.isFullScreenMode));
 };

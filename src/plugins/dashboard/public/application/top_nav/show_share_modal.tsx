@@ -21,6 +21,7 @@ import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 const showFilterBarId = 'showFilterBar';
 
 interface ShowShareModalProps {
+  isDirty: boolean;
   kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
@@ -39,6 +40,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   share,
+  isDirty,
   kibanaVersion,
   anchorElement,
   savedDashboard,
@@ -103,6 +105,7 @@ export function ShowShareModal({
   };
 
   share.toggleShareContextMenu({
+    isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl: dashboardCapabilities.createShortUrl,
@@ -117,8 +120,6 @@ export function ShowShareModal({
     sharingData: {
       title: savedDashboard.title,
     },
-    // TODO: IsDirty
-    isDirty: true,
     embedUrlParamExtensions: [
       {
         paramName: 'embed',

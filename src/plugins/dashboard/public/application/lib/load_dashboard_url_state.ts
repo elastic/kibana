@@ -19,11 +19,12 @@ import {
   RawDashboardState,
   SavedDashboardPanel,
 } from '../../types';
+import { migrateLegacyQuery } from './migrate_legacy_query';
 
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
-export const loadUrlDashboardState = ({
+export const loadDashboardUrlState = ({
   services,
   kibanaVersion,
   kbnUrlStateStorage,
@@ -39,6 +40,10 @@ export const loadUrlDashboardState = ({
     });
   }
 
+  const migratedQuery = rawAppStateInUrl.query
+    ? migrateLegacyQuery(rawAppStateInUrl.query)
+    : undefined;
+
   // remove state from URL
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
     if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
@@ -51,7 +56,8 @@ export const loadUrlDashboardState = ({
   }, true);
 
   return {
-    ..._.omit(rawAppStateInUrl, 'panels'),
-    ...(Object.keys(panelsMap).length > 0 ? { panels: panelsMap } : {}),
+    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
+    ...(migratedQuery ? { query: migratedQuery } : {}),
+    ...(rawAppStateInUrl.panels ? { panels: panelsMap } : {}),
   };
 };

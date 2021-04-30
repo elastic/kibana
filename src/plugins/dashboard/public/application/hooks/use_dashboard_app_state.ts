@@ -19,7 +19,6 @@ import { getNewDashboardTitle } from '../../dashboard_strings';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
 import {
-  DashboardEmbedSettings,
   DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,
@@ -34,7 +33,7 @@ import {
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
-  loadUrlDashboardState,
+  loadDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
 } from '../lib';
@@ -43,16 +42,16 @@ export interface UseDashboardStateProps {
   history: History;
   savedDashboardId?: string;
   redirectTo: DashboardRedirect;
-  embedSettings?: DashboardEmbedSettings;
+  isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
   redirectTo,
-  embedSettings,
   savedDashboardId,
   kbnUrlStateStorage,
+  isEmbeddedExternally,
 }: UseDashboardStateProps) => {
   const services = useKibana<DashboardAppServices>().services;
   const dispatchDashboardStateChange = useDashboardDispatch();
@@ -97,13 +96,19 @@ export const useDashboardAppState = ({
       kibanaVersion,
       savedDashboardId,
       kbnUrlStateStorage,
+      isEmbeddedExternally,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
-      isEmbeddedExternally: Boolean(embedSettings),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
       $triggerDashboardRefresh: dashboardAppState.$triggerDashboardRefresh,
       getLatestDashboardState: () => dashboardAppState.$onDashboardStateChange.value,
     };
+
+    // fetch incoming embeddable from state transfer service.
+    const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
+      DashboardConstants.DASHBOARDS_ID,
+      true
+    );
 
     let canceled = false;
     let onDestroy: () => void;
@@ -120,11 +125,14 @@ export const useDashboardAppState = ({
        * Combine initial state from the session storage,  sources, then dispatch it to Redux.
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
-      const dashboardURLState = loadUrlDashboardState(dashboardBuildContext);
+      const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...dashboardURLState,
+
+        // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
+        ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
@@ -133,16 +141,13 @@ export const useDashboardAppState = ({
        */
       const { applyFilters, stopSyncingDashboardFilterState } = syncDashboardFilterState({
         ...dashboardBuildContext,
+        initialDashboardState,
         savedDashboard,
       });
 
       /**
        * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
        */
-      const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-        DashboardConstants.DASHBOARDS_ID,
-        true
-      );
       const dashboardContainer = await buildDashboardContainer({
         ...dashboardBuildContext,
         initialDashboardState,
@@ -257,9 +262,9 @@ export const useDashboardAppState = ({
     dashboardAppState.$onDashboardStateChange,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
+    isEmbeddedExternally,
     kbnUrlStateStorage,
     savedDashboardId,
-    embedSettings,
     redirectTo,
     history,
     services,

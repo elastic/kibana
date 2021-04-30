@@ -11,7 +11,7 @@ import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import { setQuery } from '../state';
-import { DashboardBuildContext } from '../../types';
+import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import {
@@ -20,22 +20,26 @@ import {
   Filter,
   Query,
   waitUntilNextSessionCompletes$,
+  QueryState,
 } from '../../services/data';
 import { cleanFiltersForSerialize } from '.';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {
+  initialDashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
 };
 
 /**
+ * Applies initial state to the query service, and the saved dashboard search source, then
  * Sets up syncing and subscriptions between the filter state from the Data plugin
  * and the dashboard Redux store.
  */
 export const syncDashboardFilterState = ({
   services,
-  $checkForUnsavedChanges,
   savedDashboard,
   kbnUrlStateStorage,
+  initialDashboardState,
+  $checkForUnsavedChanges,
   $onDashboardStateChange,
   $triggerDashboardRefresh,
   dispatchDashboardStateChange,
@@ -45,6 +49,32 @@ export const syncDashboardFilterState = ({
   } = services;
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
+
+  // apply initial filters
+  filterManager.setAppFilters(_.cloneDeep(initialDashboardState.filters));
+  savedDashboard.searchSource.setField('filter', initialDashboardState.filters);
+
+  // apply initial query
+  queryString.setQuery(initialDashboardState.query);
+  savedDashboard.searchSource.setField('query', initialDashboardState.query);
+
+  // apply initial timepicker & refresh interval if global state is not provided
+  if (initialDashboardState.timeRestore) {
+    const initialGlobalQueryState = kbnUrlStateStorage.get<QueryState>('_g');
+    if (!initialGlobalQueryState?.time) {
+      if (savedDashboard.timeFrom && savedDashboard.timeTo) {
+        timefilterService.setTime({
+          from: savedDashboard.timeFrom,
+          to: savedDashboard.timeTo,
+        });
+      }
+    }
+    if (!initialGlobalQueryState?.refreshInterval) {
+      if (savedDashboard.refreshInterval) {
+        timefilterService.setRefreshInterval(savedDashboard.refreshInterval);
+      }
+    }
+  }
 
   const applyFilters = (query: Query, filters: Filter[]) => {
     savedDashboard.searchSource.setField('query', query);
@@ -60,8 +90,8 @@ export const syncDashboardFilterState = ({
 
   // starts syncing app filters between dashboard state and filterManager
   const intermediateFilterState: { filters: Filter[]; query: Query } = {
-    query: queryString.getDefaultQuery(),
-    filters: [],
+    query: initialDashboardState.query ?? queryString.getDefaultQuery(),
+    filters: initialDashboardState.filters ?? [],
   };
   const stopSyncingAppFilters = connectToQueryState(
     queryService,
@@ -85,6 +115,7 @@ export const syncDashboardFilterState = ({
     }
   );
 
+  // apply filters when the filter manager changes
   const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
     .pipe(debounceTime(100))
     .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));

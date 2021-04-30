@@ -40,7 +40,8 @@ export const diffDashboardState = (
   const common = commonDiffFilters<DashboardState>(
     (original as unknown) as DashboardDiffCommonFilters,
     (newState as unknown) as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options', 'savedQuery']
+    ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId'],
+    true
   );
 
   return {
@@ -93,10 +94,15 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
 const commonDiffFilters = <T extends { filters: Filter[] }>(
   originalObj: DashboardDiffCommonFilters,
   newObj: DashboardDiffCommonFilters,
-  omitKeys: string[]
+  omitKeys: string[],
+  ignorePinned?: boolean
 ): Partial<T> => {
   const filtersAreDifferent = () =>
-    !esFilters.compareFilters(originalObj.filters, newObj.filters, esFilters.COMPARE_ALL_OPTIONS);
+    !esFilters.compareFilters(
+      originalObj.filters,
+      ignorePinned ? newObj.filters.filter((f) => !esFilters.isFilterPinned(f)) : newObj.filters,
+      esFilters.COMPARE_ALL_OPTIONS
+    );
   const otherDifferences = commonDiff<T>(originalObj, newObj, [...omitKeys, 'filters']);
   return _.cloneDeep({
     ...otherDifferences,

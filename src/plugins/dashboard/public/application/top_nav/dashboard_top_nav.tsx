@@ -406,6 +406,7 @@ export function DashboardTopNav({
         dashboardCapabilities,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
+        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
     [dashboardAppState, dashboardCapabilities, share, kibanaVersion]

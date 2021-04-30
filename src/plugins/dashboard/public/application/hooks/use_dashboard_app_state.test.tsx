@@ -51,7 +51,7 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   kbnUrlStateStorage: createKbnUrlStateStorage(),
   savedDashboardId: 'testDashboardId',
   history: createBrowserHistory(),
-  embedSettings: undefined,
+  isEmbeddedExternally: false,
   redirectTo: jest.fn(),
 });
 
