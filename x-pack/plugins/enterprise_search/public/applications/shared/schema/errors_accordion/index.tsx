@@ -9,7 +9,6 @@ import React from 'react';
 
 import {
   EuiAccordion,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTable,
@@ -48,25 +47,29 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
 }) => (
   <>
     {Object.keys(fieldCoercionErrors).map((fieldName, fieldNameIndex) => {
+      const fieldType = schema[fieldName];
       const errorInfos = fieldCoercionErrors[fieldName];
 
       const accordionHeader = (
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="xl"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xl">
-              <EuiFlexItem>
-                <strong>
-                  <TruncatedContent content={fieldName} length={32} />
-                </strong>
-              </EuiFlexItem>
-              <EuiFlexItem>{schema[fieldName]}</EuiFlexItem>
-            </EuiFlexGroup>
+            <strong>
+              <TruncatedContent content={fieldName} length={32} />
+            </strong>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <code>{fieldType}</code>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {/* href is needed here because a button cannot be nested in a button or console will error and EuiAccordion uses a button to wrap this. */}
-            <EuiButton size="s" href="#">
+            {/* Mock an EuiButton without actually creating one - we shouldn't nest a button within a button */}
+            <div className="euiButton euiButton--primary euiButton--small">
               {ERROR_TABLE_REVIEW_CONTROL}
-            </EuiButton>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
