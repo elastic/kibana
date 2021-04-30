@@ -179,13 +179,14 @@ export class MonitoringPlugin
       router.get({ path: '/monitoring-myfakepath', validate: false }, async (context, req, res) => {
         try {
           const racClient = await context.ruleRegistry?.getRacClient();
-          const thing = await racClient?.get({ id: 'hello world', owner: 'observability' });
+          const thing = await racClient?.find({ owner: 'observability' });
           console.error('THE THING!!!', JSON.stringify(thing.body, null, 2));
-          return res.ok({ body: { success: true } });
+          return res.ok({ body: { success: true, alerts: thing.body.hits.hits } });
         } catch (err) {
           console.error('monitoring route threw an error');
           console.error(err);
-          return res.notFound({ body: { message: err.message } });
+          return res.unauthorized({ body: { message: err.message } });
+          // return res.customError({ statusCode: err.statusCode, body: { message: err.message } });
         }
       });
     }

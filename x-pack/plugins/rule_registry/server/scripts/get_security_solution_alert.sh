@@ -9,6 +9,11 @@
 
 set -e
 
+cd ./hunter && sh ./post_detections_role.sh && sh ./post_detections_user.sh
+cd ../observer && sh ./post_detections_role.sh && sh ./post_detections_user.sh
+cd ..
+
+
 USER=${1:-'hunter'}
 
 # Example: ./find_rules.sh

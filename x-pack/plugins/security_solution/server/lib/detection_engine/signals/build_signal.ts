@@ -6,6 +6,7 @@
  */
 
 import { SearchTypes } from '../../../../common/detection_engine/types';
+import { SERVER_APP_ID } from '../../../../common/constants';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
@@ -76,7 +77,11 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param docs The parent signals/events of the new signal to be built.
  * @param rule The rule that is generating the new signal.
  */
-export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
+export const buildSignal = (
+  docs: BaseSignalHit[],
+  rule: RulesSchema,
+  owner: typeof SERVER_APP_ID
+): Signal => {
   const _meta = {
     version: SIGNALS_TEMPLATE_VERSION,
   };
@@ -92,6 +97,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
     parents,
     ancestors,
     status: 'open',
+    owner,
     rule,
     depth,
   };

@@ -11,6 +11,10 @@ set -e
 
 USER=${1:-'observer'}
 
+cd ./hunter && sh ./post_detections_role.sh && sh ./post_detections_user.sh
+cd ../observer && sh ./post_detections_role.sh && sh ./post_detections_user.sh
+cd ..
+
 # Example: ./find_rules.sh
 curl -s -k \
  -u $USER:changeme \

@@ -12,6 +12,8 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
+
+import { SERVER_APP_ID } from '../../../../common/constants';
 import { AlertAttributes, SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
 import { RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
@@ -121,10 +123,10 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody(ruleSO, doc),
+    buildBulkBody(ruleSO, doc, SERVER_APP_ID),
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
+  const { body: response } = await services.scopedClusterClient.asInternalUser.bulk({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -140,7 +142,7 @@ export const singleBulkCreate = async ({
     .map((doc, index) => ({
       _id: response.items[index].create?._id ?? '',
       _index: response.items[index].create?._index ?? '',
-      ...buildBulkBody(ruleSO, doc),
+      ...buildBulkBody(ruleSO, doc, SERVER_APP_ID),
     }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   const createdItemsCount = createdItems.length;

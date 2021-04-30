@@ -15,6 +15,8 @@ import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
+import { SERVER_APP_ID } from '../../../security_solution/server';
+
 import {
   RacAuthorization,
   WriteOperations,
@@ -59,6 +61,11 @@ export interface FindOptions extends IndexType {
   };
   fields?: string[];
   filter?: string;
+}
+
+export interface CreateAlertParams {
+  esClient: ElasticsearchClient;
+  owner: 'observability' | 'securitySolution';
 }
 
 interface IndexType {
@@ -117,14 +124,8 @@ export class RacClient {
     owner,
   }: {
     id: string;
-    owner: 'securitySolution' | 'observability';
+    owner: typeof SERVER_APP_ID | 'observability';
   }): Promise<unknown> {
-    // TODO: type alert for the get method
-    const result = await this.esClient.search({
-      index: '.siem*',
-      body: { query: { match_all: {} } },
-    });
-    console.error(`************\nRESULT ${JSON.stringify(result, null, 2)}\n************`);
     // .get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized(
@@ -133,7 +134,25 @@ export class RacClient {
         owner,
         ReadOperations.Get
       );
+      // TODO: type alert for the get method
+
+      try {
+        const result = await this.esClient.get({
+          index: '.siem-signals-devin-hurley-default',
+          id,
+        });
+        console.error(`************\nRESULT ${JSON.stringify(result, null, 2)}\n************`);
+        return result;
+      } catch (exc) {
+        console.error('THREW ERROR WHEN TRYING GET', JSON.stringify(exc, null, 2));
+      }
+
+      // const result = await this.esClient.search({
+      //   index: '.siem*',
+      //   body: { query: { match_all: {} } },
+      // });
     } catch (error) {
+      console.error('HERES THE ERROR', error);
       // this.auditLogger?.log(
       //   alertAuditEvent({
       //     action: AlertAuditAction.GET,
@@ -152,7 +171,7 @@ export class RacClient {
     // TODO: strip out owner field maybe?
     // this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
 
-    return result;
+    // return result;
 
     // return Promise.resolve({ id: 'hello world!!!' });
     // const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
@@ -181,9 +200,58 @@ export class RacClient {
     // return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
   }
 
-  public async find<Params extends AlertTypeParams = never>({
-    options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
+  public async find({
+    owner,
+  }: {
+    owner: typeof SERVER_APP_ID | 'observability';
+  }): Promise<unknown> {
+    try {
+      await this.authorization.ensureAuthorized(
+        // TODO: add spaceid here.. I think
+        // result.body._source?.owner,
+        owner,
+        ReadOperations.Get
+      );
+      // TODO: type alert for the get method
+
+      try {
+        // const result = await this.esClient.get({
+        //   index: '.siem-signals-devin-hurley-default',
+        //   id: 'ecf1d03a9f3456bb28bf3af5ef9fd2ef441641f3b495d92112e5e76d8feae62e',
+        // });
+        const result = await this.esClient.search({
+          index: '.siem-signals*',
+          body: {
+            query: {
+              term: {
+                'signal.owner': {
+                  value: owner,
+                },
+              },
+            },
+          },
+        });
+        console.error(`************\nRESULT ${JSON.stringify(result, null, 2)}\n************`);
+        return result;
+      } catch (exc) {
+        console.error('THREW ERROR WHEN TRYING GET', JSON.stringify(exc, null, 2));
+      }
+
+      // const result = await this.esClient.search({
+      //   index: '.siem*',
+      //   body: { query: { match_all: {} } },
+      // });
+    } catch (error) {
+      console.error('HERES THE ERROR', error);
+      // this.auditLogger?.log(
+      //   alertAuditEvent({
+      //     action: AlertAuditAction.GET,
+      //     savedObject: { type: 'alert', id },
+      //     error,
+      //   })
+      // );
+      throw error;
+    }
     // let authorizationTuple;
     // try {
     //   authorizationTuple = await this.authorization.getFindAuthorizationFilter();
@@ -337,4 +405,6 @@ export class RacClient {
     // ]);
     // return updateResult;
   }
+
+  static async create({ esClient, owner, data }: createAlertParams) {}
 }
