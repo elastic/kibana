@@ -23,7 +23,7 @@ interface Props {
 }
 
 interface State {
-  doesIndexPatternHaveGeoField: boolean;
+  doesIndexPatternHaveGeoField: boolean | null;
   noIndexPatternsExist: boolean;
 }
 
@@ -31,7 +31,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   state = {
-    doesIndexPatternHaveGeoField: false,
+    doesIndexPatternHaveGeoField: null,
     noIndexPatternsExist: false,
   };
 
@@ -120,12 +120,20 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
   render() {
     const IndexPatternSelectComponent = this.props.IndexPatternSelectComponent;
-    const isIndexPatternInvalid = !!this.props.value && !this.state.doesIndexPatternHaveGeoField;
+    const isIndexPatternInvalid =
+      this.state.doesIndexPatternHaveGeoField !== null
+        ? !!this.props.value && !this.state.doesIndexPatternHaveGeoField
+        : true;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
-          defaultMessage: 'Index pattern does not contain any geospatial fields',
+          defaultMessage:
+            'Index pattern does not contain any allowed geospatial fields. Must have one of type {geoFields}.',
+          values: {
+            geoFields: this.props.includedGeoTypes.join(', '),
+          },
         })
       : '';
+
     return (
       <>
         {this._renderNoIndexPatternWarning()}
