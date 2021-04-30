@@ -6,15 +6,125 @@
  */
 
 import { initialEventFiltersPageState } from './builders';
-import { getFormEntry, getFormHasError, getCurrentLocation } from './selector';
+import {
+  getFormEntry,
+  getFormHasError,
+  getCurrentLocation,
+  getCurrentListPageState,
+  getListPageIsActive,
+  getCurrentListPageDataState,
+  getListApiSuccessResponse,
+  getListItems,
+} from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
-import { EventFiltersPageLocation } from '../state';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import {
+  createLoadedResourceState,
+  createLoadingResourceState,
+  createUninitialisedResourceState,
+  getLastLoadedResourceState,
+  LoadedResourceState,
+} from '../../../state';
 
-const initialState = initialEventFiltersPageState();
+describe('event filters selectors', () => {
+  let initialState: EventFiltersListPageState;
 
-describe('selectors', () => {
+  // When `setToLoadingState()` is called, this variable will hold the prevousState in order to
+  // avoid ts-ignores due to know issues (#830) around the LoadingResourceState
+  let previousStateWhileLoading: EventFiltersListPageState['listPage']['data'] | undefined;
+
+  const setToLoadedState = () => {
+    initialState.listPage.data = createLoadedResourceState({
+      query: { page: 2, perPage: 10 },
+      content: getFoundExceptionListItemSchemaMock(),
+    });
+  };
+
+  const setToLoadingState = (
+    previousState: EventFiltersListPageState['listPage']['data'] = createLoadedResourceState({
+      query: {},
+      content: getFoundExceptionListItemSchemaMock(),
+    })
+  ) => {
+    previousStateWhileLoading = previousState;
+
+    // will be fixed when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    initialState.listPage.data = createLoadingResourceState(previousState);
+  };
+
+  beforeEach(() => {
+    initialState = initialEventFiltersPageState();
+  });
+
+  describe('getCurrentListPageState()', () => {
+    it('should retrieve list page state', () => {
+      expect(getCurrentListPageState(initialState)).toEqual(initialState.listPage);
+    });
+  });
+
+  describe('getListPageIsActive()', () => {
+    it('should return active state', () => {
+      expect(getListPageIsActive(initialState)).toBe(false);
+
+      initialState.listPage.active = true;
+      expect(getListPageIsActive(initialState)).toBe(true);
+    });
+  });
+
+  describe('getCurrentListPageDataState()', () => {
+    it('should return list data state', () => {
+      expect(getCurrentListPageDataState(initialState)).toEqual(initialState.listPage.data);
+    });
+  });
+
+  describe('getListApiSuccessResponse()', () => {
+    it('should return api response', () => {
+      setToLoadedState();
+      expect(getListApiSuccessResponse(initialState)).toEqual(initialState.listPage.data);
+    });
+
+    it('should return undefined if not available', () => {
+      setToLoadingState(createUninitialisedResourceState());
+      expect(getListApiSuccessResponse(initialState)).toBeUndefined();
+    });
+
+    it('should return previous success response if currently loading', () => {
+      setToLoadingState();
+      expect(getListApiSuccessResponse(initialState)).toEqual(
+        getLastLoadedResourceState(previousStateWhileLoading!)?.data
+      );
+    });
+  });
+
+  describe('getListItems()', () => {
+    it('should return the list items from api response', () => {
+      setToLoadedState();
+      expect(getListItems(initialState)).toEqual(
+        getLastLoadedResourceState(initialState.listPage.data)?.data.content.data
+      );
+    });
+
+    it.todo('should return empty array if no api response');
+  });
+
+  describe('getCurrentListItemsQuery()', () => {});
+
+  describe('getListPagination()', () => {});
+
+  describe('getListFetchError()', () => {});
+
+  describe('getListIsLoading()', () => {});
+
+  describe('getListPageDataExistsState()', () => {});
+
+  describe('getListPageDataExist()', () => {});
+
+  describe('listdataNeedsRefresh()', () => {});
+
   describe('getFormEntry()', () => {
     it('returns undefined when there is no entry', () => {
       expect(getFormEntry(initialState)).toBe(undefined);
