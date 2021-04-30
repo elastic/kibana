@@ -14,6 +14,14 @@ import { DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 import { createVisTypeXyVisFn } from './xy_vis_fn';
+import { categoryAxis as categoryAxisExpressionFunction } from './expression_functions/category_axis';
+import { timeMarker as timeMarkerExpressionFunction } from './expression_functions/time_marker';
+import { valueAxis as valueAxisExpressionFunction } from './expression_functions/value_axis';
+import { seriesParam as seriesParamExpressionFunction } from './expression_functions/series_param';
+import { thresholdLine as thresholdLineExpressionFunction } from './expression_functions/threshold_line';
+import { label as labelExpressionFunction } from './expression_functions/label';
+import { visScale as visScaleExpressionFunction } from './expression_functions/vis_scale';
+import { xyDimension as xyDimensionExpressionFunction } from './expression_functions/xy_dimension';
 import {
   setDataActions,
   setFormatService,
@@ -66,7 +74,17 @@ export class VisTypeXyPlugin
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setPalettesService(charts.palettes);
-      [createVisTypeXyVisFn].forEach(expressions.registerFunction);
+      [
+        timeMarkerExpressionFunction,
+        thresholdLineExpressionFunction,
+        labelExpressionFunction,
+        visScaleExpressionFunction,
+        valueAxisExpressionFunction,
+        xyDimensionExpressionFunction,
+        seriesParamExpressionFunction,
+        categoryAxisExpressionFunction,
+        createVisTypeXyVisFn,
+      ].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }

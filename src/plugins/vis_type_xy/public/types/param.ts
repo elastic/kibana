@@ -11,7 +11,14 @@ import { Fit, Position } from '@elastic/charts';
 import { Style, Labels, PaletteOutput } from '../../../charts/public';
 import { SchemaConfig } from '../../../visualizations/public';
 
-import { ChartType } from '../../common';
+import { ChartType, XyVisType } from '../../common';
+import { ExpressionValueCategoryAxis } from '../expression_functions/category_axis';
+import { ExpressionValueSeriesParam } from '../expression_functions/series_param';
+import { ExpressionValueValueAxis } from '../expression_functions/value_axis';
+import { ExpressionValueLabel } from '../expression_functions/label';
+import { ExpressionValueThresholdLine } from '../expression_functions/threshold_line';
+import { ExpressionValueTimeMarker } from '../expression_functions/time_marker';
+import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
 import {
   ChartMode,
   AxisMode,
@@ -47,7 +54,7 @@ export interface CategoryAxis {
    * remove with vis_type_vislib
    * https://github.com/elastic/kibana/issues/56143
    */
-  style: Partial<Style>;
+  style?: Partial<Style>;
 }
 
 export interface ValueAxis extends CategoryAxis {
@@ -116,7 +123,7 @@ export interface Dimensions {
   y: Dimension[];
   z?: Dimension[];
   width?: Dimension[];
-  series?: Dimension | Dimension[];
+  series?: Dimension[];
   splitRow?: Dimension[];
   splitColumn?: Dimension[];
 }
@@ -148,4 +155,41 @@ export interface VisParams {
   detailedTooltip?: boolean;
   palette: PaletteOutput;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+}
+
+export interface XYVisConfig {
+  type: XyVisType;
+  chartType: ChartType;
+  gridCategoryLines: boolean;
+  gridValueAxis?: string;
+  categoryAxes: ExpressionValueCategoryAxis[];
+  valueAxes: ExpressionValueValueAxis[];
+  seriesParams: ExpressionValueSeriesParam[];
+  palette: string;
+  addLegend: boolean;
+  addTooltip: boolean;
+  legendPosition: Position;
+  addTimeMarker: boolean;
+  orderBucketsBySum?: boolean;
+  labels: ExpressionValueLabel;
+  thresholdLine: ExpressionValueThresholdLine;
+  radiusRatio: number;
+  times: ExpressionValueTimeMarker[]; // For compatibility with vislib
+  /**
+   * flag to indicate old vislib visualizations
+   * used for backwards compatibility including colors
+   */
+  isVislibVis?: boolean;
+  /**
+   * Add for detailed tooltip option
+   */
+  detailedTooltip?: boolean;
+  fittingFunction?: Exclude<Fit, 'explicit'>;
+  xDimension: ExpressionValueXYDimension | null;
+  yDimension: ExpressionValueXYDimension[];
+  zDimension?: ExpressionValueXYDimension[];
+  widthDimension?: ExpressionValueXYDimension[];
+  seriesDimension?: ExpressionValueXYDimension[];
+  splitRowDimension?: ExpressionValueXYDimension[];
+  splitColumnDimension?: ExpressionValueXYDimension[];
 }

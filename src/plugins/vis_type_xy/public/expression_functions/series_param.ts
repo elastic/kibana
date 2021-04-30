@@ -1,0 +1,129 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { i18n } from '@kbn/i18n';
+import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  ExpressionValueBoxed,
+} from '../../../expressions/public';
+import { SeriesParam } from '../types';
+
+export interface Arguments extends Omit<SeriesParam, 'data'> {
+  label: string;
+  id: string;
+}
+
+export type ExpressionValueSeriesParam = ExpressionValueBoxed<
+  'series_param',
+  {
+    data: { label: string; id: string };
+    drawLinesBetweenPoints: boolean;
+    interpolate?: SeriesParam['interpolate'];
+    lineWidth?: number;
+    mode: SeriesParam['mode'];
+    show: boolean;
+    showCircles: boolean;
+    seriesParamType: SeriesParam['type'];
+    valueAxis: string;
+  }
+>;
+
+export const seriesParam = (): ExpressionFunctionDefinition<
+  'seriesparam',
+  Datatable,
+  Arguments,
+  ExpressionValueSeriesParam
+> => ({
+  name: 'seriesparam',
+  help: i18n.translate('visTypeXY.function.label.help', {
+    defaultMessage: 'Generates series param object',
+  }),
+  type: 'series_param',
+  inputTypes: ['datatable'],
+  args: {
+    label: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.label.help', {
+        defaultMessage: 'Name of series param',
+      }),
+      required: true,
+    },
+    id: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.id.help', {
+        defaultMessage: 'Id of series param',
+      }),
+      required: true,
+    },
+    drawLinesBetweenPoints: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXY.function.seriesParam.drawLinesBetweenPoints.help', {
+        defaultMessage: 'Draw lines between points',
+      }),
+      required: true,
+    },
+    interpolate: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.interpolate.help', {
+        defaultMessage: 'Interpolate mode',
+      }),
+    },
+    show: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXY.function.seriesParam.show.help', {
+        defaultMessage: 'Show param',
+      }),
+      required: true,
+    },
+    lineWidth: {
+      types: ['number'],
+      help: i18n.translate('visTypeXY.function.seriesParam.lineWidth.help', {
+        defaultMessage: 'Width of line',
+      }),
+    },
+    mode: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.mode.help', {
+        defaultMessage: 'Chart mode. Can be stacked or percentage',
+      }),
+    },
+    showCircles: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXY.function.seriesParam.showCircles.help', {
+        defaultMessage: 'Show circles',
+      }),
+    },
+    type: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.type.help', {
+        defaultMessage: 'Chart type',
+      }),
+    },
+    valueAxis: {
+      types: ['string'],
+      help: i18n.translate('visTypeXY.function.seriesParam.type.help', {
+        defaultMessage: 'Name of value axis',
+      }),
+    },
+  },
+  fn: (context, args) => {
+    return {
+      type: 'series_param',
+      data: { label: args.label, id: args.id },
+      drawLinesBetweenPoints: args.drawLinesBetweenPoints,
+      interpolate: args.interpolate,
+      lineWidth: args.lineWidth,
+      mode: args.mode,
+      show: args.show,
+      showCircles: args.showCircles,
+      seriesParamType: args.type,
+      valueAxis: args.valueAxis,
+    };
+  },
+});
