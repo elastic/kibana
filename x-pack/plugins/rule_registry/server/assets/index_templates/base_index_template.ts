@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './merge_field_maps';
-export * from './runtime_type_from_fieldmap';
-export * from './types';
+export const baseIndexTemplate = {
+  template: {
+    settings: {
+      number_of_shards: 1,
+      number_of_replicas: 0,
+    },
+  },
+};

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'typings/elasticsearch';
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
@@ -29,7 +30,6 @@ import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -49,11 +49,18 @@ const alertTypeConfig =
   ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
 
 export function registerTransactionDurationAnomalyAlertType({
-  registry,
+  logger,
+  ruleDataClient,
+  alerting,
   ml,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.TransactionDurationAnomaly,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -190,7 +197,7 @@ export function registerTransactionDurationAnomalyAlertType({
               const job = mlJobs.find((j) => j.job_id === latest.job_id);
 
               if (!job) {
-                services.logger.warn(
+                logger.warn(
                   `Could not find matching job for job id ${latest.job_id}`
                 );
                 return undefined;

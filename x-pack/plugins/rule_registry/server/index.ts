@@ -9,11 +9,11 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
-export { RuleRegistryPluginSetupContract } from './plugin';
-export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
+export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export { RuleDataClient } from './rule_data_client';
+export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export { createPersistenceRuleTypeFactory } from './rule_registry/rule_type_helpers/create_persistence_rule_type_factory';
-export { FieldMapOf } from './types';
-export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 
 export const config = {
   schema: schema.object({
@@ -24,7 +24,7 @@ export const config = {
   }),
 };
 
-export type RuleRegistryConfig = TypeOf<typeof config.schema>;
+export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

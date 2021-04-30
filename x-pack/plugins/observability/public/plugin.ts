@@ -25,21 +25,16 @@ import type {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import type { LensPublicStart } from '../../lens/public';
-import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
-import type { ObservabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
-import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
 import { registerDataHandler } from './data_handler';
-import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
+import { createObservabilityRuleRegistry } from './rules/create_observability_rule_registry';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPublicSetup['ruleRegistry'];
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  ruleRegistry: RuleRegistryPublicPluginSetupContract;
   home?: HomePublicPluginSetup;
 }
 
@@ -75,11 +70,7 @@ export class Plugin
 
     createCallObservabilityApi(coreSetup.http);
 
-    const observabilityRuleRegistry = pluginsSetup.ruleRegistry.registry.create({
-      ...observabilityRuleRegistrySettings,
-      fieldMap: {} as ObservabilityRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
+    const observabilityRuleRegistry = createObservabilityRuleRegistry();
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle

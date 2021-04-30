@@ -18,11 +18,12 @@ import {
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ConfigSchema } from '..';
+import { ObservabilityRuleRegistry } from '../rules/create_observability_rule_registry';
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
   return breadcrumbs.map(({ text }) => text).reverse();

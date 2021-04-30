@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -22,7 +23,6 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
@@ -37,11 +37,18 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
 export function registerTransactionErrorRateAlertType({
-  registry,
+  alerting,
+  ruleDataClient,
+  logger,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.TransactionErrorRate,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

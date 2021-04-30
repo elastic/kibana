@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { APMRuleRegistry } from '../../plugin';
+import { estypes } from '@elastic/elasticsearch';
 
-export const createAPMLifecycleRuleType = createLifecycleRuleTypeFactory<APMRuleRegistry>();
+export interface ClusterPutComponentTemplateBody {
+  template: {
+    settings: {
+      number_of_shards: number;
+    };
+    mappings: estypes.TypeMapping;
+  };
+}
