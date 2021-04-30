@@ -29,17 +29,9 @@ import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs'
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
+import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 
-interface MlAnomalyAlertTriggerProps {
-  alertParams: MlAnomalyDetectionAlertParams;
-  setAlertParams: <T extends keyof MlAnomalyDetectionAlertParams>(
-    key: T,
-    value: MlAnomalyDetectionAlertParams[T]
-  ) => void;
-  setAlertProperty: (prop: string, update: Partial<MlAnomalyDetectionAlertParams>) => void;
-  errors: Record<keyof MlAnomalyDetectionAlertParams, string[]>;
-  alertInterval: string;
-}
+type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -116,6 +108,8 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         includeInterim: false,
         // Preserve job selection
         jobSelection,
+        lookbackInterval: undefined,
+        topNBuckets: undefined,
       });
     }
   });
@@ -164,7 +158,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         onChange={useCallback(onAlertParamChange('jobSelection'), [])}
-        errors={errors.jobSelection}
+        errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
       />
 
       <ConfigValidator
