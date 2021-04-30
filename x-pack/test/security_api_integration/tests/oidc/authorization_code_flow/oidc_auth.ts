@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import url from 'url';
 import { delay } from 'bluebird';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';

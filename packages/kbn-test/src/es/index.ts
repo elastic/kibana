@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { createLegacyEsTestCluster } from './legacy_es_test_cluster.js';
+export { createTestEsCluster } from './test_es_cluster';
 export { esTestConfig } from './es_test_config';
