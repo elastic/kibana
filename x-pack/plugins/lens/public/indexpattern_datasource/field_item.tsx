@@ -56,6 +56,7 @@ import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
+import { getVisualizeGeoFieldMessage } from '../utils';
 
 import { debouncedComponent } from '../debounced_component';
 
@@ -483,12 +484,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
-        <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
-            defaultMessage: `Lens cannot visualize {fieldType} fields.`,
-            values: { fieldType: field.type },
-          })}
-        </EuiText>
+        <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
 
         <VisualizeGeoFieldButton
           uiActions={uiActions}

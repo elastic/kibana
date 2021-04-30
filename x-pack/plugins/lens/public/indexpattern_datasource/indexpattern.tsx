@@ -54,6 +54,7 @@ import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -323,6 +324,26 @@ export function getIndexPatternDatasource({
     },
     getDropProps,
     onDrop,
+
+    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, draggedField: unknown) => {
+      const geoFieldType =
+        draggedField.field &&
+        draggedField.field.esTypes.find((esType) => {
+          return ['geo_point', 'geo_shape'].includes(esType);
+        });
+      return geoFieldType
+        ? () => {
+            return (
+              <GeoFieldWorkspacePanel
+                uiActions={uiActions}
+                fieldType={geoFieldType}
+                indexPatternId={draggedField.indexPatternId}
+                fieldName={draggedField.field.name}
+              />
+            );
+          }
+        : undefined;
+    },
 
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
