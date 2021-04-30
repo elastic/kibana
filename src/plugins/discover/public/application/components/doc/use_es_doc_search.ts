@@ -13,6 +13,8 @@ import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
+type RequestBody = Pick<estypes.SearchRequest, 'body'>;
+
 export enum ElasticRequestState {
   Loading,
   NotFound,
@@ -29,25 +31,31 @@ export function buildSearchBody(
   id: string,
   indexPattern: IndexPattern,
   useNewFieldsApi: boolean
-): estypes {
+): RequestBody | undefined {
   const computedFields = indexPattern.getComputedFields();
-  const runtimeFields = computedFields.runtimeFields;
-  const request: estypes = {
-    query: {
-      ids: {
-        values: [id],
+  const runtimeFields = computedFields.runtimeFields as estypes.RuntimeFields;
+  const request: RequestBody = {
+    body: {
+      query: {
+        ids: {
+          values: [id],
+        },
       },
+      stored_fields: computedFields.storedFields,
+      script_fields: computedFields.scriptFields,
     },
-    stored_fields: computedFields.storedFields,
-    script_fields: computedFields.scriptFields,
   };
-  if (useNewFieldsApi) {
-    request.fields = [{ field: '*', include_unmapped: 'true' }];
-    request.runtime_mappings = runtimeFields ? runtimeFields : {};
-  } else {
-    request._source = true;
+  if (!request.body) {
+    return undefined;
   }
-  request.fields = [...(request.fields || []), ...(computedFields.docvalueFields || [])];
+  if (useNewFieldsApi) {
+    // @ts-ignore
+    request.body.fields = [{ field: '*', include_unmapped: 'true' }];
+    request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
+  } else {
+    request.body._source = true;
+  }
+  request.body.fields = [...(request.body?.fields || []), ...(computedFields.docvalueFields || [])];
   return request;
 }
 
@@ -76,7 +84,7 @@ export function useEsDocSearch({
           .search({
             params: {
               index,
-              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi),
+              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi)?.body,
             },
           })
           .toPromise();
