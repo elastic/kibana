@@ -5,12 +5,17 @@
  * 2.0.
  */
 import url from 'url';
-import archives_metadata from '../fixtures/es_archiver/archives_metadata';
+import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 const { start, end } = archives_metadata['apm_8.0.0'];
 
 describe('Home page', () => {
   before(() => {
-    cy.loginAsSuperUser();
+    esArchiverLoad('apm_8.0.0');
+    cy.loginAsReadOnlyUser();
+  });
+  after(() => {
+    esArchiverUnload('apm_8.0.0');
   });
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     const baseUrl = url.format({
@@ -19,7 +24,6 @@ describe('Home page', () => {
     });
 
     cy.visit(baseUrl);
-
     cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 });
