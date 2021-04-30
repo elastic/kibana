@@ -21,13 +21,12 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
+  "README.md",
 ]
 
 SRC_DEPS = [
   "@npm//brace",
   "@npm//lodash",
-  
 ]
 
 TYPES_DEPS = [
