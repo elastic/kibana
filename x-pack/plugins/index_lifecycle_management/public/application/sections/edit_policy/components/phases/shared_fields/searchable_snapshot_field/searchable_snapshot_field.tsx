@@ -40,7 +40,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
-            defaultMessage="Mount an entire searchable snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
+            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
             values={{
               learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
             }}
@@ -64,7 +64,7 @@ const geti18nTexts = (phase: Props['phase']) => {
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.partiallyMountedSearchableSnapshotField.description"
-            defaultMessage="Mount a partial cache of a searchable snapshot. This minimizes the index footprint while keeping the data fully searchable. Data is retrieved from the snapshot as needed to process search requests. {learnMoreLink}"
+            defaultMessage="Convert to a partially-mounted index that caches the index metadata. Data is retrieved from the snapshot as needed to process search requests. This minimizes the index footprint while keeping all of your data fully searchable. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
