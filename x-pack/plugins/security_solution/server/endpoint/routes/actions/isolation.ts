@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import { RequestHandler } from 'src/core/server';
 import uuid from 'uuid';
+import { EndpointAction } from '../../../../common/endpoint/types';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '.';
 import {
   SecuritySolutionPluginRouter,
@@ -127,8 +128,9 @@ export const isolationRequestHandler = function (
         user_id: user?.username,
         data: {
           command: isolate ? 'isolate' : 'unisolate',
+          comment: req.body.comment,
         },
-      },
+      } as EndpointAction,
     });
 
     if (result.statusCode !== 201) {
