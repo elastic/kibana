@@ -117,15 +117,7 @@ export class AttributionPopover extends Component<Props, State> {
           })}
           fullWidth
         >
-          <EuiFieldText
-            compressed
-            fullWidth
-            value={this.state.url}
-            onChange={this._onUrlChange}
-            placeholder={i18n.translate('xpack.maps.attribution.urlPlaceholder', {
-              defaultMessage: 'http://myurl.com',
-            })}
-          />
+          <EuiFieldText compressed fullWidth value={this.state.url} onChange={this._onUrlChange} />
         </EuiFormRow>
         <EuiSpacer size="xs" />
         <EuiPopoverFooter>
