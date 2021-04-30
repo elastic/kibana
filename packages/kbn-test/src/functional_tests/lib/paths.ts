@@ -11,7 +11,7 @@ import { resolve, relative } from 'path';
 
 // resolve() treats relative paths as relative to process.cwd(),
 // so to return a relative path we use relative()
-function resolveRelative(path) {
+function resolveRelative(path: string) {
   return relative(process.cwd(), resolve(path));
 }
 

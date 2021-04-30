@@ -27,6 +27,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
 import { LatestMinorBanner } from '../latest_minor_banner';
 import { ESDeprecationStats } from './es_stats';
+import { KibanaDeprecationStats } from './kibana_stats';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 const i18nTexts = {
@@ -114,21 +115,25 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             <EuiSpacer size="xl" />
 
             <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+              <EuiFlexItem>
                 <ESDeprecationStats history={history} />
+              </EuiFlexItem>
 
-                <EuiSpacer />
-
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
+              <EuiFlexItem>
+                <KibanaDeprecationStats history={history} />
               </EuiFlexItem>
             </EuiFlexGroup>
+
+            <EuiSpacer />
+
+            <EuiFormRow
+              helpText={i18nTexts.getDeprecationLoggingLabel(
+                docLinks.links.elasticsearch.deprecationLogging
+              )}
+              data-test-subj="deprecationLoggingFormRow"
+            >
+              <DeprecationLoggingToggle />
+            </EuiFormRow>
           </>
         </EuiPageContentBody>
       </EuiPageContent>

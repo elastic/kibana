@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EnrichedDeprecationInfo } from '../../../../../common/types';
-
 export const DeprecationCountSummary: FunctionComponent<{
-  deprecations: EnrichedDeprecationInfo[];
-  allDeprecations: EnrichedDeprecationInfo[];
-}> = ({ deprecations, allDeprecations }) => (
+  allDeprecationsCount: number;
+  filteredDeprecationsCount: number;
+}> = ({ filteredDeprecationsCount, allDeprecationsCount }) => (
   <EuiText size="s">
-    {allDeprecations.length ? (
+    {allDeprecationsCount > 0 ? (
       <FormattedMessage
         id="xpack.upgradeAssistant.checkupTab.numDeprecationsShownLabel"
         defaultMessage="Showing {numShown} of {total}"
-        values={{ numShown: deprecations.length, total: allDeprecations.length }}
+        values={{ numShown: filteredDeprecationsCount, total: allDeprecationsCount }}
       />
     ) : (
       <FormattedMessage
@@ -29,15 +27,15 @@ export const DeprecationCountSummary: FunctionComponent<{
         defaultMessage="No deprecations"
       />
     )}
-    {deprecations.length !== allDeprecations.length && (
-      <Fragment>
+    {filteredDeprecationsCount !== allDeprecationsCount && (
+      <>
         {'. '}
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel"
           description="Explains how to show all deprecations if there are more available."
           defaultMessage="Change filter to show more."
         />
-      </Fragment>
+      </>
     )}
   </EuiText>
 );
