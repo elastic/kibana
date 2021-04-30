@@ -115,7 +115,6 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
                 />
               }
               color="warning"
-              iconType="alert"
               size={'s'}
             />
             <EuiSpacer size={'m'} />
