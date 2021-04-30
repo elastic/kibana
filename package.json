@@ -441,7 +441,7 @@
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",
     "@kbn/es": "link:packages/kbn-es",
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
-    "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
+    "@kbn/eslint-import-resolver-kibana": "link:bazel-bin/packages/kbn-eslint-import-resolver-kibana/npm_module",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
     "@kbn/expect": "link:bazel-bin/packages/kbn-expect/npm_module",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
