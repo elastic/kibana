@@ -5,16 +5,22 @@
  * 2.0.
  */
 
- .schemaFieldError {
-  border-top: 1px solid $euiColorLightShade;
-
-  &:last-child {
-    border-bottom: 1px solid $euiColorLightShade;
+.schemaErrorsAccordion {
+  // Fixes the accordion button content not stretching to full-width
+  .euiAccordion__button > :last-child {
+    flex-grow: 1;
   }
 
-  // Something about the EuiFlexGroup being inside a button collapses the row of items.
-  // This wrapper div was injected by EUI and had 'with: auto' on it.
-  .euiIEFlexWrapFix {
-    width: 100%;
+  // Tweak spacing
+  .euiAccordion__childWrapper {
+    position: relative;
+    top: -($euiSizeS);
+    padding-left: $euiSizeL;
+    padding-right: $euiSizeL;
+  }
+
+  // Remove extra border-bottom on last table row
+  .euiTableRow:last-child .euiTableRowCell {
+    border-bottom: none;
   }
 }

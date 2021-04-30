@@ -22,15 +22,16 @@ import {
 import { EuiButtonEmptyTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
-import './schema_errors_accordion.scss';
+import { FieldCoercionErrors } from '../types';
 
 import {
   ERROR_TABLE_ID_HEADER,
   ERROR_TABLE_ERROR_HEADER,
   ERROR_TABLE_REVIEW_CONTROL,
   ERROR_TABLE_VIEW_LINK,
-} from '../constants';
-import { FieldCoercionErrors } from '../types';
+} from './constants';
+
+import './schema_errors_accordion.scss';
 
 interface ISchemaErrorsAccordionProps {
   fieldCoercionErrors: FieldCoercionErrors;
@@ -78,10 +79,9 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         <EuiAccordion
           key={fieldNameIndex}
           id={`accordion${fieldNameIndex}`}
-          className="schemaFieldError"
-          buttonClassName="euiAccordionForm__button field-error__header"
+          className="schemaErrorsAccordion euiAccordionForm"
+          buttonClassName="euiAccordionForm__button"
           buttonContent={accordionHeader}
-          paddingSize="xl"
         >
           <EuiTable tableLayout="auto">
             <EuiTableHeader>
