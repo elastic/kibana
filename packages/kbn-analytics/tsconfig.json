@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "incremental": true,
+    "declarationDir": "./target/types",
     "outDir": "./target/node",
     "stripInternal": true,
     "declaration": true,

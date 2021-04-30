@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
   "main": "target/node/index.js",
-  "types": "target/node/index.d.ts",
+  "types": "target/types/index.d.ts",
   "browser": "target/web/index.js",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "SSPL-1.0 OR Elastic License 2.0"
