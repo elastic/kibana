@@ -489,7 +489,7 @@ describe('SearchSource', () => {
 
       test('_source is not set when using the fields API', async () => {
         searchSource.setField('fields', ['*']);
-        const request = searchSource.getSearchRequestBody();
+        const request = await searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['*']);
         expect(request._source).toEqual(false);
       });
