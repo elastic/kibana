@@ -110,7 +110,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               title={
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.notifyWhenWarning"
-                  defaultMessage="Expect to receive duplicate notifications about the same anomaly with a duration of up to {notificationDuration}  {notificationDuration, plural, one {minute} other {minutes}}"
+                  defaultMessage="Expect to receive duplicate notifications about the same anomaly for up to {notificationDuration} {notificationDuration, plural, one {minute} other {minutes}}. Increase the check interval or switch to notify only on status change to avoid duplicate notifications."
                   values={{ notificationDuration }}
                 />
               }
