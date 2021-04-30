@@ -81,9 +81,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
   const vegaColumns = columns.map(getEscapedVegaFieldName);
   const outliers = resultsField !== undefined;
 
-  // Use an alternative UTF-8 character for the dot
-  // since VEGA treats dots in field names as nested values.
-  const escapedOutlierScoreField = `${resultsField}․${OUTLIER_SCORE_FIELD}`;
+  const escapedOutlierScoreField = `${resultsField}\\.${OUTLIER_SCORE_FIELD}`;
 
   const colorSpec = getColorSpec(
     euiTheme,
