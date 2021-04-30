@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { GeoJsonFilePicker, OnFileSelectParameters } from './geojson_file_picker';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
-import { validateIndexName } from '../../util/indexing_service';
+import { validateIndexName } from '../../validate_index_name';
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {
@@ -32,6 +32,8 @@ interface Props {
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onGeoFieldTypeSelect: (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => void;
   onIndexNameChange: (name: string, error?: string) => void;
+  onIndexNameValidationStart: () => void;
+  onIndexNameValidationEnd: () => void;
 }
 
 interface State {
@@ -40,10 +42,19 @@ interface State {
 }
 
 export class GeoJsonUploadForm extends Component<Props, State> {
+  private _isMounted = false;
   state: State = {
     hasFile: false,
     isPointsOnly: false,
   };
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
   _onFileSelect = async (onFileSelectParameters: OnFileSelectParameters) => {
     this.setState({
@@ -53,7 +64,12 @@ export class GeoJsonUploadForm extends Component<Props, State> {
 
     this.props.onFileSelect(onFileSelectParameters);
 
+    this.props.onIndexNameValidationStart();
     const indexNameError = await validateIndexName(onFileSelectParameters.indexName);
+    if (!this._isMounted) {
+      return;
+    }
+    this.props.onIndexNameValidationEnd();
     this.props.onIndexNameChange(onFileSelectParameters.indexName, indexNameError);
 
     const geoFieldType =
@@ -107,6 +123,8 @@ export class GeoJsonUploadForm extends Component<Props, State> {
             indexName={this.props.indexName}
             indexNameError={this.props.indexNameError}
             onIndexNameChange={this.props.onIndexNameChange}
+            onIndexNameValidationStart={this.props.onIndexNameValidationStart}
+            onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
           />
         ) : null}
       </EuiForm>
