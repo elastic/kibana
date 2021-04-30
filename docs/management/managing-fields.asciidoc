@@ -76,8 +76,75 @@ include::field-formatters/duration-formatter.asciidoc[]
 
 include::field-formatters/color-formatter.asciidoc[]
 
+[[runtime-fields]]
+=== Explore your data with runtime fields 
+
+Manipulate your data fields without indexing your data. Runtime fields are most flexible than scripted fields. 
+
+Index runtime fields so that you can view and analyze the field values in *Discover* and *Dashboard*.
+
+*Discover* displays runtime fields as part of the document data...
+
+You can visualize runtime fields in the following editors: 
+
+* *Lens*
+* *Maps*
+* *TSVB*
+* *Timelion*
+* *Aggregation-based*
+
+In *Discover* and *Dashboard*, you can query runtime fields with the <<kuery-query, {kib} query language>>, and create filters for runtime fields. 
+
+For more information about runtime fields, refer to {ref}/runtime.html[Runtime fields].
+
+[float]
+[[create-runtime-fields]]
+=== Create runtime fields
+
+You can create runtime fields in *Discover* and *Lens*, or to visualize runtime fields in *Maps*, *TSVB*, *Timelion*, and *Aggregation-based* visualizations, 
+create runtime fields for the index patterns you want to visualize.
+
+// Do we add the Discover and Lens content here? Or in the separate sections?
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+. Select the index pattern you want to add the runtime field to.
+. Click *Add field*, then enter the field details. 
+
+[float]
+[[set-the-field-value]]
+==== Set the field value
+
+Set the value of a field by emitting a single value from a Painless script. 
+
+For example, to emit a single value from a Painless script:
+----
+emit(doc['bytes'].value * 10)
+----
+
+For example, to calculate the day of the week based on the value of the `@timestamp` field:
+----
+emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT)
+----
+
+// The script field uses Painless. 
+// The UI needs to point to the Kibana docs, not the ES docs. 
+// We need good script examples from Jason Burns (runtime fields PM).
+
+[float]
+[[manage-runtime-fields]]
+=== Manage runtime fields
+
+Edit the settings for existing runtime fields, or remove runtime fields from the index pattern. 
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+. Select the index pattern that contains the runtime field you want to manage.
+. For the runtime field you want to manage, open the edit options, or delete the runtime field. 
+
+// What translates in scripted fields to runtime fields? Add that.
+
 [[scripted-fields]]
-=== Scripted fields
+=== Add scripted fields to index patterns
+
 deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility.]
 
 Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
@@ -132,3 +199,5 @@ exceptions whenever you try to view the dynamically generated data.
 . Click the *Scripted fields* tab for the index pattern.
 . Click *Delete* for the scripted field you want to remove.
 . Click *Delete* on the confirmation window.
+
+
