@@ -2643,7 +2643,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint/npm_module":
   version "0.0.0"
   uid ""
 
