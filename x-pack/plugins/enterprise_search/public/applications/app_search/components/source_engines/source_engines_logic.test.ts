@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  setMockValues,
-} from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -36,6 +31,7 @@ jest.mock('../engines', () => ({
 const DEFAULT_VALUES = {
   addSourceEnginesModalOpen: false,
   dataLoading: true,
+  indexedEngines: [],
   selectedEngineNamesToAdd: [],
   sourceEngines: [],
 };

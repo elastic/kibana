@@ -18,13 +18,12 @@ import { EngineDetails } from '../../engine/types';
 import { AddSourceEnginesModal } from './add_source_engines_modal';
 
 const MOCK_VALUES = {
-  // EnginesLogic
-  engines: [
+  // SouceEnginesLogic
+  indexedEngines: [
     { name: 'source-engine-1' },
     { name: 'source-engine-2' },
     { name: 'source-engine-3' },
   ] as EngineDetails[],
-  // SouceEnginesLogic
   selectedEngineNamesToAdd: ['source-engine-2'],
   sourceEngines: [{ name: 'source-engine-1' }] as EngineDetails[],
 };
