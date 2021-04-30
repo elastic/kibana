@@ -112,6 +112,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
         schema: 'metric',
         field: column.sourceField,
         percentile: column.params.percentile,
+        timeShift: column.timeShift,
       }
     ).toAst();
   },

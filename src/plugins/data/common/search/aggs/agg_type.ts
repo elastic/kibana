@@ -8,6 +8,7 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
 import { ISearchSource } from 'src/plugins/data/public';
 import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
@@ -16,7 +17,7 @@ import type { RequestAdapter } from 'src/plugins/inspector/common';
 import { estypes } from '@elastic/elasticsearch';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
-import { IAggConfigs } from './agg_configs';
+import { GenericBucket, IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 
@@ -214,6 +215,26 @@ export class AggType<
   getValueBucketPath = (agg: TAggConfig) => {
     return agg.id;
   };
+
+  getShiftedKey(
+    agg: TAggConfig,
+    key: string | number,
+    timeShift: moment.Duration
+  ): string | number {
+    return key;
+  }
+
+  splitForTimeShift(agg: TAggConfig, aggs: IAggConfigs) {
+    return false;
+  }
+
+  getTimeShiftInterval(agg: TAggConfig): undefined | moment.Duration {
+    return undefined;
+  }
+
+  orderBuckets(agg: TAggConfig, a: GenericBucket, b: GenericBucket): number {
+    return Number(a.key) - Number(b.key);
+  }
 
   /**
    * Generic AggType Constructor

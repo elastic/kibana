@@ -83,6 +83,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       id: columnId,
       enabled: true,
       schema: 'metric',
+      timeShift: column.timeShift,
     }).toAst();
   },
   isTransferable: () => {

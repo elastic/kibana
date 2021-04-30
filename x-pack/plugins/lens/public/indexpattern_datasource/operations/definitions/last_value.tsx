@@ -181,6 +181,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
+      timeShift: column.timeShift,
     }).toAst();
   },
 

@@ -20,7 +20,7 @@ import {
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
-import { IAggConfigs } from './agg_configs';
+import { GenericBucket, IAggConfigs } from './agg_configs';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -173,11 +173,46 @@ export class AggConfig {
     return _.get(this.params, key);
   }
 
+  hasTimeShift(): boolean {
+    return Boolean(this.getParam('timeShift'));
+  }
+
   getTimeShift(): undefined | moment.Duration {
     const rawTimeShift = this.getParam('timeShift');
     if (!rawTimeShift) return undefined;
+    if (rawTimeShift === 'previous') {
+      const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
+      if (timeShiftInterval) {
+        return timeShiftInterval;
+      } else if (!this.aggConfigs.timeRange) {
+        return;
+      }
+      return moment.duration(
+        moment(this.aggConfigs.timeRange.to).diff(this.aggConfigs.timeRange.from)
+      );
+    }
     const [, amount, unit] = rawTimeShift.match(/(\d+)(\w)/);
     return moment.duration(Number(amount), unit);
+  }
+
+  getShiftedKey(key: string | number, timeShift: moment.Duration): string | number {
+    return this.type.getShiftedKey(this, key, timeShift);
+  }
+
+  getTimeShiftInterval(): undefined | moment.Duration {
+    return this.type.getTimeShiftInterval(this);
+  }
+
+  splitForTimeShift(aggs: IAggConfigs) {
+    return this.type.splitForTimeShift(this, aggs);
+  }
+
+  orderBuckets(a: GenericBucket, b: GenericBucket): number {
+    if (this.type.orderBuckets) {
+      return this.type.orderBuckets(this, a, b);
+    } else {
+      return 0;
+    }
   }
 
   write(aggs?: IAggConfigs) {

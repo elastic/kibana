@@ -519,6 +519,7 @@ function applyReferenceTransition({
             // drop the filter for the referenced column because the wrapping operation
             // is filterable as well and will handle it one level higher.
             filter: operationDefinition.filterable ? undefined : previousColumn.filter,
+            timeShift: operationDefinition.shiftable ? undefined : previousColumn.timeShift,
           },
         },
       };

@@ -54,6 +54,22 @@ function getExpressionForLayer(
         }
       });
     }
+
+    if (
+      'references' in column &&
+      rootDef.shiftable &&
+      rootDef.input === 'fullReference' &&
+      column.timeShift
+    ) {
+      // inherit filter to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.shiftable) {
+          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+        }
+      });
+    }
   });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -84,9 +100,6 @@ function getExpressionForLayer(
           layer,
           uiSettings
         );
-        if (col.label === 'shifted') {
-          aggAst.arguments.timeShift = ['1h'];
-        }
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',

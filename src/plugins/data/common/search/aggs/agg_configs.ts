@@ -15,15 +15,21 @@ import {
   Bucket,
   FiltersAggregate,
   FiltersBucketItem,
+  MultiBucketAggregate,
 } from '@elastic/elasticsearch/api/types';
 
-import { IEsSearchResponse, ISearchOptions, ISearchSource } from 'src/plugins/data/public';
+import {
+  IEsSearchResponse,
+  ISearchOptions,
+  ISearchSource,
+  RangeFilter,
+} from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { TimeRange } from '../../../common';
+import { TimeRange, getTime, isRangeFilter } from '../../../common';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -55,7 +61,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-type GenericBucket = Bucket & { [property: string]: Aggregate };
+export type GenericBucket = Bucket & { [property: string]: Aggregate };
 
 /**
  * @name AggConfigs
@@ -270,40 +276,50 @@ export class AggConfigs {
     timeShifts: Record<string, moment.Duration>,
     dslLvlCursor: Record<string, any>
   ) {
-    if (this.isTimeShiftSplitAgg(config)) {
-      const filters: Record<string, unknown> = {};
-      // TODO validate this
-      const timeField = this.timeFields![0];
-      filters['0'] = {
+    if (!config.splitForTimeShift(this)) {
+      return dslLvlCursor;
+    }
+    if (!this.timeFields || this.timeFields.length < 1) {
+      throw new Error('Time shift can only be used with configured time field');
+    }
+    if (!this.timeRange) {
+      throw new Error('Time shift can only be used with configured time range');
+    }
+    const timeRange = this.timeRange;
+    const filters: Record<string, unknown> = {};
+    const timeField = this.timeFields[0];
+    filters['0'] = {
+      range: {
+        [timeField]: {
+          // only works if there is a time range
+          gte: timeRange.from,
+          lte: timeRange.to,
+        },
+      },
+    };
+    const timeShiftInterval = config.getTimeShiftInterval();
+    Object.entries(timeShifts).forEach(([key, shift]) => {
+      if (timeShiftInterval && timeShiftInterval.asMilliseconds() > shift.asMilliseconds()) {
+        throw new Error('All time shifts need to be larger than underlying date interval');
+      }
+      filters[key] = {
         range: {
           [timeField]: {
             // only works if there is a time range
-            gte: this.timeRange!.from,
-            lte: this.timeRange!.to,
+            gte: moment(timeRange.from).subtract(shift).toISOString(),
+            lte: moment(timeRange.to).subtract(shift).toISOString(),
           },
         },
       };
-      Object.entries(timeShifts).forEach(([key, shift]) => {
-        filters[key] = {
-          range: {
-            [timeField]: {
-              // only works if there is a time range
-              gte: moment(this.timeRange!.from).subtract(shift).toISOString(),
-              lte: moment(this.timeRange!.to).subtract(shift).toISOString(),
-            },
-          },
-        };
-      });
-      dslLvlCursor.time_offset_split = {
-        filters: {
-          filters,
-        },
-        aggs: {},
-      };
+    });
+    dslLvlCursor.time_offset_split = {
+      filters: {
+        filters,
+      },
+      aggs: {},
+    };
 
-      dslLvlCursor = dslLvlCursor.time_offset_split.aggs;
-    }
-    return dslLvlCursor;
+    return dslLvlCursor.time_offset_split.aggs;
   }
 
   getAll() {
@@ -361,27 +377,81 @@ export class AggConfigs {
     return timeShifts;
   }
 
-  hasTimeShifts(): boolean {
-    const timeShifts: Record<string, moment.Duration> = {};
-    this.getAll()
-      .filter((agg) => agg.schema === 'metric')
-      .map((agg) => agg.getTimeShift())
-      .forEach((timeShift) => {
-        if (timeShift) {
-          timeShifts[String(timeShift.asMilliseconds())] = timeShift;
-        }
-      });
-    return Object.keys(timeShifts).length > 0;
+  getTimeShiftInterval(): moment.Duration | undefined {
+    const splitAgg = this.getAll().find((agg) => agg.splitForTimeShift(this));
+    return splitAgg?.getTimeShiftInterval();
   }
 
-  isTimeShiftSplitAgg(aggConfig: AggConfig) {
-    // TODO - probably abstract this in an optional flag on the agg config instead of hard-coding the relationship here
-    const hasDateHistograms = this.getAll().some((agg) => agg.type.name === 'date_histogram');
-    // the first date histogram or the first metric (if there are no date histograms) is the level to add the time shift filter split
-    return (
-      (hasDateHistograms && aggConfig.type.name === 'date_histogram') ||
-      this.byType('metrics')[0] === aggConfig
-    );
+  hasTimeShifts(): boolean {
+    return this.getAll().some((agg) => agg.hasTimeShift());
+  }
+
+  getSearchSourceTimeFilter(forceNow?: Date) {
+    if (!this.timeFields || !this.timeRange) {
+      return [];
+    }
+    const timeRange = this.timeRange;
+    const timeFields = this.timeFields;
+    const timeShifts = this.getTimeShifts();
+    const hasTimeShift = Object.values(this.getTimeShifts()).length > 0;
+    if (!hasTimeShift) {
+      return this.timeFields
+        .map((fieldName) => getTime(this.indexPattern, timeRange, { fieldName, forceNow }))
+        .filter(isRangeFilter);
+    }
+    return [
+      {
+        meta: {
+          index: this.indexPattern?.id,
+          params: {},
+          alias: '',
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              ...Object.entries(timeShifts).map(([, shift]) => {
+                return {
+                  bool: {
+                    filter: timeFields
+                      .map(
+                        (fieldName) =>
+                          [
+                            getTime(this.indexPattern, timeRange, { fieldName, forceNow }),
+                            fieldName,
+                          ] as [RangeFilter | undefined, string]
+                      )
+                      .filter(([filter]) => isRangeFilter(filter))
+                      .map(([filter, field]) => ({
+                        range: {
+                          [field]: {
+                            gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
+                            lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                          },
+                        },
+                      })),
+                  },
+                };
+              }),
+              {
+                bool: {
+                  filter: timeFields
+                    .map((fieldName) =>
+                      getTime(this.indexPattern, timeRange, { fieldName, forceNow })
+                    )
+                    .filter(isRangeFilter)
+                    .map((filter) => ({
+                      range: filter.range,
+                    })),
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      },
+    ];
   }
 
   postFlightTransform(response: IEsSearchResponse<any>) {
@@ -397,46 +467,71 @@ export class AggConfigs {
     const mergeAggLevel = (
       target: GenericBucket,
       source: GenericBucket,
-      shiftKey: string,
+      shift: moment.Duration,
       aggIndex: number
     ) => {
       Object.entries(source).forEach(([key, val]) => {
         // copy over doc count into special key
         if (typeof val === 'number' && key === 'doc_count') {
-          target[`doc_count_${shiftKey}`] = val;
+          target[`doc_count_${shift.asMilliseconds()}`] = val;
         } else if (typeof val !== 'object') {
           // other meta keys not of interest
           return;
         } else {
           // a sub-agg
           const agg = this.byId(key);
-          if (agg && agg.type.type === 'metrics') {
+          if (agg && agg.type.type === AggGroupNames.Metrics) {
             const timeShift = agg.getTimeShift();
-            if (timeShift && String(timeShift.asMilliseconds()) === shiftKey) {
+            if (timeShift && timeShift.asMilliseconds() === shift.asMilliseconds()) {
               // this is a metric from the current time shift, copy it over
               target[key] = source[key];
             }
           } else if (agg === bucketAggs[aggIndex]) {
             // expected next bucket sub agg
             const subAggregate = val as Aggregate;
-            const baseSubAggregate = target[key] as Aggregate;
-            // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
             const buckets = ('buckets' in subAggregate ? subAggregate.buckets : undefined) as
               | GenericBucket[]
               | Record<string, GenericBucket>
               | undefined;
+            if (!target[key]) {
+              // sub aggregate only exists in shifted branch, not in base branch - create dummy aggregate
+              // which will be filled with shifted data
+              target[key] = {
+                buckets: isArray(buckets) ? [] : {},
+              };
+            }
+            const baseSubAggregate = target[key] as Aggregate;
+            // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
             const baseBuckets = ('buckets' in baseSubAggregate
               ? baseSubAggregate.buckets
               : undefined) as GenericBucket[] | Record<string, GenericBucket> | undefined;
             // merge
             if (isArray(buckets) && isArray(baseBuckets)) {
-              buckets.forEach((bucket, index) =>
-                mergeAggLevel(baseBuckets[index], bucket, shiftKey, aggIndex + 1)
-              );
+              const baseBucketMap: Record<string, GenericBucket> = {};
+              baseBuckets.forEach((bucket) => {
+                baseBucketMap[String(bucket.key)] = bucket;
+              });
+              buckets.forEach((bucket) => {
+                const bucketKey = agg.getShiftedKey(bucket.key, shift);
+                // if a bucket is missing in the map, create an empty one
+                if (!baseBucketMap[bucketKey]) {
+                  baseBucketMap[String(bucketKey)] = {
+                    key: bucketKey,
+                  } as GenericBucket;
+                }
+                mergeAggLevel(baseBucketMap[bucketKey], bucket, shift, aggIndex + 1);
+              });
+              (baseSubAggregate as MultiBucketAggregate).buckets = Object.values(
+                baseBucketMap
+              ).sort(agg.orderBuckets.bind(agg));
             } else if (baseBuckets && buckets && !isArray(baseBuckets)) {
-              Object.entries(buckets).forEach(([bucketKey, bucket]) =>
-                mergeAggLevel(baseBuckets[bucketKey], bucket, shiftKey, aggIndex + 1)
-              );
+              Object.entries(buckets).forEach(([bucketKey, bucket]) => {
+                // if a bucket is missing in the base response, create an empty one
+                if (!baseBuckets[bucketKey]) {
+                  baseBuckets[bucketKey] = {} as GenericBucket;
+                }
+                mergeAggLevel(baseBuckets[bucketKey], bucket, shift, aggIndex + 1);
+              });
             }
           }
         }
@@ -449,11 +544,11 @@ export class AggConfigs {
           FiltersBucketItem
         >;
         const subTree = timeShiftedBuckets['0'];
-        Object.keys(timeShifts).forEach((key) => {
+        Object.entries(timeShifts).forEach(([key, shift]) => {
           mergeAggLevel(
             subTree as GenericBucket,
             timeShiftedBuckets[key] as GenericBucket,
-            key,
+            shift,
             aggIndex
           );
         });

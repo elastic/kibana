@@ -7,18 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { Adapters } from 'src/plugins/inspector/common';
 
-import {
-  calculateBounds,
-  Filter,
-  getTime,
-  IndexPattern,
-  isRangeFilter,
-  Query,
-  TimeRange,
-} from '../../../../common';
+import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -101,56 +92,7 @@ export const handleRequest = async ({
   // filters for that those time fields
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      const timeShifts = aggs.getTimeShifts();
-      const hasTimeShift = Object.values(aggs.getTimeShifts()).length > 0;
-      if (!hasTimeShift) {
-        return allTimeFields
-          .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
-          .filter(isRangeFilter);
-      }
-      return [
-        {
-          meta: { index: indexPattern?.id, params: {}, alias: '', disabled: false, negate: false },
-          query: {
-            bool: {
-              should: [
-                ...Object.entries(timeShifts).map(([, shift]) => {
-                  return {
-                    bool: {
-                      filter: allTimeFields
-                        .map((fieldName) =>
-                          getTime(
-                            indexPattern,
-                            {
-                              from: moment(timeRange.from).subtract(shift).toISOString(),
-                              to: moment(timeRange.to).subtract(shift).toISOString(),
-                            },
-                            { fieldName, forceNow }
-                          )
-                        )
-                        .filter(isRangeFilter)
-                        .map((filter) => ({
-                          range: filter.range,
-                        })),
-                    },
-                  };
-                }),
-                {
-                  bool: {
-                    filter: allTimeFields
-                      .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
-                      .filter(isRangeFilter)
-                      .map((filter) => ({
-                        range: filter.range,
-                      })),
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        },
-      ];
+      return aggs.getSearchSourceTimeFilter(forceNow);
     });
   }
 

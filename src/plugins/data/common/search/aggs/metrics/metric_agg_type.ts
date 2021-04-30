@@ -12,6 +12,7 @@ import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 import { BaseParamType, FieldTypes } from '../param_types';
+import { AggGroupNames } from '../agg_groups';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -77,6 +78,10 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       });
 
     this.isScalable = config.isScalable || (() => false);
+
+    // split at this point if there are time shifts and this is the first metric
+    this.splitForTimeShift = (agg, aggs) =>
+      aggs.hasTimeShifts() && aggs.byType(AggGroupNames.Metrics)[0] === agg;
   }
 }
 
