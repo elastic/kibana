@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -28,10 +29,10 @@ export function buildSearchBody(
   id: string,
   indexPattern: IndexPattern,
   useNewFieldsApi: boolean
-): Record<string, any> {
+): estypes {
   const computedFields = indexPattern.getComputedFields();
   const runtimeFields = computedFields.runtimeFields;
-  const request: Record<string, any> = {
+  const request: estypes = {
     query: {
       ids: {
         values: [id],
