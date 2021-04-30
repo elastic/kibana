@@ -602,6 +602,287 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.ISpacesClient",
+        "type": "Interface",
+        "label": "ISpacesClient",
+        "description": [
+          "\nClient interface for interacting with Kibana spaces."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-server.ISpacesClient.getAll",
+            "type": "Function",
+            "label": "getAll",
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesOptions",
+                "text": "GetAllSpacesOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetSpaceResult",
+                "text": "GetSpaceResult"
+              },
+              "[]>"
+            ],
+            "description": [
+              "\nRetrieve all available spaces."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.getAll.$1",
+                "type": "Object",
+                "label": "options",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.GetAllSpacesOptions",
+                    "text": "GetAllSpacesOptions"
+                  }
+                ],
+                "description": [
+                  "controls which spaces are retrieved."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 34
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 34
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.get",
+            "type": "Function",
+            "label": "get",
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nRetrieve a space by its id."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.get.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the space id."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 40
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.create",
+            "type": "Function",
+            "label": "create",
+            "signature": [
+              "(space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nCreates a space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.create.$1",
+                "type": "Object",
+                "label": "space",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "description": [
+                  "the space to create"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 46
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 46
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.update",
+            "type": "Function",
+            "label": "update",
+            "signature": [
+              "(id: string, space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nUpdates a space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.update.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the id of the space to update."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                }
+              },
+              {
+                "id": "def-server.ISpacesClient.update.$2",
+                "type": "Object",
+                "label": "space",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "description": [
+                  "The updated space."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 53
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.delete",
+            "type": "Function",
+            "label": "delete",
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "description": [
+              "\nDeletes a space, and all saved objects belonging to that space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.delete.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the id of the space to delete."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 59
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 59
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+          "lineNumber": 29
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.Space",
         "type": "Interface",
         "label": "Space",
@@ -908,9 +1189,13 @@
               "lineNumber": 55
             },
             "signature": [
-              "Pick<",
-              "SpacesClient",
-              ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">"
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.ISpacesClient",
+                "text": "ISpacesClient"
+              }
             ]
           },
           {
@@ -1169,23 +1454,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ISpacesClient",
-        "type": "Type",
-        "label": "ISpacesClient",
-        "tags": [],
-        "description": [
-          "\nClient interface for interacting with Kibana spaces."
-        ],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-          "lineNumber": 30
-        },
-        "signature": [
-          "{ get: (id: string) => Promise<Space>; delete: (id: string) => Promise<void>; create: (space: Space) => Promise<Space>; update: (id: string, space: Space) => Promise<Space>; getAll: (options?: GetAllSpacesOptions) => Promise<GetSpaceResult[]>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.SpacesClientRepositoryFactory",
         "type": "Type",
         "label": "SpacesClientRepositoryFactory",
@@ -1251,11 +1519,22 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any>, baseClient: Pick<",
-          "SpacesClient",
-          ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">) => Pick<",
-          "SpacesClient",
-          ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">"
+          "<unknown, unknown, unknown, any>, baseClient: ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          },
+          ") => ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          }
         ],
         "initialIsOpen": false
       }

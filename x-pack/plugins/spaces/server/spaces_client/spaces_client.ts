@@ -29,6 +29,7 @@ const DEFAULT_PURPOSE = 'any';
 export interface ISpacesClient {
   /**
    * Retrieve all available spaces.
+   * @param options controls which spaces are retrieved.
    */
   getAll(options: GetAllSpacesOptions): Promise<GetSpaceResult[]>;
 
