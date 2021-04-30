@@ -11,9 +11,7 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
-
-import { EuiPageHeader } from '@elastic/eui';
+import { mount, shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 
@@ -27,6 +25,8 @@ const MOCK_ACTIONS = {
   // SourceEnginesLogic
   fetchIndexedEngines: jest.fn(),
   fetchSourceEngines: jest.fn(),
+  // FlashMessagesLogic
+  dismissToastMessage: jest.fn(),
 };
 
 const MOCK_VALUES = {
@@ -35,15 +35,21 @@ const MOCK_VALUES = {
     canManageMetaEngineSourceEngines: true,
   },
   // SourceEnginesLogic
-  dataLoading: false,
-  sourceEngines: [],
   addSourceEnginesModalOpen: false,
+  dataLoading: false,
+  indexedEngines: [],
+  selectedEngineNamesToAdd: [],
+  sourceEngines: [],
 };
 
 describe('SourceEngines', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('non-happy-path states', () => {
@@ -78,30 +84,24 @@ describe('SourceEngines', () => {
   });
 
   describe('happy-path states', () => {
-    let wrapper: ShallowWrapper;
+    it('renders and calls a function to initialize data', () => {
+      const wrapper = shallow(<SourceEngines />);
 
-    beforeAll(() => {
-      setMockValues(MOCK_VALUES);
-      setMockActions(MOCK_ACTIONS);
-      wrapper = shallow(<SourceEngines />);
-    });
-
-    it.skip('renders and calls a function to initialize data', () => {
       expect(wrapper.find(SourceEnginesTable)).toHaveLength(1);
-
-      // TODO This is definitely being called, is the useEffect mock not working?
       expect(MOCK_ACTIONS.fetchIndexedEngines).toHaveBeenCalled();
       expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
     });
 
+    // TODO When this test runs it causes an infinite re-render loop
     it.skip('contains a button to add source engines', () => {
-      const header = wrapper.find(EuiPageHeader).dive();
+      const wrapper = mount(<SourceEngines />);
 
-      // TODO fix this test. Where is this button?
-      expect(header.find(AddSourceEnginesButton)).toHaveLength(1);
+      expect(wrapper.find(AddSourceEnginesButton)).toHaveLength(1);
     });
 
     it('hides the add source engines modal by default', () => {
+      const wrapper = shallow(<SourceEngines />);
+
       expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(0);
     });
   });

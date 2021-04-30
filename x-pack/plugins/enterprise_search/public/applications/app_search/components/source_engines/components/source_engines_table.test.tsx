@@ -9,9 +9,9 @@ import { mountWithIntl, setMockActions, setMockValues } from '../../../../__mock
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
 import { SourceEnginesTable } from './source_engines_table';
 
@@ -49,15 +49,12 @@ describe('SourceEnginesTable', () => {
     expect(wrapper.find(EuiInMemoryTable).text()).toContain('26');
   });
 
-  it.skip('clicking a remove engine link calls a confirm dialogue before remove the engine', () => {
+  it('clicking a remove engine link calls a confirm dialogue before remove the engine', () => {
     const confirmSpy = jest.spyOn(window, 'confirm');
     confirmSpy.mockReturnValueOnce(true);
-    const wrapper = shallow(<SourceEnginesTable />);
+    const wrapper = mount(<SourceEnginesTable />);
 
-    // TODO I can't figure out how to find this EuiButtonEmpty ????
-    // Fixing this test will fix coverage
-    const table = wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
-    table.find(EuiButtonEmpty).simulate('click');
+    wrapper.find(EuiButtonEmpty).simulate('click');
 
     expect(confirmSpy).toHaveBeenCalled();
     expect(MOCK_ACTIONS.removeSourceEngine);
