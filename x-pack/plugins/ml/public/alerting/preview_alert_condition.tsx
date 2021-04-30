@@ -222,7 +222,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 <strong>
                   <FormattedMessage
                     id="xpack.ml.previewAlert.previewMessage"
-                    defaultMessage="Contains {alertsCount, plural, one {# anomaly} other {# anomalies}} in the last {interval}."
+                    defaultMessage="Found {alertsCount, plural, one {# anomaly} other {# anomalies}} in the last {interval}."
                     values={{
                       alertsCount: previewResponse.count,
                       interval: lastQueryInterval,

@@ -31,7 +31,7 @@ import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
 import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 
-type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -39,6 +39,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   setAlertProperty,
   errors,
   alertInterval,
+  alertNotifyWhen,
 }) => {
   const {
     services: { http },
@@ -164,6 +165,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <ConfigValidator
         jobConfigs={jobConfigs}
         alertInterval={alertInterval}
+        alertNotifyWhen={alertNotifyWhen}
         alertParams={resultParams}
       />
 

@@ -13,18 +13,21 @@ import { parseInterval } from '../../common/util/parse_interval';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../common/constants/states';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import { MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';
+import { TOP_N_BUCKETS_COUNT } from '../../common/constants/alerts';
 
 interface ConfigValidatorProps {
   alertInterval: string;
   jobConfigs: CombinedJobWithStats[];
   alertParams: MlAnomalyDetectionAlertParams;
+  alertNotifyWhen: MlAnomalyAlertTriggerProps['alertNotifyWhen'];
 }
 
 /**
  * Validated alert configuration
  */
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
-  ({ jobConfigs = [], alertInterval, alertParams }) => {
+  ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen }) => {
     if (jobConfigs.length === 0) return null;
 
     const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
@@ -41,49 +44,78 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
 
     const configContainsIssues = isAlertIntervalTooHigh || jobWithoutStartedDatafeed.length > 0;
 
-    if (!configContainsIssues) return null;
+    const notifyWhenWarning =
+      alertNotifyWhen === 'onActiveAlert' &&
+      lookbackIntervalInSeconds &&
+      alertIntervalInSeconds < lookbackIntervalInSeconds;
+
+    const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
+    const notificationDuration = bucketSpanDuration
+      ? bucketSpanDuration.asMinutes() * (alertParams.topNBuckets ?? TOP_N_BUCKETS_COUNT)
+      : undefined;
 
     return (
       <>
         <EuiSpacer size={'m'} />
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.ml.alertConditionValidation.title"
-              defaultMessage="Alert condition contains the following issues:"
-            />
-          }
-          color="warning"
-          size={'s'}
-        >
-          <ul>
-            {isAlertIntervalTooHigh ? (
-              <li>
+        {configContainsIssues ? (
+          <>
+            <EuiCallOut
+              title={
                 <FormattedMessage
-                  id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                  defaultMessage="The check interval is greater than the lookback interval. Reduce it to {lookbackInterval} to avoid potentially missing notifications."
-                  values={{
-                    lookbackInterval: alertParams.lookbackInterval,
-                  }}
+                  id="xpack.ml.alertConditionValidation.title"
+                  defaultMessage="Alert condition contains the following issues:"
                 />
-              </li>
-            ) : null}
+              }
+              color="warning"
+              size={'s'}
+            >
+              <ul>
+                {isAlertIntervalTooHigh ? (
+                  <li>
+                    <FormattedMessage
+                      id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
+                      defaultMessage="The check interval is greater than the lookback interval. Reduce it to {lookbackInterval} to avoid potentially missing notifications."
+                      values={{
+                        lookbackInterval: alertParams.lookbackInterval,
+                      }}
+                    />
+                  </li>
+                ) : null}
 
-            {jobWithoutStartedDatafeed.length > 0 ? (
-              <li>
+                {jobWithoutStartedDatafeed.length > 0 ? (
+                  <li>
+                    <FormattedMessage
+                      id="xpack.ml.alertConditionValidation.stoppedDatafeedJobsMessage"
+                      defaultMessage="The datafeed is not started for the following {count, plural, one {job} other {jobs}}: {jobIds}."
+                      values={{
+                        count: jobWithoutStartedDatafeed.length,
+                        jobIds: jobWithoutStartedDatafeed.join(', '),
+                      }}
+                    />
+                  </li>
+                ) : null}
+              </ul>
+            </EuiCallOut>
+            <EuiSpacer size={'m'} />
+          </>
+        ) : null}
+        {notifyWhenWarning ? (
+          <>
+            <EuiCallOut
+              title={
                 <FormattedMessage
-                  id="xpack.ml.alertConditionValidation.stoppedDatafeedJobsMessage"
-                  defaultMessage="The datafeed is not started for the following {count, plural, one {job} other {jobs}}: {jobIds}."
-                  values={{
-                    count: jobWithoutStartedDatafeed.length,
-                    jobIds: jobWithoutStartedDatafeed.join(', '),
-                  }}
+                  id="xpack.ml.alertConditionValidation.notifyWhenWarning"
+                  defaultMessage="Expect to receive duplicate notifications about the same anomaly with duration of up to {notificationDuration}  {notificationDuration, plural, one {minute} other {minutes}}"
+                  values={{ notificationDuration }}
                 />
-              </li>
-            ) : null}
-          </ul>
-        </EuiCallOut>
-        <EuiSpacer size={'m'} />
+              }
+              color="warning"
+              iconType="alert"
+              size={'s'}
+            />
+            <EuiSpacer size={'m'} />
+          </>
+        ) : null}
       </>
     );
   }
