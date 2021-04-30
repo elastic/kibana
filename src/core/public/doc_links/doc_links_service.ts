@@ -312,6 +312,9 @@ export class DocLinksService {
         },
         apis: {
           bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+          byteSizeUnits: `${ELASTICSEARCH_DOCS}common-options.html#byte-units`,
+          createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
+          createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
           createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
@@ -332,6 +335,7 @@ export class DocLinksService {
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
+          timeUnits: `${ELASTICSEARCH_DOCS}common-options.html#time-units`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
@@ -533,6 +537,9 @@ export interface DocLinksStart {
     readonly visualize: Record<string, string>;
     readonly apis: Readonly<{
       bulkIndexAlias: string;
+      byteSizeUnits: string;
+      createAutoFollowPattern: string;
+      createFollower: string;
       createIndex: string;
       createSnapshotLifecyclePolicy: string;
       createRoleMapping: string;
@@ -552,6 +559,7 @@ export interface DocLinksStart {
       putIndexTemplateV1: string;
       putWatch: string;
       simulatePipeline: string;
+      timeUnits: string;
       updateTransform: string;
     }>;
     readonly observability: Record<string, string>;
