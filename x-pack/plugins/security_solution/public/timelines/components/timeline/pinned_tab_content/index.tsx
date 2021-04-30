@@ -233,8 +233,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={[defaultControlColumn]}
-                trailingControlColumns={[]}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter

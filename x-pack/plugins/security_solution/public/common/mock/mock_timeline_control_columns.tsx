@@ -61,44 +61,42 @@ const SelectionRowCell = ({ rowIndex }: { rowIndex: number }) => {
 const TestTrailingColumn = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
-    <>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        anchorPosition="upCenter"
-        panelPaddingSize="s"
-        button={
-          <EuiButtonIcon
-            aria-label="show actions"
-            iconType="boxesHorizontal"
-            color="text"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          />
-        }
-        data-test-subj="test-trailing-column-popover-button"
-        closePopover={() => setIsPopoverOpen(false)}
-      >
-        <EuiPopoverTitle>{'Actions'}</EuiPopoverTitle>
-        <div style={{ width: 150 }}>
-          <button type="button" onClick={() => {}}>
-            <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
-              </EuiFlexItem>
-              <EuiFlexItem>{'Pin'}</EuiFlexItem>
-            </EuiFlexGroup>
-          </button>
-          <EuiSpacer size="s" />
-          <button type="button" onClick={() => {}}>
-            <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
-              </EuiFlexItem>
-              <EuiFlexItem>{'Delete'}</EuiFlexItem>
-            </EuiFlexGroup>
-          </button>
-        </div>
-      </EuiPopover>
-    </>
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      anchorPosition="upCenter"
+      panelPaddingSize="s"
+      button={
+        <EuiButtonIcon
+          aria-label="show actions"
+          iconType="boxesHorizontal"
+          color="text"
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        />
+      }
+      data-test-subj="test-trailing-column-popover-button"
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiPopoverTitle>{'Actions'}</EuiPopoverTitle>
+      <div style={{ width: 150 }}>
+        <button type="button" onClick={() => {}}>
+          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
+            </EuiFlexItem>
+            <EuiFlexItem>{'Pin'}</EuiFlexItem>
+          </EuiFlexGroup>
+        </button>
+        <EuiSpacer size="s" />
+        <button type="button" onClick={() => {}}>
+          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
+            </EuiFlexItem>
+            <EuiFlexItem>{'Delete'}</EuiFlexItem>
+          </EuiFlexGroup>
+        </button>
+      </div>
+    </EuiPopover>
   );
 };
 

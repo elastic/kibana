@@ -330,8 +330,8 @@ const EventsViewerComponent: React.FC<Props> = ({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
                     })}
-                    leadingControlColumns={[defaultControlColumn]}
-                    trailingControlColumns={[]}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
