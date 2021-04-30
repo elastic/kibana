@@ -78,7 +78,7 @@ The following query can help you identify rules that are taking a long time to e
 
 Query for a list of rule ids, bucketed by their execution times:
 
-[source,sh]
+[source,console]
 --------------------------------------------------
 $ GET /.kibana-event-log*/_search
 {
@@ -100,6 +100,13 @@ $ GET /.kibana-event-log*/_search
               "value": "execute"
             }
           }
+        },
+        {
+          "term": {
+            "event.provider": {
+              "value": "alerting" <2>
+            }
+          }
         }
       ]
     }
@@ -108,7 +115,7 @@ $ GET /.kibana-event-log*/_search
     "ruleIdsByExecutionDuration": {
       "histogram": {
         "field": "event.duration",
-        "interval": 10000000000 <2>
+        "interval": 10000000000 <3>
       },
       "aggs": {
         "ruleId": {
@@ -119,7 +126,7 @@ $ GET /.kibana-event-log*/_search
             "ruleId": {
               "terms": {
                 "field": "kibana.saved_objects.id",
-                "size": 10 <3>
+                "size": 10 <4>
               }
             }
           }
@@ -129,11 +136,12 @@ $ GET /.kibana-event-log*/_search
   }
 }
 --------------------------------------------------
-// KIBANA
+// TEST
 
 <1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
-<2> Execution durations are stored as nanoseconds. This interval buckets the duration into 10 second intervals. Update this value to change the granularity of the buckets.
-<3> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
+<2> Use `event.provider: actions` to query for long-running action executions.
+<3> Execution durations are stored as nanoseconds. This interval buckets the duration into 10 second intervals. Update this value to change the granularity of the buckets.
+<4> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
 
 This query returns the following:
 
