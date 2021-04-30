@@ -36,7 +36,9 @@ const expectIdleTimeoutWarningToast = (
       "iconType": "clock",
       "text": Any<Function>,
       "title": "Warning",
-      "toastLifeTimeMs": `
+      "toastLifeTimeMs": ${toastLifeTimeMs},
+    }
+    `
   );
 };
 
@@ -55,7 +57,9 @@ const expectLifespanWarningToast = (
       "iconType": "alert",
       "text": Any<Function>,
       "title": "Warning",
-      "toastLifeTimeMs": `
+      "toastLifeTimeMs": ${toastLifeTimeMs},
+    }
+    `
   );
 };
 
