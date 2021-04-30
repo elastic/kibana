@@ -27,6 +27,9 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
+import { uptimeRuleRegistrySettings } from '../../common/rules/uptime_rule_registry_settings';
+import { FormatterRuleRegistry } from '../../../observability/public';
+import type { UptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import { FleetStart } from '../../../fleet/public';
 import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
@@ -131,25 +134,26 @@ export class UptimePlugin
 
         const { renderApp } = await import('./render_app');
 
+        const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
+          ...uptimeRuleRegistrySettings,
+          fieldMap: {} as UptimeRuleFieldMap,
+          ctor: FormatterRuleRegistry,
+        });
+
+        alertTypeInitializers.forEach((init) => {
+          const alertInitializer = init({
+            core: coreStart,
+            plugins: corePlugins,
+          });
+          uptimeRuleRegistry.registerType(alertInitializer);
+        });
+
         return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    alertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core: start,
-        plugins,
-      });
-      if (
-        plugins.triggersActionsUi &&
-        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
-      }
-    });
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 

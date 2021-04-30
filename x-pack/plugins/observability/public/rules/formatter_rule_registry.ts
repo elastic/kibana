@@ -11,7 +11,7 @@ import type { asDuration, asPercent } from '../../common/utils/formatters';
 
 type AlertTypeOf<TFieldMap extends BaseRuleFieldMap> = OutputOfFieldMap<TFieldMap>;
 
-type FormattableRuleType<TFieldMap extends BaseRuleFieldMap> = RuleType & {
+export type FormattableRuleType<TFieldMap extends BaseRuleFieldMap> = RuleType & {
   format?: (options: {
     alert: AlertTypeOf<TFieldMap>;
     formatters: {

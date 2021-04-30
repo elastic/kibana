@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
+
+import { FormattableRuleType } from '../../../../observability/public';
+
+import type { UptimeRuleFieldMap } from '../../../common/rules/uptime_rule_field_map';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 
@@ -21,7 +25,7 @@ let validateFunc: (alertParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): AlertTypeModel => ({
+}): FormattableRuleType<UptimeRuleFieldMap> => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
   iconClass: 'uptimeApp',
@@ -44,4 +48,8 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   requiresAppContext: false,
+  format: ({ alert }) => ({
+    reason: 'test',
+    link: 'http://elastic.co',
+  }),
 });

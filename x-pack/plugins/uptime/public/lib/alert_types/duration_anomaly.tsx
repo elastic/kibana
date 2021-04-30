@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
+
+import { FormattableRuleType } from '../../../../observability/public';
+import type { UptimeRuleFieldMap } from '../../../common/rules/uptime_rule_field_map';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
@@ -17,7 +19,7 @@ const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_an
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): AlertTypeModel => ({
+}): FormattableRuleType<UptimeRuleFieldMap> => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
@@ -30,4 +32,8 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: true,
+  format: ({ alert }) => ({
+    reason: 'test',
+    link: 'http://elastic.co',
+  }),
 });

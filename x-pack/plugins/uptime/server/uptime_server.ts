@@ -9,6 +9,8 @@ import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
 import { uptimeAlertTypeFactories } from './lib/alerts';
+import { uptimeRuleRegistrySettings } from '../common/rules/uptime_rule_registry_settings';
+import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,
@@ -19,7 +21,12 @@ export const initUptimeServer = (
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
   );
 
+  const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
+    ...uptimeRuleRegistrySettings,
+    fieldMap: uptimeRuleFieldMap,
+  });
+
   uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
-    plugins.alerting.registerType(alertTypeFactory(server, libs, plugins))
+    uptimeRuleRegistry.registerType(alertTypeFactory(server, libs, plugins))
   );
 };

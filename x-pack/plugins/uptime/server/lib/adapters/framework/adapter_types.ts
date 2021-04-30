@@ -37,6 +37,7 @@ export interface UptimeCorePlugins {
   features: PluginSetupContract;
   alerting: any;
   elasticsearch: any;
+  observability: any;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
 }
