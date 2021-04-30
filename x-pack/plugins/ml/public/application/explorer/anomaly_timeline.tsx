@@ -35,6 +35,36 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
+import { HelpPopover, HelpPopoverButton } from '../help_popover';
+
+const SwimLaneHelpPopover = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <HelpPopover
+      anchorPosition="upCenter"
+      button={
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        />
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
+      title={i18n.translate('xpack.ml.explorer.swimLanePopoverTitle', {
+        defaultMessage: 'Swim lanes',
+      })}
+    >
+      <p>
+        {i18n.translate('xpack.ml.explorer.swimLanePopoverBasicExplanation', {
+          defaultMessage:
+            'The overall swim lane contains the anomaly scores for each bucket in the selected time period. Each score is a value from 0 to 100, which is a statistically aggregated and normalized view of the combined anomalousness of all the anomaly record results within the bucket. The buckets with high scores are shown in red and low scores are indicated in blue.',
+        })}
+      </p>
+    </HelpPopover>
+  );
+};
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -225,6 +255,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+
+            <EuiFlexItem grow={false}>{<SwimLaneHelpPopover />}</EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />

@@ -1,0 +1,13 @@
+.mlHelpPopover__panel {
+  max-width: $euiSize * 30;
+}
+
+.mlHelpPopover__content {
+  @include euiYScrollWithShadows;
+  max-height: 40vh;
+  padding: $euiSizeM;
+}
+
+.mlHelpPopover__buttonIcon {
+  margin-right: $euiSizeXS;
+}
