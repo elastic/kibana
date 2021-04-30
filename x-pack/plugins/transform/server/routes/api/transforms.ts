@@ -563,7 +563,8 @@ const previewTransformHandler: RequestHandler<
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
         const isKeywordDuplicate =
-          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
+          fieldName.endsWith('.keyword') &&
+          fieldNamesSet.has(fieldName.split('.').slice(0, -1).join('.'));
         if (isMetaField || isKeywordDuplicate) {
           return acc;
         }
