@@ -43,6 +43,7 @@ import { DateRange } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
+import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -147,6 +148,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  activeData?: IndexPatternDimensionEditorProps['activeData'];
 }
 
 export interface HelpProps<C> {

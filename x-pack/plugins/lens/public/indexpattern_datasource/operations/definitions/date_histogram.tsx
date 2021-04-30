@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -22,8 +22,10 @@ import {
   EuiSwitchEvent,
   EuiTextColor,
 } from '@elastic/eui';
+import moment from 'moment';
+import { parseTimeShift } from '../../../../../../../src/plugins/data/common';
 import { updateColumnParam } from '../layer_helpers';
-import { OperationDefinition } from './index';
+import { OperationDefinition, ParamEditorProps } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import {
   AggFunctionsMapping,
@@ -35,6 +37,7 @@ import {
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
+import { IndexPatternLayer } from '../../types';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -48,6 +51,28 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   };
 }
 
+function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnId: string) {
+  const usesTimeShift = Object.values(layer.columns).some(
+    (col) => col.timeShift && col.timeShift !== ''
+  );
+  if (!usesTimeShift) {
+    return undefined;
+  }
+  const dateHistograms = layer.columnOrder.filter(
+    (colId) => layer.columns[colId].operationType === 'date_histogram'
+  );
+  if (dateHistograms.length < 2) {
+    return undefined;
+  }
+  return i18n.translate('xpack.lens.indexPattern.multipleDateHistogramsError', {
+    defaultMessage:
+      '"{dimensionLabel}" is not the only date histogram. When using time shifts, make sure to only use one date histogram.',
+    values: {
+      dimensionLabel: layer.columns[columnId].label,
+    },
+  });
+}
+
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field'
@@ -59,7 +84,13 @@ export const dateHistogramOperation: OperationDefinition<
   input: 'field',
   priority: 5, // Highest priority level used
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    [
+      ...(getInvalidFieldMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ) || []),
+      getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
+    ].filter(Boolean),
   getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -149,12 +180,43 @@ export const dateHistogramOperation: OperationDefinition<
       extended_bounds: JSON.stringify({}),
     }).toAst();
   },
-  paramEditor: ({ layer, columnId, currentColumn, updateLayer, dateRange, data, indexPattern }) => {
+  paramEditor: function ParamEditor({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+    dateRange,
+    data,
+    indexPattern,
+    activeData,
+  }: ParamEditorProps<DateHistogramIndexPatternColumn>) {
+    const [localValue, setLocalValue] = useState(currentColumn?.params.interval);
+    useEffect(() => {
+      setLocalValue(currentColumn?.params.interval);
+    }, [currentColumn?.params.interval]);
+
+    function isIntervalTooSmall(interval: moment.Duration | null) {
+      if (!interval) {
+        return false;
+      }
+      const timeShifts = Object.values(layer.columns)
+        .filter((col) => col.timeShift && col.timeShift !== 'previous')
+        .map((col) => col.timeShift);
+      return timeShifts.some((shift) => {
+        if (!shift) return false;
+        const parsedShift = parseTimeShift(shift);
+        return (
+          typeof parsedShift === 'object' &&
+          parsedShift.asMilliseconds() < interval.asMilliseconds()
+        );
+      });
+    }
+
     const field = currentColumn && indexPattern.getFieldByName(currentColumn.sourceField);
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const interval = parseInterval(currentColumn.params.interval);
+    const interval = parseInterval(localValue);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -172,13 +234,24 @@ export const dateHistogramOperation: OperationDefinition<
       updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     }
 
-    const setInterval = (newInterval: typeof interval) => {
+    const getIntervalAsDuration = (newInterval: typeof interval) => {
+      const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
+      const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
+      return search.aggs.parseInterval(value);
+    };
+
+    const setInterval = (newInterval: typeof interval, storeLocally: boolean = false) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
+      if (storeLocally) {
+        setLocalValue(value);
+      } else {
+        updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
+      }
     };
 
+    const currentIntervalTooSmall = isIntervalTooSmall(getIntervalAsDuration(interval));
     return (
       <>
         {!intervalIsRestricted && (
@@ -200,6 +273,14 @@ export const dateHistogramOperation: OperationDefinition<
             })}
             fullWidth
             display="rowCompressed"
+            isInvalid={currentIntervalTooSmall}
+            error={
+              currentIntervalTooSmall &&
+              i18n.translate('xpack.lens.indexPattern.intervalTooSmallError', {
+                defaultMessage:
+                  'Interval is larger than configured time shift - make sure to keep date histogram interval smaller than time shifts',
+              })
+            }
           >
             {intervalIsRestricted ? (
               <FormattedMessage
@@ -224,10 +305,12 @@ export const dateHistogramOperation: OperationDefinition<
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
                       onChange={(e) => {
-                        setInterval({
+                        const newInterval = {
                           ...interval,
                           value: e.target.value,
-                        });
+                        };
+                        const tooSmall = isIntervalTooSmall(getIntervalAsDuration(newInterval));
+                        setInterval(newInterval, tooSmall);
                       }}
                     />
                   </EuiFlexItem>
@@ -237,10 +320,12 @@ export const dateHistogramOperation: OperationDefinition<
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
                       onChange={(e) => {
-                        setInterval({
+                        const newInterval = {
                           ...interval,
                           unit: e.target.value,
-                        });
+                        };
+                        const tooSmall = isIntervalTooSmall(getIntervalAsDuration(newInterval));
+                        setInterval(newInterval, tooSmall);
                       }}
                       isInvalid={!isValid}
                       options={[

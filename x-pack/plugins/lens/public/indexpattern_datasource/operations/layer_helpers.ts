@@ -981,6 +981,8 @@ export function updateLayerIndexPattern(
  * - All columns have complete references
  * - All column references are valid
  * - All prerequisites are met
+ * - If timeshift is used, terms go before date histogram
+ * - If timeshift is used, only a single date histogram can be used
  */
 export function getErrorMessages(
   layer: IndexPatternLayer,

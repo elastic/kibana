@@ -61,9 +61,13 @@ export function isColumnInvalid(
     'references' in column &&
     Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
 
-  return (
-    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
+  const operationErrorMessages = operationDefinition.getErrorMessage?.(
+    layer,
+    columnId,
+    indexPattern
   );
+
+  return (operationErrorMessages && operationErrorMessages.length > 0) || referencesHaveErrors;
 }
 
 function getReferencesErrors(

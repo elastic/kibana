@@ -544,6 +544,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       layer={state.layers[layerId]}
                       updateLayer={setStateWrapper}
                       isFocused={timeShiftedFocused}
+                      activeData={props.activeData}
+                      layerId={layerId}
                     />
                   ) : null,
               },

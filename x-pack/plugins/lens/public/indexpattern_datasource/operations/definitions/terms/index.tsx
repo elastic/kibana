@@ -50,6 +50,30 @@ function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   );
 }
 
+function getInvalidNestingOrderMessage(layer: IndexPatternLayer, columnId: string) {
+  const usesTimeShift = Object.values(layer.columns).some(
+    (col) => col.timeShift && col.timeShift !== ''
+  );
+  if (!usesTimeShift) {
+    return undefined;
+  }
+  const dateHistogramParent = layer.columnOrder
+    .slice(0, layer.columnOrder.indexOf(columnId))
+    .find((colId) => layer.columns[colId].operationType === 'date_histogram');
+
+  if (!dateHistogramParent) {
+    return undefined;
+  }
+  return i18n.translate('xpack.lens.indexPattern.termsInShiftedDateHistogramError', {
+    defaultMessage:
+      'Date histogram "{dateLabel}" is grouped by before "{dimensionLabel}". When using time shifts, make sure to group by top values first.',
+    values: {
+      dateLabel: layer.columns[dateHistogramParent].label,
+      dimensionLabel: layer.columns[columnId].label,
+    },
+  });
+}
+
 const DEFAULT_SIZE = 3;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
@@ -90,7 +114,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    [
+      ...(getInvalidFieldMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ) || []),
+      getInvalidNestingOrderMessage(layer, columnId) || '',
+    ].filter(Boolean),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

@@ -21,6 +21,7 @@ import {
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { GenericBucket, IAggConfigs } from './agg_configs';
+import { parseTimeShift } from './utils';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -180,7 +181,11 @@ export class AggConfig {
   getTimeShift(): undefined | moment.Duration {
     const rawTimeShift = this.getParam('timeShift');
     if (!rawTimeShift) return undefined;
-    if (rawTimeShift === 'previous') {
+    const parsedTimeShift = parseTimeShift(rawTimeShift);
+    if (parsedTimeShift === 'invalid') {
+      throw new Error(`could not parse time shift ${rawTimeShift}`);
+    }
+    if (parsedTimeShift === 'previous') {
       const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
       if (timeShiftInterval) {
         return timeShiftInterval;
@@ -191,8 +196,7 @@ export class AggConfig {
         moment(this.aggConfigs.timeRange.to).diff(this.aggConfigs.timeRange.from)
       );
     }
-    const [, amount, unit] = rawTimeShift.match(/(\d+)(\w)/);
-    return moment.duration(Number(amount), unit);
+    return parsedTimeShift;
   }
 
   getShiftedKey(key: string | number, timeShift: moment.Duration): string | number {
