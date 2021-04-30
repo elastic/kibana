@@ -4,7 +4,8 @@
 - Main reviewer: (somebody familiar with the subject matter, who has committed to provide timely and detailed reviews for this RFC)
 - Owner team: (team who will own implementation, if it is accepted)
 - Stakeholders: (people or groups who will be affected by the proposed changes)
-- RFC PR: (link to PR which implements a PoC of the proposal)
+- RFC PR: (leave this empty, it will be a link to PR of this RFC)
+- PoC PR: (optional, link to a PoC implementation of the feature)
 - Kibana Issue: (link to issue where the proposed feature is tracked)
 
 
