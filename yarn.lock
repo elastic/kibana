@@ -2639,7 +2639,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-import-resolver-kibana@link:packages/kbn-eslint-import-resolver-kibana":
+"@kbn/eslint-import-resolver-kibana@link:bazel-bin/packages/kbn-eslint-import-resolver-kibana/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2663,7 +2663,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/legacy-logging@link:packages/kbn-legacy-logging":
+"@kbn/legacy-logging@link:bazel-bin/packages/kbn-legacy-logging/npm_module":
   version "0.0.0"
   uid ""
 
