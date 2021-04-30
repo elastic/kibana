@@ -175,7 +175,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
           >
             <EuiFieldText
               placeholder="15d, 6m"
-              value={lookBehindInterval}
+              value={lookBehindInterval ?? ''}
               onChange={(e) => {
                 setLookBehindInterval(e.target.value);
               }}
