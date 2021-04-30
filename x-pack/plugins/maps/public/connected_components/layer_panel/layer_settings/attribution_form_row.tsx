@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexItem, EuiTitle, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Attribution } from '../../../../common/descriptor_types';
@@ -59,9 +59,12 @@ export function AttributionFormRow(props: Props) {
                 <AttributionPopover
                   onChange={props.onChange}
                   popoverButtonIcon="pencil"
-                  popoverButtonAriaLabel={i18n.translate('xpack.maps.attribution.addBtnAriaLabel', {
-                    defaultMessage: 'Edit attribution',
-                  })}
+                  popoverButtonAriaLabel={i18n.translate(
+                    'xpack.maps.attribution.editBtnAriaLabel',
+                    {
+                      defaultMessage: 'Edit attribution',
+                    }
+                  )}
                   popoverButtonLabel={i18n.translate('xpack.maps.attribution.editBtnLabel', {
                     defaultMessage: 'Edit',
                   })}
