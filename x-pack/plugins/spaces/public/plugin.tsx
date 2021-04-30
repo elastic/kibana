@@ -23,7 +23,7 @@ import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import { getUiApi } from './ui_api';
 
-interface PluginsSetup {
+export interface PluginsSetup {
   spacesOss: SpacesOssPluginSetup;
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
@@ -31,7 +31,7 @@ interface PluginsSetup {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
 }

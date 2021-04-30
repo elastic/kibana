@@ -51,8 +51,9 @@ export interface SpacesServiceSetup {
 export interface SpacesServiceStart {
   /**
    * Creates a scoped instance of the SpacesClient.
+   * @param request the request.
    */
-  createSpacesClient: ISpacesClient;
+  createSpacesClient: (request: KibanaRequest) => ISpacesClient;
 
   /**
    * Retrieves the space id associated with the provided request.
@@ -108,7 +109,7 @@ export class SpacesService {
     };
   }
 
-  public start({ basePath, spacesClientService }: SpacesServiceStartDeps) {
+  public start({ basePath, spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
     return {
       getSpaceId: (request: KibanaRequest) => {
         return this.getSpaceId(request, basePath);

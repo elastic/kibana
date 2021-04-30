@@ -40,14 +40,14 @@ import type { SpacesRequestHandlerContext } from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 
-interface PluginsSetup {
+export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   features: FeaturesPluginStart;
 }
 

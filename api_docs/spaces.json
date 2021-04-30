@@ -615,7 +615,7 @@
             "type": "Function",
             "label": "getAll",
             "signature": [
-              "(options: ",
+              "(options?: ",
               {
                 "pluginId": "spaces",
                 "scope": "common",
@@ -623,7 +623,7 @@
                 "section": "def-common.GetAllSpacesOptions",
                 "text": "GetAllSpacesOptions"
               },
-              ") => Promise<",
+              " | undefined) => Promise<",
               {
                 "pluginId": "spaces",
                 "scope": "common",
@@ -641,7 +641,7 @@
                 "id": "def-server.ISpacesClient.getAll.$1",
                 "type": "Object",
                 "label": "options",
-                "isRequired": true,
+                "isRequired": false,
                 "signature": [
                   {
                     "pluginId": "spaces",
@@ -649,7 +649,8 @@
                     "docId": "kibSpacesPluginApi",
                     "section": "def-common.GetAllSpacesOptions",
                     "text": "GetAllSpacesOptions"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "description": [
                   "controls which spaces are retrieved."
@@ -1179,16 +1180,25 @@
           {
             "tags": [],
             "id": "def-server.SpacesServiceStart.createSpacesClient",
-            "type": "Object",
+            "type": "Function",
             "label": "createSpacesClient",
             "description": [
               "\nCreates a scoped instance of the SpacesClient."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "spaces",
                 "scope": "server",
@@ -1237,7 +1247,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 61
+                  "lineNumber": 62
                 }
               }
             ],
@@ -1245,7 +1255,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             }
           },
           {
@@ -1287,7 +1297,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 67
+                  "lineNumber": 68
                 }
               }
             ],
@@ -1295,7 +1305,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             }
           },
           {
@@ -1345,7 +1355,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 73
+                  "lineNumber": 74
                 }
               }
             ],
@@ -1353,7 +1363,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             }
           },
           {
@@ -1380,7 +1390,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 79
+                  "lineNumber": 80
                 }
               }
             ],
@@ -1388,7 +1398,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 79
+              "lineNumber": 80
             }
           },
           {
@@ -1415,7 +1425,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 85
+                  "lineNumber": 86
                 }
               }
             ],
@@ -1423,7 +1433,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             }
           }
         ],
