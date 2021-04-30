@@ -725,12 +725,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use default index`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: '.kibana-test' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: '.kibana-test_8.0.0-testing',
+        });
       });
 
       it(`should use custom index`, async () => {
         await bulkCreateSuccess([obj1, obj2].map((x) => ({ ...x, type: CUSTOM_INDEX_TYPE })));
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: 'custom_8.0.0-testing',
+        });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
@@ -1970,7 +1976,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.kibana-test' }),
+          expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -1978,7 +1984,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use custom index`, async () => {
         await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'custom' }),
+          expect.objectContaining({ index: 'custom_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -2456,7 +2462,9 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.kibana-test', 'custom'] }),
+          expect.objectContaining({
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
+          }),
           expect.anything()
         );
       });
@@ -2546,7 +2554,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess();
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            index: ['.kibana-test', 'custom'],
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
           }),
           expect.anything()
         );
@@ -3999,7 +4007,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.delete).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.kibana-test' }),
+              expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessDelete(expectFn);
@@ -4008,7 +4016,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use custom index`, async () => {
           const expectFn = () =>
             expect(client.delete).toHaveBeenCalledWith(
-              expect.objectContaining({ index: 'custom' }),
+              expect.objectContaining({ index: 'custom_8.0.0-testing' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessDelete(expectFn, {}, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE);
@@ -4076,7 +4084,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.update).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.kibana-test' }),
+              expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessUpdate(expectFn);
@@ -4085,7 +4093,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use custom index`, async () => {
           const expectFn = () =>
             expect(client.update).toHaveBeenCalledWith(
-              expect.objectContaining({ index: 'custom' }),
+              expect.objectContaining({ index: 'custom_8.0.0-testing' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessUpdate(expectFn, {}, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE);
