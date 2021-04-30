@@ -54,12 +54,20 @@ class EsTestConfig {
     const username = process.env.TEST_ES_USERNAME || adminTestUser.username;
     const password = process.env.TEST_ES_PASSWORD || adminTestUser.password;
 
+    const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
+
+    if (Number.isNaN(port)) {
+      throw new Error(
+        `process.env.TEST_ES_PORT must contain a valid port. given: ${process.env.TEST_ES_PORT}`
+      );
+    }
+
     return {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from ../kbn/users.js)
       protocol: process.env.TEST_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
-      port: process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220,
+      port,
       auth: `${username}:${password}`,
       username,
       password,
