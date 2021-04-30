@@ -79,7 +79,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected field type for custom field with passed value', function () {
     lnsAttr = new LensAttributes(mockIndexPattern, reportViewConfig, 'line', [], 'count', {
-      'performance.metric': LCP_FIELD,
+      'performance.metric': [LCP_FIELD],
     });
 
     expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
@@ -103,7 +103,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -125,7 +125,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -161,7 +161,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getXAxis()).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -186,7 +186,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time (Seconds)',
+          label: 'Page load time',
           operationType: 'range',
           params: {
             maxBars: 'auto',
@@ -350,7 +350,7 @@ describe('Lens Attribute', () => {
           'x-axis-column': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Page load time (Seconds)',
+            label: 'Page load time',
             operationType: 'range',
             params: {
               maxBars: 'auto',
@@ -395,7 +395,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time (Seconds)',
+          label: 'Page load time',
           operationType: 'range',
           params: {
             maxBars: 'auto',

@@ -10,7 +10,6 @@ import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../context/url_params_context/use_url_params';
 import * as urlHelpers from './Links/url_helpers';
 
 // The default transaction type (for non-RUM services) is "request". Set the
@@ -21,11 +20,8 @@ const EuiSelectWithWidth = styled(EuiSelect)`
 `;
 
 export function TransactionTypeSelect() {
-  const { transactionTypes } = useApmServiceContext();
+  const { transactionTypes, transactionType } = useApmServiceContext();
   const history = useHistory();
-  const {
-    urlParams: { transactionType },
-  } = useUrlParams();
 
   const handleChange = useCallback(
     (event: FormEvent<HTMLSelectElement>) => {

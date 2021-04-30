@@ -62,6 +62,7 @@ export const metricsVisDefinition = {
       show_legend: 1,
       show_grid: 1,
       tooltip_mode: 'show_all',
+      drop_last_bucket: 0,
     },
   },
   editorConfig: {

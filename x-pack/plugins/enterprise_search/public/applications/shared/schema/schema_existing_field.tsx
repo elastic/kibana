@@ -11,9 +11,7 @@ import classNames from 'classnames';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { fieldTypeSelectOptions } from '../constants/field_types';
-
-import { RECENTY_ADDED } from './constants';
+import { fieldTypeSelectOptions, RECENTY_ADDED } from './constants';
 
 interface ISchemaExistingFieldProps {
   disabled?: boolean;
