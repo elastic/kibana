@@ -7,17 +7,7 @@
  */
 
 import { memoize, once } from 'lodash';
-import {
-  BehaviorSubject,
-  defer,
-  EMPTY,
-  from,
-  fromEvent,
-  merge,
-  of,
-  Subscription,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
 import {
   catchError,
   filter,
