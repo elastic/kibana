@@ -70,6 +70,7 @@ yarn kbn watch-bazel
 - @kbn/babel-preset
 - @kbn/config-schema
 - @kbn/dev-utils
+- @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/logging

@@ -12,6 +12,7 @@ filegroup(
       "//packages/kbn-babel-preset:build",
       "//packages/kbn-config-schema:build",
       "//packages/kbn-dev-utils:build",
+      "//packages/kbn-eslint-import-resolver-kibana:build",
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
       "//packages/kbn-logging:build",
