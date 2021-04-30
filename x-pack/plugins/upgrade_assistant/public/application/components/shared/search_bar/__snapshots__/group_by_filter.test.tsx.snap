@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GroupByBar renders 1`] = `
+exports[`GroupByFilter renders 1`] = `
 <EuiFlexItem
   grow={false}
 >
