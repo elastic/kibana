@@ -9,6 +9,7 @@
 import { getStats } from './get_usage_collector';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 const mockedSavedObjects = [
   {
@@ -94,23 +95,20 @@ const mockedSavedObjectsByValue = [
 const getMockCollectorFetchContext = (hits?: unknown[], savedObjectsByValue: unknown[] = []) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
-  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
-  fetchParamsMock.soClient.find = jest.fn().mockResolvedValue({
-    saved_objects: savedObjectsByValue,
-  });
+  fetchParamsMock.soClient = ({
+    createPointInTimeFinder: jest.fn().mockResolvedValue({
+      find: function* asyncGenerator() {
+        yield savedObjectsByValue;
+      },
+    }),
+  } as unknown) as SavedObjectsClientContract;
   return fetchParamsMock;
 };
 
 describe('Timeseries visualization usage collector', () => {
-  const mockIndex = 'mock_index';
-
   test('Returns undefined when no results found (undefined)', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext([], []);
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
   });
@@ -141,11 +139,7 @@ describe('Timeseries visualization usage collector', () => {
         },
       ]
     );
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
   });
@@ -155,11 +149,7 @@ describe('Timeseries visualization usage collector', () => {
       mockedSavedObjects,
       mockedSavedObjectsByValue
     );
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toMatchObject({
       timeseries_use_last_value_mode_total: 3,
