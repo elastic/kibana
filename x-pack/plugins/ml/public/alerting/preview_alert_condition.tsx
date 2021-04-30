@@ -167,7 +167,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.previewAlert.intervalLabel"
-                defaultMessage="Check the alert condition with an interval"
+                defaultMessage="Check the rule condition with an interval"
               />
             }
             isInvalid={isInvalid}
