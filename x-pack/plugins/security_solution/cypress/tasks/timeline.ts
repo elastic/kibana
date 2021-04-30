@@ -120,7 +120,7 @@ export const addNotesToTimeline = (notes: string) => {
   cy.get(ADD_NOTE_BUTTON).pipe(($el) => $el.trigger('click'));
   cy.wait('@addNote').then(({ response }) => {
     cy.wrap(response!.statusCode).should('eql', 200);
-    cy.get(NOTE_BY_NOTE_ID(response.body.data.persistNote.note.noteId)).should('be.visible');
+    cy.get(NOTE_BY_NOTE_ID(response!.body.data.persistNote.note.noteId)).should('be.visible');
   });
   goToQueryTab();
   goToNotesTab();
