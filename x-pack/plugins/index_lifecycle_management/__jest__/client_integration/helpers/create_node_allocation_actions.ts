@@ -26,12 +26,19 @@ export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
     component.update();
   };
 
+  const isAllocationLoading = () => find(`${phase}-phase.allocationLoadingSpinner`).exists();
   const hasDefaultToDataNodesNotice = () => exists(`${phase}-phase.defaultToDataNodesNotice`);
   const hasDefaultToDataTiersNotice = () => exists(`${phase}-phase.defaultToDataTiersNotice`);
   const hasDefaultAllocationBehaviorNotice = () =>
     hasDefaultToDataNodesNotice() && hasDefaultToDataTiersNotice();
   const hasNoTiersAvailableNotice = () => exists(`${phase}-phase.noTiersAvailableNotice`);
+  const hasNoTiersAvailableUsingNodeAttributesNotice = () =>
+    exists(`${phase}-phase.noTiersAvailableUsingNodeAttributesNotice`);
   const hasWillUseFallbackTierNotice = () => exists(`${phase}-phase.willUseFallbackTierNotice`);
+  const hasWillUseFallbackTierUsingNodeAttributesNotice = () =>
+    exists(`${phase}-phase.willUseFallbackTierUsingNodeAttributesNotice`);
+  const getWillUseFallbackTierNoticeText = () =>
+    find(`${phase}-phase.willUseFallbackTierNotice`).text();
 
   return {
     hasDataTierAllocationControls: () => exists(controlsSelector),
@@ -56,11 +63,15 @@ export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
       component.update();
     },
     setSelectedNodeAttribute: createFormSetValueAction(testBed, nodeAttrsSelector),
+    isAllocationLoading,
     hasDefaultToDataNodesNotice,
     hasDefaultToDataTiersNotice,
     hasDefaultAllocationBehaviorNotice,
     hasNoTiersAvailableNotice,
+    hasNoTiersAvailableUsingNodeAttributesNotice,
     hasWillUseFallbackTierNotice,
+    hasWillUseFallbackTierUsingNodeAttributesNotice,
+    getWillUseFallbackTierNoticeText,
     hasNodeDetailsFlyout: () => exists(`${phase}-viewNodeDetailsFlyoutButton`),
     openNodeDetailsFlyout: async () => {
       await act(async () => {

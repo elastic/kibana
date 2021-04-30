@@ -194,7 +194,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           {isLoading ? (
             <>
               <EuiSpacer size="m" />
-              <EuiLoadingSpinner size="xl" />
+              <EuiLoadingSpinner data-test-subj="allocationLoadingSpinner" size="xl" />
             </>
           ) : (
             error && (
