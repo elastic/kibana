@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { BASE_ENDPOINT_ROUTE } from '../metadata';
-
-export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
-export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
-
 export * from './isolation';

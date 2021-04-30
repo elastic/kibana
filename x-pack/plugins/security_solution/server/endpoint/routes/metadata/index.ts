@@ -11,7 +11,7 @@ import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/en
 import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { GetAgentIDsForEndpoints } from '../../services';
+import { getAgentIDsForEndpoints } from '../../services';
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
@@ -110,11 +110,12 @@ export function registerEndpointRoutes(
 
   router.get(
     {
-      path: `/api/endpoint/toAgentID`,
+      path: `/api/endpoint/to_agent_id`,
       validate: { query: schema.object({ ids: schema.string() }) },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     async (context, req, res) => {
-      const agents = await GetAgentIDsForEndpoints(
+      const agents = await getAgentIDsForEndpoints(
         req.query.ids.split(','),
         context,
         endpointAppContext

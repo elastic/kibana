@@ -10,13 +10,14 @@ import moment from 'moment';
 
 import { RequestHandler } from 'src/core/server';
 import uuid from 'uuid';
+import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
+import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import { EndpointAction } from '../../../../common/endpoint/types';
-import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '.';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { GetAgentIDsForEndpoints } from '../../services';
+import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 
 export const HostIsolationRequestSchema = {
@@ -109,7 +110,7 @@ export const isolationRequestHandler = function (
     // translate any endpoint_ids into agent_ids
     let agentIDs = req.body.agent_ids?.slice() || [];
     if (req.body.endpoint_ids && req.body.endpoint_ids.length > 0) {
-      const newIDs = await GetAgentIDsForEndpoints(req.body.endpoint_ids, context, endpointContext);
+      const newIDs = await getAgentIDsForEndpoints(req.body.endpoint_ids, context, endpointContext);
       agentIDs = agentIDs.concat(newIDs);
     }
 
@@ -117,7 +118,7 @@ export const isolationRequestHandler = function (
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const actionID = uuid.v4();
     const result = await esClient.index({
-      index: '.fleet-actions',
+      index: AGENT_ACTIONS_INDEX,
       body: {
         action_id: actionID,
         '@timestamp': moment().toISOString(),

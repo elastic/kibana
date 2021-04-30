@@ -11,7 +11,7 @@ import { SecuritySolutionRequestHandlerContext } from '../../types';
 import { getESQueryHostMetadataByIDs } from '../routes/metadata/query_builders';
 import { EndpointAppContext } from '../types';
 
-export async function GetAgentIDsForEndpoints(
+export async function getAgentIDsForEndpoints(
   endpointIDs: string[],
   requestHandlerContext: SecuritySolutionRequestHandlerContext,
   endpointAppContext: EndpointAppContext

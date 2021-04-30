@@ -34,8 +34,11 @@ import { Subject } from 'rxjs';
 import { ILicense } from '../../../../../licensing/common/types';
 import { licenseMock } from '../../../../../licensing/common/licensing.mock';
 import { License } from '../../../../../licensing/common/license';
-import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '.';
-import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
+import {
+  ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+  metadataTransformPrefix,
+} from '../../../../common/endpoint/constants';
 import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
