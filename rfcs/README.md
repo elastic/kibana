@@ -58,7 +58,7 @@ Some changes do not require an RFC:
 
 ## What the process is
 
-In short, to get a major feature added to Kibana Platform codebase, one usually
+In short, to get a major feature added to the Kibana codebase, one usually
 first gets the RFC merged into the RFC tree as a markdown file. At that point
 the RFC is 'active' and may be implemented with the goal of eventual inclusion
 into Kibana.
