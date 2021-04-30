@@ -320,22 +320,22 @@ describe('engine routes', () => {
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'test-engine' } };
+      const request = { params: { name: 'test-engine' }, body: { source_engine_slugs: [] } };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without name', () => {
-      const request = { params: {} };
+      const request = { params: {}, body: { source_engine_slugs: [] } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation with a non-string name', () => {
-      const request = { params: { name: 1 } };
+      const request = { params: { name: 1 }, body: { source_engine_slugs: [] } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation with missing query params', () => {
-      const request = { query: {} };
+      const request = { params: { name: 'test-engine' }, body: {} };
       mockRouter.shouldThrow(request);
     });
 

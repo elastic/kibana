@@ -42,8 +42,11 @@ describe('SourceEnginesLogic', () => {
   const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     mount();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('initializes with default values', () => {
@@ -59,7 +62,6 @@ describe('SourceEnginesLogic', () => {
   describe('actions', () => {
     describe('closeAddSourceEnginesModal closes the modal', () => {
       mount({
-        ...DEFAULT_VALUES,
         addSourceEnginesModalOpen: true,
       });
 
@@ -70,7 +72,6 @@ describe('SourceEnginesLogic', () => {
 
     describe('openAddSourceEnginesModal opens the modal', () => {
       mount({
-        ...DEFAULT_VALUES,
         addSourceEnginesModalOpen: false,
       });
 
@@ -237,6 +238,16 @@ describe('SourceEnginesLogic', () => {
     describe('addSourceEngines', () => {
       describe('happy path', () => {
         it('calls the bulkCreateLocoMocoEngineSourceEnginesPath endpoint then onSourceEnginesAdd', async () => {
+          mount({
+            indexedEngines: [
+              {
+                name: 'source-engine-3',
+              },
+              {
+                name: 'source-engine-4',
+              },
+            ],
+          });
           jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesAdd');
           http.post.mockReturnValueOnce(Promise.resolve());
 
@@ -246,7 +257,7 @@ describe('SourceEnginesLogic', () => {
           expect(http.post).toHaveBeenCalledWith(
             '/api/app_search/engines/some-engine/source_engines/bulk_create',
             {
-              query: { source_engine_slugs: ['source-engine-3', 'source-engine-4'] },
+              body: JSON.stringify({ source_engine_slugs: ['source-engine-3', 'source-engine-4'] }),
             }
           );
           expect(SourceEnginesLogic.actions.onSourceEnginesAdd).toHaveBeenCalledWith([

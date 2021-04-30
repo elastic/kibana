@@ -112,11 +112,6 @@ export function registerEnginesRoutes({
       path: '/as/engines/:name/source_engines',
     })
   );
-  // TODO this API endpoint throws an error everytime we submit a POST, something to do with
-  // source_engine_slugs being an array. I think Kibana tries to submit this as a JSON string
-  // but out API expects it to be more like a form submission
-  // working URL from standalone:
-  // http://localhost:3002/as/engines/meta-engine-1/source_engines/bulk_create?source_engine_slugs%5B%5D=source-engine-3&source_engine_slugs%5B%5D=source-engine-4
   router.post(
     {
       path: '/api/app_search/engines/{name}/source_engines/bulk_create',
@@ -124,7 +119,7 @@ export function registerEnginesRoutes({
         params: schema.object({
           name: schema.string(),
         }),
-        query: schema.object({
+        body: schema.object({
           source_engine_slugs: schema.arrayOf(schema.string()),
         }),
       },
