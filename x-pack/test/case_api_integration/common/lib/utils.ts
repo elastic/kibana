@@ -853,12 +853,18 @@ export const updateConfiguration = async (
   return configuration;
 };
 
-export const getAllCasesStatuses = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  expectedHttpCode: number = 200
-): Promise<CasesStatusResponse> => {
+export const getAllCasesStatuses = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesStatusResponse> => {
   const { body: statuses } = await supertest
-    .get(CASE_STATUS_URL)
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_STATUS_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .expect(expectedHttpCode);
 

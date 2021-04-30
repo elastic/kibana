@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export * from './case';
-export * from './configure';
-export * from './comment';
-export * from './status';
-export * from './user_actions';
-export * from './sub_case';
-export * from './constants';
+/**
+ * The field used for authorization in various entities within cases.
+ */
+export const OWNER_FIELD = 'owner';

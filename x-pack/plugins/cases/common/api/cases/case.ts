@@ -13,7 +13,7 @@ import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
-import { OWNER_FIELD } from '.';
+import { OWNER_FIELD } from './constants';
 
 export enum CaseType {
   collection = 'collection',

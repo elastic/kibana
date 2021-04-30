@@ -571,12 +571,6 @@ interface OwnerEntity {
   id: string;
 }
 
-interface AuthFilterHelpers {
-  filter?: KueryNode;
-  ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => void;
-  logSuccessfulAuthorization: () => void;
-}
-
 /**
  * Function callback for making sure the found saved objects are of the authorized owner
  */

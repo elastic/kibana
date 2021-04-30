@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 import { UserRT } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
 import { OmitProp } from '../runtime_types';
-import { OWNER_FIELD } from '.';
+import { OWNER_FIELD } from './constants';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);

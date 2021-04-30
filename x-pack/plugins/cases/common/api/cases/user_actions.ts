@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { OWNER_FIELD } from '.';
+import { OWNER_FIELD } from './constants';
 
 import { UserRT } from '../user';
 
