@@ -30,6 +30,7 @@ import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
 import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
+import { parseInterval } from '../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
@@ -137,6 +138,20 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     };
   }, [alertParams, advancedSettings]);
 
+  const maxNumberOfBuckets = useMemo(() => {
+    if (jobConfigs.length === 0) return;
+
+    const bucketDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
+
+    const lookbackIntervalDuration = advancedSettings.lookbackInterval
+      ? parseInterval(advancedSettings.lookbackInterval)
+      : null;
+
+    if (lookbackIntervalDuration && bucketDuration) {
+      return Math.ceil(lookbackIntervalDuration.asSeconds() / bucketDuration.asSeconds());
+    }
+  }, [jobConfigs, advancedSettings]);
+
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'}>
@@ -167,6 +182,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         alertInterval={alertInterval}
         alertNotifyWhen={alertNotifyWhen}
         alertParams={resultParams}
+        maxNumberOfBuckets={maxNumberOfBuckets}
       />
 
       <ResultTypeSelector

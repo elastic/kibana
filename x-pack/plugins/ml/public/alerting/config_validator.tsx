@@ -21,13 +21,14 @@ interface ConfigValidatorProps {
   jobConfigs: CombinedJobWithStats[];
   alertParams: MlAnomalyDetectionAlertParams;
   alertNotifyWhen: MlAnomalyAlertTriggerProps['alertNotifyWhen'];
+  maxNumberOfBuckets?: number;
 }
 
 /**
  * Validated alert configuration
  */
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
-  ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen }) => {
+  ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen, maxNumberOfBuckets }) => {
     if (jobConfigs.length === 0) return null;
 
     const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
@@ -51,7 +52,11 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
 
     const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
     const notificationDuration = bucketSpanDuration
-      ? Math.ceil(bucketSpanDuration.asMinutes()) * (alertParams.topNBuckets ?? TOP_N_BUCKETS_COUNT)
+      ? Math.ceil(bucketSpanDuration.asMinutes()) *
+        Math.min(
+          alertParams.topNBuckets ?? TOP_N_BUCKETS_COUNT,
+          maxNumberOfBuckets ?? TOP_N_BUCKETS_COUNT
+        )
       : undefined;
 
     return (
