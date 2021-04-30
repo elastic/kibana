@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import {
-  SavedVisState,
-  VisualizationSavedObjectAttributes,
-} from 'src/plugins/visualizations/common';
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from 'kibana/server';
+import { SavedVisState } from 'src/plugins/visualizations/common';
 import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
+
+// elasticsearch index.max_result_window default value
+const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
 
 export interface VisTypeTableUsage {
   /**
@@ -38,20 +42,48 @@ export interface VisTypeTableUsage {
   };
 }
 
+/** @internal **/
+type SavedTableVisState = SavedVisState<TableVisParams>;
+
 /*
  * Parse the response data into telemetry payload
  */
 export async function getStats(
   soClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<VisTypeTableUsage | undefined> {
-  const visualizations = await soClient.find<VisualizationSavedObjectAttributes>({
+  const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
-    perPage: 10000,
+    perPage: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
   });
 
-  const tableVisualizations = visualizations.saved_objects
-    .map<SavedVisState<TableVisParams>>(({ attributes }) => JSON.parse(attributes.visState))
-    .filter(({ type }) => type === VIS_TYPE_TABLE);
+  let tableVisualizations: SavedTableVisState[] = [];
+
+  for await (const response of finder.find()) {
+    tableVisualizations = [
+      ...tableVisualizations,
+      ...(response.saved_objects || []).reduce(
+        (acc: SavedTableVisState[], { attributes }: SavedObjectsFindResult<any>) => {
+          if (attributes?.visState) {
+            try {
+              const visState: SavedVisState = JSON.parse(attributes.visState);
+
+              if (visState.type === VIS_TYPE_TABLE) {
+                acc.push(visState as SavedTableVisState);
+              }
+            } catch {
+              // nothing to be here, "so" not valid
+            }
+          }
+          return acc;
+        },
+        []
+      ),
+    ];
+
+    if (!response.saved_objects.length) {
+      await finder.close();
+    }
+  }
 
   const defaultStats = {
     total: tableVisualizations.length,

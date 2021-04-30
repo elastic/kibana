@@ -42,14 +42,18 @@ const mockVisualizations = {
 
 describe('vis_type_table getStats', () => {
   const mockSoClient = ({
-    find: jest.fn().mockResolvedValue(mockVisualizations),
+    createPointInTimeFinder: jest.fn().mockResolvedValue({
+      find: function* asyncGenerator() {
+        yield mockVisualizations;
+      },
+    }),
   } as unknown) as SavedObjectsClientContract;
 
   test('Returns stats from saved objects for table vis only', async () => {
     const result = await getStats(mockSoClient);
-    expect(mockSoClient.find).toHaveBeenCalledWith({
+    expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: 'visualization',
-      perPage: 10000,
+      perPage: 1000,
     });
     expect(result).toEqual({
       total: 4,
