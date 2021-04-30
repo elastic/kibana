@@ -466,6 +466,29 @@ describe('geo_containment', () => {
 
   describe('getGeoContainmentExecutor', () => {
     // Params needed for all tests
+    const expectedAlertResults = [
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: 'kFATGXkBsFLYN2Tj6AAk',
+          entityDocumentId: 'ZVBoGXkBsFLYN2Tj1wmV',
+          entityId: '0',
+          entityLocation: 'POINT (-73.99018926545978 40.751759740523994)',
+        },
+        instanceId: '0-kFATGXkBsFLYN2Tj6AAk',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: 'kFATGXkBsFLYN2Tj6AAk',
+          entityDocumentId: 'ZlBoGXkBsFLYN2Tj1wmV',
+          entityId: '1',
+          entityLocation: 'POINT (-73.99561604484916 40.75449890457094)',
+        },
+        instanceId: '1-kFATGXkBsFLYN2Tj6AAk',
+      },
+    ];
+    const testAlertActionArr: unknown[] = [];
     const mockLogger = loggingSystemMock.createLogger();
     const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
     const startedAt = new Date('2021-04-29T16:56:11.923Z');
@@ -494,6 +517,8 @@ describe('geo_containment', () => {
     const esAggCall = jest.fn();
     const alertServicesWithSearchMock: AlertServicesMock = {
       ...alertsMock.createAlertServices(),
+      // @ts-ignore
+      alertInstanceFactory: alertInstanceFactory(expectedAlertResults, testAlertActionArr),
       scopedClusterClient: {
         asCurrentUser: {
           // @ts-ignore
@@ -512,6 +537,7 @@ describe('geo_containment', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      testAlertActionArr.length = 0;
     });
 
     it('should query for shapes if state does not contain shapes', async () => {
@@ -530,6 +556,7 @@ describe('geo_containment', () => {
         expect(boundaryCall.mock.calls.length).toBe(1);
         expect(esAggCall.mock.calls.length).toBe(1);
       }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should not query for shapes if state contains shapes', async () => {
@@ -547,6 +574,7 @@ describe('geo_containment', () => {
         expect(boundaryCall.mock.calls.length).toBe(0);
         expect(esAggCall.mock.calls.length).toBe(1);
       }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should carry through shapes filters in state to next call unmodified', async () => {
@@ -563,6 +591,7 @@ describe('geo_containment', () => {
       if (executionResult && executionResult.shapesFilters) {
         expect(executionResult.shapesFilters).toEqual(geoContainmentState.shapesFilters);
       }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should return previous locations map', async () => {
@@ -597,6 +626,7 @@ describe('geo_containment', () => {
       if (executionResult && executionResult.prevLocationMap) {
         expect(executionResult.prevLocationMap).toEqual(expectedPrevLocationMap);
       }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
   });
 });
