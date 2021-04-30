@@ -15,13 +15,12 @@ import {
   EuiFlexItem,
   EuiText,
   EuiSpacer,
-  EuiModal,
-  EuiModalHeader,
   EuiPopover,
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import classNames from 'classnames';
 import {
   CodeEditor,
   CodeEditorProps,
@@ -238,10 +237,8 @@ function FormulaEditor({
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
   );
   const overflowDiv1 = React.useRef<HTMLElement>();
-  const overflowDiv2 = React.useRef<HTMLElement>();
   const updateAfterTyping = React.useRef<monaco.IDisposable>();
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
-  const editor2 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -252,12 +249,6 @@ function FormulaEditor({
     // Monaco CSS is targeted on the monaco-editor class
     node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
     document.body.appendChild(node1);
-
-    const node2 = (overflowDiv2.current = document.createElement('div'));
-    node2.setAttribute('data-test-subj', 'lnsFormulaWidget');
-    // Monaco CSS is targeted on the monaco-editor class
-    node2.classList.add('lnsFormulaOverflow', 'monaco-editor');
-    document.body.appendChild(node2);
   }
 
   // Clean up the monaco editor and DOM on unmount
@@ -265,14 +256,11 @@ function FormulaEditor({
     const model = editorModel.current;
     const disposable1 = updateAfterTyping.current;
     const editor1ref = editor1.current;
-    const editor2ref = editor2.current;
     return () => {
       model.dispose();
       overflowDiv1.current?.parentNode?.removeChild(overflowDiv1.current);
-      overflowDiv2.current?.parentNode?.removeChild(overflowDiv2.current);
       disposable1?.dispose();
       editor1ref?.dispose();
-      editor2ref?.dispose();
     };
   }, []);
 
@@ -282,6 +270,19 @@ function FormulaEditor({
 
       if (!text) {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
+        if (currentColumn.params.formula) {
+          // Only submit if valid
+          const { newLayer } = regenerateLayerFromAst(
+            text || '',
+            layer,
+            columnId,
+            currentColumn,
+            indexPattern,
+            operationDefinitionMap
+          );
+          updateLayer(newLayer);
+        }
+
         return;
       }
 
@@ -599,11 +600,7 @@ function FormulaEditor({
   // while it has focus.
   useEffect(() => {
     if (updateAfterTyping.current) {
-      if (isFullscreen) {
-        if (editor2.current) registerOnTypeHandler(editor2.current);
-      } else {
-        if (editor1.current) registerOnTypeHandler(editor1.current);
-      }
+      if (editor1.current) registerOnTypeHandler(editor1.current);
     }
   }, [isFullscreen, registerOnTypeHandler]);
 
@@ -621,7 +618,9 @@ function FormulaEditor({
       wordWrap: 'on',
       // Disable suggestions that appear when we don't provide a default suggestion
       wordBasedSuggestions: false,
-      dimension: { width: 290, height: isFullscreen ? 400 : 280 },
+      autoIndent: 'brackets',
+      wrappingIndent: 'none',
+      dimension: { width: 290, height: 200 },
       fixedOverflowWidgets: true,
     },
   };
@@ -629,11 +628,11 @@ function FormulaEditor({
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
     const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ['.', ',', '(', '=', ' ', ':', `'`],
+      triggerCharacters: ['.', '(', '=', ' ', ':', `'`],
       provideCompletionItems,
     });
     const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
-      signatureHelpTriggerCharacters: ['(', ',', '='],
+      signatureHelpTriggerCharacters: ['(', '='],
       provideSignatureHelp,
     });
     const { dispose: dispose3 } = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
@@ -649,7 +648,11 @@ function FormulaEditor({
   // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
   // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
-    <>
+    <div
+      className={classNames({
+        'lnsIndexPatternDimensionEditor--fullscreen': isFullscreen,
+      })}
+    >
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top">
         <EuiFlexGroup>
           <EuiFlexItem />
@@ -666,10 +669,10 @@ function FormulaEditor({
             >
               {isFullscreen
                 ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
-                    defaultMessage: 'Close full screen',
+                    defaultMessage: 'Collapse formula',
                   })
                 : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-                    defaultMessage: 'View full screen',
+                    defaultMessage: 'Expand formula',
                   })}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -678,7 +681,7 @@ function FormulaEditor({
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <CodeEditor
           {...codeEditorOptions}
-          height={isFullscreen ? 200 : 50}
+          height={200}
           width={'100%'}
           options={{
             ...codeEditorOptions.options,
@@ -729,60 +732,8 @@ function FormulaEditor({
 
           <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
         </EuiFlexGroup>
-
-        {false ? (
-          <EuiModal
-            onClose={() => {
-              // setIsOpen(false);
-              setText(currentColumn.params.formula);
-            }}
-          >
-            <EuiModalHeader>
-              <h1>
-                {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
-                  defaultMessage: 'Formula editor',
-                })}
-              </h1>
-            </EuiModalHeader>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-                  <CodeEditor
-                    {...codeEditorOptions}
-                    height={280}
-                    width={400}
-                    options={{
-                      ...codeEditorOptions.options,
-                      // Shared model and overflow node
-                      overflowWidgetsDomNode: overflowDiv2.current,
-                      model: editorModel?.current,
-                    }}
-                    editorDidMount={(editor) => {
-                      editor2.current = editor;
-                      registerOnTypeHandler(editor);
-                    }}
-                  />
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-                  <EuiText>
-                    {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
-                      defaultMessage: 'Function reference',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  <MemoizedFormulaHelp
-                    indexPattern={indexPattern}
-                    operationDefinitionMap={operationDefinitionMap}
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModal>
-        ) : null}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -826,8 +777,8 @@ function FormulaHelp({
   );
 
   return (
-    <EuiFlexGroup style={{ overflow: 'auto', width: 'calc(50vw)' }}>
-      <EuiFlexItem>
+    <EuiFlexGroup style={{ height: '100%' }}>
+      <EuiFlexItem grow={false}>
         <EuiSelectable
           options={helpItems}
           singleSelection={true}
@@ -849,7 +800,7 @@ function FormulaHelp({
           )}
         </EuiSelectable>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem className="eui-yScroll">
         <EuiText size="s">
           {selectedFunction ? (
             helpItems.find(({ label }) => label === selectedFunction)?.description

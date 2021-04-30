@@ -429,7 +429,7 @@ export function LayerPanel(
           }
         }}
         panel={
-          <>
+          <div>
             {activeGroup && activeId && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
@@ -499,7 +499,7 @@ export function LayerPanel(
                   />
                 </div>
               )}
-          </>
+          </div>
         }
       />
     </>

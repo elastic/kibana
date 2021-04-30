@@ -383,6 +383,7 @@ export function getSuggestion(
         };
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+        sortText = `zzz${label}`;
       }
       label = `${label}=`;
       detail = '';
