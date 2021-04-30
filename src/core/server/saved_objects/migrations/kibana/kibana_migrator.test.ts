@@ -122,38 +122,12 @@ describe('KibanaMigrator', () => {
       );
     });
 
-    it('only runs migrations once if called multiple times', async () => {
-      const options = mockOptions();
-
-      options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          // @ts-expect-error
-          { templates: [] } as CatTemplatesResponse,
-          { statusCode: 404 }
-        )
-      );
-      options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
-      options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
-
-      const migrator = new KibanaMigrator(options);
-
-      migrator.prepareMigrations();
-      await migrator.runMigrations();
-      await migrator.runMigrations();
-
-      expect(options.client.cat.templates).toHaveBeenCalledTimes(1);
-    });
-
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('emits results on getMigratorResult$()', async () => {
-      const options = mockV2MigrationOptions();
+      const options = mockOptions();
       const migrator = new KibanaMigrator(options);
       const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
       migrator.prepareMigrations();
@@ -174,7 +148,7 @@ describe('KibanaMigrator', () => {
       });
     });
     it('rejects when the migration state machine terminates in a FATAL state', () => {
-      const options = mockV2MigrationOptions();
+      const options = mockOptions();
       options.client.indices.get.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           {
@@ -198,7 +172,7 @@ describe('KibanaMigrator', () => {
       );
     });
     it('rejects when an unexpected exception occurs in an action', async () => {
-      const options = mockV2MigrationOptions();
+      const options = mockOptions();
       options.client.tasks.get.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
@@ -226,8 +200,48 @@ type MockedOptions = KibanaMigratorOptions & {
   client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 };
 
-const mockV2MigrationOptions = () => {
-  const options = mockOptions();
+const mockOptions = () => {
+  const options: MockedOptions = {
+    logger: loggingSystemMock.create().get(),
+    kibanaVersion: '8.2.3',
+    typeRegistry: createRegistry([
+      {
+        name: 'testtype',
+        hidden: false,
+        namespaceType: 'single',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
+      },
+      {
+        name: 'testtype2',
+        hidden: false,
+        namespaceType: 'single',
+        indexPattern: 'other-index',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        migrations: {},
+      },
+    ]),
+    kibanaConfig: {
+      enabled: true,
+      index: '.my-index',
+    } as KibanaMigratorOptions['kibanaConfig'],
+    soMigrationsConfig: {
+      batchSize: 20,
+      pollInterval: 20000,
+      scrollDuration: '10m',
+      skip: false,
+      retryAttempts: 20,
+    },
+    client: elasticsearchClientMock.createElasticsearchClient(),
+  };
 
   options.client.indices.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -276,50 +290,5 @@ const mockV2MigrationOptions = () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({ succeeded: true })
     );
 
-  return options;
-};
-
-const mockOptions = () => {
-  const options: MockedOptions = {
-    logger: loggingSystemMock.create().get(),
-    kibanaVersion: '8.2.3',
-    typeRegistry: createRegistry([
-      {
-        name: 'testtype',
-        hidden: false,
-        namespaceType: 'single',
-        mappings: {
-          properties: {
-            name: { type: 'keyword' },
-          },
-        },
-        migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
-      },
-      {
-        name: 'testtype2',
-        hidden: false,
-        namespaceType: 'single',
-        indexPattern: 'other-index',
-        mappings: {
-          properties: {
-            name: { type: 'keyword' },
-          },
-        },
-        migrations: {},
-      },
-    ]),
-    kibanaConfig: {
-      enabled: true,
-      index: '.my-index',
-    } as KibanaMigratorOptions['kibanaConfig'],
-    soMigrationsConfig: {
-      batchSize: 20,
-      pollInterval: 20000,
-      scrollDuration: '10m',
-      skip: false,
-      retryAttempts: 20,
-    },
-    client: elasticsearchClientMock.createElasticsearchClient(),
-  };
   return options;
 };
