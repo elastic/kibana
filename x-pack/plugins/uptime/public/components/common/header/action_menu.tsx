@@ -28,7 +28,7 @@ const ANALYZE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
 
 const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
   defaultMessage:
-    'EXPERIMENTAL - Analyze Data allows to select and filter result data in any dimensions and look for the cause or impact of performance problems.',
+    'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
 export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => {
