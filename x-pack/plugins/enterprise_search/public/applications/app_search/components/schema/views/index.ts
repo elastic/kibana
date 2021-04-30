@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { SCHEMA_TITLE } from './constants';
-export { SchemaRouter } from './schema_router';
+export { Schema } from './schema';
+export { MetaEngineSchema } from './meta_engine_schema';
